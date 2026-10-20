@@ -67,13 +67,13 @@ interface IGateProps {
 }
 
 /**
- * Shows the tutorial on an editable tile whose program needed a device when it opened, while no
- * device is connected and nobody has dismissed it yet.
+ * Shows the tutorial on an editable tile whose program needed a device when it opened, until it is
+ * dismissed (by OK on any tile, or by any connection). `connectTutorialDismissed` is the one
+ * source: DeviceConnection sets it whenever a device is connected, so no separate check is needed.
  */
 export const DataflowConnectTutorialGate: React.FC<IGateProps> = observer(function DataflowConnectTutorialGate(
   { content, connection, readOnly, onDismiss }
 ) {
-  const show = !readOnly && content.showConnectTutorialOnOpen
-    && !connection.isConnected && !connection.connectTutorialDismissed;
+  const show = !readOnly && content.showConnectTutorialOnOpen && !connection.connectTutorialDismissed;
   return show ? <DataflowConnectTutorial onDismiss={onDismiss} /> : null;
 });
