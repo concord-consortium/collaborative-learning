@@ -10,11 +10,6 @@
 .dataflow-toolbar {
   // Specificity has to beat the toolbar's own `.toolbar-row button` background and hover rules.
   .toolbar-row button.toolbar-button.connect {
-    svg {
-      height: 24px;
-      width: 24px;
-    }
-
     &.connect-attention {
       animation: connect-slowpulse 1.5s linear infinite;
 

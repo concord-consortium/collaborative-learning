@@ -17,7 +17,7 @@ import {
   connectDeviceForTile, disconnectDeviceForTile, reconnectDeviceForTile
 } from "../../utilities/device-actions";
 
-import SerialIcon from "../../assets/icons/serialconnection/serial.svg";
+import ConnectIcon from "../../assets/icons/connect-icon.svg";
 
 import "./dataflow-connect-pane.scss";
 
@@ -224,7 +224,7 @@ export const ConnectDeviceButton = observer(function ConnectDeviceButton({ name 
         dataTestId="connect-device-button" disabled={readOnly || !content}
         disabledMessage="Connecting a device isn't available in a read-only view"
         onClick={() => content?.setConnectPaneOpen(!isOpen)} extraContent={pane}>
-      <SerialIcon />
+      <ConnectIcon />
     </TileToolbarButton>
   );
 });
