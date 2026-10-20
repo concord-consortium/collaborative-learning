@@ -140,6 +140,11 @@ export const TableContentModel = TileContentModel
       const attr = self.dataSet.attrFromID(attrId);
       return !!attr && !attr.derived && !!attr.formula.display;
     },
+    /** True when the column Set Expression would act on is one the owning tile derives. */
+    get isSelectedColumnDerived() {
+      const attrId = self.dataSet.firstSelectedAttributeId;
+      return !!attrId && !!self.dataSet.attrFromID(attrId)?.derived;
+    },
   }))
   .views(self => tileContentAPIViews({
     get contentTitle() {

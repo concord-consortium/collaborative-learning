@@ -274,15 +274,11 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
     showExpressionsDialog();
   };
 
-  // The header's expression row is the other way in, and a derived column doesn't draw one.
-  const selectedAttributeIsDerived =
-    !!dataSet.firstSelectedAttributeId &&
-    !!dataSet.attrFromID(dataSet.firstSelectedAttributeId)?.derived;
-
   const handleToolbarShowExpressionsDialog = () => {
     // This is called from the toolbar. We use the first selected attribute of the table.
+    // The header's expression row is the other way in, and a derived column doesn't draw one.
+    if (content.isSelectedColumnDerived) return;
     const firstSelectedAttributeId = dataSet.firstSelectedAttributeId;
-    if (selectedAttributeIsDerived) return;
     firstSelectedAttributeId && setCurrYAttrId(firstSelectedAttributeId);
     showExpressionsDialog();
   };
@@ -476,7 +472,7 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
   }, [dataSet, changeHandlers, inputRowId]);
 
   const toolbarContext = {
-    canSetExpression: !selectedAttributeIsDerived,
+    canSetExpression: !content.isSelectedColumnDerived,
     showExpressionsDialog: handleToolbarShowExpressionsDialog,
     deleteSelected,
     importData,

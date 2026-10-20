@@ -132,6 +132,17 @@ describe("TableContent", () => {
       expect(contentWith({ derived: true }).hasExpression("derivedAttr")).toBe(false);
     });
 
+    it("is what Set Expression asks about when it is selected", () => {
+      const content = contentWith({ derived: true });
+      expect(content.isSelectedColumnDerived).toBe(false);
+
+      content.dataSet.setSelectedAttributes(["derivedAttr"]);
+      expect(content.isSelectedColumnDerived).toBe(true);
+
+      content.dataSet.setSelectedAttributes(["typedAttr"]);
+      expect(content.isSelectedColumnDerived).toBe(false);
+    });
+
     // The same formula on a column the student set still has to look like one.
     it("still reports an expression the student set", () => {
       const content = contentWith({ derived: false });
