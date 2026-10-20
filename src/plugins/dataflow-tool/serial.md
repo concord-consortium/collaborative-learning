@@ -104,13 +104,10 @@ failed attempt doesn't leave the board open.
 
 **Reconnect.** `reconnect()` repeats the last choice without asking the user to pick again.
 For a Web Serial board it tries the last port (`WebSerialTransport.lastPort`, which
-survives `close()`) first. If that fails and the last port is no longer among the granted
-ports (`getGrantedSerialPorts()`), the board was unplugged and maybe replugged, and Chrome
-gives a replugged board a new port object. Reconnect then opens a granted port with the same
-USB vendor and product ids, but only when exactly one matches, because the ids identify the
-board model and can't tell identical boards apart. In every other case, including when the
-last port is still granted and so the original board is still attached, it shows the
-browser's chooser. For a Spiker:bit it runs `connectAndStream` again on the known
+survives `close()`) first, and if that fails it shows the browser's chooser. A Web Serial
+unplug is noticed quickly, by the browser's `disconnect` event or by the read loop giving up,
+and either one clears the active device. So Reconnect isn't offered for an unplugged board:
+the menu shows the device choices, and Connect shows the chooser. For a Spiker:bit it runs `connectAndStream` again on the known
 `SpikerbitDevice`, whose library connection remembers the board and reopens it without the
 chooser. If that fails, for example because
 the board was unplugged and plugged back in, it disconnects that device and falls back to a

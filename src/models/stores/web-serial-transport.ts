@@ -16,11 +16,6 @@ const kArduinoUsbProductId = 67;
 
 export type WebSerialOpenResult = "opened" | "canceled" | "failed";
 
-/** The ports this origin already has permission for; empty when Web Serial is unavailable. */
-export async function getGrantedSerialPorts(): Promise<SerialPort[]> {
-  return (await navigator.serial?.getPorts()) ?? [];
-}
-
 export class WebSerialTransport implements IDeviceTransport {
   onData?: (chunk: string) => void;
   onDisconnect?: () => void;

@@ -4,7 +4,7 @@ import { SpikerbitDevice } from "../../../models/stores/spikerbit-device";
 import {
   createSpikerbitConnection, makeSpikerbitFlashDataSource
 } from "../../../models/stores/spikerbit-connection";
-import { getGrantedSerialPorts, WebSerialTransport } from "../../../models/stores/web-serial-transport";
+import { WebSerialTransport } from "../../../models/stores/web-serial-transport";
 import spikerbitHex from "../firmware/spikerbit-clue.hex";
 
 export type DeviceChoice = "arduino" | "microbitHub" | "spikerbit";
@@ -21,7 +21,6 @@ export type ConnectResult = "connected" | "canceled" | "failed";
 
 export interface IDeviceConnectionDeps {
   createWebSerialTransport(): WebSerialTransport;
-  getGrantedSerialPorts(): Promise<SerialPort[]>;
   createSpikerbitDevice(serialDevice: SerialDevice): SpikerbitDevice;
   getSpikerbitFlashDataSource(): unknown;
 }
@@ -54,7 +53,6 @@ export class DeviceConnection {
     this.serialDevice = serialDevice;
     this.deps = {
       createWebSerialTransport: () => new WebSerialTransport(),
-      getGrantedSerialPorts,
       createSpikerbitDevice: (device) => new SpikerbitDevice(device, createSpikerbitConnection()),
       getSpikerbitFlashDataSource: () => makeSpikerbitFlashDataSource(spikerbitHex),
       ...deps
@@ -152,15 +150,6 @@ export class DeviceConnection {
     if (lastPort) {
       const transport = this.deps.createWebSerialTransport();
       if (await transport.open(lastPort) === "opened") return this.finishWebSerial(transport);
-      // Chrome gives a replugged board a new port object, so a missing lastPort means the
-      // board was unplugged and maybe replugged. USB ids only identify the board model, so
-      // a match is trusted only when it is the single one. If lastPort is still granted,
-      // the original board is still attached and another port could be a different board.
-      const matching = await this.findOnlyGrantedPortMatching(lastPort);
-      if (matching) {
-        const matchTransport = this.deps.createWebSerialTransport();
-        if (await matchTransport.open(matching) === "opened") return this.finishWebSerial(matchTransport);
-      }
     }
 
     const chooserTransport = this.deps.createWebSerialTransport();
@@ -171,17 +160,6 @@ export class DeviceConnection {
   private finishWebSerial(transport: WebSerialTransport) {
     this.lastWebSerialTransport = transport;
     return this.activateWebSerial(transport);
-  }
-
-  private async findOnlyGrantedPortMatching(lastPort: SerialPort): Promise<SerialPort | undefined> {
-    const { usbVendorId, usbProductId } = lastPort.getInfo();
-    const granted = await this.deps.getGrantedSerialPorts();
-    if (granted.includes(lastPort)) return undefined;
-    const matches = granted.filter(port => {
-      const info = port.getInfo();
-      return info.usbVendorId === usbVendorId && info.usbProductId === usbProductId;
-    });
-    return matches.length === 1 ? matches[0] : undefined;
   }
 
   // A fresh device has a fresh library connection, which shows the chooser.
