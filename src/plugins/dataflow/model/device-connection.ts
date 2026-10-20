@@ -38,13 +38,13 @@ function isNoDeviceSelected(error: unknown) {
  * disconnect. Tiles start them through the tile device actions in `device-actions.ts`.
  */
 export class DeviceConnection {
-  // The menu choice the user last connected with. Reconnect repeats it, and the log events name
+  // The device choice the user last connected with. Reconnect repeats it, and the log events name
   // the device by it.
   lastChoice: DeviceChoice | undefined = undefined;
   // Set while a connect or reconnect attempt is in progress.
   busyChoice: DeviceChoice | undefined = undefined;
-  // True once any tile's "needs a device" tutorial dialog has been acknowledged. In memory only,
-  // so the dialog shows again after a page reload.
+  // True once the connect tutorial has been dismissed, by OK on any tile or by any connection. In
+  // memory only, so it can show again after a page reload.
   connectTutorialDismissed = false;
 
   private serialDevice: SerialDevice;
@@ -75,8 +75,8 @@ export class DeviceConnection {
         disconnect: false
       }
     );
-    // A connection made any way, from any tile, ends the tutorial, so a later disconnect can't
-    // bring it back.
+    // A connection made any way, from any tile, ends the connect tutorial, so a later disconnect
+    // can't bring it back. fireImmediately covers a connection that exists before this is created.
     reaction(() => this.isConnected, connected => {
       if (connected) this.dismissConnectTutorial();
     }, { fireImmediately: true });
