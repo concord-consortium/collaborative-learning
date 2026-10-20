@@ -70,8 +70,8 @@ const UngroupNodesButton = observer(function UngroupNodesButton({ name }: IToolb
   );
 });
 
-// Restarts the program's running state (holds, mini-graphs); recorded data is kept. Disabled for
-// read-only views and for the playback manager shown in Done mode, which is constructed read-only.
+// Resets the tile's program (resetProgramForTile says what that keeps). Disabled for read-only
+// views and for the playback manager shown in Done mode, which is constructed read-only.
 const ResetProgramButton = observer(function ResetProgramButton({ name }: IToolbarButtonComponentProps) {
   const reteManager = useContext(DataflowReteManagerContext);
   const model = useContext(TileModelContext);
