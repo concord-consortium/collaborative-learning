@@ -116,19 +116,22 @@ export const DataflowContentModel = TileContentModel
     // Volatile (not persisted): the canvas fits all content on every load rather than restoring a
     // saved pan/zoom, so this only tracks the live transform for the current session.
     liveProgramZoom: ProgramZoom.create(DEFAULT_PROGRAM_ZOOM),
-    // Whether the toolbar's pan flyout is showing (drawing's openPallette pattern; one palette only).
+    // Whether the toolbar's pan palette is showing (drawing's openPallette pattern).
     panPaletteOpen: false,
-    // The toolbar pan button's face shows and re-performs the last direction chosen from the flyout.
+    // The toolbar pan button's face shows and re-performs the last direction chosen from the palette.
     lastPanDirection: "right" as PanDirection,
     // Whether this tile's program has blocks that only work with a connected device. Kept current
     // by the tile's ReteManager while the tile is editable.
     needsDevice: false,
-    // Whether this tile's program needed a device when it opened. Set once by the editable
-    // tile's ReteManager, never by later edits; the connect tutorial dialog reads it.
+    // Whether this tile's program needed a device, with none connected, when it opened. Set once by
+    // the editable tile's ReteManager, never by later edits or connection changes; the connect
+    // tutorial reads it.
     showConnectTutorialOnOpen: false,
     // Whether the toolbar's connect pane is showing.
     connectPaneOpen: false,
-    // The message for this tile's last failed connection attempt, shown in the connect pane.
+    // The message for this tile's most recent connection attempt, if it failed. Cleared when the
+    // tile starts another attempt or disconnects, or when any device connects; the connect pane
+    // shows it while nothing is connected.
     connectError: undefined as string | undefined,
     // True when a connection failed while the pane was closed; opening the pane clears it.
     unseenConnectError: false
