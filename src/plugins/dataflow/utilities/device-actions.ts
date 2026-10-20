@@ -37,11 +37,6 @@ export function resetProgramForTile({ content, tileId, trigger }: ITileOptions &
   });
 }
 
-function clearConnectError(content: DataflowContentModelType) {
-  content.setConnectError(undefined);
-  content.setUnseenConnectError(false);
-}
-
 /** A user looking at the pane sees the error there, so only a closed pane leaves it unseen. */
 function recordConnectFailure(content: DataflowContentModelType, label: string | undefined) {
   content.setConnectError(`Couldn't connect to ${label ?? "the device"}.`);
@@ -50,7 +45,7 @@ function recordConnectFailure(content: DataflowContentModelType, label: string |
 
 export async function connectDeviceForTile(o: IConnectionOptions & { choice: DeviceChoice }): Promise<ConnectResult> {
   const { connection, content, tileId, choice } = o;
-  clearConnectError(content);
+  content.clearConnectError();
   const result = await connection.connect(choice);
   // The tile may have been deleted while the connection was being made.
   if (!isAlive(content)) return result;
@@ -65,7 +60,7 @@ export async function connectDeviceForTile(o: IConnectionOptions & { choice: Dev
 export async function reconnectDeviceForTile(o: IConnectionOptions): Promise<ConnectResult> {
   const { connection, content, tileId } = o;
   const choice = connection.lastChoice;
-  clearConnectError(content);
+  content.clearConnectError();
   const result = await connection.reconnect();
   if (!isAlive(content)) return result;
   if (result === "failed") recordConnectFailure(content, labelFor(choice));
@@ -80,7 +75,7 @@ export async function reconnectDeviceForTile(o: IConnectionOptions): Promise<Con
 export async function disconnectDeviceForTile(o: IConnectionOptions): Promise<void> {
   const { connection, content, tileId } = o;
   if (!connection.isConnected) return;
-  clearConnectError(content);
+  content.clearConnectError();
   const choice = connection.lastChoice;
   await connection.disconnect();
   logDeviceEvent(tileId, "disconnectDevice", choice);

@@ -119,3 +119,33 @@ describe("ReteManager needs-a-device on open", () => {
     expect(content.showConnectTutorialOnOpen).toBe(false);
   });
 });
+
+describe("ReteManager connect error", () => {
+  const managers: ReteManager[] = [];
+  afterEach(() => {
+    managers.splice(0).forEach(m => m.dispose());
+  });
+
+  async function openWithError() {
+    const opened = await openProgram([sensorNode("s1", "emg")]);
+    managers.push(opened.manager);
+    opened.content.setConnectError("Couldn't connect to Arduino.");
+    opened.content.setUnseenConnectError(true);
+    return opened;
+  }
+
+  it("clears the tile's error when a device connects from any tile", async () => {
+    const { content, stores } = await openWithError();
+    stores.serialDevice.setActiveDevice("arduino", fakeTransport());
+    expect(content.connectError).toBeUndefined();
+    expect(content.unseenConnectError).toBe(false);
+  });
+
+  it("does not bring the error back when that device disconnects", async () => {
+    const { content, stores } = await openWithError();
+    stores.serialDevice.setActiveDevice("arduino", fakeTransport());
+    stores.serialDevice.clearActiveDevice();
+    expect(content.connectError).toBeUndefined();
+    expect(content.unseenConnectError).toBe(false);
+  });
+});

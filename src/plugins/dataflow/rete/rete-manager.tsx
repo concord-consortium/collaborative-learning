@@ -106,7 +106,7 @@ export class ReteManager implements INodeServices {
   public disposed = false;
   public setupComplete: Promise<void>;
   private previousChannelIds = "";
-  private needsDeviceDisposer: (() => void) | undefined;
+  private deviceStateDisposer: (() => void) | undefined;
   private fitTimeout: number | undefined;
   private visibilityReapplyPending = false;
 
@@ -129,10 +129,21 @@ export class ReteManager implements INodeServices {
       // updateNeedsDevice tracks the program's blocks through getNodes(), along with each
       // block's settings and wiring. Reading the node count here keeps the dependency on blocks
       // being added and removed visible at the autorun itself.
-      this.needsDeviceDisposer = autorun(() => {
+      const needsDeviceDisposer = autorun(() => {
         void this.mstProgram.nodes.size;
         this.updateNeedsDevice();
       });
+      // The connection is app-wide, so a successful one from any tile clears this tile's error from
+      // an earlier failed attempt. A later disconnect can't bring the error back.
+      const connectedDisposer = reaction(
+        () => this.stores.serialDevice.isConnected(),
+        connected => { if (connected) this.mstContent.clearConnectError(); },
+        { fireImmediately: true }
+      );
+      this.deviceStateDisposer = () => {
+        needsDeviceDisposer();
+        connectedDisposer();
+      };
     }
   }
 
@@ -1397,7 +1408,7 @@ export class ReteManager implements INodeServices {
     this.collapsedConnectionsDisposer?.();
     this.marquee?.destroy();
     this.arrowPanDisposer?.();
-    this.needsDeviceDisposer?.();
+    this.deviceStateDisposer?.();
     if (this.fitTimeout) {
       clearTimeout(this.fitTimeout);
       this.fitTimeout = undefined;

@@ -384,6 +384,10 @@ export const DataflowContentModel = TileContentModel
     setUnseenConnectError(value: boolean) {
       self.unseenConnectError = value;
     },
+    clearConnectError() {
+      self.connectError = undefined;
+      self.unseenConnectError = false;
+    },
     setLastPanDirection(direction: PanDirection) {
       self.lastPanDirection = direction;
     },

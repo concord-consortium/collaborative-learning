@@ -66,7 +66,9 @@ choice the user connected with (`lastChoice`), and the log events by its id (suc
 The pane starts with a heading and a status block. The status block holds a status line and,
 only while nothing is connected and the tile has a `connectError`, an error line showing it. The
 tile's `unseenConnectError` is set when an attempt fails while the pane is closed, and cleared
-when the pane opens. The button face has three states, chosen by `connectButtonState`
+when the pane opens. Any successful connection, from any tile, clears every open tile's error and
+unseen flag: each editable tile's `ReteManager` watches `isConnected()`. So a later disconnect
+can't bring back an error from before the connection. The button face has three states, chosen by `connectButtonState`
 (`utilities/connect-button-state.ts`), each with its own tooltip: idle, connected, and attention
 (the program needs a device and none is connected, or there is an error the user hasn't seen).
 In the attention state the button is yellow; it pulses three times when the state is first applied,
