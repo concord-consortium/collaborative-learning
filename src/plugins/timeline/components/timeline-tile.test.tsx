@@ -102,7 +102,7 @@ describe("TimelineComponent", () => {
 
   it("renders the info button in the title area", () => {
     const { container } = renderWithStores();
-    const infoButton = screen.getByRole("button", { name: "Zooming and Moving" });
+    const infoButton = screen.getByRole("button", { name: "Using the Timeline" });
     expect(container.querySelector(".title-area")).toContainElement(infoButton);
   });
 
@@ -250,7 +250,7 @@ describe("TimelineComponent", () => {
     it("puts the title, then the info button, in the focus cycle", () => {
       const { elements } = renderInTile();
       expect(elements?.titleElement).toHaveClass("editable-tile-title-text");
-      expect(elements?.topbarElement).toBe(screen.getByRole("button", { name: "Zooming and Moving" }));
+      expect(elements?.topbarElement).toBe(screen.getByRole("button", { name: "Using the Timeline" }));
     });
 
     it("leaves the tile's contents out of the focus cycle while nothing there is enabled", () => {
@@ -263,7 +263,7 @@ describe("TimelineComponent", () => {
       (model.content as TimelineContentModelType).selectEvent(1);
       const { api, elements } = renderInTile();
       const title = elements!.titleElement;
-      const info = screen.getByRole("button", { name: "Zooming and Moving" });
+      const info = screen.getByRole("button", { name: "Using the Timeline" });
       const prev = screen.getByRole("button", { name: "Prev" });
       const next = screen.getByRole("button", { name: "Next" });
       const thumb = screen.getByRole("slider");
@@ -333,7 +333,7 @@ describe("TimelineComponent", () => {
       (model.content as TimelineContentModelType).selectEvent(1);
       placeAMarker();
       const { api } = renderInTile();
-      const info = screen.getByRole("button", { name: "Zooming and Moving" });
+      const info = screen.getByRole("button", { name: "Using the Timeline" });
       const prev = screen.getByRole("button", { name: "Prev" });
       const next = screen.getByRole("button", { name: "Next" });
       const marker = screen.getByRole("slider", { name: "Time marker" });
