@@ -1,3 +1,5 @@
+// This lives in the DataFlow plugin, not src/models/stores, because it imports the Spiker:bit
+// firmware hex, which has to stay in the DataFlow chunk.
 import { makeAutoObservable, runInAction } from "mobx";
 import { SerialDevice } from "../../../models/stores/serial";
 import { SpikerbitDevice } from "../../../models/stores/spikerbit-device";
@@ -33,10 +35,11 @@ function isNoDeviceSelected(error: unknown) {
 
 /**
  * The one device connection shared by every DataFlow tile. It owns connect, reconnect and
- * disconnect; the tiles only read its state.
+ * disconnect. Tiles start them through the tile device actions in `device-actions.ts`.
  */
 export class DeviceConnection {
-  // The menu choice the user last connected with; it names the device in the UI.
+  // The menu choice the user last connected with. Reconnect repeats it, and the log events name
+  // the device by it.
   lastChoice: DeviceChoice | undefined = undefined;
   // Set while a connect or reconnect attempt is in progress.
   busyChoice: DeviceChoice | undefined = undefined;
@@ -44,9 +47,9 @@ export class DeviceConnection {
   private serialDevice: SerialDevice;
   private deps: IDeviceConnectionDeps;
   private lastWebSerialTransport: WebSerialTransport | undefined;
-  // The Spiker:bit from the last Spiker:bit Connect. Its library connection remembers the
-  // board, so Reconnect reopens it without the chooser. Connect replaces it, which shows
-  // the chooser.
+  // The Spiker:bit from the last Spiker:bit attempt, cleared when an attempt fails. Its library
+  // connection remembers the board, so Reconnect reopens it without the chooser. Connect
+  // replaces it with a fresh one, which shows the chooser.
   private spikerbitDevice: SpikerbitDevice | undefined;
 
   constructor(serialDevice: SerialDevice, deps?: Partial<IDeviceConnectionDeps>) {
