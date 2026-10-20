@@ -72,23 +72,17 @@ describe("the Event Number column", () => {
       .toEqual(["3", "1", "2"]);
   });
 
-  // The Timeline requires a valid start, a non-empty end and a type. A case it skips must not take
-  // a number, or every event the student can see after it would be numbered one too high.
+  // The Timeline requires a valid start, a valid end and a type. A case it skips must not take a
+  // number, or every event the student can see after it would be numbered one too high.
   it.each([
     ["no event type", { windowStart: at(0, 30), eventType: "" }],
     ["a blank windowEnd", { windowStart: at(0, 30), windowEnd: "" }],
-    ["an unparseable windowStart", { windowStart: "sometime", windowEnd: at(1) }]
+    ["an unparseable windowEnd", { windowStart: at(0, 30), windowEnd: "lunchtime" }],
+    ["an unparseable windowStart", { windowStart: "sometime", windowEnd: at(1) }],
+    // A number is not a time, though rank() alone would happily sort it.
+    ["a numeric windowStart", { windowStart: "3", windowEnd: at(1) }]
   ])("gives no number to an event the Timeline skips for %s", (_label, skipped: TestEvent) => {
     expect(numbers(eventsDataSet([{ windowStart: at(2) }, skipped]))).toEqual(["1", ""]);
-  });
-
-  // A known limit of the filter, pinned so it is not mistaken for correct. The Timeline requires
-  // windowEnd to *parse*; the formula can only ask that it be non-empty, because `date()` and a
-  // nested `rank()` both collapse inside a semi-aggregate argument, which is evaluated as a whole
-  // column. Blank is the case that actually arises, and it is handled above.
-  it("numbers an event whose windowEnd is non-empty but unparseable, which the Timeline skips", () => {
-    expect(numbers(eventsDataSet([{ windowStart: at(2) }, { windowStart: at(1), windowEnd: "lunchtime" }])))
-      .toEqual(["2", "1"]);
   });
 
   it("numbers a tied pair consecutively in case order, as the Timeline does", () => {

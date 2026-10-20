@@ -1,4 +1,4 @@
-import { DateTime } from "luxon";
+import { checkDate } from "@concord-consortium/codap-formulas/utilities/date-utils";
 import {
   evaluateNode, getRootScope, isValueTruthy, UNDEF_RESULT
 } from "@concord-consortium/codap-formulas/models/formula/functions/function-utils";
@@ -10,17 +10,20 @@ import {
 } from "@concord-consortium/codap-formulas/models/formula/functions/math";
 
 /**
- * A comparable number for a cell value: numbers as themselves, ISO date strings as epoch millis.
- * A CLUE cell holds a number, a string or nothing, so those are the only cases to cover.
+ * A comparable number for a value: numbers as themselves, dates as epoch millis. A date is whatever
+ * the rest of the formula language takes for one -- `isDate()`, the comparison operators, the
+ * date-part functions -- so `rank(x)` and `isDate(x)` agree about the same value.
  */
 function sortKey(value: unknown): number | undefined {
   if (typeof value === "number") return Number.isFinite(value) ? value : undefined;
-  const str = String(value ?? "").trim();
-  if (!str) return undefined;
-  const num = Number(str);
-  if (Number.isFinite(num)) return num;
-  const date = DateTime.fromISO(str);
-  return date.isValid ? date.toMillis() : undefined;
+  if (typeof value === "string") {
+    const str = value.trim();
+    if (!str) return undefined;
+    const num = Number(str);
+    if (Number.isFinite(num)) return num;
+  }
+  const [isADate, date] = checkDate(value);
+  return isADate ? date.valueOf() : undefined;
 }
 
 /**

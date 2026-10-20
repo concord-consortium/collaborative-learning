@@ -6,8 +6,11 @@ export const kEventNumberAttrName = "Event Number";
 
 // The Timeline draws a case only when both of its times parse and its type is non-empty (see
 // `events` in timeline-content.ts), and numbers what it draws in `windowStart` order. The filter
-// holds this column to the same events, so the table and the graph cannot disagree.
-const kEventNumberFormula = `rank(windowStart, windowEnd != "" and eventType != "")`;
+// holds this column to the same events, as nearly as the formula language's date parsing matches
+// luxon's: they agree on every ISO form, and differ only on formats a student would have to type
+// on purpose, such as `Feb 1, 2026`.
+const kEventNumberFormula =
+  `rank(windowStart, isDate(windowStart) and isDate(windowEnd) and eventType != "")`;
 
 /**
  * Gives `dataSet` an "Event Number" column, first, holding each event's place in time order.
