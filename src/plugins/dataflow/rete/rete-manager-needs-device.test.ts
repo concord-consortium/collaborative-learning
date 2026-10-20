@@ -81,7 +81,7 @@ describe("ReteManager needs-a-device on open", () => {
     expect(content.showConnectTutorialOnOpen).toBe(false);
   });
 
-  it("does not flag after a real disconnect of a device that was connected at open", async () => {
+  it("does not flag after a disconnect of a device that was connected at open", async () => {
     const { content, manager, stores } = await openProgram(
       [sensorNode("s1", "emg")], { connected: true }
     );
