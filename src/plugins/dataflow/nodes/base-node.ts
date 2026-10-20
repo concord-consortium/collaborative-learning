@@ -188,7 +188,7 @@ export const BaseNodeModel = types.model("BaseNodeModel",
 }))
 .actions(self => ({
   /**
-   * Clears the node's running state. Node types with extra running state override this.
+   * Clears the node's running state. `ControlNodeModel` overrides this to release Hold values.
    */
   resetRunningState() {
     self.resetGraph();
