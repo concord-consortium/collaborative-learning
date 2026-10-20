@@ -19,7 +19,7 @@ function labelFor(choice: DeviceChoice | undefined) {
   return choice ? kDeviceChoiceLabels[choice] : undefined;
 }
 
-// Logs the menu choice's id, not its label, so rewording a label doesn't change the logged value.
+// Logs the device choice's id, not its label, so rewording a label doesn't change the logged value.
 function logDeviceEvent(tileId: string, operation: string, device: DeviceChoice | undefined) {
   logTileChangeEvent(LogEventName.DATAFLOW_TOOL_CHANGE, {
     tileId, operation, change: { targetType: "device", device }
@@ -71,7 +71,7 @@ export async function reconnectDeviceForTile(o: IConnectionOptions): Promise<Con
   return result;
 }
 
-/** Disconnects the app-wide device. The program is not reset. */
+/** Disconnects the app-wide device. The program is not reset; the tile's connect error is cleared. */
 export async function disconnectDeviceForTile(o: IConnectionOptions): Promise<void> {
   const { connection, content, tileId } = o;
   if (!connection.isConnected) return;
