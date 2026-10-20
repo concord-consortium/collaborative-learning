@@ -31,10 +31,6 @@
   top: 0;
   width: 1px;
 
-  &.hover {
-    opacity: 0.7;
-  }
-
   // Dashed to say the marker isn't settled yet. The line is a solid background, so dashing it
   // means swapping to a border instead of just adding a border-style.
   &.placing {
@@ -74,7 +70,6 @@
   white-space: nowrap;
   z-index: 1;
 
-  &.hover,
   &.placing {
     pointer-events: none;
   }
@@ -91,10 +86,14 @@
 .marker-delete {
   background: none;
   border: none;
-  color: $charcoal-light-1;
+  // $charcoal-light-1 was 3.03:1 on white and 2.61:1 on the hover background, under the 4.5:1
+  // WCAG 1.4.3 needs for a 14px glyph.
+  color: $charcoal-dark-2;
   cursor: pointer;
   font-size: 14px;
   line-height: 1;
-  margin-top: 2px;
+  // It sits on a drag grip, so a near-miss starts a drag instead. WCAG 2.5.8 wants 24x24.
+  min-height: 24px;
+  min-width: 24px;
   padding: 0;
 }

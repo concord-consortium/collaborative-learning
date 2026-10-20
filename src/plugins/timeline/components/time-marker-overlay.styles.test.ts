@@ -1,11 +1,10 @@
 import fs from "fs";
 import path from "path";
 
-// The overlay is pointer-events: none so it doesn't swallow the plot's clicks, and each interactive
-// part opts back in. jsdom ignores pointer-events when dispatching, so a rendering test cannot tell
-// a dead control from a live one — a placed label that forgot to opt back in still passes every
-// click test while being unusable in a browser. touch-action is invisible to it in the same way.
-// This reads the stylesheet instead.
+// jsdom ignores pointer-events when dispatching, so a rendering test cannot tell a dead control
+// from a live one: a grip that forgot to opt back in still passes every click test while being
+// unusable in a browser, and touch-action is invisible to it in the same way. This reads the
+// stylesheet instead. What the rules are for is in time-marker-overlay.scss.
 describe("time-marker-overlay.scss", () => {
   const source = fs.readFileSync(path.join(__dirname, "time-marker-overlay.scss"), "utf8");
 
@@ -27,7 +26,6 @@ describe("time-marker-overlay.scss", () => {
     expect(grip).toMatch(/pointer-events:\s*auto/);
   });
 
-  // The grips sit outside .timeline-plot, so the plot's own touch-action does not cover them.
   it("keeps a touch drag on a grip from being claimed for panning the page", () => {
     expect(grip).toMatch(/touch-action:\s*pan-y pinch-zoom/);
   });

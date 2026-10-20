@@ -60,14 +60,15 @@ describe("TimeMarkerOverlay", () => {
     expect(container.querySelector(".time-marker-label")).toBeNull();
   });
 
-  it("renders a hover marker with a two-line UTC label", () => {
+  it("renders the placing preview with a two-line UTC label", () => {
     const content = createContent();
     const hoverTime = viewStart.plus({ hours: 6 });
+    content.startPlacingMarker();
     content.setHoverTime(hoverTime);
     const { container } = renderOverlay(content);
 
-    const line = container.querySelector<HTMLElement>(".time-marker-line.hover");
-    const label = container.querySelector<HTMLElement>(".time-marker-label.hover");
+    const line = container.querySelector<HTMLElement>(".time-marker-line.placing");
+    const label = container.querySelector<HTMLElement>(".time-marker-label.placing");
     expect(line).toBeInTheDocument();
     expect(label).toBeInTheDocument();
     expect(line!.style.left).toBe("25%");
@@ -84,10 +85,11 @@ describe("TimeMarkerOverlay", () => {
     expect(content.markerTime).toBeDefined();
   });
 
-  // The preview is drawn only while placing, and placing is unreachable once a marker exists, so
-  // the two can no longer coexist.
+  // The preview is drawn only while placing, and placing is unreachable once a marker exists,
+  // so the two never appear together.
   it("clears the hover preview when a marker is placed", () => {
     const content = createContent();
+    content.startPlacingMarker();
     content.setHoverTime(viewStart.plus({ hours: 6 }));
     content.setMarkerTime(viewStart.plus({ hours: 12 }));
     const { container } = renderOverlay(content);
@@ -115,7 +117,7 @@ describe("TimeMarkerOverlay", () => {
   });
 
   describe("deleting the marker", () => {
-    it("deletes from the x in the label", () => {
+    it("deletes from the delete button in the label", () => {
       const { content } = renderOverlayWithAMarker();
       fireEvent.click(screen.getByRole("button", { name: "Delete marker" }));
       expect(content.markerTime).toBeUndefined();
@@ -197,16 +199,29 @@ describe("TimeMarkerOverlay", () => {
       expect(content.markerTime!.toMillis()).toBe(before.toMillis());
     });
 
-    it("does not start a drag from the delete control", () => {
+    // It sits on the label, which is itself a drag grip, so its pointerdown must not reach it.
+    it("does not start a drag from the delete button", () => {
+      const { content } = renderOverlayWithAMarker();
+      const before = content.markerTime!;
+      stubOverlayRect();
+      const deleteButton = screen.getByRole("button", { name: "Delete marker" });
+
+      fireEvent.pointerDown(deleteButton, { pointerId: 1, clientX: kOverlayWidth * 0.5 });
+      fireEvent.pointerMove(screen.getByTestId("marker-label"), { pointerId: 1, clientX: kOverlayWidth * 0.9 });
+      fireEvent.pointerUp(screen.getByTestId("marker-label"), { pointerId: 1, clientX: kOverlayWidth * 0.9 });
+
+      expect(content.markerTime!.toMillis()).toBe(before.toMillis());
+    });
+
+    it("deletes the marker when the delete button is clicked", () => {
       const { content } = renderOverlayWithAMarker();
       fireEvent.click(screen.getByRole("button", { name: "Delete marker" }));
       expect(content.markerTime).toBeUndefined();
     });
 
-    // Dragged past the edge of the view, the marker is still a placed marker out of view, which is
-    // normally not drawn. Unmounting it would take the captured pointer's target with it, so the
-    // pointerup that commits the move would never arrive.
-    it("holds the marker at the edge while it is dragged out of the view", () => {
+    // Both halves of this used to go wrong: the stem unmounted mid-drag, taking the captured
+    // pointer's target with it, and the release committed a time outside the view.
+    it("stays mounted and lands at the edge when dragged past it", () => {
       const { content } = renderOverlayWithAMarker();
       stubOverlayRect();
       const stem = screen.getByTestId("marker-stem");
@@ -217,10 +232,9 @@ describe("TimeMarkerOverlay", () => {
       expect(stem.style.left).toBe("100%");
 
       fireEvent.pointerUp(stem, { pointerId: 1, clientX: kOverlayWidth * 1.4 });
-      expect(content.timeToViewPct(content.markerTime!)).toBeCloseTo(140);
+      expect(content.timeToViewPct(content.markerTime!)).toBeCloseTo(100);
     });
 
-    // Capture can be lost without a cancel: a capture change fires lostpointercapture on its own.
     it("ends the drag when the pointer capture is lost", () => {
       const { content } = renderOverlayWithAMarker();
       const before = content.markerTime!;
@@ -253,7 +267,6 @@ describe("TimeMarkerOverlay", () => {
       expect(content.timeToViewPct(content.markerTime!)).toBeCloseTo(pct);
     });
 
-    // A marker nudged out of the view would stop being drawn, taking the focused slider with it.
     it("stops at the edge of the view", () => {
       const { content } = renderOverlayWithAMarker();
       const slider = screen.getByRole("slider");
@@ -272,10 +285,52 @@ describe("TimeMarkerOverlay", () => {
       expect(writes).toHaveLength(1);
     });
 
-    it("deletes the marker on Delete", () => {
+    it.each(["Delete", "Backspace"])("deletes the marker on %s", (key) => {
       const { content } = renderOverlayWithAMarker();
-      fireEvent.keyDown(screen.getByRole("slider"), { key: "Delete" });
+      fireEvent.keyDown(screen.getByRole("slider"), { key });
       expect(content.markerTime).toBeUndefined();
+    });
+
+    // TileComponent treats ArrowUp from a non-editable element inside a tile as a soft exit, so
+    // without stopPropagation the first nudge moved focus off the marker and out to the tile.
+    // Its handler is a React one, dispatched from the root, so this has to use a React handler too
+    // -- a native listener on an ancestor would fire before React's and prove nothing.
+    it.each(["ArrowUp", "ArrowRight", "Home", "Delete", "Backspace"])(
+      "keeps %s from also reaching the tile around it", (key) => {
+        const content = createContent();
+        act(() => { content.setMarkerTime(viewStart.plus({ hours: 12 })); });
+        const model = TileModel.create({ content });
+        const onTileKeyDown = jest.fn();
+        render(
+          <ReadOnlyContext.Provider value={false}>
+            <TileModelContext.Provider value={model}>
+              <div onKeyDown={onTileKeyDown}><TimeMarkerOverlay /></div>
+            </TileModelContext.Provider>
+          </ReadOnlyContext.Provider>
+        );
+
+        fireEvent.keyDown(screen.getByRole("slider"), { key });
+
+        expect(onTileKeyDown).not.toHaveBeenCalled();
+      });
+
+    // A key the marker does not use has to keep working on the tile.
+    it("lets a key it does not handle through to the tile", () => {
+      const content = createContent();
+      act(() => { content.setMarkerTime(viewStart.plus({ hours: 12 })); });
+      const model = TileModel.create({ content });
+      const onTileKeyDown = jest.fn();
+      render(
+        <ReadOnlyContext.Provider value={false}>
+          <TileModelContext.Provider value={model}>
+            <div onKeyDown={onTileKeyDown}><TimeMarkerOverlay /></div>
+          </TileModelContext.Provider>
+        </ReadOnlyContext.Provider>
+      );
+
+      fireEvent.keyDown(screen.getByRole("slider"), { key: "Tab" });
+
+      expect(onTileKeyDown).toHaveBeenCalled();
     });
 
     it("reads out the marker's time as the slider's value", () => {
