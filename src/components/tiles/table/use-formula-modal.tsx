@@ -20,10 +20,11 @@ interface IProps {
 }
 
 /**
- * The columns the dialog offers. A derived column has no expression for the student to see or
- * change, so it is left out, both from the choices and as the default target.
+ * The columns the dialog offers. A column whose formula is hidden has no expression for the student
+ * to see or change, so it is left out, both from the choices and as the default target.
  */
-export const expressionTargets = (dataSet: IDataSet) => dataSet.attributes.filter(attr => !attr.derived);
+export const expressionTargets = (dataSet: IDataSet) =>
+  dataSet.attributes.filter(attr => !attr.formulaHidden);
 
 type IResult = [() => void, () => void, (id: string) => void];
 export const useFormulaModal = ({ dataSet, onSubmit, table }: IProps) : IResult => {

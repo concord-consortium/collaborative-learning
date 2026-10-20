@@ -40,19 +40,19 @@ describe("addEventNumberColumn", () => {
 
   // The formula is how the numbers stay right, not something the student wrote. Without this the
   // table grows an expression row across every column reading "= rank(windowStart, ...)".
-  it("marks the column derived, so a table shows it as ordinary data", () => {
+  it("hides the column's formula, so a table shows it as ordinary data", () => {
     const dataSet = eventsDataSet([{ windowStart: at(1) }]);
-    expect(dataSet.attrFromName(kEventNumberAttrName)!.derived).toBe(true);
+    expect(dataSet.attrFromName(kEventNumberAttrName)!.formulaHidden).toBe(true);
   });
 
   // It is saved with the document: reopening one must not bring the expression row back.
-  it("keeps the column derived through a snapshot, and marks nothing else", () => {
+  it("keeps the formula hidden through a snapshot, and hides no other", () => {
     const dataSet = eventsDataSet([{ windowStart: at(1) }]);
 
     const reloaded = DataSet.create(getSnapshot(dataSet));
 
-    expect(reloaded.attrFromName(kEventNumberAttrName)!.derived).toBe(true);
-    expect(reloaded.attrFromName("windowStart")!.derived).toBeUndefined();
+    expect(reloaded.attrFromName(kEventNumberAttrName)!.formulaHidden).toBe(true);
+    expect(reloaded.attrFromName("windowStart")!.formulaHidden).toBeUndefined();
   });
 
   it("leaves an existing column alone rather than adding a second or resetting its formula", () => {

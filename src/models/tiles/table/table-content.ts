@@ -131,19 +131,19 @@ export const TableContentModel = TileContentModel
   }))
   .views(self => ({
     // Both of these ask whether the student has an expression here, not merely whether a formula
-    // exists: a derived column is computed for them and presents as ordinary data, so it must not
-    // give the table an expression row, expression styling or a cell with no editor.
+    // exists: a column whose formula is hidden is computed for them and presents as ordinary data,
+    // so it must not give the table an expression row, expression styling or a cell with no editor.
     get hasExpressions() {
-      return self.dataSet.attributes.some(attr => !attr.derived && attr.formula.display);
+      return self.dataSet.attributes.some(attr => !attr.formulaHidden && attr.formula.display);
     },
     hasExpression(attrId: string) {
       const attr = self.dataSet.attrFromID(attrId);
-      return !!attr && !attr.derived && !!attr.formula.display;
+      return !!attr && !attr.formulaHidden && !!attr.formula.display;
     },
-    /** True when the column Set Expression would act on is one the owning tile derives. */
-    get isSelectedColumnDerived() {
+    /** True when the column Set Expression would act on has a hidden formula. */
+    get isSelectedColumnFormulaHidden() {
       const attrId = self.dataSet.firstSelectedAttributeId;
-      return !!attrId && !!self.dataSet.attrFromID(attrId)?.derived;
+      return !!attrId && !!self.dataSet.attrFromID(attrId)?.formulaHidden;
     },
   }))
   .views(self => tileContentAPIViews({
@@ -259,9 +259,9 @@ export const TableContentModel = TileContentModel
     },
     setExpression(id: string, expression: string) {
       const attr = self.dataSet.attrFromID(id);
-      // A derived column's formula is how the owning tile keeps it right; replacing or clearing it
+      // A hidden formula is how the owning tile keeps the column right; replacing or clearing it
       // would stop the column updating while the table went on presenting it as ordinary data.
-      if (attr?.derived) return;
+      if (attr?.formulaHidden) return;
       attr?.setFormula(expression);
       self.logChange({ action: "update", target: "columns", ids: id, props: { expression } });
     },

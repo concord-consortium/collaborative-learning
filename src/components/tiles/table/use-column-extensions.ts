@@ -30,10 +30,10 @@ export const useColumnExtensions = ({
       editableName: !readOnly && isDataColumn(column),
       isEditing: column.key === columnEditingName,
       isRemovable: !readOnly && isDataColumn(column) && (column.key !== firstDataColumn?.key),
-      // A derived column's formula is the owning tile's business, not the student's, so the
-      // header shows neither the expression row nor the formula in it.
-      showExpressions: !!attribute && !attribute.derived && !!attribute.formula.display,
-      expression: attribute?.derived ? undefined : attribute?.formula.display,
+      // A hidden formula is the owning tile's business, not the student's, so the header shows
+      // neither the expression row nor the formula in it.
+      showExpressions: !!attribute && !attribute.formulaHidden && !!attribute.formula.display,
+      expression: attribute?.formulaHidden ? undefined : attribute?.formula.display,
       onBeginHeaderCellEdit: () => {
         !readOnly && setColumnEditingName(column);
         return undefined;

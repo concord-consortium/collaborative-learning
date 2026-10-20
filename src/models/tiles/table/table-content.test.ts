@@ -115,51 +115,51 @@ describe("TableContent", () => {
   // A table linked to a Wave Runner grew an expression row across every column, reading
   // "= rank(windowStart, ...)" under Event Number, because the column is kept current by a
   // formula. To the student that column is just one of the event's values.
-  describe("a column the owning tile derives", () => {
-    function contentWith({ derived }: { derived: boolean }) {
+  describe("a column whose formula is hidden", () => {
+    function contentWith({ formulaHidden }: { formulaHidden: boolean }) {
       const content = TableContentModel.create();
       addAttributeToDataSet(content.dataSet, { id: "typedAttr", name: "typed" });
-      addAttributeToDataSet(content.dataSet, { id: "derivedAttr", name: "number", derived });
-      content.dataSet.attrFromID("derivedAttr")!.setFormula("rank(typed)");
+      addAttributeToDataSet(content.dataSet, { id: "numberAttr", name: "number", formulaHidden });
+      content.dataSet.attrFromID("numberAttr")!.setFormula("rank(typed)");
       return content;
     }
 
     it("gives the table no expression row", () => {
-      expect(contentWith({ derived: true }).hasExpressions).toBe(false);
+      expect(contentWith({ formulaHidden: true }).hasExpressions).toBe(false);
     });
 
     it("is not treated as having an expression", () => {
-      expect(contentWith({ derived: true }).hasExpression("derivedAttr")).toBe(false);
+      expect(contentWith({ formulaHidden: true }).hasExpression("numberAttr")).toBe(false);
     });
 
     it("is what Set Expression asks about when it is selected", () => {
-      const content = contentWith({ derived: true });
-      expect(content.isSelectedColumnDerived).toBe(false);
+      const content = contentWith({ formulaHidden: true });
+      expect(content.isSelectedColumnFormulaHidden).toBe(false);
 
-      content.dataSet.setSelectedAttributes(["derivedAttr"]);
-      expect(content.isSelectedColumnDerived).toBe(true);
+      content.dataSet.setSelectedAttributes(["numberAttr"]);
+      expect(content.isSelectedColumnFormulaHidden).toBe(true);
 
       content.dataSet.setSelectedAttributes(["typedAttr"]);
-      expect(content.isSelectedColumnDerived).toBe(false);
+      expect(content.isSelectedColumnFormulaHidden).toBe(false);
     });
 
     // The Set Expression dialog's Clear and OK both come through here, whichever column the
     // dialog was pointed at.
     it("keeps its formula when Set Expression tries to replace or clear it", () => {
-      const content = contentWith({ derived: true });
+      const content = contentWith({ formulaHidden: true });
 
-      content.setExpression("derivedAttr", "typed * 2");
-      expect(content.dataSet.attrFromID("derivedAttr")!.formula.display).toBe("rank(typed)");
+      content.setExpression("numberAttr", "typed * 2");
+      expect(content.dataSet.attrFromID("numberAttr")!.formula.display).toBe("rank(typed)");
 
-      content.setExpression("derivedAttr", "");
-      expect(content.dataSet.attrFromID("derivedAttr")!.formula.display).toBe("rank(typed)");
+      content.setExpression("numberAttr", "");
+      expect(content.dataSet.attrFromID("numberAttr")!.formula.display).toBe("rank(typed)");
     });
 
     // The same formula on a column the student set still has to look like one.
     it("still reports an expression the student set", () => {
-      const content = contentWith({ derived: false });
+      const content = contentWith({ formulaHidden: false });
       expect(content.hasExpressions).toBe(true);
-      expect(content.hasExpression("derivedAttr")).toBe(true);
+      expect(content.hasExpression("numberAttr")).toBe(true);
     });
   });
 

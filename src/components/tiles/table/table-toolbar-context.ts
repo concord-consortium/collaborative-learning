@@ -1,7 +1,7 @@
 import { createContext } from "react";
 
 export interface ITableToolbarContext {
-  /** False when the selected column is one the owning tile derives, which has no expression to set. */
+  /** False when the selected column's formula is hidden, so it has no expression to set. */
   canSetExpression: boolean;
   showExpressionsDialog: () => void;
   deleteSelected: () => void;

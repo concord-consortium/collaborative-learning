@@ -3,8 +3,8 @@ import React from "react";
 import { ITableToolbarContext, TableToolbarContext } from "./table-toolbar-context";
 import { SetExpressionButton } from "./table-toolbar-registration";
 
-// The column header's expression row is the other way into the formula dialog, and a derived
-// column no longer draws one. This button reaches it from the selected column instead, so it has
+// The column header's expression row is the other way into the formula dialog, and a column whose
+// formula is hidden no longer draws one. This button reaches it from the selected column instead, so it has
 // to agree: to the student that column is data, with no expression to look at or change.
 describe("SetExpressionButton", () => {
   function renderButton(canSetExpression: boolean) {
@@ -32,7 +32,7 @@ describe("SetExpressionButton", () => {
     expect(showExpressionsDialog).toHaveBeenCalled();
   });
 
-  it("is disabled when the selected column is one the owning tile derives", () => {
+  it("is disabled when the selected column's formula is hidden", () => {
     const { button, showExpressionsDialog } = renderButton(false);
 
     expect(button).toHaveAttribute("aria-disabled", "true");
