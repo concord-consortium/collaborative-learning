@@ -11,10 +11,6 @@ describe("connectButtonState", () => {
   ])("connected=%s needsDevice=%s unseenError=%s gives %s", (connected, needsDevice, unseenError, expected) => {
     expect(connectButtonState({ connected, needsDevice, unseenError })).toBe(expected);
   });
-
-  it("a failure while the program needs no device pulses", () => {
-    expect(connectButtonState({ connected: false, needsDevice: false, unseenError: true })).toBe("attention");
-  });
 });
 
 describe("connectButtonTooltip", () => {
