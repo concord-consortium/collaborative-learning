@@ -175,9 +175,9 @@ export class WebSerialTransport implements IDeviceTransport {
 }
 
 /**
- * Registers, at CLUE startup, a handler that tears down the active connection when the browser
- * raises `disconnect` (the board was unplugged). It is guarded so it only fires while a
- * WebSerialTransport is active and can't kill a live WebUSB (Spiker:bit) session.
+ * Registers, when the stores are created, a handler that tears down the active connection when
+ * the browser raises `disconnect` (the board was unplugged). It acts only while a
+ * WebSerialTransport is active, so it can't kill a live WebUSB (Spiker:bit) session.
  */
 export function initWebSerialConnectionEvents(serialDevice: SerialDevice){
   navigator.serial?.addEventListener("disconnect", () => {
