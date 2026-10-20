@@ -13,7 +13,7 @@ import { ConnectDeviceButton } from "./components/toolbar/dataflow-connect-butto
 import { ZoomInButton, ZoomOutButton, FitAllButton, PanButton } from "./components/toolbar/dataflow-zoom-pan-buttons";
 
 import DeleteIcon from "../../assets/icons/delete/delete-selection-icon.svg";
-import RefreshIcon from "./assets/icons/refresh/refresh.svg";
+import ResetIcon from "./assets/icons/reset-icon.svg";
 import GroupIcon from "../drawing/assets/group-objects-icon.svg";
 import UngroupIcon from "../drawing/assets/ungroup-objects-icon.svg";
 
@@ -87,7 +87,7 @@ const ResetProgramButton = observer(function ResetProgramButton({ name }: IToolb
   return (
     <TileToolbarButton name={name} title="Reset program" onClick={handleClick} disabled={disabled}
         disabledMessage="Reset isn't available while a recording is shown or in a read-only view">
-      <RefreshIcon />
+      <ResetIcon />
     </TileToolbarButton>
   );
 });
