@@ -169,7 +169,6 @@ describe("DataflowProgramModel.resetRunningState", () => {
 
   afterEach(() => {
     jest.useRealTimers();
-    jest.restoreAllMocks();
   });
 
   it("empties the tick history and leaves one open tick", () => {
@@ -199,7 +198,6 @@ describe("DataflowProgramModel.resetRunningState", () => {
 
   it("releases a held Control value and stops its wait timer", () => {
     jest.useFakeTimers();
-    const warn = jest.spyOn(console, "warn").mockImplementation(() => undefined);
     const program = makeRunningProgram();
     const control = program.nodes.get("ctl")!.data as IControlNodeModel;
     control.setWaitDuration(2);
@@ -214,9 +212,7 @@ describe("DataflowProgramModel.resetRunningState", () => {
     expect(control.gateActive).toBe(false);
     expect(control.waitTimerId).toBeNull();
     expect(control.timerRunning).toBeFalsy();
-
-    jest.advanceTimersByTime(3000);
-    expect(warn).not.toHaveBeenCalledWith("No current tick entry");
+    expect(jest.getTimerCount()).toBe(0);
   });
 
   it("does not create an undo step", async () => {
