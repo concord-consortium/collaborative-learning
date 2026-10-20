@@ -408,16 +408,12 @@ export class ReteManager implements INodeServices {
       });
 
       // Reprocess when connections are changed
-      // And also recheck whether the program needs a device, since some blocks only need one
-      // once they are connected
       editor.addPipe((context) => {
-        if (["nodecreated", "noderemoved", "connectioncreated", "connectionremoved"]
-          .includes(context.type)) {
+        if (["noderemoved", "connectioncreated", "connectionremoved"].includes(context.type)) {
           // FIXME: Any changes to the state caused by these events should be combined
           // into the history entry with the actual node removal, connection creation or removal
           // In the meantime we wrap this in an action so it only creates one more history entry
           this.processAfterProgramChange();
-          this.updateNeedsDevice();
         }
         return context;
       });
@@ -1393,8 +1389,6 @@ export class ReteManager implements INodeServices {
     if (channelIds !== this.previousChannelIds) {
       this.previousChannelIds = channelIds;
       this.mstContent.setChannels(channels);
-
-      this.updateNeedsDevice();
     }
 
     // NOTE: these channels are observable, so changes to their missing or connected
