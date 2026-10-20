@@ -686,14 +686,14 @@ describe("Dataflow connect button and pane", () => {
     expect(document.activeElement).toBe(document.body);
   });
 
-  it("Reconnect and Disconnect call the connection", () => {
+  it("Reconnect and Disconnect call the connection", async () => {
     const r = openPane();
     fakeConnected(r);
     const reconnect = jest.spyOn(r.connection, "reconnect").mockResolvedValue("canceled");
     const disconnect = jest.spyOn(r.connection, "disconnect").mockResolvedValue();
     fireEvent.keyDown(screen.getByRole("button", { name: "Reconnect" }), { key: " " });
     expect(reconnect).toHaveBeenCalledTimes(1);
-    fireEvent.click(screen.getByRole("button", { name: "Disconnect" }));
+    await act(async () => { fireEvent.click(screen.getByRole("button", { name: "Disconnect" })); });
     expect(disconnect).toHaveBeenCalledTimes(1);
   });
 });
