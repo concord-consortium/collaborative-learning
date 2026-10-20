@@ -1,3 +1,4 @@
+import { destroy } from "mobx-state-tree";
 import { LogEventName } from "../../../lib/logger-types";
 import { logTileChangeEvent } from "../../../models/tiles/log/log-tile-change-event";
 import { addCasesToDataSet } from "../../../models/data/data-set";
@@ -90,6 +91,25 @@ describe("device actions", () => {
     expect(content.program.recentTicks.length).toBe(ticks);
     expect(logTileChangeEvent).not.toHaveBeenCalled();
   });
+
+  it.each(["connect", "reconnect"])(
+    "a %s that finishes after the tile was deleted does not touch the content or log", async operation => {
+      const content = makeContent();
+      let finish: (r: ConnectResult) => void = () => undefined;
+      const pending = new Promise<ConnectResult>(resolve => { finish = resolve; });
+      const connection = makeConnection("connected", { lastChoice: "arduino" });
+      (connection.connect as jest.Mock).mockReturnValue(pending);
+      (connection.reconnect as jest.Mock).mockReturnValue(pending);
+
+      const acting = operation === "connect"
+        ? connectDeviceForTile({ connection, content, tileId, choice: "arduino" })
+        : reconnectDeviceForTile({ connection, content, tileId });
+      destroy(content);
+      finish("connected");
+
+      expect(await acting).toBe("connected");
+      expect(logTileChangeEvent).not.toHaveBeenCalled();
+    });
 
   it("disconnect logs disconnectDevice and does not reset", async () => {
     const content = makeContent();

@@ -126,6 +126,9 @@ export class WebSerialTransport implements IDeviceTransport {
     // If we exited the loop without an explicit stop (close()), the connection failed.
     if (this.reading) {
       this.reading = false;
+      // Release the port so a later connect to it doesn't find it still open.
+      await this.closePort();
+      this.port = null;
       this.onDisconnect?.();
     }
   }

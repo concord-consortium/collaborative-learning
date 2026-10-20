@@ -110,12 +110,14 @@ export class DeviceConnection {
   }
 
   async disconnect(): Promise<void> {
+    const transport = this.serialDevice.activeTransport;
     try {
-      await this.serialDevice.activeTransport?.close();
+      await transport?.close();
     } catch (e) {
       console.error("Device disconnect failed", e);
     }
-    this.serialDevice.clearActiveDevice();
+    // Another connect may have replaced the device while the close was pending.
+    if (this.serialDevice.activeTransport === transport) this.serialDevice.clearActiveDevice();
   }
 
   private async attempt(choice: DeviceChoice, run: () => Promise<ConnectResult>): Promise<ConnectResult> {
@@ -161,8 +163,12 @@ export class DeviceConnection {
     if (lastPort) {
       const transport = this.deps.createWebSerialTransport();
       if (await transport.open(lastPort) === "opened") return this.finishWebSerial(transport);
-      const matching = await this.findGrantedPortMatching(lastPort);
-      if (matching && matching !== lastPort) {
+      // Chrome gives a replugged board a new port object, so a missing lastPort means the
+      // board was unplugged and maybe replugged. USB ids only identify the board model, so
+      // a match is trusted only when it is the single one. If lastPort is still granted,
+      // the original board is still attached and another port could be a different board.
+      const matching = await this.findOnlyGrantedPortMatching(lastPort);
+      if (matching) {
         const matchTransport = this.deps.createWebSerialTransport();
         if (await matchTransport.open(matching) === "opened") return this.finishWebSerial(matchTransport);
       }
@@ -178,13 +184,15 @@ export class DeviceConnection {
     return this.activateWebSerial(transport);
   }
 
-  private async findGrantedPortMatching(lastPort: SerialPort): Promise<SerialPort | undefined> {
+  private async findOnlyGrantedPortMatching(lastPort: SerialPort): Promise<SerialPort | undefined> {
     const { usbVendorId, usbProductId } = lastPort.getInfo();
     const granted = await this.deps.getGrantedSerialPorts();
-    return granted.find(port => {
+    if (granted.includes(lastPort)) return undefined;
+    const matches = granted.filter(port => {
       const info = port.getInfo();
       return info.usbVendorId === usbVendorId && info.usbProductId === usbProductId;
     });
+    return matches.length === 1 ? matches[0] : undefined;
   }
 
   // A fresh device has a fresh library connection, which shows the chooser.
