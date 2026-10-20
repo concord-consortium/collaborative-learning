@@ -719,6 +719,49 @@ describe("marker placement mode", () => {
   });
 });
 
+describe("isMarkerInData", () => {
+  const dataStart = DateTime.fromISO("2026-01-30T00:00:00.000Z");
+  const dataEnd = DateTime.fromISO("2026-02-06T00:00:00.000Z");
+
+  function contentWithData(withSeismogram = true) {
+    mockedGetSharedModelManager.mockReturnValue({
+      isReady: true,
+      getTileSharedModelsByType: (_self: any, type: any) =>
+        withSeismogram && type === SharedSeismogram
+          ? [{ station: { network: "AK", station: "K204", location: "", channel: "HNZ" },
+               startTime: dataStart, endTime: dataEnd }]
+          : [],
+    } as any);
+    return TimelineContentModel.create();
+  }
+
+  afterEach(() => mockedGetSharedModelManager.mockReset());
+
+  // Changing the Wave Runner's station or dates moves the data out from under a placed marker.
+  // The view can never leave the data, so a marker outside it can be neither dragged nor deleted.
+  it.each([
+    ["inside the data", dataStart.plus({ days: 1 }), true],
+    ["on the first instant of the data", dataStart, true],
+    ["on the last instant of the data", dataEnd, true],
+    ["before the data", dataStart.minus({ days: 1 }), false],
+    ["after the data", dataEnd.plus({ days: 1 }), false]
+  ])("is %s", (_label, time, expected) => {
+    const content = contentWithData();
+    content.setMarkerTime(time);
+    expect(content.isMarkerInData).toBe(expected);
+  });
+
+  it("is false when there is no marker", () => {
+    expect(contentWithData().isMarkerInData).toBe(false);
+  });
+
+  it("is false before any data has loaded", () => {
+    const content = contentWithData(false);
+    content.setMarkerTime(dataStart.plus({ days: 1 }));
+    expect(content.isMarkerInData).toBe(false);
+  });
+});
+
 describe("marker persistence", () => {
   const markerISO = "2026-02-01T12:00:00.000Z";
 
@@ -730,8 +773,7 @@ describe("marker persistence", () => {
     expect(reloaded.markerTime?.toISO()).toBe(content.markerTime?.toISO());
   });
 
-  // The inverse of the assertion it replaces: the marker used to be a transient pin and was
-  // deliberately kept out of the exported document. It is now the student's own work.
+  // The marker is the student's own work, so it travels with the document.
   it("includes the marker in the exported document", () => {
     const content = TimelineContentModel.create({});
     content.setMarkerTime(DateTime.fromISO(markerISO, { zone: "utc" }));

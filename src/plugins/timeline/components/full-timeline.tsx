@@ -16,7 +16,7 @@ import { describeView } from "./describe-view";
 import "./full-timeline.scss";
 
 /**
- * The whole record in a strip below the graph, with an overlay marking the part the graph shows,
+ * The whole record in a strip below the plot, with an overlay marking the part the plot shows,
  * and the scrollbar beneath it. Dragging the overlay or the scrollbar thumb moves the view, and a
  * press elsewhere on either centers the view there. Read-only, both only display the view.
  */
@@ -164,15 +164,21 @@ const FullTimelineEvents = observer(function FullTimelineEvents(
   );
 });
 
-// An indicator only, positioned against the whole data range (unlike the graph's timeToViewPct) so
-// it still shows where the marker is once it has scrolled out of the graph's zoomed view.
+// An indicator only, positioned against the whole data range rather than the model's
+// timeToViewPct, so it still shows where the marker is once it has scrolled out of the
+// zoomed view above.
 const FullTimelineMarker = observer(function FullTimelineMarker(
   { content, totalStart, totalEnd }: IDataRangeProps
 ) {
   const { markerTime, hoverTime, isPlacingMarker } = content;
   const time = isPlacingMarker ? hoverTime : markerTime;
   if (!time) return null;
-  const left = toStripPct(time.toMillis(), totalStart, totalEnd);
+  // toStripPct clamps, which is right for an event bar overlapping the range and wrong for a point:
+  // a marker outside the data would sit at the strip's end reading as "marker at the end of the
+  // data", while the plot shows nothing even after View All.
+  const ms = time.toMillis();
+  if (ms < totalStart || ms > totalEnd) return null;
+  const left = toStripPct(ms, totalStart, totalEnd);
   return (
     <div className={classNames("full-timeline-marker", { placing: isPlacingMarker })} style={{ left: `${left}%` }} />
   );

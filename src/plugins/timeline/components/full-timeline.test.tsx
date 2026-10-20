@@ -125,8 +125,8 @@ describe("FullTimeline", () => {
     expect(events[1].style.left).toBe("75%");
     expect(events[1].style.width).toBe("12.5%");
 
-    // The event shapes belong on the graph above. On the strip they crowded the Full Timeline
-    // header, which shares that band straddling the top border.
+    // The event shapes belong on the graph above: the strip shares its band with the Full
+    // Timeline header, which the shapes crowd out.
     expect(container.querySelector(".event-shape")).toBeNull();
   });
 
@@ -159,7 +159,18 @@ describe("FullTimeline", () => {
     expect(marker.style.left).toBe("75%");
   });
 
-  // Dashed on the strip too, so the two views agree about what is settled and what is not.
+  // toStripPct clamps, which suits an event bar that overlaps the range and not a point. Clamped,
+  // a marker the data no longer covers sat at the strip's end reading as "marker at the end of the
+  // data", while the graph showed nothing even after View All.
+  it.each([
+    ["before the data", -1],
+    ["after the data", 5]
+  ])("shows nothing for a marker %s", (_label, dayOffset) => {
+    const { content, container } = renderFullTimeline(day(1), day(2));
+    act(() => { content.setMarkerTime(day(dayOffset)); });
+    expect(container.querySelector(".full-timeline-marker")).toBeNull();
+  });
+
   it("shows the preview dashed while placing", () => {
     const { content, container } = renderFullTimeline(day(1), day(2));
     act(() => {

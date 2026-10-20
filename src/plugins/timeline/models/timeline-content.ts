@@ -203,6 +203,14 @@ export const TimelineContentModel = TileContentModel
       const max = self.dataEndTime?.toMillis() ?? ms;
       const time = DateTime.fromMillis(Math.min(Math.max(ms, min), max));
       return time.isValid ? time : undefined;
+    },
+    // Changing the Wave Runner's station or dates moves the data out from under a placed marker.
+    // The view can never leave the data, so a marker outside it cannot be panned to, dragged or
+    // deleted: whatever still refers to one has to ask whether it is reachable first.
+    get isMarkerInData() {
+      const { markerTime, dataStartTime, dataEndTime } = self;
+      if (!markerTime || !dataStartTime || !dataEndTime) return false;
+      return markerTime >= dataStartTime && markerTime <= dataEndTime;
     }
   }))
   .views(self => ({
