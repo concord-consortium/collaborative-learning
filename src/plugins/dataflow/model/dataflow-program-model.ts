@@ -226,8 +226,8 @@ export const DataflowProgramModel = types.
   }))
   .actions(self => ({
     /**
-     * Clears the running state of every node and the tick history, leaving one open
-     * tick for the nodes to write into. Blocks, connections and settings are untouched.
+     * Clears the running state of every node and the tick history, leaving one open tick for
+     * the nodes to write into. Blocks, block connections and settings are untouched.
      */
     resetRunningState() {
       withoutUndo();
