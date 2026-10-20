@@ -476,7 +476,7 @@ describe("Dataflow connect button and pane", () => {
     expect(connect).not.toHaveBeenCalled();
   });
 
-  it("the button pulses when the program needs a device", () => {
+  it("the button shows the attention state when the program needs a device", () => {
     const content = DataflowContentModel.create();
     content.setNeedsDevice(true);
     const { container } = renderConnect({ content });
@@ -485,7 +485,7 @@ describe("Dataflow connect button and pane", () => {
     expect(trigger.getAttribute("aria-label")).toBe("This program needs a device. Click to connect.");
   });
 
-  it("opening the pane clears an unseen error's pulse", () => {
+  it("opening the pane clears an unseen error's attention state", () => {
     const content = DataflowContentModel.create();
     content.setUnseenConnectError(true);
     const { container } = renderConnect({ content });
@@ -706,7 +706,7 @@ describe("Dataflow reset button", () => {
     expect(screen.getByRole("button", { name: "Reset program" })).toBeInTheDocument();
   });
 
-  it("reset is disabled with no rete manager, and with a read-only (playback) manager", () => {
+  it("reset is disabled with no rete manager, and with a read-only manager (a read-only view or Done-mode playback)", () => {
     const first = renderToolbarButton("reset", { manager: null });
     expect(isDisabled(screen.getByRole("button", { name: "Reset program" }))).toBe(true);
     fireEvent.click(screen.getByRole("button", { name: "Reset program" }));
