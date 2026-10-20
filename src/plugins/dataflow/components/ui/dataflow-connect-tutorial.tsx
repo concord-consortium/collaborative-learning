@@ -50,7 +50,7 @@ export const DataflowConnectTutorial: React.FC<IDialogProps> = ({ onDismiss }) =
         aria-labelledby={titleId} aria-describedby={bodyId}>
         <h3 className="dataflow-connect-tutorial-title" id={titleId}>This program uses a real device</h3>
         <p className="dataflow-connect-tutorial-body" id={bodyId}>
-          Connect your Arduino, micro:bit or Spiker:bit to the computer. Then click the flashing
+          Connect your Arduino, micro:bit or Spiker:bit to the computer. Then click the yellow
           ⚡ button in this tile&apos;s toolbar and choose your device.
         </p>
         <button className="dataflow-connect-tutorial-ok" onClick={onDismiss}>OK</button>

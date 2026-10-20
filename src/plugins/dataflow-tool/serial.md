@@ -67,6 +67,8 @@ tile's `unseenConnectError` is set when an attempt fails while the pane is close
 when the pane opens. The button face has three states, chosen by `connectButtonState`
 (`utilities/connect-button-state.ts`), each with its own tooltip: idle, connected, and attention
 (the program needs a device and none is connected, or there is an error the user hasn't seen).
+In the attention state the button is yellow; it pulses three times when the state is first applied,
+including each time the toolbar appears, and then stays yellow.
 The toolbar's `reset` button restarts the tile's program through `program.resetRunningState()`.
 
 `DeviceConnection` provides `connect(choice)`, `reconnect()` and `disconnect()`. Connect and
