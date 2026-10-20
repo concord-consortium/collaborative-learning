@@ -71,13 +71,67 @@ describe("Timeline toolbar — Add Time Marker button", () => {
     mockedGetSharedModelManager.mockReset();
   });
 
+  /** A real pointer click. A button activated from the keyboard reports detail 0, which the
+   *  button treats as a request to place the marker rather than to arm placement mode. */
+  const clickButton = () =>
+    fireEvent.click(screen.getByRole("button", { name: "Add Time Marker" }), { detail: 1 });
+
   it("turns on placement mode when clicked", () => {
     withSharedSeismogram(dataStart, dataEnd);
     const content = TimelineContentModel.create();
     renderToolbarButton(content);
 
-    fireEvent.click(screen.getByRole("button", { name: "Add Time Marker" }));
+    clickButton();
     expect(content.isPlacingMarker).toBe(true);
+  });
+
+  // aria-pressed says this is a toggle, so it has to behave like one: Escape was otherwise the
+  // only way out of placement mode, and nothing tells the student that.
+  it("turns placement mode back off when clicked again", () => {
+    withSharedSeismogram(dataStart, dataEnd);
+    const content = TimelineContentModel.create();
+    renderToolbarButton(content);
+
+    clickButton();
+    clickButton();
+
+    expect(content.isPlacingMarker).toBe(false);
+  });
+
+  it("reports whether placement mode is on", () => {
+    withSharedSeismogram(dataStart, dataEnd);
+    const content = TimelineContentModel.create();
+    renderToolbarButton(content);
+    const button = screen.getByRole("button", { name: "Add Time Marker" });
+
+    expect(button).toHaveAttribute("aria-pressed", "false");
+    clickButton();
+    expect(button).toHaveAttribute("aria-pressed", "true");
+  });
+
+  // Placement is a pointer gesture. Without this a keyboard user gets a button that reports itself
+  // pressed and then does nothing they can reach, which fails WCAG 2.1.1.
+  it("places the marker in the middle of the view when activated from the keyboard", () => {
+    withSharedSeismogram(dataStart, dataEnd);
+    const content = TimelineContentModel.create();
+    content.setViewRange(dataStart, dataEnd);
+    renderToolbarButton(content);
+
+    fireEvent.click(screen.getByRole("button", { name: "Add Time Marker" }), { detail: 0 });
+
+    expect(content.isPlacingMarker).toBe(false);
+    expect(content.timeToViewPct(content.markerTime!)).toBeCloseTo(50);
+  });
+
+  it("announces why it is disabled rather than the generic message", () => {
+    withSharedSeismogram(dataStart, dataEnd);
+    const content = TimelineContentModel.create();
+    content.setMarkerTime(dataStart.plus({ days: 1 }));
+    renderToolbarButton(content);
+
+    clickButton();
+
+    expect(screen.getByText("Delete the existing marker first")).toBeInTheDocument();
   });
 
   // Only one marker at a time: the way to get another is to delete the first.
@@ -97,9 +151,20 @@ describe("Timeline toolbar — Add Time Marker button", () => {
     renderToolbarButton(content);
 
     act(() => { content.clearMarkerTime(); });
-    fireEvent.click(screen.getByRole("button", { name: "Add Time Marker" }));
+    clickButton();
 
     expect(content.isPlacingMarker).toBe(true);
+  });
+
+  // Changing the Wave Runner's dates can leave a marker outside the data, where it can neither be
+  // panned to nor deleted. Keeping the button off then would disable it for the life of the tile.
+  it("is enabled when the marker has been left outside the data", () => {
+    withSharedSeismogram(dataStart, dataEnd);
+    const content = TimelineContentModel.create();
+    content.setMarkerTime(dataStart.minus({ days: 2 }));
+    renderToolbarButton(content);
+
+    expect(screen.getByRole("button", { name: "Add Time Marker" })).not.toHaveAttribute("aria-disabled");
   });
 
   // Nothing to place a marker against before data has loaded.

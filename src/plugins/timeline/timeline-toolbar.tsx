@@ -5,7 +5,12 @@ import { TileToolbarButton } from "../../components/toolbar/tile-toolbar-button"
 import {
   IToolbarButtonComponentProps, registerTileToolbarButtons
 } from "../../components/toolbar/toolbar-button-manager";
+import { useLiveAnnouncer } from "../../hooks/use-live-announcer";
+import { useTileModelContext } from "../../components/tiles/hooks/use-tile-model-context";
+import { getTileNode } from "../../components/tiles/tile-dom";
 import { useTimelineContent } from "./hooks/use-timeline-content";
+import { formatTime } from "./components/describe-view";
+import { kMarkerStemTestId } from "./components/time-marker-overlay";
 
 import ZoomInIcon from "./assets/toolbar/zoom-in-icon.svg";
 import ZoomOutIcon from "./assets/toolbar/zoom-out-icon.svg";
@@ -91,16 +96,52 @@ const PanRightButton = observer(function PanRightButton({ name }: IToolbarButton
 
 const AddMarkerButton = observer(function AddMarkerButton({ name }: IToolbarButtonComponentProps) {
   const content = useTimelineContent();
+  const { tile } = useTileModelContext();
+  const { announcerRef, announce } = useLiveAnnouncer();
+
+  // Placement is a pointer gesture, so a keyboard user could press this button, see it report
+  // itself pressed, and have no way to place anything (WCAG 2.1.1). Drop the marker in the middle
+  // of the view instead and hand them the stem, which is a slider they can position from there.
+  const placeFromKeyboard = () => {
+    const time = content?.viewPctToTime(50);
+    if (!time) return;
+    content.setMarkerTime(time);
+    announce(`Marker placed at ${formatTime(time)}.`);
+    const tileNode = tile?.id ? getTileNode(document, tile.id) : undefined;
+    // The marker mounts in the render this write causes, so wait for it.
+    requestAnimationFrame(() =>
+      tileNode?.querySelector<HTMLElement>(`[data-testid="${kMarkerStemTestId}"]`)?.focus());
+  };
+
+  const handleClick = (e: React.MouseEvent) => {
+    // A button activated from the keyboard reports detail 0; a real click reports 1 or more.
+    if (e.detail === 0) {
+      placeFromKeyboard();
+    // aria-pressed says this is a toggle, so pressing it again has to turn placement off. Escape
+    // was otherwise the only way out, and nothing says so.
+    } else if (content?.isPlacingMarker) {
+      content.stopPlacingMarker();
+      announce("Marker placement cancelled.");
+    } else {
+      content?.startPlacingMarker();
+      announce("Click the graph to place the time marker, or press Escape to cancel.");
+    }
+  };
 
   return (
     <TileToolbarButton
       name={name}
       title="Add Time Marker"
-      onClick={() => content?.startPlacingMarker()}
+      onClick={handleClick}
       selected={content?.isPlacingMarker}
-      disabled={!!content?.markerTime || !content?.dataStartTime}
+      // A marker left outside the data by a Wave Runner date change can no longer be reached to
+      // delete, so it must not keep this button off for good. Placing a new one replaces it.
+      disabled={!!content?.isMarkerInData || !content?.dataStartTime}
+      disabledMessage={content?.isMarkerInData
+                        ? "Delete the existing marker first" : "No data loaded"}
     >
       <AddMarkerIcon/>
+      <div ref={announcerRef} className="visually-hidden" aria-live="polite" />
     </TileToolbarButton>
   );
 });
