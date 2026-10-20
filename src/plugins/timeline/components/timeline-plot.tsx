@@ -2,6 +2,7 @@ import classNames from "classnames";
 import { observer } from "mobx-react-lite";
 import React, { useEffect, useRef, useState } from "react";
 import { useReadOnlyContext } from "../../../components/document/read-only-context";
+import { kTileSelector } from "../../../components/tiles/tile-dom";
 import { useLiveAnnouncer } from "../../../hooks/use-live-announcer";
 import { useTimelineContent } from "../hooks/use-timeline-content";
 import { describeView, formatTime } from "./describe-view";
@@ -31,6 +32,7 @@ interface IProps {
 export const TimelinePlot = observer(function TimelinePlot({ children }: IProps) {
   const content = useTimelineContent();
   const readOnly = useReadOnlyContext();
+  const plotRef = useRef<HTMLDivElement>(null);
   const dragRef = useRef<IDragState | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [isShiftDown, setIsShiftDown] = useState(false);
@@ -79,6 +81,30 @@ export const TimelinePlot = observer(function TimelinePlot({ children }: IProps)
       msPerPx: viewRangeMs / width,
       moved: false
     };
+  };
+
+  // Without this the dashed preview and its time label stay where the pointer left the plot,
+  // looking like a marker that has already been placed.
+  // Escape cancels placement, but only from inside this tile: the flag lives on the shared content
+  // model, so a read-only pane of the same document would otherwise add a listener of its own, and
+  // Escape pressed anywhere in CLUE would cancel. The key is consumed so the tile's focus trap,
+  // which also acts on Escape, doesn't exit the trap in the same press.
+  useEffect(() => {
+    if (readOnly || !content.isPlacingMarker) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key !== "Escape") return;
+      const tile = plotRef.current?.closest(kTileSelector);
+      if (!tile?.contains(document.activeElement)) return;
+      e.stopPropagation();
+      content.stopPlacingMarker();
+      announce("Marker placement cancelled.");
+    };
+    window.addEventListener("keydown", onKeyDown, true);
+    return () => window.removeEventListener("keydown", onKeyDown, true);
+  }, [announce, content, content.isPlacingMarker, readOnly]);
+
+  const handlePointerLeave = () => {
+    if (content.hoverTime) content.clearHoverTime();
   };
 
   const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
@@ -153,15 +179,6 @@ export const TimelinePlot = observer(function TimelinePlot({ children }: IProps)
     if (dragRef.current?.pointerId === e.pointerId) endDrag(e);
   };
 
-  useEffect(() => {
-    if (!content.isPlacingMarker) return;
-    const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") content.stopPlacingMarker();
-    };
-    window.addEventListener("keydown", onKeyDown);
-    return () => window.removeEventListener("keydown", onKeyDown);
-  }, [content, content.isPlacingMarker]);
-
   if (readOnly) {
     return <div className="timeline-plot">{children}</div>;
   }
@@ -173,8 +190,10 @@ export const TimelinePlot = observer(function TimelinePlot({ children }: IProps)
   return (
     <>
       <div
+        ref={plotRef}
         className={classNames("timeline-plot", "interactive", cursorClass)}
         onPointerDown={handlePointerDown}
+        onPointerLeave={handlePointerLeave}
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
         onPointerCancel={handlePointerCancel}

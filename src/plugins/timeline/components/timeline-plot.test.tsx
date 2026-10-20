@@ -7,12 +7,13 @@ jest.mock("uplot", () => {
   }));
 });
 
-import { act, fireEvent, render } from "@testing-library/react";
+import { act, fireEvent, render, screen } from "@testing-library/react";
 import { DateTime } from "luxon";
 import React from "react";
 import { ReadOnlyContext } from "../../../components/document/read-only-context";
 import { TileModelContext } from "../../../components/tiles/tile-api";
 import { kAnnounceDelayMs } from "../../../hooks/use-live-announcer";
+import { kTileClass, tileDomAttributes } from "../../../components/tiles/tile-dom";
 import { TileModel } from "../../../models/tiles/tile-model";
 import { getSharedModelManager } from "../../../models/tiles/tile-environment";
 import { mockPointerEvents } from "../../../test/pointer-events";
@@ -65,7 +66,12 @@ describe("TimelinePlot", () => {
     const tree = (isReadOnly: boolean) => (
       <ReadOnlyContext.Provider value={isReadOnly}>
         <TileModelContext.Provider value={model}>
-          <TimelinePlot><div className="plot-content" /></TimelinePlot>
+          {/* The plot scopes its Escape handling to the tile it is in, which TileComponent marks
+              with this class and attribute (see tile-dom.ts). */}
+          <div className={kTileClass} {...tileDomAttributes(model.id)}>
+            <button type="button" data-testid="tile-control">Toolbar</button>
+            <TimelinePlot><div className="plot-content" /></TimelinePlot>
+          </div>
         </TileModelContext.Provider>
       </ReadOnlyContext.Provider>
     );
@@ -309,6 +315,25 @@ describe("TimelinePlot", () => {
         `Panned. Showing ${format(day(1).plus({ hours: 6 }))} to ${format(day(2).plus({ hours: 6 }))}.`);
     });
 
+    it("announces where a marker was placed", () => {
+      const { container, content, plot } = renderPlot(day(1), day(2));
+      act(() => { content.startPlacingMarker(); });
+
+      click(plot, 500);
+
+      expect(announced(container)).toBe(`Marker placed at ${format(day(1).plus({ hours: 12 }))}.`);
+    });
+
+    it("announces a cancelled placement", () => {
+      const { container, content } = renderPlot(day(1), day(2));
+      act(() => { content.startPlacingMarker(); });
+      screen.getByTestId("tile-control").focus();
+
+      fireEvent.keyDown(window, { key: "Escape" });
+
+      expect(announced(container)).toBe("Marker placement cancelled.");
+    });
+
     it("doesn't claim a zoom is centered when the data edge shifted it", () => {
       const { container, plot } = renderPlot(dataStart, dataEnd);
       click(plot, 0);
@@ -390,10 +415,40 @@ describe("TimelinePlot", () => {
     it("leaves the mode on Escape without placing", () => {
       const { content } = renderPlot(dataStart, dataEnd);
       act(() => { content.startPlacingMarker(); });
+      screen.getByTestId("tile-control").focus();
       fireEvent.keyDown(window, { key: "Escape" });
 
       expect(content.isPlacingMarker).toBe(false);
       expect(content.markerTime).toBeUndefined();
+    });
+
+    // The listener is only registered while placing, so it has to come off when placement ends:
+    // a stray one would keep swallowing Escape from the tile long after the marker was placed.
+    it("stops listening for Escape once placement has ended", () => {
+      const { content, plot } = renderPlot(dataStart, dataEnd);
+      act(() => { content.startPlacingMarker(); });
+      click(plot, 500);
+
+      const tileControl = screen.getByTestId("tile-control");
+      const onTileEscape = jest.fn();
+      tileControl.addEventListener("keydown", onTileEscape);
+      tileControl.focus();
+      fireEvent.keyDown(tileControl, { key: "Escape" });
+
+      expect(onTileEscape).toHaveBeenCalled();
+      expect(content.markerTime).toBeDefined();
+    });
+
+    // The flag lives on the shared content model, so every pane showing the document sees it.
+    // An unscoped listener made Escape anywhere in CLUE cancel a placement in some other tile.
+    it("ignores Escape pressed outside the tile", () => {
+      const { content } = renderPlot(dataStart, dataEnd);
+      act(() => { content.startPlacingMarker(); });
+
+      (document.activeElement as HTMLElement | null)?.blur();
+      fireEvent.keyDown(window, { key: "Escape" });
+
+      expect(content.isPlacingMarker).toBe(true);
     });
 
     it("tracks the pointer with a preview while placing", () => {
@@ -403,7 +458,7 @@ describe("TimelinePlot", () => {
       expect(content.hoverTime).toBeDefined();
     });
 
-    // Outside the mode the preview stays dormant - CLUE-673 removed the follow line deliberately.
+    // Outside the mode the preview stays dormant: the plot has no follow line of its own.
     it("sets no preview when not placing", () => {
       const { content, plot } = renderPlot(dataStart, dataEnd);
       fireEvent.pointerMove(plot, { clientX: 500 });
