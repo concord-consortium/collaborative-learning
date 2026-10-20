@@ -106,7 +106,8 @@ The timings:
 
 - **before**: the new client breaks the current curriculum. Change the matching units on the
   curriculum's `main` before the PR merges to CLUE `master`. Then have the authors of every other
-  branch that still matches merge `main` or make the change on their branch.
+  branch that still matches merge `main` or make the change on their branch. The reference point
+  is the CLUE merge, not the release, unlike Deploy timing's **before**.
 - **with**: each breaks the other: the new client fails with the current curriculum, and the
   released client fails with the new one. The two have to switch over together at the release.
   That is rare and usually means the change should accept both forms for a while.
@@ -118,7 +119,7 @@ The timings:
 
 Whoever makes the curriculum change runs the search again when they do it, for `before` just
 before the CLUE PR merges, rather than working from the snapshot. A search that walks every remote
-branch with `git grep <ref>` and `git show <ref>:<path>` after a `git fetch --prune` is enough; it
+branch with `git grep <pattern> <ref>` and `git show <ref>:<path>` after a `git fetch --prune` is enough; it
 doesn't need a local checkout of each branch.
 
 The callout can't cover a unit that starts to match after the PR merges. When the condition is a
