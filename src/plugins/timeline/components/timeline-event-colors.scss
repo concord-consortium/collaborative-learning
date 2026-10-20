@@ -32,3 +32,13 @@ $default-base: #dfdfdf;
 $default-hover: #d1d1d1;
 $default-select: #b9b9b9;
 $default-transparent: rgba(223, 223, 223, 0.5);
+
+// The Full Timeline draws events darker than the graph does, so they stand out against its white
+// background and the overlay that marks the view.
+$blue-full-timeline: #0274dc;
+$orange-full-timeline: #b06002;
+$red-full-timeline: #eb0300;
+$yellow-full-timeline: #767909;
+$magenta-full-timeline: #c201ee;
+$purple-full-timeline: #884cff;
+$default-full-timeline: #747474;

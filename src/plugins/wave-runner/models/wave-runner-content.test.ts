@@ -1,9 +1,12 @@
+import { destroy, getParent, getRoot, getSnapshot, unprotect } from "mobx-state-tree";
 import { DocumentContentModel } from "../../../models/document/document-content";
 import { createDocumentModel } from "../../../models/document/document";
 import { ProblemDocument } from "../../../models/document/document-types";
 import "../../../models/shared/shared-data-set-registration";
+import { kSharedDataSetType } from "../../../models/shared/shared-data-set";
 import "../../shared-seismogram/shared-seismogram-registration";
 import { registerTileContentInfo } from "../../../models/tiles/tile-content-info";
+import { kEventNumberAttrName } from "../../shared-seismogram/event-number-column";
 import { kWaveRunnerTileType } from "../wave-runner-types";
 import { ModelListEntry, PLACEHOLDER_MODEL_URL } from "../../../../shared/seismic/models/model-metadata";
 import { WaveRunnerContentModel, defaultWaveRunnerContent } from "./wave-runner-content";
@@ -41,6 +44,40 @@ registerTileContentInfo({
   defaultContent: defaultWaveRunnerContent,
 });
 
+describe("default date range", () => {
+  it("starts a new tile at 2026-09-01 through 2026-10-01", () => {
+    const content = defaultWaveRunnerContent();
+    expect(content.startDate).toBe("2026-09-01");
+    expect(content.endDate).toBe("2026-10-01");
+  });
+
+  it("serializes the defaults into the document snapshot", () => {
+    const snapshot = getSnapshot(defaultWaveRunnerContent()) as Record<string, unknown>;
+    expect(snapshot.startDate).toBe("2026-09-01");
+    expect(snapshot.endDate).toBe("2026-10-01");
+  });
+});
+
+describe("startDateISO and endDateISO", () => {
+  // The seismogram viewport (status-and-output.tsx) reads these two getters directly as
+  // startTime/endTime. endDate is inclusive - run/loadEnvelopeData add SECONDS_PER_DAY to cover
+  // the whole end day - so a single-day range (start === end, now a valid pick) must still span
+  // a full day's worth of time, not collapse to a single zero-width instant.
+  it("gives a single-day range a non-zero span, spanning the whole end day", () => {
+    const content = WaveRunnerContentModel.create({ startDate: "2026-09-15", endDate: "2026-09-15" });
+    const spanMs = content.endDateISO.toMillis() - content.startDateISO.toMillis();
+    expect(spanMs).toBeGreaterThan(0);
+    expect(spanMs).toBe(SECONDS_PER_DAY * 1000);
+  });
+
+  it("still spans correctly across a multi-day range", () => {
+    const content = WaveRunnerContentModel.create({ startDate: "2026-09-01", endDate: "2026-09-04" });
+    const spanMs = content.endDateISO.toMillis() - content.startDateISO.toMillis();
+    // 3 full days between the two dates' starts, plus the inclusive end day itself.
+    expect(spanMs).toBe(4 * SECONDS_PER_DAY * 1000);
+  });
+});
+
 const mockCompactMetadata = {
   $schema: "https://collaborative-learning.concord.org/schemas/seismic-model/v1.json",
   id: "compact-v1",
@@ -52,27 +89,29 @@ const mockCompactMetadata = {
   weightsUrl: "./weights.json"
 };
 
+// Shared across describe blocks below: a real shared model manager (via a document, not a bare
+// WaveRunnerContentModel.create()) is needed for loadData/loadEnvelopeData/runModel.
+function setupTileInDocument() {
+  const docContent = DocumentContentModel.create({
+    tileMap: {
+      "tile1": {
+        id: "tile1",
+        content: { type: kWaveRunnerTileType },
+      }
+    }
+  });
+  const docModel = createDocumentModel({
+    uid: "1", type: ProblemDocument, key: "test", content: docContent as any
+  });
+  docModel.treeMonitor!.enableMonitoring();
+
+  return docContent.tileMap.get("tile1")!.content as any;
+}
+
 describe("WaveRunnerContent", () => {
   afterEach(() => {
     jest.restoreAllMocks();
   });
-
-  function setupTileInDocument() {
-    const docContent = DocumentContentModel.create({
-      tileMap: {
-        "tile1": {
-          id: "tile1",
-          content: { type: kWaveRunnerTileType },
-        }
-      }
-    });
-    const docModel = createDocumentModel({
-      uid: "1", type: ProblemDocument, key: "test", content: docContent as any
-    });
-    docModel.treeMonitor!.enableMonitoring();
-
-    return docContent.tileMap.get("tile1")!.content as any;
-  }
 
   it("can be created in a document through the tile registry", () => {
     const docContent = DocumentContentModel.create({});
@@ -109,8 +148,24 @@ describe("WaveRunnerContent", () => {
     // Compared as instants: the shared model normalizes to millisecond precision.
     expect(new Date(shared.startTime).toISOString())
       .toBe(new Date(`${content.startDate}T00:00:00Z`).toISOString());
-    expect(new Date(shared.endTime).toISOString())
-      .toBe(new Date(`${content.endDate}T00:00:00Z`).toISOString());
+    // endDate is inclusive, so the shared range ends at the close of that day.
+    expect(new Date(shared.endTime).getTime())
+      .toBe(Date.parse(`${content.endDate}T00:00:00Z`) + SECONDS_PER_DAY * 1000);
+  });
+
+  // Timeline It! copies the shared range, and the Timeline rejects a view whose start is not
+  // before its end, so a single-day range must still reach it with a full day's span.
+  it("gives the shared seismogram a full day for a single-day range", async () => {
+    const content = setupTileInDocument();
+    content.setStation({
+      network: "AK", station: "K204", location: "", channel: "HNZ", label: "Anchorage Airport"
+    });
+    content.setStartDate("2026-09-15");
+    content.setEndDate("2026-09-15");
+    await content.loadData();
+
+    const shared = content.sharedSeismogram!;
+    expect(shared.endTime!.toMillis() - shared.startTime!.toMillis()).toBe(SECONDS_PER_DAY * 1000);
   });
 
   it("is always user resizable", () => {
@@ -118,10 +173,10 @@ describe("WaveRunnerContent", () => {
     expect(content.isUserResizable).toBe(true);
   });
 
-  it("has default start and end dates covering the mock data range", () => {
+  it("has the standard default start and end dates", () => {
     const content = WaveRunnerContentModel.create();
-    expect(content.startDate).toBe("2025-01-01");
-    expect(content.endDate).toBe("2025-12-31");
+    expect(content.startDate).toBe("2026-09-01");
+    expect(content.endDate).toBe("2026-10-01");
   });
 
   it("allows setting start and end dates", () => {
@@ -197,6 +252,23 @@ describe("WaveRunnerContent", () => {
     content.addDetectedEvents([{ ...evt, confidence: 0.8 }, { ...evt, eventType: "traffic" }]);
     expect(content.detectedEvents).toHaveLength(2);
     expect(content.detectedEvents.map((e: any) => e.eventType)).toEqual(["earthquake", "traffic"]);
+  });
+
+  // Where the column comes from is the Wave Runner's only part in this. What the numbers are, and
+  // how they keep up with a linked table's edits, belong to the formula and are tested with it.
+  it("gives the events dataset its Event Number column when it records a run", () => {
+    const content = setupTileInDocument();
+    content.addDetectedEvents([
+      { windowStart: Date.UTC(2026, 1, 1, 1), windowEnd: Date.UTC(2026, 1, 1, 2),
+        eventType: "avalanche", confidence: 0.8 }
+    ]);
+
+    content.recordDetectedEvents();
+
+    const dataSet = content.getOrCreateEventsDataSet()!.dataSet;
+    expect(dataSet.attributes[0].name).toBe(kEventNumberAttrName);
+    expect(dataSet.attrFromName(kEventNumberAttrName)!.formula.display)
+      .toBe(`rank(windowStart, windowEnd != "" and eventType != "")`);
   });
 
   it("configures the compact model in the wave-runner settings", () => {
@@ -312,6 +384,7 @@ describe("WaveRunnerContent", () => {
         ensureRange: jest.fn(),
         nextReadyDay: jest.fn(async () => (i < days.length ? days[i++] : DONE)),
         readDay: jest.fn(async () => new ArrayBuffer(8)),
+        bytesForDay: jest.fn(() => 0),
         cancel: jest.fn(),
         erroredDays: [],
         emptyDays: [],
@@ -333,6 +406,34 @@ describe("WaveRunnerContent", () => {
       expect(processChunk).toHaveBeenCalledTimes(2);
       expect(content.runError).toBeNull();
       expect(content.isRunning).toBe(false);
+    });
+
+    // start === end must be accepted as one valid day, not rejected as an invalid range - and that
+    // guard only lives in this one branch of runModel, reached after the model/metadata/station
+    // guards pass, so the assertions below must come from an actual run rather than runError's
+    // own default of null.
+    it("treats start === end as one valid day, not an invalid range, when running the model", async () => {
+      const singleDaySec = Date.UTC(2026, 8, 15) / 1000; // 2026-09-15
+      const singleDay = singleDaySec / SECONDS_PER_DAY;
+      const fakeService = makeFakeDownloadService([singleDay]);
+      (SeismicDownloadService as jest.Mock).mockImplementation(() => fakeService);
+      jest.spyOn(SeismicModelRunner.prototype, "loadModel").mockResolvedValue(undefined);
+      const processChunk = jest.spyOn(SeismicModelRunner.prototype, "processChunk").mockResolvedValue([]);
+
+      const content = setupTileInDocument();
+      content.setStation({ network: "AK", station: "K204", location: "", channel: "HNZ", label: "x" });
+      content.setStartDate("2026-09-15");
+      content.setEndDate("2026-09-15");
+      await content.ensureModelMetadata(PLACEHOLDER_MODEL_URL);
+
+      await content.runModel();
+
+      // runError being null is not proof by itself - it starts out null anyway. Proof the single
+      // day was actually accepted and processed is that the model ran on it.
+      expect(content.runError).not.toBe("Invalid date range. End date must not be before start date.");
+      expect(content.runError).toBeNull();
+      expect(fakeService.readDay).toHaveBeenCalledTimes(1);
+      expect(processChunk).toHaveBeenCalledTimes(1);
     });
 
     describe("event database integration", () => {
@@ -400,8 +501,9 @@ describe("WaveRunnerContent", () => {
         expect(fakeService.ensureRange).toHaveBeenCalledWith(
           expect.objectContaining({ startSec: feb2Sec, endSec: feb2Sec }));
         expect(processChunk).toHaveBeenCalledTimes(1);
-        expect(content.chunksProcessed).toBe(1);
-        expect(content.chunksTotal).toBe(1);
+        // Progress counts the two already-covered days as done.
+        expect(content.chunksProcessed).toBe(3);
+        expect(content.chunksTotal).toBe(3);
         expect(content.runError).toBeNull();
       });
 
@@ -486,8 +588,8 @@ describe("WaveRunnerContent", () => {
         expect(fakeService.ensureRange).toHaveBeenNthCalledWith(2,
           expect.objectContaining({ startSec: feb3Sec, endSec: feb3Sec }));
         expect(processChunk).toHaveBeenCalledTimes(2);
-        expect(content.chunksProcessed).toBe(2);
-        expect(content.chunksTotal).toBe(2);
+        expect(content.chunksProcessed).toBe(3);
+        expect(content.chunksTotal).toBe(3);
         expect(content.runError).toBeNull();
       });
 
@@ -509,7 +611,314 @@ describe("WaveRunnerContent", () => {
         expect(content.runError).toBeNull();
         expect(warn).toHaveBeenCalled();
       });
+
+      describe("pauseModel", () => {
+        // Pauses from inside the first day's processChunk, as a click mid-run would.
+        async function runAndPauseOnFirstDay() {
+          const evt = makeEvent(Date.UTC(2026, 1, 1, 1));
+          makeFakeService([feb1Day, feb1Day + 1, feb1Day + 2]);
+          const content = await setupRunReadyContent();
+          const processChunk = jest.spyOn(SeismicModelRunner.prototype, "processChunk")
+            .mockImplementationOnce(async (_seismogram: any, callbacks: any) => {
+              callbacks.onEvents([evt]);
+              content.pauseModel();
+              return [];
+            });
+          await content.runModel();
+          return { content, processChunk, evt };
+        }
+
+        it("does nothing when no run is in progress", () => {
+          const content = WaveRunnerContentModel.create();
+          content.pauseModel();
+          expect(content.isPaused).toBe(false);
+        });
+
+        it("stops after the day in progress, keeping its events without making a dataset", async () => {
+          const { content, processChunk } = await runAndPauseOnFirstDay();
+
+          expect(processChunk).toHaveBeenCalledTimes(1);
+          expect(markCovered).toHaveBeenCalledTimes(1);
+          expect(content.isRunning).toBe(false);
+          expect(content.isPaused).toBe(true);
+          expect(content.runError).toBeNull();
+          expect(content.eventsDataSet).toBeUndefined();
+          expect(content.eventsFound).toBe(1);
+          expect(content.chunksProcessed).toBe(1);
+          expect(content.chunksTotal).toBe(3);
+        });
+
+        it("resumes with only the uncovered days, reloading the paused run's events", async () => {
+          const { content, evt } = await runAndPauseOnFirstDay();
+
+          const feb2Sec = feb1Sec + SECONDS_PER_DAY;
+          (loadEvents as jest.Mock).mockResolvedValueOnce([evt]);
+          (getUncoveredRanges as jest.Mock).mockResolvedValueOnce(
+            [{ start: feb2Sec, end: feb2Sec + 2 * SECONDS_PER_DAY }]);
+          const fakeService = makeFakeService([feb1Day + 1, feb1Day + 2]);
+          const processChunk = jest.spyOn(SeismicModelRunner.prototype, "processChunk").mockResolvedValue([]);
+          processChunk.mockClear();
+          await content.runModel();
+
+          expect(fakeService.ensureRange).toHaveBeenCalledWith(
+            expect.objectContaining({ startSec: feb2Sec, endSec: feb2Sec + SECONDS_PER_DAY }));
+          expect(processChunk).toHaveBeenCalledTimes(2);
+          expect(content.isPaused).toBe(false);
+          expect(content.chunksProcessed).toBe(3);
+          expect(content.eventsDataSet?.dataSet.cases).toHaveLength(1);
+        });
+
+        it("takes a resumed run's earlier events from the database, not from memory", async () => {
+          const { content } = await runAndPauseOnFirstDay();
+
+          // loadEvents finds nothing, as if the paused day's events had been deleted.
+          const feb2Sec = feb1Sec + SECONDS_PER_DAY;
+          (getUncoveredRanges as jest.Mock).mockResolvedValueOnce(
+            [{ start: feb2Sec, end: feb2Sec + 2 * SECONDS_PER_DAY }]);
+          makeFakeService([feb1Day + 1, feb1Day + 2]);
+          jest.spyOn(SeismicModelRunner.prototype, "processChunk").mockResolvedValue([]);
+          await content.runModel();
+
+          expect(content.eventsDataSet?.dataSet.cases).toHaveLength(0);
+        });
+
+        it("completes the run when the pause lands during the last day", async () => {
+          const feb3Sec = feb1Sec + 2 * SECONDS_PER_DAY;
+          (getUncoveredRanges as jest.Mock).mockResolvedValueOnce(
+            [{ start: feb3Sec, end: feb3Sec + SECONDS_PER_DAY }]);
+          makeFakeService([feb1Day + 2]);
+          const content = await setupRunReadyContent();
+          jest.spyOn(SeismicModelRunner.prototype, "processChunk").mockImplementationOnce(async () => {
+            content.pauseModel();
+            return [];
+          });
+          await content.runModel();
+
+          expect(content.isPaused).toBe(false);
+          expect(content.eventsDataSet).toBeDefined();
+        });
+
+        it("clears the pause when the run then fails", async () => {
+          jest.spyOn(console, "error").mockImplementation(() => undefined);
+          makeFakeService([feb1Day, feb1Day + 1, feb1Day + 2]);
+          const content = await setupRunReadyContent();
+          jest.spyOn(SeismicModelRunner.prototype, "processChunk").mockImplementationOnce(async () => {
+            content.pauseModel();
+            throw new Error("bad chunk");
+          });
+          await content.runModel();
+
+          expect(content.runError).toBe("Error running model: bad chunk");
+          expect(content.isPaused).toBe(false);
+        });
+
+        it.each([
+          ["start date", (content: any) => content.setStartDate("2026-01-31")],
+          ["end date", (content: any) => content.setEndDate("2026-02-04")],
+          ["station", (content: any) =>
+            content.setStation({ network: "AK", station: "DDM", location: "01", channel: "HNZ", label: "y" })],
+          ["model", (content: any) => content.ensureModelMetadata("https://models.example.com/other/metadata.json")],
+        ])("forgets the paused run when the %s changes", async (_setting, change) => {
+          jest.spyOn(console, "error").mockImplementation(() => undefined);
+          const { content } = await runAndPauseOnFirstDay();
+
+          await change(content);
+
+          expect(content.isPaused).toBe(false);
+          expect(content.eventsFound).toBeUndefined();
+          expect(content.chunksProcessed).toBe(0);
+        });
+
+        it("keeps the paused run if a setting changes while it is still pausing", async () => {
+          makeFakeService([feb1Day, feb1Day + 1, feb1Day + 2]);
+          const content = await setupRunReadyContent();
+          jest.spyOn(SeismicModelRunner.prototype, "processChunk").mockImplementationOnce(async () => {
+            content.pauseModel();
+            content.clearPausedRun();
+            return [];
+          });
+          await content.runModel();
+
+          expect(content.isPaused).toBe(true);
+          expect(content.chunksProcessed).toBe(1);
+        });
+      });
+
+      describe("run lifecycle", () => {
+        it("starts only one run when Run is clicked twice while the model metadata loads", async () => {
+          makeFakeService([feb1Day, feb1Day + 1, feb1Day + 2]);
+          jest.spyOn(SeismicModelRunner.prototype, "loadModel").mockResolvedValue(undefined);
+          const processChunk = jest.spyOn(SeismicModelRunner.prototype, "processChunk").mockResolvedValue([]);
+          const content = setupTileInDocument();
+          content.setStation({ network: "AK", station: "K204", location: "", channel: "HNZ", label: "x" });
+          content.setStartDate("2026-02-01");
+          content.setEndDate("2026-02-03");
+          // Selects the model without waiting for its metadata, as after a page reload.
+          content.ensureModelMetadata(PLACEHOLDER_MODEL_URL);
+
+          await Promise.all([content.runModel(), content.runModel()]);
+
+          expect(loadEvents).toHaveBeenCalledTimes(1);
+          expect(processChunk).toHaveBeenCalledTimes(3);
+        });
+
+        it("resets progress when a new run starts", async () => {
+          makeFakeService([feb1Day, feb1Day + 1, feb1Day + 2]);
+          jest.spyOn(SeismicModelRunner.prototype, "processChunk").mockResolvedValue([]);
+          const content = await setupRunReadyContent();
+          await content.runModel();
+          expect(content.chunksProcessed).toBe(3);
+
+          let progressAtStart: number[] = [];
+          (loadEvents as jest.Mock).mockImplementationOnce(async () => {
+            progressAtStart = [content.chunksProcessed, content.chunksTotal];
+            return [];
+          });
+          await content.runModel();
+
+          expect(progressAtStart).toEqual([0, 0]);
+        });
+
+        describe("when the tile is deleted", () => {
+          let warn: jest.SpyInstance;
+          beforeEach(() => {
+            warn = jest.spyOn(console, "warn");
+          });
+          afterEach(() => {
+            const deadNodeWarnings = warn.mock.calls.filter(args =>
+              args.some((arg: unknown) => String(arg).includes("no longer part of a state tree")));
+            expect(deadNodeWarnings).toEqual([]);
+          });
+
+          function deleteTile(content: any) {
+            unprotect(getRoot(content));
+            destroy(getParent(content));
+          }
+
+          it("stops the run after the day in progress", async () => {
+            makeFakeService([feb1Day, feb1Day + 1, feb1Day + 2]);
+            const content = await setupRunReadyContent();
+            const processChunk = jest.spyOn(SeismicModelRunner.prototype, "processChunk")
+              .mockResolvedValue([])
+              .mockImplementationOnce(async (_seismogram: any, callbacks: any) => {
+                deleteTile(content);
+                callbacks.onEvents([makeEvent(Date.UTC(2026, 1, 1, 1))]);
+                return [];
+              });
+            await content.runModel();
+
+            expect(processChunk).toHaveBeenCalledTimes(1);
+          });
+
+          it("doesn't start the run if deleted while the model metadata loads", async () => {
+            makeFakeService([feb1Day, feb1Day + 1, feb1Day + 2]);
+            jest.spyOn(SeismicModelRunner.prototype, "loadModel").mockResolvedValue(undefined);
+            const processChunk = jest.spyOn(SeismicModelRunner.prototype, "processChunk").mockResolvedValue([]);
+            const content = setupTileInDocument();
+            content.setStation({ network: "AK", station: "K204", location: "", channel: "HNZ", label: "x" });
+            content.setStartDate("2026-02-01");
+            content.setEndDate("2026-02-03");
+            // Selects the model without waiting for its metadata, as after a page reload.
+            content.ensureModelMetadata(PLACEHOLDER_MODEL_URL);
+
+            const run = content.runModel();
+            deleteTile(content);
+            await run;
+
+            expect(loadEvents).not.toHaveBeenCalled();
+            expect(processChunk).not.toHaveBeenCalled();
+          });
+
+          it("doesn't make an events table if deleted during the last day", async () => {
+            makeFakeService([feb1Day, feb1Day + 1, feb1Day + 2]);
+            const content = await setupRunReadyContent();
+            const docContent = getParent<any>(getParent(content), 2);
+            jest.spyOn(SeismicModelRunner.prototype, "processChunk")
+              .mockResolvedValueOnce([])
+              .mockResolvedValueOnce([])
+              .mockImplementationOnce(async () => {
+                deleteTile(content);
+                return [];
+              });
+            await content.runModel();
+
+            const sharedTypes = [...docContent.sharedModelMap.values()].map((entry: any) => entry.sharedModel.type);
+            expect(sharedTypes).not.toContain(kSharedDataSetType);
+          });
+        });
+      });
     });
+  });
+});
+
+// See runModel's and loadEnvelopeData's own comments in wave-runner-content.ts for why each must
+// clear the other's error as it starts.
+describe("cross-operation error clearing", () => {
+  const testStation = { network: "AK", station: "K204", location: "", channel: "HNZ", label: "x" };
+
+  it("clears a stale loadDataError once a run starts", async () => {
+    const content = setupTileInDocument();
+    content.setStation(testStation);
+    content.setStartDate("2026-02-01");
+    content.setEndDate("2026-02-01");
+
+    await content.loadEnvelopeData({
+      getJwt: async () => "jwt",
+      uploader: { uploadTile: jest.fn().mockResolvedValue(undefined) },
+      processEnvelopes: jest.fn().mockRejectedValue(new Error("offline")),
+    });
+    expect(content.loadDataError).toContain("offline");
+
+    jest.spyOn(SeismicModelRunner.prototype, "loadModel").mockResolvedValue(undefined);
+    jest.spyOn(SeismicModelRunner.prototype, "processChunk").mockResolvedValue([]);
+    const feb1Sec = Date.UTC(2026, 1, 1) / 1000;
+    const feb1Day = feb1Sec / SECONDS_PER_DAY;
+    (SeismicDownloadService as jest.Mock).mockImplementation(() => makeFakeDownloadService([feb1Day]));
+    await content.ensureModelMetadata(PLACEHOLDER_MODEL_URL);
+
+    await content.runModel();
+
+    expect(content.runError).toBeNull();
+    expect(content.loadDataError).toBeNull();
+  });
+
+  it("clears a stale runError once loadEnvelopeData starts", async () => {
+    const content = setupTileInDocument();
+    await content.runModel();
+    expect(content.runError).toBe("No model selected");
+
+    content.setStation(testStation);
+    const processEnvelopes = jest.fn().mockResolvedValue(
+      { uploadedTiles: 0, processedDays: 0, skippedDays: 0, totalDays: 0 });
+    await content.loadEnvelopeData({
+      getJwt: async () => "jwt",
+      uploader: { uploadTile: jest.fn().mockResolvedValue(undefined) },
+      processEnvelopes,
+    });
+
+    expect(content.loadDataError).toBeNull();
+    expect(content.runError).toBeNull();
+  });
+
+  // The cross-clear used to run only after the "no model selected" guard, so a bailed-out runModel
+  // call - one that never gets far enough to do anything - left a previous load failure on screen
+  // indefinitely. Clearing loadDataError must happen before that guard, not after it.
+  it("clears a stale loadDataError even when runModel bails out on an early guard", async () => {
+    const content = setupTileInDocument();
+    content.setStation(testStation);
+
+    await content.loadEnvelopeData({
+      getJwt: async () => "jwt",
+      uploader: { uploadTile: jest.fn().mockResolvedValue(undefined) },
+      processEnvelopes: jest.fn().mockRejectedValue(new Error("offline")),
+    });
+    expect(content.loadDataError).toContain("offline");
+
+    // No model selected, so this bails out on the very first guard in runModel.
+    await content.runModel();
+
+    expect(content.runError).toBe("No model selected");
+    expect(content.loadDataError).toBeNull();
   });
 });
 

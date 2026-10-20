@@ -2,17 +2,18 @@ import React, { useState } from "react";
 import classNames from "classnames";
 import { IconButton } from "../../../../components/utilities/icon-button";
 import { SerialDevice } from "../../../../models/stores/serial";
+import { useReadOnlyContext } from "../../../../components/document/read-only-context";
 
 import "./dataflow-program-topbar.scss";
 
 interface SerialConnectProps {
   onConnectDevice: (deviceType: "serial" | "spikerbit") => void;
-  readOnly: boolean;
   serialDevice: SerialDevice;
 }
 
 export const DataflowSerialConnectButton = (props: SerialConnectProps) => {
-  const { onConnectDevice, readOnly, serialDevice } = props;
+  const { onConnectDevice, serialDevice } = props;
+  const readOnly = useReadOnlyContext();
   const [menuOpen, setMenuOpen] = useState(false);
 
   // Only track physical connection independently of port state when the device provides it.

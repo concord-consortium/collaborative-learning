@@ -4,19 +4,20 @@ import { observer } from "mobx-react";
 
 import { dataflowDroppableId, getNodeType, isNodeDraggableId } from "../dataflow-types";
 import { ReteManager } from "../../rete/rete-manager";
+import { useReadOnlyContext } from "../../../../components/document/read-only-context";
 
 interface IDataflowDropZoneProps {
   addNode: (nodeType: string, position?: [number, number]) => void;
   children?: any;
   className?: string;
   reteManager?: ReteManager;
-  readOnly?: boolean;
   style?: any;
   tileId: string;
 }
 export const DataflowDropZone = observer((
-  { addNode, children, className, reteManager, readOnly, style, tileId }: IDataflowDropZoneProps
+  { addNode, children, className, reteManager, style, tileId }: IDataflowDropZoneProps
 ) => {
+  const readOnly = useReadOnlyContext();
 
   const droppableId = dataflowDroppableId(tileId);
   const { isOver, setNodeRef } = useDroppable({ id: droppableId });

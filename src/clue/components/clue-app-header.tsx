@@ -262,7 +262,7 @@ export const ClueAppHeaderComponent: React.FC<IProps> = observer(function ClueAp
         ref={chatTutorLauncherRef}
         className="chat-tutor-launcher"
         hidden={isChatTutorOpen}
-        aria-label="Open the AIdeas chat tutor"
+        aria-label="Open the AIdeas chat with Ada"
         aria-expanded={isChatTutorOpen}
         aria-controls="chat-tutor-sidebar"
         onClick={() => ui.setShowChatTutor(true)}

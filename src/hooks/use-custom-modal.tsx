@@ -1,5 +1,5 @@
 import classNames from "classnames";
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useId, useRef, useState } from "react";
 import Modal from "react-modal";
 import { useModal } from "react-modal-hook";
 import CloseIconSvg from "../assets/icons/close/close.svg";
@@ -29,6 +29,9 @@ interface IProps<IContentProps> {
   Content: React.FC<IContentProps>;
   contentProps: IContentProps;
   focusElement?: string;
+  // Points aria-describedby at the content, so a message-only dialog's text is read on open. A
+  // form's controls are announced as they're reached instead.
+  describeContent?: boolean;
   canCancel?: boolean;
   // defined left-to-right, e.g. Extra Button, Cancel, OK
   buttons: IModalButton[];
@@ -36,7 +39,7 @@ interface IProps<IContentProps> {
   dataTestId?: string;
 }
 export const useCustomModal = <IContentProps,>({
-  className, Icon, title, Content, contentProps, focusElement, canCancel, buttons,
+  className, Icon, title, Content, contentProps, focusElement, describeContent, canCancel, buttons,
   onClose, dataTestId
 }: IProps<IContentProps>, dependencies?: any[]) => {
 
@@ -101,7 +104,9 @@ export const useCustomModal = <IContentProps,>({
   }, []);
   handleCloseRef.current = handleClose;
 
-  const titleId = `custom-modal-title-${(dataTestId || className || "default").replace(/\s+/g, "-")}`;
+  const idPrefix = useId();
+  const titleId = `${idPrefix}-title`;
+  const contentId = `${idPrefix}-content`;
 
   const [showModal, hideModal] = useModal(() => {
     // NOTE: the data-testid attribute is not passed to the modal element
@@ -109,7 +114,7 @@ export const useCustomModal = <IContentProps,>({
     // is passed to the modal header and content elements to allow for testing
     return (
       <Modal className={`custom-modal ${className || ""}`} isOpen
-              aria={{ labelledby: titleId, modal: true }}
+              aria={{ labelledby: titleId, describedby: describeContent ? contentId : undefined, modal: true }}
               shouldCloseOnEsc={canCancel}
               shouldCloseOnOverlayClick={false}
               onAfterOpen={handleAfterOpen as any}
@@ -124,7 +129,7 @@ export const useCustomModal = <IContentProps,>({
               <CloseIconSvg />
             </button>}
         </div>
-        <div className="modal-content" data-testid={dataTestId && `${dataTestId}-content`}>
+        <div className="modal-content" id={contentId} data-testid={dataTestId && `${dataTestId}-content`}>
           { /* TODO Fix type cast */ }
           <Content as any {...(contentProps)}/>
         </div>

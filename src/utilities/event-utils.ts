@@ -10,7 +10,9 @@ export function isSelectionModifierKeyDown() {
   return selectionModiferKeyDown;
 }
 
-export function hasSelectionModifier(e: MouseEvent | TouchEvent | KeyboardEvent | React.MouseEvent | React.TouchEvent) {
+export function hasSelectionModifier(
+    e: MouseEvent | PointerEvent | TouchEvent | KeyboardEvent |
+       React.MouseEvent | React.PointerEvent | React.TouchEvent) {
   return e.ctrlKey || e.metaKey || e.shiftKey;
 }
 

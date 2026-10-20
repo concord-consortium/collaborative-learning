@@ -1,10 +1,12 @@
-import React, { useEffect, useRef } from "react";
+import React, { useRef } from "react";
 import { DragOverlay, useDraggable } from "@dnd-kit/core";
 import { getNodeType, isNodeDraggableId, nodeDraggableId } from "../dataflow-types";
 import { NodeType, NodeTypes } from "../../model/utilities/node";
+import { useLiveAnnouncer } from "../../../../hooks/use-live-announcer";
 import { useUIStore } from "../../../../hooks/use-stores";
 import { useRovingTabindex } from "../../../../hooks/use-roving-tabindex";
 import { getNodeLetter } from "../../nodes/utilities/view-utilities";
+import { useReadOnlyContext } from "../../../../components/document/read-only-context";
 
 import "./dataflow-program-toolbar.scss";
 
@@ -98,39 +100,20 @@ const AddNodeButton = ({
 };
 
 interface IProps {
-  disabled: boolean;
   isTesting: boolean;
   onClearClick: () => void;
   onNodeCreateClick: (type: string) => void;
   tileId: string;
 }
-export const DataflowProgramToolbar = ({ disabled, isTesting, onClearClick, onNodeCreateClick, tileId }: IProps) => {
+export const DataflowProgramToolbar = ({ isTesting, onClearClick, onNodeCreateClick, tileId }: IProps) => {
+  const readOnly = useReadOnlyContext();
   const ui = useUIStore();
   const containerRef = useRef<HTMLElement>(null);
   const { handleKeyDown } = useRovingTabindex(containerRef, "vertical");
 
   // Live region for "Added X block" announcements. Lives inside the toolbar nav
-  // because the assistive tech is interacting with this region. Clear-then-set
-  // with a 150ms gap (long enough for SR pollers ~100-150ms to observe the
-  // empty state) so identical back-to-back messages are still re-announced.
-  const announcerRef = useRef<HTMLDivElement>(null);
-  const announceTimeoutRef = useRef<number | null>(null);
-  const announce = (text: string) => {
-    if (!announcerRef.current) return;
-    if (announceTimeoutRef.current !== null) {
-      window.clearTimeout(announceTimeoutRef.current);
-    }
-    announcerRef.current.textContent = "";
-    announceTimeoutRef.current = window.setTimeout(() => {
-      announceTimeoutRef.current = null;
-      if (announcerRef.current) announcerRef.current.textContent = text;
-    }, 150);
-  };
-  useEffect(() => () => {
-    if (announceTimeoutRef.current !== null) {
-      window.clearTimeout(announceTimeoutRef.current);
-    }
-  }, []);
+  // because the assistive tech is interacting with this region.
+  const { announcerRef, announce } = useLiveAnnouncer();
 
   let dragOverlay = null;
   if (ui.dragId && isNodeDraggableId(ui.dragId)) {
@@ -153,7 +136,7 @@ export const DataflowProgramToolbar = ({ disabled, isTesting, onClearClick, onNo
     >
       { NodeTypes.map((nt: NodeType, i: number) => (
         <AddNodeButton
-          disabled={disabled}
+          disabled={readOnly}
           i={i}
           key={nt.name}
           nodeType={nt.name}

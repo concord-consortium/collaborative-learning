@@ -19,6 +19,7 @@ registerTileComponentInfo({
   type: kTimelineTileType,
   Component: TimelineComponent,
   tileEltClass: "timeline-tool-tile",
+  tileHandlesOwnSelection: true,
   Icon,
   HeaderIcon
 });

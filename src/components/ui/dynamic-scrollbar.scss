@@ -1,3 +1,5 @@
+@import "./dynamic-scrollbar-vars";
+
 .dynamic-scrollbar {
   align-items: center;
   background-color: #f2f2f2;
@@ -6,21 +8,42 @@
   display: flex;
   height: 17px;
   position: relative;
+  // Keep a drag from selecting text or panning the page sideways; vertical scrolling and
+  // pinch-zoom still work on touch devices.
+  touch-action: pan-y pinch-zoom;
+  user-select: none;
   width: 100%;
 
   .dynamic-scrollbar-thumb {
-    background-color: #787878;
+    // At least 3:1 against the track
+    background-color: rgba(0, 0, 0, 0.45);
     border-radius: 5px;
     box-sizing: border-box;
     cursor: grab;
     height: calc(100% - 4px);
+    // Keep a thumb widened to its minimum inside the track
+    left: min(var(--thumb-left), calc(100% - #{$dynamic-scrollbar-min-thumb-width}));
     margin: 2px 0;
-    min-width: 8px;
+    min-width: $dynamic-scrollbar-min-thumb-width;
     position: absolute;
     top: 0;
 
-    &:active {
-      cursor: grabbing;
+    &:hover {
+      background-color: rgba(0, 0, 0, 0.55);
     }
+  }
+
+  // The track holds the pointer capture while scrubbing, so its cursor is the one that shows.
+  &.is-scrubbing, &.is-scrubbing .dynamic-scrollbar-thumb {
+    cursor: grabbing;
+  }
+
+  &.is-scrubbing .dynamic-scrollbar-thumb {
+    background-color: rgba(0, 0, 0, 0.65);
+  }
+
+  &.disabled .dynamic-scrollbar-thumb {
+    background-color: rgba(0, 0, 0, 0.45);
+    cursor: default;
   }
 }

@@ -380,3 +380,35 @@ describe("ChatTutorSidebar as a highlight source", () => {
     });
   });
 });
+
+// Nothing else pins the assistant's name, so a later edit could reintroduce "Tutor" in one of these
+// strings without failing a test. A screen-reader user who is invited to message Ada and then hears
+// replies attributed to someone else has no way to tell it is the same party.
+describe("ChatTutorSidebar names the assistant consistently", () => {
+  const problem = mockStores.unit.investigations[0].problems[0];
+
+  beforeEach(() => {
+    render(
+      <ChatTutorSidebar
+        documentKey="doc-1"
+        documentTitle="Test Document"
+        problemPath="unit/1/1"
+        problem={problem}
+        content={DocumentContentModel.create({})}
+        onClose={jest.fn()}
+      />
+    );
+  });
+
+  it("calls the assistant Ada everywhere the student can perceive it", () => {
+    expect(screen.getByRole("complementary", { name: /^Ada chat:/ })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Close Ada chat" })).toBeInTheDocument();
+    expect(screen.getByLabelText("Message Ada")).toBeInTheDocument();
+    expect(screen.getByText("Ada said:")).toBeInTheDocument();
+  });
+
+  it("does not attribute anything to a differently named assistant", () => {
+    expect(screen.queryByText(/Tutor said:/)).not.toBeInTheDocument();
+    expect(screen.queryByLabelText(/Tutor/)).not.toBeInTheDocument();
+  });
+});
