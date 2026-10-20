@@ -16,10 +16,15 @@ const kEventNumberFormula = `rank(windowStart, windowEnd != "" and eventType != 
  * after a linked table adds, deletes or re-times an event, and a value typed over it is recomputed
  * away. That makes adding it a one-time structural change, and doing it twice would overwrite a
  * formula the student may have since edited.
+ *
+ * The formula is how the numbers stay right, not something the student wrote, so the column is
+ * marked derived: to them it is one of the event's values, like its type or its start time, and a
+ * table shows it as an ordinary column.
  */
 export function addEventNumberColumn(dataSet: IDataSet) {
   if (dataSet.attrFromName(kEventNumberAttrName)) return;
 
-  addAttributeToDataSet(dataSet, { name: kEventNumberAttrName }, dataSet.attributes[0]?.id);
+  addAttributeToDataSet(dataSet, { name: kEventNumberAttrName, derived: true },
+                        dataSet.attributes[0]?.id);
   dataSet.attrFromName(kEventNumberAttrName)?.setFormula(kEventNumberFormula);
 }

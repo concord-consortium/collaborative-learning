@@ -12,7 +12,7 @@ import { kDefaultColumnWidth } from "../../../components/tiles/table/table-types
 import { createFormulaDataSetProxy } from "../../../models/data/formula-data-set-proxy";
 import { SharedDataSet, SharedDataSetSnapshotType, SharedDataSetType } from "../../../models/shared/shared-data-set";
 import { ISharedModelManager } from "../../../models/shared/shared-model-manager";
-import { IDataSet } from "../../data/data-set";
+import { addAttributeToDataSet, IDataSet } from "../../data/data-set";
 import { SharedModelType } from "../../shared/shared-model";
 import { defaultTableContent, kTableTileType, TableContentModel, TableContentModelType,
   TableContentSnapshotType, TableMetadataModel } from "./table-content";
@@ -111,6 +111,35 @@ const setupContainer = (content: TableContentModelType, dataSetSnapshot?: Shared
 };
 
 describe("TableContent", () => {
+
+  // A table linked to a Wave Runner grew an expression row across every column, reading
+  // "= rank(windowStart, ...)" under Event Number, because the column is kept current by a
+  // formula. To the student that column is just one of the event's values.
+  describe("a column the owning tile derives", () => {
+    function contentWith({ derived }: { derived: boolean }) {
+      const content = TableContentModel.create();
+      addAttributeToDataSet(content.dataSet, { id: "typedAttr", name: "typed" });
+      addAttributeToDataSet(content.dataSet, { id: "derivedAttr", name: "number", derived });
+      content.dataSet.attrFromID("derivedAttr")!.setFormula("rank(typed)");
+      return content;
+    }
+
+    it("gives the table no expression row", () => {
+      expect(contentWith({ derived: true }).hasExpressions).toBe(false);
+    });
+
+    it("is not treated as having an expression", () => {
+      expect(contentWith({ derived: true }).hasExpression("derivedAttr")).toBe(false);
+    });
+
+    // The same formula on a column the student set still has to look like one.
+    it("still reports an expression the student set", () => {
+      const content = contentWith({ derived: false });
+      expect(content.hasExpressions).toBe(true);
+      expect(content.hasExpression("derivedAttr")).toBe(true);
+    });
+  });
+
 
   it("can create empty/default TableContentModels", () => {
     const emptyTable = TableContentModel.create();

@@ -20,6 +20,14 @@ export const Attribute = types.model("Attribute", {
   sourceID: types.maybe(types.string),
   name: types.string,
   hidden: false,
+  // True for a column the tile that owns the data computes, such as a seismic event's number.
+  // Its formula is how it is kept current, not something the student wrote, so the table presents
+  // it as an ordinary column: no expression row, no expression styling, and Set Expression does
+  // not offer it. Presentation only -- an older client that drops it shows the formula again, and
+  // the next save from a current client restores it.
+  // `maybe` rather than a false default so it stays out of the snapshot of every other attribute
+  // in every document.
+  derived: types.maybe(types.boolean),
   units: "",
   formula: types.optional(Formula, () => Formula.create()),
   values: types.array(ValueType),

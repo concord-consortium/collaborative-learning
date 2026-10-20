@@ -1,4 +1,5 @@
-import { addAttributeToDataSet, addCasesToDataSet, IDataSet } from "../../models/data/data-set";
+import { getSnapshot } from "mobx-state-tree";
+import { addAttributeToDataSet, addCasesToDataSet, DataSet, IDataSet } from "../../models/data/data-set";
 import { evaluateFormulas } from "../../models/formula/formula-test-harness";
 import { SharedDataSet } from "../../models/shared/shared-data-set";
 import { addEventNumberColumn, kEventNumberAttrName } from "./event-number-column";
@@ -35,6 +36,23 @@ describe("addEventNumberColumn", () => {
   it("adds the column first, so a linked table leads with it", () => {
     const dataSet = eventsDataSet([{ windowStart: at(1) }]);
     expect(dataSet.attributes[0].name).toBe(kEventNumberAttrName);
+  });
+
+  // The formula is how the numbers stay right, not something the student wrote. Without this the
+  // table grows an expression row across every column reading "= rank(windowStart, ...)".
+  it("marks the column derived, so a table shows it as ordinary data", () => {
+    const dataSet = eventsDataSet([{ windowStart: at(1) }]);
+    expect(dataSet.attrFromName(kEventNumberAttrName)!.derived).toBe(true);
+  });
+
+  // It is saved with the document: reopening one must not bring the expression row back.
+  it("keeps the column derived through a snapshot, and marks nothing else", () => {
+    const dataSet = eventsDataSet([{ windowStart: at(1) }]);
+
+    const reloaded = DataSet.create(getSnapshot(dataSet));
+
+    expect(reloaded.attrFromName(kEventNumberAttrName)!.derived).toBe(true);
+    expect(reloaded.attrFromName("windowStart")!.derived).toBeUndefined();
   });
 
   it("leaves an existing column alone rather than adding a second or resetting its formula", () => {

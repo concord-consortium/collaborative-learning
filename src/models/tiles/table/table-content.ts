@@ -130,13 +130,15 @@ export const TableContentModel = TileContentModel
     }
   }))
   .views(self => ({
+    // Both of these ask whether the student has an expression here, not merely whether a formula
+    // exists: a derived column is computed for them and presents as ordinary data, so it must not
+    // give the table an expression row, expression styling or a cell with no editor.
     get hasExpressions() {
-      // Check if any of the attributes of the dataSet have truthy formulas
-      return self.dataSet.attributes.some(attr => attr.formula.display);
+      return self.dataSet.attributes.some(attr => !attr.derived && attr.formula.display);
     },
     hasExpression(attrId: string) {
       const attr = self.dataSet.attrFromID(attrId);
-      return !!attr?.formula.display;
+      return !!attr && !attr.derived && !!attr.formula.display;
     },
   }))
   .views(self => tileContentAPIViews({
