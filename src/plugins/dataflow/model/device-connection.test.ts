@@ -22,6 +22,7 @@ function makeTransport(
     startReading: jest.fn(),
     write: jest.fn(),
     deviceFamily: "deviceFamily" in options ? options.deviceFamily : "arduino",
+    raisesWebSerialConnect: true,
     lastPort: options.lastPort ?? makePort(1, 2)
   };
 }
@@ -87,6 +88,7 @@ describe("DeviceConnection", () => {
     expect(await connection.connect("arduino")).toBe("connected");
     expect(serialDevice.isConnected()).toBe(true);
     expect(serialDevice.deviceFamily).toBe("arduino");
+    expect(serialDevice.raisesWebSerialConnect).toBe(true);
     expect(transport.startReading).toHaveBeenCalled();
     expect(connection.connectedLabel).toBe("Arduino");
   });

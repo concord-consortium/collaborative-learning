@@ -26,18 +26,20 @@ function stubSerial(port: any) {
 describe("WebSerialTransport", () => {
   afterEach(() => { delete (navigator as any).serial; jest.clearAllTimers(); });
 
-  it("resolves deviceFamily=microbit for a micro:bit", async () => {
+  it("resolves deviceFamily=microbit and raisesWebSerialConnect=false for a micro:bit", async () => {
     stubSerial(fakePort({ usbProductId: 516, usbVendorId: 3368 }));
     const t = new WebSerialTransport();
     expect(await t.open()).toBe("opened");
     expect(t.deviceFamily).toBe("microbit");
+    expect(t.raisesWebSerialConnect).toBe(false);
   });
 
-  it("resolves deviceFamily=arduino for an authentic Arduino", async () => {
+  it("resolves deviceFamily=arduino and raisesWebSerialConnect=true for an authentic Arduino", async () => {
     stubSerial(fakePort({ usbProductId: 67, usbVendorId: 9999 }));
     const t = new WebSerialTransport();
     expect(await t.open()).toBe("opened");
     expect(t.deviceFamily).toBe("arduino");
+    expect(t.raisesWebSerialConnect).toBe(true);
   });
 
   it("open returns canceled when the chooser is dismissed", async () => {

@@ -12,12 +12,21 @@ function log(message: string) {
 
 export class SerialDevice {
   localBuffer: string;
+  connectChangeStamp: number | null;
+  lastConnectMessage: string | null;
+  serialModalShown: boolean | null;
   deviceFamily: string | undefined;
   // The active write transport (Web Serial or WebUSB). writeLine routes here.
   activeTransport: IDeviceTransport | undefined;
   // Functions that each return the channels of one tile. Inbound data is delivered to the
   // channels of every registered source.
   private channelSources = new Set<() => NodeChannelInfo[]>();
+  /**
+   * True when we think the connected Web Serial board will raise the browser
+   * connect/disconnect events. It drives connect-button physical-connection UI. Only ever set
+   * by the Web Serial path — stays false for a WebUSB (Spiker:bit) connection.
+   */
+  raisesWebSerialConnect = false;
 
   constructor() {
     this.localBuffer = "";
@@ -39,6 +48,17 @@ export class SerialDevice {
     return Array.from(this.channelSources).flatMap(getChannels => getChannels());
   }
 
+  // TODO, revise this so it is more clear how its used
+  public updateConnectionInfo(timeStamp: number | null, status: string ){
+    this.connectChangeStamp = timeStamp;
+    this.lastConnectMessage = status;
+    localStorage.setItem("last-connect-message", status);
+  }
+
+  public setRaisesWebSerialConnect(raises: boolean){
+    this.raisesWebSerialConnect = raises;
+  }
+
   public isConnected(){
     return this.activeTransport != null;
   }
@@ -53,12 +73,17 @@ export class SerialDevice {
     this.deviceFamily = deviceFamily;
     transport.onData = (chunk: string) => { if (this.activeTransport === transport) this.receive(chunk); };
     transport.onDisconnect = () => { if (this.activeTransport === transport) this.clearActiveDevice(); };
+    this.updateConnectionInfo(Date.now(), "connect");
   }
 
   public clearActiveDevice(){
     this.activeTransport = undefined;
     this.deviceFamily = undefined;
     this.localBuffer = "";
+    // Reset so a prior Web Serial session's value can't stick to a later WebUSB device, which
+    // never raises the browser connect/disconnect events this flag gates the connect-button UI on.
+    this.raisesWebSerialConnect = false;
+    this.updateConnectionInfo(Date.now(), "disconnect");
   }
 
   // Central inbound router: dispatch a serial chunk to the parser for the connected

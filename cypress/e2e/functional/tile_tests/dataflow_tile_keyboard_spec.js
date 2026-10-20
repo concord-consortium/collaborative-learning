@@ -18,6 +18,7 @@ context('Dataflow keyboard accessibility (CLUE-455)', function () {
   }
 
   const focusOrder = [
+    ['data-testid', 'serial-icon'],
     ['data-testid', 'rate-select'],
     ['data-testid', 'record-data-button'],
     ['data-testid', 'add-sensor-button'],

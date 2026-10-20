@@ -8,6 +8,7 @@ import { ReadOnlyContext } from "../../../../components/document/read-only-conte
 import { DataflowContentModel } from "../../model/dataflow-content";
 import { ProgramDataRates } from "../../model/utilities/node";
 import { ProgramMode } from "../types/dataflow-tile-types";
+import { getDeviceConnection } from "../../model/device-connection";
 import { DataflowProgramTopbar } from "./dataflow-program-topbar";
 
 import "../../dataflow-registration";
@@ -22,8 +23,13 @@ function renderTopbar(readOnly: boolean) {
             programDataRates={ProgramDataRates}
             dataRate={ProgramDataRates[0].val}
             onRateSelectClick={jest.fn()}
+            onConnectDevice={jest.fn()}
+            onReconnectDevice={jest.fn()}
+            onDisconnectDevice={jest.fn()}
+            connection={getDeviceConnection(stores.serialDevice)}
             showRateUI={false}
             lastIntervalDuration={0}
+            serialDevice={stores.serialDevice}
             handleChangeOfProgramMode={jest.fn()}
             programMode={ProgramMode.Ready}
             playBackIndex={0}
@@ -44,11 +50,13 @@ describe("DataflowProgramTopbar read-only state", () => {
     renderTopbar(true);
     expect(screen.getByTestId("record-data-button")).toBeDisabled();
     expect(screen.getByTestId("rate-select")).toBeDisabled();
+    expect(screen.getByTitle("Connect a device")).toBeDisabled();
   });
 
   it("leaves its controls enabled when the document is editable", () => {
     renderTopbar(false);
     expect(screen.getByTestId("record-data-button")).toBeEnabled();
     expect(screen.getByTestId("rate-select")).toBeEnabled();
+    expect(screen.getByTitle("Connect a device")).toBeEnabled();
   });
 });
