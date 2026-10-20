@@ -1,3 +1,4 @@
+import { DateTime } from "luxon";
 import { checkDate } from "@concord-consortium/codap-formulas/utilities/date-utils";
 import {
   evaluateNode, getRootScope, isValueTruthy, UNDEF_RESULT
@@ -10,9 +11,12 @@ import {
 } from "@concord-consortium/codap-formulas/models/formula/functions/math";
 
 /**
- * A comparable number for a value: numbers as themselves, dates as epoch millis. A date is whatever
- * the rest of the formula language takes for one -- `isDate()`, the comparison operators, the
- * date-part functions -- so `rank(x)` and `isDate(x)` agree about the same value.
+ * A comparable number for a value: numbers as themselves, dates as epoch millis.
+ *
+ * ISO strings are read with luxon, as the Timeline reads them, because `checkDate` drops a `Z` or
+ * an offset and reads the wall-clock time as local: `10:00+02:00` would rank after `09:00Z`.
+ * Anything else the formula language takes for a date -- other date strings, and `Date` values a
+ * formula builds -- goes through `checkDate`, so every value `isDate()` accepts gets a rank.
  */
 function sortKey(value: unknown): number | undefined {
   if (typeof value === "number") return Number.isFinite(value) ? value : undefined;
@@ -21,6 +25,8 @@ function sortKey(value: unknown): number | undefined {
     if (!str) return undefined;
     const num = Number(str);
     if (Number.isFinite(num)) return num;
+    const iso = DateTime.fromISO(str);
+    if (iso.isValid) return iso.toMillis();
   }
   const [isADate, date] = checkDate(value);
   return isADate ? date.valueOf() : undefined;
