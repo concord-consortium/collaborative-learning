@@ -9,8 +9,9 @@ export interface IDataflowFocusSlotsArgs {
 
 /**
  * The elements the tile reports to the keyboard focus trap, read live each time focus moves.
- * While the connect dialog shows, it is the only slot besides the toolbar: the title, topbar and
- * palette are hidden from the trap so Tab and Enter can't reach controls the dialog covers.
+ * While the connect tutorial shows, it takes the content slot, and the title, topbar and palette
+ * slots are hidden, so Tab and Enter can't reach controls it covers. The toolbar, drag handle and
+ * resize handle stay reachable.
  */
 export function getDataflowFocusSlots({ tileElt, programContainerEl }: IDataflowFocusSlotsArgs) {
   const dialog = getConnectTutorialElement(tileElt);
