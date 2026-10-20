@@ -7,7 +7,7 @@ import { createClueTileStrategy } from "../../../../hooks/create-clue-tile-strat
 import { acknowledgeConnectTutorial, DataflowConnectTutorialGate } from "./dataflow-connect-tutorial";
 import { getDataflowFocusSlots } from "../dataflow-focus-slots";
 
-const kTitle = "This program uses a real device";
+const kTitle = "This program needs a real device";
 
 function openedContent() {
   const content = DataflowContentModel.create();
@@ -35,7 +35,7 @@ describe("DataflowConnectTutorialGate", () => {
     renderTile(openedContent(), new DeviceConnection(new SerialDevice()));
     const dialog = screen.getByRole("dialog", { name: kTitle });
     expect(dialog).toHaveTextContent("Connect your Arduino, micro:bit or Spiker:bit to the computer.");
-    expect(dialog).toHaveTextContent("⚡ button in this tile's toolbar");
+    expect(dialog).toHaveTextContent("yellow ⚡ Connect button in this tile's toolbar");
     expect(screen.getByRole("button", { name: "OK" }).tagName).toBe("BUTTON");
   });
 
