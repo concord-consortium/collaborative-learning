@@ -1,4 +1,4 @@
-import { act, fireEvent, render, screen } from "@testing-library/react";
+import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import React from "react";
 import Modal from "react-modal";
 import { ModalProvider } from "react-modal-hook";
@@ -40,9 +40,11 @@ describe("TimelineInfoButton", () => {
     expect(dialog).toHaveAccessibleDescription(/^Zoom in and out with the Zoom In and Zoom Out buttons\./);
   });
 
+  // Focus moves in a timeout queued after react-modal's open frame, so on a busy machine it can land
+  // after any fixed wait.
   it("focuses the OK button when it opens", async () => {
     await openModal();
-    expect(screen.getByRole("button", { name: "OK" })).toHaveFocus();
+    await waitFor(() => expect(screen.getByRole("button", { name: "OK" })).toHaveFocus());
   });
 
   it("closes with the OK button", async () => {
