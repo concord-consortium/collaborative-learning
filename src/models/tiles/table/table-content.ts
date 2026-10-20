@@ -258,7 +258,11 @@ export const TableContentModel = TileContentModel
       self.logChange({ action: "delete", target: "columns", ids });
     },
     setExpression(id: string, expression: string) {
-      self.dataSet.attrFromID(id)?.setFormula(expression);
+      const attr = self.dataSet.attrFromID(id);
+      // A derived column's formula is how the owning tile keeps it right; replacing or clearing it
+      // would stop the column updating while the table went on presenting it as ordinary data.
+      if (attr?.derived) return;
+      attr?.setFormula(expression);
       self.logChange({ action: "update", target: "columns", ids: id, props: { expression } });
     },
     addCanonicalCases(cases: ICaseCreation[], beforeID?: string | string[]) {

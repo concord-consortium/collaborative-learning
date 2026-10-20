@@ -143,6 +143,18 @@ describe("TableContent", () => {
       expect(content.isSelectedColumnDerived).toBe(false);
     });
 
+    // The Set Expression dialog's Clear and OK both come through here, whichever column the
+    // dialog was pointed at.
+    it("keeps its formula when Set Expression tries to replace or clear it", () => {
+      const content = contentWith({ derived: true });
+
+      content.setExpression("derivedAttr", "typed * 2");
+      expect(content.dataSet.attrFromID("derivedAttr")!.formula.display).toBe("rank(typed)");
+
+      content.setExpression("derivedAttr", "");
+      expect(content.dataSet.attrFromID("derivedAttr")!.formula.display).toBe("rank(typed)");
+    });
+
     // The same formula on a column the student set still has to look like one.
     it("still reports an expression the student set", () => {
       const content = contentWith({ derived: false });

@@ -19,11 +19,17 @@ interface IProps {
   onSubmit: () => void;
 }
 
+/**
+ * The columns the dialog offers. A derived column has no expression for the student to see or
+ * change, so it is left out, both from the choices and as the default target.
+ */
+export const expressionTargets = (dataSet: IDataSet) => dataSet.attributes.filter(attr => !attr.derived);
+
 type IResult = [() => void, () => void, (id: string) => void];
 export const useFormulaModal = ({ dataSet, onSubmit, table }: IProps) : IResult => {
   const [currYAttrId, _setCurrYAttrId] = useState<Maybe<string>>(() => {
-    // If the dataSet has a second attribute, use that by default
-    const yAttr = dataSet.attributes[1];
+    // Default to the first column after the first that the dialog offers
+    const yAttr = expressionTargets(dataSet).find(target => target !== dataSet.attributes[0]);
     return yAttr ? yAttr.id : undefined;
   });
 
@@ -134,7 +140,7 @@ const Content: React.FC<IContentProps> = ({
           onChange={e => {
             setCurrYAttrId(e.target.value);
           }}>
-          {dataSet.attributes
+          {expressionTargets(dataSet)
             .map(attr => <option key={attr.id} value={attr.id}>{attr.name}</option>)}
         </select>
         { " " }:
