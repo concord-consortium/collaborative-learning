@@ -91,7 +91,7 @@ describe("DeviceConnection", () => {
     expect(connection.connectedLabel).toBe("Arduino");
   });
 
-  it("connectedLabel is the menu choice's label, not the detected family", async () => {
+  it("connectedLabel is the device choice's label, not the detected family", async () => {
     const { connection } = setup([makeTransport(["opened"], { deviceFamily: "arduino" })]);
     await connection.connect("microbitHub");
     expect(connection.connectedLabel).toBe("micro:bit (radio hub)");
