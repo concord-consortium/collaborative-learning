@@ -276,6 +276,9 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
 
   const handleToolbarShowExpressionsDialog = () => {
     // This is called from the toolbar. We use the first selected attribute of the table.
+    // The header's expression row is the other way in, and a column with a hidden formula doesn't
+    // draw one.
+    if (content.isSelectedColumnFormulaHidden) return;
     const firstSelectedAttributeId = dataSet.firstSelectedAttributeId;
     firstSelectedAttributeId && setCurrYAttrId(firstSelectedAttributeId);
     showExpressionsDialog();
@@ -470,6 +473,7 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
   }, [dataSet, changeHandlers, inputRowId]);
 
   const toolbarContext = {
+    canSetExpression: !content.isSelectedColumnFormulaHidden,
     showExpressionsDialog: handleToolbarShowExpressionsDialog,
     deleteSelected,
     importData,

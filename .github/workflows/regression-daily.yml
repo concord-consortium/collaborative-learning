@@ -40,7 +40,7 @@ jobs:
           DEFAULT_BROWSER: chrome
         run: echo "BROWSER=${{ github.event.inputs.browser || env.DEFAULT_BROWSER }}" >> $GITHUB_ENV
       - name: Run Cypress Tests
-        uses: cypress-io/github-action@v4
+        uses: cypress-io/github-action@v7
         with:
           # retry registry fetches; a bare `npm ci` fails the whole container on a
           # transient ECONNRESET, which is unrecoverable without a full re-run
@@ -98,7 +98,7 @@ jobs:
           DEFAULT_BROWSER: chrome
         run: echo "BROWSER=${{ github.event.inputs.browser || env.DEFAULT_BROWSER }}" >> $GITHUB_ENV
       - name: Cleanup Comments
-        uses: cypress-io/github-action@v4
+        uses: cypress-io/github-action@v7
         with:
           install-command: npm ci --fetch-retries=5 --fetch-retry-maxtimeout=120000
           start: npm start

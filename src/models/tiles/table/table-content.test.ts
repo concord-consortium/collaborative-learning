@@ -12,7 +12,7 @@ import { kDefaultColumnWidth } from "../../../components/tiles/table/table-types
 import { createFormulaDataSetProxy } from "../../../models/data/formula-data-set-proxy";
 import { SharedDataSet, SharedDataSetSnapshotType, SharedDataSetType } from "../../../models/shared/shared-data-set";
 import { ISharedModelManager } from "../../../models/shared/shared-model-manager";
-import { IDataSet } from "../../data/data-set";
+import { addAttributeToDataSet, IDataSet } from "../../data/data-set";
 import { SharedModelType } from "../../shared/shared-model";
 import { defaultTableContent, kTableTileType, TableContentModel, TableContentModelType,
   TableContentSnapshotType, TableMetadataModel } from "./table-content";
@@ -111,6 +111,58 @@ const setupContainer = (content: TableContentModelType, dataSetSnapshot?: Shared
 };
 
 describe("TableContent", () => {
+
+  // A table linked to a Wave Runner grew an expression row across every column, reading
+  // "= rank(windowStart, ...)" under Event Number, because the column is kept current by a
+  // formula. To the student that column is just one of the event's values.
+  describe("a column whose formula is hidden", () => {
+    function contentWith({ formulaHidden }: { formulaHidden: boolean }) {
+      const content = TableContentModel.create();
+      addAttributeToDataSet(content.dataSet, { id: "typedAttr", name: "typed" });
+      addAttributeToDataSet(content.dataSet, { id: "numberAttr", name: "number", formulaHidden });
+      content.dataSet.attrFromID("numberAttr")!.setFormula("rank(typed)");
+      return content;
+    }
+
+    it("gives the table no expression row", () => {
+      expect(contentWith({ formulaHidden: true }).hasExpressions).toBe(false);
+    });
+
+    it("is not treated as having an expression", () => {
+      expect(contentWith({ formulaHidden: true }).hasExpression("numberAttr")).toBe(false);
+    });
+
+    it("is what Set Expression asks about when it is selected", () => {
+      const content = contentWith({ formulaHidden: true });
+      expect(content.isSelectedColumnFormulaHidden).toBe(false);
+
+      content.dataSet.setSelectedAttributes(["numberAttr"]);
+      expect(content.isSelectedColumnFormulaHidden).toBe(true);
+
+      content.dataSet.setSelectedAttributes(["typedAttr"]);
+      expect(content.isSelectedColumnFormulaHidden).toBe(false);
+    });
+
+    // The Set Expression dialog's Clear and OK both come through here, whichever column the
+    // dialog was pointed at.
+    it("keeps its formula when Set Expression tries to replace or clear it", () => {
+      const content = contentWith({ formulaHidden: true });
+
+      content.setExpression("numberAttr", "typed * 2");
+      expect(content.dataSet.attrFromID("numberAttr")!.formula.display).toBe("rank(typed)");
+
+      content.setExpression("numberAttr", "");
+      expect(content.dataSet.attrFromID("numberAttr")!.formula.display).toBe("rank(typed)");
+    });
+
+    // The same formula on a column the student set still has to look like one.
+    it("still reports an expression the student set", () => {
+      const content = contentWith({ formulaHidden: false });
+      expect(content.hasExpressions).toBe(true);
+      expect(content.hasExpression("numberAttr")).toBe(true);
+    });
+  });
+
 
   it("can create empty/default TableContentModels", () => {
     const emptyTable = TableContentModel.create();

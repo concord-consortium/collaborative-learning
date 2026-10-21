@@ -138,7 +138,7 @@ jobs:
           cache: 'npm'
           cache-dependency-path: |
             package-lock.json
-      - uses: cypress-io/github-action@v4
+      - uses: cypress-io/github-action@v7
         with:
           # retry registry fetches; a bare `npm ci` fails the whole container on a
           # transient ECONNRESET, which is unrecoverable without a full re-run

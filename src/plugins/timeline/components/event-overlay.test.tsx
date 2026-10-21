@@ -19,6 +19,7 @@ import { getSharedModelManager } from "../../../models/tiles/tile-environment";
 import { SharedSeismogram } from "../../shared-seismogram/shared-seismogram";
 import { TimelineContentModel } from "../models/timeline-content";
 import { EventOverlay } from "./event-overlay";
+import { HiddenEventTypesContext } from "./hidden-event-types-context";
 
 // The timeline tile needs to be registered so TileModel.create
 // knows it is a supported tile type
@@ -65,18 +66,29 @@ describe("EventOverlay", () => {
     mockedGetSharedModelManager.mockReset();
   });
 
-  function renderOverlay(readOnly = false) {
+  function renderOverlay(readOnly = false, hiddenTypes: string[] = []) {
     const content = TimelineContentModel.create();
     content.setViewRange(dataStart, dataEnd);
     const model = TileModel.create({ content });
     return render(
       <ReadOnlyContext.Provider value={readOnly}>
         <TileModelContext.Provider value={model}>
-          <EventOverlay />
+          <HiddenEventTypesContext.Provider value={{ types: hiddenTypes, toggle: jest.fn() }}>
+            <EventOverlay />
+          </HiddenEventTypesContext.Provider>
         </TileModelContext.Provider>
       </ReadOnlyContext.Provider>
     );
   }
+
+  it("leaves out the events whose type its pane has switched off, keeping the others' numbers", () => {
+    const { container } = renderOverlay(false, ["Earthquake"]);
+    expect(container.querySelectorAll(".event-overlay")).toHaveLength(1);
+    expect(container.querySelector(".event-overlay")).toHaveClass("orange-event");
+    const buttons = container.querySelectorAll(".event-label-button");
+    expect(buttons).toHaveLength(1);
+    expect(buttons[0]).toHaveTextContent("2");
+  });
 
   it("labels each event with its number and its type's shape, centered on the event", () => {
     const { container } = renderOverlay();

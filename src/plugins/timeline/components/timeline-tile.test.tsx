@@ -8,7 +8,7 @@ jest.mock("uplot", () => {
 });
 
 import { FocusTrapController } from "@concord-consortium/accessibility-tools/hooks";
-import { act, fireEvent, render, screen } from "@testing-library/react";
+import { act, fireEvent, render, screen, within } from "@testing-library/react";
 import { DateTime } from "luxon";
 import { Provider } from "mobx-react";
 import React from "react";
@@ -28,7 +28,7 @@ import "../../../models/tiles/table/table-registration";
 import "../../bar-graph/bar-graph-registration";
 import "../../data-card/data-card-registration";
 import { SharedSeismogram } from "../../shared-seismogram/shared-seismogram";
-import { defaultTimelineContent, TimelineContentModelType } from "../models/timeline-content";
+import { defaultTimelineContent, TimelineContentModel, TimelineContentModelType } from "../models/timeline-content";
 import { TimelineComponent } from "./timeline-tile";
 
 // The timeline tile needs to be registered so the TileModel.create
@@ -102,7 +102,7 @@ describe("TimelineComponent", () => {
 
   it("renders the info button in the title area", () => {
     const { container } = renderWithStores();
-    const infoButton = screen.getByRole("button", { name: "Zooming and Moving" });
+    const infoButton = screen.getByRole("button", { name: "Using the Timeline" });
     expect(container.querySelector(".title-area")).toContainElement(infoButton);
   });
 
@@ -135,6 +135,15 @@ describe("TimelineComponent", () => {
     });
 
     afterEach(() => mockedGetSharedModelManager.mockReset());
+
+    it("heads the tile with the station and the run's dates, zero-padded", () => {
+      const { container } = renderWithStores();
+      const lines = container.querySelectorAll(".metadata-display div");
+      // Station, start, end: the three lines the design shows.
+      expect(lines).toHaveLength(3);
+      expect(lines[1]).toHaveTextContent("02/01/2026");
+      expect(lines[2]).toHaveTextContent("02/05/2026");
+    });
 
     it("enables each pan button only while the view can pan that way", () => {
       const timeline = model.content as TimelineContentModelType;
@@ -178,11 +187,14 @@ describe("TimelineComponent", () => {
   });
 
   describe("keyboard focus slots", () => {
+    const kDataStart = DateTime.fromISO("2026-02-01T00:00:00.000Z");
+    const kDataEnd = DateTime.fromISO("2026-02-05T00:00:00.000Z");
     let tileElt: HTMLElement | undefined;
 
     afterEach(() => {
       tileElt?.remove();
       mockedGetSharedModelManager.mockReset();
+      (model.content as TimelineContentModelType).clearMarkerTime();
     });
 
     function renderInTile(props: Partial<ITileProps> = {}) {
@@ -212,9 +224,7 @@ describe("TimelineComponent", () => {
         eventType: "Earthquake"
       })));
       const sharedDataSet = SharedDataSet.create({ dataSet });
-      const sharedSeismogram = {
-        startTime: DateTime.fromISO("2026-02-01T00:00:00.000Z"), endTime: DateTime.fromISO("2026-02-05T00:00:00.000Z")
-      };
+      const sharedSeismogram = { startTime: kDataStart, endTime: kDataEnd };
       mockedGetSharedModelManager.mockReturnValue({
         isReady: true,
         getTileSharedModelsByType: (_self: any, type: any) =>
@@ -249,7 +259,7 @@ describe("TimelineComponent", () => {
     it("puts the title, then the info button, in the focus cycle", () => {
       const { elements } = renderInTile();
       expect(elements?.titleElement).toHaveClass("editable-tile-title-text");
-      expect(elements?.topbarElement).toBe(screen.getByRole("button", { name: "Zooming and Moving" }));
+      expect(elements?.topbarElement).toBe(screen.getByRole("button", { name: "Using the Timeline" }));
     });
 
     it("leaves the tile's contents out of the focus cycle while nothing there is enabled", () => {
@@ -257,23 +267,26 @@ describe("TimelineComponent", () => {
       expect(elements?.contentElement).toBeUndefined();
     });
 
-    it("Tabs through the title, info button, Prev, Next and thumb, in both directions", () => {
+    it("Tabs through the title, info button, Prev, Next, thumb and the Event Key, both ways", () => {
       provideData({ eventCount: 3, seismogram: true });
       (model.content as TimelineContentModelType).selectEvent(1);
       const { api, elements } = renderInTile();
       const title = elements!.titleElement;
-      const info = screen.getByRole("button", { name: "Zooming and Moving" });
+      const info = screen.getByRole("button", { name: "Using the Timeline" });
       const prev = screen.getByRole("button", { name: "Prev" });
       const next = screen.getByRole("button", { name: "Next" });
       const thumb = screen.getByRole("slider");
+      // provideData gives every event one type, so the Event Key holds a single checkbox, and it
+      // renders after the Full Timeline — making it the last control in the tile's contents.
+      const keyBox = screen.getByRole("checkbox");
       expect(prev).toBeEnabled();
       expect(next).toBeEnabled();
 
       const trap = createFocusTrap(api!);
       act(() => trap.enterTrap());
       expect(document.activeElement).toBe(title);
-      expect(pressTab(5)).toEqual([info, prev, next, thumb, title]);
-      expect(pressTab(5, true)).toEqual([thumb, next, prev, info, title]);
+      expect(pressTab(6)).toEqual([info, prev, next, thumb, keyBox, title]);
+      expect(pressTab(6, true)).toEqual([keyBox, thumb, next, prev, info, title]);
       trap.destroy();
     });
 
@@ -317,6 +330,46 @@ describe("TimelineComponent", () => {
       fireEvent.click(next);
       expect(next).toBeDisabled();
       expect(document.activeElement).toBe(document.body);
+    });
+
+    // The model is shared across these tests, and an earlier one may have left it zoomed in, so the
+    // view is set alongside the marker rather than relying on the fit the tile does on mount.
+    function placeAMarker() {
+      const timeline = model.content as TimelineContentModelType;
+      timeline.setViewRange(kDataStart, kDataEnd);
+      timeline.setMarkerTime(kDataStart.plus({ days: 2 }));
+    }
+
+    it("puts a placed marker in the Tab order, between Next and the thumb", () => {
+      provideData({ eventCount: 3, seismogram: true });
+      (model.content as TimelineContentModelType).selectEvent(1);
+      placeAMarker();
+      const { api } = renderInTile();
+      const info = screen.getByRole("button", { name: "Using the Timeline" });
+      const prev = screen.getByRole("button", { name: "Prev" });
+      const next = screen.getByRole("button", { name: "Next" });
+      const marker = screen.getByRole("slider", { name: "Time marker" });
+      const del = screen.getByRole("button", { name: "Delete marker" });
+      const thumb = screen.getByRole("slider", { name: "Timeline scroll position" });
+
+      const trap = createFocusTrap(api!);
+      act(() => trap.enterTrap());
+      expect(pressTab(6)).toEqual([info, prev, next, marker, del, thumb]);
+      trap.destroy();
+    });
+
+    it("moves focus to Prev when the marker is deleted from the keyboard", () => {
+      provideData({ eventCount: 3, seismogram: true });
+      (model.content as TimelineContentModelType).selectEvent(1);
+      placeAMarker();
+      renderInTile();
+      const marker = screen.getByRole("slider", { name: "Time marker" });
+      act(() => marker.focus());
+
+      fireEvent.keyDown(marker, { key: "Delete" });
+
+      expect(screen.queryByRole("slider", { name: "Time marker" })).not.toBeInTheDocument();
+      expect(document.activeElement).toBe(screen.getByRole("button", { name: "Prev" }));
     });
 
     it("doesn't join the focus cycle when read-only", () => {
@@ -387,6 +440,83 @@ describe("TimelineComponent", () => {
       const { fullTimeline } = renderInTile("other-tile");
       fireEvent.pointerDown(fullTimeline);
       expect([...stores.ui.selectedTileIds]).toEqual([model.id]);
+    });
+  });
+
+  // One model in an editable and a read-only pane, as My Work shows a student's own document
+  // beside the workspace.
+  describe("Event Key in two panes", () => {
+    beforeEach(() => {
+      const dataSet = DataSet.create();
+      ["windowStart", "windowEnd", "eventType"].forEach(name => addAttributeToDataSet(dataSet, { name }));
+      addCasesToDataSet(dataSet, ["Earthquake", "Noise", "Earthquake"].map((eventType, i) => ({
+        windowStart: `2026-02-0${i + 1}T00:00:00.000Z`, windowEnd: `2026-02-0${i + 1}T01:00:00.000Z`, eventType
+      })));
+      const sharedDataSet = SharedDataSet.create({ dataSet });
+      const sharedSeismogram = {
+        startTime: DateTime.fromISO("2026-02-01T00:00:00.000Z"), endTime: DateTime.fromISO("2026-02-05T00:00:00.000Z")
+      };
+      mockedGetSharedModelManager.mockReturnValue({
+        isReady: true,
+        getTileSharedModelsByType: (_self: any, type: any) =>
+          type === SharedDataSet ? [sharedDataSet] : type === SharedSeismogram ? [sharedSeismogram] : []
+      } as any);
+    });
+
+    afterEach(() => mockedGetSharedModelManager.mockReset());
+
+    function renderTwoPanes() {
+      const paneContent = TimelineContentModel.create();
+      const paneModel = TileModel.create({ content: paneContent });
+      render(
+        <ModalProvider>
+          <Provider stores={stores}>
+            <TileModelContext.Provider value={paneModel}>
+              <div data-testid="workspace"><TimelineComponent {...defaultProps} model={paneModel} /></div>
+              <div data-testid="my-work"><TimelineComponent {...defaultProps} model={paneModel} readOnly /></div>
+            </TileModelContext.Provider>
+          </Provider>
+        </ModalProvider>
+      );
+      const inPane = (pane: string) => within(screen.getByTestId(pane));
+      return { paneContent, inPane };
+    }
+
+    it("keeps a reader's filtering out of the document and the editable pane", () => {
+      const { paneContent, inPane } = renderTwoPanes();
+      fireEvent.click(inPane("my-work").getByRole("checkbox", { name: "Noise" }));
+
+      expect(inPane("my-work").getByRole("checkbox", { name: "Noise" })).not.toBeChecked();
+      expect(inPane("workspace").getByRole("checkbox", { name: "Noise" })).toBeChecked();
+      expect(paneContent.hiddenEventTypes.slice()).toEqual([]);
+    });
+
+    it("saves a type switched off in the editable pane", () => {
+      const { paneContent, inPane } = renderTwoPanes();
+      fireEvent.click(inPane("workspace").getByRole("checkbox", { name: "Noise" }));
+
+      expect(inPane("workspace").getByRole("checkbox", { name: "Noise" })).not.toBeChecked();
+      expect(paneContent.hiddenEventTypes.slice()).toEqual(["Noise"]);
+    });
+
+    it("follows the document in the reader's pane until the reader toggles a type", () => {
+      const { paneContent, inPane } = renderTwoPanes();
+      act(() => paneContent.toggleEventType("Noise"));
+      expect(inPane("my-work").getByRole("checkbox", { name: "Noise" })).not.toBeChecked();
+
+      fireEvent.click(inPane("my-work").getByRole("checkbox", { name: "Earthquake" }));
+      act(() => paneContent.toggleEventType("Noise"));
+      expect(inPane("my-work").getByRole("checkbox", { name: "Noise" })).not.toBeChecked();
+      expect(inPane("my-work").getByRole("checkbox", { name: "Earthquake" })).not.toBeChecked();
+      expect(inPane("workspace").getByRole("checkbox", { name: "Noise" })).toBeChecked();
+    });
+
+    it("steps Next over the types the reader's pane has switched off", () => {
+      const { paneContent, inPane } = renderTwoPanes();
+      fireEvent.click(inPane("my-work").getByRole("checkbox", { name: "Noise" }));
+      fireEvent.click(inPane("my-work").getByRole("button", { name: "Next" }));
+
+      expect(paneContent.selectedEventIndex).toBe(2);
     });
   });
 });

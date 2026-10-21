@@ -829,6 +829,23 @@
           ]
         }
       ]
+    },
+    {
+      "description": "Investigation 4",
+      "ordinal": 4,
+      "title": "Test Timeline",
+      "introduction": {"tiles": []},
+      "problems": [
+        {
+          "description": "Timeline event icons and Event Key",
+          "ordinal": 1,
+          "title": "QA 4.1 Test Timeline",
+          "subtitle": "",
+          "sections": [
+            "investigation-4/problem-1/introduction/content.json"
+          ]
+        }
+      ]
     }
   ]
 }
