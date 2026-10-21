@@ -465,8 +465,7 @@ context('Dataflow Tool Tile', function () {
     dataflowToolTile.getNumberNodeOutput().click();
     dataflowToolTile.getLiveOutputNodeInput().click();
 
-    // The alert shows only when a program opens, never after an edit; the connect button marks the
-    // need instead.
+    // The alert shows only when a program opens; the tile records the need on the button's class.
     cy.get(".dialog-contents").should("not.exist");
     cy.get(".primary-workspace [data-testid='serial-icon']").should("have.class", "nodes-in-need");
 
