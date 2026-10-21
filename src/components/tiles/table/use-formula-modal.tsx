@@ -26,13 +26,19 @@ interface IProps {
 export const expressionTargets = (dataSet: IDataSet) =>
   dataSet.attributes.filter(attr => !attr.formulaHidden);
 
+/**
+ * The column the dialog starts on: the first one it offers after the table's first column, or the
+ * first one it offers at all when there is no such column. Starting on nothing would leave the
+ * picker showing a column that Clear and OK don't act on.
+ */
+export const defaultExpressionTarget = (dataSet: IDataSet) => {
+  const targets = expressionTargets(dataSet);
+  return targets.find(target => target !== dataSet.attributes[0]) ?? targets[0];
+};
+
 type IResult = [() => void, () => void, (id: string) => void];
 export const useFormulaModal = ({ dataSet, onSubmit, table }: IProps) : IResult => {
-  const [currYAttrId, _setCurrYAttrId] = useState<Maybe<string>>(() => {
-    // Default to the first column after the first that the dialog offers
-    const yAttr = expressionTargets(dataSet).find(target => target !== dataSet.attributes[0]);
-    return yAttr ? yAttr.id : undefined;
-  });
+  const [currYAttrId, _setCurrYAttrId] = useState<Maybe<string>>(() => defaultExpressionTarget(dataSet)?.id);
 
   const getAttribute = (id: string) => {
     const _attr = dataSet.attrFromID(id);
