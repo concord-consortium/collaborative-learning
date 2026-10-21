@@ -1,6 +1,6 @@
 # CLUE-716: Connect and Reset in the DataFlow Toolbar — Design
 
-**Status:** draft, awaiting review
+**Status:** built in two PRs (#3039, #3040); removing the old top-bar button moved to CLUE-736
 **Jira:** CLUE-716 (epic CLUE-714, "Microbits for Inquiry")
 
 ## Goal
@@ -32,8 +32,9 @@ only its own tile instead of the whole application.
 - A status area in the pane, sized for a short message.
 - New button color/pulse states.
 - The automatic dialog rendered over its own tile, shown as a once-per-page-load tutorial.
-- Removing the connect button and its "connect a device" / "click to finish connecting" text from
-  the tile's top bar.
+- Hiding the top-bar connect button, with its "connect a device" / "click to finish connecting"
+  text, when the tile's toolbar has the new button. Removing it entirely moved to CLUE-736 (see
+  "Delivery").
 - Logging Reset, Connect, Reconnect and Disconnect.
 - One app-wide connection that feeds incoming data to every DataFlow tile, not only the one that
   connected (see "One connection, many tiles").
@@ -52,6 +53,9 @@ only its own tile instead of the whole application.
 - **A coachmark pointing at the connect button.** One could replace the dialog, or show when a
   student picks a sensor or output that needs hardware. CLUE has no coachmark system yet, so this
   would be a separate story.
+- **Removing the top-bar connect button and migrating the curriculum** belong to CLUE-736.
+- **A non-color cue for the button's states**, and support for forced colors, belong to CLUE-735.
+- **Toolbar palettes closing when the toolbar wraps** to two rows belongs to CLUE-734.
 - **Connection status when the tile isn't selected.** The tile toolbar only appears while the tile
   is selected, so after this change an unselected tile shows no connection status. This is a known
   limitation, accepted because it is what the project lead asked for.
@@ -102,15 +106,15 @@ Today, "the program needs a device" is the global `serialDevice.serialNodesCount
   doesn't recount it.
 
 This story replaces it with a per-tile value that updates as the student edits, including when a
-Sensor block's sensor changes or a Live Output block is wired or its output changes. It uses the same test as today: a `SensorNode` or
-`LiveOutputNode` whose `requiresSerial()` is true. That value drives the tile's button pulse and
-whether the tile's automatic dialog shows. Remove the global `serialNodesCount` once nothing reads
-it.
+Sensor block's sensor changes or a Live Output block is wired or its output changes. It uses the
+same test as today: a `SensorNode` or `LiveOutputNode` whose `requiresSerial()` is true. That
+value drives whether the tile's button turns yellow and whether its automatic dialog shows. The
+global `serialNodesCount` is removed.
 
 ## Reset
 
-Reset restarts the program's running state for the tile it's clicked in. It does not change the program itself or anything
-that was recorded.
+Reset restarts the program's running state for the tile it's clicked in. It does not change the
+program itself or anything that was recorded.
 
 **What it clears**
 
@@ -164,8 +168,8 @@ time, with no way to stop it.
 
 ### Button
 
-A new tile-toolbar button with the existing lightning-bolt icon
-(`assets/icons/serialconnection/serial.svg`). Clicking it opens and closes an attached pane, the
+A new tile-toolbar button with a lightning-bolt icon (`assets/icons/connect-icon.svg`, drawn at the
+toolbar's icon size). Clicking it opens and closes an attached pane, the
 way the Pan button's palette works (`PanButton` in
 `src/plugins/dataflow/components/toolbar/dataflow-zoom-pan-buttons.tsx`). The pane closes when the
 user:
@@ -176,7 +180,12 @@ user:
 - deselects the tile.
 
 Focus handling follows the Pan palette's: focus moves into the pane on open and goes back to the
-button when the pane closes while it holds focus.
+button when the pane closes while it holds focus. The arrow keys and Home/End move between the
+pane's controls; Tab is left to the toolbar.
+
+The pane opens below the button and flips above it when the tile's scroll area has no room below.
+It is positioned with Floating UI, measured against the tile's scroll containers, because the
+toolbar renders in a portal outside them.
 
 ### Button states
 
@@ -197,19 +206,21 @@ Yellow means "click here, something needs your attention."
   just the first time in a session.
 - **Unseen error.** A failed attempt is unseen until the pane is open while the error is showing.
   Usually the user clicked Connect inside the pane, which stays open behind the browser's native
-  device chooser, so they see the error at once and the button never pulses for it. If the pane
-  was closed when the failure arrived (they clicked away or deselected the tile while it was
-  connecting), the button pulses until they open it. Once the error has been seen, the button goes
-  back to whatever the program calls for: gray if no device is needed, still pulsing if one is.
+  device chooser, so they see the error at once and the button never turns yellow for it. If the
+  pane was closed when the failure arrived (they clicked away or deselected the tile while it was
+  connecting), the button is yellow until they open it. Once the error has been seen, the button
+  goes back to whatever the program calls for: gray if no device is needed, yellow if one is.
   Any successful connection, from any tile, also clears the error on every open tile.
   Connection attempts can fail even when the program needs no device, and this rule covers that
   case too.
-- Canceling the browser's device chooser is not a failure. It shows no message and no pulse.
-- The pulse keeps today's look: the background animates between `$star-yellow` and `#eee` over
-  1.5 s (`slowpulse` in `dataflow-program-topbar.scss`), now run three times instead of forever.
+- Canceling the browser's device chooser is not a failure. It shows no message and no yellow.
+- The pulse keeps the top-bar button's look: the background animates between `$star-yellow` and
+  `#eee` over 1.5 s (`connect-slowpulse` in `dataflow-connect-pane.scss`, copied from the top bar's
+  `slowpulse`), run three times instead of forever.
   With reduced motion the button is a steady yellow with no pulse.
 
-**Removed.** The orange states and the "physical connection" logic go away:
+**Not carried over.** The new button leaves out the top-bar button's orange states and its
+"physical connection" logic:
 
 - The `physical-connection`, `no-physical-connection` and `nodes-in-need` classes.
 - The use of the `last-connect-message` localStorage key to drive the button.
@@ -220,17 +231,18 @@ only while a device is connected and is cleared on disconnect. The yellow pulse 
 `last-connect-message` value that could be stale from an earlier visit, so a student opening a
 Spiker:bit program usually saw a plain gray button.
 
-`initWebSerialConnectionEvents` still needs its `disconnect` handler, which tears down a Web Serial
-connection when the cable is pulled. Whether to keep its `connect` handler and the localStorage key
-is up to the builder, once nothing reads them.
+The top-bar button keeps all of this while it remains as a fallback (see "Toolbar
+configuration"). CLUE-736 removes it with the button: the `connect` handler in
+`initWebSerialConnectionEvents` and the localStorage key go, and the `disconnect` handler, which
+tears down a Web Serial connection when the cable is pulled, stays.
 
 **Tooltip.** The text that used to sit beside the button moves into its tooltip. *My call on
 wording*, which the builder can adjust:
 
 - Gray: "Connect a device"
 - Green: "Connected: Spiker:bit" (the connected device's name)
-- Pulsing for a needed device: "This program needs a device. Click to connect."
-- Pulsing for an unseen error: "Couldn't connect. Click for details."
+- Yellow for a needed device: "This program needs a device. Click to connect."
+- Yellow for an unseen error: "Couldn't connect. Click for details."
 
 The button is disabled in read-only views, as it is today.
 
@@ -274,7 +286,7 @@ This story builds neither the link nor the dialog. Today a failed connection onl
 `console.error`, so this story's generic "Couldn't connect to <device>." line is the first visible
 failure message. CLUE-727 replaces it with specific ones.
 
-The device name in the pane and tooltip is the menu choice the user connected with ("Arduino",
+The device name in the pane and tooltip is the device choice the user connected with ("Arduino",
 "micro:bit (radio hub)" or "Spiker:bit"), not the board's detected `deviceFamily`. The choice is
 kept with the app-wide connection, so every tile shows the same name and Reconnect reuses it.
 
@@ -308,9 +320,9 @@ Reconnect runs Reset.
 ### Disconnect
 
 Disconnect closes the active transport (`IDeviceTransport.close()`, which for a Spiker:bit
-disconnects the library connection) and clears the active device. The pane closes and focus returns to the button; reopening it shows
-"Not connected." Disconnect does not reset the
-program.
+disconnects the library connection) and clears the active device. The pane closes, moving focus
+to the button if the pane held it; reopening it shows "Not connected." Disconnect does not reset
+the program.
 
 ### Logging
 
@@ -342,10 +354,10 @@ The new dialog works like a one-time tutorial:
   page load, such as one in a document opened afterward, shows it too. Editing a program so that
   it needs a device, by adding a hardware block or switching a sensor to a hardware one, doesn't
   show the dialog. That block already turns pink and says "connect device," and the toolbar button
-  starts pulsing. Today the dialog can pop up mid-edit, so this is a deliberate change.
+  turns yellow. Today the dialog can pop up mid-edit, so this is a deliberate change.
 - **Dismissing.** Clicking OK on any tile dismisses the dialog on all of them for the rest of the
-  page load. The dismissal lives in memory only, like today's flag, so it shows again after a
-  reload.
+  page load. Any successful connection, from any tile, dismisses it the same way. The dismissal
+  lives in memory only, like today's flag, so it shows again after a reload.
 - **It doesn't come back** after a disconnect within the same page load.
 - **Read-only views don't show it.** They can't connect anyway.
 - **What it says.** It explains that the program needs a device, and that the yellow lightning
@@ -356,18 +368,22 @@ The new dialog works like a one-time tutorial:
   > Connect button in this tile's toolbar and choose your device.
   > [OK]
 
+  When the tile's toolbar has no `connect` button (see "Toolbar configuration"), the second
+  sentence points at the top-bar button instead: "Then click the ⚡ button at the top of this tile
+  and choose your device." That button doesn't turn yellow on its own, so the color is left out.
+
   The title is "Program Requires Connection to External Device" today. Drop the old text about
   "usbserial"/"usbmodem" and "the upper left," which no longer apply.
 - **Look.** It still looks like a dialog: a titled box with an OK button, centered on a dimming
   layer over the tile. It has a sensible fixed maximum width instead of stretching. On a tile
   narrower than the dialog, it shrinks to fit.
-- *My call:* clicking OK also selects the tile, so the toolbar and its pulsing button appear right
+- *My call:* clicking OK also selects the tile, so the toolbar and its yellow button appear right
   away.
 - **Accessibility.** The dialog is labeled as a dialog, and focus can reach its OK button by
   keyboard. Because it only blocks one tile, it must not trap focus across the whole application.
 
-Remove the `stores.ui.alert()` call. The global flag can be repurposed to hold the in-memory
-dismissal.
+The `stores.ui.alert()` call is removed. The in-memory dismissal is
+`DeviceConnection.connectTutorialDismissed`. The old `serialModalShown` flag goes in CLUE-736.
 
 ## Toolbar configuration
 
@@ -377,12 +393,14 @@ The new buttons are registered with `registerTileToolbarButtons('dataflow', …)
 - **Default configuration.** Add both to the default DataFlow tools in `src/clue/app-config.json`,
   after `pan`, as their own group separated by `"|"`.
 - **Units with their own tool list.** A unit that sets its own DataFlow tool list won't get the new
-  buttons until its list is updated. Such a unit would have no way to connect a device at all, so
-  check the curriculum units for DataFlow tool overrides and list any that need updating:
+  buttons until its list is updated. So that such a unit still has a way to connect, the top-bar
+  connect button stays as a fallback: it shows only when the tile's toolbar has no `connect`
+  button (`toolbarShowsConnect`), and the dialog's text points at whichever button the tile has.
+  CLUE-736 updates those units and then removes the top-bar button.
   - None of the demo or QA units in `src/public/demo/units/` override the DataFlow tools.
-  - An older local copy of the curriculum repo has one override, `curriculum/vibe/content.json`.
-  - Curriculum changes are made in the curriculum repo, not in these PRs. The PR description lists
-    the units that need the new tool names.
+  - As of 2026-10-20 the curriculum repo has one override, `curriculum/vibe/content.json`, on
+    `main` and 12 other branches.
+  - Curriculum changes are made in the curriculum repo, not in these PRs.
 - **Authoring docs.** Document the two new tool names in the DataFlow section of
   `docs/unit-configuration.md`.
 
@@ -405,7 +423,9 @@ The new buttons are registered with `registerTileToolbarButtons('dataflow', …)
 - **Pane open state.** The Pan palette keeps its open state as a volatile on the tile content
   (`panPaletteOpen`) and closes it when the toolbar unmounts. Use the same pattern for the pane.
 - **Reset icon.** `src/plugins/dataflow/assets/icons/refresh/` has `refresh.svg`,
-  `refresh-hover.svg` and `refresh-active.svg`, which are currently unused.
+  `refresh-hover.svg` and `refresh-active.svg`, which are unused. Reset uses Number Line's reset
+  icon instead, copied into the DataFlow plugin as `reset-icon.svg` so the plugins stay
+  independent. CLUE-736 deletes the `refresh/` icons.
 - **Automatic dialog:** `postSerialModal()` and `countSerialDataNodes()` in
   `src/plugins/dataflow/rete/rete-manager.tsx`.
 - **Docs that describe the old behavior:** `src/plugins/dataflow-tool/serial.md` mentions
@@ -423,9 +443,11 @@ What the tests should cover:
 - **Connect and Reconnect.** A successful Connect or Reconnect runs Reset. A failed or canceled
   attempt doesn't.
 - **Disconnect** closes the pane, so reopening it shows "Not connected", and doesn't reset.
-- **Pane closing.** A successful Connect, Reconnect or Disconnect closes the pane and returns
-  focus to the button; a failed or canceled attempt leaves it open.
-- **Button state.** Gray, green and pulsing for each combination of "needs a device," "connected,"
+- **Pane closing.** A successful Connect, Reconnect or Disconnect closes the pane, returning focus
+  to the button if the pane held it; a failed or canceled attempt leaves it open.
+- **Top-bar fallback.** The top-bar button hides when the configured tools include `connect` and
+  shows otherwise, and the dialog's text matches.
+- **Button state.** Gray, green and yellow for each combination of "needs a device," "connected,"
   and "unseen error," including a failure while the program needs no device, and an error that
   becomes seen. A pure function deriving the state from these inputs makes this easy to unit-test.
 - **Pane contents** in the not-connected, connected and after-failure states.
@@ -433,9 +455,9 @@ What the tests should cover:
   - incoming data reaches the channels of every live tile, including a tile that mounts after the
     connection was made
   - the connect-triggered Reset touches only the clicking tile
-  - an unseen error pulses only the tile where the attempt was made
+  - an unseen error turns only the attempting tile's button yellow, until any connection succeeds
 - **Needs a device**
-  - is computed per tile, so a tile without hardware doesn't clear another tile's pulse
+  - is computed per tile, so a tile without hardware doesn't clear another tile's yellow button
   - updates when a Sensor block's sensor changes, or a Live Output block is wired or its output
     changes
 - **Automatic dialog**
@@ -448,7 +470,7 @@ What the tests should cover:
   looks for the top-bar button's `serial-icon` test id. `dataflow-program-topbar.test.tsx` covers
   the top bar the button is leaving.
 
-## Delivery: two PRs
+## Delivery: two PRs and a follow-up story
 
 The whole story touches about 40 files, so it ships as two PRs. Behavior comes first and UI
 second.
@@ -477,14 +499,20 @@ second.
 - **Toolbar buttons.** The connect button and pane, and the Reset button.
 - **Button behavior.** The new button states, the unseen-error rule and the tooltips.
 - **Tile-scoped dialog.** The dialog that covers only its tile, shown when a program opens.
-- **Removals.** The top-bar button, its menu and their styles go.
+- **Top-bar fallback.** The top-bar button stays, shown only when the toolbar has no `connect`
+  button, so PR 2 can be released before the curriculum changes.
 - **Configuration, docs and tests.** The default toolbar configuration, `unit-configuration.md`,
   `serial.md`'s toolbar and dialog text, and the Cypress update.
+
+**CLUE-736: removing the top-bar button.** Once every unit's DataFlow tool list includes
+`connect`, CLUE-736 removes the top-bar button, its styles and icons, the connect-event state only
+it read (`lastConnectMessage`, `connectChangeStamp`, `raisesWebSerialConnect`, `serialModalShown`)
+and the fallback. It was first written as part of PR 2, and split out so PR 2 could ship before
+the curriculum changes.
 
 ## Left to the builder
 
 - Component structure, and how the toolbar reaches the connect and reset logic.
 - Exact pane styling within the fixed width, and the wording of status and tooltip text.
 - Log event names and payloads.
-- Whether to remove the now-unused `connect` event handler and the `last-connect-message` key.
 - How Reconnect finds the previously permitted device in each transport.
