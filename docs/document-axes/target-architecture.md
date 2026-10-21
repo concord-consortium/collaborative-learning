@@ -221,9 +221,9 @@ runtime, they are simply not persisted onto that document yet.
 
 Converting a type's existing documents is where the security question above bites: a converted type whose axis
 feeds a rule needs its existing documents stamped by an admin script or a Cloud Function, and its rule tightened
-to reject after-the-fact changes. `concurrent` went this way. Its backfill ran as the axes sweep, and the rule
-that lets a client set it after creation is made creation-only once no client still makes that write (see
-[planned-rules-tightening.md](./planned-rules-tightening.md)).
+to reject after-the-fact changes. `concurrent` went this way: its backfill ran as the axes sweep, and the rules
+treat it as read-only after creation. The rule could only be tightened once no released client still wrote the
+field to existing documents, so a type whose clients backfill on open has to wait for those clients to drain.
 
 ## The boundary — metadata getters on the model, behaviors outside
 

@@ -95,37 +95,14 @@ service cloud.firestore {
     // selects a cohort by, so a client able to write it could aim a migration at documents that were
     // never made from that profile. It is settable only at creation: the one backfill that writes it
     // afterwards (scripts/backfill-group-document-axes.ts) runs as a service account, past these rules.
+    // `concurrent` is an authorization input for the history rule below (isConcurrentClassDocument), so a
+    // client able to change it could grant the whole class history access to a document or strip it from a
+    // shared one. It is settable only at creation, where concurrentCreateOk limits it to synthetic owners.
     function preservesReadOnlyDocumentFields() {
-      let readOnlyFieldsSet = ["uid", "type", "key", "createdAt", "context_id", "axisProfile"].toSet();
+      let readOnlyFieldsSet =
+        ["uid", "type", "key", "createdAt", "context_id", "axisProfile", "concurrent"].toSet();
       let affectedFieldsSet = request.resource.data.diff(resource.data).affectedKeys();
       return !affectedFieldsSet.hasAny(readOnlyFieldsSet);
-    }
-
-    // TRANSITIONAL: `concurrent` is an authorization input for the history rule below
-    // (isConcurrentClassDocument), so letting any class member set it on any document would let them
-    // grant themselves history access to a classmate's document. It stays writable on axes-typed
-    // documents only, and then only to `true`, because older app bundles still merge-update it onto group
-    // documents that predate the field when they open them. That backfill writes only `true`, so clearing
-    // the field is nobody's legitimate operation, and permitting it would let a class member strip a group
-    // document's shared history and edit access. `type` itself is read-only
-    // (preservesReadOnlyDocumentFields), so it cannot be flipped first to unlock this.
-    // Residual: a class member can still create an axes-typed document owned by themselves with no
-    // `concurrent` field — both create rules permit that — and then any classmate can update it to
-    // `concurrent: true`, because this function tests only the document's `type`, never its owner. That
-    // grants the whole class read and write access to that one document's history. It is not a way into
-    // anyone else's work: documentOwnerOk blocks creating under another user's `uid`, and `type` is
-    // read-only after creation, so an existing personal document can never be turned into a group one this
-    // way. Closing it needs `concurrent` to become unchangeable after creation, which can't ship until the
-    // bundles that make this backfill write are gone: this function is then deleted and `concurrent` made
-    // read-only. See docs/document-axes/planned-rules-tightening.md.
-    // `"group"` is the pre-sweep type value. It stays accepted, alongside `"axes"`, until the tightening in
-    // docs/document-axes/planned-rules-tightening.md.
-    function concurrentChangeOk() {
-      let affectedFieldsSet = request.resource.data.diff(resource.data).affectedKeys();
-      let docType = resource.data.get("type", "");
-      return !affectedFieldsSet.hasAny(["concurrent"].toSet())
-        || ((docType == "group" || docType == "axes")
-            && request.resource.data.get("concurrent", false) == true);
     }
 
     function isValidSupportCreateRequest() {
@@ -235,7 +212,7 @@ service cloud.firestore {
 
       // Only a document nobody owns in particular may be created class-shared. `type` is deliberately not
       // tested here: the transitional type value is on its way out, while the owner is the durable fact.
-      // The update side is governed by concurrentChangeOk.
+      // After creation `concurrent` is read-only (preservesReadOnlyDocumentFields).
       function concurrentCreateOk() {
         return request.resource.data.get("concurrent", false) == false
           || documentOwnerIsCallersClass() || documentOwnerIsCallersGroup();
@@ -253,7 +230,7 @@ service cloud.firestore {
       }
 
       function isValidDocumentUpdateRequest() {
-        return preservesReadOnlyDocumentFields() && concurrentChangeOk() &&
+        return preservesReadOnlyDocumentFields() &&
                ( resourceInUserClass() || userInResourceTeachers() );
       }
 
@@ -516,11 +493,9 @@ service cloud.firestore {
         allow delete: if (isAuthedTeacher() || isAuthedResearcher()) && userIsResourceUser();
         // Allows class members to delete the non-winning (non-canonical) axes-typed documents from the
         // canonical-pointer creation race.
-        // `"group"` is the pre-sweep type value. It stays accepted, alongside `"axes"`, until the tightening
-        // in docs/document-axes/planned-rules-tightening.md.
         allow delete: if isAuthed()
           && request.auth.token.class_hash == resource.data.context_id
-          && (resource.data.type == "group" || resource.data.type == "axes")
+          && resource.data.type == "axes"
           && !isCanonicalValue(resource.data.get('canonical', ""));
         // teachers can read their own documents or other documents in their network
         allow read: if (isAuthed() && (resource == null || userOwnsDocument() || resourceInUserClass())) ||
