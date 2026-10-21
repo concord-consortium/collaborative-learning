@@ -2,7 +2,7 @@ import classNames from "classnames";
 import { observer } from "mobx-react-lite";
 import React, { useEffect, useRef, useState } from "react";
 import { useReadOnlyContext } from "../../../components/document/read-only-context";
-import { kTileSelector } from "../../../components/tiles/tile-dom";
+import { kTileIdAttr, kTileSelector } from "../../../components/tiles/tile-dom";
 import { useLiveAnnouncer } from "../../../hooks/use-live-announcer";
 import { useTimelineContent } from "../hooks/use-timeline-content";
 import { describeView, formatTime } from "./describe-view";
@@ -83,18 +83,21 @@ export const TimelinePlot = observer(function TimelinePlot({ children }: IProps)
     };
   };
 
-  // Without this the dashed preview and its time label stay where the pointer left the plot,
-  // looking like a marker that has already been placed.
-  // Escape cancels placement, but only from inside this tile: the flag lives on the shared content
-  // model, so a read-only pane of the same document would otherwise add a listener of its own, and
-  // Escape pressed anywhere in CLUE would cancel. The key is consumed so the tile's focus trap,
-  // which also acts on Escape, doesn't exit the trap in the same press.
+  // Escape cancels placement, but only while focus is in this tile or its toolbar: the listener is
+  // on window, so Escape pressed anywhere else in CLUE would otherwise cancel it. The toolbar is in
+  // a portal outside the tile, and it is where focus is after a click on Add Time Marker. The key
+  // is consumed so the tile's focus trap and the toolbar, which also act on Escape, don't exit the
+  // tile in the same press.
   useEffect(() => {
     if (readOnly || !content.isPlacingMarker) return;
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.key !== "Escape") return;
       const tile = plotRef.current?.closest(kTileSelector);
-      if (!tile?.contains(document.activeElement)) return;
+      const focused = document.activeElement;
+      const inTile = !!tile?.contains(focused);
+      const inToolbar = !!tile &&
+        focused?.closest("[data-tile-id]")?.getAttribute("data-tile-id") === tile.getAttribute(kTileIdAttr);
+      if (!inTile && !inToolbar) return;
       e.stopPropagation();
       content.stopPlacingMarker();
       announce("Marker placement cancelled.");
@@ -103,6 +106,8 @@ export const TimelinePlot = observer(function TimelinePlot({ children }: IProps)
     return () => window.removeEventListener("keydown", onKeyDown, true);
   }, [announce, content, content.isPlacingMarker, readOnly]);
 
+  // Without this the dashed preview and its time label stay where the pointer left the plot,
+  // looking like a marker that has already been placed.
   const handlePointerLeave = () => {
     if (content.hoverTime) content.clearHoverTime();
   };

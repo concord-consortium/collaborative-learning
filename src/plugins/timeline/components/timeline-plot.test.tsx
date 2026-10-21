@@ -67,10 +67,14 @@ describe("TimelinePlot", () => {
       <ReadOnlyContext.Provider value={isReadOnly}>
         <TileModelContext.Provider value={model}>
           {/* The plot scopes its Escape handling to the tile it is in, which TileComponent marks
-              with this class and attribute (see tile-dom.ts). */}
+              with this class and attribute (see tile-dom.ts), and to the tile's toolbar, which
+              TileToolbar portals outside the tile and tags with data-tile-id. */}
           <div className={kTileClass} {...tileDomAttributes(model.id)}>
-            <button type="button" data-testid="tile-control">Toolbar</button>
+            <button type="button" data-testid="tile-control">Prev</button>
             <TimelinePlot><div className="plot-content" /></TimelinePlot>
+          </div>
+          <div role="toolbar" data-tile-id={model.id}>
+            <button type="button" data-testid="toolbar-button">Add Time Marker</button>
           </div>
         </TileModelContext.Provider>
       </ReadOnlyContext.Provider>
@@ -420,6 +424,22 @@ describe("TimelinePlot", () => {
 
       expect(content.isPlacingMarker).toBe(false);
       expect(content.markerTime).toBeUndefined();
+    });
+
+    // A click on Add Time Marker leaves focus on it, outside the tile. The toolbar's own Escape
+    // handler exits the tile, so the key must not reach it.
+    it("leaves the mode on Escape from the tile's toolbar, consuming the key", () => {
+      const { content } = renderPlot(dataStart, dataEnd);
+      act(() => { content.startPlacingMarker(); });
+      const toolbarButton = screen.getByTestId("toolbar-button");
+      const onToolbarEscape = jest.fn();
+      toolbarButton.addEventListener("keydown", onToolbarEscape);
+      toolbarButton.focus();
+
+      fireEvent.keyDown(toolbarButton, { key: "Escape" });
+
+      expect(content.isPlacingMarker).toBe(false);
+      expect(onToolbarEscape).not.toHaveBeenCalled();
     });
 
     // The listener is only registered while placing, so it has to come off when placement ends:
