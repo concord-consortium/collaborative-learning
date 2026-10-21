@@ -123,6 +123,22 @@ events with the operations `connectDevice`, `reconnectDevice`, `disconnectDevice
 `resetProgram`. A successful connect or reconnect resets only the clicking tile's program,
 through `resetProgramForTile`, which says what Reset leaves alone. Disconnect never resets.
 
+**Log events.** Each is a `DATAFLOW_TOOL_CHANGE` event for the clicking tile (`tileId`). The
+fields below sit at the top level of the event.
+
+| `operation` | Other fields | Logged when |
+|---|---|---|
+| `connectDevice` | `targetType: "device"`, `device`: the choice id (`arduino`, `microbitHub` or `spikerbit`) | A Connect succeeds |
+| `reconnectDevice` | `targetType: "device"`, `device` | A Reconnect succeeds |
+| `disconnectDevice` | `targetType: "device"`, `device`: the choice that was connected | The user disconnects |
+| `resetProgram` | `targetType: "program"`, `trigger`: `connect`, `reconnect` or `button` | The program is reset |
+
+- A successful Connect or Reconnect logs two events: the device event, then `resetProgram` with
+  `trigger` `connect` or `reconnect`.
+- A failed or canceled attempt logs nothing.
+- Only a Disconnect the user chooses is logged. An unplug logs nothing, so a `connectDevice` can
+  have no matching `disconnectDevice`.
+
 ### Channel sources
 
 Each DataFlow tile owns its own `NodeChannelInfo[]`. While a tile is mounted and editable,
