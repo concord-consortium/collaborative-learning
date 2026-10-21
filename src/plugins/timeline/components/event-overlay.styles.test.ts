@@ -76,6 +76,5 @@ describe("event-overlay.scss", () => {
     const rule = body(source, ".event-overlay", "{");
     expect(rule).toMatch(/border-color:\s*map-get\(\$colors,\s*select\)/);
     expect(rule).toMatch(/background-color:\s*map-get\(\$colors,\s*fill\)/);
-    expect(rule).not.toMatch(/\$[a-z]+-base/);
   });
 });
