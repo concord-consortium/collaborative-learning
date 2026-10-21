@@ -157,8 +157,7 @@ describe("TimelineKey", () => {
     expect(content.hiddenEventTypes.slice()).toEqual(["Earthquake"]);
   });
 
-  // The case hidden-event-types-context exists for: My Work renders a student's own document
-  // read-only beside the editable workspace, both on one model.
+  // The case HiddenEventTypesContext exists for; see that module.
   it("keeps a reader's filtering out of an editable pane showing the same model", () => {
     const { content, boxIn } = renderTwoPanes();
 

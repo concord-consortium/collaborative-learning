@@ -35,8 +35,7 @@ $full-timeline-overlay-color: $workspace-teal;
     position: absolute;
     top: 0;
 
-    // The strip is white, so an event is drawn in the darker `full-timeline` variant rather than
-    // the `select` the graph uses against black.
+    // The strip is white, so an event is drawn in the `full-timeline` variant.
     @each $word, $colors in $event-colors {
       &.#{$word}-event {
         $value: map-get($colors, full-timeline);

@@ -2,10 +2,10 @@
 // map, and `timeline-event-styles.tsx` holds the same words for TypeScript, paired with their
 // icons; `event-overlay.styles.test.ts` asserts the two lists agree.
 //
-// Do not re-sample these from the spec sheet attached to the story. That file is Display P3
-// converted to sRGB, so every saturated color reads desaturated — blue samples as #5ea4f8 where
-// the design is #42a6ff — while the grays come back exact, which makes the file look trustworthy
-// when it is not. The values here are the designer's own.
+// Do not re-sample these from the design's exported spec sheet. That file is tagged Display P3,
+// so a sampler reads P3 coordinates: saturated colors read desaturated — blue samples as #5ea4f8
+// where the design is #42a6ff — while grays, identical in both spaces, come back exact, which
+// makes the file look trustworthy when it is not. The values here are the designer's own.
 //
 // `base` is the event number button, `hover` and `select` its other two states; `select` is also
 // the icon's fill and the event rectangle's border. `full-timeline` is darker, so an event stands

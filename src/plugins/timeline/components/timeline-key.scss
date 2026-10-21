@@ -34,7 +34,7 @@ $key-checkbox-border: 2px;
     .key-checkbox {
       display: block;
       // Padded to take in the icon's overhang, so this box encloses both it and the checkbox --
-      // which is what lets the focus ring go round the pair, as the design draws it.
+      // which is what lets the focus ring go around both, as the design draws it.
       padding: $key-icon-overhang 0 0 $key-icon-overhang;
       position: relative;
 
@@ -57,8 +57,8 @@ $key-checkbox-border: 2px;
 
     input[type="checkbox"] {
       appearance: none;
-      // A mark on the plot is its color over the black graph. The checkbox carries its own black
-      // so the swatch is a true miniature of the mark it governs.
+      // A mark on the plot sits on black. The checkbox carries a near-black of its own so the
+      // swatch reads like the mark it governs wherever the key is placed.
       background-color: #121212;
       border: $key-checkbox-outline solid #121212;
       box-sizing: border-box;

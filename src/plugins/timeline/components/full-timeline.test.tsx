@@ -149,7 +149,6 @@ describe("FullTimeline", () => {
              .container.querySelectorAll(".full-timeline-event")).toHaveLength(2);
     cleanup();
 
-    // The hidden set belongs to the pane, not the document, so the strip is told rather than asked.
     const { container } = renderFullTimeline(day(1), day(2), { hiddenEventTypes: ["Earthquake"] });
 
     const left = container.querySelectorAll<HTMLElement>(".full-timeline-event");

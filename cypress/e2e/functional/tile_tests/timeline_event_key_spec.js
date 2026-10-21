@@ -44,8 +44,7 @@ context("Timeline event marks and Event Key", () => {
     });
 
     // eventTypeColorWords hands out six color words, so a seventh type draws with the default
-    // gray "?" but gets no Event Key entry; the seventh color is reserved for student-defined
-    // event types.
+    // gray "?" but gets no Event Key entry.
     cy.log("the key lists the types that have a color");
     cy.get(".timeline-key .event-type-entry").should("have.length", 6);
     cy.get(".timeline-key").should("contain.text", "Avalanche").and("contain.text", "Landslide");
@@ -54,8 +53,8 @@ context("Timeline event marks and Event Key", () => {
   it("colors a rectangle from its icon color, not the pale button color", () => {
     beforeTest();
 
-    // $blue-select. The button beside it stays $blue-base, so a rule that colored both from the
-    // same variable would fail one of these.
+    // The blue entry's `select`. The button beside it stays on `base`, so a rule that colored
+    // both from the same value would fail one of these.
     cy.get(".event-overlay.blue-event").first()
       .should("have.css", "border-top-color", "rgb(66, 166, 255)")
       .and("have.css", "background-color", "rgba(66, 166, 255, 0.4)");
@@ -63,11 +62,11 @@ context("Timeline event marks and Event Key", () => {
       .should("have.css", "background-color", "rgb(170, 215, 255)");
   });
 
-  it("draws an event too narrow to fill as a single line in the outline color", () => {
+  it("draws an event too narrow to fill as a single line in the icon color", () => {
     beforeTest();
 
     // Event 2 spans three minutes of a one-day view. The telling measure is the content box: a
-    // degenerate event has none at all, so what shows is border only, in the outline color. A
+    // degenerate event has none at all, so what shows is border only, in the icon color. A
     // rectangle that lost its border, or stopped being border-box, would fail this.
     cy.get(".event-overlay.orange-event").first().then($el => {
       const el = $el[0];
@@ -102,8 +101,8 @@ context("Timeline event marks and Event Key", () => {
   it("keeps each event's number when a type is switched off", () => {
     beforeTest();
 
-    // Event 1 is an Avalanche and event 3 an Explosion. Hiding the Avalanches must not renumber
-    // the Explosion to 2.
+    // Event 1 is an Avalanche. With Avalanches hidden the first button is event 2, and it must
+    // still read 2.
     keyCheckbox("Avalanche").uncheck();
     cy.get(".event-overlay.red-event").should("exist");
     cy.get(".event-label-button").first().should("have.text", "2");
