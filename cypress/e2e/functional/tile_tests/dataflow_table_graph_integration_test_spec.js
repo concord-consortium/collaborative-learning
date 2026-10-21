@@ -84,6 +84,10 @@ context('Dataflow Tool Tile', function () {
     cy.visit("/editor/?appMode=qa&unit=./demo/units/qa-moth-plot/content.json&mouseSensor");
     docEditor.hideReadOnlyPanes();
 
+    // The restore has to finish, and the tile has to be selected, before its toolbar exists.
+    dataflowToolTile.getDataflowTile().should("exist");
+    dataflowToolTile.getDataflowTileTitle().click();
+
     clueCanvas.clickToolbarButton("dataflow", "data-set-link");
     tableTile.getLinkGraphModalTileMenu().select(graphTitle);
     tableTile.getLinkGraphModalLinkButton()
