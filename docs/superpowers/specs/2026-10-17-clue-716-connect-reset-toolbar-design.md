@@ -141,6 +141,17 @@ loaded program does.
 **Shared documents.** The tick history is saved in the document, so in a shared document one
 person's Reset clears the mini-graphs for everyone viewing it. That is intended.
 
+**Undo.** Reset doesn't create an undo step, so a Reset clicked by mistake loses the mini-graphs
+the student was looking at, with no way back. Two reasons:
+- Reset isn't an edit. It clears the program's running state, not its blocks, connections,
+  settings or recorded data, and undo is for the student's edits.
+- The program keeps ticking after a Reset. By the time the student chose Undo, new ticks would
+  have been added on top of the reset history, so undoing the Reset has no clear meaning.
+
+Undo would fit if the program could be stopped: Reset could stop it, and undoing the Reset would
+restore the stopped program's state. But the product owners want the program to run all the
+time, with no way to stop it.
+
 **Availability**
 
 - Disabled in read-only views. That matches today's connect button.
