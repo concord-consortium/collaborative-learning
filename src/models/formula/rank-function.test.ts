@@ -35,6 +35,32 @@ describe("rank", () => {
     ])).toEqual(["3", "1", "2"]);
   });
 
+  // The offsets above are all zero. These are not: 09:00Z, 08:00Z and 08:30Z, which read as local
+  // wall-clock times would rank in a different order.
+  it("ranks ISO date strings with non-zero offsets by the instant they name", () => {
+    expect(ranks("rank(t)", [
+      { t: "2026-02-01T09:00:00Z" },
+      { t: "2026-02-01T10:00:00+02:00" },
+      { t: "2026-02-01T03:30:00-05:00" }
+    ])).toEqual(["3", "1", "2"]);
+  });
+
+  // Not ISO, but a date to `isDate()` and the comparison operators, so a date to rank() as well.
+  // All three are local times, so the order holds in any time zone.
+  it("ranks a date string in any form the formula language recognizes", () => {
+    expect(ranks("rank(t)", [
+      { t: "2/1/2026 3:00 PM" },
+      { t: "2026-02-01T09:00:00" },
+      { t: "1/31/2026" }
+    ])).toEqual(["3", "2", "1"]);
+  });
+
+  it("ranks dates a formula builds, not only date strings", () => {
+    expect(ranks("rank(date(y, m, d))", [
+      { y: 2026, m: 3, d: 1 }, { y: 2026, m: 1, d: 15 }, { y: 2025, m: 12, d: 31 }
+    ])).toEqual(["3", "2", "1"]);
+  });
+
   it("gives tied values consecutive ranks in case order", () => {
     // The Timeline breaks ties the same way: a stable sort leaves tied events in case order.
     expect(ranks("rank(v)", [{ v: 10 }, { v: 20 }, { v: 20 }, { v: 5 }]))
