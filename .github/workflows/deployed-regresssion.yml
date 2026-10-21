@@ -40,7 +40,7 @@ jobs:
           # Hard code the branch for testing
           # ref: 187652818-cypress-on-staging
       - name: Run Cypress Tests
-        uses: cypress-io/github-action@v6
+        uses: cypress-io/github-action@v7
         with:
           # retry registry fetches; a bare `npm ci` fails the whole container on a
           # transient ECONNRESET, which is unrecoverable without a full re-run
