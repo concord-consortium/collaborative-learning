@@ -85,8 +85,8 @@ describe("deleting group documents", () => {
     await assertFails(db.doc(kDocPath).delete());
   });
 
-  it("a class member may NOT delete a non-canonical document still typed \"group\"", async () => {
-    // The race delete is limited to axes-typed documents; the pre-sweep type value no longer qualifies.
+  it("a class member may NOT delete a non-canonical document typed \"group\"", async () => {
+    // The race delete admits only axes-typed documents, so a non-canonical one typed "group" is refused.
     await adminWriteDoc(kDocPath, groupDoc({ type: "group" }));
     db = initFirestore(studentAuth);
     await assertFails(db.doc(kDocPath).delete());
