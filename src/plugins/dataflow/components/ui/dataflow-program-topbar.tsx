@@ -2,20 +2,15 @@ import React from "react";
 import { observer } from "mobx-react";
 import { RateSelectorOrPlayBack } from "./dataflow-rateselector-playback";
 import { ProgramDataRate } from "../../model/utilities/node";
-import { SerialDevice } from "../../../../models/stores/serial";
 import RecordIcon from "../../assets/topbar-buttons/record-icon.svg";
 import StopIcon from "../../assets/topbar-buttons/stop-icon.svg";
 import PlayIcon from "../../assets/topbar-buttons/play-icon.svg";
 import PauseIcon from "../../assets/topbar-buttons/pause-icon.svg";
 import ClearIcon from "../../assets/topbar-buttons/clear-icon.svg";
-import { DeviceChoice, DeviceConnection } from "../../model/device-connection";
-import { DataflowSerialConnectButton } from "./dataflow-serial-connect-button";
 import { DataflowContentModelType } from "../../model/dataflow-content";
 import { ProgramMode } from "../types/dataflow-tile-types";
 import { useCautionAlert } from "../../../../components/utilities/use-caution-alert";
 import { useReadOnlyContext } from "../../../../components/document/read-only-context";
-import { useSettingFromStores } from "../../../../hooks/use-stores";
-import { toolbarShowsConnect } from "../../utilities/connect-button-state";
 
 import "./dataflow-program-topbar.scss";
 
@@ -23,13 +18,8 @@ interface TopbarProps {
   programDataRates: ProgramDataRate[];
   dataRate: number;
   onRateSelectClick: (rate: number) => void;
-  onConnectDevice: (choice: DeviceChoice) => void;
-  onReconnectDevice: () => void;
-  onDisconnectDevice: () => void;
   showRateUI: boolean;
   lastIntervalDuration: number;
-  serialDevice: SerialDevice;
-  connection: DeviceConnection;
   handleChangeOfProgramMode: () => void;
   programMode: ProgramMode;
   playBackIndex: number;
@@ -39,24 +29,12 @@ interface TopbarProps {
 }
 
 export const DataflowProgramTopbar = observer(function DataflowProgramTopbar(props: TopbarProps) {
-  const { onConnectDevice, onReconnectDevice, onDisconnectDevice, serialDevice, connection,
-          programDataRates, dataRate, onRateSelectClick, handleChangeOfProgramMode,
+  const { programDataRates, dataRate, onRateSelectClick, handleChangeOfProgramMode,
           programMode, playBackIndex, isPlaying, handleChangeIsPlaying, tileContent} = props;
   const readOnly = useReadOnlyContext();
-  // The toolbar's connect button replaces this one. A unit whose own tools list leaves it out keeps
-  // this one, so students there can still connect.
-  const showConnectButton = !toolbarShowsConnect(useSettingFromStores("tools", "dataflow"));
 
   return (
     <div className="program-editor-topbar">
-        {showConnectButton && <DataflowSerialConnectButton
-          onConnectDevice={onConnectDevice}
-          onReconnectDevice={onReconnectDevice}
-          onDisconnectDevice={onDisconnectDevice}
-          serialDevice={serialDevice}
-          connection={connection}
-          needsDevice={tileContent.needsDevice}
-        />}
         <div className="topbar-center-container">
           <div className="topbar-blank-or-play">
             {

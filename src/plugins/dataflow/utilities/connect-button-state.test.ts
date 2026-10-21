@@ -1,4 +1,4 @@
-import { connectButtonState, connectButtonTooltip, toolbarShowsConnect } from "./connect-button-state";
+import { connectButtonState, connectButtonTooltip } from "./connect-button-state";
 
 describe("connectButtonState", () => {
   it.each([
@@ -28,17 +28,5 @@ describe("connectButtonTooltip", () => {
   it("the unseen-error text wins when a device is also needed", () => {
     expect(connectButtonTooltip({ connected: false, needsDevice: true, unseenError: true }))
       .toBe("Couldn't connect. Click for details.");
-  });
-});
-
-describe("toolbarShowsConnect", () => {
-  it.each([
-    [["zoom-in", "|", "connect", "reset"], true],
-    [["zoom-in", "pan"], false],
-    [[], false],
-    [undefined, false],
-    ["connect", false]
-  ])("tools=%j gives %s", (tools, expected) => {
-    expect(toolbarShowsConnect(tools)).toBe(expected);
   });
 });

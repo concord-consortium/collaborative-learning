@@ -20,10 +20,6 @@ import { ObjectBoundingBox } from "../../../models/annotations/clue-object";
 import { recordCase } from "../model/utilities/recording-utilities";
 import { DataflowDropZone } from "./ui/dataflow-drop-zone";
 import { ReteManager } from "../rete/rete-manager";
-import { DeviceChoice, getDeviceConnection } from "../model/device-connection";
-import {
-  connectDeviceForTile, disconnectDeviceForTile, reconnectDeviceForTile
-} from "../utilities/device-actions";
 
 import "./dataflow-program.scss";
 
@@ -97,28 +93,6 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     return this.props.tileId || "";
   }
 
-  private get deviceConnection() {
-    return getDeviceConnection(this.stores.serialDevice);
-  }
-
-  private handleConnectDevice = (choice: DeviceChoice) => {
-    connectDeviceForTile({
-      connection: this.deviceConnection, content: this.props.tileContent, tileId: this.tileId, choice
-    });
-  };
-
-  private handleReconnectDevice = () => {
-    reconnectDeviceForTile({
-      connection: this.deviceConnection, content: this.props.tileContent, tileId: this.tileId
-    });
-  };
-
-  private handleDisconnectDevice = () => {
-    disconnectDeviceForTile({
-      connection: this.deviceConnection, content: this.props.tileContent, tileId: this.tileId
-    });
-  };
-
   public render() {
     const { tileContent, programDataRate } = this.props;
     const { playBackIndex, isPlaying } = this.state;
@@ -142,16 +116,11 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
         }}
       >
         <DataflowProgramTopbar
-          onConnectDevice={this.handleConnectDevice}
-          onReconnectDevice={this.handleReconnectDevice}
-          onDisconnectDevice={this.handleDisconnectDevice}
-          connection={this.deviceConnection}
           programDataRates={ProgramDataRates}
           dataRate={programDataRate}
           onRateSelectClick={this.handleRateSelectClick}
           showRateUI={showRateUI}
           lastIntervalDuration={this.state.lastIntervalDuration}
-          serialDevice={this.stores.serialDevice}
           programMode={programMode}
           playBackIndex={playBackIndex}
           isPlaying={isPlaying}
