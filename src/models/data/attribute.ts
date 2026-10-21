@@ -23,8 +23,9 @@ export const Attribute = types.model("Attribute", {
   // True for a column whose formula the tile that owns the data set, such as a seismic event's
   // number. The formula is how the column is kept current, not something the student wrote, so the
   // table hides it and presents an ordinary column: no expression row, no expression styling, and
-  // Set Expression does not offer it. Presentation only -- an older client that drops the flag
-  // shows the formula again, and the next save from a current client restores it.
+  // Set Expression does not offer it. Presentation only -- an older client that re-saves the
+  // document drops the flag, and the formula shows again until the owning tile recreates the
+  // column (for Event Number, by running the Wave Runner again); nothing restores it on load.
   // `maybe` rather than a false default so it stays out of the snapshot of every other attribute
   // in every document.
   formulaHidden: types.maybe(types.boolean),
