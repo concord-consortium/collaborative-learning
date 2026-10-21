@@ -119,7 +119,10 @@ export const DataflowContentModel = TileContentModel
     // Whether the toolbar's pan flyout is showing (drawing's openPallette pattern; one palette only).
     panPaletteOpen: false,
     // The toolbar pan button's face shows and re-performs the last direction chosen from the flyout.
-    lastPanDirection: "right" as PanDirection
+    lastPanDirection: "right" as PanDirection,
+    // Whether this tile's program has blocks that only work with a connected device. Kept current
+    // by the tile's ReteManager while the tile is editable.
+    needsDevice: false
   }))
   .views(self => ({
     get sharedModel() {
@@ -352,6 +355,9 @@ export const DataflowContentModel = TileContentModel
     },
     setLiveProgramZoom(transform: Transform) {
       self.liveProgramZoom.update(transform);
+    },
+    setNeedsDevice(value: boolean) {
+      self.needsDevice = value;
     },
     setPanPaletteOpen(open: boolean) {
       self.panPaletteOpen = open;

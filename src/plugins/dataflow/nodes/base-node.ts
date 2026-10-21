@@ -185,6 +185,14 @@ export const BaseNodeModel = types.model("BaseNodeModel",
     // a plot with wrong points on it.
     self.clearTickEntries();
   }
+}))
+.actions(self => ({
+  /**
+   * Clears the node's running state. `ControlNodeModel` overrides this to release Hold values.
+   */
+  resetRunningState() {
+    self.resetGraph();
+  }
 }));
 export interface IBaseNodeModel extends Instance<typeof BaseNodeModel> {}
 

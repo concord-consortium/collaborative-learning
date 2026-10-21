@@ -1,4 +1,3 @@
-import { NodeChannelInfo } from "../../plugins/dataflow/model/utilities/channel";
 import { SerialDevice } from "./serial";
 import { detectSpikerbitVersion } from "./serial-protocol";
 import { IDeviceTransport } from "./device-transport";
@@ -28,7 +27,7 @@ export interface IMicrobitUsbConnection {
 
 // IDeviceTransport over a micro:bit WebUSB serial connection. Like WebSerialTransport,
 // it owns the connection's inbound events: it forwards serial chunks to onData and fires
-// onDisconnect on a lost/deauthorised connection, so SerialDevice can receive centrally.
+// onDisconnect on a lost/deauthorized connection, so SerialDevice can receive centrally.
 export class MicrobitUsbTransport implements IDeviceTransport {
   onData?: (chunk: string) => void;
   onDisconnect?: () => void;
@@ -58,7 +57,6 @@ export class SpikerbitDevice {
   private serialDevice: SerialDevice;
   private connection: IMicrobitUsbConnection;
   private transport: MicrobitUsbTransport;
-  private channels: NodeChannelInfo[] = [];
   private buffer = "";
   private detectedVersion: number | null = null;
   private versionQueryTimeoutMs: number;
@@ -71,22 +69,48 @@ export class SpikerbitDevice {
   }
 
   public async connectAndStream(
-    channels: NodeChannelInfo[],
     flashDataSource: unknown,
     progress?: (stage: string, pct?: number) => void
   ){
-    this.channels = channels;
     // During connect, inbound data feeds only version detection. EMG parsing begins once
     // setActiveDevice repoints the transport's onData at SerialDevice.receive (below).
     this.transport.onData = this.handleVersionData;
 
+    try {
+      await this.connectAndCheckFirmware(flashDataSource, progress);
+    } catch (e) {
+      // Close the link so a failed attempt doesn't leave the board open and still feeding
+      // the version handler.
+      await this.disconnect().catch((err) => console.warn("Spiker:bit disconnect failed", err));
+      throw e;
+    }
+
+    // Route servo writes and inbound EMG through this WebUSB transport and mark the shared
+    // store connected. setActiveDevice wires transport.onData -> receive (spikerbit maps to
+    // the keyValue protocol -> parseKeyValueData) and transport.onDisconnect, replacing
+    // the connect-time version handler.
+    this.serialDevice.setActiveDevice("spikerbit", this.transport);
+  }
+
+  // Closes the WebUSB link. The library connection's status event then clears the store's
+  // active device if this transport holds it.
+  public disconnect() {
+    this.transport.onData = undefined;
+    this.buffer = "";
+    return this.connection.disconnect();
+  }
+
+  private async connectAndCheckFirmware(
+    flashDataSource: unknown,
+    progress?: (stage: string, pct?: number) => void
+  ) {
     await this.connection.connect();
 
     const running = await this.queryVersion();
     if (running == null || running < kSpikerbitFirmwareVersion) {
       // Flash when the board is running no known firmware (no reply) or an out-of-date
       // version. USB connection stays Connected through a flash (DAPLink interface chip is
-      // untouched) and serial auto-reinitialises, so no explicit reconnect here.
+      // untouched) and serial auto-reinitializes, so no explicit reconnect here.
       await this.connection.flash(flashDataSource, { partial: true, progress });
       // Re-query to confirm the flash took, but proceed regardless: the board was just written
       // with the known-good bundled hex, so a null/stale reply here is far more likely a serial
@@ -101,12 +125,6 @@ export class SpikerbitDevice {
         );
       }
     }
-
-    // Route servo writes and inbound EMG through this WebUSB transport and mark the shared
-    // store connected. setActiveDevice wires transport.onData -> receive (spikerbit maps to
-    // the keyValue protocol -> parseKeyValueData) and transport.onDisconnect, replacing
-    // the connect-time version handler.
-    this.serialDevice.setActiveDevice("spikerbit", this.transport, this.channels);
   }
 
   // Connect-time only: scan inbound data for the firmware version reply, surfaced via

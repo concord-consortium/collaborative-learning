@@ -30,6 +30,16 @@ describe("EventShape", () => {
     expect(renderShape("blue", 6)).toHaveAttribute("height", "6");
   });
 
+  // In the Event Key the icon overlaps the dark checkbox, where its dark stroke would vanish.
+  it("takes a halo when it sits on a dark background", () => {
+    const { container } = render(<EventShape colorWord="blue" onDark />);
+    expect(container.querySelector("svg")).toHaveClass("on-dark");
+  });
+
+  it("has no halo by default", () => {
+    expect(renderShape("blue")).not.toHaveClass("on-dark");
+  });
+
   it("is hidden from assistive technology", () => {
     expect(renderShape("blue")).toHaveAttribute("aria-hidden", "true");
   });

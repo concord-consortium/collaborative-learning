@@ -1,45 +1,20 @@
 @import "./timeline-event-colors.scss";
 
 .event-overlay {
+  // Everything inherits border-box from index.scss, so these borders also floor the width: an
+  // event too narrow to show an interior collapses to 2px of pure border, which is why a brief
+  // event reads as a single line in the icon color and needs no threshold of its own.
   border: 1px solid;
   height: 100%;
   pointer-events: none;
   position: absolute;
   top: 0;
 
-  &.blue-event {
-    background-color: $blue-transparent;
-    border-color: $blue-base;
-  }
-
-  &.orange-event {
-    background-color: $orange-transparent;
-    border-color: $orange-base;
-  }
-
-  &.red-event {
-    background-color: $red-transparent;
-    border-color: $red-base;
-  }
-
-  &.yellow-event {
-    background-color: $yellow-transparent;
-    border-color: $yellow-base;
-  }
-
-  &.magenta-event {
-    background-color: $magenta-transparent;
-    border-color: $magenta-base;
-  }
-
-  &.purple-event {
-    background-color: $purple-transparent;
-    border-color: $purple-base;
-  }
-
-  &.default-event {
-    background-color: $default-transparent;
-    border-color: $default-base;
+  @each $word, $colors in $event-colors {
+    &.#{$word}-event {
+      background-color: map-get($colors, fill);
+      border-color: map-get($colors, select);
+    }
   }
 }
 
@@ -61,87 +36,25 @@
   font-size: 12px;
   height: 20px;
   justify-content: center;
-  padding: 0;
+  // A minimum rather than a fixed width, so a 3-digit event number widens the button to fit
+  // while 1 and 2 digits stay 24px wide.
+  min-width: 24px;
+  padding: 0 4px;
   position: absolute;
   // Above the event's shape
   top: -37px;
   transform: translateX(-50%);
-  width: 24px;
 
-  &.blue-event {
-    background-color: $blue-base;
+  @each $word, $colors in $event-colors {
+    &.#{$word}-event {
+      background-color: map-get($colors, base);
 
-    &:hover {
-      background-color: $blue-hover;
-    }
-    &:active {
-      background-color: $blue-select;
-    }
-  }
-
-  &.orange-event {
-    background-color: $orange-base;
-
-    &:hover {
-      background-color: $orange-hover;
-    }
-    &:active {
-      background-color: $orange-select;
-    }
-  }
-
-  &.red-event {
-    background-color: $red-base;
-
-    &:hover {
-      background-color: $red-hover;
-    }
-    &:active {
-      background-color: $red-select;
-    }
-  }
-
-  &.yellow-event {
-    background-color: $yellow-base;
-
-    &:hover {
-      background-color: $yellow-hover;
-    }
-    &:active {
-      background-color: $yellow-select;
-    }
-  }
-
-  &.magenta-event {
-    background-color: $magenta-base;
-
-    &:hover {
-      background-color: $magenta-hover;
-    }
-    &:active {
-      background-color: $magenta-select;
-    }
-  }
-
-  &.purple-event {
-    background-color: $purple-base;
-
-    &:hover {
-      background-color: $purple-hover;
-    }
-    &:active {
-      background-color: $purple-select;
-    }
-  }
-
-  &.default-event {
-    background-color: $default-base;
-
-    &:hover {
-      background-color: $default-hover;
-    }
-    &:active {
-      background-color: $default-select;
+      &:hover {
+        background-color: map-get($colors, hover);
+      }
+      &:active {
+        background-color: map-get($colors, select);
+      }
     }
   }
 }
