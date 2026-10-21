@@ -37,7 +37,7 @@ context('Dataflow Tool Tile', function () {
     dataflowToolTile.checkInitialStateButtons();
 
     cy.log("create linked table, verify empty and with recorded data");
-    clueCanvas.clickToolbarButton("dataflow", "data-set-view-Table");
+    clueCanvas.clickToolbarButtonLabelled("dataflow", "data-set-view", "Table It!");
     dataflowToolTile.checkEmptyLinkedTable(tableTile, programTitle, defaultTableAttributes);
 
     dataflowToolTile.recordData("1000", timer1);
@@ -59,7 +59,7 @@ context('Dataflow Tool Tile', function () {
     // is open. For now we close the readOnly views first.
     docEditor.hideReadOnlyPanes();
 
-    clueCanvas.clickToolbarButton("dataflow", "data-set-view-Graph");
+    clueCanvas.clickToolbarButtonLabelled("dataflow", "data-set-view", "Graph It!");
     graphTile.getTile().should("exist").contains(graphTitle);
     graphTile.getLayerName().should("contain.text", programTitle);
     graphTile.getXAttributesLabel().should("contain.text", linkedTableAttributes[0]);
@@ -74,6 +74,31 @@ context('Dataflow Tool Tile', function () {
     graphTile.getTile().should("exist").contains(graphTitle);
     graphTile.getLayerName().should("not.exist");
     graphTile.getGraphDot().should("not.exist");
+
+    cy.log("re-link and unlink through the data-set-link dialog");
+
+    // `data-set-link` is no longer on the default Dataflow toolbar, but units may still configure
+    // it, so it keeps a test. qa-moth-plot has it; the /editor/ route restores this document from
+    // sessionStorage whatever the unit, so the program and the unlinked graph come back with that
+    // unit's toolbar. Linking the graph back is also the state the dialog needs for "Clear It!".
+    cy.visit("/editor/?appMode=qa&unit=./demo/units/qa-moth-plot/content.json&mouseSensor");
+    docEditor.hideReadOnlyPanes();
+
+    clueCanvas.clickToolbarButton("dataflow", "data-set-link");
+    tableTile.getLinkGraphModalTileMenu().select(graphTitle);
+    tableTile.getLinkGraphModalLinkButton()
+      .should("contain.text", "Graph It!")
+      .click({force: true});
+    graphTile.getLayerName().should("contain.text", programTitle);
+    graphTile.getGraphDot().should("exist");
+
+    clueCanvas.clickToolbarButton("dataflow", "data-set-link");
+    tableTile.getLinkGraphModalTileMenu().select(graphTitle);
+    tableTile.getLinkGraphModalLinkButton()
+      .should("contain.text", "Clear It!")
+      .click({force: true});
+    graphTile.getLayerName().should("not.exist");
+    graphTile.getGraphDot().should("not.exist");
   });
 
   it("verify the effect of page reload cause on various button states and linked table state", () => {
@@ -84,7 +109,7 @@ context('Dataflow Tool Tile', function () {
     dataflowToolTile.createProgram(programNodes);
     dataflowToolTile.checkInitialStateButtons();
     dataflowToolTile.recordData("1000", timer1);
-    clueCanvas.clickToolbarButton("dataflow", "data-set-view-Table");
+    clueCanvas.clickToolbarButtonLabelled("dataflow", "data-set-view", "Table It!");
 
     // record data
     dataflowToolTile.clearRecordedData();

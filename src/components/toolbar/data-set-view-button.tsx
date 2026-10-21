@@ -44,8 +44,6 @@ export const DataSetViewButton = observer(function DataSetViewButton({name, args
     <TileToolbarButton
       disabled={!dataSet}
       name={name}
-      // Dataflow carries two of these and the Timeline three.
-      extraClass={`${name}-${newTileType}`}
       title={tooltip}
       onClick={handleClick}
     >
