@@ -9,9 +9,11 @@ import {
 import { WebSerialTransport } from "../../../models/stores/web-serial-transport";
 import spikerbitHex from "../firmware/spikerbit-clue.hex";
 
-export type DeviceChoice = "arduino" | "microbitHub" | "spikerbit";
+// The device choices, in the order the UI lists them. The type is derived from this list, so a
+// new choice can't be left out of it.
+export const kDeviceChoiceOrder = ["arduino", "microbitHub", "spikerbit"] as const;
 
-export const kDeviceChoiceOrder: DeviceChoice[] = ["arduino", "microbitHub", "spikerbit"];
+export type DeviceChoice = typeof kDeviceChoiceOrder[number];
 
 export const kDeviceChoiceLabels: Record<DeviceChoice, string> = {
   arduino: "Arduino",

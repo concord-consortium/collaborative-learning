@@ -313,6 +313,23 @@ describe("DeviceConnection", () => {
     expect(serialDevice.isConnected()).toBe(false);
   });
 
+  it("reconnect while a Spiker:bit is connected closes it, then reopens the same device", async () => {
+    const serialDevice = new SerialDevice();
+    const usbConnection = makeUsbConnection();
+    const deps = realSpikerbitDeps(usbConnection);
+    const createSpikerbitDevice = jest.fn(deps.createSpikerbitDevice!);
+    const connection = new DeviceConnection(serialDevice, { ...deps, createSpikerbitDevice });
+    expect(await connection.connect("spikerbit")).toBe("connected");
+
+    expect(await connection.reconnect()).toBe("connected");
+    expect(createSpikerbitDevice).toHaveBeenCalledTimes(1);
+    expect(usbConnection.disconnect).toHaveBeenCalledTimes(1);
+    expect(usbConnection.connect).toHaveBeenCalledTimes(2);
+    expect(usbConnection.disconnect.mock.invocationCallOrder[0])
+      .toBeLessThan(usbConnection.connect.mock.invocationCallOrder[1]);
+    expect(serialDevice.activeTransport).toBeDefined();
+  });
+
   it("disconnect closes the transport and clears the active device", async () => {
     const transport = makeTransport();
     const { serialDevice, connection } = setup([transport]);
