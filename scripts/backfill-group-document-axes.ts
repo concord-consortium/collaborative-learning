@@ -44,7 +44,8 @@
 // Apply (performs the writes):                cd scripts && APPLY=1 npx tsx backfill-group-document-axes.ts
 //
 // This script authenticates as a service account, so it writes past Firestore rules regardless of
-// what they allow — including `type` and `concurrent`, which the rules make read-only after creation.
+// what they allow — including `type`, `axisProfile` and `concurrent`, which the rules make read-only after
+// creation.
 
 import type { Firestore } from "firebase-admin/firestore";
 
