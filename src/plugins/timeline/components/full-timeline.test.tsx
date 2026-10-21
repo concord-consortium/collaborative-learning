@@ -1,4 +1,4 @@
-import { act, fireEvent, render } from "@testing-library/react";
+import { act, cleanup, fireEvent, render } from "@testing-library/react";
 import { DateTime } from "luxon";
 import { observable, runInAction } from "mobx";
 import { IJsonPatch, onPatch } from "mobx-state-tree";
@@ -14,6 +14,7 @@ import { mockPointerEvents } from "../../../test/pointer-events";
 import { SharedSeismogram } from "../../shared-seismogram/shared-seismogram";
 import { TimelineContentModel, TimelineContentModelType } from "../models/timeline-content";
 import { FullTimeline } from "./full-timeline";
+import { HiddenEventTypesContext } from "./hidden-event-types-context";
 
 // The timeline tile needs to be registered so TileModel.create
 // knows it is a supported tile type
@@ -69,14 +70,17 @@ describe("FullTimeline", () => {
     });
   }
 
-  function renderFullTimeline(viewStart: DateTime, viewEnd: DateTime, { readOnly = false } = {}) {
+  function renderFullTimeline(viewStart: DateTime, viewEnd: DateTime,
+                              { readOnly = false, hiddenEventTypes = [] as string[] } = {}) {
     const content = TimelineContentModel.create();
     content.setViewRange(viewStart, viewEnd);
     const model = TileModel.create({ content });
     const result = render(
       <ReadOnlyContext.Provider value={readOnly}>
         <TileModelContext.Provider value={model}>
-          <FullTimeline />
+          <HiddenEventTypesContext.Provider value={{ types: hiddenEventTypes, toggle: () => undefined }}>
+            <FullTimeline />
+          </HiddenEventTypesContext.Provider>
         </TileModelContext.Provider>
       </ReadOnlyContext.Provider>
     );
@@ -128,6 +132,28 @@ describe("FullTimeline", () => {
     // The event shapes belong on the graph above: the strip shares its band with the Full
     // Timeline header, which the shapes crowd out.
     expect(container.querySelector(".event-shape")).toBeNull();
+  });
+
+  it("stops drawing a type that is switched off in the Event Key", () => {
+    const dataSet = DataSet.create();
+    addAttributeToDataSet(dataSet, { name: "windowStart" });
+    addAttributeToDataSet(dataSet, { name: "windowEnd" });
+    addAttributeToDataSet(dataSet, { name: "eventType" });
+    addCasesToDataSet(dataSet, [
+      { windowStart: day(1.5).toISO()!, windowEnd: day(1.75).toISO()!, eventType: "Earthquake" },
+      { windowStart: day(3).toISO()!, windowEnd: day(3.5).toISO()!, eventType: "Noise" }
+    ]);
+    mockSharedDataSet = SharedDataSet.create({ dataSet });
+
+    expect(renderFullTimeline(day(1), day(2))
+             .container.querySelectorAll(".full-timeline-event")).toHaveLength(2);
+    cleanup();
+
+    const { container } = renderFullTimeline(day(1), day(2), { hiddenEventTypes: ["Earthquake"] });
+
+    const left = container.querySelectorAll<HTMLElement>(".full-timeline-event");
+    expect(left).toHaveLength(1);
+    expect(left[0]).toHaveClass("orange-event");
   });
 
   it("keeps events within the strip, leaving out those that don't overlap the data", () => {

@@ -12,6 +12,7 @@ import { useTimelineContent } from "../hooks/use-timeline-content";
 import { TimelineContentModelType } from "../models/timeline-content";
 import { getEventColorClass } from "../timeline-types";
 import { describeView } from "./describe-view";
+import { useHiddenEventTypes } from "./hidden-event-types-context";
 
 import "./full-timeline.scss";
 
@@ -142,10 +143,11 @@ const FullTimelineEvents = observer(function FullTimelineEvents(
   { content, totalStart, totalEnd }: IDataRangeProps
 ) {
   const toPct = (ms: number) => toStripPct(ms, totalStart, totalEnd);
+  const hiddenEventTypes = useHiddenEventTypes();
   const colorWords = content.eventTypeColorWords;
   return (
     <>
-      {content.events.map(event => {
+      {content.shownEvents(hiddenEventTypes.types).map(event => {
         const windowStart = event.windowStart.toMillis();
         const windowEnd = event.windowEnd.toMillis();
         if (windowEnd <= totalStart || windowStart >= totalEnd) return null;

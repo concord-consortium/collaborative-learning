@@ -21,6 +21,7 @@ export const TimelineContentModel = TileContentModel
     type: types.optional(types.literal(kTimelineTileType), kTimelineTileType),
     viewStartTimeISO: types.maybe(types.string),
     viewEndTimeISO: types.maybe(types.string),
+    hiddenEventTypes: types.array(types.string),
     markerTimeISO: types.maybe(types.string),
     selectedEventIndex: types.optional(types.number, 0),
   })
@@ -145,6 +146,16 @@ export const TimelineContentModel = TileContentModel
     }
   }))
   .views(self => ({
+    /**
+     * The events whose type is still switched on in the Event Key. The hidden set is passed in
+     * rather than read from here because it belongs to a pane, not to the document: see
+     * `HiddenEventTypesContext`.
+     */
+    shownEvents(hiddenEventTypes: string[]): TimelineEvent[] {
+      return self.events.filter(e => !hiddenEventTypes.includes(e.eventType));
+    }
+  }))
+  .views(self => ({
     get dataRangeSeconds() {
       if (!self.dataStartTime || !self.dataEndTime) return undefined;
       return self.dataEndTime.diff(self.dataStartTime, "seconds").seconds;
@@ -166,6 +177,8 @@ export const TimelineContentModel = TileContentModel
     get canPanRight() {
       return !!self.viewEndTime && !!self.dataEndTime && self.viewEndTime < self.dataEndTime;
     },
+    // The events inside the current view. EventOverlay draws these less whatever its pane has
+    // switched off in the Event Key.
     get visibleEvents(): TimelineEvent[] {
       if (!self.viewStartTime || !self.viewEndTime) return [];
       return self.events.filter(e =>
@@ -178,12 +191,18 @@ export const TimelineContentModel = TileContentModel
       const idx = Math.max(0, Math.min(self.selectedEventIndex, events.length - 1));
       return events[idx];
     },
-    get canSelectPrev() {
-      return self.events.length > 0 && self.selectedEventIndex > 0;
+    // Prev and Next walk the shown events, so a switched-off type is stepped over rather than
+    // being zoomed to by `focusEvent` and left invisible. Numbering is untouched: an event keeps
+    // its index in the full list however many types are off.
+    canSelectPrev(hiddenEventTypes: string[]) {
+      return self.shownEvents(hiddenEventTypes).some(e => e.index < self.selectedEventIndex);
     },
-    get canSelectNext() {
-      return self.selectedEventIndex < self.events.length - 1;
+    canSelectNext(hiddenEventTypes: string[]) {
+      return self.shownEvents(hiddenEventTypes).some(e => e.index > self.selectedEventIndex);
     },
+    // The label keeps the selected event's number even when its type is switched off and nothing
+    // is drawn for it. Clearing the selection instead would move the view out from under a reader
+    // who only meant to filter the key.
     get selectedEventLabel() {
       if (self.events.length === 0) return "Event";
       return `Event ${self.selectedEventIndex + 1}`;
@@ -371,15 +390,22 @@ export const TimelineContentModel = TileContentModel
     }
   }))
   .actions(self => ({
-    selectNextEvent() {
-      if (self.canSelectNext) {
-        self.selectEvent(self.selectedEventIndex + 1);
+    toggleEventType(eventType: string) {
+      if (self.hiddenEventTypes.includes(eventType)) {
+        // Every match, not the first: a hand-edited document could hold the type twice.
+        self.hiddenEventTypes.replace(self.hiddenEventTypes.filter(t => t !== eventType));
+      } else {
+        self.hiddenEventTypes.push(eventType);
       }
     },
-    selectPrevEvent() {
-      if (self.canSelectPrev) {
-        self.selectEvent(self.selectedEventIndex - 1);
-      }
+    selectNextEvent(hiddenEventTypes: string[]) {
+      const next = self.shownEvents(hiddenEventTypes).find(e => e.index > self.selectedEventIndex);
+      if (next) self.selectEvent(next.index);
+    },
+    selectPrevEvent(hiddenEventTypes: string[]) {
+      const shownBefore = self.shownEvents(hiddenEventTypes).filter(e => e.index < self.selectedEventIndex);
+      const prev = shownBefore[shownBefore.length - 1];
+      if (prev) self.selectEvent(prev.index);
     }
   }));
 

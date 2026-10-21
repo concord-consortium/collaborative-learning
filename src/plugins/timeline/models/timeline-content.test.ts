@@ -34,15 +34,18 @@ describe("TimelineContent", () => {
     const content = TimelineContentModel.create({
       viewStartTimeISO: "2026-02-01T00:00:00.000Z",
       viewEndTimeISO: "2026-02-02T00:00:00.000Z",
+      hiddenEventTypes: ["Noise"],
       selectedEventIndex: 3
     });
     const json = content.exportJson();
     expect(typeof json).toBe("string");
     expect(json.length).toBeGreaterThan(0);
+    // The types switched off in the Event Key travel with the document, like the view range.
     expect(JSON.parse(json)).toEqual({
       type: "Timeline",
       viewStartTimeISO: "2026-02-01T00:00:00.000Z",
       viewEndTimeISO: "2026-02-02T00:00:00.000Z",
+      hiddenEventTypes: ["Noise"],
       selectedEventIndex: 3
     });
   });
@@ -530,7 +533,7 @@ describe("event views", () => {
     mockSharedDataSet = createEventsDataSet([
       { windowStart: "2026-01-31T00:00:00.000Z", windowEnd: "2026-01-31T01:00:00.000Z", eventType: "Earthquake" },
     ]);
-    expect(content.canSelectPrev).toBe(false);
+    expect(content.canSelectPrev([])).toBe(false);
   });
 
   it("canSelectNext is true when more events exist", () => {
@@ -538,7 +541,7 @@ describe("event views", () => {
       { windowStart: "2026-01-31T00:00:00.000Z", windowEnd: "2026-01-31T01:00:00.000Z", eventType: "Earthquake" },
       { windowStart: "2026-02-01T00:00:00.000Z", windowEnd: "2026-02-01T01:00:00.000Z", eventType: "Noise" },
     ]);
-    expect(content.canSelectNext).toBe(true);
+    expect(content.canSelectNext([])).toBe(true);
   });
 
   it("selectNextEvent increments selectedEventIndex", () => {
@@ -547,7 +550,7 @@ describe("event views", () => {
       { windowStart: "2026-02-01T00:00:00.000Z", windowEnd: "2026-02-01T01:00:00.000Z", eventType: "Noise" },
     ]);
     content.fitToData();
-    content.selectNextEvent();
+    content.selectNextEvent([]);
     expect(content.selectedEventIndex).toBe(1);
     expect(content.selectedEventLabel).toBe("Event 2");
   });
@@ -558,8 +561,8 @@ describe("event views", () => {
       { windowStart: "2026-02-01T00:00:00.000Z", windowEnd: "2026-02-01T01:00:00.000Z", eventType: "Noise" },
     ]);
     content.fitToData();
-    content.selectNextEvent();
-    content.selectPrevEvent();
+    content.selectNextEvent([]);
+    content.selectPrevEvent([]);
     expect(content.selectedEventIndex).toBe(0);
   });
 
@@ -580,7 +583,7 @@ describe("event views", () => {
       { windowStart: "2026-02-01T00:00:00.000Z", windowEnd: "2026-02-01T01:00:00.000Z", eventType: "Noise" },
     ]);
     content.fitToData();
-    content.selectNextEvent();
+    content.selectNextEvent([]);
     // Should adjust view to second event with padding
     const event = content.events[1];
     const duration = event.windowEnd.diff(event.windowStart, "seconds").seconds;
@@ -832,5 +835,111 @@ describe("viewPctToTime", () => {
 
   it("returns undefined with no view set", () => {
     expect(TimelineContentModel.create({}).viewPctToTime(50)).toBeUndefined();
+  });
+});
+
+describe("hiding event types", () => {
+  it("hides no types by default", () => {
+    expect(TimelineContentModel.create().hiddenEventTypes.slice()).toEqual([]);
+  });
+
+  it("toggles a type off and on again", () => {
+    const content = TimelineContentModel.create();
+    content.toggleEventType("Earthquake");
+    expect(content.hiddenEventTypes.slice()).toEqual(["Earthquake"]);
+    content.toggleEventType("Earthquake");
+    expect(content.hiddenEventTypes.slice()).toEqual([]);
+  });
+
+  // A hand-edited document could hold the type twice; one click should still show it again.
+  it("removes every copy of a duplicated type", () => {
+    const content = TimelineContentModel.create({ hiddenEventTypes: ["Noise", "Noise"] });
+    content.toggleEventType("Noise");
+    expect(content.hiddenEventTypes.slice()).toEqual([]);
+  });
+
+  it("keeps a hidden type through a save and reload", () => {
+    const content = TimelineContentModel.create();
+    content.toggleEventType("Earthquake");
+    const reloaded = TimelineContentModel.create(getSnapshot(content));
+    expect(reloaded.hiddenEventTypes.slice()).toEqual(["Earthquake"]);
+  });
+});
+
+describe("navigating with types hidden", () => {
+  const dataStart = DateTime.fromISO("2026-01-30T00:00:00.000Z");
+  const dataEnd = DateTime.fromISO("2026-02-06T00:00:00.000Z");
+
+  let content: ReturnType<typeof TimelineContentModel.create>;
+
+  beforeEach(() => {
+    const mockSharedSeismogram = {
+      station: { network: "AK", station: "K204", location: "", channel: "HNZ" },
+      startTime: dataStart,
+      endTime: dataEnd,
+    };
+    // Six events an hour apart, types A B A C A B, so hiding B leaves indices 0, 2, 3, 4.
+    const mockSharedDataSet = createEventsDataSet(
+      ["A", "B", "A", "C", "A", "B"].map((eventType, i) => ({
+        windowStart: dataStart.plus({ hours: i + 1 }).toISO()!,
+        windowEnd: dataStart.plus({ hours: i + 1, minutes: 30 }).toISO()!,
+        eventType
+      }))
+    );
+    mockedGetSharedModelManager.mockReturnValue({
+      isReady: true,
+      getTileSharedModelsByType: (_self: any, type: any) => {
+        if (type === SharedSeismogram) return [mockSharedSeismogram];
+        if (type === SharedDataSet) return [mockSharedDataSet];
+        return [];
+      },
+    } as any);
+    content = TimelineContentModel.create();
+    // Wide enough to hold every event, so visibleEvents is never clipped by the view.
+    content.setViewRange(dataStart, dataEnd);
+  });
+
+  afterEach(() => {
+    mockedGetSharedModelManager.mockReset();
+  });
+
+  it("skips hidden events going forward", () => {
+    content.selectEvent(0);
+    content.selectNextEvent(["B"]);
+    expect(content.selectedEventIndex).toBe(2);
+  });
+
+  it("skips hidden events going back", () => {
+    content.selectEvent(2);
+    content.selectPrevEvent(["B"]);
+    expect(content.selectedEventIndex).toBe(0);
+  });
+
+  it("does not renumber the events that remain", () => {
+    content.selectEvent(2);
+    expect(content.selectedEventLabel).toBe("Event 3");
+  });
+
+  it("leaves the selection alone when its own type is hidden", () => {
+    content.selectEvent(1);
+    expect(content.selectedEventIndex).toBe(1);
+    expect(content.selectedEventLabel).toBe("Event 2");
+  });
+
+  it("walks on from a selection whose own type is hidden", () => {
+    content.selectEvent(1);
+    // Only the C at index 3 is left, so stepping by one would land on the hidden index 2.
+    expect(content.canSelectNext(["A", "B"])).toBe(true);
+    content.selectNextEvent(["A", "B"]);
+    expect(content.selectedEventIndex).toBe(3);
+  });
+
+  it("disables both Prev and Next when every type is hidden", () => {
+    expect(content.canSelectPrev(["A", "B", "C"])).toBe(false);
+    expect(content.canSelectNext(["A", "B", "C"])).toBe(false);
+  });
+
+  it("leaves a hidden event out of visibleEvents", () => {
+    expect(content.shownEvents(["B"]).map(e => e.index)).toEqual([0, 2, 3, 4]);
   });
 });
