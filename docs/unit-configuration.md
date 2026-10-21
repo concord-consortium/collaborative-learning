@@ -282,6 +282,9 @@ Common toolbar framework.  Supports:
 - `pan`: Pan the canvas. The button's face repeats the last direction used; its corner triangle opens
   a palette of the four directions.
 - `connect`: Connect, reconnect or disconnect a device. The button shows the connection's state.
+  A unit that sets its own DataFlow `tools` list without `connect` gets an older connect button at
+  the top of the tile instead. That button will be removed, so new tool lists should include
+  `connect`.
 - `reset`: Restart the program's running state: releases holds and clears the mini-graphs.
   Recorded data is kept.
 

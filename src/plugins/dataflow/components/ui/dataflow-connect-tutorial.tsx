@@ -33,6 +33,9 @@ export function acknowledgeConnectTutorial({ connection, ui, tileId, readOnly, t
 }
 
 interface IDialogProps {
+  // Whether the tile's toolbar has the connect button. A unit whose own tools list leaves it out
+  // has the older connect button at the top of the tile instead, which doesn't turn yellow.
+  connectInToolbar?: boolean;
   onDismiss: () => void;
 }
 
@@ -40,7 +43,7 @@ interface IDialogProps {
  * A dialog drawn over its own tile that tells the student the program needs a real device.
  * It doesn't move focus on mount, because several tiles may show it at once.
  */
-export const DataflowConnectTutorial: React.FC<IDialogProps> = ({ onDismiss }) => {
+export const DataflowConnectTutorial: React.FC<IDialogProps> = ({ connectInToolbar = true, onDismiss }) => {
   const id = React.useId();
   const titleId = `${id}-title`;
   const bodyId = `${id}-body`;
@@ -50,8 +53,9 @@ export const DataflowConnectTutorial: React.FC<IDialogProps> = ({ onDismiss }) =
         aria-labelledby={titleId} aria-describedby={bodyId}>
         <h3 className="dataflow-connect-tutorial-title" id={titleId}>This program needs a real device</h3>
         <p className="dataflow-connect-tutorial-body" id={bodyId}>
-          Connect your Arduino, micro:bit or Spiker:bit to the computer. Then click the yellow
-          ⚡ Connect button in this tile&apos;s toolbar and choose your device.
+          Connect your Arduino, micro:bit or Spiker:bit to the computer. Then click the {connectInToolbar
+            ? <>yellow ⚡ Connect button in this tile&apos;s toolbar</>
+            : <>⚡ button at the top of this tile</>} and choose your device.
         </p>
         <button className="dataflow-connect-tutorial-ok" onClick={onDismiss}>OK</button>
       </div>
@@ -63,6 +67,7 @@ interface IGateProps {
   content: DataflowContentModelType;
   connection: DeviceConnection;
   readOnly?: boolean;
+  connectInToolbar?: boolean;
   onDismiss: () => void;
 }
 
@@ -72,8 +77,8 @@ interface IGateProps {
  * source: DeviceConnection sets it whenever a device is connected, so no separate check is needed.
  */
 export const DataflowConnectTutorialGate: React.FC<IGateProps> = observer(function DataflowConnectTutorialGate(
-  { content, connection, readOnly, onDismiss }
+  { content, connection, readOnly, connectInToolbar, onDismiss }
 ) {
   const show = !readOnly && content.showConnectTutorialOnOpen && !connection.connectTutorialDismissed;
-  return show ? <DataflowConnectTutorial onDismiss={onDismiss} /> : null;
+  return show ? <DataflowConnectTutorial connectInToolbar={connectInToolbar} onDismiss={onDismiss} /> : null;
 });

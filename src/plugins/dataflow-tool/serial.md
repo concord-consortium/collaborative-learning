@@ -61,8 +61,11 @@ Disconnect closes the pane, moving focus to the button if the pane held it, and 
 color and tooltip then show the result. A failed or canceled attempt leaves the pane open. The
 arrow keys and Home/End move focus between the pane's controls, wrapping at the ends. The UI
 names the device by the label of the choice the user connected with (`lastChoice`), and the log
-events by its id (such as `microbitHub`), not by the detected `deviceFamily`. The tile's top bar
-also has a connect menu (`dataflow-serial-connect-button.tsx`) with the same choices and actions.
+events by its id (such as `microbitHub`), not by the detected `deviceFamily`. A unit whose own
+DataFlow `tools` list leaves out `connect` gets an older connect menu at the top of the tile
+instead (`dataflow-serial-connect-button.tsx`), with the same choices and actions. The top bar
+shows it only when the toolbar doesn't (`toolbarShowsConnect`), and the connect tutorial's text
+points at whichever one the tile has.
 
 The pane starts with a heading and a status block. The status block holds a status line and,
 only while nothing is connected and the tile has a `connectError`, an error line showing it. The

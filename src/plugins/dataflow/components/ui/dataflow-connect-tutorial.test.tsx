@@ -20,11 +20,12 @@ function connectedDevice(serialDevice: SerialDevice) {
 }
 
 function renderTile(
-  content: ReturnType<typeof openedContent>, connection: DeviceConnection, readOnly = false
+  content: ReturnType<typeof openedContent>, connection: DeviceConnection, readOnly = false,
+  connectInToolbar?: boolean
 ) {
   return render(
     <DataflowConnectTutorialGate
-      content={content} connection={connection} readOnly={readOnly}
+      content={content} connection={connection} readOnly={readOnly} connectInToolbar={connectInToolbar}
       onDismiss={() => connection.dismissConnectTutorial()}
     />
   );
@@ -37,6 +38,12 @@ describe("DataflowConnectTutorialGate", () => {
     expect(dialog).toHaveTextContent("Connect your Arduino, micro:bit or Spiker:bit to the computer.");
     expect(dialog).toHaveTextContent("yellow ⚡ Connect button in this tile's toolbar");
     expect(screen.getByRole("button", { name: "OK" }).tagName).toBe("BUTTON");
+  });
+
+  it("points at the button at the top of the tile when the toolbar has no connect button", () => {
+    renderTile(openedContent(), new DeviceConnection(new SerialDevice()), false, false);
+    const dialog = screen.getByRole("dialog", { name: kTitle });
+    expect(dialog).toHaveTextContent("Then click the ⚡ button at the top of this tile and choose your device.");
   });
 
   it("does not move focus when it mounts", () => {
