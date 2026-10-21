@@ -159,9 +159,7 @@ describe("FullTimeline", () => {
     expect(marker.style.left).toBe("75%");
   });
 
-  // toStripPct clamps, which suits an event bar that overlaps the range and not a point. Clamped,
-  // a marker the data no longer covers sat at the strip's end reading as "marker at the end of the
-  // data", while the graph showed nothing even after View All.
+  // Why the strip has to reject these rather than clamp them is in FullTimelineMarker.
   it.each([
     ["before the data", -1],
     ["after the data", 5]

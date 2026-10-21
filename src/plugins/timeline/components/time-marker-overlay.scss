@@ -86,8 +86,7 @@
 .marker-delete {
   background: none;
   border: none;
-  // $charcoal-light-1 was 3.03:1 on white and 2.61:1 on the hover background, under the 4.5:1
-  // WCAG 1.4.3 needs for a 14px glyph.
+  // A 14px glyph needs 4.5:1 against both white and the #eee hover background (WCAG 1.4.3).
   color: $charcoal-dark-2;
   cursor: pointer;
   font-size: 14px;

@@ -37,8 +37,8 @@ export const TimelineComponent: React.FC<ITileProps> = observer(function Timelin
 
   // Placement mode outlives the toolbar that armed it: deselecting the tile takes the button away
   // but leaves the flag set, so a later click on the plot would place a marker instead of zooming.
-  // Only the editable pane decides this -- the flag is on the shared content model, so a read-only
-  // pane, which is never the selected tile, would otherwise cancel placement the moment it armed.
+  // Only the editable pane decides this. Selection is by tile id, so every pane showing the
+  // document agrees on it -- one owner keeps them from racing over a flag they all share.
   const isSelected = ui.isSelectedTile(model);
   useEffect(() => {
     if (!readOnly && !isSelected && content.isPlacingMarker) content.stopPlacingMarker();

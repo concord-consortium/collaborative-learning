@@ -193,8 +193,8 @@ export const TimelineContentModel = TileContentModel
       if (viewStartMs === undefined || viewRangeMs === undefined || viewRangeMs <= 0) return undefined;
       return (time.toMillis() - viewStartMs) / viewRangeMs * 100;
     },
-    // The inverse of timeToViewPct, clamped to the loaded data rather than to the visible view: a
-    // drag can run past the edge of the plot, and the marker must not land where there is no data.
+    // The inverse of timeToViewPct. Callers clamp their own input to the view, so clamping here
+    // to the loaded data is the backstop: whatever the percentage, the time is one the data covers.
     viewPctToTime(pct: number): DateTime | undefined {
       const { viewStartMs, viewRangeMs } = self;
       if (viewStartMs === undefined || viewRangeMs === undefined || viewRangeMs <= 0) return undefined;

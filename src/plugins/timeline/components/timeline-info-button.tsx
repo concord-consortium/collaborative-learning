@@ -27,7 +27,7 @@ function TimelineInfoContent() {
       </p>
       <p>
         Move a marker by dragging its line or its label. Delete it with the × on its label, or
-        select the line and press Delete.
+        click the line and press Delete or Backspace.
       </p>
     </>
   );

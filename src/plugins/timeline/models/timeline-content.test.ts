@@ -737,8 +737,6 @@ describe("isMarkerInData", () => {
 
   afterEach(() => mockedGetSharedModelManager.mockReset());
 
-  // Changing the Wave Runner's station or dates moves the data out from under a placed marker.
-  // The view can never leave the data, so a marker outside it can be neither dragged nor deleted.
   it.each([
     ["inside the data", dataStart.plus({ days: 1 }), true],
     ["on the first instant of the data", dataStart, true],

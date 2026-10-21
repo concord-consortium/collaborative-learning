@@ -99,6 +99,10 @@ export const TimeMarkerOverlay = observer(function TimeMarkerOverlay() {
   // The marker takes the focus with it when it goes, so hand focus back to the tile.
   const deleteMarker = (from: HTMLElement, restoreFocus: boolean) => {
     content.clearMarkerTime();
+    // A press on the stem focuses it, so Delete can arrive mid-drag. Left alone, the drag would
+    // go on drawing the marker and commit it again on pointer-up.
+    dragPointerRef.current = undefined;
+    setDrag(undefined);
     announce("Marker deleted.");
     if (restoreFocus) focusFirstContentControl(from);
   };
@@ -113,9 +117,8 @@ export const TimeMarkerOverlay = observer(function TimeMarkerOverlay() {
     e.stopPropagation();
   };
 
-  // The stem is the marker's keyboard control: a slider over the visible view rather than over the
-  // whole of the data a drag can reach. Nudged out of the view it would stop being drawn, taking
-  // the focused control with it.
+  // The stem is the marker's keyboard control, and a slider over the visible view: nudged out of
+  // the view the marker would stop being drawn, taking the focused control with it.
   const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
     if (placedPct === undefined) return;
     let pct = placedPct;

@@ -85,8 +85,7 @@ describe("TimeMarkerOverlay", () => {
     expect(content.markerTime).toBeDefined();
   });
 
-  // The preview is drawn only while placing, and placing is unreachable once a marker exists,
-  // so the two never appear together.
+  // Placing a marker ends placement, so the preview and a placed marker never appear together.
   it("clears the hover preview when a marker is placed", () => {
     const content = createContent();
     content.startPlacingMarker();
@@ -213,14 +212,29 @@ describe("TimeMarkerOverlay", () => {
       expect(content.markerTime!.toMillis()).toBe(before.toMillis());
     });
 
+    // A press on the stem focuses it, so Delete can arrive mid-drag. The marker was still drawn
+    // from the drag state, and pointer-up committed it again.
+    it("stays deleted when Delete arrives mid-drag", () => {
+      const { content } = renderOverlayWithAMarker();
+      stubOverlayRect();
+      const stem = screen.getByTestId("marker-stem");
+
+      fireEvent.pointerDown(stem, { pointerId: 1, clientX: kOverlayWidth * 0.5 });
+      fireEvent.pointerMove(stem, { pointerId: 1, clientX: kOverlayWidth * 0.7 });
+      fireEvent.keyDown(stem, { key: "Delete" });
+      fireEvent.pointerUp(stem, { pointerId: 1, clientX: kOverlayWidth * 0.7 });
+
+      expect(content.markerTime).toBeUndefined();
+    });
+
     it("deletes the marker when the delete button is clicked", () => {
       const { content } = renderOverlayWithAMarker();
       fireEvent.click(screen.getByRole("button", { name: "Delete marker" }));
       expect(content.markerTime).toBeUndefined();
     });
 
-    // Both halves of this used to go wrong: the stem unmounted mid-drag, taking the captured
-    // pointer's target with it, and the release committed a time outside the view.
+    // The stem holds the captured pointer, so it has to stay mounted for the whole drag, and
+    // the release has to land somewhere the view reaches.
     it("stays mounted and lands at the edge when dragged past it", () => {
       const { content } = renderOverlayWithAMarker();
       stubOverlayRect();
@@ -292,9 +306,9 @@ describe("TimeMarkerOverlay", () => {
     });
 
     // TileComponent treats ArrowUp from a non-editable element inside a tile as a soft exit, so
-    // without stopPropagation the first nudge moved focus off the marker and out to the tile.
-    // Its handler is a React one, dispatched from the root, so this has to use a React handler too
-    // -- a native listener on an ancestor would fire before React's and prove nothing.
+    // the marker has to consume the keys it uses or focus leaves it. Its handler is a React one,
+    // dispatched from the root, so this has to use a React handler too -- a native listener on an
+    // ancestor would fire before React's and prove nothing.
     it.each(["ArrowUp", "ArrowRight", "Home", "Delete", "Backspace"])(
       "keeps %s from also reaching the tile around it", (key) => {
         const content = createContent();

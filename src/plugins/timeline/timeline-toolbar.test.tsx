@@ -107,8 +107,7 @@ describe("Timeline toolbar — Add Time Marker button", () => {
     }
   });
 
-  // aria-pressed says this is a toggle, so it has to behave like one: Escape was otherwise the
-  // only way out of placement mode, and nothing tells the student that.
+  // aria-pressed says this is a toggle, so it has to behave like one.
   it("turns placement mode back off when clicked again", () => {
     withSharedSeismogram(dataStart, dataEnd);
     const content = TimelineContentModel.create();
@@ -200,7 +199,7 @@ describe("Timeline toolbar — Add Time Marker button", () => {
   });
 
   // Only one marker at a time: the way to get another is to delete the first.
-  it("is disabled once a marker exists", () => {
+  it("is disabled while a marker within the data exists", () => {
     withSharedSeismogram(dataStart, dataEnd);
     const content = TimelineContentModel.create();
     content.setMarkerTime(dataStart.plus({ days: 1 }));

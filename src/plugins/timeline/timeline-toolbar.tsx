@@ -135,8 +135,8 @@ const AddMarkerButton = observer(function AddMarkerButton({ name }: IToolbarButt
       title="Add Time Marker"
       onClick={handleClick}
       selected={content?.isPlacingMarker}
-      // A marker left outside the data by a Wave Runner date change can no longer be reached to
-      // delete, so it must not keep this button off for good. Placing a new one replaces it.
+      // An unreachable marker must not keep this button off for good; placing a new one
+      // replaces it. See isMarkerInData for how a marker ends up outside the data.
       disabled={!!content?.isMarkerInData || !content?.dataStartTime}
       disabledMessage={content?.isMarkerInData
                         ? "Delete the existing marker first" : "No data loaded"}
