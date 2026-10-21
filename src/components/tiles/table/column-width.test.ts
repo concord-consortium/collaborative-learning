@@ -1,7 +1,7 @@
 import { defaultFont } from "../../constants";
 import * as measureTextModule from "../hooks/use-measure-text";
 import { headerFitWidth } from "./column-width";
-import { kHeaderControlsReserve, kMaxAutoColumnWidth, kMinColumnWidth } from "./table-types";
+import { kHeaderControlsReserve, kHeaderFont, kMaxAutoColumnWidth, kMinColumnWidth } from "./table-types";
 
 // jest-canvas-mock measures one pixel per character, so these widths are exact.
 describe("headerFitWidth", () => {
@@ -12,7 +12,6 @@ describe("headerFitWidth", () => {
   it("fits a name that needs more than the minimum", () => {
     const name = "a".repeat(40);
     expect(headerFitWidth(name)).toBe(40 + kHeaderControlsReserve);
-    expect(headerFitWidth(name)).toBeGreaterThan(kMinColumnWidth);
   });
 
   it("clamps a long name at the maximum", () => {
@@ -24,7 +23,7 @@ describe("headerFitWidth", () => {
   it("measures with the header's own bold font", () => {
     const spy = jest.spyOn(measureTextModule, "measureText");
     headerFitWidth("Event Number");
-    expect(spy).toHaveBeenCalledWith("Event Number", expect.stringContaining("700"));
+    expect(spy).toHaveBeenCalledWith("Event Number", kHeaderFont);
     expect(spy).not.toHaveBeenCalledWith("Event Number", defaultFont);
     spy.mockRestore();
   });

@@ -1,5 +1,5 @@
 import { Column, RenderCellProps, RenderHeaderCellProps } from "react-data-grid";
-import { defaultFont } from "../../constants";
+import { defaultBoldFont } from "../../constants";
 
 export const kIndexColumnWidth = 34;
 export const kIndexColumnWidthWithLabel = kIndexColumnWidth + 7;
@@ -18,8 +18,9 @@ export const kHeaderCellHorizontalPadding = 32; // half on either side of text
 export const kHeaderControlsReserve = 2 * kControlsColumnWidth;
 // A name longer than this is left to wrap rather than letting one column take over the tile.
 export const kMaxAutoColumnWidth = 200;
-// The header renders bold; measuring it with anything else under-measures.
-export const kHeaderFont = `700 ${defaultFont}`;
+// Named for its role: the width rule and the header-height calculation have to measure with the
+// same font, and it is bold -- measuring it as regular under-measures.
+export const kHeaderFont = defaultBoldFont;
 export const kExpressionCellPadding = 20;
 export const kTitlePadding = 8;
 export interface IGridContext {

@@ -17,8 +17,8 @@ export const useMeasureColumnWidth = ({ content }: IUseMeasureColumnWidth) => {
     if (resizeColumn.current === attr.id && resizeColumnWidth.current !== undefined) {
       return resizeColumnWidth.current;
     } else {
-      // Fit the heading when nobody has set a width. Falling back to the minimum is what made
-      // every unsized column 80px and every longer name wrap.
+      // Falling back to the minimum here is what made every unsized column 80px and every
+      // longer name wrap.
       return content.storedColumnWidth(attr.id) ?? headerFitWidth(attr.name);
     }
   }, [content]);
