@@ -1,6 +1,6 @@
 import classNames from "classnames";
 import { observer } from "mobx-react-lite";
-import React from "react";
+import React, { useId } from "react";
 import { useTimelineContent } from "../hooks/use-timeline-content";
 import { getEventColorClass } from "../timeline-types";
 import { EventShape } from "./event-shape";
@@ -12,10 +12,12 @@ export const TimelineKey = observer(function TimelineKey() {
   const content = useTimelineContent();
   const hiddenEventTypes = useHiddenEventTypes();
   const colorWords = content.eventTypeColorWords;
+  // One per Key: a document can hold several Timeline tiles, and show each in more than one pane.
+  const titleId = useId();
 
   return (
-    <div className="timeline-key" role="group" aria-labelledby="timeline-key-title">
-      <div className="key-title" id="timeline-key-title">Event Key</div>
+    <div className="timeline-key" role="group" aria-labelledby={titleId}>
+      <div className="key-title" id={titleId}>Event Key</div>
       {Array.from(colorWords.entries()).map(([eventType, colorWord]) => (
         // The label is what names the checkbox for assistive technology; the icon is decorative.
         <label key={eventType} className={classNames("event-type-entry", getEventColorClass(colorWord))}>

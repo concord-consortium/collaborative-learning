@@ -181,6 +181,13 @@ describe("TimelineKey", () => {
     expect(content.hiddenEventTypes.slice()).toEqual(["Earthquake"]);
   });
 
+  it("names each pane's checkbox group by its own title", () => {
+    renderTwoPanes();
+    const groups = screen.getAllByRole("group", { name: "Event Key" });
+    expect(groups).toHaveLength(2);
+    expect(groups[0].getAttribute("aria-labelledby")).not.toBe(groups[1].getAttribute("aria-labelledby"));
+  });
+
   it("carries each type's icon, haloed for the dark checkbox", () => {
     const { container } = renderKey();
     expect(container.querySelectorAll(".event-shape.on-dark")).toHaveLength(2);
