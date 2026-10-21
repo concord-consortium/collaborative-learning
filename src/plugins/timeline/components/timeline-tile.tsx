@@ -35,8 +35,8 @@ export const TimelineComponent: React.FC<ITileProps> = observer(function Timelin
 }) {
   const content = useTimelineContent();
 
-  // A reader's own hidden set, seeded from the document and kept out of it; see
-  // hidden-event-types-context for why it is per pane and why the two are allowed to diverge.
+  // A read-only pane's toggles never reach the document; see hidden-event-types-context for why the
+  // hidden set is per pane and when a reader's set diverges from the document's.
   const hiddenEventTypes = usePaneHiddenEventTypes(content, readOnly);
 
   const timelineContainerRef = useRef<HTMLDivElement>(null);

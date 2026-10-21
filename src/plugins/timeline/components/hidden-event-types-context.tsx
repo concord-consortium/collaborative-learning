@@ -15,10 +15,10 @@ export interface IHiddenEventTypes {
  * workspace, and the doc editor does the same. A reader's filtering kept on the model would reach
  * the editable pane, where the Event Key would then draw one thing and save another.
  *
- * So a read-only pane seeds its set from the document once, at mount, and from then on the two
- * diverge: an author switching a type off afterwards does not change what the reader sees, and the
- * reader's choices are dropped when the pane closes. Reconciling them would mean deciding whose
- * choice wins on each type, which is not something either person asked for.
+ * So a read-only pane follows the document until its reader first toggles a type, and from then on
+ * the two diverge: an author switching a type off afterwards does not change what that reader sees,
+ * and the reader's choices are dropped when the pane closes. Reconciling them would mean deciding
+ * whose choice wins on each type, which is not something either person asked for.
  */
 export const HiddenEventTypesContext = createContext<IHiddenEventTypes>({ types: [], toggle: () => undefined });
 
@@ -26,20 +26,23 @@ export const useHiddenEventTypes = () => useContext(HiddenEventTypesContext);
 
 /** The value a pane provides: an editable pane's toggle saves to the document, a reader's stays here. */
 export function usePaneHiddenEventTypes(content: TimelineContentModelType, readOnly?: boolean): IHiddenEventTypes {
-  const [readerHiddenTypes, setReaderHiddenTypes] = useState<string[]>(() =>
-    Array.from(content.hiddenEventTypes));
+  // Undefined until the reader makes a choice of their own.
+  const [readerHiddenTypes, setReaderHiddenTypes] = useState<string[]>();
   const toggle = useCallback((eventType: string) => {
     if (readOnly) {
-      setReaderHiddenTypes(hidden => hidden.includes(eventType)
-        ? hidden.filter(t => t !== eventType)
-        : [...hidden, eventType]);
+      setReaderHiddenTypes(hidden => {
+        const current = hidden ?? Array.from(content.hiddenEventTypes);
+        return current.includes(eventType)
+          ? current.filter(t => t !== eventType)
+          : [...current, eventType];
+      });
     } else {
       content.toggleEventType(eventType);
     }
   }, [content, readOnly]);
   const savedHiddenTypes = Array.from(content.hiddenEventTypes);
   return useMemo(
-    () => ({ types: readOnly ? readerHiddenTypes : savedHiddenTypes, toggle }),
+    () => ({ types: readOnly ? readerHiddenTypes ?? savedHiddenTypes : savedHiddenTypes, toggle }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [readOnly, readerHiddenTypes, savedHiddenTypes.join("\u0000"), toggle]);
 }

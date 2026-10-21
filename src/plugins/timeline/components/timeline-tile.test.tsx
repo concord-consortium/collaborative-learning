@@ -458,6 +458,18 @@ describe("TimelineComponent", () => {
       expect(paneContent.hiddenEventTypes.slice()).toEqual(["Noise"]);
     });
 
+    it("follows the document in the reader's pane until the reader toggles a type", () => {
+      const { paneContent, inPane } = renderTwoPanes();
+      act(() => paneContent.toggleEventType("Noise"));
+      expect(inPane("my-work").getByRole("checkbox", { name: "Noise" })).not.toBeChecked();
+
+      fireEvent.click(inPane("my-work").getByRole("checkbox", { name: "Earthquake" }));
+      act(() => paneContent.toggleEventType("Noise"));
+      expect(inPane("my-work").getByRole("checkbox", { name: "Noise" })).not.toBeChecked();
+      expect(inPane("my-work").getByRole("checkbox", { name: "Earthquake" })).not.toBeChecked();
+      expect(inPane("workspace").getByRole("checkbox", { name: "Noise" })).toBeChecked();
+    });
+
     it("steps Next over the types the reader's pane has switched off", () => {
       const { paneContent, inPane } = renderTwoPanes();
       fireEvent.click(inPane("my-work").getByRole("checkbox", { name: "Noise" }));
