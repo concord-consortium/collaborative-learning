@@ -103,7 +103,7 @@ export const ControlNodeModel = BaseNodeModel.named("ControlNodeModel")
 .actions(self => {
   const baseResetRunningState = self.resetRunningState;
   return {
-    // Stop the timer before the tick entries are cleared so it can't write to a missing entry.
+    // Stop the wait timer so it can't fire against the cleared tick entries.
     resetRunningState() {
       self.clearWaitTimer();
       self.setHeldValue(null);
