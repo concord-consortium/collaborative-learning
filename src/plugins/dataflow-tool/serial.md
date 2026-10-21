@@ -52,32 +52,11 @@ by more than one device (the Arduino and the Spiker:bit both speak `keyValue`).
 
 The connection is app-wide: there is one `DeviceConnection` per `SerialDevice` (from
 `getDeviceConnection`), and it does not live in any tile component. At most one device is
-connected at a time. The `connect` button in a DataFlow tile's toolbar
-(`dataflow-connect-button.tsx`) opens a pane. While nothing is connected the pane lists three
-device choices: Arduino, micro:bit (radio hub) and Spiker:bit (`kDeviceChoiceLabels`). While a
-device is connected it shows Reconnect and Disconnect instead. All of the controls are disabled
-while a connection attempt is in progress (`busyChoice`). A successful Connect, Reconnect or
-Disconnect closes the pane, moving focus to the button if the pane held it, and the button's
-color and tooltip then show the result. A failed or canceled attempt leaves the pane open. The
-arrow keys and Home/End move focus between the pane's controls, wrapping at the ends. The UI
-names the device by the label of the choice the user connected with (`lastChoice`), and the log
-events by its id (such as `microbitHub`), not by the detected `deviceFamily`.
-
-The pane starts with a heading and a status block. The status block holds a status line and,
-only while nothing is connected and the tile has a `connectError`, an error line showing it. The
-tile's `unseenConnectError` is set when an attempt fails while the pane is closed, and cleared
-when the pane opens or the tile starts another attempt or disconnects. Any successful
-connection, from any tile, clears every open tile's error and unseen flag: each editable tile's
-`ReteManager` watches `isConnected()`. So a later disconnect can't bring back an error from
-before the connection.
-
-The button face has three states, chosen by `connectButtonState`
-(`utilities/connect-button-state.ts`): idle, connected, and attention (the program needs a
-device and none is connected, or there is an error the user hasn't seen). Each state has a
-tooltip; attention's says which of the two causes applies, preferring the error. In the
-attention state the button is yellow; it pulses three times when the state is first applied,
-including each time the toolbar appears, and then stays yellow.
-The toolbar's `reset` button calls `resetProgramForTile` (see Tile device actions below).
+connected at a time, and a second attempt while one is in progress is ignored (`busyChoice`).
+It is started from the `connect` button in the DataFlow tile toolbar
+(`components/toolbar/dataflow-connect-button.tsx`), which calls the tile device actions below.
+The log events name the device by the choice the user connected with (`lastChoice`, such as
+`microbitHub`), not by the detected `deviceFamily`.
 
 `DeviceConnection` provides `connect(choice)`, `reconnect()` and `disconnect()`. Connect and
 reconnect resolve `"connected"`, `"canceled"` or `"failed"`. When a device is already
@@ -325,23 +304,15 @@ Walkthrough:
 ## Connection status tracking
 
 The UI reflects connection state through `SerialDevice.isConnected()`, which is observable, so
-the connect button and pane re-render as the connection changes.
+it re-renders as the connection changes.
 
 Whether a program needs a device is per tile. Each DataFlow tile's `content.needsDevice` is a
 volatile value that its `ReteManager` keeps current as the student edits
 (`updateNeedsDevice`, using `programNeedsDevice` in
 `src/plugins/dataflow/utilities/program-needs-device.ts`). When a tile's program needs a
-device and none is connected, that tile can show the connect tutorial
-(`DataflowConnectTutorial`, with its gate), a dialog drawn over that tile only. The check runs
-when the tile's program opens: `ReteManager.recordNeedsDeviceOnOpen()` sets the content's
-volatile `showConnectTutorialOnOpen` if the program needs a device and none is connected. It
-skips managers that are disposed, read-only or playback, and it never runs after an edit or a
-connection change. One OK, or any successful connection, sets
-`DeviceConnection.connectTutorialDismissed`, which dismisses the tutorial on every tile for the
-rest of the page load. While the tutorial shows, it replaces the tile's title, topbar, content
-and palette focus slots (`dataflow-focus-slots.ts`). The toolbar, drag handle and resize handle
-stay reachable, and the toolbar renders outside the tile, so the tutorial doesn't cover it.
-Activating OK moves focus to the tile element when it was inside the tutorial.
+device and none is connected as the program opens, the tile shows the connect tutorial
+(`components/ui/dataflow-connect-tutorial.tsx`). That is checked only when the program opens
+(`ReteManager.recordNeedsDeviceOnOpen()`), never after an edit or a connection change.
 
 The browser's own `navigator.serial` `disconnect` event is wired once at store creation by
 `initWebSerialConnectionEvents` (`web-serial-transport.ts`), keeping `navigator.serial` out of
