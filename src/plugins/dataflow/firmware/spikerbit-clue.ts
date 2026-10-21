@@ -1,7 +1,7 @@
 // CLUE Spiker:bit EMG firmware — v3  (source of record)
 //
-// This is MakeCode (static TypeScript) authored at https://makecode.microbit.org.
-// It is NOT compiled by the CLUE build — the `src/plugins/dataflow/firmware` directory
+// This is MakeCode (static TypeScript), compiled into spikerbit-clue.hex by `npm run build:firmware`.
+// The CLUE app build doesn't compile it — the `src/plugins/dataflow/firmware` directory
 // is excluded from tsconfig.json and eslint, because these globals (serial, pins, basic,
 // control, input, AnalogPin, DigitalPin, Delimiters) only exist in the MakeCode runtime.
 //

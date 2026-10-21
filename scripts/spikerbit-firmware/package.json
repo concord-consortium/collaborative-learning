@@ -1,0 +1,13 @@
+{
+  "name": "spikerbit-firmware",
+  "private": true,
+  "description": "Builds src/plugins/dataflow/firmware/spikerbit-clue.hex from spikerbit-clue.ts with a pinned MakeCode toolchain",
+  "scripts": {
+    "build": "node build.mjs",
+    "check": "node build.mjs --check"
+  },
+  "dependencies": {
+    "pxt-core": "13.0.4",
+    "pxt-microbit": "9.0.5"
+  }
+}

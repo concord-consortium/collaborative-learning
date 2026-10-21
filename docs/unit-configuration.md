@@ -479,6 +479,30 @@ Additionally these buttons are supported and can be added to the toolbar if the 
 - `insert-variable`
 - `edit-variable`
 
+#### Timeline
+
+Common toolbar framework.
+
+- `add-marker`: Toggle placement of the time marker; the next click on the graph places it, and
+  Escape or a second press cancels. Activated from the keyboard it places the marker in the middle
+  of the view and moves focus to it. Disabled while the tile has no data, and while a marker
+  within the loaded data exists.
+
+Defaults:
+
+- `["data-set-view", "Table"]`
+- `["data-set-view", "DataCard"]`
+- `["data-set-view", "BarGraph"]`
+- `|`
+- `add-marker`
+- `|`
+- `zoom-in`
+- `zoom-out`
+- `view-all`
+- `|`
+- `pan-left`
+- `pan-right`
+
 #### Wave Runner
 
 Common toolbar framework; default buttons:
