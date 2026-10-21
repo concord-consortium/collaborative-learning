@@ -21,11 +21,12 @@ export const TimelineContentModel = TileContentModel
     type: types.optional(types.literal(kTimelineTileType), kTimelineTileType),
     viewStartTimeISO: types.maybe(types.string),
     viewEndTimeISO: types.maybe(types.string),
+    markerTimeISO: types.maybe(types.string),
     selectedEventIndex: types.optional(types.number, 0),
   })
   .volatile(self => ({
     hoverTime: undefined as DateTime | undefined,
-    pinnedTime: undefined as DateTime | undefined,
+    isPlacingMarker: false,
     // The view shown while a preview is active, and the saved view it started from; see
     // `beginViewPreview`.
     viewPreview: undefined as {
@@ -56,6 +57,12 @@ export const TimelineContentModel = TileContentModel
     },
     get viewEndTime() {
       const iso = self.viewPreview ? self.viewPreview.endISO : self.viewEndTimeISO;
+      if (!iso) return undefined;
+      const time = DateTime.fromISO(iso);
+      return time.isValid ? time : undefined;
+    },
+    get markerTime() {
+      const iso = self.markerTimeISO;
       if (!iso) return undefined;
       const time = DateTime.fromISO(iso);
       return time.isValid ? time : undefined;
@@ -185,6 +192,25 @@ export const TimelineContentModel = TileContentModel
       const { viewStartMs, viewRangeMs } = self;
       if (viewStartMs === undefined || viewRangeMs === undefined || viewRangeMs <= 0) return undefined;
       return (time.toMillis() - viewStartMs) / viewRangeMs * 100;
+    },
+    // The inverse of timeToViewPct. Callers clamp their own input to the view, so clamping here
+    // to the loaded data is the backstop: whatever the percentage, the time is one the data covers.
+    viewPctToTime(pct: number): DateTime | undefined {
+      const { viewStartMs, viewRangeMs } = self;
+      if (viewStartMs === undefined || viewRangeMs === undefined || viewRangeMs <= 0) return undefined;
+      const ms = viewStartMs + pct / 100 * viewRangeMs;
+      const min = self.dataStartTime?.toMillis() ?? ms;
+      const max = self.dataEndTime?.toMillis() ?? ms;
+      const time = DateTime.fromMillis(Math.min(Math.max(ms, min), max));
+      return time.isValid ? time : undefined;
+    },
+    // Changing the Wave Runner's station or dates moves the data out from under a placed marker.
+    // The view can never leave the data, so a marker outside it cannot be panned to, dragged or
+    // deleted: whatever still refers to one has to ask whether it is reachable first.
+    get isMarkerInData() {
+      const { markerTime, dataStartTime, dataEndTime } = self;
+      if (!markerTime || !dataStartTime || !dataEndTime) return false;
+      return markerTime >= dataStartTime && markerTime <= dataEndTime;
     }
   }))
   .views(self => ({
@@ -207,11 +233,20 @@ export const TimelineContentModel = TileContentModel
     clearHoverTime() {
       self.hoverTime = undefined;
     },
-    setPinnedTime(time: DateTime) {
-      self.pinnedTime = time;
+    setMarkerTime(time: DateTime) {
+      self.markerTimeISO = time.toUTC().toISO() ?? undefined;
+      self.isPlacingMarker = false;
+      self.hoverTime = undefined;
     },
-    clearPinnedTime() {
-      self.pinnedTime = undefined;
+    clearMarkerTime() {
+      self.markerTimeISO = undefined;
+    },
+    startPlacingMarker() {
+      self.isPlacingMarker = true;
+    },
+    stopPlacingMarker() {
+      self.isPlacingMarker = false;
+      self.hoverTime = undefined;
     },
     setViewRange(start: DateTime, end: DateTime) {
       if (!isValidDateTime(start) || !isValidDateTime(end) || start >= end) return;

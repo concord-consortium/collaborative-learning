@@ -12,18 +12,11 @@ import { getEditableTitleElement } from "../../../utilities/dom-utils";
 import { hasSelectionModifier } from "../../../utilities/event-utils";
 import { useTimelineContent } from "../hooks/use-timeline-content";
 import { Timeline } from "./timeline";
+import { getContentControls } from "./timeline-content-controls";
 import { TimelineInfoButton } from "./timeline-info-button";
 import { TimelineKey } from "./timeline-key";
 import "../timeline-toolbar";
 import "./timeline-tile.scss";
-
-// The controls Tab visits in the tile's contents, in order: Prev, Next and the Full Timeline's
-// scrollbar thumb, less any that are disabled.
-const kContentControls =
-  ".event-row .timeline-button:not(:disabled), .dynamic-scrollbar-thumb:not([aria-disabled])";
-function getContentControls(container: HTMLElement | null) {
-  return container ? Array.from(container.querySelectorAll<HTMLElement>(kContentControls)) : [];
-}
 
 export const TimelineComponent: React.FC<ITileProps> = observer(function TimelineComponent({
   model, readOnly, tileElt, onRegisterTileApi, onUnregisterTileApi
@@ -41,6 +34,15 @@ export const TimelineComponent: React.FC<ITileProps> = observer(function Timelin
     refocusContentRef.current = false;
     getContentControls(timelineContainerRef.current)[0]?.focus();
   });
+
+  // Placement mode outlives the toolbar that armed it: deselecting the tile takes the button away
+  // but leaves the flag set, so a later click on the plot would place a marker instead of zooming.
+  // Only the editable pane decides this. Selection is by tile id, so every pane showing the
+  // document agrees on it -- one owner keeps them from racing over a flag they all share.
+  const isSelected = ui.isSelectedTile(model);
+  useEffect(() => {
+    if (!readOnly && !isSelected && content.isPlacingMarker) content.stopPlacingMarker();
+  }, [content, content.isPlacingMarker, isSelected, readOnly]);
 
   const handleSelectEvent = (e: React.MouseEvent<HTMLButtonElement>, direction: "prev" | "next") => {
     const hadFocus = e.currentTarget === document.activeElement;
