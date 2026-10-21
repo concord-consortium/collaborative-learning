@@ -3,6 +3,8 @@
 import { getSnapshot } from "mobx-state-tree";
 import { parsedExport, getColumnWidths } from "./dc-test-utils";
 import { DocumentContentModel, DocumentContentModelType, DocumentContentSnapshotType } from "../document-content";
+import { SharedDataSetSnapshotType } from "../../shared/shared-data-set";
+import { SharedModelEntryType } from "../shared-model-entry";
 import { IDropRowInfo } from "../tile-row";
 
 import { IDocumentImportSnapshot } from "../document-content-import-types";
@@ -46,6 +48,26 @@ function createDocumentContentModel(snapshot: IDocumentImportSnapshot) {
   const content = DocumentContentModel.create(snapshot as DocumentContentSnapshotType, environment);
   sharedModelManager.setDocument(content);
   return content;
+}
+
+/**
+ * Asserts everything a copied shared dataset has to carry. Checking that it arrived is not enough
+ * on its own: a copy that made the wrapper but dropped the data would look the same from outside.
+ */
+function expectCopiedDataSet(copiedShared: SharedModelEntryType, copiedTableId: string) {
+  const entry = getSnapshot(copiedShared);
+  // Rewired onto the copy. Left as "tableTool", the dataset would name a tile in another document.
+  expect(entry.provider).toEqual(copiedTableId);
+  // The snapshot's sharedModel is the union's base type, which has no dataSet of its own.
+  const sharedModel = entry.sharedModel as SharedDataSetSnapshotType;
+  expect(sharedModel.providerId).toEqual(copiedTableId);
+
+  const dataSet = sharedModel.dataSet!;
+  expect(dataSet.attributes!.map(attr => attr.name)).toEqual(["x", "y"]);
+  expect(dataSet.attributes![0].values).toEqual(["1", "2", "3"]);
+  expect(dataSet.cases).toHaveLength(3);
+  // Fresh ids, so editing the copy cannot reach back into the source's attributes.
+  expect(dataSet.attributes!.map(attr => attr.id)).not.toEqual(["attribute1", "attribute2"]);
 }
 
 describe("DocumentContentModel -- shared Models --", () => {
@@ -137,164 +159,11 @@ describe("DocumentContentModel -- shared Models --", () => {
         rowDropLocation: "right"
       };
       documentContent.moveTiles(dragTiles, dropRowInfo);
-      expect(getSnapshot(documentContent)).toMatchInlineSnapshot(`
-{
-  "annotations": {},
-  "rowMap": {
-    "testid-6": {
-      "height": undefined,
-      "id": "testid-6",
-      "isSectionHeader": false,
-      "sectionId": undefined,
-      "tiles": [
-        {
-          "tileId": "graphTool",
-          "widthPct": undefined,
-        },
-        {
-          "tileId": "tableTool",
-          "widthPct": undefined,
-        },
-      ],
-    },
-  },
-  "rowOrder": [
-    "testid-6",
-  ],
-  "sharedModelMap": {
-    "sharedDataSet1": {
-      "provider": "tableTool",
-      "sharedModel": {
-        "dataSet": {
-          "attributes": [
-            {
-              "clientKey": "",
-              "description": undefined,
-              "formula": {
-                "display": "",
-              },
-              "hidden": false,
-              "id": "attribute1",
-              "name": "x",
-              "precision": undefined,
-              "sourceID": undefined,
-              "title": "",
-              "units": "",
-              "values": [
-                "1",
-                "2",
-                "3",
-              ],
-            },
-            {
-              "clientKey": "",
-              "description": undefined,
-              "formula": {
-                "display": "",
-              },
-              "hidden": false,
-              "id": "attribute2",
-              "name": "y",
-              "precision": undefined,
-              "sourceID": undefined,
-              "title": "",
-              "units": "",
-              "values": [
-                "-1",
-                "0",
-                "1",
-              ],
-            },
-          ],
-          "cases": [
-            {
-              "__id__": "HR3at2-RqvnRaT9z",
-            },
-            {
-              "__id__": "O3SmGUb4iRPw29HU",
-            },
-            {
-              "__id__": "76WRbhQpTu2Wqy1c",
-            },
-          ],
-          "id": "dataSet1",
-          "name": "Demo Dataset",
-          "sortByAttribute": undefined,
-          "sortDirection": "NONE",
-          "sourceID": undefined,
-        },
-        "id": "sharedDataSet1",
-        "providerId": "tableTool",
-        "type": "SharedDataSet",
-      },
-      "tiles": [
-        "tableTool",
-        "graphTool",
-      ],
-    },
-  },
-  "tileMap": {
-    "graphTool": {
-      "content": {
-        "bgImage": undefined,
-        "board": {
-          "xAxis": {
-            "label": undefined,
-            "min": -2,
-            "name": undefined,
-            "range": undefined,
-            "unit": 18.3,
-          },
-          "yAxis": {
-            "label": undefined,
-            "min": -1,
-            "name": undefined,
-            "range": undefined,
-            "unit": 18.3,
-          },
-        },
-        "isNavigatorVisible": true,
-        "linkedAttributeColors": {},
-        "navigatorPosition": "bottom",
-        "objects": {},
-        "offsetX": 0,
-        "offsetY": 0,
-        "pointMetadata": {},
-        "type": "Geometry",
-        "zoom": 1,
-      },
-      "createdHash": "5faefa6a838fb8d6c69e520146666176cce3219ed34cad6cf82c438ca8adf6a0",
-      "display": undefined,
-      "fixedPosition": false,
-      "id": "graphTool",
-      "title": undefined,
-      "updatedHash": "5faefa6a838fb8d6c69e520146666176cce3219ed34cad6cf82c438ca8adf6a0",
-    },
-    "tableTool": {
-      "content": {
-        "columnWidths": {},
-        "importedDataSet": {
-          "attributes": [],
-          "cases": [],
-          "id": "testid-7",
-          "name": undefined,
-          "sortByAttribute": undefined,
-          "sortDirection": "NONE",
-          "sourceID": undefined,
-        },
-        "isImported": false,
-        "type": "Table",
-      },
-      "createdHash": "9715aa61a8206041413d8b00982ad72ca4ac872cc93dc1aab1a6e394ecad6991",
-      "display": undefined,
-      "fixedPosition": false,
-      "id": "tableTool",
-      "title": undefined,
-      "updatedHash": "9715aa61a8206041413d8b00982ad72ca4ac872cc93dc1aab1a6e394ecad6991",
-    },
-  },
-}
-`);
+      // A move reorders the row; it must not duplicate the tile or its shared model.
+      const movedOrder = documentContent.getAllTilesInRow(documentContent.getRowByIndex(0)!.id)
+                           .map(tile => tile.id);
+      expect(movedOrder).toEqual(["graphTool", "tableTool"]);
+      expect(documentContent.tileMap.size).toEqual(2);
 
       expect(documentContent.sharedModelMap.size).toEqual(1);
 
@@ -313,125 +182,19 @@ describe("DocumentContentModel -- shared Models --", () => {
         rowInsertIndex: 0
       };
       targetDocument.handleDragCopyTiles(dragTileInfo, dropRowInfo);
-      // FIXME: the ids here are not going to be consistent, so we should
-      // reset them in beforeEach
-      expect(getSnapshot(targetDocument)).toMatchInlineSnapshot(`
-{
-  "annotations": {},
-  "rowMap": {
-    "testid-21": {
-      "height": undefined,
-      "id": "testid-21",
-      "isSectionHeader": false,
-      "sectionId": undefined,
-      "tiles": [
-        {
-          "tileId": "testid-20",
-          "widthPct": undefined,
-        },
-      ],
-    },
-  },
-  "rowOrder": [
-    "testid-21",
-  ],
-  "sharedModelMap": {
-    "testid-17": {
-      "provider": "testid-20",
-      "sharedModel": {
-        "dataSet": {
-          "attributes": [
-            {
-              "clientKey": "",
-              "description": undefined,
-              "formula": {
-                "display": "",
-              },
-              "hidden": false,
-              "id": "testid-18",
-              "name": "x",
-              "precision": undefined,
-              "sourceID": undefined,
-              "title": "",
-              "units": "",
-              "values": [
-                "1",
-                "2",
-                "3",
-              ],
-            },
-            {
-              "clientKey": "",
-              "description": undefined,
-              "formula": {
-                "display": "",
-              },
-              "hidden": false,
-              "id": "testid-19",
-              "name": "y",
-              "precision": undefined,
-              "sourceID": undefined,
-              "title": "",
-              "units": "",
-              "values": [
-                "-1",
-                "0",
-                "1",
-              ],
-            },
-          ],
-          "cases": [
-            {
-              "__id__": "caseid-0",
-            },
-            {
-              "__id__": "caseid-1",
-            },
-            {
-              "__id__": "caseid-2",
-            },
-          ],
-          "id": "testid-16",
-          "name": "Demo Dataset",
-          "sortByAttribute": undefined,
-          "sortDirection": "NONE",
-          "sourceID": undefined,
-        },
-        "id": "testid-17",
-        "providerId": "testid-20",
-        "type": "SharedDataSet",
-      },
-      "tiles": [
-        "testid-20",
-      ],
-    },
-  },
-  "tileMap": {
-    "testid-20": {
-      "content": {
-        "columnWidths": {},
-        "importedDataSet": {
-          "attributes": [],
-          "cases": [],
-          "id": "testid-12",
-          "name": undefined,
-          "sortByAttribute": undefined,
-          "sortDirection": "NONE",
-          "sourceID": undefined,
-        },
-        "isImported": false,
-        "type": "Table",
-      },
-      "createdHash": "0aeddcb588714035abc5feadb188e793ad31d8008d19d5b8743e7eb260a69e22",
-      "display": undefined,
-      "fixedPosition": false,
-      "id": "testid-20",
-      "title": undefined,
-      "updatedHash": "0aeddcb588714035abc5feadb188e793ad31d8008d19d5b8743e7eb260a69e22",
-    },
-  },
-}
-`);
+      // The copy lands as the only tile in the only row, under a new id, and the shared dataset
+      // comes with it rewired to that id rather than the source tile's.
+      expect(targetDocument.rowOrder).toHaveLength(1);
+      const copiedIds = targetDocument.getTilesInDocumentOrder();
+      expect(copiedIds).toHaveLength(1);
+      expect(copiedIds[0]).not.toEqual("tableTool");
+      expect(targetDocument.tileMap.get(copiedIds[0])!.content.type).toEqual("Table");
+
+      expect(targetDocument.sharedModelMap.size).toEqual(1);
+      const copiedShared = Array.from(targetDocument.sharedModelMap.values())[0];
+      expect(getSnapshot(copiedShared).tiles).toEqual(copiedIds);
+
+      expectCopiedDataSet(copiedShared, copiedIds[0]);
     });
 
     it("can copy a tile into another document's row", () => {
@@ -447,144 +210,22 @@ describe("DocumentContentModel -- shared Models --", () => {
         rowDropLocation: "right"
       };
       targetDocument.handleDragCopyTiles(dragTileInfo, dropRowInfo);
-      // FIXME: the ids here are not going to be consistent, so we should
-      // reset them in beforeEach
-      expect(getSnapshot(targetDocument)).toMatchInlineSnapshot(`
-{
-  "annotations": {},
-  "rowMap": {
-    "testid-28": {
-      "height": undefined,
-      "id": "testid-28",
-      "isSectionHeader": false,
-      "sectionId": undefined,
-      "tiles": [
-        {
-          "tileId": "textTool",
-          "widthPct": undefined,
-        },
-        {
-          "tileId": "testid-34",
-          "widthPct": undefined,
-        },
-      ],
-    },
-  },
-  "rowOrder": [
-    "testid-28",
-  ],
-  "sharedModelMap": {
-    "testid-31": {
-      "provider": "testid-34",
-      "sharedModel": {
-        "dataSet": {
-          "attributes": [
-            {
-              "clientKey": "",
-              "description": undefined,
-              "formula": {
-                "display": "",
-              },
-              "hidden": false,
-              "id": "testid-32",
-              "name": "x",
-              "precision": undefined,
-              "sourceID": undefined,
-              "title": "",
-              "units": "",
-              "values": [
-                "1",
-                "2",
-                "3",
-              ],
-            },
-            {
-              "clientKey": "",
-              "description": undefined,
-              "formula": {
-                "display": "",
-              },
-              "hidden": false,
-              "id": "testid-33",
-              "name": "y",
-              "precision": undefined,
-              "sourceID": undefined,
-              "title": "",
-              "units": "",
-              "values": [
-                "-1",
-                "0",
-                "1",
-              ],
-            },
-          ],
-          "cases": [
-            {
-              "__id__": "caseid-3",
-            },
-            {
-              "__id__": "caseid-4",
-            },
-            {
-              "__id__": "caseid-5",
-            },
-          ],
-          "id": "testid-30",
-          "name": "Demo Dataset",
-          "sortByAttribute": undefined,
-          "sortDirection": "NONE",
-          "sourceID": undefined,
-        },
-        "id": "testid-31",
-        "providerId": "testid-34",
-        "type": "SharedDataSet",
-      },
-      "tiles": [
-        "testid-34",
-      ],
-    },
-  },
-  "tileMap": {
-    "testid-34": {
-      "content": {
-        "columnWidths": {},
-        "importedDataSet": {
-          "attributes": [],
-          "cases": [],
-          "id": "testid-24",
-          "name": undefined,
-          "sortByAttribute": undefined,
-          "sortDirection": "NONE",
-          "sourceID": undefined,
-        },
-        "isImported": false,
-        "type": "Table",
-      },
-      "createdHash": "bf6efb008cb9048ef82b551651c76a15ed948932a17ca38054ab3f2e26942395",
-      "display": undefined,
-      "fixedPosition": false,
-      "id": "testid-34",
-      "title": undefined,
-      "updatedHash": "bf6efb008cb9048ef82b551651c76a15ed948932a17ca38054ab3f2e26942395",
-    },
-    "textTool": {
-      "content": {
-        "format": undefined,
-        "highlightedText": [],
-        "linkDisplayModes": {},
-        "text": "",
-        "type": "Text",
-      },
-      "createdHash": "7e10c66d65b651c9af8ccb4d214747f659f719659104bda6e0f5f1ab81152674",
-      "display": undefined,
-      "fixedPosition": false,
-      "id": "textTool",
-      "title": undefined,
-      "updatedHash": "7e10c66d65b651c9af8ccb4d214747f659f719659104bda6e0f5f1ab81152674",
-    },
-  },
-}
-`);
+      // The copy joins the existing row beside the text tile rather than making a row of its own.
+      expect(targetDocument.rowOrder).toHaveLength(1);
+      const rowTileIds = targetDocument.getAllTilesInRow(targetDocument.getRowByIndex(0)!.id)
+                           .map(tile => tile.id);
+      expect(rowTileIds).toHaveLength(2);
+      expect(rowTileIds[0]).toEqual("textTool");
+
+      const copiedId = rowTileIds[1];
+      expect(copiedId).not.toEqual("tableTool");
+      expect(targetDocument.tileMap.get(copiedId)!.content.type).toEqual("Table");
+
+      expect(targetDocument.sharedModelMap.size).toEqual(1);
+      const copiedShared = Array.from(targetDocument.sharedModelMap.values())[0];
+      expect(getSnapshot(copiedShared).tiles).toEqual([copiedId]);
+
+      expectCopiedDataSet(copiedShared, copiedId);
     });
 
   });
@@ -597,166 +238,18 @@ describe("DocumentContentModel -- shared Models --", () => {
         rowInsertIndex: 0
       };
       targetDocument.handleDragCopyTiles(dragTileInfo, dropRowInfo);
-      // FIXME: the ids here are not going to be consistent, so we should
-      // reset them in beforeEach
-      expect(getSnapshot(targetDocument)).toMatchInlineSnapshot(`
-{
-  "annotations": {},
-  "rowMap": {
-    "testid-48": {
-      "height": undefined,
-      "id": "testid-48",
-      "isSectionHeader": false,
-      "sectionId": undefined,
-      "tiles": [
-        {
-          "tileId": "testid-46",
-          "widthPct": undefined,
-        },
-        {
-          "tileId": "testid-47",
-          "widthPct": undefined,
-        },
-      ],
-    },
-  },
-  "rowOrder": [
-    "testid-48",
-  ],
-  "sharedModelMap": {
-    "testid-43": {
-      "provider": "testid-46",
-      "sharedModel": {
-        "dataSet": {
-          "attributes": [
-            {
-              "clientKey": "",
-              "description": undefined,
-              "formula": {
-                "display": "",
-              },
-              "hidden": false,
-              "id": "testid-44",
-              "name": "x",
-              "precision": undefined,
-              "sourceID": undefined,
-              "title": "",
-              "units": "",
-              "values": [
-                "1",
-                "2",
-                "3",
-              ],
-            },
-            {
-              "clientKey": "",
-              "description": undefined,
-              "formula": {
-                "display": "",
-              },
-              "hidden": false,
-              "id": "testid-45",
-              "name": "y",
-              "precision": undefined,
-              "sourceID": undefined,
-              "title": "",
-              "units": "",
-              "values": [
-                "-1",
-                "0",
-                "1",
-              ],
-            },
-          ],
-          "cases": [
-            {
-              "__id__": "caseid-6",
-            },
-            {
-              "__id__": "caseid-7",
-            },
-            {
-              "__id__": "caseid-8",
-            },
-          ],
-          "id": "testid-42",
-          "name": "Demo Dataset",
-          "sortByAttribute": undefined,
-          "sortDirection": "NONE",
-          "sourceID": undefined,
-        },
-        "id": "testid-43",
-        "providerId": "testid-46",
-        "type": "SharedDataSet",
-      },
-      "tiles": [
-        "testid-46",
-        "testid-47",
-      ],
-    },
-  },
-  "tileMap": {
-    "testid-46": {
-      "content": {
-        "columnWidths": {},
-        "importedDataSet": {
-          "attributes": [],
-          "cases": [],
-          "id": "testid-37",
-          "name": undefined,
-          "sortByAttribute": undefined,
-          "sortDirection": "NONE",
-          "sourceID": undefined,
-        },
-        "isImported": false,
-        "type": "Table",
-      },
-      "createdHash": "ce1722ac802435259cd5159bc84abc42e4c04111d0b538d13cd5af2edeced810",
-      "display": undefined,
-      "fixedPosition": false,
-      "id": "testid-46",
-      "title": undefined,
-      "updatedHash": "ce1722ac802435259cd5159bc84abc42e4c04111d0b538d13cd5af2edeced810",
-    },
-    "testid-47": {
-      "content": {
-        "bgImage": undefined,
-        "board": {
-          "xAxis": {
-            "label": undefined,
-            "min": -2,
-            "name": undefined,
-            "range": undefined,
-            "unit": 18.3,
-          },
-          "yAxis": {
-            "label": undefined,
-            "min": -1,
-            "name": undefined,
-            "range": undefined,
-            "unit": 18.3,
-          },
-        },
-        "isNavigatorVisible": true,
-        "linkedAttributeColors": {},
-        "navigatorPosition": "bottom",
-        "objects": {},
-        "offsetX": 0,
-        "offsetY": 0,
-        "pointMetadata": {},
-        "type": "Geometry",
-        "zoom": 1,
-      },
-      "createdHash": "5faefa6a838fb8d6c69e520146666176cce3219ed34cad6cf82c438ca8adf6a0",
-      "display": undefined,
-      "fixedPosition": false,
-      "id": "testid-47",
-      "title": undefined,
-      "updatedHash": "5faefa6a838fb8d6c69e520146666176cce3219ed34cad6cf82c438ca8adf6a0",
-    },
-  },
-}
-`);
+      // Both tiles arrive, and the one dataset they shared is copied once rather than twice, with
+      // both copies referencing it.
+      const copiedIds = targetDocument.getTilesInDocumentOrder();
+      expect(copiedIds).toHaveLength(2);
+      expect(copiedIds.map(id => targetDocument.tileMap.get(id)!.content.type))
+        .toEqual(["Table", "Geometry"]);
+
+      expect(targetDocument.sharedModelMap.size).toEqual(1);
+      const copiedShared = Array.from(targetDocument.sharedModelMap.values())[0];
+      expect(getSnapshot(copiedShared).tiles).toEqual(copiedIds);
+
+      expectCopiedDataSet(copiedShared, copiedIds[0]);
     });
   });
 
