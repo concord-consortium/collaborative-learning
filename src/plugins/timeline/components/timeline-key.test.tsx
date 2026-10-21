@@ -10,7 +10,7 @@ jest.mock("uplot", () => {
 import { fireEvent, render, screen, within } from "@testing-library/react";
 import { DateTime } from "luxon";
 import { observer } from "mobx-react-lite";
-import React, { useState } from "react";
+import React from "react";
 import { TileModelContext } from "../../../components/tiles/tile-api";
 import { addAttributeToDataSet, addCasesToDataSet, DataSet } from "../../../models/data/data-set";
 import { SharedDataSet } from "../../../models/shared/shared-data-set";
@@ -18,7 +18,7 @@ import { TileModel } from "../../../models/tiles/tile-model";
 import { getSharedModelManager } from "../../../models/tiles/tile-environment";
 import { SharedSeismogram } from "../../shared-seismogram/shared-seismogram";
 import { TimelineContentModel, TimelineContentModelType } from "../models/timeline-content";
-import { HiddenEventTypesContext } from "./hidden-event-types-context";
+import { HiddenEventTypesContext, usePaneHiddenEventTypes } from "./hidden-event-types-context";
 import { TimelineKey } from "./timeline-key";
 
 // The timeline tile needs to be registered so TileModel.create
@@ -66,25 +66,12 @@ describe("TimelineKey", () => {
     mockedGetSharedModelManager.mockReset();
   });
 
-  /**
-   * Stands in for the tile, which owns the pane's hidden set and decides whether a toggle is
-   * saved. `readOnly` means the same here as there: a reader's choice stays in this pane.
-   */
+  /** The key as the tile provides it, without the rest of the tile. */
   const KeyInAPane = observer(function KeyInAPane(
     { content, readOnly }: { content: TimelineContentModelType, readOnly: boolean }
   ) {
-    const [readerHidden, setReaderHidden] = useState<string[]>(() => Array.from(content.hiddenEventTypes));
-    const toggle = (eventType: string) => {
-      if (readOnly) {
-        setReaderHidden(hidden => hidden.includes(eventType)
-          ? hidden.filter(t => t !== eventType) : [...hidden, eventType]);
-      } else {
-        content.toggleEventType(eventType);
-      }
-    };
-    const types = readOnly ? readerHidden : Array.from(content.hiddenEventTypes);
     return (
-      <HiddenEventTypesContext.Provider value={{ types, toggle }}>
+      <HiddenEventTypesContext.Provider value={usePaneHiddenEventTypes(content, readOnly)}>
         <TimelineKey />
       </HiddenEventTypesContext.Provider>
     );

@@ -1,4 +1,5 @@
-import { createContext, useContext } from "react";
+import { createContext, useCallback, useContext, useMemo, useState } from "react";
+import { TimelineContentModelType } from "../models/timeline-content";
 
 export interface IHiddenEventTypes {
   /** The event types switched off in this pane's Event Key. */
@@ -22,3 +23,23 @@ export interface IHiddenEventTypes {
 export const HiddenEventTypesContext = createContext<IHiddenEventTypes>({ types: [], toggle: () => undefined });
 
 export const useHiddenEventTypes = () => useContext(HiddenEventTypesContext);
+
+/** The value a pane provides: an editable pane's toggle saves to the document, a reader's stays here. */
+export function usePaneHiddenEventTypes(content: TimelineContentModelType, readOnly?: boolean): IHiddenEventTypes {
+  const [readerHiddenTypes, setReaderHiddenTypes] = useState<string[]>(() =>
+    Array.from(content.hiddenEventTypes));
+  const toggle = useCallback((eventType: string) => {
+    if (readOnly) {
+      setReaderHiddenTypes(hidden => hidden.includes(eventType)
+        ? hidden.filter(t => t !== eventType)
+        : [...hidden, eventType]);
+    } else {
+      content.toggleEventType(eventType);
+    }
+  }, [content, readOnly]);
+  const savedHiddenTypes = Array.from(content.hiddenEventTypes);
+  return useMemo(
+    () => ({ types: readOnly ? readerHiddenTypes : savedHiddenTypes, toggle }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [readOnly, readerHiddenTypes, savedHiddenTypes.join("\u0000"), toggle]);
+}

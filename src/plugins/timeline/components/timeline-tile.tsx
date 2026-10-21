@@ -1,5 +1,5 @@
 import { observer } from "mobx-react";
-import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useLayoutEffect, useRef } from "react";
 import ScrollArrowIcon from "../../../assets/scroll-arrow-small-icon.svg";
 import { useContainerContext } from "../../../components/document/container-context";
 import { BasicEditableTileTitle } from "../../../components/tiles/basic-editable-tile-title";
@@ -11,7 +11,7 @@ import { userSelectTile } from "../../../models/stores/ui";
 import { getEditableTitleElement } from "../../../utilities/dom-utils";
 import { hasSelectionModifier } from "../../../utilities/event-utils";
 import { useTimelineContent } from "../hooks/use-timeline-content";
-import { HiddenEventTypesContext } from "./hidden-event-types-context";
+import { HiddenEventTypesContext, usePaneHiddenEventTypes } from "./hidden-event-types-context";
 import { Timeline } from "./timeline";
 import { TimelineInfoButton } from "./timeline-info-button";
 import { TimelineKey } from "./timeline-key";
@@ -37,22 +37,7 @@ export const TimelineComponent: React.FC<ITileProps> = observer(function Timelin
 
   // A reader's own hidden set, seeded from the document and kept out of it; see
   // hidden-event-types-context for why it is per pane and why the two are allowed to diverge.
-  const [readerHiddenTypes, setReaderHiddenTypes] = useState<string[]>(() =>
-    Array.from(content.hiddenEventTypes));
-  const toggleHiddenType = useCallback((eventType: string) => {
-    if (readOnly) {
-      setReaderHiddenTypes(hidden => hidden.includes(eventType)
-        ? hidden.filter(t => t !== eventType)
-        : [...hidden, eventType]);
-    } else {
-      content.toggleEventType(eventType);
-    }
-  }, [content, readOnly]);
-  const savedHiddenTypes = Array.from(content.hiddenEventTypes);
-  const hiddenEventTypes = useMemo(
-    () => ({ types: readOnly ? readerHiddenTypes : savedHiddenTypes, toggle: toggleHiddenType }),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [readOnly, readerHiddenTypes, savedHiddenTypes.join("\u0000"), toggleHiddenType]);
+  const hiddenEventTypes = usePaneHiddenEventTypes(content, readOnly);
 
   const timelineContainerRef = useRef<HTMLDivElement>(null);
   const refocusContentRef = useRef(false);

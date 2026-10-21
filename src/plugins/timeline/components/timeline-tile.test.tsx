@@ -8,7 +8,7 @@ jest.mock("uplot", () => {
 });
 
 import { FocusTrapController } from "@concord-consortium/accessibility-tools/hooks";
-import { act, fireEvent, render, screen } from "@testing-library/react";
+import { act, fireEvent, render, screen, within } from "@testing-library/react";
 import { DateTime } from "luxon";
 import { Provider } from "mobx-react";
 import React from "react";
@@ -28,7 +28,7 @@ import "../../../models/tiles/table/table-registration";
 import "../../bar-graph/bar-graph-registration";
 import "../../data-card/data-card-registration";
 import { SharedSeismogram } from "../../shared-seismogram/shared-seismogram";
-import { defaultTimelineContent, TimelineContentModelType } from "../models/timeline-content";
+import { defaultTimelineContent, TimelineContentModel, TimelineContentModelType } from "../models/timeline-content";
 import { TimelineComponent } from "./timeline-tile";
 
 // The timeline tile needs to be registered so the TileModel.create
@@ -399,6 +399,71 @@ describe("TimelineComponent", () => {
       const { fullTimeline } = renderInTile("other-tile");
       fireEvent.pointerDown(fullTimeline);
       expect([...stores.ui.selectedTileIds]).toEqual([model.id]);
+    });
+  });
+
+  // One model in an editable and a read-only pane, as My Work shows a student's own document
+  // beside the workspace.
+  describe("Event Key in two panes", () => {
+    beforeEach(() => {
+      const dataSet = DataSet.create();
+      ["windowStart", "windowEnd", "eventType"].forEach(name => addAttributeToDataSet(dataSet, { name }));
+      addCasesToDataSet(dataSet, ["Earthquake", "Noise", "Earthquake"].map((eventType, i) => ({
+        windowStart: `2026-02-0${i + 1}T00:00:00.000Z`, windowEnd: `2026-02-0${i + 1}T01:00:00.000Z`, eventType
+      })));
+      const sharedDataSet = SharedDataSet.create({ dataSet });
+      const sharedSeismogram = {
+        startTime: DateTime.fromISO("2026-02-01T00:00:00.000Z"), endTime: DateTime.fromISO("2026-02-05T00:00:00.000Z")
+      };
+      mockedGetSharedModelManager.mockReturnValue({
+        isReady: true,
+        getTileSharedModelsByType: (_self: any, type: any) =>
+          type === SharedDataSet ? [sharedDataSet] : type === SharedSeismogram ? [sharedSeismogram] : []
+      } as any);
+    });
+
+    afterEach(() => mockedGetSharedModelManager.mockReset());
+
+    function renderTwoPanes() {
+      const paneContent = TimelineContentModel.create();
+      const paneModel = TileModel.create({ content: paneContent });
+      render(
+        <ModalProvider>
+          <Provider stores={stores}>
+            <TileModelContext.Provider value={paneModel}>
+              <div data-testid="workspace"><TimelineComponent {...defaultProps} model={paneModel} /></div>
+              <div data-testid="my-work"><TimelineComponent {...defaultProps} model={paneModel} readOnly /></div>
+            </TileModelContext.Provider>
+          </Provider>
+        </ModalProvider>
+      );
+      const inPane = (pane: string) => within(screen.getByTestId(pane));
+      return { paneContent, inPane };
+    }
+
+    it("keeps a reader's filtering out of the document and the editable pane", () => {
+      const { paneContent, inPane } = renderTwoPanes();
+      fireEvent.click(inPane("my-work").getByRole("checkbox", { name: "Noise" }));
+
+      expect(inPane("my-work").getByRole("checkbox", { name: "Noise" })).not.toBeChecked();
+      expect(inPane("workspace").getByRole("checkbox", { name: "Noise" })).toBeChecked();
+      expect(paneContent.hiddenEventTypes.slice()).toEqual([]);
+    });
+
+    it("saves a type switched off in the editable pane", () => {
+      const { paneContent, inPane } = renderTwoPanes();
+      fireEvent.click(inPane("workspace").getByRole("checkbox", { name: "Noise" }));
+
+      expect(inPane("workspace").getByRole("checkbox", { name: "Noise" })).not.toBeChecked();
+      expect(paneContent.hiddenEventTypes.slice()).toEqual(["Noise"]);
+    });
+
+    it("steps Next over the types the reader's pane has switched off", () => {
+      const { paneContent, inPane } = renderTwoPanes();
+      fireEvent.click(inPane("my-work").getByRole("checkbox", { name: "Noise" }));
+      fireEvent.click(inPane("my-work").getByRole("button", { name: "Next" }));
+
+      expect(paneContent.selectedEventIndex).toBe(2);
     });
   });
 });
