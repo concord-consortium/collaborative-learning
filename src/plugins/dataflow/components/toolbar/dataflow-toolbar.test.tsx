@@ -706,12 +706,13 @@ describe("Dataflow reset button", () => {
     expect(screen.getByRole("button", { name: "Reset program" })).toBeInTheDocument();
   });
 
-  it("reset is disabled with no rete manager, and with a read-only manager (a read-only view or Done-mode playback)", () => {
+  it("reset is disabled with no rete manager and with a read-only one", () => {
     const first = renderToolbarButton("reset", { manager: null });
     expect(isDisabled(screen.getByRole("button", { name: "Reset program" }))).toBe(true);
     fireEvent.click(screen.getByRole("button", { name: "Reset program" }));
     first.unmount();
 
+    // A read-only manager is what a read-only view and Done-mode playback both use.
     const content = DataflowContentModel.create();
     const readOnlyManager = { ...makeManagerStub(content), readOnly: true };
     renderToolbarButton("reset", { content, manager: readOnlyManager });
