@@ -20,10 +20,10 @@ import { ObjectBoundingBox } from "../../../models/annotations/clue-object";
 import { recordCase } from "../model/utilities/recording-utilities";
 import { DataflowDropZone } from "./ui/dataflow-drop-zone";
 import { ReteManager } from "../rete/rete-manager";
-import { SpikerbitDevice } from "../../../models/stores/spikerbit-device";
-import { createSpikerbitConnection, makeSpikerbitFlashDataSource } from "../../../models/stores/spikerbit-connection";
-import { WebSerialTransport } from "../../../models/stores/web-serial-transport";
-import spikerbitHex from "../firmware/spikerbit-clue.hex";
+import { DeviceChoice, getDeviceConnection } from "../model/device-connection";
+import {
+  connectDeviceForTile, disconnectDeviceForTile, reconnectDeviceForTile
+} from "../utilities/device-actions";
 
 import "./dataflow-program.scss";
 
@@ -78,7 +78,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   private playbackReteManager: ReteManager | undefined;
   private programContainerEl: HTMLElement | null = null;
   private updateObservable = observable({updateCount: 0});
-  private spikerbitDevice: SpikerbitDevice | undefined;
+  private disposeChannelSource: (() => void) | undefined;
 
   constructor(props: IProps) {
     super(props);
@@ -96,6 +96,28 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   private get tileId() {
     return this.props.tileId || "";
   }
+
+  private get deviceConnection() {
+    return getDeviceConnection(this.stores.serialDevice);
+  }
+
+  private handleConnectDevice = (choice: DeviceChoice) => {
+    connectDeviceForTile({
+      connection: this.deviceConnection, content: this.props.tileContent, tileId: this.tileId, choice
+    });
+  };
+
+  private handleReconnectDevice = () => {
+    reconnectDeviceForTile({
+      connection: this.deviceConnection, content: this.props.tileContent, tileId: this.tileId
+    });
+  };
+
+  private handleDisconnectDevice = () => {
+    disconnectDeviceForTile({
+      connection: this.deviceConnection, content: this.props.tileContent, tileId: this.tileId
+    });
+  };
 
   public render() {
     const { tileContent, programDataRate } = this.props;
@@ -120,8 +142,10 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
         }}
       >
         <DataflowProgramTopbar
-          onConnectDevice={(deviceType) =>
-            deviceType === "spikerbit" ? this.connectSpikerbit() : this.serialDeviceRefresh()}
+          onConnectDevice={this.handleConnectDevice}
+          onReconnectDevice={this.handleReconnectDevice}
+          onDisconnectDevice={this.handleDisconnectDevice}
+          connection={this.deviceConnection}
           programDataRates={ProgramDataRates}
           dataRate={programDataRate}
           onRateSelectClick={this.handleRateSelectClick}
@@ -256,9 +280,17 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     this.props.onProgramApiRef?.({ getObjectBoundingBox: this.getObjectBoundingBox });
 
     document.addEventListener("keydown", this.handleConnectingKeyDown, true);
+
+    if (!this.props.readOnly) {
+      this.disposeChannelSource = this.stores.serialDevice.registerChannelSource(
+        () => this.props.tileContent.channels
+      );
+    }
   }
 
   public componentWillUnmount() {
+    this.disposeChannelSource?.();
+    this.disposeChannelSource = undefined;
     document.removeEventListener("keydown", this.handleConnectingKeyDown, true);
     clearInterval(this.intervalHandle);
     this.reteManager?.dispose();
@@ -436,32 +468,6 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
 
   private addNode = (nodeType: string, position?: [number, number]) => {
     this.reteManager?.createAndAddNode(nodeType, position);
-  };
-
-  private serialDeviceRefresh = async () => {
-    if (this.stores.serialDevice.isConnected()) return;
-    const transport = new WebSerialTransport();
-    const opened = await transport.open();
-    const deviceFamily = transport.deviceFamily;
-    if (!opened || !deviceFamily) return;
-    this.stores.serialDevice.setActiveDevice(
-      deviceFamily, transport, this.props.tileContent.channels);
-    this.stores.serialDevice.setRaisesWebSerialConnect(transport.raisesWebSerialConnect);
-    transport.startReading();
-  };
-
-  private connectSpikerbit = async () => {
-    if (this.stores.serialDevice.isConnected()) return;
-    try {
-      const connection = createSpikerbitConnection();
-      this.spikerbitDevice = new SpikerbitDevice(this.stores.serialDevice, connection);
-      await this.spikerbitDevice.connectAndStream(
-        this.props.tileContent.channels,
-        makeSpikerbitFlashDataSource(spikerbitHex)
-      );
-    } catch (e) {
-      console.error("Spiker:bit connection failed", e);
-    }
   };
 
   private clearProgram = () => {

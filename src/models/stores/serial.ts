@@ -1,3 +1,4 @@
+import { action, makeObservable, observable } from "mobx";
 import { NodeChannelInfo } from "src/plugins/dataflow/model/utilities/channel";
 import { NodeLiveOutputTypes } from "../../plugins/dataflow/model/utilities/node";
 import { parseKeyValueData } from "./serial-protocol";
@@ -13,13 +14,13 @@ export class SerialDevice {
   localBuffer: string;
   connectChangeStamp: number | null;
   lastConnectMessage: string | null;
-  serialNodesCount: number;
   serialModalShown: boolean | null;
   deviceFamily: string | undefined;
   // The active write transport (Web Serial or WebUSB). writeLine routes here.
   activeTransport: IDeviceTransport | undefined;
-  // The connecting tile's channels, recorded at connect so inbound data can be parsed.
-  channels: NodeChannelInfo[] = [];
+  // Functions that each return the channels of one tile. Inbound data is delivered to the
+  // channels of every registered source.
+  private channelSources = new Set<() => NodeChannelInfo[]>();
   /**
    * True when we think the connected Web Serial board will raise the browser
    * connect/disconnect events. It drives connect-button physical-connection UI. Only ever set
@@ -29,10 +30,22 @@ export class SerialDevice {
 
   constructor() {
     this.localBuffer = "";
+    makeObservable(this, {
+      activeTransport: observable.ref,
+      deviceFamily: observable,
+      setActiveDevice: action,
+      clearActiveDevice: action
+    });
   }
 
-  public setSerialNodesCount(n: number){
-    this.serialNodesCount = n;
+  // Registers a tile's channels to receive inbound data. Returns a disposer.
+  public registerChannelSource(getChannels: () => NodeChannelInfo[]): () => void {
+    this.channelSources.add(getChannels);
+    return () => { this.channelSources.delete(getChannels); };
+  }
+
+  private get allChannels(): NodeChannelInfo[] {
+    return Array.from(this.channelSources).flatMap(getChannels => getChannels());
   }
 
   // TODO, revise this so it is more clear how its used
@@ -52,13 +65,12 @@ export class SerialDevice {
 
   // Called by a transport (Web Serial or WebUSB) to become the active write path, receive
   // inbound data centrally, and mark the store connected.
-  public setActiveDevice(deviceFamily: string, transport: IDeviceTransport, channels: NodeChannelInfo[]){
+  public setActiveDevice(deviceFamily: string, transport: IDeviceTransport){
     // Start each session with an empty parse buffer so a partial line left by a prior
     // connection can't combine with new data into a spurious message.
     this.localBuffer = "";
     this.activeTransport = transport;
     this.deviceFamily = deviceFamily;
-    this.channels = channels;
     transport.onData = (chunk: string) => { if (this.activeTransport === transport) this.receive(chunk); };
     transport.onDisconnect = () => { if (this.activeTransport === transport) this.clearActiveDevice(); };
     this.updateConnectionInfo(Date.now(), "connect");
@@ -75,11 +87,11 @@ export class SerialDevice {
   }
 
   // Central inbound router: dispatch a serial chunk to the parser for the connected
-  // device's protocol, using the recorded channels.
+  // device's protocol, using the channels of every registered source.
   public receive(chunk: string){
     const protocol = deviceProtocol(this.deviceFamily);
-    if (protocol === "keyValue") this.handleKeyValueStreamObj(chunk, this.channels);
-    if (protocol === "radioHub") this.handleRadioHubStreamObj(chunk, this.channels);
+    if (protocol === "keyValue") this.handleKeyValueStreamObj(chunk, this.allChannels);
+    if (protocol === "radioHub") this.handleRadioHubStreamObj(chunk, this.allChannels);
   }
 
   public handleRadioHubStreamObj(value: string, channels: Array<NodeChannelInfo>){
@@ -99,23 +111,23 @@ export class SerialDevice {
       this.localBuffer = this.localBuffer.substring(match.index + fullMatch.length);
 
       const targetChannelId = `${element}-${microbitId}`;
-      const targetChannel = channels.find((c: NodeChannelInfo) => {
-        return c.channelId === targetChannelId;
-      });
+      const targetChannels = channels.filter((c: NodeChannelInfo) => c.channelId === targetChannelId);
 
-      if (targetChannel && signalType === "s" ){
-        if (["h", "t"].includes(element)){
-          // handle message from a humidity or temperature sensor
-          if (isFinite(Number(reading))){
-            targetChannel.value = Number(reading);
+      if (signalType === "s" ){
+        targetChannels.forEach(targetChannel => {
+          if (["h", "t"].includes(element)){
+            // handle message from a humidity or temperature sensor
+            if (isFinite(Number(reading))){
+              targetChannel.value = Number(reading);
+            }
+            targetChannel.lastMessageReceivedAt = Date.now();
           }
-          targetChannel.lastMessageReceivedAt = Date.now();
-        }
-        if (["r"].includes(element)){
-          // handle message about relays state
-          targetChannel.relaysState = reading.split('').map(s => Number(s));
-          targetChannel.lastMessageReceivedAt = Date.now();
-        }
+          if (["r"].includes(element)){
+            // handle message about relays state
+            targetChannel.relaysState = reading.split('').map(s => Number(s));
+            targetChannel.lastMessageReceivedAt = Date.now();
+          }
+        });
       }
     } while (match);
   }
