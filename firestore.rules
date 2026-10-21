@@ -822,6 +822,12 @@ service cloud.firestore {
       }
     }
 
+    // The researcher dashboard's per-learner activity documents, written only by functions-v2's
+    // onHistoryEntryCreated with the Admin SDK. A researcher of the class may read them.
+    match /researcher_dashboard/{portal}/activity/{classHash}/users/{uid} {
+      allow get, list: if isAuthedResearcher() && request.auth.token.class_hash == classHash;
+    }
+
     //
     // non-portal-authenticated/dev/demo/qa/test rules
     //
