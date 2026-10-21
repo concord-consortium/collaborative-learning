@@ -24,8 +24,9 @@ async function openProgram(
   nodes.forEach(node => content.program.addNode(node));
   const stores = specStores();
   const alert = jest.spyOn(stores.ui, "alert").mockImplementation(() => undefined);
-  const connected = options.connected ?? false;
-  jest.spyOn(stores.serialDevice, "isConnected").mockImplementation(() => connected);
+  if (options.connected) {
+    stores.serialDevice.setActiveDevice("arduino", { write: jest.fn(), close: jest.fn() });
+  }
   const manager = new ReteManager(
     content.program, "tile1", document.createElement("div"), content, stores,
     options.readOnly, false
@@ -79,8 +80,8 @@ describe("ReteManager needs-a-device alert", () => {
     managers.push(manager);
     expect(alert).not.toHaveBeenCalled();
 
-    jest.spyOn(stores.serialDevice, "isConnected").mockImplementation(() => false);
-    manager.updateNeedsDevice();
+    stores.serialDevice.clearActiveDevice();
+    await Promise.resolve();
     expect(content.needsDevice).toBe(true);
     expect(alert).not.toHaveBeenCalled();
   });
