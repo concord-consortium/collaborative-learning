@@ -10,6 +10,9 @@ import { registerTileContentInfo } from "../../models/tiles/tile-content-info";
 import { specStores } from "../../models/stores/spec-stores";
 import { getToolbarButtonInfo } from "../../components/toolbar/toolbar-button-manager";
 import { getSharedModelManager } from "../../models/tiles/tile-environment";
+import { kAnnounceDelayMs } from "../../hooks/use-live-announcer";
+import { kTileClass, tileDomAttributes } from "../../components/tiles/tile-dom";
+import { kMarkerStemTestId } from "./components/time-marker-overlay";
 import { TimelineContentModel, TimelineContentModelType, defaultTimelineContent } from "./models/timeline-content";
 import { kTimelineTileType } from "./timeline-types";
 import { SharedSeismogram } from "../shared-seismogram/shared-seismogram";
@@ -52,7 +55,7 @@ function renderToolbarButton(content: TimelineContentModelType) {
   const stores = specStores();
   const model = TileModel.create({ content });
 
-  return render(
+  const result = render(
     <ModalProvider>
       <Provider stores={stores}>
         <TileModelContext.Provider value={model}>
@@ -61,6 +64,7 @@ function renderToolbarButton(content: TimelineContentModelType) {
       </Provider>
     </ModalProvider>
   );
+  return { ...result, model };
 }
 
 describe("Timeline toolbar — Add Time Marker button", () => {
@@ -85,6 +89,24 @@ describe("Timeline toolbar — Add Time Marker button", () => {
     expect(content.isPlacingMarker).toBe(true);
   });
 
+  it("announces placement mode from a live region beside the button, not inside it", () => {
+    jest.useFakeTimers();
+    try {
+      withSharedSeismogram(dataStart, dataEnd);
+      const content = TimelineContentModel.create();
+      const { container } = renderToolbarButton(content);
+
+      clickButton();
+      act(() => { jest.advanceTimersByTime(kAnnounceDelayMs); });
+
+      const region = container.querySelector("[aria-live='polite']");
+      expect(region).toHaveTextContent("Click the graph to place the time marker");
+      expect(region!.closest("button")).toBeNull();
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
   // aria-pressed says this is a toggle, so it has to behave like one: Escape was otherwise the
   // only way out of placement mode, and nothing tells the student that.
   it("turns placement mode back off when clicked again", () => {
@@ -96,6 +118,20 @@ describe("Timeline toolbar — Add Time Marker button", () => {
     clickButton();
 
     expect(content.isPlacingMarker).toBe(false);
+  });
+
+  // A click leaves focus on the button, so the second press may well come from the keyboard.
+  it("turns placement mode off when pressed from the keyboard after a click", () => {
+    withSharedSeismogram(dataStart, dataEnd);
+    const content = TimelineContentModel.create();
+    content.setViewRange(dataStart, dataEnd);
+    renderToolbarButton(content);
+
+    clickButton();
+    fireEvent.click(screen.getByRole("button", { name: "Add Time Marker" }), { detail: 0 });
+
+    expect(content.isPlacingMarker).toBe(false);
+    expect(content.markerTime).toBeUndefined();
   });
 
   it("reports whether placement mode is on", () => {
@@ -121,6 +157,35 @@ describe("Timeline toolbar — Add Time Marker button", () => {
 
     expect(content.isPlacingMarker).toBe(false);
     expect(content.timeToViewPct(content.markerTime!)).toBeCloseTo(50);
+  });
+
+  // The marker's own overlay isn't rendered here, so these stand in for two rendered copies of the
+  // tile: a read-only one first, as a My Work copy of the open document is, then the editable one.
+  it("hands focus to the editable copy's stem after placing from the keyboard", () => {
+    jest.useFakeTimers();
+    try {
+      withSharedSeismogram(dataStart, dataEnd);
+      const content = TimelineContentModel.create();
+      content.setViewRange(dataStart, dataEnd);
+      const { model } = renderToolbarButton(content);
+      render(
+        <>
+          <div className={kTileClass} {...tileDomAttributes(model.id)}>
+            <div data-testid={kMarkerStemTestId} />
+          </div>
+          <div className={kTileClass} {...tileDomAttributes(model.id)}>
+            <div data-testid={kMarkerStemTestId} tabIndex={0} />
+          </div>
+        </>
+      );
+
+      fireEvent.click(screen.getByRole("button", { name: "Add Time Marker" }), { detail: 0 });
+      act(() => { jest.runOnlyPendingTimers(); });
+
+      expect(screen.getAllByTestId(kMarkerStemTestId)[1]).toHaveFocus();
+    } finally {
+      jest.useRealTimers();
+    }
   });
 
   it("announces why it is disabled rather than the generic message", () => {

@@ -7,7 +7,7 @@ import {
 } from "../../components/toolbar/toolbar-button-manager";
 import { useLiveAnnouncer } from "../../hooks/use-live-announcer";
 import { useTileModelContext } from "../../components/tiles/hooks/use-tile-model-context";
-import { getTileNode } from "../../components/tiles/tile-dom";
+import { tileSelector } from "../../components/tiles/tile-dom";
 import { useTimelineContent } from "./hooks/use-timeline-content";
 import { formatTime } from "./components/describe-view";
 import { kMarkerStemTestId } from "./components/time-marker-overlay";
@@ -107,21 +107,22 @@ const AddMarkerButton = observer(function AddMarkerButton({ name }: IToolbarButt
     if (!time) return;
     content.setMarkerTime(time);
     announce(`Marker placed at ${formatTime(time)}.`);
-    const tileNode = tile?.id ? getTileNode(document, tile.id) : undefined;
-    // The marker mounts in the render this write causes, so wait for it.
-    requestAnimationFrame(() =>
-      tileNode?.querySelector<HTMLElement>(`[data-testid="${kMarkerStemTestId}"]`)?.focus());
+    if (!tile?.id) return;
+    // The marker mounts in the render this write causes, so wait for it. Read-only copies of the
+    // same document carry the same tile id, so pick the stem that can take focus.
+    requestAnimationFrame(() => document.querySelector<HTMLElement>(
+      `${tileSelector(tile.id)} [data-testid="${kMarkerStemTestId}"][tabindex]`)?.focus());
   };
 
   const handleClick = (e: React.MouseEvent) => {
-    // A button activated from the keyboard reports detail 0; a real click reports 1 or more.
-    if (e.detail === 0) {
-      placeFromKeyboard();
-    // aria-pressed says this is a toggle, so pressing it again has to turn placement off. Escape
-    // was otherwise the only way out, and nothing says so.
-    } else if (content?.isPlacingMarker) {
+    // aria-pressed says this is a toggle, so pressing it again turns placement off, however it is
+    // pressed.
+    if (content?.isPlacingMarker) {
       content.stopPlacingMarker();
       announce("Marker placement cancelled.");
+    // A button activated from the keyboard reports detail 0; a real click reports 1 or more.
+    } else if (e.detail === 0) {
+      placeFromKeyboard();
     } else {
       content?.startPlacingMarker();
       announce("Click the graph to place the time marker, or press Escape to cancel.");
@@ -139,9 +140,11 @@ const AddMarkerButton = observer(function AddMarkerButton({ name }: IToolbarButt
       disabled={!!content?.isMarkerInData || !content?.dataStartTime}
       disabledMessage={content?.isMarkerInData
                         ? "Delete the existing marker first" : "No data loaded"}
+      // A button's contents are presentational to assistive technology, so the live region goes
+      // beside it rather than inside it.
+      extraContent={<div ref={announcerRef} className="visually-hidden" aria-live="polite" />}
     >
       <AddMarkerIcon/>
-      <div ref={announcerRef} className="visually-hidden" aria-live="polite" />
     </TileToolbarButton>
   );
 });
