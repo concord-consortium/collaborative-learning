@@ -97,7 +97,8 @@ service cloud.firestore {
     // afterwards (scripts/backfill-group-document-axes.ts) runs as a service account, past these rules.
     // `concurrent` is an authorization input for the history rule below (isConcurrentClassDocument), so a
     // client able to change it could grant the whole class history access to a document or strip it from a
-    // shared one. It is settable only at creation, where concurrentCreateOk limits it to synthetic owners.
+    // shared one. It is settable only at creation, where concurrentCreateOk allows any value but `false` only
+    // on a class- or group-owned document.
     function preservesReadOnlyDocumentFields() {
       let readOnlyFieldsSet =
         ["uid", "type", "key", "createdAt", "context_id", "axisProfile", "concurrent"].toSet();
@@ -211,7 +212,7 @@ service cloud.firestore {
       }
 
       // Only a document nobody owns in particular may be created class-shared. `type` is deliberately not
-      // tested here: the transitional type value is on its way out, while the owner is the durable fact.
+      // tested here: the owner is what makes a document shareable, and it can't change after creation.
       // After creation `concurrent` is read-only (preservesReadOnlyDocumentFields).
       function concurrentCreateOk() {
         return request.resource.data.get("concurrent", false) == false
