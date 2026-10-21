@@ -19,13 +19,26 @@ interface IProps {
   onSubmit: () => void;
 }
 
+/**
+ * The columns the dialog offers. A column whose formula is hidden has no expression for the student
+ * to see or change, so it is left out, both from the choices and as the default target.
+ */
+export const expressionTargets = (dataSet: IDataSet) =>
+  dataSet.attributes.filter(attr => !attr.formulaHidden);
+
+/**
+ * The column the dialog starts on: the first one it offers after the table's first column, or the
+ * first one it offers at all when there is no such column. Starting on nothing would leave the
+ * picker showing a column that Clear and OK don't act on.
+ */
+export const defaultExpressionTarget = (dataSet: IDataSet) => {
+  const targets = expressionTargets(dataSet);
+  return targets.find(target => target !== dataSet.attributes[0]) ?? targets[0];
+};
+
 type IResult = [() => void, () => void, (id: string) => void];
 export const useFormulaModal = ({ dataSet, onSubmit, table }: IProps) : IResult => {
-  const [currYAttrId, _setCurrYAttrId] = useState<Maybe<string>>(() => {
-    // If the dataSet has a second attribute, use that by default
-    const yAttr = dataSet.attributes[1];
-    return yAttr ? yAttr.id : undefined;
-  });
+  const [currYAttrId, _setCurrYAttrId] = useState<Maybe<string>>(() => defaultExpressionTarget(dataSet)?.id);
 
   const getAttribute = (id: string) => {
     const _attr = dataSet.attrFromID(id);
@@ -134,7 +147,7 @@ const Content: React.FC<IContentProps> = ({
           onChange={e => {
             setCurrYAttrId(e.target.value);
           }}>
-          {dataSet.attributes
+          {expressionTargets(dataSet)
             .map(attr => <option key={attr.id} value={attr.id}>{attr.name}</option>)}
         </select>
         { " " }:
