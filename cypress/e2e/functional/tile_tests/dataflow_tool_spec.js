@@ -457,7 +457,7 @@ context('Dataflow Tool Tile', function () {
     dataflowToolTile.getDropdown(liveOutputNode, liveOutputType).click();
     dataflowToolTile.getDropdownOptions(liveOutputNode, liveOutputType).eq(0).click();
 
-    cy.log("can connect and trigger modal connection warning");
+    cy.log("wiring a block to a Live Output asks for a device without an alert");
     dataflowToolTile.getCreateNodeButton("number").click();
     dataflowToolTile.getNode("number").should("exist");
     dataflowToolTile.getNumberField().type("1{enter}");
@@ -465,7 +465,10 @@ context('Dataflow Tool Tile', function () {
     dataflowToolTile.getNumberNodeOutput().click();
     dataflowToolTile.getLiveOutputNodeInput().click();
 
-    dataflowToolTile.getModalOkButton().click();
+    // The alert shows only when a program opens, never after an edit; the connect button marks the
+    // need instead.
+    cy.get(".dialog-contents").should("not.exist");
+    cy.get(".primary-workspace [data-testid='serial-icon']").should("have.class", "nodes-in-need");
 
     cy.log("should show needs connection message when fan is selected and there are no outputs");
     dataflowToolTile.getDropdown(liveOutputNode, liveOutputType).click();

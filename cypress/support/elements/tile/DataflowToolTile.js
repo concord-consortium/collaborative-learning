@@ -91,9 +91,6 @@ class DataflowToolTile {
   getLiveOutputNodeInput() {
     return cy.get(".primary-workspace .flow-tool .node.live-output .input-socket");
   }
-  getModalOkButton() {
-    return cy.get('.dialog-contents #okButton');
-  }
   //Generator
   getAmplitudeField() {
     return cy.get(`${getNodeText("generator")} [title='Set Amplitude']`);
