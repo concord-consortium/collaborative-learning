@@ -148,6 +148,9 @@ directions: the new client against the deployed part, and the *released* client 
 part. Decisions come from the PR authors and the developer. An index deploy prompts before deleting
 extra indexes, so never pass `--force`.
 
+A part whose strictest timing is `before` doesn't need to wait for release day. Deploy it while the
+release is being prepared, so that only `with` and `after` parts go out at release time.
+
 Also record the deploy **order**. The default is indexes (wait until they show Enabled), then
 rules, then functions, then the client, and a part marked `after` deploys only once Release
 Production has succeeded. Read each touching PR for its own order (a PR can ask for one function
