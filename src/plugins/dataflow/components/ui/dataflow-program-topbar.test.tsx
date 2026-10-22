@@ -4,20 +4,16 @@ import { Provider } from "mobx-react";
 import { ModalProvider } from "react-modal-hook";
 
 import { specStores } from "../../../../models/stores/spec-stores";
-import { specAppConfig } from "../../../../models/stores/spec-app-config";
 import { ReadOnlyContext } from "../../../../components/document/read-only-context";
 import { DataflowContentModel } from "../../model/dataflow-content";
 import { ProgramDataRates } from "../../model/utilities/node";
 import { ProgramMode } from "../types/dataflow-tile-types";
-import { getDeviceConnection } from "../../model/device-connection";
 import { DataflowProgramTopbar } from "./dataflow-program-topbar";
 
 import "../../dataflow-registration";
 
-function renderTopbar(readOnly: boolean, tools?: string[]) {
-  const stores = specStores(
-    tools ? { appConfig: specAppConfig({ config: { settings: { dataflow: { tools } } } }) } : undefined
-  );
+function renderTopbar(readOnly: boolean) {
+  const stores = specStores();
   return render(
     <ModalProvider>
       <Provider stores={stores}>
@@ -26,13 +22,8 @@ function renderTopbar(readOnly: boolean, tools?: string[]) {
             programDataRates={ProgramDataRates}
             dataRate={ProgramDataRates[0].val}
             onRateSelectClick={jest.fn()}
-            onConnectDevice={jest.fn()}
-            onReconnectDevice={jest.fn()}
-            onDisconnectDevice={jest.fn()}
-            connection={getDeviceConnection(stores.serialDevice)}
             showRateUI={false}
             lastIntervalDuration={0}
-            serialDevice={stores.serialDevice}
             handleChangeOfProgramMode={jest.fn()}
             programMode={ProgramMode.Ready}
             playBackIndex={0}
@@ -53,25 +44,11 @@ describe("DataflowProgramTopbar read-only state", () => {
     renderTopbar(true);
     expect(screen.getByTestId("record-data-button")).toBeDisabled();
     expect(screen.getByTestId("rate-select")).toBeDisabled();
-    expect(screen.getByTitle("Connect a device")).toBeDisabled();
   });
 
   it("leaves its controls enabled when the document is editable", () => {
     renderTopbar(false);
     expect(screen.getByTestId("record-data-button")).toBeEnabled();
     expect(screen.getByTestId("rate-select")).toBeEnabled();
-    expect(screen.getByTitle("Connect a device")).toBeEnabled();
-  });
-});
-
-describe("DataflowProgramTopbar connect button", () => {
-  it("is hidden when the tile toolbar has the connect button", () => {
-    renderTopbar(false, ["pan", "|", "connect", "reset"]);
-    expect(screen.queryByTitle("Connect a device")).toBeNull();
-  });
-
-  it("stays when the unit's tools list leaves out connect", () => {
-    renderTopbar(false, ["pan"]);
-    expect(screen.getByTitle("Connect a device")).toBeInTheDocument();
   });
 });

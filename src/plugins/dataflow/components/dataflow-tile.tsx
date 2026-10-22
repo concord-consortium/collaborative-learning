@@ -21,7 +21,6 @@ import { ITileApi } from "../../../components/tiles/tile-api";
 import { getDeviceConnection } from "../model/device-connection";
 import { acknowledgeConnectTutorial, DataflowConnectTutorialGate } from "./ui/dataflow-connect-tutorial";
 import { getDataflowFocusSlots } from "./dataflow-focus-slots";
-import { toolbarShowsConnect } from "../utilities/connect-button-state";
 
 import "../dataflow-toolbar-registration";
 import "./dataflow-tile.scss";
@@ -170,7 +169,6 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
           connection={getDeviceConnection(this.stores.serialDevice)}
           tileId={model.id}
           readOnly={readOnly}
-          connectInToolbar={toolbarShowsConnect(this.stores.appConfig.getSetting("tools", "dataflow"))}
           onDismiss={this.handleDismissConnectTutorial}
         />
         {!readOnly && (

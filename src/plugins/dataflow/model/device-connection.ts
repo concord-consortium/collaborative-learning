@@ -164,7 +164,6 @@ export class DeviceConnection {
       return "failed";
     }
     this.serialDevice.setActiveDevice(deviceFamily, transport);
-    this.serialDevice.setRaisesWebSerialConnect(transport.raisesWebSerialConnect);
     transport.startReading();
     return "connected";
   }
