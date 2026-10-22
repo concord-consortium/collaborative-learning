@@ -822,10 +822,34 @@ service cloud.firestore {
       }
     }
 
-    // The researcher dashboard's per-learner activity documents, written only by functions-v2's
-    // onHistoryEntryCreated with the Admin SDK. A researcher of the class may read them.
+    // The researcher dashboard's per-learner activity documents. The CLUE app writes the launched
+    // learner's own document after each saved change, at most every 5 seconds. A researcher of the
+    // class may read them.
     match /researcher_dashboard/{portal}/activity/{classHash}/users/{uid} {
+      // Same label comparison report-service uses for its activity documents.
+      function tokenPortalIs() {
+        return request.auth.token.platform_id.split('://')[1].split('/')[0].split('\\.') == portal.split('_');
+      }
+      function isOwnLearnerWrite() {
+        return hasRole("learner") && hasUserId()
+          && string(request.auth.token.platform_user_id) == uid
+          && request.auth.token.class_hash == classHash
+          && tokenPortalIs();
+      }
+      function isValidActivity() {
+        let d = request.resource.data;
+        let before = resource == null ? {} : resource.data;
+        let offering = string(request.auth.token.offering_id);
+        let keys = d.get("changed", {}).diff(before.get("changed", {})).affectedKeys();
+        return d.keys().hasOnly(["lastActivityAt", "writeCount", "changed"])
+          && d.lastActivityAt == request.time
+          && d.writeCount == before.get("writeCount", 0) + 1
+          && keys.hasOnly([offering])
+          && (!(offering in keys) || d.changed[offering] == request.time)
+          && (resource == null || request.time >= before.lastActivityAt + duration.value(5, "s"));
+      }
       allow get, list: if isAuthedResearcher() && request.auth.token.class_hash == classHash;
+      allow create, update: if isOwnLearnerWrite() && isValidActivity();
     }
 
     //
