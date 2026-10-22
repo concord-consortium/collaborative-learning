@@ -73,20 +73,17 @@ cy.get(`... .toolbar-button.${buttonName}`).should('have.length', 1)
 That breaks the *table* half of the existing spec as well as the graph half, and Timeline — which
 already ships three `data-set-view` buttons — has the same latent problem.
 
-`TileToolbarButton` cannot fix this itself: it never sees the args. So it gains an optional
-`extraClass`, and `DataSetViewButton`, which does know its tile type, passes
-`` `${name}-${newTileType}` ``. A button then carries both classes:
+The buttons already differ in a way that needs no new markup: their accessible names, "Table It!"
+and "Graph It!", which `DataSetViewButton` builds from the tile type. So the test addresses them by
+`aria-label` rather than by a class:
 
+```js
+clueCanvas.clickToolbarButtonLabelled("dataflow", "data-set-view", "Graph It!");
 ```
-toolbar-button  data-set-view  data-set-view-Graph
-```
 
-Existing selectors matching `.data-set-view` keep working — `TableToolTile.js` and
-`shared_dataset_spec.js` both rely on that — and each button becomes individually addressable. No
-stylesheet keys on these classes, so nothing visual moves.
-
-`DataSetLinkButton` is deliberately left alone: nothing needs to address it individually today, and
-it is no longer on any default toolbar.
+`cCanvas` gains that one helper beside `clickToolbarButton`, matching the label as well as the
+button class. `TileToolbarButton` and `DataSetViewButton` are untouched, no class is invented for
+the tests to key on, and the spec finds the button the way a student or a screen reader would.
 
 ## Documentation
 
@@ -97,8 +94,8 @@ setting it describes.
 
 ## Testing
 
-The Dataflow specs address the two export buttons by their qualified classes, `data-set-view-Table`
-and `data-set-view-Graph`, so each click names the button it means.
+The Dataflow specs address the two export buttons by their accessible names, "Table It!" and
+"Graph It!", through `clickToolbarButtonLabelled`, so each click names the button it means.
 
 `cypress/e2e/functional/tile_tests/dataflow_table_graph_integration_test_spec.js` drives the whole
 dialog flow from the toolbar: create through "New Graph", unlink through "Clear It!", then relink to
@@ -112,11 +109,11 @@ rewritten rather than repointed — to the flow a student will actually have:
   button opened the graph.
 - Unlink from the graph's own legend button, keeping the assertions that the layer name and the dot
   go away.
-- Drop the relink-to-existing step, because that path is no longer in the default toolbar.
-
-That removes Dataflow's coverage of the link dialog. The dialog itself stays covered through the
-Table tile, whose `link-graph` button drives the same machinery in `table_tool_spec.js`, so it is
-not left untested.
+- Keep the relink-and-unlink pass through the `data-set-link` dialog, which units may still
+  configure. It needs a unit whose Dataflow toolbar has that button, so the step revisits
+  `/editor/` with `qa-moth-plot`: the route restores the document from sessionStorage whatever the
+  unit, so the program and the unlinked graph come back under that unit's toolbar, which is also
+  the state "Clear It!" needs.
 
 The table half of the same spec is untouched: it already clicks `data-set-view`, which does not
 change.

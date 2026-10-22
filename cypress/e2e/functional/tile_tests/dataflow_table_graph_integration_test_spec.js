@@ -85,22 +85,26 @@ context('Dataflow Tool Tile', function () {
     docEditor.hideReadOnlyPanes();
 
     // The restore has to finish, and the tile has to be selected, before its toolbar exists.
+    // Selecting by the tile rather than its title: after the revisit the document holds both the
+    // program and Graph 1, so the title selector matches two elements.
     dataflowToolTile.getDataflowTile().should("exist");
-    dataflowToolTile.getDataflowTileTitle().click();
+    dataflowToolTile.getDataflowTile().click();
 
+    // Relink to existing tile
     clueCanvas.clickToolbarButton("dataflow", "data-set-link");
     tableTile.getLinkGraphModalTileMenu().select(graphTitle);
-    tableTile.getLinkGraphModalLinkButton()
-      .should("contain.text", "Graph It!")
-      .click({force: true});
+    tableTile.getLinkGraphModalLinkButton().should("contain.text", "Graph It!").click({force: true});
+    graphTile.getTile().should("exist").contains(graphTitle);
     graphTile.getLayerName().should("contain.text", programTitle);
+    graphTile.getXAttributesLabel().should("contain.text", linkedTableAttributes[0]);
+    graphTile.getYAttributesLabel().should("contain.text", linkedTableAttributes[1]);
     graphTile.getGraphDot().should("exist");
 
+    // Unlink
     clueCanvas.clickToolbarButton("dataflow", "data-set-link");
     tableTile.getLinkGraphModalTileMenu().select(graphTitle);
-    tableTile.getLinkGraphModalLinkButton()
-      .should("contain.text", "Clear It!")
-      .click({force: true});
+    tableTile.getLinkGraphModalLinkButton().should("contain.text", "Clear It!").click({force: true});
+    graphTile.getTile().should("exist").contains(graphTitle);
     graphTile.getLayerName().should("not.exist");
     graphTile.getGraphDot().should("not.exist");
   });
