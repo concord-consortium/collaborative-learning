@@ -77,7 +77,8 @@ const seedHistory = async (docId: string) => {
 
 const seed = async () => {
   await seedDocument({uid: kStudent, docId: kHistoryDoc, firestore: {offeringId: "701", title: "Problem 1.1",
-    tools: ["Text"]}, rtdb: {offeringId: "701", createdAt: 1700000000000},
+    tools: ["Text"], visibility: "private", unit: "msa", investigation: "1", problem: "1", network: "net1"},
+  rtdb: {offeringId: "701", createdAt: 1700000000000},
   content: {version: "1.0", type: "problem", content: kBigContent, changeCount: 3, lastHistoryEntryId: "e-e",
     self: {uid: kStudent, documentKey: kHistoryDoc, classHash: kHash}}});
   await seedDocument({uid: kStudent, docId: "doc702", firestore: {offeringId: "702"}, rtdb: {offeringId: "702"}});
@@ -88,7 +89,8 @@ const seed = async () => {
   await seedDocument({uid: kStudent, docId: "docdisagree", firestore: {offeringId: "702", title: "fs"},
     rtdb: {offeringId: "701", title: "rtdb"}});
   await seedDocument({uid: kStudent, docId: "docreverse", firestore: {offeringId: "701"}, rtdb: {offeringId: "702"}});
-  await seedDocument({uid: kStudent, docId: "rtdbonly", rtdb: {offeringId: "701", title: "Only RTDB"}});
+  await seedDocument({uid: kStudent, docId: "rtdbonly",
+    rtdb: {offeringId: "701", title: "Only RTDB", groupId: "3", unit: "rtdbunit"}});
   await seedDocument({uid: kStudent, docId: "docotherclass", classHash: kOtherHash, firestore: {offeringId: ""}});
   await seedDocument({uid: kStudent, docId: "fsonly", firestore: {type: "personal", title: "Only Firestore"}});
   await seedHistory(kHistoryDoc);
@@ -173,12 +175,13 @@ describe("clueExport walk", () => {
     expect(byId[kHistoryDoc]).toMatchObject({
       uid: kStudent, context_id: kHash, portal_class_id: 601, owner_kind: "student", offering_id: 701,
       title: "Problem 1.1", tools: ["Text"], created_at: 1700000000000, metadata_sources: ["firestore", "rtdb"],
+      visibility: "private", unit: "msa", investigation: "1", problem: "1", network: "net1", group_id: null,
     });
     expect(byId.docdisagree).toMatchObject({offering_id: 701, title: "fs"});
     expect(byId.docnone).toMatchObject({offering_id: null, tools: null});
     expect(byId.fsonly).toMatchObject({metadata_sources: ["firestore"], rtdb_metadata: null, type: "personal"});
     expect(byId.rtdbonly).toMatchObject({metadata_sources: ["rtdb"], firestore_metadata: null, title: "Only RTDB",
-      offering_id: 701});
+      offering_id: 701, group_id: "3", unit: "rtdbunit"});
     expect(page).toMatchObject({stop_owner_offset: 0, owner_exhausted: true, inner_cursor: null,
       served_owner_offsets: [0]});
   });
