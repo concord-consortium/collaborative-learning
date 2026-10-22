@@ -16,7 +16,9 @@ import { addCanonicalCasesToDataSet, IDataSet, ICaseCreation, ICase, DataSet } f
 import { kSharedDataSetType, SharedDataSet, SharedDataSetType } from "../../shared/shared-data-set";
 import { updateSharedDataSetColors } from "../../shared/shared-data-set-colors";
 import { SharedModelType } from "../../shared/shared-model";
-import { kMinColumnWidth } from "../../../components/tiles/table/table-types";
+import { kHeaderControlsWidth, kHeaderFont, kMaxAutoColumnWidth, kMinColumnWidth }
+  from "../../../components/tiles/table/table-types";
+import { measureText } from "../../../components/tiles/hooks/use-measure-text";
 import { LogEventName } from "../../../lib/logger-types";
 import { logTileChangeEvent } from "../log/log-tile-change-event";
 import { uniqueId } from "../../../utilities/js-utils";
@@ -101,6 +103,10 @@ export const TableContentModel = TileContentModel
       const tileIds = sharedModelManager?.getSharedModelTileIds(self.sharedModel) ?? [];
       return tileIds.filter(id => id !== self.metadata.id);
     },
+    /** The width stored for this column, if anything ever set one. */
+    storedColumnWidth(attrId: string) {
+      return self.columnWidths.get(attrId);
+    },
   }))
   .views(self => ({
     get dataSet() {
@@ -108,16 +114,6 @@ export const TableContentModel = TileContentModel
         return self.sharedModel.dataSet;
       }
       return self.importedDataSet;
-    },
-    columnWidth(attrId: string) {
-      return self.columnWidths.get(attrId) || kMinColumnWidth;
-    },
-    /**
-     * The width stored for this column, if one was ever set. `columnWidth` above substitutes the
-     * minimum when there is none, which cannot tell "nobody set one" from "somebody set 80".
-     */
-    storedColumnWidth(attrId: string) {
-      return self.columnWidths.get(attrId);
     },
     get isUserResizable() {
       return true;
@@ -137,6 +133,21 @@ export const TableContentModel = TileContentModel
     }
   }))
   .views(self => ({
+    /**
+     * The width a column is drawn at: the one stored for it, or -- when nothing has set one -- a
+     * width that fits its heading on one line, clear of the header controls. Everything that needs
+     * a column width goes through here, so the grid and the exported JSON agree.
+     *
+     * Only the heading is measured. Sizing to the data would depend on whichever rows happen to be
+     * loaded, so it is deliberately out of scope.
+     */
+    columnWidth(attrId: string) {
+      const stored = self.storedColumnWidth(attrId);
+      if (stored) return stored;
+      const name = self.dataSet.attrFromID(attrId)?.name ?? "";
+      const fitted = measureText(name, kHeaderFont) + kHeaderControlsWidth;
+      return Math.max(kMinColumnWidth, Math.min(kMaxAutoColumnWidth, fitted));
+    },
     // Both of these ask whether the student has an expression here, not merely whether a formula
     // exists: a column whose formula is hidden is computed for them and presents as ordinary data,
     // so it must not give the table an expression row, expression styling or a cell with no editor.

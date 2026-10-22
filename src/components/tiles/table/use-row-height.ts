@@ -2,7 +2,7 @@ import { useCallback } from "react";
 import { RowHeightArgs } from "react-data-grid";
 import { kCellHorizontalPadding, kCellLineHeight, kCellVerticalPadding,
   kDefaultImageCellHeight,
-  kHeaderControlsReserve, kHeaderFont, kHeaderRowHeight, kRowHeight, TRow } from "./table-types";
+  kHeaderCellHorizontalPadding, kHeaderFont, kHeaderRowHeight, kRowHeight, TRow } from "./table-types";
 import { useCurrent } from "../../../hooks/use-current";
 import { measureTextLines } from "../hooks/use-measure-text";
 import { defaultFont } from "../../constants";
@@ -57,8 +57,10 @@ export const useRowHeight = ({ dataSet, measureColumnWidth, model }: IUseRowHeig
     dataSet.attributes.forEach(attribute => {
       height = Math.max(height, textHeight(
         attribute.name,
-        // The same space the width rule reserves, so the two agree about how much text fits.
-        measureColumnWidth(attribute) - kHeaderControlsReserve,
+        // `.header-name`'s margins, which is where the text actually wraps. Measuring against the
+        // space the fit rule reserves for the controls instead would predict more lines than the
+        // browser draws, and leave a gap under the last one.
+        measureColumnWidth(attribute) - kHeaderCellHorizontalPadding,
         kHeaderFont
       ));
     });

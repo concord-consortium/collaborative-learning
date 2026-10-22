@@ -2,7 +2,7 @@ import { renderHook } from "@testing-library/react";
 import { onPatch } from "mobx-state-tree";
 import { addAttributeToDataSet } from "../../../models/data/data-set";
 import { TableContentModel, TableContentModelType } from "../../../models/tiles/table/table-content";
-import { headerFitWidth } from "./column-width";
+import { kHeaderControlsWidth } from "./table-types";
 import { useMeasureColumnWidth } from "./use-measure-column-width";
 
 describe("useMeasureColumnWidth", () => {
@@ -14,16 +14,19 @@ describe("useMeasureColumnWidth", () => {
     return { content, attr, result };
   }
 
-  it("fits the heading when the column has no stored width", () => {
-    const { attr, result } = setup();
-    expect(result.current.measureColumnWidth(attr)).toBe(headerFitWidth(attr.name));
+  // Delegating rather than deciding is the point: the grid and the exported JSON have to agree,
+  // so the rule lives in the model. jest-canvas-mock measures one pixel per character.
+  it("takes the width from the model when the column is not being dragged", () => {
+    const { content, attr, result } = setup();
+    expect(result.current.measureColumnWidth(attr)).toBe(content.columnWidth("attr"));
+    expect(result.current.measureColumnWidth(attr)).toBe(40 + kHeaderControlsWidth);
   });
 
   // A column the student has resized is theirs; the heading must not pull it back.
   it("keeps a stored width even when it is narrower than the heading needs", () => {
     const { content, attr, result } = setup();
-    content.setColumnWidth("attr", 80);
-    expect(result.current.measureColumnWidth(attr)).toBe(80);
+    content.setColumnWidth("attr", 100);
+    expect(result.current.measureColumnWidth(attr)).toBe(100);
   });
 
   it("uses the in-progress width while the column is being dragged", () => {

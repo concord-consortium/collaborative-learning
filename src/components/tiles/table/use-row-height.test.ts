@@ -9,9 +9,8 @@ import { useRowHeight } from "./use-row-height";
 import "../../../models/tiles/table/table-registration";
 
 describe("useRowHeight headerHeight", () => {
-  // jest-canvas-mock measures one pixel per character, so a 150-character heading needs 150px.
-  // In a 200px column that is one line against the old 32px padding (168px of room) and two
-  // against the 72px the controls actually take (128px of room).
+  // jest-canvas-mock measures one pixel per character, so a heading needs one pixel per character.
+  // The text wraps inside `.header-name`'s margins, which leave the column width less 32px.
   function heightFor(name: string, columnWidth = 200) {
     const content = TableContentModel.create();
     addAttributeToDataSet(content.dataSet, { id: "attr", name });
@@ -28,7 +27,11 @@ describe("useRowHeight headerHeight", () => {
     expect(heightFor("x")).toBe(kHeaderRowHeight);
   });
 
-  it("grows for a heading that does not fit the space left by the controls", () => {
-    expect(heightFor("a".repeat(150))).toBeGreaterThan(kHeaderRowHeight);
+  it("leaves a heading that just fits at one row", () => {
+    expect(heightFor("a".repeat(160))).toBe(kHeaderRowHeight);
+  });
+
+  it("grows for a heading too long to fit on one line", () => {
+    expect(heightFor("a".repeat(400))).toBeGreaterThan(kHeaderRowHeight);
   });
 });
