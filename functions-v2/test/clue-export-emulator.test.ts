@@ -89,6 +89,7 @@ const seed = async () => {
     rtdb: {offeringId: "701", title: "rtdb"}});
   await seedDocument({uid: kStudent, docId: "docreverse", firestore: {offeringId: "701"}, rtdb: {offeringId: "702"}});
   await seedDocument({uid: kStudent, docId: "rtdbonly", rtdb: {offeringId: "701", title: "Only RTDB"}});
+  await seedDocument({uid: kStudent, docId: "docotherclass", classHash: kOtherHash, firestore: {offeringId: ""}});
   await seedDocument({uid: kStudent, docId: "fsonly", firestore: {type: "personal", title: "Only Firestore"}});
   await seedHistory(kHistoryDoc);
 

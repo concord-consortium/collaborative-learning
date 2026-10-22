@@ -22,7 +22,6 @@ export const callClueExport = async (options: CallOptions) => {
     query: options.query ?? {},
     body: options.body,
     get: (name: string) => headers[name.toLowerCase()],
-    header: (name: string) => headers[name.toLowerCase()],
   };
   const answer: Answer = {status: 0, body: undefined};
   const res: any = {
@@ -34,9 +33,6 @@ export const callClueExport = async (options: CallOptions) => {
       answer.body = body;
       return res;
     },
-    setHeader: () => res,
-    getHeader: () => undefined,
-    on: () => res,
   };
   await (clueExport as any)(req, res);
   return answer;
