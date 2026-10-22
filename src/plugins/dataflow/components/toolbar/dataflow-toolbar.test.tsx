@@ -650,6 +650,34 @@ describe("Dataflow connect button and pane", () => {
     expect(within(paneGroup()).getByRole("button", { name: "Connect Arduino" })).toBeInTheDocument();
   });
 
+  it("a failed Connect shows the error only in the pane of the tile where it was clicked", async () => {
+    const Component = getToolbarButtonInfo("dataflow", "connect")!.component;
+    const stores = specStores();
+    const tiles = [TileModel.create({ content: DataflowContentModel.create() }),
+      TileModel.create({ content: DataflowContentModel.create() })];
+    jest.spyOn(getDeviceConnection(stores.serialDevice), "connect").mockResolvedValue("failed");
+    render(
+      <ModalProvider>
+        <Provider stores={stores}>
+          {tiles.map(model => (
+            <div key={model.id} data-testid={model.id}>
+              <TileModelContext.Provider value={model}>
+                <Component name="connect" />
+              </TileModelContext.Provider>
+            </div>
+          ))}
+        </Provider>
+      </ModalProvider>
+    );
+    const [a, b] = tiles.map(model => within(screen.getByTestId(model.id)));
+    fireEvent.click(a.getByTestId("connect-device-button"));
+    await act(async () => { fireEvent.click(a.getByRole("button", { name: "Connect Spiker:bit" })); });
+    expect(a.getByText("Couldn't connect to Spiker:bit.")).toBeInTheDocument();
+    fireEvent.click(b.getByTestId("connect-device-button"));
+    expect(b.getByRole("group", { name: "Device connection" })).toBeInTheDocument();
+    expect(b.queryByText(/Couldn't connect/)).toBeNull();
+  });
+
   it("a canceled Connect keeps the pane open", async () => {
     const r = openPane();
     jest.spyOn(r.connection, "connect").mockResolvedValue("canceled");
