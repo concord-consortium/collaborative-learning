@@ -278,9 +278,15 @@ Common toolbar framework.  Supports:
 - `ungroup`: Ungroup the selected group.
 - `zoom-in`: Zoom the program canvas in one step. Disabled at maximum zoom.
 - `zoom-out`: Zoom the program canvas out one step. Disabled at minimum zoom.
-- `fit-all`: Zoom and centre the canvas so every block is visible. Disabled when the program is empty.
+- `fit-all`: Zoom and center the canvas so every block is visible. Disabled when the program is empty.
 - `pan`: Pan the canvas. The button's face repeats the last direction used; its corner triangle opens
   a palette of the four directions.
+- `connect`: Connect, reconnect or disconnect a device. The button shows the connection's state.
+  A unit that sets its own DataFlow `tools` list without `connect` gets an older connect button at
+  the top of the tile instead. That button will be removed, so new tool lists should include
+  `connect`.
+- `reset`: Restart the program's running state: releases holds and clears the mini-graphs.
+  Recorded data is kept.
 
 Defaults:
 
@@ -294,6 +300,9 @@ Defaults:
 - `zoom-out`
 - `fit-all`
 - `pan`
+- `|`
+- `connect`
+- `reset`
 
 Additional Live Output / sampling keys (all optional; each defaults to today's behavior):
 

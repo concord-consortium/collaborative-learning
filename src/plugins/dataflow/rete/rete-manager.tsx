@@ -107,7 +107,7 @@ export class ReteManager implements INodeServices {
   public disposed = false;
   public setupComplete: Promise<void>;
   private previousChannelIds = "";
-  private needsDeviceDisposer: (() => void) | undefined;
+  private deviceStateDisposer: (() => void) | undefined;
   private fitTimeout: number | undefined;
   private visibilityReapplyPending = false;
 
@@ -124,12 +124,23 @@ export class ReteManager implements INodeServices {
     this.area = new AreaPlugin<Schemes, AreaExtra>(div);
     this.updateMainProcessor();
 
-    this.setupComplete = this.setup().then(() => this.alertIfOpenedWithoutNeededDevice());
+    this.setupComplete = this.setup().then(() => this.recordNeedsDeviceOnOpen());
 
     if (!this.readOnly && !this.playback) {
       // updateNeedsDevice tracks the program's blocks through getNodes(), along with each
       // block's settings and wiring.
-      this.needsDeviceDisposer = autorun(() => this.updateNeedsDevice());
+      const needsDeviceDisposer = autorun(() => this.updateNeedsDevice());
+      // The connection is app-wide, so a successful one from any tile clears this tile's error from
+      // an earlier failed attempt. A later disconnect can't bring the error back.
+      const connectedDisposer = reaction(
+        () => this.stores.serialDevice.isConnected(),
+        connected => { if (connected) this.mstContent.clearConnectError(); },
+        { fireImmediately: true }
+      );
+      this.deviceStateDisposer = () => {
+        needsDeviceDisposer();
+        connectedDisposer();
+      };
     }
   }
 
@@ -1319,8 +1330,8 @@ export class ReteManager implements INodeServices {
 
   /**
    * Records on the tile whether its program needs a connected device. The constructor's autorun
-   * calls it, so it tracks each block's settings and wiring. It only records the state; the alert
-   * is posted by alertIfOpenedWithoutNeededDevice.
+   * calls it, so it tracks each block's settings and wiring. It only records the state; the
+   * on-open state is recorded by recordNeedsDeviceOnOpen.
    */
   public updateNeedsDevice() {
     if (this.readOnly || this.playback) return;
@@ -1329,43 +1340,17 @@ export class ReteManager implements INodeServices {
   }
 
   /**
-   * Posts the connection alert when an editable program has just opened, needs a device and none
-   * is connected. It runs once, after setup, so a later edit or a connection change never raises
-   * it. The need is computed here rather than read from the tile so it reflects the program as
-   * it opened.
+   * Records on the tile whether an editable program needed a device, with none connected, when it
+   * opened. It runs once, after setup, so later edits and connection changes, including a
+   * disconnect, never change it. The need is computed here rather than read from the tile so it
+   * reflects the program as it opened.
    */
-  private alertIfOpenedWithoutNeededDevice() {
+  private recordNeedsDeviceOnOpen() {
     if (this.disposed || this.readOnly || this.playback) return;
 
-    if (programNeedsDevice(this.editor.getNodes()) && !this.stores.serialDevice.isConnected()) {
-      this.postSerialModal();
-    }
-  }
-
-  private postSerialModal(){
-    const lastMsg = localStorage.getItem("last-connect-message");
-
-    let alertMessage = "";
-
-    const btnMsg = `
-      Click the ⚡️ button on the upper left, then select your device in the popup.
-      Devices differ, but it may contain the words "usbserial" or "usbmodem"`;
-
-    if (lastMsg !== "connect"){
-      alertMessage += `1. Connect the arduino or micro:bit to your computer.  2.${btnMsg}`;
-    }
-
-    // physical connection has been made but user action needed
-    if (lastMsg === "connect"
-        && !this.stores.serialDevice.isConnected()
-    ){
-      alertMessage += btnMsg;
-    }
-
-    if (!this.stores.serialDevice.serialModalShown){
-      this.stores.ui.alert(alertMessage, "Program Requires Connection to External Device");
-      this.stores.serialDevice.serialModalShown = true;
-    }
+    this.mstContent.setShowConnectTutorialOnOpen(
+      programNeedsDevice(this.editor.getNodes()) && !this.stores.serialDevice.isConnected()
+    );
   }
 
   private get simulatedChannels() {
@@ -1419,7 +1404,7 @@ export class ReteManager implements INodeServices {
     this.collapsedConnectionsDisposer?.();
     this.marquee?.destroy();
     this.arrowPanDisposer?.();
-    this.needsDeviceDisposer?.();
+    this.deviceStateDisposer?.();
     if (this.fitTimeout) {
       clearTimeout(this.fitTimeout);
       this.fitTimeout = undefined;
