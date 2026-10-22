@@ -42,6 +42,7 @@ import { IStores } from "../models/stores/stores";
 import { urlParams } from "../utilities/url-params";
 import { applyStartupUIState } from "../models/stores/persistent-ui/persistent-ui";
 import { TeacherSupportModelType, SectionTarget, AudienceModelType } from "../models/stores/supports";
+import { retryAbortedTransaction } from "../utilities/db-utils";
 import { safeJsonParse } from "../utilities/js-utils";
 import { initializeApp } from "./firebase-config";
 import { UserModelType } from "../models/stores/user";
@@ -437,7 +438,9 @@ export class DB {
     const { user } = this.stores;
     const groupsRef = this.firebase.ref(this.firebase.getGroupsPath(user));
 
-    await groupsRef.transaction((groups: DBOfferingGroupMap | null) => {
+    // Retried when a concurrent set() aborts it: the groups listener auto-rejoins a student's
+    // latest group with a set() on a path under this one, which otherwise fails the move outright.
+    await retryAbortedTransaction(() => groupsRef.transaction((groups: DBOfferingGroupMap | null) => {
       if (groups === null) {
         groups = {};
       }
@@ -484,7 +487,7 @@ export class DB {
       }
 
       return groups;
-    });
+    }));
 
     // If moving the current user, update their latestGroupId preference and set up connection handlers.
     // These operations are outside the transaction above because they operate on different database paths.
