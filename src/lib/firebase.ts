@@ -195,6 +195,10 @@ export class Firebase {
     return `${this.getUserDocumentMetadataPath(user, documentKey, userId)}/lastEditedAt`;
   }
 
+  private get evaluateOnSessionEnd() {
+    return !!this.db.stores.appConfig.aiEvaluateOnSessionEnd;
+  }
+
   // Returns the path to the evaluation type & timestamp for a document, if specified in the appConfig
   public getEvaluationMetadataPath(user: UserModelType, documentKey: string, userId?: string) {
     const evaluation = this.db.stores.appConfig.aiEvaluation;
@@ -221,7 +225,8 @@ export class Firebase {
   /**
    * Set up Firebase onDisconnect handlers.
    * All documents get one to update the lastEditedAt timestamp when the user disconnects.
-   * If the appConfig specifies an AI Evaluation to be run, a metadata field is added to request that as well.
+   * A dropped connection ends the session, so the evaluation request is added only for units that
+   * opted into evaluating every session.
    */
   public setLastEditedOnDisconnect(user: UserModelType, documentKey: string, userId?: string):
       firebase.database.OnDisconnect[] {
@@ -231,7 +236,9 @@ export class Firebase {
     onDisconnect.set(firebase.database.ServerValue.TIMESTAMP);
     onDisconnects.push(onDisconnect);
 
-    const evaluation = this.getEvaluationMetadataPath(user, documentKey, userId);
+    const evaluation = this.evaluateOnSessionEnd
+      ? this.getEvaluationMetadataPath(user, documentKey, userId)
+      : undefined;
     if (evaluation) {
       const evaluationRef = this.ref(evaluation);
       const evaluationOnDisconnect = evaluationRef.onDisconnect();
@@ -246,6 +253,9 @@ export class Firebase {
    * If the appConfig specifies an AI Evaluation to be run, that timestamp is set as well, alongside
    * `requestId` (omitted, not just undefined, when not supplied) so the completion status can be
    * correlated back to this request.
+   *
+   * A `requestId` marks an evaluation the student asked for, which always runs. Without one this is
+   * the document's cleanup — the end of the session — which only opted-in units evaluate.
    */
   public setLastEditedNow(user: UserModelType, documentKey: string, userId: string|undefined,
       onDisconnects?: firebase.database.OnDisconnect[], requestId?: string) {
@@ -259,7 +269,9 @@ export class Firebase {
     const promises: Promise<any>[] = [];
     promises.push(this.ref(this.getLastEditedMetadataPath(user, documentKey, userId))
       .set(firebase.database.ServerValue.TIMESTAMP));
-    const evaluation = this.getEvaluationMetadataPath(user, documentKey, userId);
+    const evaluation = (requestId || this.evaluateOnSessionEnd)
+      ? this.getEvaluationMetadataPath(user, documentKey, userId)
+      : undefined;
     if (evaluation) {
       const updatePromise = this.updateEvaluation(this.ref(evaluation), requestId);
       updatePromise && promises.push(updatePromise);

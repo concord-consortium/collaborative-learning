@@ -50,6 +50,7 @@ export interface IUnitConfig extends IItemTemplateConfig {
   enableCommentRoles: CommentRole[];
   aiEvaluation?: AIEvaluation;
   aiPrompt: IAiPrompt;
+  aiEvaluateOnSessionEnd?: boolean;
   chatTutorPrompts?: IChatTutorPrompts;
   chatTutorEnabled?: boolean;
   chatTutorIntro?: string;

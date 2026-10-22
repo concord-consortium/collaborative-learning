@@ -98,4 +98,41 @@ describe("AISettings", () => {
     const mockDraft = applyLastUpdater();
     expect("summarizer" in mockDraft.config.aiPrompt).toBe(false);
   });
+
+  it("shows session-end evaluation as off for a unit that has not opted in", () => {
+    mockConfig.aiEvaluation = "custom";
+    render(<AISettings />);
+
+    expect(screen.getByLabelText("Evaluate At Session End")).not.toBeChecked();
+  });
+
+  it("turns session-end evaluation on", async () => {
+    mockConfig.aiEvaluation = "custom";
+    mockConfig.aiPrompt = aiPromptFields;
+    render(<AISettings />);
+
+    fireEvent.click(screen.getByLabelText("Evaluate At Session End"));
+    save();
+
+    await waitFor(() => expect(mockSetUnitConfig).toHaveBeenCalled());
+    const mockDraft = applyLastUpdater({ aiEvaluation: "custom", aiPrompt: aiPromptFields });
+    expect(mockDraft.config.aiEvaluateOnSessionEnd).toBe(true);
+  });
+
+  it("turns session-end evaluation back off", async () => {
+    mockConfig.aiEvaluation = "custom";
+    mockConfig.aiPrompt = aiPromptFields;
+    mockConfig.aiEvaluateOnSessionEnd = true;
+    render(<AISettings />);
+
+    expect(screen.getByLabelText("Evaluate At Session End")).toBeChecked();
+    fireEvent.click(screen.getByLabelText("Evaluate At Session End"));
+    save();
+
+    await waitFor(() => expect(mockSetUnitConfig).toHaveBeenCalled());
+    const mockDraft = applyLastUpdater({
+      aiEvaluation: "custom", aiPrompt: aiPromptFields, aiEvaluateOnSessionEnd: true
+    });
+    expect(mockDraft.config.aiEvaluateOnSessionEnd).toBe(false);
+  });
 });

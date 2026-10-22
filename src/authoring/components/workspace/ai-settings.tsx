@@ -18,6 +18,7 @@ interface AISettingsFormInputs {
   },
   aiTileAvailable: boolean;
   showIdeasButton: boolean;
+  aiEvaluateOnSessionEnd: boolean;
 }
 
 const isAIAuthorTool = (tool: IAuthorTool | WritableDraft<IAuthorTool>) => {
@@ -52,7 +53,8 @@ const AISettings: React.FC = () => {
         discussionPrompt: aiPrompt?.discussionPrompt ?? "",
       },
       aiTileAvailable,
-      showIdeasButton
+      showIdeasButton,
+      aiEvaluateOnSessionEnd: !!unitConfig?.config?.aiEvaluateOnSessionEnd
     };
   }, [unitConfig]);
 
@@ -136,6 +138,8 @@ const AISettings: React.FC = () => {
         if (data.showIdeasButton !== undefined) {
           config.showIdeasButton = data.showIdeasButton;
         }
+
+        config.aiEvaluateOnSessionEnd = data.aiEvaluateOnSessionEnd;
       }
     });
   };
@@ -170,6 +174,14 @@ const AISettings: React.FC = () => {
           <option value="categorize-design">Categorize Design</option>
         </select>
         {errors.aiEvaluation && <span className="form-error">{errors.aiEvaluation.message}</span>}
+      </div>
+      <div>
+        <label htmlFor="aiEvaluateOnSessionEnd">Evaluate At Session End</label>
+        <input
+          id="aiEvaluateOnSessionEnd"
+          type="checkbox"
+          {...register("aiEvaluateOnSessionEnd")}
+        /> Evaluate every document when its session ends, not only when a student asks for ideas
       </div>
       <div>
         <label htmlFor="systemPrompt">System Prompt</label>
