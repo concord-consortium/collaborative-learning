@@ -11,6 +11,7 @@ import { kMaxNodeValues } from "./utilities/node";
 import { TransformNodeModel } from "../nodes/transform-node";
 import { TimerNodeModel } from "../nodes/timer-node";
 import { ControlNodeModel } from "../nodes/control-node";
+import { withoutUndo } from "../../../models/history/without-undo";
 import { uniqueId } from "../../../utilities/js-utils";
 import { BaseNodeModel, IBaseNodeModel } from "../nodes/base-node";
 import { IDataSet } from "../../../models/data/data-set";
@@ -221,6 +222,18 @@ export const DataflowProgramModel = types.
       self.nodes.forEach(node => {
         node.data.createNextTickEntry(currentTick, newTick, recentTicks);
       });
+    }
+  }))
+  .actions(self => ({
+    /**
+     * Clears the running state of every node and the tick history, leaving one open tick for
+     * the nodes to write into. Blocks, block connections and settings are untouched.
+     */
+    resetRunningState() {
+      withoutUndo();
+      self.nodes.forEach(node => node.data.resetRunningState());
+      self.clearRecentTicks();
+      self.addNewTick(uniqueId());
     }
   }))
   .actions(self => ({

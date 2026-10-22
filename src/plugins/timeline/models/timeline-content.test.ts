@@ -1,5 +1,5 @@
 import { DateTime } from "luxon";
-import { IJsonPatch, applyPatch, onPatch } from "mobx-state-tree";
+import { IJsonPatch, applyPatch, getSnapshot, onPatch } from "mobx-state-tree";
 import { TimelineContentModel, kMinViewRangeSeconds } from "./timeline-content";
 import { getSharedModelManager } from "../../../models/tiles/tile-environment";
 import { SharedDataSet } from "../../../models/shared/shared-data-set";
@@ -34,15 +34,18 @@ describe("TimelineContent", () => {
     const content = TimelineContentModel.create({
       viewStartTimeISO: "2026-02-01T00:00:00.000Z",
       viewEndTimeISO: "2026-02-02T00:00:00.000Z",
+      hiddenEventTypes: ["Noise"],
       selectedEventIndex: 3
     });
     const json = content.exportJson();
     expect(typeof json).toBe("string");
     expect(json.length).toBeGreaterThan(0);
+    // The types switched off in the Event Key travel with the document, like the view range.
     expect(JSON.parse(json)).toEqual({
       type: "Timeline",
       viewStartTimeISO: "2026-02-01T00:00:00.000Z",
       viewEndTimeISO: "2026-02-02T00:00:00.000Z",
+      hiddenEventTypes: ["Noise"],
       selectedEventIndex: 3
     });
   });
@@ -530,7 +533,7 @@ describe("event views", () => {
     mockSharedDataSet = createEventsDataSet([
       { windowStart: "2026-01-31T00:00:00.000Z", windowEnd: "2026-01-31T01:00:00.000Z", eventType: "Earthquake" },
     ]);
-    expect(content.canSelectPrev).toBe(false);
+    expect(content.canSelectPrev([])).toBe(false);
   });
 
   it("canSelectNext is true when more events exist", () => {
@@ -538,7 +541,7 @@ describe("event views", () => {
       { windowStart: "2026-01-31T00:00:00.000Z", windowEnd: "2026-01-31T01:00:00.000Z", eventType: "Earthquake" },
       { windowStart: "2026-02-01T00:00:00.000Z", windowEnd: "2026-02-01T01:00:00.000Z", eventType: "Noise" },
     ]);
-    expect(content.canSelectNext).toBe(true);
+    expect(content.canSelectNext([])).toBe(true);
   });
 
   it("selectNextEvent increments selectedEventIndex", () => {
@@ -547,7 +550,7 @@ describe("event views", () => {
       { windowStart: "2026-02-01T00:00:00.000Z", windowEnd: "2026-02-01T01:00:00.000Z", eventType: "Noise" },
     ]);
     content.fitToData();
-    content.selectNextEvent();
+    content.selectNextEvent([]);
     expect(content.selectedEventIndex).toBe(1);
     expect(content.selectedEventLabel).toBe("Event 2");
   });
@@ -558,8 +561,8 @@ describe("event views", () => {
       { windowStart: "2026-02-01T00:00:00.000Z", windowEnd: "2026-02-01T01:00:00.000Z", eventType: "Noise" },
     ]);
     content.fitToData();
-    content.selectNextEvent();
-    content.selectPrevEvent();
+    content.selectNextEvent([]);
+    content.selectPrevEvent([]);
     expect(content.selectedEventIndex).toBe(0);
   });
 
@@ -580,7 +583,7 @@ describe("event views", () => {
       { windowStart: "2026-02-01T00:00:00.000Z", windowEnd: "2026-02-01T01:00:00.000Z", eventType: "Noise" },
     ]);
     content.fitToData();
-    content.selectNextEvent();
+    content.selectNextEvent([]);
     // Should adjust view to second event with padding
     const event = content.events[1];
     const duration = event.windowEnd.diff(event.windowStart, "seconds").seconds;
@@ -635,10 +638,10 @@ describe("time markers", () => {
   const viewStart = DateTime.fromISO("2026-02-01T00:00:00.000Z");
   const viewEnd = DateTime.fromISO("2026-02-02T00:00:00.000Z");
 
-  it("hoverTime and pinnedTime default to undefined", () => {
+  it("hoverTime and markerTime default to undefined", () => {
     const content = TimelineContentModel.create();
     expect(content.hoverTime).toBeUndefined();
-    expect(content.pinnedTime).toBeUndefined();
+    expect(content.markerTime).toBeUndefined();
   });
 
   it("setHoverTime and clearHoverTime update hoverTime", () => {
@@ -650,19 +653,13 @@ describe("time markers", () => {
     expect(content.hoverTime).toBeUndefined();
   });
 
-  it("setPinnedTime and clearPinnedTime update pinnedTime", () => {
+  it("setMarkerTime and clearMarkerTime update markerTime", () => {
     const content = TimelineContentModel.create();
     const time = DateTime.fromISO("2026-02-01T12:00:00.000Z");
-    content.setPinnedTime(time);
-    expect(content.pinnedTime?.toISO()).toBe(time.toISO());
-    content.clearPinnedTime();
-    expect(content.pinnedTime).toBeUndefined();
-  });
-
-  it("marker times are volatile, not serialized", () => {
-    const content = TimelineContentModel.create();
-    content.setPinnedTime(DateTime.fromISO("2026-02-01T12:00:00.000Z"));
-    expect(JSON.parse(content.exportJson())).not.toHaveProperty("pinnedTime");
+    content.setMarkerTime(time);
+    expect(content.markerTime?.toISO()).toBe(time.toISO());
+    content.clearMarkerTime();
+    expect(content.markerTime).toBeUndefined();
   });
 
   it("timeToViewPct returns undefined when there is no view range", () => {
@@ -683,5 +680,266 @@ describe("time markers", () => {
     content.setViewRange(viewStart, viewEnd);
     expect(content.timeToViewPct(viewStart.minus({ hours: 6 }))).toBe(-25);
     expect(content.timeToViewPct(viewEnd.plus({ hours: 12 }))).toBe(150);
+  });
+});
+
+describe("marker placement mode", () => {
+  it("starts off and toggles on", () => {
+    const content = TimelineContentModel.create({});
+    expect(content.isPlacingMarker).toBe(false);
+
+    content.startPlacingMarker();
+    expect(content.isPlacingMarker).toBe(true);
+
+    content.stopPlacingMarker();
+    expect(content.isPlacingMarker).toBe(false);
+  });
+
+  // A half-finished placement is not something to reload into.
+  it("is not saved in the document", () => {
+    const content = TimelineContentModel.create({});
+    content.startPlacingMarker();
+
+    expect(JSON.parse(content.exportJson())).not.toHaveProperty("isPlacingMarker");
+  });
+
+  // Placing is one gesture, not a mode the student then has to turn off.
+  it("stops placing once a marker is set", () => {
+    const content = TimelineContentModel.create({});
+    content.startPlacingMarker();
+    content.setMarkerTime(DateTime.fromISO("2026-02-01T12:00:00.000Z"));
+
+    expect(content.isPlacingMarker).toBe(false);
+  });
+
+  it("drops the hover preview when the mode ends", () => {
+    const content = TimelineContentModel.create({});
+    content.startPlacingMarker();
+    content.setHoverTime(DateTime.fromISO("2026-02-01T12:00:00.000Z"));
+
+    content.stopPlacingMarker();
+    expect(content.hoverTime).toBeUndefined();
+  });
+});
+
+describe("isMarkerInData", () => {
+  const dataStart = DateTime.fromISO("2026-01-30T00:00:00.000Z");
+  const dataEnd = DateTime.fromISO("2026-02-06T00:00:00.000Z");
+
+  function contentWithData(withSeismogram = true) {
+    mockedGetSharedModelManager.mockReturnValue({
+      isReady: true,
+      getTileSharedModelsByType: (_self: any, type: any) =>
+        withSeismogram && type === SharedSeismogram
+          ? [{ station: { network: "AK", station: "K204", location: "", channel: "HNZ" },
+               startTime: dataStart, endTime: dataEnd }]
+          : [],
+    } as any);
+    return TimelineContentModel.create();
+  }
+
+  afterEach(() => mockedGetSharedModelManager.mockReset());
+
+  it.each([
+    ["inside the data", dataStart.plus({ days: 1 }), true],
+    ["on the first instant of the data", dataStart, true],
+    ["on the last instant of the data", dataEnd, true],
+    ["before the data", dataStart.minus({ days: 1 }), false],
+    ["after the data", dataEnd.plus({ days: 1 }), false]
+  ])("is %s", (_label, time, expected) => {
+    const content = contentWithData();
+    content.setMarkerTime(time);
+    expect(content.isMarkerInData).toBe(expected);
+  });
+
+  it("is false when there is no marker", () => {
+    expect(contentWithData().isMarkerInData).toBe(false);
+  });
+
+  it("is false before any data has loaded", () => {
+    const content = contentWithData(false);
+    content.setMarkerTime(dataStart.plus({ days: 1 }));
+    expect(content.isMarkerInData).toBe(false);
+  });
+});
+
+describe("marker persistence", () => {
+  const markerISO = "2026-02-01T12:00:00.000Z";
+
+  it("round-trips the marker through a snapshot", () => {
+    const content = TimelineContentModel.create({});
+    content.setMarkerTime(DateTime.fromISO(markerISO, { zone: "utc" }));
+
+    const reloaded = TimelineContentModel.create(getSnapshot(content));
+    expect(reloaded.markerTime?.toISO()).toBe(content.markerTime?.toISO());
+  });
+
+  // The marker is the student's own work, so it travels with the document.
+  it("includes the marker in the exported document", () => {
+    const content = TimelineContentModel.create({});
+    content.setMarkerTime(DateTime.fromISO(markerISO, { zone: "utc" }));
+
+    expect(JSON.parse(content.exportJson())).toHaveProperty("markerTimeISO", markerISO);
+  });
+
+  it("clears the marker out of the exported document", () => {
+    const content = TimelineContentModel.create({});
+    content.setMarkerTime(DateTime.fromISO(markerISO, { zone: "utc" }));
+    content.clearMarkerTime();
+
+    expect(JSON.parse(content.exportJson())).not.toHaveProperty("markerTimeISO");
+  });
+});
+
+describe("viewPctToTime", () => {
+  const dataStart = DateTime.fromISO("2026-01-30T00:00:00.000Z");
+  const dataEnd = DateTime.fromISO("2026-02-06T00:00:00.000Z");
+
+  let content: ReturnType<typeof TimelineContentModel.create>;
+
+  beforeEach(() => {
+    const mockSharedSeismogram = {
+      station: { network: "AK", station: "K204", location: "", channel: "HNZ" },
+      startTime: dataStart,
+      endTime: dataEnd,
+    };
+
+    mockedGetSharedModelManager.mockReturnValue({
+      isReady: true,
+      getTileSharedModelsByType: (_self: any, type: any) => {
+        if (type === SharedSeismogram) return [mockSharedSeismogram];
+        return [];
+      },
+    } as any);
+
+    content = TimelineContentModel.create();
+    content.fitToData();
+  });
+
+  afterEach(() => {
+    mockedGetSharedModelManager.mockReset();
+  });
+
+  it("is the inverse of timeToViewPct", () => {
+    const time = dataStart.plus({ days: 3, hours: 12 });
+    const pct = content.timeToViewPct(time);
+
+    expect(pct).toBeDefined();
+    expect(content.viewPctToTime(pct!)?.toMillis()).toBe(time.toMillis());
+  });
+
+  it("clamps to the loaded data range", () => {
+    expect(content.viewPctToTime(-500)?.toMillis()).toBe(content.dataStartTime?.toMillis());
+    expect(content.viewPctToTime(500)?.toMillis()).toBe(content.dataEndTime?.toMillis());
+  });
+
+  it("returns undefined with no view set", () => {
+    expect(TimelineContentModel.create({}).viewPctToTime(50)).toBeUndefined();
+  });
+});
+
+describe("hiding event types", () => {
+  it("hides no types by default", () => {
+    expect(TimelineContentModel.create().hiddenEventTypes.slice()).toEqual([]);
+  });
+
+  it("toggles a type off and on again", () => {
+    const content = TimelineContentModel.create();
+    content.toggleEventType("Earthquake");
+    expect(content.hiddenEventTypes.slice()).toEqual(["Earthquake"]);
+    content.toggleEventType("Earthquake");
+    expect(content.hiddenEventTypes.slice()).toEqual([]);
+  });
+
+  // A hand-edited document could hold the type twice; one click should still show it again.
+  it("removes every copy of a duplicated type", () => {
+    const content = TimelineContentModel.create({ hiddenEventTypes: ["Noise", "Noise"] });
+    content.toggleEventType("Noise");
+    expect(content.hiddenEventTypes.slice()).toEqual([]);
+  });
+
+  it("keeps a hidden type through a save and reload", () => {
+    const content = TimelineContentModel.create();
+    content.toggleEventType("Earthquake");
+    const reloaded = TimelineContentModel.create(getSnapshot(content));
+    expect(reloaded.hiddenEventTypes.slice()).toEqual(["Earthquake"]);
+  });
+});
+
+describe("navigating with types hidden", () => {
+  const dataStart = DateTime.fromISO("2026-01-30T00:00:00.000Z");
+  const dataEnd = DateTime.fromISO("2026-02-06T00:00:00.000Z");
+
+  let content: ReturnType<typeof TimelineContentModel.create>;
+
+  beforeEach(() => {
+    const mockSharedSeismogram = {
+      station: { network: "AK", station: "K204", location: "", channel: "HNZ" },
+      startTime: dataStart,
+      endTime: dataEnd,
+    };
+    // Six events an hour apart, types A B A C A B, so hiding B leaves indices 0, 2, 3, 4.
+    const mockSharedDataSet = createEventsDataSet(
+      ["A", "B", "A", "C", "A", "B"].map((eventType, i) => ({
+        windowStart: dataStart.plus({ hours: i + 1 }).toISO()!,
+        windowEnd: dataStart.plus({ hours: i + 1, minutes: 30 }).toISO()!,
+        eventType
+      }))
+    );
+    mockedGetSharedModelManager.mockReturnValue({
+      isReady: true,
+      getTileSharedModelsByType: (_self: any, type: any) => {
+        if (type === SharedSeismogram) return [mockSharedSeismogram];
+        if (type === SharedDataSet) return [mockSharedDataSet];
+        return [];
+      },
+    } as any);
+    content = TimelineContentModel.create();
+    // Wide enough to hold every event, so visibleEvents is never clipped by the view.
+    content.setViewRange(dataStart, dataEnd);
+  });
+
+  afterEach(() => {
+    mockedGetSharedModelManager.mockReset();
+  });
+
+  it("skips hidden events going forward", () => {
+    content.selectEvent(0);
+    content.selectNextEvent(["B"]);
+    expect(content.selectedEventIndex).toBe(2);
+  });
+
+  it("skips hidden events going back", () => {
+    content.selectEvent(2);
+    content.selectPrevEvent(["B"]);
+    expect(content.selectedEventIndex).toBe(0);
+  });
+
+  it("does not renumber the events that remain", () => {
+    content.selectEvent(2);
+    expect(content.selectedEventLabel).toBe("Event 3");
+  });
+
+  it("leaves the selection alone when its own type is hidden", () => {
+    content.selectEvent(1);
+    expect(content.selectedEventIndex).toBe(1);
+    expect(content.selectedEventLabel).toBe("Event 2");
+  });
+
+  it("walks on from a selection whose own type is hidden", () => {
+    content.selectEvent(1);
+    // Only the C at index 3 is left, so stepping by one would land on the hidden index 2.
+    expect(content.canSelectNext(["A", "B"])).toBe(true);
+    content.selectNextEvent(["A", "B"]);
+    expect(content.selectedEventIndex).toBe(3);
+  });
+
+  it("disables both Prev and Next when every type is hidden", () => {
+    expect(content.canSelectPrev(["A", "B", "C"])).toBe(false);
+    expect(content.canSelectNext(["A", "B", "C"])).toBe(false);
+  });
+
+  it("leaves a hidden event out of visibleEvents", () => {
+    expect(content.shownEvents(["B"]).map(e => e.index)).toEqual([0, 2, 3, 4]);
   });
 });

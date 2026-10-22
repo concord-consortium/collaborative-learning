@@ -270,7 +270,7 @@ describe("WaveRunnerContent", () => {
     const dataSet = content.getOrCreateEventsDataSet()!.dataSet;
     expect(dataSet.attributes[0].name).toBe(kEventNumberAttrName);
     expect(dataSet.attrFromName(kEventNumberAttrName)!.formula.display)
-      .toBe(`rank(windowStart, windowEnd != "" and eventType != "")`);
+      .toBe(`rank(windowStart, isDate(windowStart) and isDate(windowEnd) and eventType != "")`);
   });
 
   describe("eventsFound and eventTypesFound", () => {

@@ -8,6 +8,7 @@ import { ReadOnlyContext } from "../../../../components/document/read-only-conte
 import { DataflowContentModel } from "../../model/dataflow-content";
 import { ProgramDataRates } from "../../model/utilities/node";
 import { ProgramMode } from "../types/dataflow-tile-types";
+import { getDeviceConnection } from "../../model/device-connection";
 import { DataflowProgramTopbar } from "./dataflow-program-topbar";
 
 import "../../dataflow-registration";
@@ -23,6 +24,9 @@ function renderTopbar(readOnly: boolean) {
             dataRate={ProgramDataRates[0].val}
             onRateSelectClick={jest.fn()}
             onConnectDevice={jest.fn()}
+            onReconnectDevice={jest.fn()}
+            onDisconnectDevice={jest.fn()}
+            connection={getDeviceConnection(stores.serialDevice)}
             showRateUI={false}
             lastIntervalDuration={0}
             serialDevice={stores.serialDevice}

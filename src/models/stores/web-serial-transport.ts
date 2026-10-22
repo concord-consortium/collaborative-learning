@@ -14,6 +14,8 @@ function log(message: string) {
 // of port state.
 const kArduinoUsbProductId = 67;
 
+export type WebSerialOpenResult = "opened" | "canceled" | "failed";
+
 export class WebSerialTransport implements IDeviceTransport {
   onData?: (chunk: string) => void;
   onDisconnect?: () => void;
@@ -21,7 +23,13 @@ export class WebSerialTransport implements IDeviceTransport {
   deviceFamily: string | undefined;
   private deviceInfo: SerialPortInfo | null = null;
   private port: SerialPort | null = null;
+  // The port most recently given to or chosen in open(); unlike `port`, it is kept after close()
+  // so it can be reopened.
+  lastPort: SerialPort | null = null;
   private writer: WritableStreamDefaultWriter | undefined;
+  // The read loop's current reader. It holds a lock on `port.readable`, which must be
+  // released before the port can be closed.
+  private activeReader: ReadableStreamDefaultReader<Uint8Array> | undefined;
   private reading = false;
   private readonly READ_TIMEOUT_MS = 2000;
 
@@ -39,25 +47,27 @@ export class WebSerialTransport implements IDeviceTransport {
     return info.usbProductId === 516 && info.usbVendorId === 3368 ? "microbit" : "arduino";
   }
 
-  // requestPort + open + resolve deviceFamily/deviceInfo. Returns false if the user
-  // cancels the chooser or the port cannot be opened for writing.
-  public async open(): Promise<boolean> {
+  // Opens `port`, or asks the user to choose one when none is given, then resolves
+  // deviceFamily/deviceInfo. Resolves "canceled" if the user dismisses the chooser, and
+  // "failed" for any other error or a port that cannot be opened for writing.
+  public async open(port?: SerialPort): Promise<WebSerialOpenResult> {
     try {
-      this.port = await navigator.serial.requestPort();
+      this.port = port ?? await navigator.serial.requestPort();
+      this.lastPort = this.port;
       this.deviceInfo = await this.port.getInfo();
       this.deviceFamily = this.determineDeviceFamily(this.deviceInfo);
     } catch (error) {
       console.error("error requesting port: ", error);
-      return false;
+      return (error as Error | undefined)?.name === "NotFoundError" ? "canceled" : "failed";
     }
     await this.port.open({ baudRate: 9600 }).catch((e: any) => console.error(e));
     if (!this.port.writable) {
       console.error("Port is not writable");
       await this.closePort();
-      return false;
+      return "failed";
     }
     this.writer = this.port.writable.getWriter();
-    return true;
+    return "opened";
   }
 
   public write(line: string){
@@ -70,13 +80,19 @@ export class WebSerialTransport implements IDeviceTransport {
 
   public async close(){
     this.reading = false;
+    const reader = this.activeReader;
+    this.activeReader = undefined;
+    if (reader) {
+      try { await reader.cancel(); } catch (e) { /* reader may already be released */ }
+      try { reader.releaseLock(); } catch (e) { /* lock may already be released */ }
+    }
     await this.closePort();
     this.port = null;
   }
 
-  // Read loop. Delivers decoded chunks to onData; on give-up (reopen fails) fires
-  // onDisconnect. Preserves the prior reopen/timeout recovery behavior. Relies on the
-  // browser nulling `port.readable` on a real disconnect to drive the reopen check below.
+  // Read loop. Delivers decoded chunks to onData; on give-up (reopen fails) closes the port,
+  // then fires onDisconnect. Relies on the browser nulling `port.readable` on a real
+  // disconnect to drive the reopen check below.
   public async startReading(){
     // Not proactively stopped by the navigator.serial "disconnect" event; it self-terminates
     // within one reopen cycle once the port stops being readable (see the timeout/reopen logic below).
@@ -92,6 +108,7 @@ export class WebSerialTransport implements IDeviceTransport {
       }
 
       const streamReader = this.port.readable!.getReader();
+      this.activeReader = streamReader;
       try {
         while (this.reading && this.port.readable) {
           const { value, done, timedOut } = await this.readWithTimeout(streamReader);
@@ -110,11 +127,15 @@ export class WebSerialTransport implements IDeviceTransport {
         // If it hasn't, we need to release it here so we can get a new reader later.
         // It is idempotent so it is safe to call a second time.
         streamReader.releaseLock();
+        if (this.activeReader === streamReader) this.activeReader = undefined;
       }
     }
     // If we exited the loop without an explicit stop (close()), the connection failed.
     if (this.reading) {
       this.reading = false;
+      // Release the port so a later connect to it doesn't find it still open.
+      await this.closePort();
+      this.port = null;
       this.onDisconnect?.();
     }
   }

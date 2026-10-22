@@ -58,6 +58,7 @@ on:
           - functional/tile_tests/simulator_tile_spec.js
           - functional/tile_tests/table_tool_spec.js
           - functional/tile_tests/text_tool_spec.js
+          - functional/tile_tests/timeline_event_key_spec.js
           - functional/tile_tests/xy_plot_tool_spec.js
           - functional/standalone_tests/standalone_load_spec.js
           - portal/teacher_chat_spec.js
@@ -104,7 +105,7 @@ jobs:
         run: |
           echo "BROWSER=${{ github.event.inputs.browser || env.DEFAULT_BROWSER }}" >> $GITHUB_ENV
           echo "Tests to run: ${{ github.event.inputs.test }}"
-      - uses: cypress-io/github-action@v4
+      - uses: cypress-io/github-action@v7
         with:
           # retry registry fetches; a bare `npm ci` fails the whole container on a
           # transient ECONNRESET, which is unrecoverable without a full re-run
@@ -168,7 +169,7 @@ jobs:
         run: |
           echo "BROWSER=${{ github.event.inputs.browser || env.DEFAULT_BROWSER }}" >> $GITHUB_ENV
           echo "Tests to run: ${{ github.event.inputs.test }}"
-      - uses: cypress-io/github-action@v4
+      - uses: cypress-io/github-action@v7
         with:
           install-command: npm ci --fetch-retries=5 --fetch-retry-maxtimeout=120000
           start: npm start

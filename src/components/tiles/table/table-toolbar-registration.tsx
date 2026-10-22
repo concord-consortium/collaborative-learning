@@ -36,11 +36,14 @@ const DeleteSelectedButton = ({name}: IToolbarButtonComponentProps) => {
 
 export const SetExpressionButton = ({name}: IToolbarButtonComponentProps) => {
   const toolbarContext = useContext(TableToolbarContext);
+  const disabled = toolbarContext ? !toolbarContext.canSetExpression : false;
 
   return (
     <TileToolbarButton
       name={name}
       title="Set expression"
+      disabled={disabled}
+      disabledMessage="This column is calculated for you"
       onClick={() => toolbarContext?.showExpressionsDialog()}
     >
       <SetExpressionIcon />

@@ -3,7 +3,7 @@ import { useCustomModal } from "../../../hooks/use-custom-modal";
 import InfoIcon from "../assets/info-icon.svg";
 import "./timeline-info-button.scss";
 
-const kModalTitle = "Zooming and Moving";
+const kModalTitle = "Using the Timeline";
 
 function TimelineInfoContent() {
   return (
@@ -20,6 +20,14 @@ function TimelineInfoContent() {
         The Full Timeline below the graph shows the whole timeline at once. The shaded box marks the
         part you’re viewing above — drag it, or the gray bar beneath it, to move to a different part
         of the graph.
+      </p>
+      <p>
+        Add a time marker with the Add Time Marker button, then click the graph where you want it.
+        Press Escape, or the button again, if you change your mind.
+      </p>
+      <p>
+        Move a marker by dragging its line or its label. Delete it with the × on its label, or
+        click the line and press Delete or Backspace.
       </p>
     </>
   );

@@ -1,18 +1,26 @@
 import React, { useState } from "react";
 import classNames from "classnames";
+import { observer } from "mobx-react";
 import { IconButton } from "../../../../components/utilities/icon-button";
 import { SerialDevice } from "../../../../models/stores/serial";
 import { useReadOnlyContext } from "../../../../components/document/read-only-context";
+import { DeviceChoice, DeviceConnection, kDeviceChoiceLabels, kDeviceChoiceOrder } from "../../model/device-connection";
 
 import "./dataflow-program-topbar.scss";
 
 interface SerialConnectProps {
-  onConnectDevice: (deviceType: "serial" | "spikerbit") => void;
+  onConnectDevice: (choice: DeviceChoice) => void;
+  onReconnectDevice: () => void;
+  onDisconnectDevice: () => void;
   serialDevice: SerialDevice;
+  connection: DeviceConnection;
+  needsDevice: boolean;
 }
 
-export const DataflowSerialConnectButton = (props: SerialConnectProps) => {
-  const { onConnectDevice, serialDevice } = props;
+export const DataflowSerialConnectButton = observer(function DataflowSerialConnectButton(
+  props: SerialConnectProps
+) {
+  const { onConnectDevice, onReconnectDevice, onDisconnectDevice, serialDevice, connection, needsDevice } = props;
   const readOnly = useReadOnlyContext();
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -23,18 +31,18 @@ export const DataflowSerialConnectButton = (props: SerialConnectProps) => {
     "icon-serial",
     { "physical-connection": lastMsg === "connect"},
     { "no-physical-connection": lastMsg === "disconnect" && raisesWebSerialConnect},
-    serialDevice.serialNodesCount > 0 ? "nodes-in-need" : "no-serial-needed",
+    needsDevice ? "nodes-in-need" : "no-serial-needed",
     serialDevice.isConnected() ? "connected" : "not-connected"
   );
   function serialMessage(){
     // nodes that use serial, but no device physically connected
-    if (lastMsg !== "connect" && serialDevice.serialNodesCount > 0){
+    if (lastMsg !== "connect" && needsDevice){
       return raisesWebSerialConnect ? "connect a device" : "";
     }
     // physical connection has been made but user action needed
     if (lastMsg === "connect"
         && !serialDevice.isConnected()
-        && serialDevice.serialNodesCount > 0
+        && needsDevice
     ){
       return "click to finish connecting";
     }
@@ -43,10 +51,11 @@ export const DataflowSerialConnectButton = (props: SerialConnectProps) => {
     }
   }
 
-  const chooseDevice = (deviceType: "serial" | "spikerbit") => {
+  const choose = (action: () => void) => {
     setMenuOpen(false);
-    onConnectDevice(deviceType);
+    action();
   };
+  const busy = connection.busyChoice !== undefined;
 
   return (
     <div className="topbar-icon">
@@ -60,9 +69,17 @@ export const DataflowSerialConnectButton = (props: SerialConnectProps) => {
       />
       { menuOpen &&
         <div className="serial-device-menu">
-          <button onClick={() => chooseDevice("serial")}>Arduino</button>
-          <button onClick={() => chooseDevice("serial")}>micro:bit (radio hub)</button>
-          <button onClick={() => chooseDevice("spikerbit")}>Spiker:bit</button>
+          { connection.isConnected
+            ? <>
+                <button disabled={busy} onClick={() => choose(onReconnectDevice)}>Reconnect</button>
+                <button disabled={busy} onClick={() => choose(onDisconnectDevice)}>Disconnect</button>
+              </>
+            : kDeviceChoiceOrder.map(choice => (
+                <button key={choice} disabled={busy} onClick={() => choose(() => onConnectDevice(choice))}>
+                  {kDeviceChoiceLabels[choice]}
+                </button>
+              ))
+          }
         </div>
       }
       <div className="serial-message">
@@ -70,4 +87,4 @@ export const DataflowSerialConnectButton = (props: SerialConnectProps) => {
       </div>
     </div>
   );
-};
+});
