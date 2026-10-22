@@ -18,7 +18,7 @@ describe("TimelineInfoButton", () => {
 
   // react-modal finishes opening in a requestAnimationFrame, which jsdom backs with a timer.
   const clickInfoButton = async () => {
-    fireEvent.click(screen.getByRole("button", { name: "Zooming and Moving" }));
+    fireEvent.click(screen.getByRole("button", { name: "Using the Timeline" }));
     await act(async () => { await new Promise(resolve => setTimeout(resolve, 50)); });
   };
 
@@ -27,16 +27,20 @@ describe("TimelineInfoButton", () => {
     await clickInfoButton();
   };
 
-  it("opens the Zooming and Moving modal", async () => {
+  it("opens the Using the Timeline modal", async () => {
     renderButton();
-    expect(screen.getByRole("button", { name: "Zooming and Moving" })).toHaveAttribute("aria-haspopup", "dialog");
+    expect(screen.getByRole("button", { name: "Using the Timeline" })).toHaveAttribute("aria-haspopup", "dialog");
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
 
     await clickInfoButton();
-    const dialog = screen.getByRole("dialog", { name: "Zooming and Moving" });
+    const dialog = screen.getByRole("dialog", { name: "Using the Timeline" });
     expect(dialog).toHaveTextContent("shift+click to zoom back out");
     expect(dialog).toHaveTextContent("click+hold+drag the graph");
     expect(dialog).toHaveTextContent("The Full Timeline below the graph");
+    // The marker tool is otherwise undiscoverable: this modal is the only place that describes it.
+    expect(dialog).toHaveTextContent("Add a time marker with the Add Time Marker button");
+    expect(dialog).toHaveTextContent("Press Escape, or the button again");
+    expect(dialog).toHaveTextContent("Delete it with the × on its label");
     expect(dialog).toHaveAccessibleDescription(/^Zoom in and out with the Zoom In and Zoom Out buttons\./);
   });
 
@@ -67,7 +71,7 @@ describe("TimelineInfoButton", () => {
 
   it("returns focus to the info button when it closes", async () => {
     renderButton();
-    const infoButton = screen.getByRole("button", { name: "Zooming and Moving" });
+    const infoButton = screen.getByRole("button", { name: "Using the Timeline" });
     act(() => infoButton.focus());
     await clickInfoButton();
     expect(infoButton).not.toHaveFocus();

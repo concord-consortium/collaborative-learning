@@ -1,4 +1,6 @@
-import React, { useCallback, useContext, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import React, {
+  useCallback, useContext, useEffect, useId, useLayoutEffect, useMemo, useRef, useState
+} from "react";
 import { observer } from "mobx-react";
 import { isAlive } from "mobx-state-tree";
 import classNames from "classnames";
@@ -22,8 +24,6 @@ import ConnectIcon from "../../assets/icons/connect-icon.svg";
 
 import "./dataflow-connect-pane.scss";
 
-const kPaneLabel = "Device connection";
-
 // How each navigation key moves focus: by a signed number of controls, or to the first or last one.
 const kFocusSteps: Record<string, number | "first" | "last"> = {
   ArrowDown: 1, ArrowRight: 1, ArrowUp: -1, ArrowLeft: -1, Home: "first", End: "last"
@@ -36,7 +36,8 @@ function findTrigger(pane: Element | null | undefined) {
 }
 
 interface IPaneControlProps {
-  label: string;
+  // The accessible name, when the visible text alone doesn't say enough
+  label?: string;
   text: string;
   busy: boolean;
   onActivate: () => void;
@@ -77,15 +78,14 @@ const ConnectPane = observer(function ConnectPane(
   const containerRef = useRef<HTMLDivElement | null>(null);
   const { busyChoice, isConnected, connectedLabel } = connection;
   const busy = !!busyChoice;
+  const headingId = useId();
 
   // TileToolbarButton doesn't expose a ref, and the pane has to stay beside the button in the DOM,
   // so the trigger is found from the pane (findTrigger).
   const [triggerElement, setTriggerElement] = useState<HTMLElement | null>(null);
-  // Opens below the trigger and flips above it when there is no room left below. The room that
-  // matters is the visible part of the tile's scroll containers (the document's scroll area). The
-  // toolbar is portaled outside that area, so neither the pane's nor the trigger's own ancestors
-  // include it; the boundary comes from the tile's ancestors instead. The tile itself clips, but
-  // the toolbar sits outside it on purpose, and <body> and <html> are left to the viewport check.
+  // Opens below the trigger, flipping above it when there's no room below. The room is within the
+  // tile's scroll ancestors, since the toolbar is portaled outside them. The tile itself isn't one:
+  // the toolbar sits outside it on purpose. <body> and <html> are left to the viewport check.
   const tileElement = useTileToolbarTileElement();
   const boundary = useMemo(() => {
     const scrollers = tileElement
@@ -122,9 +122,8 @@ const ConnectPane = observer(function ConnectPane(
     // Mount-only, as in PanPalette.
   }, []);
 
-  // Swapping between the device list and the connected actions unmounts the focused control, which
-  // drops focus to <body> where the pane's Escape handler can no longer hear it. Track whether the
-  // pane holds focus and, if the swap orphaned it, move it to the pane's first control.
+  // Swapping the device list for the connected actions, or back, unmounts the focused control and
+  // drops focus to <body>. If the pane held focus, move it to the pane's first control.
   const holdsFocus = useRef(false);
   const firstRender = useRef(true);
   useLayoutEffect(() => {
@@ -149,9 +148,8 @@ const ConnectPane = observer(function ConnectPane(
     if (next && !containerRef.current?.contains(next)) holdsFocus.current = false;
   }
 
-  // Arrow keys and Home/End move focus among the pane's controls, wrapping at the ends; Tab is left
-  // to the toolbar's focus routing. Capture phase, and stopping Escape and the arrows, for the
-  // reasons in PanPalette's handleKeyDownCapture (dataflow-zoom-pan-buttons.tsx).
+  // Arrow keys and Home/End move among the controls, wrapping; Tab is left to the toolbar. Capture
+  // phase and stopPropagation for the reasons in PanPalette's handleKeyDownCapture.
   function handleKeyDownCapture(e: React.KeyboardEvent) {
     if (e.key === "Escape") {
       e.stopPropagation();
@@ -173,11 +171,9 @@ const ConnectPane = observer(function ConnectPane(
     controls[next].focus({ preventScroll: true });
   }
 
-  // A successful action closes the pane; the trigger's name and color then report the result. A failed
-  // or canceled attempt leaves it open. The pane that started the attempt may have closed since, and
-  // another one opened, so this reads whichever pane is showing now. Focus moves to the trigger only
-  // if that pane held it. If no pane is showing, closing again is harmless. A tile deleted during the
-  // attempt has nothing left to close.
+  // A successful action closes the pane; the trigger's name and color then report the result. The
+  // pane may have been closed and reopened during the attempt, so this closes whichever one is
+  // showing, and moves focus to the trigger only if that pane held it.
   function closeAfterSuccess() {
     if (!isAlive(content)) return;
     const live = paneRef.current;
@@ -205,9 +201,9 @@ const ConnectPane = observer(function ConnectPane(
 
   return (
     <div ref={setContainer} className="toolbar-palette dataflow-connect-pane" style={floatingStyles}
-        role="group" aria-label={kPaneLabel} onKeyDownCapture={handleKeyDownCapture}
+        role="group" aria-labelledby={headingId} onKeyDownCapture={handleKeyDownCapture}
         onFocus={handleFocus} onBlur={handleBlur}>
-      <div className="connect-heading">{kPaneLabel}</div>
+      <div className="connect-heading" id={headingId}>Device connection</div>
       <div className="connect-status" role="status">
         <div className="connect-status-line">{status}</div>
         {!isConnected && content.connectError &&
@@ -215,8 +211,8 @@ const ConnectPane = observer(function ConnectPane(
       </div>
       {isConnected
         ? <div className="connect-actions">
-            <PaneControl label="Reconnect" text="Reconnect" busy={busy} onActivate={reconnect} />
-            <PaneControl label="Disconnect" text="Disconnect" busy={busy} onActivate={disconnect} />
+            <PaneControl text="Reconnect" busy={busy} onActivate={reconnect} />
+            <PaneControl text="Disconnect" busy={busy} onActivate={disconnect} />
           </div>
         : <div className="connect-devices">
             {kDeviceChoiceOrder.map(choice => (
@@ -240,8 +236,11 @@ export const ConnectDeviceButton = observer(function ConnectDeviceButton({ name 
   const isOpen = !!content?.connectPaneOpen;
   const paneRef = useRef<HTMLDivElement | null>(null);
 
-  // Deselecting the tile unmounts the toolbar; the model volatile would otherwise stay open.
-  useEffect(() => () => content?.setConnectPaneOpen(false), [content]);
+  // Deselecting the tile unmounts the toolbar; the model volatile would otherwise stay open. Deleting
+  // the tile destroys the content before this runs.
+  useEffect(() => () => {
+    if (content && isAlive(content)) content.setConnectPaneOpen(false);
+  }, [content]);
 
   // Clicking anywhere outside the trigger or the pane closes it, handing focus back to the trigger
   // if the pane held it, as PanButton does for its palette (dataflow-zoom-pan-buttons.tsx).
@@ -270,7 +269,7 @@ export const ConnectDeviceButton = observer(function ConnectDeviceButton({ name 
     : undefined;
 
   return (
-    <TileToolbarButton name={name} title={title} colorClass={`connect-${state}`}
+    <TileToolbarButton name={name} title={title} colorClass={`connect-${state}`} expanded={isOpen}
         dataTestId="connect-device-button" disabled={readOnly || !content}
         disabledMessage="Connecting a device isn't available in a read-only view"
         onClick={() => content?.setConnectPaneOpen(!isOpen)} extraContent={pane}>

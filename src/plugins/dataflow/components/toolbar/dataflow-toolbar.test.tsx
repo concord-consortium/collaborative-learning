@@ -68,7 +68,12 @@ function renderToolbarButton(buttonName: string, opts: RenderOptions = {}) {
       </Provider>
     </ModalProvider>
   );
-  return { ...result, manager: theManager, content: theContent };
+  return { ...result, manager: theManager, content: theContent, model };
+}
+
+// MST warns when code reads or writes a node that was destroyed.
+function deadNodeWarnings(warn: jest.SpyInstance) {
+  return warn.mock.calls.filter(args => String(args[0]).includes("no longer part of a state tree"));
 }
 
 // Disabled state is exposed via aria-disabled, not the native attribute — see tile-toolbar-button.tsx.
@@ -307,6 +312,17 @@ describe("Dataflow pan split button (CLUE-573)", () => {
     expect(document.activeElement).toBe(getTrigger(container));
   });
 
+  // Deleting a tile destroys its model before the toolbar unmounts.
+  it("unmounting after the tile was deleted does not touch the destroyed content", () => {
+    const { model, unmount } = openPalette();
+    const warn = jest.spyOn(console, "warn").mockImplementation(() => undefined);
+    destroy(model);
+    unmount();
+    const warnings = deadNodeWarnings(warn);
+    warn.mockRestore();
+    expect(warnings).toEqual([]);
+  });
+
 });
 
 describe("Dataflow connect button and pane", () => {
@@ -365,12 +381,15 @@ describe("Dataflow connect button and pane", () => {
       fireEvent.click(getTrigger(container));
     };
     expect(screen.queryByRole("group", { name: "Device connection" })).toBeNull();
+    expect(getTrigger(container)).toHaveAttribute("aria-expanded", "false");
     press();
     expect(content.connectPaneOpen).toBe(true);
     expect(screen.getByRole("group", { name: "Device connection" })).toBeInTheDocument();
+    expect(getTrigger(container)).toHaveAttribute("aria-expanded", "true");
     press();
     expect(content.connectPaneOpen).toBe(false);
     expect(screen.queryByRole("group", { name: "Device connection" })).toBeNull();
+    expect(getTrigger(container)).toHaveAttribute("aria-expanded", "false");
   });
 
   it("opening the pane moves focus to the first control", () => {
@@ -596,8 +615,6 @@ describe("Dataflow connect button and pane", () => {
     expect(document.activeElement).toBe(trigger);
   });
 
-  // Deleting a tile destroys its model. The unmount cleanup that follows warns on the dead node too,
-  // so only the warnings logged while the attempt resolves are checked.
   it("a success with focus outside the pane leaves focus where it is", async () => {
     const r = openPane();
     const resolve = pendingConnect(r);
@@ -610,17 +627,17 @@ describe("Dataflow connect button and pane", () => {
     outside.remove();
   });
 
+  // Deleting a tile destroys its model before the toolbar unmounts.
   it("a success after the tile was deleted does not touch the destroyed content", async () => {
     const r = openPane();
     const resolve = pendingConnect(r);
+    const warn = jest.spyOn(console, "warn").mockImplementation(() => undefined);
     destroy(r.model);
     r.unmount();
-    const warn = jest.spyOn(console, "warn").mockImplementation(() => undefined);
     await resolve("connected");
-    const deadNodeWarnings = warn.mock.calls.filter(args =>
-      String(args[0]).includes("no longer part of a state tree"));
+    const warnings = deadNodeWarnings(warn);
     warn.mockRestore();
-    expect(deadNodeWarnings).toEqual([]);
+    expect(warnings).toEqual([]);
   });
 
   it("a failed Connect keeps the pane open and shows the error", async () => {
@@ -631,6 +648,34 @@ describe("Dataflow connect button and pane", () => {
     expect(r.content.connectPaneOpen).toBe(true);
     expect(within(paneGroup()).getByText("Couldn't connect to Spiker:bit.")).toBeInTheDocument();
     expect(within(paneGroup()).getByRole("button", { name: "Connect Arduino" })).toBeInTheDocument();
+  });
+
+  it("a failed Connect shows the error only in the pane of the tile where it was clicked", async () => {
+    const Component = getToolbarButtonInfo("dataflow", "connect")!.component;
+    const stores = specStores();
+    const tiles = [TileModel.create({ content: DataflowContentModel.create() }),
+      TileModel.create({ content: DataflowContentModel.create() })];
+    jest.spyOn(getDeviceConnection(stores.serialDevice), "connect").mockResolvedValue("failed");
+    render(
+      <ModalProvider>
+        <Provider stores={stores}>
+          {tiles.map(model => (
+            <div key={model.id} data-testid={model.id}>
+              <TileModelContext.Provider value={model}>
+                <Component name="connect" />
+              </TileModelContext.Provider>
+            </div>
+          ))}
+        </Provider>
+      </ModalProvider>
+    );
+    const [a, b] = tiles.map(model => within(screen.getByTestId(model.id)));
+    fireEvent.click(a.getByTestId("connect-device-button"));
+    await act(async () => { fireEvent.click(a.getByRole("button", { name: "Connect Spiker:bit" })); });
+    expect(a.getByText("Couldn't connect to Spiker:bit.")).toBeInTheDocument();
+    fireEvent.click(b.getByTestId("connect-device-button"));
+    expect(b.getByRole("group", { name: "Device connection" })).toBeInTheDocument();
+    expect(b.queryByText(/Couldn't connect/)).toBeNull();
   });
 
   it("a canceled Connect keeps the pane open", async () => {

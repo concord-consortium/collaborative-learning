@@ -345,6 +345,16 @@ describe("DeviceConnection", () => {
     serialDevice.setActiveDevice("arduino", { write: jest.fn(), close: jest.fn() });
     const connection = new DeviceConnection(serialDevice);
     expect(connection.connectTutorialDismissed).toBe(true);
+    expect(connection.connectTutorialDismissal).toEqual({ by: "connection" });
+  });
+
+  it("keeps the first thing that dismissed the connect tutorial", () => {
+    const serialDevice = new SerialDevice();
+    const connection = new DeviceConnection(serialDevice);
+    expect(connection.connectTutorialDismissed).toBe(false);
+    connection.dismissConnectTutorial({ by: "ok", tileId: "tile1" });
+    serialDevice.setActiveDevice("arduino", { write: jest.fn(), close: jest.fn() });
+    expect(connection.connectTutorialDismissal).toEqual({ by: "ok", tileId: "tile1" });
   });
 
   it("getDeviceConnection returns one instance per SerialDevice", () => {

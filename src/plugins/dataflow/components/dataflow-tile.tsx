@@ -167,6 +167,7 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
         <DataflowConnectTutorialGate
           content={tileContent}
           connection={getDeviceConnection(this.stores.serialDevice)}
+          tileId={model.id}
           readOnly={readOnly}
           onDismiss={this.handleDismissConnectTutorial}
         />

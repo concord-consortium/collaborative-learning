@@ -1,9 +1,25 @@
+@import "../../../components/vars";
 @import "./timeline-event-colors.scss";
 
+// The checkbox is a thin black outline, a band of the icon color, and the 40% fill: 2px, 2px
+// and a 16px center of a 24px box.
+$key-checkbox-size: 24px;
+// How far the icon reaches beyond the checkbox's top-left corner.
+$key-icon-overhang: 5px;
+$key-checkbox-outline: 2px;
+$key-checkbox-border: 2px;
+
 .timeline-key {
+  align-items: center;
   display: flex;
-  gap: 12px;
+  // The key holds up to six entries, which do not fit on one line in a narrow tile. Wrapping
+  // costs height, which the tile can be resized for; overflowing clips the key and puts a
+  // horizontal scrollbar on the tile.
+  flex-wrap: wrap;
+  gap: 6px 12px;
   justify-content: center;
+  // The same step the Full Timeline keeps from the graph above it.
+  margin-top: 16px;
 
   .key-title {
     font-weight: bold;
@@ -15,37 +31,82 @@
     display: flex;
     gap: 6px;
 
-    .color-swatch {
-      border: 1px solid #121212;
-      height: 16px;
-      width: 16px;
+    .key-checkbox {
+      display: block;
+      // Padded to take in the icon's overhang, so this box encloses both it and the checkbox --
+      // which is what lets the focus ring go around both, as the design draws it.
+      padding: $key-icon-overhang 0 0 $key-icon-overhang;
+      position: relative;
 
-      &.blue-event {
-        background-color: $blue-base;
+      // The icon overlaps the box's top-left corner, as the design has it. It names nothing -- the
+      // label does that -- so it must not swallow clicks meant for the checkbox under it.
+      .event-shape {
+        left: 0;
+        pointer-events: none;
+        position: absolute;
+        top: 0;
       }
 
-      &.orange-event {
-        background-color: $orange-base;
+      // The ring belongs to the whole control, but only :focus-visible on the input should raise
+      // it, so that a pointer click does not.
+      &:has(input:focus-visible) {
+        outline: $focus-ring-outer-width solid $focus-ring-color;
+        outline-offset: $focus-ring-inner-width;
+      }
+    }
+
+    input[type="checkbox"] {
+      appearance: none;
+      // A mark on the plot sits on black. The checkbox carries a near-black of its own so the
+      // swatch reads like the mark it governs wherever the key is placed.
+      background-color: #121212;
+      border: $key-checkbox-outline solid #121212;
+      box-sizing: border-box;
+      cursor: pointer;
+      height: $key-checkbox-size;
+      margin: 0;
+      position: relative;
+      width: $key-checkbox-size;
+
+      &:disabled {
+        cursor: default;
       }
 
-      &.red-event {
-        background-color: $red-base;
+      // The checkmark, drawn always so that hovering an unchecked box can ghost it in. Sized and
+      // placed against the fill, not the whole box, so the borders never crowd it.
+      &::after {
+        border: solid white;
+        border-width: 0 2.5px 2.5px 0;
+        content: "";
+        height: 11px;
+        left: 8px;
+        opacity: 0;
+        position: absolute;
+        top: 3px;
+        transform: rotate(45deg);
+        width: 5px;
       }
 
-      &.yellow-event {
-        background-color: $yellow-base;
+      &:checked::after {
+        opacity: 1;
       }
 
-      &.magenta-event {
-        background-color: $magenta-base;
+      &:hover:not(:checked):not(:disabled)::after {
+        opacity: 0.45;
       }
+    }
 
-      &.purple-event {
-        background-color: $purple-base;
-      }
+    @each $word, $colors in $event-colors {
+      &.#{$word}-event input[type="checkbox"] {
+        // A gradient, not a background-color: the swatch needs two layers, the black backing and
+        // the translucent color over it, and background-color is only one.
+        background-image: linear-gradient(map-get($colors, fill), map-get($colors, fill));
+        box-shadow: inset 0 0 0 $key-checkbox-border map-get($colors, select);
 
-      &.default-event {
-        background-color: $default-base;
+        &:hover:not(:disabled) {
+          background-image: linear-gradient(map-get($colors, hover-fill), map-get($colors, hover-fill));
+          box-shadow: inset 0 0 0 $key-checkbox-border map-get($colors, hover);
+        }
       }
     }
   }

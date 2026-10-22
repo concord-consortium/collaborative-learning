@@ -1,4 +1,4 @@
-import { act, fireEvent, render } from "@testing-library/react";
+import { act, cleanup, fireEvent, render } from "@testing-library/react";
 import { DateTime } from "luxon";
 import { observable, runInAction } from "mobx";
 import { IJsonPatch, onPatch } from "mobx-state-tree";
@@ -14,6 +14,7 @@ import { mockPointerEvents } from "../../../test/pointer-events";
 import { SharedSeismogram } from "../../shared-seismogram/shared-seismogram";
 import { TimelineContentModel, TimelineContentModelType } from "../models/timeline-content";
 import { FullTimeline } from "./full-timeline";
+import { HiddenEventTypesContext } from "./hidden-event-types-context";
 
 // The timeline tile needs to be registered so TileModel.create
 // knows it is a supported tile type
@@ -69,14 +70,17 @@ describe("FullTimeline", () => {
     });
   }
 
-  function renderFullTimeline(viewStart: DateTime, viewEnd: DateTime, { readOnly = false } = {}) {
+  function renderFullTimeline(viewStart: DateTime, viewEnd: DateTime,
+                              { readOnly = false, hiddenEventTypes = [] as string[] } = {}) {
     const content = TimelineContentModel.create();
     content.setViewRange(viewStart, viewEnd);
     const model = TileModel.create({ content });
     const result = render(
       <ReadOnlyContext.Provider value={readOnly}>
         <TileModelContext.Provider value={model}>
-          <FullTimeline />
+          <HiddenEventTypesContext.Provider value={{ types: hiddenEventTypes, toggle: () => undefined }}>
+            <FullTimeline />
+          </HiddenEventTypesContext.Provider>
         </TileModelContext.Provider>
       </ReadOnlyContext.Provider>
     );
@@ -125,11 +129,31 @@ describe("FullTimeline", () => {
     expect(events[1].style.left).toBe("75%");
     expect(events[1].style.width).toBe("12.5%");
 
-    // Each event's shape is centered on the event
-    const shapes = container.querySelectorAll<HTMLElement>(".full-timeline-shape");
-    expect(shapes).toHaveLength(2);
-    expect(shapes[1].style.left).toBe("81.25%");
-    expect(shapes[1].querySelector(".event-shape")).toHaveClass("orange-event");
+    // The event shapes belong on the graph above: the strip shares its band with the Full
+    // Timeline header, which the shapes crowd out.
+    expect(container.querySelector(".event-shape")).toBeNull();
+  });
+
+  it("stops drawing a type that is switched off in the Event Key", () => {
+    const dataSet = DataSet.create();
+    addAttributeToDataSet(dataSet, { name: "windowStart" });
+    addAttributeToDataSet(dataSet, { name: "windowEnd" });
+    addAttributeToDataSet(dataSet, { name: "eventType" });
+    addCasesToDataSet(dataSet, [
+      { windowStart: day(1.5).toISO()!, windowEnd: day(1.75).toISO()!, eventType: "Earthquake" },
+      { windowStart: day(3).toISO()!, windowEnd: day(3.5).toISO()!, eventType: "Noise" }
+    ]);
+    mockSharedDataSet = SharedDataSet.create({ dataSet });
+
+    expect(renderFullTimeline(day(1), day(2))
+             .container.querySelectorAll(".full-timeline-event")).toHaveLength(2);
+    cleanup();
+
+    const { container } = renderFullTimeline(day(1), day(2), { hiddenEventTypes: ["Earthquake"] });
+
+    const left = container.querySelectorAll<HTMLElement>(".full-timeline-event");
+    expect(left).toHaveLength(1);
+    expect(left[0]).toHaveClass("orange-event");
   });
 
   it("keeps events within the strip, leaving out those that don't overlap the data", () => {
@@ -150,6 +174,36 @@ describe("FullTimeline", () => {
     expect(events).toHaveLength(1);
     expect(events[0].style.left).toBe("87.5%");
     expect(events[0].style.width).toBe("12.5%");
+  });
+
+  it("shows a placed marker", () => {
+    const { content, container } = renderFullTimeline(day(1), day(2));
+    act(() => { content.setMarkerTime(day(3)); });
+    const marker = container.querySelector<HTMLElement>(".full-timeline-marker")!;
+    expect(marker).toBeInTheDocument();
+    expect(marker).not.toHaveClass("placing");
+    expect(marker.style.left).toBe("75%");
+  });
+
+  // Why the strip has to reject these rather than clamp them is in FullTimelineMarker.
+  it.each([
+    ["before the data", -1],
+    ["after the data", 5]
+  ])("shows nothing for a marker %s", (_label, dayOffset) => {
+    const { content, container } = renderFullTimeline(day(1), day(2));
+    act(() => { content.setMarkerTime(day(dayOffset)); });
+    expect(container.querySelector(".full-timeline-marker")).toBeNull();
+  });
+
+  it("shows the preview dashed while placing", () => {
+    const { content, container } = renderFullTimeline(day(1), day(2));
+    act(() => {
+      content.startPlacingMarker();
+      content.setHoverTime(day(0.5));
+    });
+    const marker = container.querySelector<HTMLElement>(".full-timeline-marker")!;
+    expect(marker).toHaveClass("placing");
+    expect(marker.style.left).toBe("12.5%");
   });
 
   it("centers the view on a press outside the overlay", () => {

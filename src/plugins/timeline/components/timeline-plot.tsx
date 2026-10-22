@@ -2,6 +2,7 @@ import classNames from "classnames";
 import { observer } from "mobx-react-lite";
 import React, { useEffect, useRef, useState } from "react";
 import { useReadOnlyContext } from "../../../components/document/read-only-context";
+import { kTileIdAttr, kTileSelector } from "../../../components/tiles/tile-dom";
 import { useLiveAnnouncer } from "../../../hooks/use-live-announcer";
 import { useTimelineContent } from "../hooks/use-timeline-content";
 import { describeView, formatTime } from "./describe-view";
@@ -31,6 +32,7 @@ interface IProps {
 export const TimelinePlot = observer(function TimelinePlot({ children }: IProps) {
   const content = useTimelineContent();
   const readOnly = useReadOnlyContext();
+  const plotRef = useRef<HTMLDivElement>(null);
   const dragRef = useRef<IDragState | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [isShiftDown, setIsShiftDown] = useState(false);
@@ -81,8 +83,41 @@ export const TimelinePlot = observer(function TimelinePlot({ children }: IProps)
     };
   };
 
+  // Escape cancels placement, but only while focus is in this tile or its toolbar: the listener is
+  // on window, so Escape pressed anywhere else in CLUE would otherwise cancel it. The toolbar is in
+  // a portal outside the tile, and it is where focus is after a click on Add Time Marker. The key
+  // is consumed so the tile's focus trap and the toolbar, which also act on Escape, don't exit the
+  // tile in the same press.
+  useEffect(() => {
+    if (readOnly || !content.isPlacingMarker) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key !== "Escape") return;
+      const tile = plotRef.current?.closest(kTileSelector);
+      const focused = document.activeElement;
+      const inTile = !!tile?.contains(focused);
+      const inToolbar = !!tile &&
+        focused?.closest("[data-tile-id]")?.getAttribute("data-tile-id") === tile.getAttribute(kTileIdAttr);
+      if (!inTile && !inToolbar) return;
+      e.stopPropagation();
+      content.stopPlacingMarker();
+      announce("Marker placement cancelled.");
+    };
+    window.addEventListener("keydown", onKeyDown, true);
+    return () => window.removeEventListener("keydown", onKeyDown, true);
+  }, [announce, content, content.isPlacingMarker, readOnly]);
+
+  // Without this the dashed preview and its time label stay where the pointer left the plot,
+  // looking like a marker that has already been placed.
+  const handlePointerLeave = () => {
+    if (content.hoverTime) content.clearHoverTime();
+  };
+
   const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
     setIsShiftDown(e.shiftKey);
+    if (content.isPlacingMarker) {
+      const time = timeAtClientX(e);
+      if (time) content.setHoverTime(time);
+    }
     const drag = dragRef.current;
     if (!drag || drag.pointerId !== e.pointerId) return;
     const dx = e.clientX - drag.startX;
@@ -124,6 +159,12 @@ export const TimelinePlot = observer(function TimelinePlot({ children }: IProps)
     }
     const time = timeAtClientX(e);
     if (!time) return;
+    // While placing, the click belongs to the marker: zooming would move the ground out from under it.
+    if (content.isPlacingMarker) {
+      content.setMarkerTime(time);
+      announce(`Marker placed at ${formatTime(time)}.`);
+      return;
+    }
     if (e.shiftKey && !content.canZoomOut) {
       announce(`Already showing the full time range. ${describeView(content)}`);
       return;
@@ -147,13 +188,17 @@ export const TimelinePlot = observer(function TimelinePlot({ children }: IProps)
     return <div className="timeline-plot">{children}</div>;
   }
 
-  const cursorClass = isDragging ? "grabbing" : isShiftDown ? "zoom-out" : "zoom-in";
+  const cursorClass = content.isPlacingMarker
+    ? "placing"
+    : isDragging ? "grabbing" : isShiftDown ? "zoom-out" : "zoom-in";
 
   return (
     <>
       <div
+        ref={plotRef}
         className={classNames("timeline-plot", "interactive", cursorClass)}
         onPointerDown={handlePointerDown}
+        onPointerLeave={handlePointerLeave}
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
         onPointerCancel={handlePointerCancel}
