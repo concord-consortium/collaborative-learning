@@ -89,7 +89,8 @@ Add this to the PR description, with one entry per part and a reason for each:
 > **Deploy timing**
 ${touched.map(deployable => `> - **${deployable}: <before|with|after>** — <why>`).join("\n")}
 
-  before  safe to deploy as soon as it merges; the released client keeps working with it
+  before  (preferred) safe to deploy any time from merge until the client release;
+          the released client keeps working with it
   with    deploy just before or just after the client release
   after   needs the new client released first
 Think about both directions: the new client against the currently deployed part, and the
