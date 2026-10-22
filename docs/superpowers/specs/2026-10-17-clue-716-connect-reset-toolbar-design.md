@@ -447,7 +447,7 @@ and deletes `postSerialModal`. The dialog works like a one-time tutorial:
   title, top bar and block palette, so Tab and Enter can't reach controls it covers. The toolbar,
   drag handle and resize handle stay reachable.
 
-PR 2 stops reading the old `serialModalShown` flag; CLUE-736 deletes it.
+PR 2 deletes the old `serialModalShown` flag, which nothing reads once `postSerialModal` is gone.
 
 ## Toolbar configuration
 
@@ -537,7 +537,7 @@ The work ships as two PRs, behavior first and UI second, followed by CLUE-736.
 - the top-bar button and menu (`DataflowSerialConnectButton`), its styles, its `serial.svg` icon
   and the unused `refresh/` icons;
 - the connect-event state only it read: `SerialDevice`'s `lastConnectMessage`,
-  `connectChangeStamp`, `raisesWebSerialConnect` and `serialModalShown`, the `last-connect-message`
+  `connectChangeStamp` and `raisesWebSerialConnect`, the `last-connect-message`
   localStorage key, `WebSerialTransport.raisesWebSerialConnect`, and the `connect` handler in
   `initWebSerialConnectionEvents` (the `disconnect` handler stays);
 - the fallback: `toolbarShowsConnect` and the dialog's alternate text.
