@@ -354,6 +354,10 @@ export const NodeDemoOutputTypes = [
   {
     name: "Humidifier",
     icon: HumidIcon
+  },
+  {
+    name: "Servo",
+    icon: ServoIcon
   }
 ] as const;
 export type NodeDemoOutputTypeNames = (typeof NodeDemoOutputTypes)[number]['name'];
