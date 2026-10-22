@@ -141,6 +141,16 @@ describe("clueExport request handling", () => {
 
 describe("toHistoryRow", () => {
   const snap = (id: string, data: Record<string, unknown>) => ({id, data: () => data});
+
+  it.each([
+    ["a fraction", 1.5],
+    ["a numeric string", "3"],
+    ["an integer past 2^53", 2 ** 60],
+    ["missing", undefined],
+  ])("gives a null idx when the stored index is %s", (_name, index) => {
+    expect(toHistoryRow("doc1", snap("e6", {index, entry: "{}"})).idx).toBeNull();
+  });
+
   const created = Timestamp.fromMillis(Date.UTC(2026, 9, 1, 12, 0, 0));
 
   it("extracts the fields of a parseable entry", () => {
@@ -195,7 +205,20 @@ describe("toHistoryRow", () => {
     });
   });
 
-  it.each([["a string", "yesterday"], ["out of the Date range", 1e20]])(
+  it.each([
+    ["the first millisecond of year 1", Date.parse("0001-01-01T00:00:00.000Z"), "0001-01-01T00:00:00.000Z"],
+    ["the last millisecond of year 9999", Date.parse("9999-12-31T23:59:59.999Z"), "9999-12-31T23:59:59.999Z"],
+  ])("keeps a created at %s", (_name, created, iso) => {
+    const row = toHistoryRow("doc1", snap("e5", {index: 1, entry: JSON.stringify({created})}));
+    expect(row.created).toBe(iso);
+  });
+
+  it.each([
+    ["a string", "yesterday"],
+    ["out of the Date range", 1e20],
+    ["in year 0", Date.parse("0001-01-01T00:00:00.000Z") - 1],
+    ["in year 10000", Date.parse("9999-12-31T23:59:59.999Z") + 1],
+  ])(
     "gives a null created when the entry's created is %s", (_name, created) => {
       const row = toHistoryRow("doc1", snap("e4", {index: 1, entry: JSON.stringify({created})}));
       expect(row).toMatchObject({created: null, parse_ok: true});

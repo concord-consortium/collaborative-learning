@@ -100,10 +100,13 @@ const documentOffering = (owner: ExportOwner, firestore: Metadata | null, rtdb: 
   return value === undefined ? null : parseOffering(value);
 };
 
+// Years 1 to 9999: outside them toISOString writes a year a SQL TIMESTAMP cannot read.
+const kMinIsoMillis = Date.parse("0001-01-01T00:00:00.000Z");
+const kMaxIsoMillis = Date.parse("9999-12-31T23:59:59.999Z");
+
 const isoFromMillis = (value: unknown) => {
-  if (typeof value !== "number") return null;
-  const date = new Date(value);
-  return Number.isNaN(date.getTime()) ? null : date.toISOString();
+  if (typeof value !== "number" || !(value >= kMinIsoMillis && value <= kMaxIsoMillis)) return null;
+  return new Date(value).toISOString();
 };
 
 const fieldOf = (firestore: Metadata | null, rtdb: Metadata | null, field: string) =>
@@ -179,7 +182,7 @@ export function toHistoryRow(docId: string, snap: {id: string, data(): Metadata 
   return {
     doc_id: docId,
     entry_id: snap.id,
-    idx: stored.index ?? null,
+    idx: Number.isSafeInteger(stored.index) ? stored.index : null,
     prev_entry_id: stored.previousEntryId ?? null,
     server_created: stored.created instanceof Timestamp ? stored.created.toDate().toISOString() : null,
     created: parseOk ? isoFromMillis(entry.created) : null,
