@@ -36,16 +36,17 @@ callout like this:
 | rules | `firestore.rules`, `database.rules.json` |
 | indexes | `firestore.indexes.json` |
 
-- **before**: safe to deploy any time before the client release, as soon as it merges. The currently
-  released client keeps working with it.
+- **before**: safe to deploy any time from merge until the client release. The currently released
+  client keeps working with it.
 - **with**: deploy just before or just after the client release, but not long before it.
 - **after**: needs the new client released first.
 
-`before` is the usual timing, so make a change `before` wherever it can be. `before` doesn't mean the
-part has to go out right away; it means it is safe to deploy early. Preparing a release usually takes a
-few days. When every part of a release is `before`, it can all be deployed during that time, instead of
-within minutes of the client release. Use `with` only when the part has to go out at about the same
-moment as the client, because the released client would misbehave against it if it went out early.
+`before` is the usual timing, so make a change `before` wherever it can be. `before` doesn't mean
+the part has to go out right away; it means it is safe to deploy early. Preparing a release usually
+takes a few days. When every part of a release is `before`, it can all be deployed during that time,
+instead of within minutes of the client release. Use `with` only when the released client would
+misbehave against the part if it went out early, but can live with it for the few minutes around
+the release. Use `after` when the released client can't run against it at all.
 
 The reason is required: it is what a release manager reads when planning the deploys. Judge both
 directions: the new client running against the currently deployed part, and the **currently
