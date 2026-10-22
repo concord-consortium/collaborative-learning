@@ -83,8 +83,8 @@ export class WebSerialTransport implements IDeviceTransport {
     const reader = this.activeReader;
     this.activeReader = undefined;
     if (reader) {
-      try { await reader.cancel(); } catch (e) { /* reader may already be released */ }
-      try { reader.releaseLock(); } catch (e) { /* lock may already be released */ }
+      try { await reader.cancel(); } catch { /* reader may already be released */ }
+      try { reader.releaseLock(); } catch { /* lock may already be released */ }
     }
     await this.closePort();
     this.port = null;
@@ -160,11 +160,11 @@ export class WebSerialTransport implements IDeviceTransport {
     if (!this.port) return;
     try {
       if (streamReader) {
-        try { await streamReader.cancel(); } catch (e) { /* reader may already be released */ }
-        try { streamReader.releaseLock(); } catch (e) { /* lock may already be released */ }
+        try { await streamReader.cancel(); } catch { /* reader may already be released */ }
+        try { streamReader.releaseLock(); } catch { /* lock may already be released */ }
       }
       if (this.writer) {
-        try { await this.writer.close(); } catch (e) { /* writer may already be closed */ }
+        try { await this.writer.close(); } catch { /* writer may already be closed */ }
       }
       await this.port.close();
     } catch (e) {
