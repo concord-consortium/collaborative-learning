@@ -63,7 +63,7 @@ export const StatusAndOutput: React.FC = observer(function StatusAndOutput() {
         <div className="status-count">
           <label className="status-count-label">Event Categories</label>
           <div className="status-count-box">
-            {model.eventCategoriesFound.size || "-"}
+            {model.eventTypesFound.size || "-"}
           </div>
         </div>
       </div>

@@ -110,19 +110,22 @@ export const WaveRunnerContentModel = TileContentModel
         ? self.detectedEvents.length
         : self.eventsDataSet?.dataSet.cases.length;
     },
-    get eventCategoriesFound() {
+    get eventTypesFound() {
       if (self.isRunning || self.isPaused) {
         return new Set(self.detectedEvents.map(event => event.eventType));
       } else {
-        const categories = new Set<string>();
+        const typesFound = new Set<string>();
 
         const dataSet = self.eventsDataSet?.dataSet;
         const attrId = dataSet?.attrFromName(kEventTypeAttributeName)?.id;
         if (attrId) {
-          dataSet?.cases.forEach(aCase => categories.add(dataSet.getStrValue(aCase.__id__, attrId)));
+          dataSet?.cases.forEach(aCase => {
+            const type = dataSet.getStrValue(aCase.__id__, attrId);
+            if (type) typesFound.add(type);
+          });
         }
 
-        return categories;
+        return typesFound;
       }
     }
   }))

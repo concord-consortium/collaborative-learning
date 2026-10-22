@@ -11,7 +11,7 @@ import { registerTileContentInfo } from "../../../models/tiles/tile-content-info
 import { kEventNumberAttrName } from "../../shared-seismogram/event-number-column";
 import { kWaveRunnerTileType } from "../wave-runner-types";
 import { ModelListEntry, PLACEHOLDER_MODEL_URL } from "../../../../shared/seismic/models/model-metadata";
-import { WaveRunnerContentModel, defaultWaveRunnerContent } from "./wave-runner-content";
+import { WaveRunnerContentModel, WaveRunnerContentModelType, defaultWaveRunnerContent } from "./wave-runner-content";
 import appConfig from "../../../clue/app-config.json";
 import { SeismicDownloadService, DONE } from "../../../models/stores/seismic/seismic-download-service";
 import {
@@ -107,7 +107,7 @@ function setupTileInDocument() {
   });
   docModel.treeMonitor!.enableMonitoring();
 
-  return docContent.tileMap.get("tile1")!.content as any;
+  return docContent.tileMap.get("tile1")!.content as WaveRunnerContentModelType;
 }
 
 describe("WaveRunnerContent", () => {
@@ -145,13 +145,13 @@ describe("WaveRunnerContent", () => {
     const shared = content.sharedSeismogram;
     expect(shared).toBeDefined();
     expect(content.hasStationData).toBe(true);
-    expect(shared.station.station).toBe("K204");
-    expect(shared.station.network).toBe("AK");
+    expect(shared?.station?.station).toBe("K204");
+    expect(shared?.station?.network).toBe("AK");
     // Compared as instants: the shared model normalizes to millisecond precision.
-    expect(new Date(shared.startTime).toISOString())
+    expect(new Date(shared?.startTime as any).toISOString())
       .toBe(new Date(`${content.startDate}T00:00:00Z`).toISOString());
     // endDate is inclusive, so the shared range ends at the close of that day.
-    expect(new Date(shared.endTime).getTime())
+    expect(new Date(shared?.endTime as any).getTime())
       .toBe(Date.parse(`${content.endDate}T00:00:00Z`) + SECONDS_PER_DAY * 1000);
   });
 
@@ -273,7 +273,7 @@ describe("WaveRunnerContent", () => {
       .toBe(`rank(windowStart, windowEnd != "" and eventType != "")`);
   });
 
-  describe("eventsFound and eventCategoriesFound", () => {
+  describe("eventsFound and eventTypesFound", () => {
     const makeEvent = (hour: number, eventType: string) => ({
       windowStart: Date.UTC(2026, 1, 1, hour), windowEnd: Date.UTC(2026, 1, 1, hour) + 60000,
       eventType, confidence: 0.9
@@ -288,7 +288,7 @@ describe("WaveRunnerContent", () => {
     it("reports nothing found before any run", () => {
       const content = setupTileInDocument();
       expect(content.eventsFound).toBeUndefined();
-      expect(content.eventCategoriesFound).toEqual(new Set());
+      expect(content.eventTypesFound).toEqual(new Set());
     });
 
     it("reads the events dataset when no run is in progress", () => {
@@ -299,7 +299,7 @@ describe("WaveRunnerContent", () => {
       content.recordDetectedEvents();
 
       expect(content.eventsFound).toBe(3);
-      expect(content.eventCategoriesFound).toEqual(new Set(["earthquake", "traffic"]));
+      expect(content.eventTypesFound).toEqual(new Set(["earthquake", "traffic"]));
     });
 
     it("ignores detected events that haven't been recorded when no run is in progress", () => {
@@ -309,11 +309,11 @@ describe("WaveRunnerContent", () => {
       content.addDetectedEvents([makeEvent(2, "traffic"), makeEvent(3, "avalanche")]);
 
       expect(content.eventsFound).toBe(1);
-      expect(content.eventCategoriesFound).toEqual(new Set(["earthquake"]));
+      expect(content.eventTypesFound).toEqual(new Set(["earthquake"]));
 
       content.recordDetectedEvents();
       expect(content.eventsFound).toBe(3);
-      expect(content.eventCategoriesFound).toEqual(new Set(["avalanche", "earthquake", "traffic"]));
+      expect(content.eventTypesFound).toEqual(new Set(["avalanche", "earthquake", "traffic"]));
     });
 
     it.each([
@@ -324,7 +324,7 @@ describe("WaveRunnerContent", () => {
       content.addDetectedEvents([makeEvent(1, "earthquake")]);
       content.recordDetectedEvents();
       expect(content.eventsFound).toBe(1);
-      expect(content.eventCategoriesFound).toEqual(new Set(["earthquake"]));
+      expect(content.eventTypesFound).toEqual(new Set(["earthquake"]));
 
       setRunState(content, state);
       content.addDetectedEvents([
@@ -332,7 +332,7 @@ describe("WaveRunnerContent", () => {
       ]);
 
       expect(content.eventsFound).toBe(3);
-      expect(content.eventCategoriesFound).toEqual(new Set(["traffic", "avalanche"]));
+      expect(content.eventTypesFound).toEqual(new Set(["traffic", "avalanche"]));
     });
 
     it("reports zero events and no categories while a run has found nothing yet", () => {
@@ -342,7 +342,7 @@ describe("WaveRunnerContent", () => {
       setRunState(content, { isRunning: true });
 
       expect(content.eventsFound).toBe(0);
-      expect(content.eventCategoriesFound).toEqual(new Set());
+      expect(content.eventTypesFound).toEqual(new Set());
     });
 
     it("finds no categories in a linked dataset without an eventType attribute", () => {
@@ -353,7 +353,7 @@ describe("WaveRunnerContent", () => {
       getSharedModelManager(content)!.addTileSharedModel(content, SharedDataSet.create({ dataSet }));
 
       expect(content.eventsFound).toBe(2);
-      expect(content.eventCategoriesFound).toEqual(new Set());
+      expect(content.eventTypesFound).toEqual(new Set());
     });
   });
 
