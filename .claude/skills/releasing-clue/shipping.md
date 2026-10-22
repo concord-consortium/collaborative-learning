@@ -20,7 +20,9 @@ for each codebase with the tag's `<codebase>/.env.collaborative-learning-ec215`.
 staging can differ.
 
 Follow the recorded order:
-- **`before`:** deploy now, before Release Production.
+- **`before`:** it has often gone out already. Compare production's deployed copy with the tag
+  ("Firebase deployables" in preparing.md), and deploy now, before Release Production, only if they
+  differ.
 - **`with`:** deploy immediately before Release Production and start the release right after, so
   the released client and the new part overlap as briefly as possible.
 - **`after`:** don't deploy yet. Deploy it once Release Production has succeeded and

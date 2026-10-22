@@ -130,7 +130,8 @@ What's deployed (read-only; projects are `staging` = collaborative-learning-stag
   `environmentVariables` shows each function's non-secret params. For 1st-gen functions use
   `gcloud functions describe <fn> --project <project> --region us-central1 --format='value(updateTime)'`.
   Compare deploy times with `git log --first-parent <range> -- functions-v2 shared` to see which
-  merges each project is missing. Production's 1st-gen functions are in codebase `default` on
+  merges each project is missing. This compares times, not code, so a function deployed from an
+  unmerged branch looks current; ask whoever deployed it when one is newer than you expect. Production's 1st-gen functions are in codebase `default` on
   nodejs16, while staging's are in `functions-v1`; a `functions-v1` deploy to production needs a
   decision about that first.
 - **Indexes:** `npx firebase firestore:indexes --project <project>`. Strip the implicit `__name__`
@@ -148,8 +149,9 @@ directions: the new client against the deployed part, and the *released* client 
 part. Decisions come from the PR authors and the developer. An index deploy prompts before deleting
 extra indexes, so never pass `--force`.
 
-A part whose strictest timing is `before` doesn't need to wait for release day. Deploy it while the
-release is being prepared, so that only `with` and `after` parts go out at release time.
+A part whose strictest timing is `before` doesn't need to wait for release day, and has often gone
+out already. Deploy it while the release is being prepared, unless the deployed state above shows it
+is already live, so that only `with` and `after` parts are left for release time.
 
 Also record the deploy **order**. The default is indexes (wait until they show Enabled), then
 rules, then functions, then the client, and a part marked `after` deploys only once Release
