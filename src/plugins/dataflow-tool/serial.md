@@ -33,7 +33,7 @@ and **outbound** (a Live Output node → bytes leaving the computer).
 | `MicrobitUsbTransport` | `src/models/stores/spikerbit-device.ts` | `IDeviceTransport` over a micro:bit WebUSB connection: `write()` out, `serialdata` → `onData` in, `status` → `onDisconnect`. |
 | `SpikerbitDevice` | `src/models/stores/spikerbit-device.ts` | Spiker:bit connect/version/flash state machine; taps `onData` for connect-time version detection, then hands the transport to the store. |
 | `SerialDevice` | `src/models/stores/serial.ts` | Transport-agnostic connection store: holds the active transport and the registered channel sources, routes writes (`writeLine`) and inbound parsing (`receive`). `isConnected()` is observable. |
-| `DeviceConnection` | `src/plugins/dataflow/model/device-connection.ts` | App-wide connect, reconnect and disconnect; one instance per `SerialDevice`, from `getDeviceConnection`. Tracks `lastChoice`, `busyChoice` and `connectTutorialDismissed`. |
+| `DeviceConnection` | `src/plugins/dataflow/model/device-connection.ts` | App-wide connect, reconnect and disconnect; one instance per `SerialDevice`, from `getDeviceConnection`. Tracks `lastChoice`, `busyChoice` and `connectTutorialDismissal`. |
 | tile device actions | `src/plugins/dataflow/utilities/device-actions.ts` | Wrap `DeviceConnection` for one tile: they reset the clicking tile's program, log the change, and record a failed attempt's message on the tile. |
 | `parseKeyValueData` | `src/models/stores/serial-protocol.ts` | Shared parser: `emg:<n>\r\n` lines → channel values. |
 | tile serial channels | `NodeChannelInfo[]` (`.../model/utilities/channel.ts`) | The shared blackboard: parsers write `channel.value`; the Sensor node reads it. Each mounted, editable tile registers its channels with `SerialDevice` as a channel source. |
@@ -123,8 +123,9 @@ events with the operations `connectDevice`, `reconnectDevice`, `disconnectDevice
 `resetProgram`. A successful connect or reconnect resets only the clicking tile's program,
 through `resetProgramForTile`, which says what Reset leaves alone. Disconnect never resets.
 
-**Log events.** Each is a `DATAFLOW_TOOL_CHANGE` event for the clicking tile (`tileId`). The
-fields below sit at the top level of the event.
+**Log events.** Each is a `DATAFLOW_TOOL_CHANGE` event for one tile (`tileId`): the clicking
+tile, or for the connect tutorial's events, the tile it covers. The fields below sit at the top
+level of the event.
 
 | `operation` | Other fields | Logged when |
 |---|---|---|
@@ -132,12 +133,17 @@ fields below sit at the top level of the event.
 | `reconnectDevice` | `targetType: "device"`, `device` | A Reconnect succeeds |
 | `disconnectDevice` | `targetType: "device"`, `device`: the choice that was connected | The user disconnects |
 | `resetProgram` | `targetType: "program"`, `trigger`: `connect`, `reconnect` or `button` | The program is reset |
+| `showConnectTutorial` | `targetType: "connectTutorial"` | The connect tutorial appears over the tile |
+| `dismissConnectTutorial` | `targetType: "connectTutorial"`, `trigger`: `ok` (OK in this tile), `okInAnotherTile` or `connection` | The tutorial over the tile is dismissed |
 
 - A successful Connect or Reconnect logs two events: the device event, then `resetProgram` with
   `trigger` `connect` or `reconnect`.
 - A failed or canceled attempt logs nothing.
 - Only a Disconnect the user chooses is logged. An unplug logs nothing, so a `connectDevice` can
   have no matching `disconnectDevice`.
+- One OK or one connection dismisses the tutorial on every tile, so each tile it covered logs a
+  dismissal; the tile whose OK was clicked has `trigger` `ok`. A tile that closes while the
+  tutorial shows, such as a deleted tile, logs no dismissal.
 
 ### Channel sources
 

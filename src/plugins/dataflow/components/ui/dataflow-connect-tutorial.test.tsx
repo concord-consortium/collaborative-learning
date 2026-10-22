@@ -6,6 +6,10 @@ import { SerialDevice } from "../../../../models/stores/serial";
 import { createClueTileStrategy } from "../../../../hooks/create-clue-tile-strategy";
 import { acknowledgeConnectTutorial, DataflowConnectTutorialGate } from "./dataflow-connect-tutorial";
 import { getDataflowFocusSlots } from "../dataflow-focus-slots";
+import { LogEventName } from "../../../../lib/logger-types";
+import { logTileChangeEvent } from "../../../../models/tiles/log/log-tile-change-event";
+
+jest.mock("../../../../models/tiles/log/log-tile-change-event", () => ({ logTileChangeEvent: jest.fn() }));
 
 const kTitle = "This program needs a real device";
 
@@ -25,8 +29,8 @@ function renderTile(
 ) {
   return render(
     <DataflowConnectTutorialGate
-      content={content} connection={connection} readOnly={readOnly} connectInToolbar={connectInToolbar}
-      onDismiss={() => connection.dismissConnectTutorial()}
+      content={content} connection={connection} tileId="tile1" readOnly={readOnly} connectInToolbar={connectInToolbar}
+      onDismiss={() => connection.dismissConnectTutorial({ by: "ok", tileId: "tile1" })}
     />
   );
 }
@@ -67,15 +71,70 @@ describe("DataflowConnectTutorialGate", () => {
     const connection = new DeviceConnection(new SerialDevice());
     render(
       <>
-        <DataflowConnectTutorialGate content={openedContent()} connection={connection}
-          onDismiss={() => connection.dismissConnectTutorial()} />
-        <DataflowConnectTutorialGate content={openedContent()} connection={connection}
-          onDismiss={() => connection.dismissConnectTutorial()} />
+        <DataflowConnectTutorialGate content={openedContent()} connection={connection} tileId="tile1"
+          onDismiss={() => connection.dismissConnectTutorial({ by: "ok", tileId: "tile1" })} />
+        <DataflowConnectTutorialGate content={openedContent()} connection={connection} tileId="tile2"
+          onDismiss={() => connection.dismissConnectTutorial({ by: "ok", tileId: "tile2" })} />
       </>
     );
     expect(screen.getAllByRole("dialog")).toHaveLength(2);
     fireEvent.click(screen.getAllByRole("button", { name: "OK" })[0]);
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+  });
+
+  describe("logging", () => {
+    const logged = () => (logTileChangeEvent as jest.Mock).mock.calls.map(([, { tileId, operation, change }]) =>
+      [tileId, operation, change.trigger]);
+
+    beforeEach(() => (logTileChangeEvent as jest.Mock).mockClear());
+
+    it("logs the tutorial showing on each tile, and OK as clicked in one tile", () => {
+      const connection = new DeviceConnection(new SerialDevice());
+      render(
+        <>
+          <DataflowConnectTutorialGate content={openedContent()} connection={connection} tileId="tile1"
+            onDismiss={() => connection.dismissConnectTutorial({ by: "ok", tileId: "tile1" })} />
+          <DataflowConnectTutorialGate content={openedContent()} connection={connection} tileId="tile2"
+            onDismiss={() => connection.dismissConnectTutorial({ by: "ok", tileId: "tile2" })} />
+        </>
+      );
+      expect(logged()).toEqual([
+        ["tile1", "showConnectTutorial", undefined], ["tile2", "showConnectTutorial", undefined]
+      ]);
+      expect((logTileChangeEvent as jest.Mock).mock.calls[0])
+        .toEqual([LogEventName.DATAFLOW_TOOL_CHANGE,
+          { tileId: "tile1", operation: "showConnectTutorial", change: { targetType: "connectTutorial" } }]);
+      (logTileChangeEvent as jest.Mock).mockClear();
+      fireEvent.click(screen.getAllByRole("button", { name: "OK" })[1]);
+      expect(logged()).toEqual([
+        ["tile1", "dismissConnectTutorial", "okInAnotherTile"], ["tile2", "dismissConnectTutorial", "ok"]
+      ]);
+    });
+
+    it("logs a dismissal by a connection, and nothing after a disconnect", () => {
+      const serialDevice = new SerialDevice();
+      renderTile(openedContent(), new DeviceConnection(serialDevice));
+      (logTileChangeEvent as jest.Mock).mockClear();
+      act(() => { connectedDevice(serialDevice); });
+      act(() => { serialDevice.clearActiveDevice(); });
+      expect(logged()).toEqual([["tile1", "dismissConnectTutorial", "connection"]]);
+    });
+
+    it("logs the tutorial when the program finishes opening after the tile mounts", () => {
+      const content = DataflowContentModel.create();
+      renderTile(content, new DeviceConnection(new SerialDevice()));
+      expect(logged()).toEqual([]);
+      act(() => content.setShowConnectTutorialOnOpen(true));
+      expect(logged()).toEqual([["tile1", "showConnectTutorial", undefined]]);
+    });
+
+    it("logs nothing when the tutorial doesn't show", () => {
+      const serialDevice = new SerialDevice();
+      connectedDevice(serialDevice);
+      renderTile(openedContent(), new DeviceConnection(serialDevice));
+      renderTile(openedContent(), new DeviceConnection(new SerialDevice()), true);
+      expect(logged()).toEqual([]);
+    });
   });
 
   it("does not come back after a disconnect of a device connected while it was showing", () => {
@@ -93,8 +152,10 @@ describe("DataflowConnectTutorialGate", () => {
     const connection = new DeviceConnection(new SerialDevice());
     render(
       <>
-        <DataflowConnectTutorialGate content={openedContent()} connection={connection} onDismiss={jest.fn()} />
-        <DataflowConnectTutorialGate content={openedContent()} connection={connection} onDismiss={jest.fn()} />
+        <DataflowConnectTutorialGate content={openedContent()} connection={connection} tileId="tile1"
+          onDismiss={jest.fn()} />
+        <DataflowConnectTutorialGate content={openedContent()} connection={connection} tileId="tile2"
+          onDismiss={jest.fn()} />
       </>
     );
     const [a, b] = screen.getAllByRole("dialog");
@@ -114,8 +175,8 @@ describe("DataflowConnectTutorialGate", () => {
             <div className="dataflow-program-content"><button>Block</button></div>
             <div className="program-toolbar"><button>Add</button></div>
           </div>
-          <DataflowConnectTutorialGate content={openedContent()} connection={connection}
-            onDismiss={() => connection.dismissConnectTutorial()} />
+          <DataflowConnectTutorialGate content={openedContent()} connection={connection} tileId="tile1"
+            onDismiss={() => connection.dismissConnectTutorial({ by: "ok", tileId: "tile1" })} />
         </div>
       );
       const tileElt = container.firstElementChild as HTMLElement;
@@ -178,7 +239,7 @@ describe("acknowledgeConnectTutorial", () => {
     ok.focus();
     expect(ok).toHaveFocus();
     acknowledgeConnectTutorial({ connection, ui, tileId: "tile1", readOnly: false, tileElt });
-    expect(connection.connectTutorialDismissed).toBe(true);
+    expect(connection.connectTutorialDismissal).toEqual({ by: "ok", tileId: "tile1" });
     expect(ui.setSelectedTileId).toHaveBeenCalledWith("tile1", { readOnly: false });
     expect(tileElt).toHaveFocus();
   });

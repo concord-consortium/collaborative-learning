@@ -23,6 +23,9 @@ export const kDeviceChoiceLabels: Record<DeviceChoice, string> = {
 
 export type ConnectResult = "connected" | "canceled" | "failed";
 
+// What dismissed the connect tutorial: OK in one tile, or any connection.
+export type ConnectTutorialDismissal = { by: "ok", tileId: string } | { by: "connection" };
+
 export interface IDeviceConnectionDeps {
   createWebSerialTransport(): WebSerialTransport;
   createSpikerbitDevice(serialDevice: SerialDevice): SpikerbitDevice;
@@ -45,9 +48,9 @@ export class DeviceConnection {
   lastChoice: DeviceChoice | undefined = undefined;
   // Set while a connect or reconnect attempt is in progress.
   busyChoice: DeviceChoice | undefined = undefined;
-  // True once the connect tutorial has been dismissed, by OK on any tile or by any connection. In
-  // memory only, so it can show again after a page reload.
-  connectTutorialDismissed = false;
+  // What first dismissed the connect tutorial, which then stays dismissed on every tile. In memory
+  // only, so it can show again after a page reload.
+  connectTutorialDismissal: ConnectTutorialDismissal | undefined = undefined;
 
   private serialDevice: SerialDevice;
   private deps: IDeviceConnectionDeps;
@@ -80,7 +83,7 @@ export class DeviceConnection {
     // A connection made any way, from any tile, ends the connect tutorial, so a later disconnect
     // can't bring it back. fireImmediately covers a connection that exists before this is created.
     reaction(() => this.isConnected, connected => {
-      if (connected) this.dismissConnectTutorial();
+      if (connected) this.dismissConnectTutorial({ by: "connection" });
     }, { fireImmediately: true });
   }
 
@@ -92,8 +95,13 @@ export class DeviceConnection {
     return this.isConnected && this.lastChoice ? kDeviceChoiceLabels[this.lastChoice] : undefined;
   }
 
-  dismissConnectTutorial() {
-    this.connectTutorialDismissed = true;
+  get connectTutorialDismissed() {
+    return !!this.connectTutorialDismissal;
+  }
+
+  // Keeps the first dismissal, so the tiles that log it agree on what dismissed it.
+  dismissConnectTutorial(dismissal: ConnectTutorialDismissal) {
+    this.connectTutorialDismissal ??= dismissal;
   }
 
   async connect(choice: DeviceChoice): Promise<ConnectResult> {

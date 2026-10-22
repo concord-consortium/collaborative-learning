@@ -1,9 +1,11 @@
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import { observer } from "mobx-react";
 
 import { DataflowContentModelType } from "../../model/dataflow-content";
 import { UIModelType } from "../../../../models/stores/ui";
-import { DeviceConnection } from "../../model/device-connection";
+import { ConnectTutorialDismissal, DeviceConnection } from "../../model/device-connection";
+import { LogEventName } from "../../../../lib/logger-types";
+import { logTileChangeEvent } from "../../../../models/tiles/log/log-tile-change-event";
 
 import "./dataflow-connect-tutorial.scss";
 
@@ -27,9 +29,21 @@ interface IAcknowledgeArgs {
  */
 export function acknowledgeConnectTutorial({ connection, ui, tileId, readOnly, tileElt }: IAcknowledgeArgs) {
   const focusWasInDialog = !!getConnectTutorialElement(tileElt)?.contains(document.activeElement);
-  connection.dismissConnectTutorial();
+  connection.dismissConnectTutorial({ by: "ok", tileId });
   ui.setSelectedTileId(tileId, { readOnly });
   if (focusWasInDialog) tileElt?.focus();
+}
+
+// How a tile's tutorial was dismissed, from that tile's point of view.
+function dismissTrigger(dismissal: ConnectTutorialDismissal, tileId: string) {
+  if (dismissal.by === "connection") return "connection";
+  return dismissal.tileId === tileId ? "ok" : "okInAnotherTile";
+}
+
+function logConnectTutorialEvent(tileId: string, operation: string, trigger?: string) {
+  logTileChangeEvent(LogEventName.DATAFLOW_TOOL_CHANGE, {
+    tileId, operation, change: { targetType: "connectTutorial", ...(trigger && { trigger }) }
+  });
 }
 
 interface IDialogProps {
@@ -47,6 +61,8 @@ export const DataflowConnectTutorial: React.FC<IDialogProps> = ({ connectInToolb
   const id = React.useId();
   const titleId = `${id}-title`;
   const bodyId = `${id}-body`;
+  // Screen readers would read the ⚡ as "high voltage".
+  const bolt = <span aria-hidden="true">⚡</span>;
   return (
     <div className="dataflow-connect-tutorial">
       <div className="dataflow-connect-tutorial-box" role="dialog"
@@ -54,8 +70,8 @@ export const DataflowConnectTutorial: React.FC<IDialogProps> = ({ connectInToolb
         <h3 className="dataflow-connect-tutorial-title" id={titleId}>This program needs a real device</h3>
         <p className="dataflow-connect-tutorial-body" id={bodyId}>
           Connect your Arduino, micro:bit or Spiker:bit to the computer. Then click the {connectInToolbar
-            ? <>yellow ⚡ Connect button in this tile&apos;s toolbar</>
-            : <>⚡ button at the top of this tile</>} and choose your device.
+            ? <>yellow {bolt} Connect button in this tile&apos;s toolbar</>
+            : <>{bolt} button at the top of this tile</>} and choose your device.
         </p>
         <button className="dataflow-connect-tutorial-ok" onClick={onDismiss}>OK</button>
       </div>
@@ -66,19 +82,31 @@ export const DataflowConnectTutorial: React.FC<IDialogProps> = ({ connectInToolb
 interface IGateProps {
   content: DataflowContentModelType;
   connection: DeviceConnection;
+  tileId: string;
   readOnly?: boolean;
   connectInToolbar?: boolean;
   onDismiss: () => void;
 }
 
 /**
- * Shows the tutorial on an editable tile whose program needed a device when it opened, until it is
- * dismissed (by OK on any tile, or by any connection). `connectTutorialDismissed` is the one
- * source: DeviceConnection sets it whenever a device is connected, so no separate check is needed.
+ * Shows on an editable tile whose program needed a device when it opened, until
+ * `connectTutorialDismissed` (OK on any tile, or any connection). Logs when it shows on this tile and
+ * when it is dismissed here, since it blocks the program while it shows.
  */
 export const DataflowConnectTutorialGate: React.FC<IGateProps> = observer(function DataflowConnectTutorialGate(
-  { content, connection, readOnly, connectInToolbar, onDismiss }
+  { content, connection, tileId, readOnly, connectInToolbar, onDismiss }
 ) {
   const show = !readOnly && content.showConnectTutorialOnOpen && !connection.connectTutorialDismissed;
+  const shown = useRef(false);
+  useEffect(() => {
+    if (show) {
+      shown.current = true;
+      logConnectTutorialEvent(tileId, "showConnectTutorial");
+    } else if (shown.current) {
+      shown.current = false;
+      const dismissal = connection.connectTutorialDismissal;
+      if (dismissal) logConnectTutorialEvent(tileId, "dismissConnectTutorial", dismissTrigger(dismissal, tileId));
+    }
+  }, [show, connection, tileId]);
   return show ? <DataflowConnectTutorial connectInToolbar={connectInToolbar} onDismiss={onDismiss} /> : null;
 });
