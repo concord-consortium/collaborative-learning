@@ -302,6 +302,17 @@ describe("WaveRunnerContent", () => {
       expect(content.eventTypesFound).toEqual(new Set(["earthquake", "traffic"]));
     });
 
+    it("does not include blank types", () => {
+      const content = setupTileInDocument();
+      content.addDetectedEvents([
+        makeEvent(1, "earthquake"), makeEvent(2, ""), makeEvent(3, "earthquake")
+      ]);
+      content.recordDetectedEvents();
+
+      expect(content.eventsFound).toBe(3);
+      expect(content.eventTypesFound).toEqual(new Set(["earthquake"]));
+    });
+
     it("ignores detected events that haven't been recorded when no run is in progress", () => {
       const content = setupTileInDocument();
       content.addDetectedEvents([makeEvent(1, "earthquake")]);
@@ -333,6 +344,15 @@ describe("WaveRunnerContent", () => {
 
       expect(content.eventsFound).toBe(3);
       expect(content.eventTypesFound).toEqual(new Set(["traffic", "avalanche"]));
+    });
+
+    it("does not include blank events while running", () => {
+      const content = setupTileInDocument();
+      setRunState(content, { isRunning: true });
+      content.addDetectedEvents([makeEvent(1, "earthquake"), makeEvent(2, "")]);
+
+      expect(content.eventsFound).toBe(2);
+      expect(content.eventTypesFound).toEqual(new Set(["earthquake"]));
     });
 
     it("reports zero events and no categories while a run has found nothing yet", () => {

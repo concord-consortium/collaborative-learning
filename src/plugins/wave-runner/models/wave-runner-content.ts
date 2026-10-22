@@ -112,7 +112,7 @@ export const WaveRunnerContentModel = TileContentModel
     },
     get eventTypesFound() {
       if (self.isRunning || self.isPaused) {
-        return new Set(self.detectedEvents.map(event => event.eventType));
+        return new Set(self.detectedEvents.map(event => event.eventType).filter(type => !!type));
       } else {
         const typesFound = new Set<string>();
 
