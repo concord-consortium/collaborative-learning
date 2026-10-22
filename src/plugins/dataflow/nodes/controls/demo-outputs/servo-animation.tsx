@@ -23,13 +23,6 @@ function sweepFraction(angle: number) {
   return (angle - kServoMinAngle) / (kServoMaxAngle - kServoMinAngle);
 }
 
-// The body lies on its side with the hub at its right, so the arm sweeps the space to the right
-// of it: 0 degrees points up, 90 to the right, 180 down. The arm's ink runs only upwards from
-// its pivot, which is why an unrotated arm is the one pointing up.
-function armRotation(angle: number) {
-  return angle;
-}
-
 interface IProps {
   angle: number;
 }
@@ -48,10 +41,13 @@ export const ServoAnimation: React.FC<IProps> = ({ angle }) => {
   return (
     <div className="servo-assembly">
       <img className="servo-part body" src={servoBody} alt="" />
+      {/* The body lies on its side with the hub at its right, so the angle is the rotation: 0
+          points up, 90 to the right, 180 down, sweeping the space beside the body. The arm's ink
+          runs only upwards from its pivot, which is why an unrotated arm is the one pointing up. */}
       <img
         className="servo-part arm"
         src={servoArm}
-        style={{ transform: `rotate(${armRotation(shownAngle)}deg)` }}
+        style={{ transform: `rotate(${shownAngle}deg)` }}
         alt=""
       />
     </div>
