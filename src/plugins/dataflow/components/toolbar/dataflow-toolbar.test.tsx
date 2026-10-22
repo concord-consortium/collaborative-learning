@@ -68,7 +68,12 @@ function renderToolbarButton(buttonName: string, opts: RenderOptions = {}) {
       </Provider>
     </ModalProvider>
   );
-  return { ...result, manager: theManager, content: theContent };
+  return { ...result, manager: theManager, content: theContent, model };
+}
+
+// MST warns when code reads or writes a node that was destroyed.
+function deadNodeWarnings(warn: jest.SpyInstance) {
+  return warn.mock.calls.filter(args => String(args[0]).includes("no longer part of a state tree"));
 }
 
 // Disabled state is exposed via aria-disabled, not the native attribute — see tile-toolbar-button.tsx.
@@ -305,6 +310,17 @@ describe("Dataflow pan split button (CLUE-573)", () => {
     expect(document.activeElement).toBe(screen.getByRole("button", { name: "Pan up" }));
     fireEvent.pointerDown(document.body);
     expect(document.activeElement).toBe(getTrigger(container));
+  });
+
+  // Deleting a tile destroys its model before the toolbar unmounts.
+  it("unmounting after the tile was deleted does not touch the destroyed content", () => {
+    const { model, unmount } = openPalette();
+    const warn = jest.spyOn(console, "warn").mockImplementation(() => undefined);
+    destroy(model);
+    unmount();
+    const warnings = deadNodeWarnings(warn);
+    warn.mockRestore();
+    expect(warnings).toEqual([]);
   });
 
 });
@@ -596,8 +612,6 @@ describe("Dataflow connect button and pane", () => {
     expect(document.activeElement).toBe(trigger);
   });
 
-  // Deleting a tile destroys its model. The unmount cleanup that follows warns on the dead node too,
-  // so only the warnings logged while the attempt resolves are checked.
   it("a success with focus outside the pane leaves focus where it is", async () => {
     const r = openPane();
     const resolve = pendingConnect(r);
@@ -610,17 +624,17 @@ describe("Dataflow connect button and pane", () => {
     outside.remove();
   });
 
+  // Deleting a tile destroys its model before the toolbar unmounts.
   it("a success after the tile was deleted does not touch the destroyed content", async () => {
     const r = openPane();
     const resolve = pendingConnect(r);
+    const warn = jest.spyOn(console, "warn").mockImplementation(() => undefined);
     destroy(r.model);
     r.unmount();
-    const warn = jest.spyOn(console, "warn").mockImplementation(() => undefined);
     await resolve("connected");
-    const deadNodeWarnings = warn.mock.calls.filter(args =>
-      String(args[0]).includes("no longer part of a state tree"));
+    const warnings = deadNodeWarnings(warn);
     warn.mockRestore();
-    expect(deadNodeWarnings).toEqual([]);
+    expect(warnings).toEqual([]);
   });
 
   it("a failed Connect keeps the pane open and shows the error", async () => {

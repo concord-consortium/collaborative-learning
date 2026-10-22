@@ -240,8 +240,11 @@ export const ConnectDeviceButton = observer(function ConnectDeviceButton({ name 
   const isOpen = !!content?.connectPaneOpen;
   const paneRef = useRef<HTMLDivElement | null>(null);
 
-  // Deselecting the tile unmounts the toolbar; the model volatile would otherwise stay open.
-  useEffect(() => () => content?.setConnectPaneOpen(false), [content]);
+  // Deselecting the tile unmounts the toolbar; the model volatile would otherwise stay open. Deleting
+  // the tile destroys the content before this runs.
+  useEffect(() => () => {
+    if (content && isAlive(content)) content.setConnectPaneOpen(false);
+  }, [content]);
 
   // Clicking anywhere outside the trigger or the pane closes it, handing focus back to the trigger
   // if the pane held it, as PanButton does for its palette (dataflow-zoom-pan-buttons.tsx).
