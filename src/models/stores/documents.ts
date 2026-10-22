@@ -17,6 +17,7 @@ import { TreeManagerType } from "../history/tree-manager";
 import { FirestoreHistoryManager, IFirestoreHistoryManagerArgs } from "../history/firestore-history-manager";
 import { FirestoreHistoryManagerConcurrent } from "../history/firestore-history-manager-concurrent";
 import { UserContextProvider } from "./user-context-provider";
+import type { ActivityRecorder } from "./activity-recorder";
 
 const extractLatestPublications = (publications: DocumentModelType[], attr: "uid" | "originDoc") => {
   const latestPublications: DocumentModelType[] = [];
@@ -45,6 +46,7 @@ export const DocumentsModel = types
     appConfig: undefined as AppConfigModelType | undefined,
     userContextProvider: undefined as UserContextProvider | undefined,
     firestore: undefined as Firestore | undefined,
+    activityRecorder: undefined as ActivityRecorder | undefined,
     requiredDocuments: {} as Record<string, IRequiredDocumentPromise>,
     visibleExemplars: observable(new Set<string>()),
     all: observable<DocumentModelType>([])
@@ -195,6 +197,9 @@ export const DocumentsModel = types
     setFirestore(firestore: Firestore) {
       self.firestore = firestore;
     },
+    setActivityRecorder(activityRecorder: ActivityRecorder) {
+      self.activityRecorder = activityRecorder;
+    },
     setExemplarVisible(exemplarId: string, visible: boolean) {
       if (visible) {
         self.visibleExemplars.add(exemplarId);
@@ -268,7 +273,8 @@ export const DocumentsModel = types
             const content = document.content;
             const snapshot = content && getSnapshot(content);
             document.setContentError(snapshot ?? {}, message);
-          }
+          },
+          onLocalEntryUploaded: (entry) => self.activityRecorder?.onLocalEntryUploaded(document, entry)
         };
         if (document.concurrent) {
           historyManagerArgs.syncRemoteHistory = true;

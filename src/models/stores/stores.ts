@@ -42,6 +42,7 @@ import { ExemplarControllerModel, ExemplarControllerModelType } from "./exemplar
 import { SectionDocuments } from "./section-docs-store";
 import { Portal } from "./portal";
 import { SeismicQueryService } from "./seismic/seismic-query-service";
+import { ActivityRecorder } from "./activity-recorder";
 
 export interface IStores extends IBaseStores {
   problemPath: string;
@@ -409,6 +410,9 @@ class Stores implements IStores{
       this.documents.setAppConfig(appConfig);
       this.documents.setFirestore(this.db.firestore);
       this.documents.setUserContextProvider(this.userContextProvider);
+      if (!this.documents.activityRecorder) {
+        this.documents.setActivityRecorder(new ActivityRecorder(this));
+      }
 
       if (investigation && problem) {
         this.investigation = investigation;

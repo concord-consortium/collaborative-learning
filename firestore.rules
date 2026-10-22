@@ -823,8 +823,9 @@ service cloud.firestore {
     }
 
     // The researcher dashboard's per-learner activity documents. The CLUE app writes the launched
-    // learner's own document after each saved change, at most every 5 seconds. A researcher of the
-    // class may read them.
+    // learner's own document after each saved change, at most every 5 seconds (the floor below must
+    // equal kActivityWriteFloorMs in src/models/stores/activity-recorder.ts). A researcher of the class
+    // may read them.
     match /researcher_dashboard/{portal}/activity/{classHash}/users/{uid} {
       // Same label comparison report-service uses for its activity documents.
       function tokenPortalIs() {
