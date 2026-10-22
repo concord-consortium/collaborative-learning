@@ -221,6 +221,12 @@ describe("clueExport walk", () => {
     const items = pages.flatMap((page) => page.items);
     expect(items.map((item) => item.entry_id)).toEqual(kEntriesInOrder);
     items.forEach((item) => expect(item.entry_json).toBe(entryJson(item.entry_id as string)));
+    items.forEach((item) => {
+      const seeded = kEntries.findIndex(({id}) => id === item.entry_id);
+      const {index} = kEntries[seeded];
+      expect(item).toMatchObject({idx: index, prev_entry_id: seeded === 0 ? null : kEntries[seeded - 1].id,
+        server_created: new Date(1700000000000 + index).toISOString()});
+    });
     expect(pages.length).toBeGreaterThan(2);
     expect(pages[0]).toMatchObject({owner_exhausted: false,
       inner_cursor: {docId: kHistoryDoc, index: 1, entryId: "e-d"}});
