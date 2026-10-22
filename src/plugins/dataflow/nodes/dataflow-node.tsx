@@ -303,11 +303,11 @@ export const CustomDataflowNode = observer(
             }
           </div>
       ))}
-      <DataflowNodePlot
-        display={showPlot}
-        model={model}
-        recordedTicks={reteManager.recordedTicks}
-      />
+      {showPlot &&
+        <DataflowNodePlot
+          model={model}
+          recordedTicks={reteManager.recordedTicks}
+        />}
 
     </div>
   );

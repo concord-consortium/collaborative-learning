@@ -367,7 +367,7 @@
       "dataflow": {
         "tools": [
           ["data-set-view", "Table"],
-          ["data-set-link", "Graph"],
+          ["data-set-view", "Graph"],
           "delete",
           "group",
           "ungroup",
@@ -375,7 +375,10 @@
           "zoom-in",
           "zoom-out",
           "fit-all",
-          "pan"
+          "pan",
+          "|",
+          "connect",
+          "reset"
         ]
       },
       "diagram": {

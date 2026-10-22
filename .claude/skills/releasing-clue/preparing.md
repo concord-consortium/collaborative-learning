@@ -130,9 +130,10 @@ What's deployed (read-only; projects are `staging` = collaborative-learning-stag
   `environmentVariables` shows each function's non-secret params. For 1st-gen functions use
   `gcloud functions describe <fn> --project <project> --region us-central1 --format='value(updateTime)'`.
   Compare deploy times with `git log --first-parent <range> -- functions-v2 shared` to see which
-  merges each project is missing. Production's 1st-gen functions are in codebase `default` on
-  nodejs16, while staging's are in `functions-v1`; a `functions-v1` deploy to production needs a
-  decision about that first.
+  merges each project is missing. This compares times, not code, so a function deployed from an
+  unmerged branch looks current; ask whoever deployed it when one is newer than you expect.
+  Production's 1st-gen functions are in codebase `default` on nodejs16, while staging's are in
+  `functions-v1`; a `functions-v1` deploy to production needs a decision about that first.
 - **Indexes:** `npx firebase firestore:indexes --project <project>`. Strip the implicit `__name__`
   field before comparing with `firestore.indexes.json`.
 - **Firestore rules:** the Firebase Rules API (`releases/cloud.firestore`) with a gcloud token.
@@ -147,6 +148,17 @@ Per part, work out: must it deploy, has it already, and when relative to the cli
 directions: the new client against the deployed part, and the *released* client against the new
 part. Decisions come from the PR authors and the developer. An index deploy prompts before deleting
 extra indexes, so never pass `--force`.
+
+A part whose strictest timing is `before` doesn't need to wait for release day, and has often gone
+out already. Unless the deployed state above shows it is already live, deploy it while the release
+is being prepared:
+- to staging, then production, each part and project its own **[approve]**;
+- from a clean, detached checkout of `origin/master` (`git switch --detach origin/master` after a
+  fetch), never a local branch that may hold unpushed or unmerged work;
+- with the commands in "Staging Firebase" (cutting.md), using that checkout as `<worktree>`;
+- then read each one back, as above, and compare it with that checkout.
+
+That leaves only `with` and `after` parts for release time.
 
 Also record the deploy **order**. The default is indexes (wait until they show Enabled), then
 rules, then functions, then the client, and a part marked `after` deploys only once Release

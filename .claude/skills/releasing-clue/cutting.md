@@ -107,6 +107,8 @@ until the developer allows them.
 
 Deploy what the deploy-timing decisions call for, in the recorded order, from the release worktree
 at the tag, the same way production will be deployed. Each part below is its own **[approve]**.
+First compare staging's deployed copy of each part with the tag ("Firebase deployables" in
+preparing.md), and skip a part that already matches.
 Parts marked `after` deploy here too, so the project team can test them, but staging.html keeps
 serving the previous release against them until Release Staging; tell the developer so they can
 decide whether that matters.

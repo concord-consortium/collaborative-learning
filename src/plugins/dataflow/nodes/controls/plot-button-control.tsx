@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React, { useState } from "react";
 import { ClassicPreset } from "rete";
 import PreviewPlotIcon from "../../assets/icons/preview-plot.svg";
 import { observer } from "mobx-react";
@@ -38,15 +38,15 @@ export const PlotButtonControlComponent = observer(
   const control = props.data;
   const showGraph = control.model.plot;
 
-  const divRef = useRef<HTMLDivElement>(null);
-  useStopEventPropagation(divRef, "pointerdown");
-  useStopEventPropagation(divRef, "dblclick");
+  const [divEl, setDivEl] = useState<HTMLDivElement | null>(null);
+  useStopEventPropagation(divEl, "pointerdown");
+  useStopEventPropagation(divEl, "dblclick");
 
   return (
     <div className="node-graph-toggle-button"
         title={showGraph ? "Hide Block Value Graph" : "Show Block Value Graph"}>
       <div
-        ref={divRef}
+        ref={setDivEl}
         className={`graph-button main-color ${showGraph ? "active" : ""}`}
         role="button"
         tabIndex={-1}

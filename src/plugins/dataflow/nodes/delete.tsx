@@ -1,4 +1,4 @@
-import React, { useCallback, useRef } from "react";
+import React, { useCallback, useState } from "react";
 import DeleteNodeIcon from "../assets/icons/delete-node.svg";
 import { useStopEventPropagation } from "./controls/custom-hooks";
 import { ReteManager } from "../rete/rete-manager";
@@ -16,13 +16,13 @@ export const Delete = ({reteManager, nodeId}: IProps) => {
     reteManager.removeNodeAndConnections(nodeId);
   }, [reteManager, nodeId]);
 
-  const buttonRef = useRef<HTMLButtonElement>(null);
-  useStopEventPropagation(buttonRef, "pointerdown");
+  const [buttonEl, setButtonEl] = useState<HTMLButtonElement | null>(null);
+  useStopEventPropagation(buttonEl, "pointerdown");
   return (
     <button
       type="button"
       className="close-node-button control-color control-color-hoverable"
-      ref={buttonRef}
+      ref={setButtonEl}
       tabIndex={-1}
       onClick={handleClick}
       onKeyDown={handleBlockChildKeyDown}
