@@ -223,7 +223,8 @@ export function useDocumentSyncToFirebase(
 
   interface SyncContext { seq: number }
   type SyncMutationOptions =
-    Omit<UseMutationOptions<unknown, unknown, SnapshotOut<DocumentContentSnapshotType>, SyncContext>, 'mutationFn'>;
+    Omit<UseMutationOptions<string | undefined, unknown, SnapshotOut<DocumentContentSnapshotType>, SyncContext>,
+      'mutationFn'>;
   const options: SyncMutationOptions = {
     // default is to retry with linear back-off to a maximum
     retry: true,
@@ -231,10 +232,11 @@ export function useDocumentSyncToFirebase(
     // Capture the latest dirty seq at the moment this mutation actually starts (for leading
     // throttle this is when the change happens; for trailing it's when the throttle fires).
     onMutate: () => ({ seq: dirtySeqRef.current }),
-    onSuccess: (data, snapshot, context) => {
+    onSuccess: (lastHistoryEntryId, snapshot, context) => {
       debugLog(`DEBUG: Updated document content for ${type} document ${key}:`, document.changeCount);
       const seq = context?.seq ?? 0;
       if (seq > savedSeqRef.current) savedSeqRef.current = seq;
+      if (lastHistoryEntryId) document.setSavedLastHistoryEntryId(lastHistoryEntryId);
       // Only signal "saved" when no newer changes are pending.
       if (savedSeqRef.current === dirtySeqRef.current) {
         document.setSaveState(SaveState.Saved);
@@ -245,14 +247,22 @@ export function useDocumentSyncToFirebase(
       document.setSaveState(SaveState.Retrying);
     }
   };
-  const transform = (snapshot: DocumentContentSnapshotType) => {
+  const stampedIdsRef = useRef(new WeakMap<DocumentContentSnapshotType, string | undefined>());
+  const transform = (snapshot: DocumentContentSnapshotType):
+      { changeCount: number, content: string, lastHistoryEntryId?: string } => {
     // Record the id of the last history entry that had been applied when
     // this content snapshot was captured. The drift check on document load
     // compares this to the Firestore history — if the id isn't present in
     // the history, the content reflects edits that never made it to the
     // history chain.
+    // A retry runs again with the same snapshot and must keep the id of its first attempt, or the
+    // older content would be stamped with a later entry.
+    const stampedIds = stampedIdsRef.current;
     const treeManager = document.treeManagerAPI as TreeManagerType | undefined;
-    const lastHistoryEntryId = treeManager?.latestDocumentHistoryEntry?.id;
+    const lastHistoryEntryId = stampedIds.has(snapshot)
+      ? stampedIds.get(snapshot)
+      : treeManager?.latestDocumentHistoryEntry?.id;
+    stampedIds.set(snapshot, lastHistoryEntryId);
     const base = {
       changeCount: document.incChangeCount(),
       content: JSON.stringify(snapshot)
@@ -297,8 +307,9 @@ export function useDocumentSyncToFirebase(
     // update tiletypes for metadata document in firestore
     promises.push(updateFirestoreDocumentProp("tools", tools));
 
-    promises.push(firebase.ref(contentPath).update(transform?.(snapshot) ?? snapshot));
-    return Promise.all(promises);
+    const content = transform(snapshot);
+    promises.push(firebase.ref(contentPath).update(content));
+    return Promise.all(promises).then(() => content.lastHistoryEntryId);
   }, options);
 
   const throttledMutate = useMemo(() => _throttle(mutation.mutate, 1000), [mutation.mutate]);
