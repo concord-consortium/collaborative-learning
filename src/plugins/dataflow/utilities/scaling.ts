@@ -1,8 +1,7 @@
-import { IContentBounds, MAX_ZOOM, MIN_ZOOM } from "./rete-manager";
+import { IContentBounds, MAX_ZOOM, MIN_ZOOM } from "../rete/rete-manager";
 
-// A node is drawn at its default size -- the size it has when placed from the menu -- at scale 1,
-// so fitting must never choose more than that. Zooming in by hand still reaches MAX_ZOOM; this is
-// only about what Fit all picks on its own, which used to magnify a lone node to twice its size.
+// A node is drawn at its default size at scale 1; fitting must never choose more than that.
+// This only limits what Fit all picks; zooming in by hand allows MAX_ZOOM.
 export const kMaxFitScale = 1;
 
 /** The scale and offset that fit `bounds` into the container, centred, without enlarging it. */

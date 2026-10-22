@@ -1,5 +1,5 @@
-import { calculateFitTransform, kMaxFitScale } from "./fit-transform";
-import { MIN_ZOOM } from "./rete-manager";
+import { calculateFitTransform } from "./scaling";
+import { MIN_ZOOM } from "../rete/rete-manager";
 
 // A node is drawn at its default size at scale 1, so Fit all must never choose more than that.
 describe("calculateFitTransform", () => {
@@ -7,7 +7,7 @@ describe("calculateFitTransform", () => {
 
   it("does not enlarge content that already fits", () => {
     const { scale } = calculateFitTransform(bounds(100, 100), 800, 600);
-    expect(scale).toBe(kMaxFitScale);
+    expect(scale).toBe(1);
   });
 
   it("scales down content too big for the container", () => {

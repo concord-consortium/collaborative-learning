@@ -52,7 +52,7 @@ import { getNewIndexedName } from "../nodes/utilities/indexed-name";
 import { simulatedChannel } from "../model/utilities/simulated-channel";
 import { virtualSensorChannels } from "../model/utilities/virtual-channel";
 import { serialSensorChannels } from "../model/utilities/channel";
-import { calculateFitTransform } from "./fit-transform";
+import { calculateFitTransform } from "../utilities/scaling";
 
 export const MAX_ZOOM = 2;
 export const MIN_ZOOM = .1;
