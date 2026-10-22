@@ -1,4 +1,4 @@
-import React, { useCallback, useRef, useState } from "react";
+import React, { useCallback, useState } from "react";
 import { ClassicPreset } from "rete";
 import { observer } from "mobx-react";
 import { useStopEventPropagation } from "./custom-hooks";
@@ -112,9 +112,9 @@ export const NumberControlComponent: React.FC<{ data: INumberControl }> = observ
   // with the nodes. It would be better to make this more clear somehow.
   const possiblyReadOnlyInputValue = control.node.readOnly ? control.getValue() : inputValue;
 
-  const inputRef = useRef<HTMLInputElement>(null);
-  useStopEventPropagation(inputRef, "pointerdown");
-  useStopEventPropagation(inputRef, "dblclick");
+  const [inputEl, setInputEl] = useState<HTMLInputElement | null>(null);
+  useStopEventPropagation(inputEl, "pointerdown");
+  useStopEventPropagation(inputEl, "dblclick");
 
   const unitsClass = control.units ? "units one" : "";
   return (
@@ -124,7 +124,7 @@ export const NumberControlComponent: React.FC<{ data: INumberControl }> = observ
         : null
       }
       <input className={`number-input`}
-        ref={inputRef}
+        ref={setInputEl}
         tabIndex={-1}
         type={"text"}
         value={possiblyReadOnlyInputValue}

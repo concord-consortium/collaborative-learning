@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React, { useState } from "react";
 import { Line } from "react-chartjs-2";
 import { ChartOptions, ChartData, ChartDataset } from "chart.js";
 import "chart.js/auto";
@@ -10,12 +10,15 @@ import { observer } from "mobx-react";
 import { useStopEventPropagation } from "./controls/custom-hooks";
 
 interface INodePlotProps {
-  display: boolean;
   model: IBaseNodeModel;
   recordedTicks: string[];
 }
 
 let stepY = 5;
+
+// Half-height of the axis a zoom falls back to when the plotted values give it nothing to
+// scale. One unit of total span suits the 0-1 devices that hit this most often.
+const kMinZoomHalfSpan = 0.5;
 
 // CHECKME: dsMax defaults to -Infinity this might cause a problem
 function maxY(model: IBaseNodeModel) {
@@ -32,20 +35,21 @@ enum Zoom {
 }
 
 export const DataflowNodePlot: React.FC<INodePlotProps> = observer(
-  function DataflowNodePlot({display, model, recordedTicks})
+  function DataflowNodePlot({model, recordedTicks})
 {
-  const divRef = useRef<HTMLDivElement>(null);
-  useStopEventPropagation(divRef, "pointerdown");
-  useStopEventPropagation(divRef, "dblclick");
-
-  if (!display) return null;
+  const [plotEl, setPlotEl] = useState<HTMLDivElement | null>(null);
+  useStopEventPropagation(plotEl, "pointerdown");
+  useStopEventPropagation(plotEl, "dblclick");
 
   const handleClickOffset = (zoomDir: Zoom) => {
     const max = maxY(model);
     const min = minY(model);
-    const difference = Math.abs(max - min);
-    const midpoint = (max + min)/2;
-    const distanceFromMidpoint = difference / 2;
+    const haveRange = isFinite(max) && isFinite(min);
+    const halfRange = haveRange ? Math.abs(max - min) / 2 : 0;
+    const midpoint = haveRange ? (max + min) / 2 : 0;
+    // Scaling zero leaves it at zero, so a block whose value never moves, or one with nothing
+    // plotted yet, would have dead zoom buttons forever.
+    const distanceFromMidpoint = halfRange > 0 ? halfRange : kMinZoomHalfSpan;
     const scalar = (zoomDir === Zoom.In) ? 0.8 : 1.25;
     const newDistanceFromMidpoint = scalar * distanceFromMidpoint;
     model.setTickMax(midpoint + newDistanceFromMidpoint);
@@ -56,7 +60,7 @@ export const DataflowNodePlot: React.FC<INodePlotProps> = observer(
 
   // FIXME: for some reason onClick doesn't work on these buttons but onMouseDown does
   return (
-    <div className="node-bottom-section" ref={divRef} >
+    <div className="node-bottom-section" ref={setPlotEl} >
       <div className="node-bottom-buttons">
         <button
           className={`scale-buttons ${scaleBtnColorClass} plus`} onMouseDown={() => handleClickOffset(Zoom.In)}>
