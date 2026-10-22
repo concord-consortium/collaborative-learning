@@ -478,7 +478,7 @@ describe("Firestore security rules", () => {
       await expectUpdateToFail(db, kDocumentDocPath, { title: "new-title" });
     });
 
-    it("a class member cannot set concurrent:true on a classmate's problem document", async () => {
+    it("a class member cannot set concurrent:true on a document a classmate owns", async () => {
       // `concurrent` is an authorization input for the history rule (isConcurrentClassDocument), so
       // granting it here would let a class member hand themselves and every classmate history access
       // to someone else's document.
