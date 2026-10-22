@@ -50,6 +50,7 @@ import { logExemplarDocumentEvent } from "../models/document/log-exemplar-docume
 import { AppMode } from "../models/stores/store-types";
 import { DEBUG_FIRESTORE } from "./debug";
 import { firebaseRefPath } from "./fire-utils";
+import { retryAbortedTransaction } from "./retry-aborted-transaction";
 import {
   CanonicalSlotOwnerChangedError, getCanonicalPointerPath, ICanonicalPointer, kDefaultCanonicalDocumentLabel
 } from "./scoped-document-pointers";
@@ -427,7 +428,8 @@ export class DB {
    * - Sets up connection handlers only when the student being moved is the current user
    * - Updates latestGroupId only when the student being moved is the current user
    * - Uses a Firebase transaction to prevent race conditions when multiple clients modify groups
-   *   concurrently (e.g., student opens multiple tabs, teacher and student act simultaneously)
+   *   concurrently (e.g., student opens multiple tabs, teacher and student act simultaneously),
+   *   retried when a concurrent set() aborts it rather than failing the move
    *
    * @param studentId - The ID of the student to move
    * @param targetGroupId - The ID of the group to move the student to, or null to remove from all groups
@@ -437,7 +439,9 @@ export class DB {
     const { user } = this.stores;
     const groupsRef = this.firebase.ref(this.firebase.getGroupsPath(user));
 
-    await groupsRef.transaction((groups: DBOfferingGroupMap | null) => {
+    // Retried when a concurrent set() aborts it: the groups listener auto-rejoins a student's
+    // latest group with a set() on a path under this one, which otherwise fails the move outright.
+    await retryAbortedTransaction(() => groupsRef.transaction((groups: DBOfferingGroupMap | null) => {
       if (groups === null) {
         groups = {};
       }
@@ -484,7 +488,7 @@ export class DB {
       }
 
       return groups;
-    });
+    }));
 
     // If moving the current user, update their latestGroupId preference and set up connection handlers.
     // These operations are outside the transaction above because they operate on different database paths.
