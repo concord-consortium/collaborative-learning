@@ -23,6 +23,13 @@ function sweepFraction(angle: number) {
   return (angle - kServoMinAngle) / (kServoMaxAngle - kServoMinAngle);
 }
 
+// The arm's ink runs only upwards from its pivot, so an unrotated arm points straight up, over
+// the node's dropdown. The simulator turns it the same way: 0 degrees points left and 180 points
+// right, so the arm sweeps down through the body and never rises above the hub.
+function armRotation(angle: number) {
+  return 270 - angle;
+}
+
 interface IProps {
   angle: number;
 }
@@ -44,7 +51,7 @@ export const ServoAnimation: React.FC<IProps> = ({ angle }) => {
       <img
         className="servo-part arm"
         src={servoArm}
-        style={{ transform: `rotate(${shownAngle}deg)` }}
+        style={{ transform: `rotate(${armRotation(shownAngle)}deg)` }}
         alt=""
       />
     </div>

@@ -125,32 +125,37 @@
 }
 
 .servo-control {
-  height: 100px;
+  // Taller than the other outputs, as the humidifier is, so the arm's sweep has room below the
+  // hub without reaching the dropdown above it.
+  height: 124px;
   width: 113px;
 
-  // The body is 44x91 and the arm 150x151, both at natural size: the arm image is deliberately
-  // much larger than the body because its pivot -- the cross on the bar -- sits at the image
-  // centre, which is what lets `rotate` turn it about the hub without a transform-origin.
   .servo-assembly {
     position: relative;
-    height: 100px;
-    left: 34px;
+    height: 124px;
+    left: 42px;
 
+    // Decorative: without this the arm's image box, which is mostly transparent, swallows clicks
+    // meant for the dropdown behind it.
     .servo-part {
       position: absolute;
+      pointer-events: none;
     }
 
+    // The art is scaled to about two thirds so the arm's 76px reach, which traces a half circle
+    // about the hub, stays inside the node rather than running past its sides.
     .servo-part.body {
-      height: 91px;
+      height: 59px;
       left: 0;
-      top: 5px;
+      top: 26px;
     }
 
-    // Centred on the body's hub, which sits at (22, 21) within the body image.
+    // Centred on the hub, which sits at (14, 14) of the scaled body. The arm image is far larger
+    // than its ink, and its pivot is the image centre, which is what lets rotate turn it there.
     .servo-part.arm {
-      height: 151px;
-      left: -53px;
-      top: -49px;
+      height: 98px;
+      left: -35px;
+      top: -9px;
     }
   }
 }
