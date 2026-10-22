@@ -1,0 +1,209 @@
+# The client-written activity document
+
+**Jira**: https://concord-consortium.atlassian.net/browse/CLUE-693
+
+**Status**: **Closed**
+
+## Overview
+
+When a student launched from the portal changes one of their CLUE documents, the CLUE app updates a small per-learner activity document in CLUE's Firestore, at most once every 5 seconds, after the change is saved. The researcher dashboard reads these documents, in the same path and shape report-service writes for Activity Player answers (REPORT-153), to count active students, show per-assignment activity (RD-12), and re-run a researcher's packages when the class's work changes (RD-6). No Cloud Function is involved; Firestore rules limit each student to their own document, their own offering's key and the server's clock.
+
+Only real student work counts. A running simulation or DataFlow program changes the document on its own every second; those automatic steps are not activity, while a student's own slider drag, node edit or typing is. A record is written only after the change it reports has been saved, because the dashboard treats an analysis that started before the record's time as up to date. Students on an older CLUE release, or launched from an assignment pinned to an older CLUE version, record nothing until they reach the release with this change.
+
+CLUE-693 was first built as a Cloud Function on history writes (branch `CLUE-693-the-history-write-activity-trigger`, `90ba1f049`, never pushed or deployed). It keyed `changed` by CLUE document key where RD-12 looks up portal offering ids, recorded teachers and unchecked uploader stamps, counted every Simulator and DataFlow tick, and dropped the last edit of each burst. The research on channel `stream/researcher-dashboard/clue-activity` (#838) and the design sketch (global oob `streams/researcher-dashboard/clue-693-client-written-sketch.md`) replaced it with this client-written document.
+
+## Requirements
+
+### Who records
+
+- **R1.** A recorder runs only when `appMode === "authed"`, `user.isStudent`, and the user has a `classHash` and an `offeringId`. Portal and standalone launches both qualify (standalone students hold the same learner token); demo, qa, dev, test, previews, teachers and researchers never write.
+
+### What counts
+
+- **R2.** A local, non-empty history entry of a document the student is editing counts, and nothing else: remote entries (`addHistoryEntryAfterApplying`) and playback copies (`uploadLocalHistory: false`) never reach the recorder.
+- **R3.** Tick entries do not count: `model "SimulatorTool"` with an action ending `/step`, and `model "DataflowProgram"` with an action ending `/tickAndProcess`. There is no input-event gate. Entries a tile records as it opens, such as a backfilled text tile title or a row height, count like any other change.
+
+### When it writes
+
+- **R4.** A counted entry is written only after both its history upload has resolved and an RTDB content save whose `lastHistoryEntryId` is the entry or a later entry of the same document's history has succeeded. If no such save is confirmed within 30 s while the tab stays open, it is written anyway. An entry whose upload fails (the metadata document never appears, or the write is rejected) or which the concurrent manager rolls back after a fork is dropped and never written, `pagehide` included.
+- **R5.** Throttle: the first counted change after a quiet period is written as soon as R4 allows; later changes wait until 5 s after the previous write's acknowledgment; each write covers every change that has landed by then, and a trailing write always follows the last change of a burst. At most one write is in flight. The recorder never debounces. On `visibilitychange` to hidden, changes that have landed are written as soon as the 5 s floor allows, and unconfirmed ones keep waiting. On `pagehide`, every pending change is written at once without waiting for its save or the floor. A close within 5 s of the previous write is refused by the rule and lost, and a write started in `pagehide` may not complete; that is the design's known loss.
+  - *(The hidden-tab behavior needs no `visibilitychange` handler: every upload, save and timer already schedules the next write.)*
+- **R6.** A write refused inside the 5 s window (another tab wrote) keeps the change pending and retries 5 s later; after 3 consecutive refusals the recorder stops until the next counted change.
+
+### The document
+
+- **R7.** The recorder writes `researcher_dashboard/{escapeKey(user.portal)}/activity/{user.classHash}/users/{user.id}` with a merge `set` of `lastActivityAt: serverTimestamp()`, `writeCount: increment(1)`, and `changed.{user.offeringId}: serverTimestamp()` when any change the write covers was in a document of the launch offering: a problem or planning document, or a group document whose owner is the student's group in this offering (`user.userIdForGroupDocuments`). Personal, learning log and class documents bump `lastActivityAt` and `writeCount` only. The key comes from `user.offeringId`, never `DocumentModel.offeringId`, which is unset for problem documents opened from the offering listener.
+- **R8.** No identity fields, no cap logic (the rule bounds keys to the offering in the learner's token), and nothing deletes a document.
+
+### Rules and index
+
+- **R9.** Keep the researcher read rule. Add the learner write rule: own `uid` (`platform_user_id`), `class_hash` and token portal (`platform_id`'s host labels equal `{portal}` split on `_`, report-service's comparison); only `lastActivityAt`, `writeCount` and `changed`; times equal `request.time`; `writeCount` up by exactly one; only the token's `offering_id` key changes in `changed`; at least 5 s since the stored `lastActivityAt`. No delete. The block's comment says who writes the documents and under what limits.
+- **R10.** `firestore.indexes.json` gains a field override exempting `changed` on the `users` collection group from indexing (`indexes: []`), as report-service's does. Nothing queries the map.
+
+### Tests
+
+- **R11.** Rules tests in `firebase-test/src/researcher-dashboard-activity-rules.test.ts`, using a `learnerAuth` fixture in `setup-rules-tests.ts` with the real `user_type: "learner"` and `offering_id` and `platform_id` claims: 19 write cases, 3 floor-timing cases (5,000 ms accepted 10 times running, 4,900 ms refused, two tabs give exactly one success), and the existing client-write refusal test renamed for the researcher, teacher and student-claim tokens it covers.
+- **R12.** Recorder unit tests on fake timers, each named for the line it guards: ticks, the upload-and-save condition, the timeout, leading and trailing writes, no debounce, hidden and `pagehide`, refusals and the stop and restart, the key per document type, and the R1 gate per app mode, role, and missing class hash or offering. A test asserts the client interval equals the rule's floor. History-manager tests show an entry is reported only once its upload is accepted.
+- **R13.** Staging check: a staging student with `firebaseEnv=staging` edits a text tile and their activity document appears within seconds with the offering key; a running EMG simulation alone writes nothing more; and opening a problem document without editing it is recorded, to measure how often tiles' writes on open set `changed`. *(A post-deploy check, not code; see Not Yet Implemented.)*
+
+### Docs
+
+- **R14.** `docs/firestore-schema.md` gains a "Researcher dashboard activity" section holding the contract: path, fields, what counts, who writes, the 5 s floor, that a launch without `firebaseEnv=staging` writes to production Firebase, and that an offering pinned to a `/version/` URL records nothing until it is repointed. The list of top-level collections gains `researcher_dashboard`.
+
+## Technical Notes
+
+- **Where it lives.** `src/models/stores/activity-recorder.ts` (the recorder); `FirestoreHistoryManager` and `FirestoreHistoryManagerConcurrent` report each landed local entry through `onLocalEntryUploaded`; `DocumentsModel` passes that callback, with the document, into both managers; `useDocumentSyncToFirebase` sets `DocumentModel.savedLastHistoryEntryId` on each successful content save; `Stores` creates one recorder where it sets the documents' Firestore.
+- **The save can carry the previous entry's id.** For a plain tile edit the entry completes before the leading save's `transform` runs, so that save carries the new entry's id. For an edit to a shared model, `recordAction`'s extra `startExchange` await completes the entry after the leading save captured its id, so the leading save carries the previous entry's id and the trailing save covers it. This is why R4 compares positions in the history, with the 30 s timeout as a backstop.
+- **Retried saves.** react-query retries by calling the mutation again with the same snapshot, so `transform` would stamp the old content with a newer entry. The hook keeps each snapshot's first-attempt id in a `WeakMap`.
+- **Ticks.** `src/plugins/simulator/model/simulator-content.ts` (`SimulatorTool`, `step`) and `src/plugins/dataflow/model/dataflow-program-model.ts` (`DataflowProgram`, `tickAndProcess`). The entry's `model` is the action's model name and its `action` the full path, so it ends with `/step` or `/tickAndProcess`. The PR names both so a later rename (Scott Cytacki's tick work) updates the recorder too.
+- **Group documents** are type `axes`, owned by `group_<offeringId>_<groupId>`; R7 compares the document's `uid` with `user.userIdForGroupDocuments`. Class documents are owned by `class_<classHash>`.
+- **The token's offering.** The rule takes the key from the token's `offering_id`; the client from `user.offeringId`. Both come from the same launch. A mismatch would have every write refused: R6's stop lasts only until the next counted change, so a student who keeps editing makes one refused write and one console warning every 5 s.
+- **The `{portal}` segment** is `escapeKey(user.portal)`, the escaping CLUE's own `authed/{portal}` root uses, which equals report-service's segment for real portal hosts.
+- **The floor.** Both the client's 5 s and the rule's `duration.value(5, "s")` compare server times: the client measures from the previous write's acknowledgment, which follows the server's `request.time` for it. `activity-recorder.test.ts` reads the floor out of `firestore.rules` to keep the two equal.
+- **Deploy timing:** rules before and indexes before the client release (the released client never writes this path; the exemption must exist before the first write). No functions deploy. Order: staging indexes then rules through `releasing-clue` (compare deployed rules with `master` first), a branch build against staging Firebase for R13, production indexes and rules, then the CLUE release.
+- **Review.** Scott Cytacki reviews the PR: the history-manager and save-hook changes and the tick-name coupling.
+
+## Out of Scope
+
+- RD-6 pass 2: the researcher dashboard's CLUE listener, which Firebase project per environment, the per-learner merge of `changed`, and the RD prose that says report-service is the only writer.
+- Scott's tick work (a marker on tick entries).
+- Pruning activity documents.
+- Activity from comments or metadata changes (title, visibility, properties).
+- Repointing offerings pinned to a `/version/` URL (documented, R14).
+- Deleting the old branch `CLUE-693-the-history-write-activity-trigger`, which waits on Doug's go.
+
+## Not Yet Implemented
+
+- R13's staging check: a post-deploy check, run after the staging rules and indexes deploy against a branch build on staging Firebase.
+
+## Decisions
+
+### Drop an entry whose upload fails or is rolled back
+**Context**: R4 released an entry only once its upload resolved. A rolled-back entry (concurrent fork) and one whose metadata document never appears never resolve, so they would stay pending until `pagehide`.
+**Options considered**:
+- A) Drop it: it records no change, since the change was reverted or never stored.
+- B) Let the 30 s timeout also release an entry waiting on its upload.
+- C) Leave it pending; `pagehide` writes it.
+
+**Decision**: A (Doug). Neither change is in the history REPORT-109 exports, so neither is activity; B reports a change that is not stored and C leaves a pending list that only grows. The managers report only successful uploads, so the recorder never hears of the rest, with no extra API.
+
+---
+
+### Entries a tile records as it opens
+**Context**: Some tiles change the document when they mount, with no student input (a backfilled text tile title, a row height, DataFlow's output config). They complete as local, non-tick entries, so opening a problem document can set `changed`.
+**Options considered**:
+- A) Count them, and have R13 measure how often opening a document writes.
+- B) Skip every non-undoable entry except undo and redo, which also drops data card navigation and `noUndo` shared-variable edits.
+- C) Add these actions to the tick list.
+
+**Decision**: A (Doug). They are real content changes and mostly one-time, and the 5 s floor folds the rest into about one write per open.
+
+---
+
+### Which test proves a group document belongs to the launch offering
+**Context**: The sketch said "a group document owned by `group_{user.offeringId}_*`".
+**Options considered**:
+- A) Prefix match on the stored `uid`.
+- B) Compare the stored `uid` with `user.userIdForGroupDocuments`.
+
+**Decision**: B. `document-axes.ts` asks callers to build the owner id and compare rather than parse a stored uid; the result is the same for every document a student can edit.
+
+---
+
+### What "a save at or after the entry" means
+**Context**: R4 needs an order between a save's `lastHistoryEntryId` and a pending entry.
+**Options considered**:
+- A) Any save that succeeds after the entry completed.
+- B) A save whose `lastHistoryEntryId` is at the entry's position in the document's history or later.
+
+**Decision**: B. A leading save can succeed after the entry completed while carrying the previous entry's id (shared-model edits), so A would release an entry whose content was not saved.
+
+---
+
+### Reuse `savedLastHistoryEntryId` or add a field for the last saved entry
+**Context**: The sketch asked for a volatile last-saved history entry id; `DocumentModel.savedLastHistoryEntryId` already held the loaded envelope's id.
+**Options considered**:
+- A) A new volatile field beside it.
+- B) Keep the existing field current on every save.
+
+**Decision**: B. Both hold the id stamped on the content now in RTDB. The drift check reads the history manager's own copy, taken at load, so updating the field later cannot affect it.
+
+---
+
+### Create the recorder when R1 holds, or always and gate per entry
+**Context**: The sketch said `stores.ts` creates the recorder when R1 holds.
+**Options considered**:
+- A) Create it after authentication, only for a launched student.
+- B) Create it where `Stores` sets the documents' Firestore, and check R1 on each entry.
+
+**Decision**: B. The user is authenticated and their offering known only after the stores exist, and `setAppMode` can change the mode; a per-entry check needs no second hook into authentication. The behavior is R1's either way.
+
+---
+
+### How the recorder learns an entry failed or was rolled back
+**Context**: R4 drops an entry whose upload fails or is rolled back.
+**Options considered**:
+- A) The managers report completion, upload, failure and rollback; the recorder tracks each.
+- B) The managers report only successful uploads; the recorder never hears of the rest.
+
+**Decision**: B. A rolled-back entry is removed from the queue before upload and a failed one never resolves, so neither reaches the callback.
+
+---
+
+### A retried save stamped older content with a later entry's id
+**Context**: react-query reruns the mutation on retry, so `transform` read the latest entry again; a throwaway test showed the retry writing the newer id, which `onSuccess` would hand the recorder as saved.
+**Options considered**:
+- A) Keep each snapshot's first-attempt id in a `WeakMap` and reuse it on retry.
+- B) Leave it; the recorder would release an entry whose content was not saved.
+
+**Decision**: A.
+
+---
+
+### A retried older save can move the saved id backwards
+**Context**: An older save can succeed after a newer one and set `savedLastHistoryEntryId` to an earlier entry.
+**Options considered**:
+- A) Guard against it in the hook.
+- B) Accept it: an entry already written is unaffected, and a pending one waits for the next save or the 30 s timeout.
+
+**Decision**: B. It only delays a write, and the older save also wrote the older content last, so the id still matches what is in RTDB.
+
+---
+
+### The `visibilitychange` handler did nothing
+**Context**: Deleting the listener left every recorder test green: it only called `schedule()`, which every upload, save reaction and timer already calls.
+**Options considered**:
+- A) Keep it.
+- B) Remove it; the hidden test still guards against a flush on hide.
+
+**Decision**: B. R5's hidden behavior is unchanged.
+
+---
+
+### R6's stop does not stop a student who keeps editing
+**Context**: With every write refused and a change every 4 s, a throwaway test gave 12 refused writes a minute: each counted change clears the stop, as R6 says.
+**Options considered**:
+- A) Make the stop permanent for the session.
+- B) Keep R6 and state the rate instead of saying the recorder "stops".
+
+**Decision**: B. The cost of a token mismatch is one refused write and one warning every 5 s, which the Technical Notes now give.
+
+---
+
+### Recorder lines no test guarded
+**Context**: Mutating the recorder left the suite green for four lines: the class and offering gate, clearing the stopped state on a new change, resetting refusals on success, and `pagehide` ignoring the floor. A later review found the refusal test did not pin the retry to the floor either.
+**Options considered**:
+- A) Add a test for each.
+- B) Leave them unguarded.
+
+**Decision**: A. Each new test fails exactly its mutation, and the refusal test asserts no retry before the floor. The recorder has 27 tests.
+
+---
+
+### Nothing to delete on this branch
+**Context**: The sketch's kept, replaced and deleted table was written against the old trigger branch.
+**Options considered**:
+- A) Carry the table as written.
+- B) Describe this branch: only the read rule and its tests exist, so the exemption and schema section are added fresh and nothing is deleted.
+
+**Decision**: B.
