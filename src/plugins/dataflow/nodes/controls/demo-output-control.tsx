@@ -7,6 +7,8 @@ import { fanFrames, fanHousing, fanMotor,
   grabberPaddle, humidifier, lightBulbOff, lightBulbOn } from "./demo-outputs/demo-output-control-assets";
 import { HumidifierAnimation } from "./demo-outputs/humidifier-animation";
 import { GrabberAnimation } from "./demo-outputs/grabber-animation";
+import { ServoAnimation } from "./demo-outputs/servo-animation";
+import { servoAngleForValue } from "../utilities/servo-angle";
 import { AdvancedGrabberAnimation } from "./demo-outputs/advanced-grabber-animation";
 
 import "./demo-output-control.scss";
@@ -14,7 +16,9 @@ import "./demo-output-control.scss";
 export class DemoOutputControl extends ClassicPreset.Control
 {
   constructor(
-    public model: IDemoOutputNodeModel
+    public model: IDemoOutputNodeModel,
+    // Reads settings.dataflow.servoInputMode, which only the node can reach.
+    private isServoProportionMode: () => boolean = () => false
   ) {
     super();
   }
@@ -29,6 +33,11 @@ export class DemoOutputControl extends ClassicPreset.Control
 
   get tilt() {
     return this.model.tilt ?? 0;
+  }
+
+  /** Where a Servo's arm should point, handled as the live Servo output handles it. */
+  get servoAngle() {
+    return servoAngleForValue(this.nodeValue, this.isServoProportionMode());
   }
 
   // Converts [-1,1] to [0,1]. Caps at 0 and 1.
@@ -52,6 +61,7 @@ export const DemoOutputControlComponent: React.FC<{ data: DemoOutputControl }> =
     "grabber-control": type === "Grabber",
     "humidifier-control": type === "Humidifier",
     "fan-control": type === "Fan",
+    "servo-control": type === "Servo",
   });
   const fanBladeClasses = classNames({
     "fan-part blades": true,
@@ -98,6 +108,10 @@ export const DemoOutputControlComponent: React.FC<{ data: DemoOutputControl }> =
               nodeValue={control.nodeValue}
             />
         </>
+      }
+
+      { type === "Servo" &&
+        <ServoAnimation angle={control.servoAngle}/>
       }
 
       { type === "Fan" &&

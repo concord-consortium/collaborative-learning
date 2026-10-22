@@ -82,7 +82,10 @@ export class DemoOutputNode extends BaseNode<
     const dropdownControl = new DropdownListControl(this, "outputType", model.setOutputType, outputTypes);
     this.addControl("outputType", dropdownControl);
 
-    const demoOutputControl = new DemoOutputControl(model);
+    const demoOutputControl = new DemoOutputControl(
+      model,
+      () => this.services.stores.appConfig.getSetting("servoInputMode", "dataflow") === "proportion"
+    );
     this.addControl("demoOutput", demoOutputControl);
 
     const inputValueControl = new InputValueControl(this, "nodeValue", "", "Display for nodeValue",
