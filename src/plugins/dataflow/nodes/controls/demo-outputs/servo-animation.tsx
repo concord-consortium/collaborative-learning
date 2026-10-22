@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { kServoMaxAngle, kServoMinAngle } from "../../utilities/servo-angle";
+import { kServoMaxAngle, kServoMinAngle } from "../../utilities/servo";
 import { Sequence, TargetAnimator } from "./animator";
 import servoArm from "../../../assets/servo-arm.png";
 import servoBody from "../../../assets/servo-body.png";

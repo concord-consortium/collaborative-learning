@@ -12,3 +12,13 @@ export function servoAngleForValue(value: number, proportionMode: boolean) {
   const scaled = proportionMode ? value * kServoMaxAngle : value;
   return Math.min(Math.max(scaled, kServoMinAngle), kServoMaxAngle);
 }
+
+/**
+ * The Servo output field label. The stored value is always the angle in degrees (0-180). In degrees
+ * mode (default) it is shown as degrees; in proportion mode as % of full rotation, mirroring the
+ * gripper's "% closed".
+ */
+export function servoDisplayMessage(value: number, proportionMode: boolean) {
+  if (proportionMode) return `${Math.round((value / kServoMaxAngle) * 100)}% rotation`;
+  return `${Math.round(value)}°`;
+}

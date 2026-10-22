@@ -352,15 +352,22 @@ context('Dataflow Tool Tile', function () {
 
     cy.log("can change output type");
     const demoOutputType = "outputType";
-    const demoOutputTypes = ["Light Bulb", "Gripper", "Advanced Gripper", "Fan", "Humidifier"];
+    const demoOutputTypes = ["Light Bulb", "Gripper", "Advanced Gripper", "Fan", "Humidifier", "Servo"];
     dataflowToolTile.getDropdown(demoOutputNode, demoOutputType).click();
-    dataflowToolTile.getDropdownOptions(demoOutputNode, demoOutputType).should("have.length", 5);
+    dataflowToolTile.getDropdownOptions(demoOutputNode, demoOutputType)
+      .should("have.length", demoOutputTypes.length);
     dataflowToolTile.getDropdownOptions(demoOutputNode, demoOutputType).each(($tab, index, $typeList) => {
       expect($tab.text()).to.contain(demoOutputTypes[index]);
     });
     dataflowToolTile.getDropdownOptions(demoOutputNode, demoOutputType).last().click();
     dataflowToolTile.getDropdownOptions(demoOutputNode, demoOutputType).should("have.length", 0);
-    dataflowToolTile.getDropdown(demoOutputNode, demoOutputType).contains("Humidifier").should("exist");
+    dataflowToolTile.getDropdown(demoOutputNode, demoOutputType)
+      .contains(demoOutputTypes[demoOutputTypes.length - 1]).should("exist");
+
+    cy.log("verify servo demo output");
+    // The Servo is driven in degrees, unlike the gripper's 0-1, so its readout is degrees too.
+    dataflowToolTile.getServoImages();
+    dataflowToolTile.getOutputNodeValueText().should("contain", "0°");
 
     cy.log("verify demo output images, node inputs outputs & toggle minigraph");
     //verify advanced grabber

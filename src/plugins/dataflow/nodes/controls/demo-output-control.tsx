@@ -8,18 +8,13 @@ import { fanFrames, fanHousing, fanMotor,
 import { HumidifierAnimation } from "./demo-outputs/humidifier-animation";
 import { GrabberAnimation } from "./demo-outputs/grabber-animation";
 import { ServoAnimation } from "./demo-outputs/servo-animation";
-import { servoAngleForValue } from "../utilities/servo-angle";
 import { AdvancedGrabberAnimation } from "./demo-outputs/advanced-grabber-animation";
 
 import "./demo-output-control.scss";
 
 export class DemoOutputControl extends ClassicPreset.Control
 {
-  constructor(
-    public model: IDemoOutputNodeModel,
-    // Reads settings.dataflow.servoInputMode, which only the node can reach.
-    private isServoProportionMode: () => boolean = () => false
-  ) {
+  constructor(public model: IDemoOutputNodeModel) {
     super();
   }
 
@@ -35,9 +30,9 @@ export class DemoOutputControl extends ClassicPreset.Control
     return this.model.tilt ?? 0;
   }
 
-  /** Where a Servo's arm should point, handled as the live Servo output handles it. */
+  /** Where a Servo's arm should point. The node stores the angle in degrees, as the live Servo does. */
   get servoAngle() {
-    return servoAngleForValue(this.nodeValue, this.isServoProportionMode());
+    return this.nodeValue;
   }
 
   // Converts [-1,1] to [0,1]. Caps at 0 and 1.

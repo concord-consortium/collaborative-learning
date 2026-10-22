@@ -2,7 +2,8 @@ import { ClassicPreset } from "rete";
 import { autorun } from "mobx";
 import { Instance, isAlive } from "mobx-state-tree";
 import { numSocket } from "./num-socket";
-import { NodeDemoOutputTypes, NodePlotRed, kBinaryOutputTypes } from "../model/utilities/node";
+import { NodeDemoOutputTypes, NodePlotRed, kBinaryOutputTypes, kServoOutputTypes }
+  from "../model/utilities/node";
 import { BaseNode, BaseNodeModel, NoOutputs } from "./base-node";
 import { DropdownListControl, IDropdownListControl } from "./controls/dropdown-list-control";
 import { typeField } from "../../../utilities/mst-utils";
@@ -11,6 +12,7 @@ import { DemoOutputControl } from "./controls/demo-output-control";
 import { InputValueControl } from "./controls/input-value-control";
 import { MinigraphOptions } from "./dataflow-node-plot-types";
 import { getValueOrZero } from "./utilities/view-utilities";
+import { servoAngleForValue, servoDisplayMessage } from "./utilities/servo";
 
 const tiltMinigraphOptions: MinigraphOptions = {
   backgroundColor: "#fff",
@@ -82,10 +84,7 @@ export class DemoOutputNode extends BaseNode<
     const dropdownControl = new DropdownListControl(this, "outputType", model.setOutputType, outputTypes);
     this.addControl("outputType", dropdownControl);
 
-    const demoOutputControl = new DemoOutputControl(
-      model,
-      () => this.services.stores.appConfig.getSetting("servoInputMode", "dataflow") === "proportion"
-    );
+    const demoOutputControl = new DemoOutputControl(model);
     this.addControl("demoOutput", demoOutputControl);
 
     const inputValueControl = new InputValueControl(this, "nodeValue", "", "Display for nodeValue",
@@ -129,12 +128,18 @@ export class DemoOutputNode extends BaseNode<
     return tilt === 1 ? "up" : tilt === -1 ? "down" : "center";
   };
 
+  private get servoProportionMode() {
+    return this.services.stores.appConfig.getSetting("servoInputMode", "dataflow") === "proportion";
+  }
+
   getNodeValueDisplayMessage = () => {
     if (!isAlive(this.model)) return "";
 
     const nodeValue = this.model.nodeValue ?? 0;
     if (kBinaryOutputTypes.includes(this.model.outputType)) {
       return nodeValue === 0 ? "off" : "on";
+    } else if (kServoOutputTypes.includes(this.model.outputType)) {
+      return servoDisplayMessage(nodeValue, this.servoProportionMode);
     } else {
       const hundredPercentClosed = Math.round(nodeValue * 10) * 10;
       return `${hundredPercentClosed}% closed`;
@@ -162,6 +167,10 @@ export class DemoOutputNode extends BaseNode<
       // otherwise convert all non-zero to 1
       const newValue = (value == null || isNaN(value)) ? 0 : +(value !== 0);
       this.saveNodeValue(newValue);
+    } else if (kServoOutputTypes.includes(this.model.outputType)) {
+      // A Servo is driven in degrees, so it must not go through the 0-1 clamp below: that turns
+      // every angle a student can type into 1 degree. Stored in degrees like the live Servo.
+      this.saveNodeValue(servoAngleForValue(value, this.servoProportionMode));
     } else {
       // Clamp the value between 0 and 1
       const newValue = (value == null) ? 0 : Math.max(0, Math.min(1, value));

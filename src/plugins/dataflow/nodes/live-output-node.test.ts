@@ -1,4 +1,5 @@
-import { LiveOutputNode, servoDisplayMessage } from "./live-output-node";
+import { LiveOutputNode } from "./live-output-node";
+import { servoDisplayMessage } from "./utilities/servo";
 import { NodeLiveOutputTypes, resolveAllowedOutputTypes } from "../model/utilities/node";
 
 // Minimal fake SerialDevice that records which output writer the node invoked. The keyValue

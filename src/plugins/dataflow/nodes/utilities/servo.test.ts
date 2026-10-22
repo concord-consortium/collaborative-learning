@@ -1,4 +1,4 @@
-import { kServoMaxAngle, kServoMinAngle, servoAngleForValue } from "./servo-angle";
+import { kServoMaxAngle, kServoMinAngle, servoAngleForValue } from "./servo";
 
 describe("servoAngleForValue", () => {
   describe("in degrees mode", () => {
