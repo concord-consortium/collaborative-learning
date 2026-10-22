@@ -111,9 +111,18 @@ rewritten rather than repointed — to the flow a student will actually have:
   go away.
 - Keep the relink-and-unlink pass through the `data-set-link` dialog, which units may still
   configure. It needs a unit whose Dataflow toolbar has that button, so the step revisits
-  `/editor/` with `qa-moth-plot`: the route restores the document from sessionStorage whatever the
-  unit, so the program and the unlinked graph come back under that unit's toolbar, which is also
-  the state "Clear It!" needs.
+  `/editor/` with `qa-dataflow-link`: the route restores the document from sessionStorage whatever
+  the unit, so the program and the unlinked graph come back under that unit's toolbar, which is
+  also the state "Clear It!" needs.
+
+  `qa-dataflow-link` is `qa-config-subtabs` plus the toolbar entry, added rather than reusing an
+  existing unit because the graph's `defaultSeriesLegend` has to stay on. `graph.tsx` renders the
+  whole `MultiLegend` only under that setting, and `qa-moth-plot` turns it off, so
+  the layer name and axis labels this test asserts on would not exist there.
+
+  Both dialog clicks wait for the primary button to lose its `disabled` class. A disabled button
+  in `useCustomModal` silently ignores the click, and it stays disabled until React commits the
+  `<select>` change, which lags `cy.select()` in the render storm after a page load.
 
 The table half of the same spec is untouched: it already clicks `data-set-view`, which does not
 change.

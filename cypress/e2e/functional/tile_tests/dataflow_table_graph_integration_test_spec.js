@@ -78,10 +78,12 @@ context('Dataflow Tool Tile', function () {
     cy.log("re-link and unlink through the data-set-link dialog");
 
     // `data-set-link` is no longer on the default Dataflow toolbar, but units may still configure
-    // it, so it keeps a test. qa-moth-plot has it; the /editor/ route restores this document from
-    // sessionStorage whatever the unit, so the program and the unlinked graph come back with that
-    // unit's toolbar. Linking the graph back is also the state the dialog needs for "Clear It!".
-    cy.visit("/editor/?appMode=qa&unit=./demo/units/qa-moth-plot/content.json&mouseSensor");
+    // it, so it keeps a test. qa-dataflow-link has it; the /editor/ route restores this document
+    // from sessionStorage whatever the unit, so the program and the unlinked graph come back with
+    // that unit's toolbar. Linking the graph back is also the state the dialog needs for
+    // "Clear It!". The unit must leave the graph's defaultSeriesLegend on: with it off, as in
+    // qa-moth-plot, the graph renders no legend at all and none of the assertions below can pass.
+    cy.visit("/editor/?appMode=qa&unit=./demo/units/qa-dataflow-link/content.json&mouseSensor");
     docEditor.hideReadOnlyPanes();
 
     // The restore has to finish, and the tile has to be selected, before its toolbar exists.
@@ -93,6 +95,9 @@ context('Dataflow Tool Tile', function () {
     // Relink to existing tile
     clueCanvas.clickToolbarButton("dataflow", "data-set-link");
     tableTile.getLinkGraphModalTileMenu().select(graphTitle);
+    // The dialog's primary button ignores a click while it is disabled, and it stays disabled
+    // until React commits the selection, which lags cy.select() after a page load.
+    tableTile.getLinkGraphModalLinkButton().should("not.have.class", "disabled");
     tableTile.getLinkGraphModalLinkButton().should("contain.text", "Graph It!").click({force: true});
     graphTile.getTile().should("exist").contains(graphTitle);
     graphTile.getLayerName().should("contain.text", programTitle);
@@ -103,6 +108,7 @@ context('Dataflow Tool Tile', function () {
     // Unlink
     clueCanvas.clickToolbarButton("dataflow", "data-set-link");
     tableTile.getLinkGraphModalTileMenu().select(graphTitle);
+    tableTile.getLinkGraphModalLinkButton().should("not.have.class", "disabled");
     tableTile.getLinkGraphModalLinkButton().should("contain.text", "Clear It!").click({force: true});
     graphTile.getTile().should("exist").contains(graphTitle);
     graphTile.getLayerName().should("not.exist");

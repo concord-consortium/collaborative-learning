@@ -14,16 +14,7 @@
       "dataflow": {
         "servoInputMode": "proportion",
         "liveOutputTypes": ["Servo", "Gripper 2.0"],
-        "defaultSamplingRate": 10000,
-        "__comment__": [
-          "A tools list replaces the whole toolbar, so this is the default from app-config.json",
-          "plus data-set-link, which no longer appears by default. The integration spec uses this",
-          "unit to keep that button covered."
-        ],
-        "tools": [
-          ["data-set-view", "Table"], ["data-set-view", "Graph"], ["data-set-link", "Graph"],
-          "delete", "group", "ungroup", "|", "zoom-in", "zoom-out", "fit-all", "pan"
-        ]
+        "defaultSamplingRate": 10000
       },
       "datacard": {
         "tools": [
