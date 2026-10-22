@@ -1,7 +1,6 @@
 import React from "react";
 import { observer, inject } from "mobx-react";
 import classNames from "classnames";
-import { getVisibleFocusables } from "@concord-consortium/accessibility-tools/hooks";
 
 import { DataflowProgram, IDataflowProgramApi } from "./dataflow-program";
 import { BaseComponent } from "../../../components/base";
@@ -17,9 +16,12 @@ import { TileToolbar } from "../../../components/toolbar/tile-toolbar";
 import { ReteManager } from "../rete/rete-manager";
 import { DataflowReteManagerContext } from "./dataflow-rete-manager-context";
 import { ClueTileAccessibilityBridge } from "../../../hooks/use-clue-accessibility";
-import { getEditableTitleElement } from "../../../utilities/dom-utils";
 import { ITileExportOptions } from "../../../models/tiles/tile-content-info";
 import { ITileApi } from "../../../components/tiles/tile-api";
+import { getDeviceConnection } from "../model/device-connection";
+import { acknowledgeConnectTutorial, DataflowConnectTutorialGate } from "./ui/dataflow-connect-tutorial";
+import { getDataflowFocusSlots } from "./dataflow-focus-slots";
+import { toolbarShowsConnect } from "../utilities/connect-button-state";
 
 import "../dataflow-toolbar-registration";
 import "./dataflow-tile.scss";
@@ -117,6 +119,20 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
     }
   };
 
+  private handleDismissConnectTutorial = () => {
+    const { model, readOnly, tileElt } = this.props;
+    acknowledgeConnectTutorial({
+      connection: getDeviceConnection(this.stores.serialDevice), ui: this.stores.ui,
+      tileId: model.id, readOnly, tileElt
+    });
+  };
+
+  private getFocusSlots() {
+    return getDataflowFocusSlots({
+      tileElt: this.props.tileElt, programContainerEl: this.programContainerEl
+    });
+  }
+
   public render() {
     const { readOnly, height, model, onRegisterTileApi, tileElt } = this.props;
     const editableClass = readOnly ? "read-only" : "editable";
@@ -149,28 +165,23 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
           />
           <TileToolbar tileType="dataflow" readOnly={!!readOnly} tileElement={this.props.tileElt} />
         </div>
+        <DataflowConnectTutorialGate
+          content={tileContent}
+          connection={getDeviceConnection(this.stores.serialDevice)}
+          tileId={model.id}
+          readOnly={readOnly}
+          connectInToolbar={toolbarShowsConnect(this.stores.appConfig.getSetting("tools", "dataflow"))}
+          onDismiss={this.handleDismissConnectTutorial}
+        />
         {!readOnly && (
           <ClueTileAccessibilityBridge
             tileType="dataflow"
             onRegisterTileApi={this.props.onRegisterTileApi}
             onUnregisterTileApi={this.props.onUnregisterTileApi}
-            getTitleElement={() => getEditableTitleElement(this.props.tileElt ?? undefined)}
-            getContentElement={() => {
-              const el = this.programContainerEl?.querySelector<HTMLElement>(".dataflow-program-content");
-              // The focus trap advances past a slot only if it can put focus somewhere inside it,
-              // and it treats a slot with no element as "not present" and skips it. An empty
-              // program has no focusable blocks — and since zoom moved to the toolbar, nothing
-              // else — so reporting the element here would swallow Tab instead of moving on.
-              // Deliberately the accessibility-tools helper rather than the similar one in
-              // utilities/dom-utils: this has to agree with what the trap itself counts as
-              // focusable, or the slot can be reported as non-empty and swallow Tab anyway.
-              return el && getVisibleFocusables(el).length > 0 ? el : undefined;
-            }}
-            getTopbarElement={() =>
-              this.programContainerEl?.querySelector<HTMLElement>(".program-editor-topbar")
-              ?? undefined}
-            getPaletteElement={() =>
-              this.programContainerEl?.querySelector<HTMLElement>(".program-toolbar") ?? undefined}
+            getTitleElement={() => this.getFocusSlots().title}
+            getContentElement={() => this.getFocusSlots().content}
+            getTopbarElement={() => this.getFocusSlots().topbar}
+            getPaletteElement={() => this.getFocusSlots().palette}
             additionalApi={this.getAdditionalApi()}
           />
         )}

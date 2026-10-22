@@ -1,6 +1,6 @@
 // This lives in the DataFlow plugin, not src/models/stores, because it imports the Spiker:bit
 // firmware hex, which has to stay in the DataFlow chunk.
-import { makeAutoObservable, runInAction } from "mobx";
+import { makeAutoObservable, reaction, runInAction } from "mobx";
 import { SerialDevice } from "../../../models/stores/serial";
 import { SpikerbitDevice } from "../../../models/stores/spikerbit-device";
 import {
@@ -23,6 +23,9 @@ export const kDeviceChoiceLabels: Record<DeviceChoice, string> = {
 
 export type ConnectResult = "connected" | "canceled" | "failed";
 
+// What dismissed the connect tutorial: OK in one tile, or any connection.
+export type ConnectTutorialDismissal = { by: "ok", tileId: string } | { by: "connection" };
+
 export interface IDeviceConnectionDeps {
   createWebSerialTransport(): WebSerialTransport;
   createSpikerbitDevice(serialDevice: SerialDevice): SpikerbitDevice;
@@ -40,11 +43,14 @@ function isNoDeviceSelected(error: unknown) {
  * disconnect. Tiles start them through the tile device actions in `device-actions.ts`.
  */
 export class DeviceConnection {
-  // The menu choice the user last connected with. Reconnect repeats it, and the log events name
+  // The device choice the user last connected with. Reconnect repeats it, and the log events name
   // the device by it.
   lastChoice: DeviceChoice | undefined = undefined;
   // Set while a connect or reconnect attempt is in progress.
   busyChoice: DeviceChoice | undefined = undefined;
+  // What first dismissed the connect tutorial, which then stays dismissed on every tile. In memory
+  // only, so it can show again after a page reload.
+  connectTutorialDismissal: ConnectTutorialDismissal | undefined = undefined;
 
   private serialDevice: SerialDevice;
   private deps: IDeviceConnectionDeps;
@@ -74,6 +80,11 @@ export class DeviceConnection {
         disconnect: false
       }
     );
+    // A connection made any way, from any tile, ends the connect tutorial, so a later disconnect
+    // can't bring it back. fireImmediately covers a connection that exists before this is created.
+    reaction(() => this.isConnected, connected => {
+      if (connected) this.dismissConnectTutorial({ by: "connection" });
+    }, { fireImmediately: true });
   }
 
   get isConnected() {
@@ -82,6 +93,15 @@ export class DeviceConnection {
 
   get connectedLabel(): string | undefined {
     return this.isConnected && this.lastChoice ? kDeviceChoiceLabels[this.lastChoice] : undefined;
+  }
+
+  get connectTutorialDismissed() {
+    return !!this.connectTutorialDismissal;
+  }
+
+  // Keeps the first dismissal, so the tiles that log it agree on what dismissed it.
+  dismissConnectTutorial(dismissal: ConnectTutorialDismissal) {
+    this.connectTutorialDismissal ??= dismissal;
   }
 
   async connect(choice: DeviceChoice): Promise<ConnectResult> {
