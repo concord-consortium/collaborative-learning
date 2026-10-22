@@ -9,7 +9,6 @@ place, with `type`/`kind` dereferenced only inside a kind registry, a creation f
 - **Concepts — what the axes are, read out of current CLUE behavior:** [axes.md](./axes.md)
 - **Target — how the axes live in code (layers and boundaries):** [target-architecture.md](./target-architecture.md)
 - **Current state — what a consumer can read off a document today, and what the rules enforce:** [axes-current-state.md](./axes-current-state.md)
-- **Planned — the Firestore rules tightening that waits on older clients draining:** [planned-rules-tightening.md](./planned-rules-tightening.md)
 - **Decision record — why these axes and not others:** [2026-07-21-document-axes-planning.md](../superpowers/specs/2026-07-21-document-axes-planning.md)
 
 ### Related existing docs this roadmap evolves toward

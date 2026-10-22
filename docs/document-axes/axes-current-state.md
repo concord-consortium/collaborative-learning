@@ -116,6 +116,8 @@ is the caller's own, their own class (`class_<class_hash>`), or a group in their
 corroborated by a token claim rather than by the document — `class_hash` for the class, `offering_id` for
 the offering — so neither can be aimed anywhere the caller is not. `concurrent: true` is admitted only
 alongside one of the two synthetic owners, so no real-user-owned document can be created class-shared.
+After creation `concurrent` is read-only, like the owner, so no client can grant a document's history to
+the class, or take it away, by updating the field later.
 
 **`offering_id` is a learner-only claim.** The portal mints it for a student launched into one offering, and
 deliberately omits it for a teacher or researcher so they are not confined to a single offering. That lines
