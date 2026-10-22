@@ -36,9 +36,9 @@ service cloud.firestore {
       return isAuthed() && request.auth.token.platform_user_id != null;
     }
 
-    // function matchUserId(userId) {
-    //   return hasUserId() && string(request.auth.token.platform_user_id) == userId;
-    // }
+    function matchUserId(userId) {
+      return hasUserId() && string(request.auth.token.platform_user_id) == userId;
+    }
 
     function matchFirebaseUserId(userId) {
       return isAuthed() && request.auth.uid == userId;
@@ -50,6 +50,10 @@ service cloud.firestore {
 
     function isAuthedResearcher() {
       return hasUserId() && hasRole("researcher");
+    }
+
+    function isAuthedLearner() {
+      return hasUserId() && hasRole("learner");
     }
 
     // uid of submitted document must match user's platform_user_id
@@ -832,12 +836,11 @@ service cloud.firestore {
         return request.auth.token.platform_id.split('://')[1].split('/')[0].split('\\.') == portal.split('_');
       }
       function isOwnLearnerWrite() {
-        return hasRole("learner") && hasUserId()
-          && string(request.auth.token.platform_user_id) == uid
+        return isAuthedLearner() && matchUserId(uid)
           && request.auth.token.class_hash == classHash
           && tokenPortalIs();
       }
-      function isValidActivity() {
+      function isValidActivityRequest() {
         let d = request.resource.data;
         let before = resource == null ? {} : resource.data;
         let offering = string(request.auth.token.offering_id);
@@ -850,7 +853,7 @@ service cloud.firestore {
           && (resource == null || request.time >= before.lastActivityAt + duration.value(5, "s"));
       }
       allow get, list: if isAuthedResearcher() && request.auth.token.class_hash == classHash;
-      allow create, update: if isOwnLearnerWrite() && isValidActivity();
+      allow create, update: if isOwnLearnerWrite() && isValidActivityRequest();
     }
 
     //
