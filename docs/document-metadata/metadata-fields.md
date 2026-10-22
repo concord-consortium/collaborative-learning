@@ -68,7 +68,7 @@ so this table doubles as a migration-progress view.
 |---|---|---|---|---|
 | `content` | RTDB | all | `DocumentModel.content` | Yes — own + group |
 | `changeCount` | RTDB | all editable | `DocumentModel.changeCount` | No — local counter |
-| `lastHistoryEntryId` | RTDB | all editable | `DocumentModel.savedLastHistoryEntryId` (volatile) | No — read once |
+| `lastHistoryEntryId` | RTDB | all editable | `DocumentModel.savedLastHistoryEntryId` (volatile) | No: set at load and by this client's saves |
 | `pubVersion` | RTDB | publications | `DocumentModel.pubVersion` | No |
 | `groupUserConnections` | RTDB | publication | `DocumentModel.groupUserConnections` — **never populated** | No |
 | `lastEditedAt` | RTDB | all editable | not surfaced | No |
@@ -507,12 +507,15 @@ for the Firestore sourcing work.
 - **Location:** `/{classPath}/users/{uid}/documents/{key}/lastHistoryEntryId`
 - **Applies to:** editable documents with history; omitted for fresh documents and pre-feature saves
 - **Runtime:** `DocumentModel.savedLastHistoryEntryId` — **volatile**, not a persisted prop
-- **Updated by:** written conditionally as part of the content-write transform
-- **Reactive:** No — read exactly once at load time.
+- **Updated by:** written conditionally as part of the content-write transform; the runtime value is
+  loaded with the document and set again by each successful content save (`useDocumentSyncToFirebase`)
+- **Reactive:** No. Another client's saves never reach it.
 
-Records which history entry had been applied when a content snapshot was saved, so the history loader can
-detect drift between RTDB content and the Firestore history chain. See `lastHistoryEntry` above for the
-Firestore field with the confusingly similar name.
+Records which history entry had been applied when a content snapshot was saved. The history loader reads
+the loaded value once to detect drift between RTDB content and the Firestore history chain, and the
+activity recorder (`src/models/stores/activity-recorder.ts`) watches it to tell which history entries the
+saved content covers. See `lastHistoryEntry` above for the Firestore field with the confusingly similar
+name.
 
 ### `pubVersion`
 

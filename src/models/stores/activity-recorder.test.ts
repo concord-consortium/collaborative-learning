@@ -174,6 +174,12 @@ describe("ActivityRecorder", () => {
     recorder = new ActivityRecorder(makeStores());
     const doc = makeDocument();
     recorder.onLocalEntryUploaded(doc, addSavedEntry(doc));
+    await flush();
+    expect(mockSet).toHaveBeenCalledTimes(1);
+    jest.advanceTimersByTime(kActivityWriteFloorMs - 1);
+    await flush();
+    expect(mockSet).toHaveBeenCalledTimes(1);
+    jest.advanceTimersByTime(1);
     for (let i = 0; i < 5; i++) {
       await flush();
       jest.advanceTimersByTime(kActivityWriteFloorMs);

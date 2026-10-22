@@ -188,7 +188,6 @@ describe("researcher dashboard activity learner writes", () => {
     expect(snap.get("writeCount")).toBe(1);
   });
 
-
   it("refuses a non-merge overwrite that drops another offering's key", async () => {
     await seedOld();
     const db = initFirestore(learnerAuth);
