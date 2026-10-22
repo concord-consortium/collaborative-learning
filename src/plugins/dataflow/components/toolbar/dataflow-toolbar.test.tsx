@@ -381,12 +381,15 @@ describe("Dataflow connect button and pane", () => {
       fireEvent.click(getTrigger(container));
     };
     expect(screen.queryByRole("group", { name: "Device connection" })).toBeNull();
+    expect(getTrigger(container)).toHaveAttribute("aria-expanded", "false");
     press();
     expect(content.connectPaneOpen).toBe(true);
     expect(screen.getByRole("group", { name: "Device connection" })).toBeInTheDocument();
+    expect(getTrigger(container)).toHaveAttribute("aria-expanded", "true");
     press();
     expect(content.connectPaneOpen).toBe(false);
     expect(screen.queryByRole("group", { name: "Device connection" })).toBeNull();
+    expect(getTrigger(container)).toHaveAttribute("aria-expanded", "false");
   });
 
   it("opening the pane moves focus to the first control", () => {
