@@ -160,6 +160,16 @@ CLUE-693 was first built as a Cloud Function on history writes (branch `CLUE-693
 
 ---
 
+### A save whose snapshot a newer one replaced before it ran
+**Context**: react-query runs the mutation a few microtasks after `mutate()`, so when two changes land in one synchronous turn, both entries can complete before the first save reads the latest entry, and that save would claim the second change before its content is saved.
+**Options considered**:
+- A) Stamp every save with the latest entry when its snapshot was taken.
+- B) Stamp only the newest snapshot with the latest entry; a snapshot already replaced keeps the entry from when it was taken.
+
+**Decision**: B. A snapshot's own entry completes after the snapshot, so A would under-claim every single edit and make it wait the 30 s timeout; B only under-claims the replaced snapshot, whose newer snapshot's trailing save covers both changes.
+
+---
+
 ### A retried older save can move the saved id backwards
 **Context**: An older save can succeed after a newer one and set `savedLastHistoryEntryId` to an earlier entry.
 **Options considered**:

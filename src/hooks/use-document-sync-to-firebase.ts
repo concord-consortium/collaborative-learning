@@ -18,6 +18,9 @@ import { DocumentContentSnapshotType } from "src/models/document/document-conten
 import { IArrowAnnotation } from "src/models/annotations/arrow-annotation";
 import { TreeManagerType } from "../models/history/tree-manager";
 
+const latestHistoryEntryId = (document: DocumentModelType) =>
+  (document.treeManagerAPI as TreeManagerType | undefined)?.latestDocumentHistoryEntry?.id;
+
 function debugLog(...args: any[]) {
   // eslint-disable-next-line no-console
   DEBUG_SAVE && console.log(...args);
@@ -247,6 +250,10 @@ export function useDocumentSyncToFirebase(
       document.setSaveState(SaveState.Retrying);
     }
   };
+  // The latest entry when each snapshot was taken. Its own entry completes later, so this can only
+  // under-claim what the snapshot holds.
+  const snapshotIdsRef = useRef(new WeakMap<DocumentContentSnapshotType, string | undefined>());
+  const latestSnapshotRef = useRef<DocumentContentSnapshotType | undefined>(undefined);
   const stampedIdsRef = useRef(new WeakMap<DocumentContentSnapshotType, string | undefined>());
   const transform = (snapshot: DocumentContentSnapshotType):
       { changeCount: number, content: string, lastHistoryEntryId?: string } => {
@@ -255,14 +262,15 @@ export function useDocumentSyncToFirebase(
     // compares this to the Firestore history — if the id isn't present in
     // the history, the content reflects edits that never made it to the
     // history chain.
-    // A retry runs again with the same snapshot and must keep the id of its first attempt, or the
-    // older content would be stamped with a later entry.
+    // The mutation runs a few microtasks after it is queued, so the latest entry may already belong to
+    // a newer snapshot; only the newest snapshot takes it. A retry keeps its first attempt's id.
     const stampedIds = stampedIdsRef.current;
-    const treeManager = document.treeManagerAPI as TreeManagerType | undefined;
-    const lastHistoryEntryId = stampedIds.has(snapshot)
-      ? stampedIds.get(snapshot)
-      : treeManager?.latestDocumentHistoryEntry?.id;
-    stampedIds.set(snapshot, lastHistoryEntryId);
+    if (!stampedIds.has(snapshot)) {
+      stampedIds.set(snapshot, snapshot === latestSnapshotRef.current
+        ? latestHistoryEntryId(document)
+        : snapshotIdsRef.current.get(snapshot));
+    }
+    const lastHistoryEntryId = stampedIds.get(snapshot);
     const base = {
       changeCount: document.incChangeCount(),
       content: JSON.stringify(snapshot)
@@ -317,6 +325,8 @@ export function useDocumentSyncToFirebase(
   useEffect(() => {
     const cleanup = enabled
             ? onSnapshot<DocumentContentSnapshotType>(document.content!, snapshot => {
+                snapshotIdsRef.current.set(snapshot, latestHistoryEntryId(document));
+                latestSnapshotRef.current = snapshot;
                 dirtySeqRef.current++;
                 document.setSaveState(SaveState.Saving);
                 // reset (e.g. stop retrying and restart) when value changes

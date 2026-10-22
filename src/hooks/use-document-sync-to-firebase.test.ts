@@ -753,5 +753,39 @@ describe("useDocumentSyncToFirebase hook", () => {
       });
       expect(contentUpdates().map(value => value.lastHistoryEntryId)).toEqual(["e1", "e1"]);
     });
+
+    it("stamps a snapshot replaced before its save ran with the entry current when it was taken", async () => {
+      const synchronous = mockUseMutation.getMockImplementation()!;
+      // react-query runs the mutation a few microtasks after mutate(), behind onMutate.
+      mockUseMutation.mockImplementation((callback: (vars: any) => Promise<any>, options?: any) => ({
+        mutate: (vars: any) => {
+          const context = options?.onMutate?.(vars) ?? {};
+          Promise.resolve()
+            .then(() => callback(vars))
+            .then(data => options?.onSuccess?.(data, vars, context));
+        }
+      }));
+      try {
+        const { user, fb, firestore, document } = specArgs(ProblemDocument, "xyz");
+        addHistoryEntry(document, "e0");
+        renderHook(() => useDocumentSyncToFirebase(user, fb, firestore, document));
+
+        document.content?.addTile("text");
+        document.content?.addTile("text");
+        addHistoryEntry(document, "e1");
+        addHistoryEntry(document, "e2");
+        await waitFor(() => expect(contentUpdates()).toHaveLength(1));
+        expect(contentUpdates()[0].lastHistoryEntryId).toBe("e0");
+        await waitFor(() => expect(document.savedLastHistoryEntryId).toBe("e0"));
+
+        jest.runAllTimers();
+        await waitFor(() => expect(contentUpdates()).toHaveLength(2));
+        const latestId = (document.treeManagerAPI as TreeManagerType).latestDocumentHistoryEntry?.id;
+        expect(contentUpdates()[1].lastHistoryEntryId).toBe(latestId);
+        await waitFor(() => expect(document.savedLastHistoryEntryId).toBe(latestId));
+      } finally {
+        mockUseMutation.mockImplementation(synchronous);
+      }
+    });
   });
 });
