@@ -1,4 +1,4 @@
-import { retryAbortedTransaction } from "./retry-aborted-transaction";
+import { retryAbortedTransaction } from "./db-utils";
 
 const setAbort = () => new Error("set");
 

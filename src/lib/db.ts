@@ -42,6 +42,7 @@ import { IStores } from "../models/stores/stores";
 import { urlParams } from "../utilities/url-params";
 import { applyStartupUIState } from "../models/stores/persistent-ui/persistent-ui";
 import { TeacherSupportModelType, SectionTarget, AudienceModelType } from "../models/stores/supports";
+import { retryAbortedTransaction } from "../utilities/db-utils";
 import { safeJsonParse } from "../utilities/js-utils";
 import { initializeApp } from "./firebase-config";
 import { UserModelType } from "../models/stores/user";
@@ -50,7 +51,6 @@ import { logExemplarDocumentEvent } from "../models/document/log-exemplar-docume
 import { AppMode } from "../models/stores/store-types";
 import { DEBUG_FIRESTORE } from "./debug";
 import { firebaseRefPath } from "./fire-utils";
-import { retryAbortedTransaction } from "./retry-aborted-transaction";
 import {
   CanonicalSlotOwnerChangedError, getCanonicalPointerPath, ICanonicalPointer, kDefaultCanonicalDocumentLabel
 } from "./scoped-document-pointers";
@@ -428,8 +428,7 @@ export class DB {
    * - Sets up connection handlers only when the student being moved is the current user
    * - Updates latestGroupId only when the student being moved is the current user
    * - Uses a Firebase transaction to prevent race conditions when multiple clients modify groups
-   *   concurrently (e.g., student opens multiple tabs, teacher and student act simultaneously),
-   *   retried when a concurrent set() aborts it rather than failing the move
+   *   concurrently (e.g., student opens multiple tabs, teacher and student act simultaneously)
    *
    * @param studentId - The ID of the student to move
    * @param targetGroupId - The ID of the group to move the student to, or null to remove from all groups
