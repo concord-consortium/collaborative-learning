@@ -23,11 +23,11 @@ function sweepFraction(angle: number) {
   return (angle - kServoMinAngle) / (kServoMaxAngle - kServoMinAngle);
 }
 
-// The arm's ink runs only upwards from its pivot, so an unrotated arm points straight up, over
-// the node's dropdown. The simulator turns it the same way: 0 degrees points left and 180 points
-// right, so the arm sweeps down through the body and never rises above the hub.
+// The body lies on its side with the hub at its right, so the arm sweeps the space to the right
+// of it: 0 degrees points up, 90 to the right, 180 down. The arm's ink runs only upwards from
+// its pivot, which is why an unrotated arm is the one pointing up.
 function armRotation(angle: number) {
-  return 270 - angle;
+  return angle;
 }
 
 interface IProps {

@@ -125,37 +125,38 @@
 }
 
 .servo-control {
-  // Taller than the other outputs, as the humidifier is, so the arm's sweep has room below the
-  // hub without reaching the dropdown above it.
+  // Taller than the other outputs, as the humidifier is, so the arm's sweep has room above and
+  // below the hub without reaching the dropdown.
   height: 124px;
-  width: 113px;
+  width: 120px;
 
   .servo-assembly {
     position: relative;
     height: 124px;
-    left: 42px;
+    left: 8px;
 
-    // Decorative: without this the arm's image box, which is mostly transparent, swallows clicks
-    // meant for the dropdown behind it.
+    // Decorative: without this the arm's image box, which is mostly transparent, swallows the
+    // clicks meant for the dropdown behind it.
     .servo-part {
       position: absolute;
       pointer-events: none;
     }
 
-    // The art is scaled to about two thirds so the arm's 76px reach, which traces a half circle
-    // about the hub, stays inside the node rather than running past its sides.
+    // The servo lies on its side, hub to the right, at 80%: 91x44 becomes 73x35 with the hub at
+    // (55, 18) within it. Placing the hub at (56, 62) of the assembly puts the body here.
     .servo-part.body {
-      height: 59px;
-      left: 0;
-      top: 26px;
+      height: 35px;
+      left: 1px;
+      top: 44px;
     }
 
-    // Centred on the hub, which sits at (14, 14) of the scaled body. The arm image is far larger
-    // than its ink, and its pivot is the image centre, which is what lets rotate turn it there.
+    // Centred on that hub. The arm image is far larger than its ink and its pivot is the image
+    // centre, which is what lets rotate turn it about the hub. At 80% it reaches 61px, so the
+    // sweep spans the assembly's full height and stops just inside its right edge.
     .servo-part.arm {
-      height: 98px;
-      left: -35px;
-      top: -9px;
+      height: 121px;
+      left: -4px;
+      top: 2px;
     }
   }
 }

@@ -14,24 +14,23 @@ describe("ServoAnimation", () => {
     expect(container.querySelector(".servo-part.arm")).toBeInTheDocument();
   });
 
-  // The arm's ink runs only upwards from its pivot, so an unrotated arm points straight up over
-  // the node's dropdown. Keeping the sweep between left and right through the bottom is what
-  // stops it reaching the controls above it.
+  // The body lies on its side with the hub at its right, so the arm sweeps the space to the
+  // right of it rather than back across the body.
   it.each([
-    ["one end of the sweep", 0, 270],
-    ["the middle, pointing down", 90, 180],
-    ["the other end", 180, 90]
-  ])("points sideways or down at %s", (_label, angle, expected) => {
+    ["the start of the sweep, pointing up", 0, 0],
+    ["the middle, pointing right", 90, 90],
+    ["the end, pointing down", 180, 180]
+  ])("points %s", (_label, angle, expected) => {
     render(<ServoAnimation angle={angle} />);
     expect(armDegrees()).toBe(expected);
   });
 
   // It steps towards a new angle rather than jumping, so just after a change it is still on its
-  // way. Wherever it is, it must not be above the hub.
-  it("stays below the hub while it travels", () => {
+  // way. Wherever it is, it must stay within the half turn the servo has.
+  it("stays within the sweep while it travels", () => {
     const { rerender } = render(<ServoAnimation angle={0} />);
     rerender(<ServoAnimation angle={180} />);
-    expect(armDegrees()).toBeGreaterThanOrEqual(90);
-    expect(armDegrees()).toBeLessThanOrEqual(270);
+    expect(armDegrees()).toBeGreaterThanOrEqual(0);
+    expect(armDegrees()).toBeLessThanOrEqual(180);
   });
 });
