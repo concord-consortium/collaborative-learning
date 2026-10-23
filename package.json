@@ -89,6 +89,7 @@
     "build-and-serve": "npm-run-all build serve",
     "build:debug": "npm-run-all lint clean build:webpack",
     "build:firmware": "npm --prefix scripts/spikerbit-firmware ci && npm --prefix scripts/spikerbit-firmware run build",
+    "bench:spikerbit": "npm --prefix scripts/spikerbit-bench ci && node scripts/spikerbit-bench/bench.mjs",
     "check:firmware": "npm --prefix scripts/spikerbit-firmware ci && npm --prefix scripts/spikerbit-firmware run check",
     "build:webpack": "cross-env NODE_OPTIONS=--max-old-space-size=4096 webpack --mode production",
     "build:for-deploy": "npm-run-all clean build:webpack",
