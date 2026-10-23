@@ -1,8 +1,8 @@
 import { LiveOutputNode, servoDisplayMessage } from "./live-output-node";
 import { NodeLiveOutputTypes, resolveAllowedOutputTypes } from "../model/utilities/node";
 
-// Minimal fake SerialDevice that records which output writer the node invoked. The keyValue and ccDevice
-// branches of sendDataToSerialDevice reads only this.model and the device's deviceFamily, so an
+// Minimal fake SerialDevice that records which output writer the node invoked. The combined keyValue and
+// ccDevice branch of sendDataToSerialDevice reads only this.model and the device's deviceFamily, so an
 // Object.create stub of the node (as the rete-manager tests do) exercises the gate directly.
 function fakeSerialDevice(deviceFamily: string) {
   return {

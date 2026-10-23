@@ -23,7 +23,6 @@ describe("device-capabilities", () => {
   it("satisfies a channel when the device protocol matches the channel protocol tag", () => {
     expect(channelSatisfiedBy("arduino", arduinoChannel)).toBe(true);
     expect(channelSatisfiedBy("microbit", arduinoChannel)).toBe(false);
-    expect(channelSatisfiedBy("spikerbit", microbitChannel)).toBe(false);
     expect(channelSatisfiedBy(undefined, arduinoChannel)).toBe(false);
   });
 
@@ -31,6 +30,7 @@ describe("device-capabilities", () => {
     expect(channelSatisfiedBy("spikerbit", { channelId: "emg", protocol: "keyValue" } as NodeChannelInfo)).toBe(true);
     expect(channelSatisfiedBy("spikerbit", { channelId: "fsr", protocol: "keyValue" } as NodeChannelInfo)).toBe(false);
     expect(channelSatisfiedBy("spikerbit", { channelId: "tmp", protocol: "keyValue" } as NodeChannelInfo)).toBe(false);
+    expect(channelSatisfiedBy("spikerbit", microbitChannel)).toBe(false);
   });
 
   it("reports per-device output support", () => {

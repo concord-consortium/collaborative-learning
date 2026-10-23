@@ -356,8 +356,8 @@ The design and the reasoning behind it are recorded in
 ## What `keyValue` and `radioHub` don't do
 
 The gaps in the two older protocols, as facts about their wire format. The CC Device
-Protocol fills the first three and the integrity, output and value-range gaps, and reserves
-`caps` and `set` for discovery and configuration.
+Protocol fills the liveness, acknowledgment and identification gaps and the integrity, output
+and value-range gaps; capability discovery (`caps`) and configuration (`set`) are reserved.
 
 - **No liveness signal.** Dataflow can only infer that data stopped from the per-channel
   `lastMessageReceivedAt` stamps. Nothing distinguishes a quiet device from a lost
