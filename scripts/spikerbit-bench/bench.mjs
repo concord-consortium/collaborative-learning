@@ -107,10 +107,10 @@ class Board {
     return this.write(`${checksummed ? withChecksum(body) : body}\n`);
   }
 
-  // Throws away what has arrived so far (readings from before a command, say).
+  // Throws away the complete lines so far (readings from before a command, say). A partly
+  // received line stays in `pending` so its rest doesn't show up later as a fragment.
   clear() {
     this.lines = [];
-    this.pending = "";
   }
 
   // The first unread line that isn't a reading, within `ms`. Null if none arrives.
@@ -284,11 +284,17 @@ async function main() {
   try {
     await sleep(300);
     board.clear();
-    await board.send("?");
-    const first = await board.nextReply(1000);
-    const legacy = first && kLegacyPattern.exec(first);
+    // Plain, with no checksum: the old firmware compares the whole line to "?".
+    await board.send("?", { checksummed: false });
+    const firstLines = await board.collect(1000);
+    const legacy = firstLines.map(line => kLegacyPattern.exec(line)).find(Boolean);
     if (legacy) {
       console.log(`running v${legacy[1]} firmware; rerun with --flash`);
+      failed = 1;
+      return;
+    }
+    if (!firstLines.some(line => verifiedBody(line)?.startsWith("hello "))) {
+      console.log(`no reply to ?; is the board running this firmware? rerun with --flash (got ${describeLines(firstLines)})`);
       failed = 1;
       return;
     }
