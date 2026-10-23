@@ -12,9 +12,12 @@ npm run bench:spikerbit -- [--port <path>] [--flash] [--expect-identify]
 
 - `--port <path>`: the serial device. Without it, the script uses the only `/dev/cu.usbmodem*`;
   zero or several is an error that names what it found.
-- `--flash`: first copies `src/plugins/dataflow/firmware/spikerbit-clue.hex` to
-  `/Volumes/MICROBIT/`, then waits up to 30 s for the drive to remount and the serial port to
-  reappear.
+- `--flash`: first flashes `src/plugins/dataflow/firmware/spikerbit-clue.hex` by running
+  `cp -X` to `/Volumes/MICROBIT/` as a child process, waits 10 s for the board to reprogram, then
+  retries `?` for up to 30 s until the board answers. A `FAIL.TXT` on the drive afterward is
+  reported and fails the run. The script never reads the drive itself, because file calls on it
+  can block while the board reprograms. If the copy hasn't finished after 30 s the script says
+  "flash copy is stuck; unplug and replug the board" and exits 1.
 - `--expect-identify`: expect `identify #n` to reply `ok #n`. Without it the script expects
   `err #n unknown`, which is what firmware that doesn't have `identify` yet replies.
 

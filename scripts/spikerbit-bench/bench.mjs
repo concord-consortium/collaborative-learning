@@ -1,17 +1,20 @@
 // Checks a real Spiker:bit's replies to the CC Device Protocol over USB serial.
 // Usage: node bench.mjs [--port <path>] [--flash] [--expect-identify]
 import fs from "node:fs";
+import { spawn } from "node:child_process";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { SerialPort } from "serialport";
 
 const kBaudRate = 115200;
 const kReplyTimeoutMs = 500;
-// DAPLink takes a while to program the 1.3 MB hex before the drive remounts.
-const kFlashTimeoutMs = 60000;
+const kCopyTimeoutMs = 30000;
+// How long the board gets to reprogram before the first `?`, then to start answering it.
+const kSettleMs = 10000;
+const kBoardWaitMs = 30000;
+const kFailTextTimeoutMs = 5000;
 const kIdentifyAttempts = 5;
 const kDriveDir = "/Volumes/MICROBIT";
-const kHexName = "spikerbit-clue.hex";
 const kHexPath = path.resolve(path.dirname(fileURLToPath(import.meta.url)),
   "../../src/plugins/dataflow/firmware/spikerbit-clue.hex");
 const kReadingPattern = /^[a-z0-9_/]+:-?\d+(\.\d+)?$/;
@@ -61,46 +64,74 @@ function findPort(requested) {
     : `More than one port found (${ports.join(", ")}). Pass --port.`);
 }
 
-async function flash(hexPath) {
-  if (!fs.existsSync(kDriveDir)) throw new Error(`Can't flash: ${kDriveDir} isn't mounted`);
-  const target = path.join(kDriveDir, kHexName);
-  const failPath = path.join(kDriveDir, "FAIL.TXT");
-  console.log(`Flashing ${hexPath}`);
-  const appleDouble = path.join(kDriveDir, `._${kHexName}`);
-  fs.rmSync(failPath, { force: true });
-  fs.rmSync(appleDouble, { force: true });
-  // Written byte for byte rather than with copyFile, which on macOS also copies extended
-  // attributes; on the FAT drive those become "._" files that make DAPLink's transfer fail.
-  const fd = fs.openSync(target, "w");
-  fs.writeSync(fd, fs.readFileSync(hexPath));
-  fs.fsyncSync(fd);
-  fs.closeSync(fd);
-  // macOS still tags files written by some processes (com.apple.provenance), and the drive
-  // then gets a "._" file next to the hex. Remove it while DAPLink is still waiting for the
-  // transfer to finish.
-  for (let i = 0; i < 40; i++) {
-    fs.rmSync(appleDouble, { force: true });
-    await sleep(50);
-  }
-
-  // DAPLink removes the file (the drive remounts) once it has programmed the board, or writes
-  // FAIL.TXT. The remount can fall between polls, so a missing drive counts as done too.
-  const deadline = Date.now() + kFlashTimeoutMs;
-  const failure = () => (fs.existsSync(failPath) ? fs.readFileSync(failPath, "utf8").trim() : null);
-  const transferred = () => !fs.existsSync(target);
-  while (Date.now() < deadline && !transferred() && !failure()) await sleep(250);
-  if (failure()) throw new Error(`Flashing failed; the drive's FAIL.TXT says:\n${failure()}`);
-  if (!transferred()) throw new Error(`The board didn't finish taking the hex within ${kFlashTimeoutMs / 1000} s`);
-
-  // Then the drive and the serial port come back.
-  const backDeadline = Date.now() + kFlashTimeoutMs;
-  while (Date.now() < backDeadline && !(fs.existsSync(kDriveDir) && listPorts().length > 0)) await sleep(250);
-  if (!(fs.existsSync(kDriveDir) && listPorts().length > 0)) {
-    throw new Error(`The board's drive and serial port didn't come back within ${kFlashTimeoutMs / 1000} s of flashing`);
-  }
-  await sleep(1000);
-  if (failure()) throw new Error(`Flashing failed; the drive's FAIL.TXT says:\n${failure()}`);
+// Runs a command on the board's drive as a child process and resolves with how it ended. The
+// script never touches the drive itself (no fs calls on kDriveDir): while DAPLink programs the
+// board and remounts the drive, file calls on it can block in the kernel and can't be
+// interrupted. A child that does hang is abandoned, not waited for.
+function runOnDrive(command, args, timeoutMs) {
+  return new Promise(resolve => {
+    const child = spawn(command, args, { detached: true, stdio: ["ignore", "pipe", "pipe"] });
+    let output = "";
+    let done = false;
+    const finish = (result) => {
+      if (done) return;
+      done = true;
+      clearTimeout(timer);
+      child.stdout.destroy();
+      child.stderr.destroy();
+      child.unref();
+      resolve({ output: output.trim(), ...result });
+    };
+    const timer = setTimeout(() => finish({ timedOut: true }), timeoutMs);
+    child.stdout.on("data", chunk => { output += chunk; });
+    child.stderr.on("data", chunk => { output += chunk; });
+    child.on("error", err => { output += err.message; finish({ code: 1 }); });
+    child.on("close", code => finish({ code }));
+  });
 }
+
+// Copies the hex to the board's drive. `cp -X` leaves out extended attributes, which on the
+// FAT drive become "._" files that make DAPLink's transfer fail.
+async function copyHex(hexPath) {
+  console.log(`Flashing ${hexPath}`);
+  const result = await runOnDrive("cp", ["-X", hexPath, `${kDriveDir}/`], kCopyTimeoutMs);
+  if (result.timedOut) {
+    throw new StuckError("flash copy is stuck; unplug and replug the board");
+  }
+  if (result.code !== 0) throw new Error(`Flash copy failed: ${result.output}`);
+}
+
+// After flashing, the board reprograms and reboots; the serial port stays present throughout,
+// so the only sign it's ready is that it answers `?`.
+async function waitForBoard(requestedPort) {
+  console.log(`Waiting ${kSettleMs / 1000} s for the board to reprogram`);
+  await sleep(kSettleMs);
+  const deadline = Date.now() + kBoardWaitMs;
+  while (Date.now() < deadline) {
+    let port;
+    try {
+      port = new SerialPort({ path: findPort(requestedPort), baudRate: kBaudRate, autoOpen: false });
+      await new Promise((resolve, reject) => port.open(err => (err ? reject(err) : resolve())));
+      const board = new Board(port);
+      await board.send("?", { checksummed: false });
+      const lines = await board.collect(1000);
+      if (lines.some(line => kLegacyPattern.test(line) || verifiedBody(line)?.startsWith("hello "))) return;
+    } catch {
+      await sleep(1000);
+    } finally {
+      if (port?.isOpen) await new Promise(resolve => port.close(() => resolve()));
+    }
+  }
+  throw new Error(`The board didn't answer ? within ${kBoardWaitMs / 1000} s of the flash copy`);
+}
+
+// DAPLink writes FAIL.TXT to the drive when programming fails. Returns its text, or null.
+async function readFailText() {
+  const result = await runOnDrive("cat", [`${kDriveDir}/FAIL.TXT`], kFailTextTimeoutMs);
+  return result.code === 0 && result.output ? result.output : null;
+}
+
+class StuckError extends Error {}
 
 // Collects complete lines from the port, with the time each arrived.
 class Board {
@@ -292,7 +323,12 @@ async function runCheck(board, check, ctx) {
 
 async function main() {
   const args = parseArgs(process.argv.slice(2));
-  if (args.flash) await flash(kHexPath);
+  if (args.flash) {
+    await copyHex(kHexPath);
+    await waitForBoard(args.port);
+    const failText = await readFailText();
+    if (failText) throw new Error(`Flashing failed; the drive's FAIL.TXT says:\n${failText}`);
+  }
   const portPath = findPort(args.port);
   console.log(`Using ${portPath}`);
 
@@ -352,4 +388,6 @@ async function main() {
 main().catch(err => {
   console.error(err.message);
   process.exitCode = 1;
+  // A stuck copy can't be waited for or killed, so don't let it keep the process alive.
+  if (err instanceof StuckError) process.exit(1);
 });
