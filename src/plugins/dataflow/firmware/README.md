@@ -67,7 +67,7 @@ Two checks keep them in sync:
   rebuilds the hex and fails if it differs from the committed one.
 
 Behavior changes still need a bench test on real hardware; the checks only prove the hex
-was built from the source. `npm run bench:spikerbit -- --flash --expect-identify` flashes a
+was built from the source. `npm run bench:spikerbit -- --flash` flashes a
 plugged-in board and checks its protocol replies (see [`scripts/spikerbit-bench/`](../../../../scripts/spikerbit-bench/)).
 
 ### Prototyping in the MakeCode editor

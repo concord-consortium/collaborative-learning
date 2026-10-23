@@ -1,5 +1,5 @@
 // Checks a real Spiker:bit's replies to the CC Device Protocol over USB serial.
-// Usage: node bench.mjs [--port <path>] [--flash] [--expect-identify]
+// Usage: node bench.mjs [--port <path>] [--flash]
 import fs from "node:fs";
 import { spawn } from "node:child_process";
 import path from "node:path";
@@ -41,11 +41,10 @@ function verifiedBody(line) {
 }
 
 function parseArgs(argv) {
-  const args = { port: undefined, flash: false, expectIdentify: false };
+  const args = { port: undefined, flash: false };
   for (let i = 0; i < argv.length; i++) {
     if (argv[i] === "--port") args.port = argv[++i];
     else if (argv[i] === "--flash") args.flash = true;
-    else if (argv[i] === "--expect-identify") args.expectIdentify = true;
     else throw new Error(`Unknown argument: ${argv[i]}`);
   }
   return args;
@@ -226,7 +225,7 @@ function checkReadings(lines, ms, min, max) {
 //     so it can be wrong on purpose; `raw` sends exactly that text.
 //   run(board, ctx): custom steps; returns null when it passes or a failure message.
 // `#n` in a `send` string is the next sequence number.
-function buildChecks(expectIdentify) {
+function buildChecks() {
   return [
     { name: "? identifies the board", send: "?",
       reply: "hello protocol:CCDeviceProtocol version:1 device:spikerbit firmware:4" },
@@ -297,10 +296,7 @@ function buildChecks(expectIdentify) {
         return failure && checkReply(line, `err #${n} checksum`) ? failure : null;
       } },
     { name: "foo -> err unknown", send: "foo #n", reply: ctx => `err #${ctx.n} unknown` },
-    expectIdentify
-      ? { name: "identify #n -> ok", send: "identify #n", reply: ctx => `ok #${ctx.n}` }
-      : { name: "identify #n -> err unknown (firmware without identify)", send: "identify #n",
-          reply: ctx => `err #${ctx.n} unknown` },
+    { name: "identify #n -> ok", send: "identify #n", reply: ctx => `ok #${ctx.n}` },
     { name: "close leaves the board idle", send: ctx => `close session:${ctx.id} #n`, reply: ctx => `ok #${ctx.n}` },
   ];
 }
@@ -365,7 +361,7 @@ async function main() {
       return;
     }
 
-    for (const check of buildChecks(args.expectIdentify)) {
+    for (const check of buildChecks()) {
       const { failure, sent, got } = await runCheck(board, check, ctx);
       if (failure) {
         failed++;

@@ -7,7 +7,7 @@ only. It can't see sensors, the display, sound or the servo, so those checks sta
 ## Running
 
 ```bash
-npm run bench:spikerbit -- [--port <path>] [--flash] [--expect-identify]
+npm run bench:spikerbit -- [--port <path>] [--flash]
 ```
 
 - `--port <path>`: the serial device. Without it, the script uses the only `/dev/cu.usbmodem*`;
@@ -18,8 +18,6 @@ npm run bench:spikerbit -- [--port <path>] [--flash] [--expect-identify]
   reported and fails the run. The script never reads the drive itself, because file calls on it
   can block while the board reprograms. If the copy hasn't finished after 30 s the script says
   "flash copy is stuck; unplug and replug the board" and exits 1.
-- `--expect-identify`: expect `identify #n` to reply `ok #n`. Without it the script expects
-  `err #n unknown`, which is what firmware that doesn't have `identify` yet replies.
 
 The first thing it does is send `?`. If the board answers with the old `CLUE-SPIKERBIT v<N>`
 banner, the script stops with "running v<N> firmware; rerun with --flash".
