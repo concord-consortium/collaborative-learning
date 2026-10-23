@@ -125,17 +125,18 @@ describe("detectFirmwareReply", () => {
 });
 
 describe("shouldFlash", () => {
-  const cc = (version: number, firmware: number, protocol = "CCDeviceProtocol"): FirmwareReply =>
-    ({ kind: "ccDevice", hello: { protocol, version, device: "spikerbit", firmware } });
+  const cc = (version: number, firmware: number, protocol = "CCDeviceProtocol", device = "spikerbit"): FirmwareReply =>
+    ({ kind: "ccDevice", hello: { protocol, version, device, firmware } });
   it.each([
     ["no reply", null, true],
     ["a legacy banner", { kind: "legacy", firmware: 3 } as FirmwareReply, true],
     ["another protocol", cc(1, 4, "Other"), true],
     ["a newer protocol version, even with newer firmware", cc(2, 9), true],
+    ["another device on the same protocol, even with newer firmware", cc(1, 9, "CCDeviceProtocol", "other"), true],
     ["older firmware", cc(1, 3), true],
     ["the same firmware", cc(1, 4), false],
     ["newer firmware", cc(1, 5), false],
   ])("%s", (_label, reply, expected) => {
-    expect(shouldFlash(reply, 4)).toBe(expected);
+    expect(shouldFlash(reply, "spikerbit", 4)).toBe(expected);
   });
 });

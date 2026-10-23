@@ -6,6 +6,9 @@ import { IDeviceTransport } from "./device-transport";
 // Bump together with the firmware number in the MakeCode source's HELLO line.
 export const kSpikerbitFirmwareVersion = 4;
 
+// The `device` field of the hello a Spiker:bit sends.
+const kSpikerbitDeviceName = "spikerbit";
+
 // How long to wait for a "?" firmware reply before deciding to flash.
 const kVersionQueryTimeoutMs = 1500;
 
@@ -91,7 +94,7 @@ export class SpikerbitDevice {
     // store connected. setActiveDevice wires transport.onData -> receive (spikerbit maps to
     // the ccDevice protocol -> CcDeviceSession) and transport.onDisconnect, replacing
     // the connect-time firmware handler, and starts the session.
-    this.serialDevice.setActiveDevice("spikerbit", this.transport);
+    this.serialDevice.setActiveDevice(kSpikerbitDeviceName, this.transport);
   }
 
   // Closes the WebUSB link. The library connection's status event then clears the store's
@@ -109,7 +112,7 @@ export class SpikerbitDevice {
     await this.connection.connect();
 
     const running = await this.queryFirmware();
-    if (shouldFlash(running, kSpikerbitFirmwareVersion)) {
+    if (shouldFlash(running, kSpikerbitDeviceName, kSpikerbitFirmwareVersion)) {
       // Flash when the board answers with no recognized reply, the legacy banner, a protocol
       // Dataflow doesn't speak, or older firmware. USB connection stays Connected through a
       // flash (DAPLink interface chip is untouched) and serial auto-reinitializes, so no explicit
@@ -121,7 +124,7 @@ export class SpikerbitDevice {
       // showing the user nothing. We warn rather than fail so a genuinely halted board (e.g. a
       // partial flash whose reset was swallowed) still leaves a trace.
       const confirmed = await this.queryFirmware();
-      if (shouldFlash(confirmed, kSpikerbitFirmwareVersion)) {
+      if (shouldFlash(confirmed, kSpikerbitDeviceName, kSpikerbitFirmwareVersion)) {
         console.warn(
           `Spiker:bit firmware not confirmed after flash (got ${JSON.stringify(confirmed)}, ` +
           `expected version ${kSpikerbitFirmwareVersion}); connecting anyway.`
