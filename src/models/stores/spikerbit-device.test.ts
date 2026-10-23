@@ -108,9 +108,9 @@ describe("SpikerbitDevice", () => {
     const device = new SpikerbitDevice(serialDevice, conn);
 
     await device.connectAndStream("HEX");
-    serialDevice.writeToOutForServo(90, "Servo");
+    serialDevice.writeToOutForServo(0, "Servo");
 
-    expect(conn.written.some(w => /^servo:90\*[0-9A-F]{2}\n$/.test(w))).toBe(true);
+    expect(conn.written.some(w => /^servo:30\*[0-9A-F]{2}\n$/.test(w))).toBe(true);
   });
 
   it("sends open once streaming", async () => {

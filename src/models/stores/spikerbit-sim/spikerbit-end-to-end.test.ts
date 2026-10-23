@@ -101,9 +101,9 @@ describe("Dataflow and the Spiker:bit firmware", () => {
 
   it("moves the servo from a Live Output", async () => {
     await connect();
-    serialDevice.writeToOutForServo(90, "Servo");
+    serialDevice.writeToOutForServo(0, "Servo");
     await tick(100);
-    expect(sim.servoAngle("P0")).toBe(90);
+    expect(sim.servoAngle("P0")).toBe(30);
   });
 
   it("keeps the session open with pings", async () => {

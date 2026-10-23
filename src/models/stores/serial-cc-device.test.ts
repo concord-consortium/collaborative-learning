@@ -84,8 +84,8 @@ describe("SerialDevice with a ccDevice device", () => {
 
   it("writes servo as servo:<angle> to a ccDevice device", () => {
     serialDevice.setActiveDevice("spikerbit", transport);
-    serialDevice.writeToOutForServo(90, "Servo");
-    expect(lastBody(transport)).toBe("servo:90");
+    serialDevice.writeToOutForServo(0, "Servo");
+    expect(lastBody(transport)).toBe("servo:30");
   });
 
   it("still writes a bare angle to an Arduino", () => {
