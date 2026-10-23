@@ -157,22 +157,26 @@ matching id updates, so several tiles can read the same device at once.
 
 ## Spiker:bit version check and flashing
 
-The Spiker:bit runs a fixed micro:bit program (`CLUE-SPIKERBIT v<N>`, bundled at
-`src/plugins/dataflow/firmware/spikerbit-clue.hex`). Before handing the transport to the
+The Spiker:bit runs a fixed micro:bit program, bundled at
+`src/plugins/dataflow/firmware/spikerbit-clue.hex`. Before handing the transport to the
 store, `SpikerbitDevice.connectAndStream` makes sure the board is running a current build:
 
-1. It points the transport's `onData` at a connect-time handler (`handleVersionData`) that
-   scans inbound data for the version banner using `detectSpikerbitVersion`, recording the
-   reported version.
-2. `queryVersion` writes `?` and waits up to ~1.5s (`kVersionQueryTimeoutMs`) for that
-   banner to arrive.
-3. If no banner arrives (no known firmware) or the reported version is older than
-   `kSpikerbitFirmwareVersion`, it flashes the bundled hex (a partial flash, reporting
-   progress) and queries again. The USB connection stays Connected across the flash — the
-   DAPLink interface chip is untouched and serial auto-reinitializes — so no explicit
-   reconnect is needed.
+1. It points the transport's `onData` at a connect-time handler (`handleFirmwareData`) that
+   scans inbound data with `detectFirmwareReply`, recording the reply. A reply is either a
+   CC Device Protocol `hello` line (with a valid checksum), or the legacy
+   `CLUE-SPIKERBIT v<N>` banner that older firmware sends. Stale readings before the reply
+   and a reply split across chunks are handled; a `hello` with a bad checksum is ignored.
+2. `queryFirmware` writes `?` and waits up to ~1.5s (`kVersionQueryTimeoutMs`) for a reply.
+3. `shouldFlash` decides. It flashes the bundled hex (a partial flash, reporting progress)
+   and queries again when there is no recognized reply, the reply is a legacy banner, the
+   `hello` names a protocol or protocol version Dataflow doesn't speak (even if its firmware
+   is newer), or its firmware is older than `kSpikerbitFirmwareVersion`. It connects without
+   flashing when the protocol is `CCDeviceProtocol` version 1 and the firmware is the same
+   or newer. The USB connection stays Connected across the flash: the DAPLink interface chip
+   is untouched and serial auto-reinitializes, so no explicit reconnect is needed. The
+   re-query after the flash uses the same rule, and only warns.
 4. It then calls `setActiveDevice("spikerbit", transport)`, which repoints
-   `onData` from version detection to `SerialDevice.receive` and begins EMG streaming.
+   `onData` from firmware detection to `SerialDevice.receive` and begins EMG streaming.
 
 Bump `kSpikerbitFirmwareVersion` together with the `VERSION` constant in the MakeCode
 source whenever the firmware changes; see
