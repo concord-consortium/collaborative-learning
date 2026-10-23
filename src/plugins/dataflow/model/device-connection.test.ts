@@ -3,7 +3,9 @@ import {
   IMicrobitUsbConnection, kSpikerbitFirmwareVersion, SpikerbitDevice
 } from "../../../models/stores/spikerbit-device";
 import { WebSerialOpenResult, WebSerialTransport } from "../../../models/stores/web-serial-transport";
-import { DeviceConnection, getDeviceConnection, IDeviceConnectionDeps } from "./device-connection";
+import {
+  DeviceConnection, getDeviceConnection, IDeviceConnectionDeps, kEndSessionTimeoutMs
+} from "./device-connection";
 
 function makePort(usbVendorId: number, usbProductId: number) {
   return { getInfo: () => ({ usbVendorId, usbProductId }) } as unknown as SerialPort;
@@ -366,6 +368,24 @@ describe("DeviceConnection", () => {
     expect(transport.close).toHaveBeenCalled();
     expect(serialDevice.isConnected()).toBe(false);
     consoleError.mockRestore();
+  });
+
+  it("still closes the transport when ending the session never settles", async () => {
+    jest.useFakeTimers();
+    try {
+      const transport = makeTransport();
+      const { serialDevice, connection } = setup([transport]);
+      await connection.connect("arduino");
+      jest.spyOn(serialDevice, "endSession").mockImplementation(() => new Promise<void>(() => undefined));
+      const disconnecting = connection.disconnect();
+      await jest.advanceTimersByTimeAsync(kEndSessionTimeoutMs);
+      await disconnecting;
+      expect(transport.close).toHaveBeenCalled();
+      expect(serialDevice.isConnected()).toBe(false);
+      expect(connection.busyChoice).toBeUndefined();
+    } finally {
+      jest.useRealTimers();
+    }
   });
 
   it("starts with the connect tutorial dismissed when a device is already connected", () => {
