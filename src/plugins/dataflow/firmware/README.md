@@ -65,6 +65,27 @@ Change `pxt-core` and `pxt-microbit` in `scripts/spikerbit-firmware/package.json
 with), run `npm --prefix scripts/spikerbit-firmware install`, rebuild, and bench test. The
 build records the versions in the hex itself.
 
+## Testing the firmware in Jest
+
+The MakeCode simulator can't receive serial input, and no emulator runs a micro:bit V2 hex,
+so Jest runs `spikerbit-clue.ts` itself on a simulated MakeCode runtime,
+[`MakeCodeSim`](../../../models/stores/spikerbit-sim/makecode-sim.ts). It transpiles the
+source with `typescript`, runs it against fake MakeCode globals on a simulated clock, and
+lets a test send serial input, read serial output, press buttons, set the analog input on
+a pin, and check the servo angle, the icon shown and the sounds played.
+
+- **Only what the firmware uses is faked.** Calling anything else throws
+  `not simulated: <name>`; add a fake to `makecode-sim.ts` when the firmware starts using
+  something new.
+- **The loop rule.** `basic.pause` ends the current pass of a `forever` or background loop,
+  and the simulator calls the function again for the next pass. So a loop pauses only as
+  its last statement, a background loop (`while (true) { ...; basic.pause(n) }`) keeps its
+  state outside the function, and event handlers don't pause at all. The header of
+  `spikerbit-clue.ts` states the same rule.
+- `basic.pause(0)` lets 2 ms pass, about one pass of the sampler on a V2.
+
+These tests check the program's logic, not its timing on the board or the compiled hex.
+
 ## Bench-test firmware
 
 Two diagnostic programs (never flashed by CLUE — paste into MakeCode and use the

@@ -39,6 +39,12 @@
 // forever loop (one fiber): the "?" handler only sets a flag, so a version reply can never
 // interleave with the emg stream.
 //
+// LOOP RULE: a loop pauses only as its last statement, and a background loop
+// (`while (true) { ...; basic.pause(n) }`) keeps its state outside the function. Event
+// handlers (serial, buttons) don't pause at all. Jest tests run this source on a simulated
+// MakeCode runtime (src/models/stores/spikerbit-sim) that ends a pass at the pause and calls
+// the function again for the next one, so code after a pause would never run there.
+//
 // Keep VERSION's number in sync with kSpikerbitFirmwareVersion in
 // src/models/stores/spikerbit-device.ts whenever this program changes.
 
