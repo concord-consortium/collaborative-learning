@@ -1,54 +1,57 @@
 import * as fs from "fs";
 import * as os from "os";
 import * as path from "path";
+import { withChecksum } from "../cc-device-protocol";
 import { MakeCodeSim } from "./makecode-sim";
 
 const firmwarePath = path.join(__dirname, "../../../plugins/dataflow/firmware/spikerbit-clue.ts");
 const sim = () => MakeCodeSim.load(firmwarePath);
+const kHello = "hello protocol:CCDeviceProtocol version:1 device:spikerbit firmware:4";
 
-// The emg values in a batch of serial lines.
+// The emg values in a batch of serial lines, each ending in its checksum.
 const emgValues = (lines: string[]) =>
-  lines.filter(l => l.startsWith("emg:")).map(l => Number(l.slice("emg:".length)));
+  lines.filter(l => l.startsWith("emg:")).map(l => Number(l.slice("emg:".length, l.indexOf("*"))));
 
 describe("MakeCodeSim running the Spiker:bit firmware", () => {
-  it("runs the v3 startup banner and streams emg every 100 ms", () => {
+  it("is silent until streaming, then streams emg every 100 ms", () => {
     const s = sim();
     s.setAnalog("P1", 511);
     s.advance(1000);
-    const lines = s.takeSerialLines();
-    expect(lines[0]).toBe("CLUE-SPIKERBIT v3");
-    expect(lines.filter(l => l.startsWith("emg:")).length).toBeGreaterThanOrEqual(9);
+    expect(s.takeSerialLines()).toEqual([]);
+    s.sendSerial(`${withChecksum("stream")}\n`);
+    s.advance(1000);
+    expect(emgValues(s.takeSerialLines()).length).toBeGreaterThanOrEqual(9);
   });
 
   it("answers ? on the next loop pass", () => {
     const s = sim();
     s.advance(10);
-    s.takeSerialOutput();
     s.sendSerial("?\n");
-    s.advance(150);
-    expect(s.takeSerialLines()).toContain("CLUE-SPIKERBIT v3");
+    expect(s.takeSerialLines()).toEqual([]);
+    s.advance(20);
+    expect(s.takeSerialLines()).toEqual([withChecksum(kHello)]);
   });
 
-  it("drives the servo from a bare angle", () => {
+  it("drives the servo from servo:<angle>", () => {
     const s = sim();
-    s.sendSerial("90\n");
+    s.sendSerial(`${withChecksum("servo:90")}\n`);
     expect(s.servoAngle("P0")).toBe(90);
   });
 
   it("feeds the sampler from the analog pin", () => {
-    const steady = sim();
-    steady.setAnalog("P1", 500);
-    steady.advance(3000);
-    const steadyEmg = emgValues(steady.takeSerialLines());
-
-    const alternating = sim();
+    const streaming = (read: number | (() => number)) => {
+      const s = sim();
+      s.setAnalog("P1", read);
+      s.sendSerial(`${withChecksum("stream")}\n`);
+      s.advance(3000);
+      return emgValues(s.takeSerialLines());
+    };
+    const steadyEmg = streaming(500);
     let high = false;
-    alternating.setAnalog("P1", () => {
+    const alternatingEmg = streaming(() => {
       high = !high;
       return high ? 700 : 300;
     });
-    alternating.advance(3000);
-    const alternatingEmg = emgValues(alternating.takeSerialLines());
 
     // A steady signal leaves only the baseline's remaining error; a 300/700 swing around 500
     // is a 200-count deviation on every sample.
@@ -58,7 +61,9 @@ describe("MakeCodeSim running the Spiker:bit firmware", () => {
 
   it("ends each line with \\r\\n and clears what it has handed out", () => {
     const s = sim();
-    expect(s.takeSerialOutput()).toBe("CLUE-SPIKERBIT v3\r\n");
+    s.sendSerial("?\n");
+    s.advance(10);
+    expect(s.takeSerialOutput()).toBe(`${withChecksum(kHello)}\r\n`);
     expect(s.takeSerialOutput()).toBe("");
     expect(s.takeSerialLines()).toEqual([]);
   });

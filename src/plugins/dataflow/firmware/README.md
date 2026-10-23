@@ -1,11 +1,23 @@
 # Spiker:bit DataFlow firmware
 
-`spikerbit-clue.hex` is a universal micro:bit hex (V1+V2) authored in MakeCode.
-It streams the Spiker:bit EMG envelope over serial as `emg:<value>\r\n`, drives a
-servo from bare-integer angle lines, and replies to a `?` query with
-`CLUE-SPIKERBIT v<N>`. The DataFlow tile flashes it automatically over WebUSB
-(via `@microbit/microbit-connection`) when a connected micro:bit is not already
-running it.
+`spikerbit-clue.hex` is a universal micro:bit hex (V1+V2) authored in MakeCode. It
+reads the Spiker:bit's EMG signal, sends its envelope over USB serial, and drives a servo
+on P0. The DataFlow tile flashes it automatically over WebUSB (via
+`@microbit/microbit-connection`) when a connected micro:bit is not already running it.
+
+It speaks the CC Device Protocol, described in
+[`serial-protocols.md`](../../dataflow-tool/serial-protocols.md): one text line per message,
+each ending in an XOR checksum (`*hh`). `?` gets a `hello` line naming the protocol and the
+firmware version, which is how Dataflow decides whether to flash. `open session:<id>` starts a
+session that sends an `emg:<value>` reading every 100 ms and ends on `close`, or when no
+`ping session:<id>` has arrived for its timeout (5 s unless `open` asks for another).
+`stream` and `stop` turn the same readings on and off without a session, for a plotter or a
+terminal. `servo:<angle>` sets the servo. A trailing `#n` asks for an `ok #n` reply, and errors
+are sent either way.
+
+**The board is silent until it is spoken to.** It sends no startup banner and no readings
+until a session or `stream` starts them, so a board nobody is talking to doesn't fill the USB
+interface chip's buffer with stale data for the next connection.
 
 As of v3 the firmware computes the EMG envelope itself — it tracks the DC baseline
 and full-wave rectifies (`envelope = EMA(|raw - baseline|)`) instead of using the
@@ -31,8 +43,8 @@ exact versions in [`scripts/spikerbit-firmware/`](../../../../scripts/spikerbit-
 the same source always produces the same hex.
 
 1. Edit `spikerbit-clue.ts`.
-2. If behavior changed, bump `VERSION` there and `kSpikerbitFirmwareVersion` in
-   `src/models/stores/spikerbit-device.ts`.
+2. If behavior changed, bump the `firmware:` number in its `HELLO` line and
+   `kSpikerbitFirmwareVersion` in `src/models/stores/spikerbit-device.ts`.
 3. Run `npm run build:firmware`. It reinstalls the pinned toolchain into
    `scripts/spikerbit-firmware/node_modules` (about 550 MB) with `npm ci`, compiles, and
    overwrites `spikerbit-clue.hex`. A compile error is printed and leaves the hex untouched.
@@ -48,7 +60,8 @@ Two checks keep them in sync:
   rebuilds the hex and fails if it differs from the committed one.
 
 Behavior changes still need a bench test on real hardware; the checks only prove the hex
-was built from the source.
+was built from the source. `npm run bench:spikerbit -- --flash` flashes a plugged-in board and
+checks its protocol replies (see [`scripts/spikerbit-bench/`](../../../../scripts/spikerbit-bench/)).
 
 ### Prototyping in the MakeCode editor
 
