@@ -35,7 +35,8 @@ and **outbound** (a Live Output node → bytes leaving the computer).
 | `SerialDevice` | `src/models/stores/serial.ts` | Transport-agnostic connection store: holds the active transport and the registered channel sources, routes writes (`writeLine`) and inbound parsing (`receive`). `isConnected()` is observable. |
 | `DeviceConnection` | `src/plugins/dataflow/model/device-connection.ts` | App-wide connect, reconnect and disconnect; one instance per `SerialDevice`, from `getDeviceConnection`. Tracks `lastChoice`, `busyChoice` and `connectTutorialDismissal`. |
 | tile device actions | `src/plugins/dataflow/utilities/device-actions.ts` | Wrap `DeviceConnection` for one tile: they reset the clicking tile's program, log the change, and record a failed attempt's message on the tile. |
-| `parseKeyValueData` | `src/models/stores/serial-protocol.ts` | Shared parser: `emg:<n>\r\n` lines → channel values. |
+| `parseKeyValueData` | `src/models/stores/serial-protocol.ts` | `keyValue` parser (Arduino): `emg:<n>\r\n` lines → channel values. |
+| `CcDeviceSession` | `src/models/stores/cc-device-session.ts` | One CC Device Protocol session (Spiker:bit): opens it, pings it, parses its lines into channel values, and writes its outputs. Created by `setActiveDevice` for a `ccDevice` device. |
 | tile serial channels | `NodeChannelInfo[]` (`.../model/utilities/channel.ts`) | The shared blackboard: parsers write `channel.value`; the Sensor node reads it. Each mounted, editable tile registers its channels with `SerialDevice` as a channel source. |
 | `SensorNode` / `LiveOutputNode` | `.../nodes/sensor-node.ts`, `live-output-node.ts` | DataFlow nodes that read inbound values / emit outbound values each tick. |
 
@@ -45,8 +46,11 @@ and **outbound** (a Live Output node → bytes leaving the computer).
 Device **identity** (`SerialDevice.deviceFamily`: `arduino` / `microbit` / `spikerbit`)
 is distinct from a channel's **protocol** tag (`channel.protocol`: `keyValue` /
 `radioHub`). `kDeviceCapabilities` (`.../model/utilities/device-capabilities.ts`) maps
-identity → `{ protocol, displayName, outputs }`, so the same wire protocol can be spoken
-by more than one device (the Arduino and the Spiker:bit both speak `keyValue`).
+identity → `{ protocol, displayName, outputs, channels? }`: the Arduino speaks `keyValue`,
+the radio-hub micro:bit `radioHub`, and the Spiker:bit `ccDevice` (the CC Device Protocol;
+see [serial-protocols.md](serial-protocols.md)). A device with a `channels` list provides
+only those channel ids, whatever their tag: the Spiker:bit lists `emg`, so it provides the
+`emg` channel, which is tagged `keyValue`.
 
 ## Connecting a device
 
@@ -176,10 +180,12 @@ store, `SpikerbitDevice.connectAndStream` makes sure the board is running a curr
    is untouched and serial auto-reinitializes, so no explicit reconnect is needed. The
    re-query after the flash uses the same rule, and only warns.
 4. It then calls `setActiveDevice("spikerbit", transport)`, which repoints
-   `onData` from firmware detection to `SerialDevice.receive` and begins EMG streaming.
+   `onData` from firmware detection to `SerialDevice.receive` and starts a CC Device
+   Protocol session. The board streams EMG readings once it acknowledges the session's
+   `open`.
 
-Bump `kSpikerbitFirmwareVersion` together with the `VERSION` constant in the MakeCode
-source whenever the firmware changes; see
+Bump `kSpikerbitFirmwareVersion` together with the `firmware:` number in the `HELLO` line of
+the MakeCode source whenever the firmware changes; see
 [the firmware README](../dataflow/firmware/README.md) for how to rebuild the hex.
 
 ## Inbound: hardware → Sensor node
@@ -208,8 +214,9 @@ flowchart TB
   end
 
   recv["SerialDevice.receive<br/>routes by deviceProtocol"]
-  parse["parseKeyValueData<br/>shared parser"]
+  parse["parseKeyValueData<br/>keyValue parser"]
   mparse["handleRadioHubStreamObj<br/>radio parser"]
+  cparse["CcDeviceSession.receive<br/>CC Device Protocol parser"]
 
   subgraph tile [DataFlow tile]
     ch["serial channels<br/>NodeChannelInfo value"]
@@ -227,9 +234,11 @@ flowchart TB
 
   recv -->|"keyValue protocol"| parse
   recv -->|"radioHub protocol"| mparse
+  recv -->|"ccDevice protocol"| cparse
 
   parse -->|"writes channel value"| ch
   mparse -->|"writes channel value"| ch
+  cparse -->|"writes channel value"| ch
   ch -->|"sampled each tick"| sensor
 ```
 
@@ -245,9 +254,10 @@ Walkthrough:
 - **Spiker:bit (WebUSB):** `MicrobitUsbTransport` owns the connection's `serialdata` event
   and forwards each chunk to `onData`, which `SerialDevice.setActiveDevice` wired to
   `SerialDevice.receive` — exactly like the Web Serial path. The Spiker:bit's `deviceFamily`
-  maps to the `keyValue` protocol, so `receive` dispatches to the same
-  `handleKeyValueStreamObj` → `parseKeyValueData`. During connect (before
-  `setActiveDevice`), `SpikerbitDevice` temporarily points `onData` at a version-detection
+  maps to the `ccDevice` protocol, so `receive` hands the chunk to the active
+  `CcDeviceSession`, which checks each line's checksum, routes `ok` and `err` replies to the
+  session, and writes each reading to the channels with its name. During connect (before
+  `setActiveDevice`), `SpikerbitDevice` temporarily points `onData` at a firmware-detection
   handler to decide whether to flash; EMG parsing begins once the transport becomes the
   active device.
 - **Into the node:** both paths mutate the same `NodeChannelInfo` objects (each registered
@@ -258,8 +268,8 @@ Walkthrough:
 > differently. A **radio-hub micro:bit** connects over **Web Serial** (same transport as
 > the Arduino); `receive` routes its data to `handleRadioHubStreamObj` — a different parser
 > — because its `deviceFamily` maps to the `radioHub` protocol. The **Spiker:bit** is a
-> micro:bit running the flashed CLUE-SPIKERBIT program on an expansion board; it connects
-> over **WebUSB** so it can be flashed and read via `@microbit/microbit-connection`.
+> micro:bit running the flashed `spikerbit-clue.hex` program on an expansion board; it
+> connects over **WebUSB** so it can be flashed and read via `@microbit/microbit-connection`.
 
 ### Reconstituting messages from the stream
 
@@ -267,7 +277,8 @@ The read loop hands each parser a raw string chunk decoded from the port. A chun
 malformed representation of any number of whole or partial serial messages, chomped off
 the stream at unpredictable spots that do not respect the original message boundaries. So
 the parser cannot assume a chunk is one clean line. Each parser (`parseKeyValueData`,
-`handleRadioHubStreamObj`) therefore appends the chunk to a **local buffer**, then scans
+`handleRadioHubStreamObj`, `CcDeviceSession.receive`) therefore appends the chunk to a
+**local buffer**, then scans
 the buffer for a complete, legitimate value using a regular expression closely paired to
 the devices and the sensors/actuators DataFlow supports. On a match it parses out the
 value plus an indicator of which channel the value belongs to, finds that channel, and
@@ -287,8 +298,9 @@ flowchart TB
   end
 
   send["LiveOutputNode.sendDataToSerialDevice<br/>routes by deviceProtocol"]
-  fmt["SerialDevice.writeToOutForServo etc.<br/>value becomes a line string"]
+  fmt["SerialDevice.writeToOutForServo etc.<br/>scales the value"]
   wl["SerialDevice.writeLine<br/>calls activeTransport.write"]
+  cc["CcDeviceSession.sendOutput<br/>servo:angle with its checksum"]
 
   subgraph transport [Transport layer]
     wst["WebSerialTransport.write<br/>writes the line to the port writer"]
@@ -308,9 +320,10 @@ flowchart TB
 
   lout --> send
   send --> fmt
-  fmt --> wl
+  fmt -->|"keyValue or radioHub"| wl
+  fmt -->|"ccDevice"| cc
   wl -->|"active transport is WebSerialTransport"| wst
-  wl -->|"active transport is MicrobitUsbTransport"| mut
+  cc -->|"the session's transport"| mut
   wst --> ws
   ws --> ard
   ws --> mbit
@@ -325,12 +338,16 @@ Walkthrough:
 - Each tick, the `Live Output node`'s `data()` calls `sendDataToSerialDevice`, which reads
   `serialDevice.deviceFamily`, resolves its protocol via the capability map, and calls the
   matching `SerialDevice.writeToOut…` formatter (e.g. servo-angle scaling).
-- The formatter produces a line string and calls `SerialDevice.writeLine(line)`, which is
-  the **single unified exit**: `this.activeTransport.write(line)`.
+- For `keyValue` and `radioHub`, the formatter produces a line string and calls
+  `SerialDevice.writeLine(line)`: `this.activeTransport.write(line)`.
+- For `ccDevice` (the Spiker:bit), `writeToOutForServo` hands the rounded angle to the
+  active `CcDeviceSession`, which writes `servo:<angle>*hh` through the transport it was
+  given by `setActiveDevice`, the same one `writeLine` would use. The session writes its own
+  `open`, `ping` and `close` the same way.
 - Only the concrete transport differs: `WebSerialTransport.write` frames the line and
   writes it to the Web Serial port's writer; `MicrobitUsbTransport.write` calls
-  `connection.serialWrite`. Neither the node nor `SerialDevice` above `writeLine` knows or
-  cares which transport is active.
+  `connection.serialWrite`. Neither the node nor `SerialDevice` knows or cares which
+  transport is active.
 
 ## Connection status tracking
 
@@ -357,5 +374,6 @@ disconnect cannot kill a live WebUSB (Spiker:bit) session.
 ## Summary
 
 Both directions run through `SerialDevice` and are transport-agnostic: outbound via
-`writeLine → activeTransport.write`, inbound via `transport.onData → SerialDevice.receive`.
+`writeLine → activeTransport.write` (or the `CcDeviceSession`, which writes to the same
+transport), inbound via `transport.onData → SerialDevice.receive`.
 The active transport is swapped in at connect through `setActiveDevice`.

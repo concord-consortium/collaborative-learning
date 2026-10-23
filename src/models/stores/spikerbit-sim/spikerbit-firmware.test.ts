@@ -7,10 +7,20 @@ import { MakeCodeSim } from "./makecode-sim";
 const firmwarePath = path.join(__dirname, "../../../plugins/dataflow/firmware/spikerbit-clue.ts");
 const kHello = "hello protocol:CCDeviceProtocol version:1 device:spikerbit firmware:4";
 
+// The firmware's display stages and its identify sound.
+const kWaitingIcon = "Asleep";
+const kFoundIcon = "Surprised";
+const kConnectedIcon = "Yes";
+const kIdentifyIcon = "Heart";
+const kStreamingIcon = "Chessboard";
+const kIdentifySound = "hello";
+// How long the connected and identify icons stay.
+const kIconMs = 3000;
+
 interface TimedLine { at: number; line: string }
 
-function boot() {
-  const sim = MakeCodeSim.load(firmwarePath);
+function boot(hardwareVersion?: string) {
+  const sim = MakeCodeSim.load(firmwarePath, { hardwareVersion });
   sim.setAnalog("P1", 511);
   return sim;
 }
@@ -279,7 +289,8 @@ describe("Spiker:bit firmware", () => {
     const sim = boot();
     expect(exchange(sim, "foo #9")).toEqual(["err #9 unknown"]);
     expect(exchange(sim, "foo")).toEqual(["err unknown"]);
-    expect(exchange(sim, "identify #10")).toEqual(["err #10 unknown"]);
+    expect(exchange(sim, "caps #10")).toEqual(["err #10 unknown"]);
+    expect(exchange(sim, "identify extra:1 #11")).toEqual(["err #11 unknown"]);
   });
 
   it("accepts \\r\\n and \\n line endings", () => {
@@ -301,5 +312,145 @@ describe("Spiker:bit firmware", () => {
     send(sim, "close session:8");
     run(sim, 100);
     expect(sim.servoAngle("P0")).toBe(70);
+  });
+});
+
+describe("Spiker:bit firmware display, sound and buttons", () => {
+  it("shows the waiting icon after power-up and the found icon after ?", () => {
+    const sim = boot();
+    expect(sim.shownIcon()).toBe(kWaitingIcon);
+    run(sim, 1000);
+    expect(sim.shownIcon()).toBe(kWaitingIcon);
+    expect(exchange(sim, "?")).toEqual([kHello]);
+    expect(sim.shownIcon()).toBe(kFoundIcon);
+  });
+
+  it("shows the connected icon on open for 3000 ms, then draws nothing for the rest of the session", () => {
+    const sim = boot();
+    exchange(sim, "?");
+    send(sim, "open session:7 #1");
+    expect(sim.shownIcon()).toBe(kConnectedIcon);
+    run(sim, kIconMs - 10);
+    expect(sim.shownIcon()).toBe(kConnectedIcon);
+    run(sim, 40);
+    expect(sim.shownIcon()).toBeUndefined();
+
+    const drawn = sim.displayCalls.length;
+    for (let second = 0; second < 10; second++) {
+      ["?", `ping session:7 #${second + 2}`, "servo:90", "stream", "stop", "ping #99", "foo"]
+        .forEach(command => send(sim, command));
+      run(sim, 1000);
+    }
+    expect(sim.displayCalls.length).toBe(drawn);
+  });
+
+  it("shows the waiting icon and stops any sound when a session ends", () => {
+    const sim = inSession();
+    expect(exchange(sim, "identify #2")).toEqual(["ok #2"]);
+    expect(sim.soundsStopped).toBe(0);
+    send(sim, "close session:7");
+    expect(sim.shownIcon()).toBe(kWaitingIcon);
+    expect(sim.soundsStopped).toBe(1);
+    // The identify icon's time running out doesn't change the display.
+    run(sim, kIconMs);
+    expect(sim.shownIcon()).toBe(kWaitingIcon);
+
+    send(sim, "open session:8 #3");
+    run(sim, 5100);
+    expect(sim.shownIcon()).toBe(kWaitingIcon);
+    expect(sim.soundsStopped).toBe(2);
+  });
+
+  it("answers identify with its icon and one sound from the speaker alone, then shows what the state calls for", () => {
+    const identify = (sim: MakeCodeSim, command: string, reply: string[], after: string | undefined) => {
+      const soundsBefore = sim.sounds.length;
+      send(sim, command);
+      expect(sim.shownIcon()).toBe(kIdentifyIcon);
+      expect(replies(run(sim, kIconMs - 10))).toEqual(reply);
+      expect(sim.shownIcon()).toBe(kIdentifyIcon);
+      run(sim, 40);
+      expect(sim.shownIcon()).toBe(after);
+      expect(sim.sounds.slice(soundsBefore)).toEqual([kIdentifySound]);
+      expect(sim.speakerEnabled).toBe(true);
+      expect(sim.audioPinEnabled).toBe(false);
+    };
+
+    const idle = boot();
+    identify(idle, "identify #5", ["ok #5"], kWaitingIcon);
+    exchange(idle, "?");
+    identify(idle, "identify", [], kFoundIcon);
+
+    identify(inSession(), "identify #6", ["ok #6"], undefined);
+
+    const freeRun = boot();
+    expect(exchange(freeRun, "stream #1")).toEqual(["ok #1"]);
+    identify(freeRun, "identify #7", ["ok #7"], kStreamingIcon);
+  });
+
+  it("shows the identify icon without a sound on a micro:bit V1, leaving its speaker setting alone", () => {
+    const sim = boot("1");
+    expect(exchange(sim, "identify #4")).toEqual(["ok #4"]);
+    expect(sim.shownIcon()).toBe(kIdentifyIcon);
+    run(sim, kIconMs);
+    expect(sim.shownIcon()).toBe(kWaitingIcon);
+    expect(sim.sounds).toEqual([]);
+    expect(sim.speakerEnabled).toBeUndefined();
+    expect(sim.audioPinEnabled).toBe(false);
+
+    send(sim, "open session:7 #5");
+    send(sim, "close session:7 #6");
+    expect(sim.soundsStopped).toBe(0);
+  });
+
+  it("shows the streaming icon on stream and the waiting icon on stop", () => {
+    const sim = boot();
+    exchange(sim, "?");
+    expect(exchange(sim, "stream #1")).toEqual(["ok #1"]);
+    expect(sim.shownIcon()).toBe(kStreamingIcon);
+    expect(exchange(sim, "stop #2")).toEqual(["ok #2"]);
+    expect(sim.shownIcon()).toBe(kWaitingIcon);
+  });
+
+  it("starts and stops free-run on a long press of A outside a session, and ignores it in one", () => {
+    const sim = boot();
+    sim.pressButton("A", "longClick");
+    expect(sim.shownIcon()).toBe(kStreamingIcon);
+    expect(readings(run(sim, 1000)).length).toBeGreaterThanOrEqual(9);
+    sim.pressButton("A", "longClick");
+    expect(sim.shownIcon()).toBe(kWaitingIcon);
+    expect(run(sim, 1000)).toEqual([]);
+
+    const session = inSession();
+    run(session, kIconMs);
+    const drawn = session.displayCalls.length;
+    session.pressButton("A", "longClick");
+    expect(readings(run(session, 500)).length).toBeGreaterThanOrEqual(4);
+    expect(exchange(session, "ping session:7 #2")).toEqual(["ok #2"]);
+    expect(session.displayCalls.length).toBe(drawn);
+    // When the session lapses, the board goes to idle, not free-run.
+    run(session, 5100);
+    expect(run(session, 1000)).toEqual([]);
+  });
+
+  it("ignores a click of A in every state", () => {
+    const sim = boot();
+    const clickA = () => {
+      const drawn = sim.displayCalls.length;
+      sim.pressButton("A", "click");
+      expect(sim.displayCalls.length).toBe(drawn);
+    };
+
+    clickA();
+    expect(run(sim, 1000)).toEqual([]);
+
+    expect(exchange(sim, "stream #1")).toEqual(["ok #1"]);
+    clickA();
+    expect(readings(run(sim, 1000)).length).toBeGreaterThanOrEqual(9);
+    expect(sim.shownIcon()).toBe(kStreamingIcon);
+
+    expect(exchange(sim, "open session:7 #2")).toEqual(["ok #2"]);
+    run(sim, kIconMs);
+    clickA();
+    expect(exchange(sim, "ping session:7 #3")).toEqual(["ok #3"]);
   });
 });

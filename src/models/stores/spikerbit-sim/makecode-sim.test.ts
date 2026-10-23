@@ -74,10 +74,10 @@ describe("MakeCodeSim runtime", () => {
   beforeEach(() => { dir = fs.mkdtempSync(path.join(os.tmpdir(), "makecode-sim-")); });
   afterEach(() => { fs.rmSync(dir, { recursive: true, force: true }); });
 
-  const load = (source: string) => {
+  const load = (source: string, hardwareVersion?: string) => {
     const file = path.join(dir, "program.ts");
     fs.writeFileSync(file, source);
-    return MakeCodeSim.load(file);
+    return MakeCodeSim.load(file, { hardwareVersion });
   };
 
   it("reports an API the firmware uses but the sim doesn't fake", () => {
@@ -162,13 +162,15 @@ describe("MakeCodeSim runtime", () => {
     expect(() => s.sendSerial("x\n")).toThrow("event handlers must not pause");
   });
 
-  it("runs button handlers for the matching button and event only", () => {
+  it("raises a button's click or long-click event for the handlers registered for it", () => {
     const s = load(`
       input.onButtonPressed(Button.A, function () { serial.writeLine("A click") })
-      input.onButtonEvent(Button.A, input.buttonEventValue(ButtonEvent.LongClick), function () {
+      control.onEvent(EventBusSource.MICROBIT_ID_BUTTON_A, DAL.MICROBIT_BUTTON_EVT_LONG_CLICK, function () {
         serial.writeLine("A long")
       })
-      input.onButtonEvent(Button.B, input.buttonEventClick(), function () { serial.writeLine("B click") })
+      control.onEvent(EventBusSource.MICROBIT_ID_BUTTON_B, DAL.MICROBIT_BUTTON_EVT_CLICK, function () {
+        serial.writeLine("B click")
+      })
     `);
     s.pressButton("A", "longClick");
     s.pressButton("B", "click");
@@ -177,7 +179,25 @@ describe("MakeCodeSim runtime", () => {
     expect(s.takeSerialLines()).toEqual(["A long", "B click", "A click"]);
   });
 
-  it("records the icon shown, sounds started and audio settings", () => {
+  it("doesn't fake button event APIs that pxt-microbit doesn't have", () => {
+    expect(() => load(`input.onButtonEvent(Button.A, 4, function () {})`)).toThrow("not simulated: input.onButtonEvent");
+    expect(() => load(`let e = ButtonEvent.LongClick`)).toThrow("ButtonEvent is not defined");
+  });
+
+  it("reports a micro:bit V2 unless loaded as another hardware version", () => {
+    expect(load(`serial.writeLine(control.hardwareVersion())`).takeSerialLines()).toEqual(["2.0"]);
+    expect(load(`serial.writeLine(control.hardwareVersion())`, "1").takeSerialLines()).toEqual(["1"]);
+  });
+
+  it("panics on a micro:bit V1 that turns the speaker on or plays a sound expression", () => {
+    const play = `music.play(music.builtinPlayableSoundEffect(soundExpression.hello), music.PlaybackMode.InBackground)`;
+    expect(() => load(`music.setBuiltInSpeakerEnabled(true)`, "1")).toThrow("panic");
+    expect(() => load(play, "1")).toThrow("panic");
+    const s = load(`music.setBuiltInSpeakerEnabled(false)`, "1");
+    expect(s.speakerEnabled).toBe(false);
+  });
+
+  it("records the icon shown, display calls, sounds started and stopped, and audio settings", () => {
     const s = load(`
       music.setBuiltInSpeakerEnabled(true)
       pins.setAudioPinEnabled(false)
@@ -187,10 +207,13 @@ describe("MakeCodeSim runtime", () => {
     `);
     expect(s.shownIcon()).toBe("Heart");
     expect(s.sounds).toEqual(["hello"]);
+    expect(s.soundsStopped).toBe(0);
     expect(s.speakerEnabled).toBe(true);
     expect(s.audioPinEnabled).toBe(false);
     s.pressButton("A", "click");
     expect(s.shownIcon()).toBeUndefined();
+    expect(s.displayCalls).toEqual(["Heart", "clear"]);
+    expect(s.soundsStopped).toBe(1);
   });
 
   it("leaves the audio settings and display unset until the program sets them", () => {
@@ -198,6 +221,7 @@ describe("MakeCodeSim runtime", () => {
     expect(s.speakerEnabled).toBeUndefined();
     expect(s.audioPinEnabled).toBeUndefined();
     expect(s.shownIcon()).toBeUndefined();
+    expect(s.displayCalls).toEqual([]);
     expect(s.servoAngle("P0")).toBeUndefined();
   });
 

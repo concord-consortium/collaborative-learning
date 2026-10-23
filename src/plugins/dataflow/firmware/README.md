@@ -12,8 +12,15 @@ firmware version, which is how Dataflow decides whether to flash. `open session:
 session that sends an `emg:<value>` reading every 100 ms and ends on `close`, or when no
 `ping session:<id>` has arrived for its timeout (5 s unless `open` asks for another).
 `stream` and `stop` turn the same readings on and off without a session, for a plotter or a
-terminal. `servo:<angle>` sets the servo. A trailing `#n` asks for an `ok #n` reply, and errors
-are sent either way.
+terminal, and so does a long press of button A, outside a session. `identify` shows an icon and
+plays a short sound on the built-in speaker (a V1 has no speaker, so it only shows the icon).
+`servo:<angle>` sets the servo. A trailing `#n` asks for an `ok #n` reply, and errors are sent
+either way.
+
+The LED display shows how far a connection got: a waiting icon at power-up and after a session
+ends, a "found" icon once Dataflow has sent `?`, a connected icon for 3 s after `open`, then
+nothing for the rest of the session, and a streaming icon in free-run. `serial-protocols.md`
+lists the icons.
 
 **The board is silent until it is spoken to.** It sends no startup banner and no readings
 until a session or `stream` starts them, so a board nobody is talking to doesn't fill the USB
@@ -60,8 +67,8 @@ Two checks keep them in sync:
   rebuilds the hex and fails if it differs from the committed one.
 
 Behavior changes still need a bench test on real hardware; the checks only prove the hex
-was built from the source. `npm run bench:spikerbit -- --flash` flashes a plugged-in board and
-checks its protocol replies (see [`scripts/spikerbit-bench/`](../../../../scripts/spikerbit-bench/)).
+was built from the source. `npm run bench:spikerbit -- --flash --expect-identify` flashes a
+plugged-in board and checks its protocol replies (see [`scripts/spikerbit-bench/`](../../../../scripts/spikerbit-bench/)).
 
 ### Prototyping in the MakeCode editor
 
@@ -84,8 +91,10 @@ The MakeCode simulator can't receive serial input, and no emulator runs a micro:
 so Jest runs `spikerbit-clue.ts` itself on a simulated MakeCode runtime,
 [`MakeCodeSim`](../../../models/stores/spikerbit-sim/makecode-sim.ts). It transpiles the
 source with `typescript`, runs it against fake MakeCode globals on a simulated clock, and
-lets a test send serial input, read serial output, press buttons, set the analog input on
-a pin, and check the servo angle, the icon shown and the sounds played.
+lets a test send serial input, read serial output, click or long-press a button, set the
+analog input on a pin, and check the servo angle, the icon shown and the sounds played. It acts
+as a micro:bit V2 unless it is loaded with `hardwareVersion: "1"`; then, like a V1, it panics
+if the program turns the speaker on or plays a sound expression.
 
 - **Only what the firmware uses is faked.** Calling anything else throws
   `not simulated: <name>`; add a fake to `makecode-sim.ts` when the firmware starts using
@@ -93,7 +102,9 @@ a pin, and check the servo angle, the icon shown and the sounds played.
 - **The loop rule.** `basic.pause` ends the current pass of a `forever` or background loop,
   and the simulator calls the function again for the next pass. So a loop pauses only as
   its last statement, a background loop (`while (true) { ...; basic.pause(n) }`) keeps its
-  state outside the function, and event handlers don't pause at all. The header of
+  state outside the function, and event handlers don't pause at all. A one-off wait, such
+  as how long an icon stays, is timed from the `forever` loop with `control.millis()`
+  deadlines, and display calls pass an interval of 0 so they don't pause. The header of
   `spikerbit-clue.ts` states the same rule.
 - `basic.pause(0)` lets 2 ms pass, about one pass of the sampler on a V2, and the `forever`
   loop sleeps 20 ms after every pass, as MakeCode's does.

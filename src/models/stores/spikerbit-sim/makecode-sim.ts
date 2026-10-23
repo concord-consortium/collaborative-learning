@@ -15,15 +15,26 @@ import * as ts from "typescript";
 // of `fn`, and code after a pause never runs. A background loop therefore keeps its state outside
 // the function. MakeCode's forever loop sleeps 20 ms after every pass, so a `forever` fiber wakes
 // 20 ms after its pass ends, on top of any pause the body made. An `inBackground` function that
-// returns ends its fiber.
+// returns ends its fiber. One that pauses and then returns would run again from the top here,
+// though the board runs it once, so a program times one-off waits (such as how long an icon
+// stays) from its forever loop with `control.millis()` deadlines instead.
 //
-// Events (serial input and buttons) run their handler synchronously and must not pause.
+// Events (serial input and buttons) run their handler synchronously and must not pause. A button
+// raises the events CODAL does: a click, or a long click when it was held for a second or more.
+//
+// `control.hardwareVersion()` reports a micro:bit V2 ("2.0") unless the sim is loaded with another
+// version; a V1 reports "1". A V1 has no speaker, so on one, turning the speaker on or playing a
+// sound expression panics, as pxt-microbit's V1 build does.
 //
 // Serial input goes through a receive buffer of MakeCode's size, as described at `sendSerial`.
 
 type Thunk = () => void;
 type ButtonName = "A" | "B";
 type ButtonEventName = "click" | "longClick";
+
+export interface MakeCodeSimOptions {
+  hardwareVersion?: string;
+}
 
 // How long MakeCode's forever loop sleeps after each pass of its body.
 const kForeverSleepMs = 20;
@@ -45,6 +56,7 @@ interface Fiber {
 }
 
 const notSimulated = (name: string) => new Error(`not simulated: ${name}`);
+const notOnV1 = (name: string) => new Error(`panic: ${name} isn't supported on a micro:bit V1`);
 
 // A namespace or enum whose unknown members throw.
 function namespace<T extends Record<string, unknown>>(name: string, members: T): T {
@@ -77,9 +89,15 @@ const kIconNames = [
 const kSoundExpressions = [
   "giggle", "happy", "hello", "mysterious", "sad", "slide", "soaring", "spring", "twinkle", "yawn"
 ];
+// Message bus ids and button event values, from pxt-microbit's dal.d.ts and enums.d.ts.
+const kButtonIds: Record<ButtonName, number> = { A: 1, B: 2 };
+const kButtonEvents: Record<ButtonEventName, number> = { click: 3, longClick: 4 };
 
 export class MakeCodeSim {
+  // Every sound started, by name.
   readonly sounds: string[] = [];
+  // Every display call in order: an icon's name, or "clear".
+  readonly displayCalls: string[] = [];
 
   private _now = 0;
   private fibers: Fiber[] = [];
@@ -88,20 +106,23 @@ export class MakeCodeSim {
   private rxBufferSize = kDefaultRxBufferSize;
   private serialOutput = "";
   private serialHandler: { delimiters: string, handler: Thunk } | undefined;
-  private buttonHandlers = new Map<string, Thunk>();
+  private eventHandlers = new Map<string, Thunk>();
   private analog = new Map<string, () => number>();
   private servos = new Map<string, number>();
   private icon: string | undefined;
   private _speakerEnabled: boolean | undefined;
   private _audioPinEnabled: boolean | undefined;
+  private _soundsStopped = 0;
 
-  static load(sourcePath: string): MakeCodeSim {
+  constructor(private readonly hardwareVersion = "2.0") {}
+
+  static load(sourcePath: string, options: MakeCodeSimOptions = {}): MakeCodeSim {
     const source = fs.readFileSync(sourcePath, "utf8");
     const js = ts.transpileModule(source, {
       compilerOptions: { target: ts.ScriptTarget.ES2019 },
       fileName: sourcePath
     }).outputText;
-    const sim = new MakeCodeSim();
+    const sim = new MakeCodeSim(options.hardwareVersion);
     const globals = sim.globals();
     // The program's top-level declarations become locals of this function, shared by its closures.
     const program = new Function(...Object.keys(globals), js);
@@ -118,12 +139,21 @@ export class MakeCodeSim {
     return this._now;
   }
 
+  private get isV1() {
+    return this.hardwareVersion.startsWith("1");
+  }
+
   get speakerEnabled() {
     return this._speakerEnabled;
   }
 
   get audioPinEnabled() {
     return this._audioPinEnabled;
+  }
+
+  // How many times the program called music.stopAllSounds.
+  get soundsStopped() {
+    return this._soundsStopped;
   }
 
   advance(ms: number) {
@@ -159,7 +189,7 @@ export class MakeCodeSim {
   }
 
   pressButton(button: ButtonName, event: ButtonEventName) {
-    const handler = this.buttonHandlers.get(`${button}:${event}`);
+    const handler = this.eventHandlers.get(`${kButtonIds[button]}:${kButtonEvents[event]}`);
     if (handler) this.runEvent(handler);
   }
 
@@ -223,6 +253,16 @@ export class MakeCodeSim {
     }
   }
 
+  // Like pxt-microbit's registerWithDal, a new handler for an event replaces the old one.
+  private onEvent(source: number, value: number, handler: Thunk) {
+    this.eventHandlers.set(`${source}:${value}`, handler);
+  }
+
+  private showIcon(name: string) {
+    this.icon = name;
+    this.displayCalls.push(name);
+  }
+
   private readUntil(delimiters: string) {
     const index = [...this.serialInput].findIndex(char => delimiters.includes(char));
     if (index >= 0) {
@@ -250,24 +290,22 @@ export class MakeCodeSim {
         showIcon: (icon: string, interval = 600) => {
           // A nonzero interval pauses the caller, which would hold up the loop it is called from.
           if (interval !== 0) throw notSimulated("basic.showIcon with a pause; pass an interval of 0");
-          this.icon = icon;
+          this.showIcon(icon);
         },
-        clearScreen: () => { this.icon = undefined; }
+        clearScreen: () => {
+          this.icon = undefined;
+          this.displayCalls.push("clear");
+        }
       }),
       control: namespace("control", {
         inBackground: (body: Thunk) => this.startFiber(body, false),
-        millis: () => this._now
+        millis: () => this._now,
+        hardwareVersion: () => this.hardwareVersion,
+        onEvent: (source: number, value: number, handler: Thunk) => this.onEvent(source, value, handler)
       }),
       input: namespace("input", {
         runningTimeMicros: () => this._now * 1000,
-        onButtonPressed: (button: ButtonName, handler: Thunk) => {
-          this.buttonHandlers.set(`${button}:click`, handler);
-        },
-        onButtonEvent: (button: ButtonName, event: ButtonEventName, handler: Thunk) => {
-          this.buttonHandlers.set(`${button}:${event}`, handler);
-        },
-        buttonEventValue: (event: ButtonEventName) => event,
-        buttonEventClick: () => "click"
+        onButtonPressed: (button: number, handler: Thunk) => this.onEvent(button, kButtonEvents.click, handler)
       }),
       pins: namespace("pins", {
         digitalWritePin: (pin: string, value: number) => undefined,
@@ -293,18 +331,28 @@ export class MakeCodeSim {
         play: (sound: { name: string }, mode: string) => {
           // Waiting for the sound would hold up the loop it is called from.
           if (mode !== PlaybackMode.InBackground) throw notSimulated("music.play that waits for the sound");
+          if (this.isV1) throw notOnV1("a sound expression");
           this.sounds.push(sound.name);
         },
         builtinPlayableSoundEffect: (name: string) => ({ name }),
-        setBuiltInSpeakerEnabled: (enabled: boolean) => { this._speakerEnabled = enabled; },
-        stopAllSounds: () => undefined
+        setBuiltInSpeakerEnabled: (enabled: boolean) => {
+          if (enabled && this.isV1) throw notOnV1("the built-in speaker");
+          this._speakerEnabled = enabled;
+        },
+        stopAllSounds: () => { this._soundsStopped++; }
       }),
       soundExpression: enumeration("soundExpression", kSoundExpressions),
       radio: namespace("radio", {}),
       AnalogPin: enumeration("AnalogPin", kAnalogPins),
       DigitalPin: enumeration("DigitalPin", kDigitalPins),
-      Button: enumeration("Button", ["A", "B", "AB"]),
-      ButtonEvent: namespace("ButtonEvent", { Click: "click", LongClick: "longClick" }),
+      Button: namespace("Button", { ...kButtonIds, AB: 3 }),
+      EventBusSource: namespace("EventBusSource", {
+        MICROBIT_ID_BUTTON_A: kButtonIds.A, MICROBIT_ID_BUTTON_B: kButtonIds.B, MICROBIT_ID_BUTTON_AB: 3
+      }),
+      DAL: namespace("DAL", {
+        MICROBIT_ID_BUTTON_A: kButtonIds.A, MICROBIT_ID_BUTTON_B: kButtonIds.B, MICROBIT_ID_BUTTON_AB: 3,
+        MICROBIT_BUTTON_EVT_CLICK: kButtonEvents.click, MICROBIT_BUTTON_EVT_LONG_CLICK: kButtonEvents.longClick
+      }),
       IconNames: enumeration("IconNames", kIconNames),
       Delimiters: namespace("Delimiters", {
         NewLine: "\n", Comma: ",", Dollar: "$", Colon: ":", Fullstop: ".", Hash: "#", CarriageReturn: "\r",
