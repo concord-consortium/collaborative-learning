@@ -7,8 +7,11 @@ import { SerialPort } from "serialport";
 
 const kBaudRate = 115200;
 const kReplyTimeoutMs = 500;
-const kFlashTimeoutMs = 30000;
+// DAPLink takes a while to program the 1.3 MB hex before the drive remounts.
+const kFlashTimeoutMs = 60000;
+const kIdentifyAttempts = 5;
 const kDriveDir = "/Volumes/MICROBIT";
+const kHexName = "spikerbit-clue.hex";
 const kHexPath = path.resolve(path.dirname(fileURLToPath(import.meta.url)),
   "../../src/plugins/dataflow/firmware/spikerbit-clue.hex");
 const kReadingPattern = /^[a-z0-9_/]+:-?\d+(\.\d+)?$/;
@@ -60,21 +63,43 @@ function findPort(requested) {
 
 async function flash(hexPath) {
   if (!fs.existsSync(kDriveDir)) throw new Error(`Can't flash: ${kDriveDir} isn't mounted`);
+  const target = path.join(kDriveDir, kHexName);
+  const failPath = path.join(kDriveDir, "FAIL.TXT");
   console.log(`Flashing ${hexPath}`);
-  fs.copyFileSync(hexPath, path.join(kDriveDir, "spikerbit-clue.hex"));
-  // The board reboots: the drive and the serial port disappear, then come back.
-  const deadline = Date.now() + kFlashTimeoutMs;
-  let sawGone = false;
-  while (Date.now() < deadline) {
-    await sleep(500);
-    const present = listPorts().length > 0 && fs.existsSync(kDriveDir);
-    if (!present) sawGone = true;
-    else if (sawGone) {
-      await sleep(1000);
-      return;
-    }
+  const appleDouble = path.join(kDriveDir, `._${kHexName}`);
+  fs.rmSync(failPath, { force: true });
+  fs.rmSync(appleDouble, { force: true });
+  // Written byte for byte rather than with copyFile, which on macOS also copies extended
+  // attributes; on the FAT drive those become "._" files that make DAPLink's transfer fail.
+  const fd = fs.openSync(target, "w");
+  fs.writeSync(fd, fs.readFileSync(hexPath));
+  fs.fsyncSync(fd);
+  fs.closeSync(fd);
+  // macOS still tags files written by some processes (com.apple.provenance), and the drive
+  // then gets a "._" file next to the hex. Remove it while DAPLink is still waiting for the
+  // transfer to finish.
+  for (let i = 0; i < 40; i++) {
+    fs.rmSync(appleDouble, { force: true });
+    await sleep(50);
   }
-  throw new Error(`The board didn't reboot and come back within ${kFlashTimeoutMs / 1000} s of flashing`);
+
+  // DAPLink removes the file (the drive remounts) once it has programmed the board, or writes
+  // FAIL.TXT. The remount can fall between polls, so a missing drive counts as done too.
+  const deadline = Date.now() + kFlashTimeoutMs;
+  const failure = () => (fs.existsSync(failPath) ? fs.readFileSync(failPath, "utf8").trim() : null);
+  const transferred = () => !fs.existsSync(target);
+  while (Date.now() < deadline && !transferred() && !failure()) await sleep(250);
+  if (failure()) throw new Error(`Flashing failed; the drive's FAIL.TXT says:\n${failure()}`);
+  if (!transferred()) throw new Error(`The board didn't finish taking the hex within ${kFlashTimeoutMs / 1000} s`);
+
+  // Then the drive and the serial port come back.
+  const backDeadline = Date.now() + kFlashTimeoutMs;
+  while (Date.now() < backDeadline && !(fs.existsSync(kDriveDir) && listPorts().length > 0)) await sleep(250);
+  if (!(fs.existsSync(kDriveDir) && listPorts().length > 0)) {
+    throw new Error(`The board's drive and serial port didn't come back within ${kFlashTimeoutMs / 1000} s of flashing`);
+  }
+  await sleep(1000);
+  if (failure()) throw new Error(`Flashing failed; the drive's FAIL.TXT says:\n${failure()}`);
 }
 
 // Collects complete lines from the port, with the time each arrived.
@@ -282,18 +307,23 @@ async function main() {
   let failed = 0;
 
   try {
-    await sleep(300);
-    board.clear();
-    // Plain, with no checksum: the old firmware compares the whole line to "?".
-    await board.send("?", { checksummed: false });
-    const firstLines = await board.collect(1000);
-    const legacy = firstLines.map(line => kLegacyPattern.exec(line)).find(Boolean);
-    if (legacy) {
-      console.log(`running v${legacy[1]} firmware; rerun with --flash`);
-      failed = 1;
-      return;
+    // Plain `?`, with no checksum: the old firmware compares the whole line to "?". A board
+    // that has just rebooted may need a few tries to answer.
+    let firstLines = [];
+    let hello = false;
+    for (let attempt = 0; attempt < kIdentifyAttempts && !hello; attempt++) {
+      board.clear();
+      await board.send("?", { checksummed: false });
+      firstLines = await board.collect(1000);
+      const legacy = firstLines.map(line => kLegacyPattern.exec(line)).find(Boolean);
+      if (legacy) {
+        console.log(`running v${legacy[1]} firmware; rerun with --flash`);
+        failed = 1;
+        return;
+      }
+      hello = firstLines.some(line => verifiedBody(line)?.startsWith("hello "));
     }
-    if (!firstLines.some(line => verifiedBody(line)?.startsWith("hello "))) {
+    if (!hello) {
       console.log(`no reply to ?; is the board running this firmware? rerun with --flash (got ${describeLines(firstLines)})`);
       failed = 1;
       return;
