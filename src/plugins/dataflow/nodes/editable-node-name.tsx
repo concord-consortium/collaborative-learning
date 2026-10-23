@@ -44,14 +44,14 @@ export const EditableNodeName: React.FC<EditableNodeNameProps> = observer(
 
     const valueString = node.readOnly ? node.model.orderedDisplayName : nodeName;
 
-    const inputRef = useRef<HTMLInputElement>(null);
-    useStopEventPropagation(inputRef, "pointerdown");
-    useStopEventPropagation(inputRef, "dblclick");
+    const [inputEl, setInputEl] = useState<HTMLInputElement | null>(null);
+    useStopEventPropagation(inputEl, "pointerdown");
+    useStopEventPropagation(inputEl, "dblclick");
 
     return (
       <div className="node-name">
         <input
-          ref={inputRef}
+          ref={setInputEl}
           className="node-name-input"
           aria-label="Block name"
           tabIndex={-1}

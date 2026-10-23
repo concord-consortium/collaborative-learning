@@ -2,15 +2,22 @@ import { RefObject, useEffect } from "react";
 
 const stopEventPropagation = (e: Event) => e.stopPropagation();
 
-export function useStopEventPropagation<T extends HTMLElement, K extends keyof HTMLElementEventMap>(
-                  domRef: RefObject<T>, event: K): void {
+/**
+ * Keeps a press inside a node control from reaching rete, which would otherwise start dragging
+ * the node out from under it.
+ *
+ * Takes the element rather than a ref to it. A ref object is the same object on every render, so
+ * an effect that depends on one runs only on mount -- when an element rendered conditionally, or
+ * mounted hidden, does not exist yet, and so is never guarded. Callers hold the element in state
+ * and pass the setter as `ref`.
+ */
+export function useStopEventPropagation<K extends keyof HTMLElementEventMap>(
+                  element: HTMLElement | null, event: K): void {
   useEffect(() => {
-    domRef.current?.addEventListener(event, stopEventPropagation);
-    const current = domRef.current;
-    return () => {
-      current?.removeEventListener(event, stopEventPropagation);
-    };
-  }, [domRef, event]);
+    if (!element) return;
+    element.addEventListener(event, stopEventPropagation);
+    return () => element.removeEventListener(event, stopEventPropagation);
+  }, [element, event]);
 }
 
 export function useCloseDropdownOnOutsideEvent<T extends HTMLElement>(

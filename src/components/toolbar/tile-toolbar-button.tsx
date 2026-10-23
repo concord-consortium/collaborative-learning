@@ -23,6 +23,8 @@ export interface TileToolbarButtonProps {
   selected?: boolean; // puts button in 'active' state if defined and true
   // 'active' look without aria-pressed, for a button whose title changes with its state
   highlighted?: boolean;
+  // Whether the panel this button opens is showing, for a button that opens one (aria-expanded)
+  expanded?: boolean;
   disabled?: boolean; // makes button grey and unclickable if defined and true
   disabledMessage?: string; // announced when the disabled button is activated
   extraContent?: JSX.Element; // Additional element added after the button.
@@ -41,6 +43,7 @@ export const TileToolbarButton = function ({
   onTouchHold,
   selected,
   highlighted,
+  expanded,
   disabled,
   disabledMessage = "Select something to enable this action",
   children,
@@ -72,6 +75,7 @@ export const TileToolbarButton = function ({
         aria-disabled={disabled || undefined}
         aria-label={title}
         aria-pressed={selected !== undefined ? selected : undefined}
+        aria-expanded={expanded}
         onClick={disabled ? handleDisabledClick : handleOnClick}
         onMouseDown={disabled ? undefined : onMouseDown}
         onMouseUp={disabled ? undefined : onMouseUp}

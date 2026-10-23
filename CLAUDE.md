@@ -102,8 +102,11 @@ why. The `Deploy Timing` check enforces it; the format is in "Deploy timing" in
 a deploy is safe ahead of the client often depends on things the diff doesn't show. Give a
 recommendation for each part with your reasoning, covering both directions: the new client against
 the currently deployed part, and the currently released client against the new part (e.g. functions
-that stop replying in a case where the released client waits for a reply). Then write the callout
-with the timing the developer picks and their reasoning.
+that stop replying in a case where the released client waits for a reply). `before` is the
+preferred timing (see docs/deploy.md). Recommend `with` only when the released client would
+misbehave against the new part but can live with it briefly around the release, and `after` when
+it can't run against it at all. Then write the callout with the timing the developer picks and
+their reasoning.
 
 ### URL Parameters for Testing
 

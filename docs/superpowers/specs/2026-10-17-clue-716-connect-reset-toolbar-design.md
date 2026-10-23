@@ -34,7 +34,8 @@ only its own tile instead of the whole application.
 - Hiding the top-bar connect button, with its "connect a device" / "click to finish connecting"
   text, when the tile's toolbar has the new button. Removing it entirely moved to CLUE-736 (see
   "Delivery").
-- Logging Reset, Connect, Reconnect and Disconnect.
+- Logging Reset, Connect, Reconnect and Disconnect, and when the automatic dialog shows and is
+  dismissed.
 - One app-wide connection that feeds incoming data to every DataFlow tile, not only the one that
   connected (see "One connection, many tiles").
 - A per-tile, live "needs a device" check that drives the button color and the dialog.
@@ -372,7 +373,8 @@ or Reconnect, log the events, and, in PR 2, record and clear the tile's connecti
 
 ### Logging
 
-Each event is a `DATAFLOW_TOOL_CHANGE` event for the clicking tile (`tileId`), with these fields:
+Each event is a `DATAFLOW_TOOL_CHANGE` event for one tile (`tileId`): the clicking tile, or for the
+dialog events, the tile the dialog covers. The fields:
 
 | `operation` | Other fields | Logged when |
 |---|---|---|
@@ -380,6 +382,8 @@ Each event is a `DATAFLOW_TOOL_CHANGE` event for the clicking tile (`tileId`), w
 | `reconnectDevice` | `targetType: "device"`, `device` | A Reconnect succeeds |
 | `disconnectDevice` | `targetType: "device"`, `device`: the choice that was connected | The user disconnects |
 | `resetProgram` | `targetType: "program"`, `trigger`: `connect`, `reconnect` or `button` | The program is reset |
+| `showConnectTutorial` | `targetType: "connectTutorial"` | The automatic dialog appears over the tile (PR 2) |
+| `dismissConnectTutorial` | `targetType: "connectTutorial"`, `trigger`: `ok` (OK in this tile), `okInAnotherTile` or `connection` | The dialog over the tile is dismissed (PR 2) |
 
 - `device` is the choice id, not its label, so rewording a label doesn't change the logged value.
 - A successful Connect or Reconnect logs two events: the device event, then `resetProgram` with
@@ -387,6 +391,11 @@ Each event is a `DATAFLOW_TOOL_CHANGE` event for the clicking tile (`tileId`), w
 - A failed or canceled attempt logs nothing.
 - Only a Disconnect the user chooses is logged. An unplug logs nothing, so a `connectDevice` can
   have no matching `disconnectDevice`.
+- The dialog blocks the program it covers, so researchers need to know when it was showing. Each
+  tile it covers logs its own `showConnectTutorial` and `dismissConnectTutorial`. One OK or one
+  connection dismisses it everywhere, so it logs a dismissal for each of those tiles; the tile whose
+  OK was clicked has `trigger` `ok`. A tile that closes while the dialog shows, such as a deleted
+  tile, logs no dismissal.
 
 CLUE-727 will add logging for every connection step, and can add operations alongside these.
 
@@ -416,8 +425,8 @@ and deletes `postSerialModal`. The dialog works like a one-time tutorial:
   deliberate change.
 - **Dismissing.** Clicking OK on any tile dismisses the dialog on all of them for the rest of the
   page load. Any successful connection, from any tile, dismisses it the same way. The dismissal is
-  `DeviceConnection.connectTutorialDismissed`, in memory only like the old flag, so the dialog
-  shows again after a reload.
+  `DeviceConnection.connectTutorialDismissal`, which records what dismissed it first. It is in
+  memory only like the old flag, so the dialog shows again after a reload.
 - **It doesn't come back** after a disconnect within the same page load.
 - **Read-only views don't show it.** They can't connect anyway.
 - **What it says.** It explains that the program needs a device, and that the yellow lightning
@@ -447,7 +456,7 @@ and deletes `postSerialModal`. The dialog works like a one-time tutorial:
   title, top bar and block palette, so Tab and Enter can't reach controls it covers. The toolbar,
   drag handle and resize handle stay reachable.
 
-PR 2 stops reading the old `serialModalShown` flag; CLUE-736 deletes it.
+PR 2 deletes the old `serialModalShown` flag, which nothing reads once `postSerialModal` is gone.
 
 ## Toolbar configuration
 
@@ -537,7 +546,7 @@ The work ships as two PRs, behavior first and UI second, followed by CLUE-736.
 - the top-bar button and menu (`DataflowSerialConnectButton`), its styles, its `serial.svg` icon
   and the unused `refresh/` icons;
 - the connect-event state only it read: `SerialDevice`'s `lastConnectMessage`,
-  `connectChangeStamp`, `raisesWebSerialConnect` and `serialModalShown`, the `last-connect-message`
+  `connectChangeStamp` and `raisesWebSerialConnect`, the `last-connect-message`
   localStorage key, `WebSerialTransport.raisesWebSerialConnect`, and the `connect` handler in
   `initWebSerialConnectionEvents` (the `disconnect` handler stays);
 - the fallback: `toolbarShowsConnect` and the dialog's alternate text.

@@ -23,6 +23,8 @@ import { SharedSeismogram, SharedSeismogramType } from "../../shared-seismogram/
 import { StationModel, StationSnapshot } from "../../shared-seismogram/station-model";
 import { kWaveRunnerTileType } from "../wave-runner-types";
 
+const kEventTypeAttributeName = "eventType";
+
 // Exported so the date pickers' Clear can reset to the same dates the model defaults to.
 export const kDefaultStartDate = "2026-09-01";
 export const kDefaultEndDate = "2026-10-01";
@@ -107,6 +109,24 @@ export const WaveRunnerContentModel = TileContentModel
       return self.isRunning || self.isPaused
         ? self.detectedEvents.length
         : self.eventsDataSet?.dataSet.cases.length;
+    },
+    get eventTypesFound() {
+      if (self.isRunning || self.isPaused) {
+        return new Set(self.detectedEvents.map(event => event.eventType).filter(type => !!type));
+      } else {
+        const typesFound = new Set<string>();
+
+        const dataSet = self.eventsDataSet?.dataSet;
+        const attrId = dataSet?.attrFromName(kEventTypeAttributeName)?.id;
+        if (attrId) {
+          dataSet?.cases.forEach(aCase => {
+            const type = dataSet.getStrValue(aCase.__id__, attrId);
+            if (type) typesFound.add(type);
+          });
+        }
+
+        return typesFound;
+      }
     }
   }))
   .actions(self => ({
@@ -202,7 +222,7 @@ export const WaveRunnerContentModel = TileContentModel
       if (!smm?.isReady) return undefined;
 
       const dataSet = DataSet.create();
-      addAttributeToDataSet(dataSet, { name: "eventType" });
+      addAttributeToDataSet(dataSet, { name: kEventTypeAttributeName });
       addAttributeToDataSet(dataSet, { name: "windowStart" });
       addAttributeToDataSet(dataSet, { name: "windowEnd" });
       addAttributeToDataSet(dataSet, { name: "confidence" });
@@ -244,7 +264,7 @@ export const WaveRunnerContentModel = TileContentModel
         addCasesToDataSet(dataSet, self.detectedEvents.map(evt => ({
           windowStart: new Date(evt.windowStart).toISOString(),
           windowEnd: new Date(evt.windowEnd).toISOString(),
-          eventType: evt.eventType,
+          [kEventTypeAttributeName]: evt.eventType,
           confidence: evt.confidence,
           modelLabel,
         })));

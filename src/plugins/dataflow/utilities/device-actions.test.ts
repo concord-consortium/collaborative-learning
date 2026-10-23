@@ -111,6 +111,28 @@ describe("device actions", () => {
       expect(logTileChangeEvent).not.toHaveBeenCalled();
     });
 
+  it.each(["connect", "reconnect"])(
+    "a %s that fails after the tile was deleted does not throw or log", async operation => {
+      const content = makeContent();
+      let finish: (r: ConnectResult) => void = () => undefined;
+      const pending = new Promise<ConnectResult>(resolve => { finish = resolve; });
+      const connection = makeConnection("failed", { lastChoice: "arduino" });
+      (connection.connect as jest.Mock).mockReturnValue(pending);
+      (connection.reconnect as jest.Mock).mockReturnValue(pending);
+
+      const acting = operation === "connect"
+        ? connectDeviceForTile({ connection, content, tileId, choice: "arduino" })
+        : reconnectDeviceForTile({ connection, content, tileId });
+      destroy(content);
+      const warn = jest.spyOn(console, "warn").mockImplementation(() => undefined);
+      finish("failed");
+
+      await expect(acting).resolves.toBe("failed");
+      expect(warn).not.toHaveBeenCalled();
+      expect(logTileChangeEvent).not.toHaveBeenCalled();
+      warn.mockRestore();
+    });
+
   it("disconnect logs disconnectDevice and does not reset", async () => {
     const content = makeContent();
     const ticks = content.program.recentTicks.length;
@@ -131,6 +153,75 @@ describe("device actions", () => {
 
     expect(connection.disconnect).not.toHaveBeenCalled();
     expect(logTileChangeEvent).not.toHaveBeenCalled();
+  });
+
+  it.each([[false, true], [true, false]])(
+    "a failed connect records the error, and marks it unseen only when the pane is closed (pane open: %s)",
+    async (paneOpen, unseen) => {
+      const content = makeContent();
+      content.setConnectPaneOpen(paneOpen);
+
+      await connectDeviceForTile({ connection: makeConnection("failed"), content, tileId, choice: "spikerbit" });
+
+      expect(content.connectError).toBe("Couldn't connect to Spiker:bit.");
+      expect(content.unseenConnectError).toBe(unseen);
+    }
+  );
+
+  it("a failed reconnect names the last choice", async () => {
+    const content = makeContent();
+
+    await reconnectDeviceForTile({
+      connection: makeConnection("failed", { lastChoice: "arduino" }), content, tileId
+    });
+
+    expect(content.connectError).toBe("Couldn't connect to Arduino.");
+    expect(content.unseenConnectError).toBe(true);
+  });
+
+  it("a canceled connect records no error", async () => {
+    const content = makeContent();
+
+    await connectDeviceForTile({ connection: makeConnection("canceled"), content, tileId, choice: "arduino" });
+
+    expect(content.connectError).toBeUndefined();
+    expect(content.unseenConnectError).toBe(false);
+  });
+
+  it("a later connect, reconnect or disconnect clears the error", async () => {
+    const content = makeContent();
+    const fail = () =>
+      connectDeviceForTile({ connection: makeConnection("failed"), content, tileId, choice: "arduino" });
+
+    await fail();
+    await connectDeviceForTile({ connection: makeConnection("connected"), content, tileId, choice: "arduino" });
+    expect(content.connectError).toBeUndefined();
+    expect(content.unseenConnectError).toBe(false);
+
+    await fail();
+    await reconnectDeviceForTile({
+      connection: makeConnection("connected", { lastChoice: "arduino" }), content, tileId
+    });
+    expect(content.connectError).toBeUndefined();
+    expect(content.unseenConnectError).toBe(false);
+
+    await fail();
+    await disconnectDeviceForTile({
+      connection: makeConnection("connected", { lastChoice: "arduino", isConnected: true }), content, tileId
+    });
+    expect(content.connectError).toBeUndefined();
+    expect(content.unseenConnectError).toBe(false);
+  });
+
+  it("opening the pane marks the error seen", async () => {
+    const content = makeContent();
+    await connectDeviceForTile({ connection: makeConnection("failed"), content, tileId, choice: "arduino" });
+    expect(content.unseenConnectError).toBe(true);
+
+    content.setConnectPaneOpen(true);
+
+    expect(content.unseenConnectError).toBe(false);
+    expect(content.connectError).toBe("Couldn't connect to Arduino.");
   });
 
   it("resetProgramForTile resets the program, logs the trigger and leaves recorded data alone", () => {
