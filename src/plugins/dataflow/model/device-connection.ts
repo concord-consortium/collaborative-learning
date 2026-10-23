@@ -122,6 +122,12 @@ export class DeviceConnection {
 
   async disconnect(): Promise<void> {
     const transport = this.serialDevice.activeTransport;
+    // Tell the board the session is over before its transport closes.
+    try {
+      await this.serialDevice.endSession();
+    } catch (e) {
+      console.error("Device session end failed", e);
+    }
     try {
       await transport?.close();
     } catch (e) {

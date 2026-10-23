@@ -22,6 +22,9 @@ class FakeConnection implements IMicrobitUsbConnection {
   async flash() { this.flashed = true; }
   async serialWrite(data: string) {
     this.written.push(data);
+    // Acknowledge an open so the session starts pinging; the seq is the "#n" before the checksum.
+    const open = /^open session:\d+ #(\d+)/.exec(data);
+    if (open) this.emitSerial(`${withChecksum(`ok #${open[1]}`)}\r\n`);
     if (data.trim() === "?" && this.respondHello != null) {
       this.emitSerial(this.respondHello);
     }
@@ -29,9 +32,21 @@ class FakeConnection implements IMicrobitUsbConnection {
   async disconnect() { /* no-op */ }
 }
 
+// Sessions ping on a timer, so each test's device is cleared afterward.
+const serialDevices: SerialDevice[] = [];
+function makeSerialDevice() {
+  const device = new SerialDevice();
+  serialDevices.push(device);
+  return device;
+}
+
 describe("SpikerbitDevice", () => {
+  afterEach(() => {
+    serialDevices.splice(0).forEach(d => d.clearActiveDevice());
+  });
+
   it("does NOT flash when the board reports the current firmware version", async () => {
-    const serialDevice = new SerialDevice();
+    const serialDevice = makeSerialDevice();
     const conn = new FakeConnection();
     conn.respondHello = helloLine(kSpikerbitFirmwareVersion);
     const device = new SpikerbitDevice(serialDevice, conn);
@@ -43,7 +58,7 @@ describe("SpikerbitDevice", () => {
   });
 
   it("flashes when no version reply arrives", async () => {
-    const serialDevice = new SerialDevice();
+    const serialDevice = makeSerialDevice();
     const conn = new FakeConnection();
     conn.respondHello = null; // never answers "?"
     const device = new SpikerbitDevice(serialDevice, conn, { versionQueryTimeoutMs: 50 });
@@ -54,7 +69,7 @@ describe("SpikerbitDevice", () => {
   });
 
   it("flashes (auto-updates) when the board reports an out-of-date version", async () => {
-    const serialDevice = new SerialDevice();
+    const serialDevice = makeSerialDevice();
     const conn = new FakeConnection();
     conn.respondHello = helloLine(kSpikerbitFirmwareVersion - 1); // older firmware still running
     const device = new SpikerbitDevice(serialDevice, conn);
@@ -65,7 +80,7 @@ describe("SpikerbitDevice", () => {
   });
 
   it("flashes a board answering with the legacy banner", async () => {
-    const serialDevice = new SerialDevice();
+    const serialDevice = makeSerialDevice();
     const conn = new FakeConnection();
     conn.respondHello = "CLUE-SPIKERBIT v3\r\n";
     const device = new SpikerbitDevice(serialDevice, conn);
@@ -76,7 +91,7 @@ describe("SpikerbitDevice", () => {
   });
 
   it("flashes a board speaking a newer protocol version, even with newer firmware", async () => {
-    const serialDevice = new SerialDevice();
+    const serialDevice = makeSerialDevice();
     const conn = new FakeConnection();
     conn.respondHello = helloLine(kSpikerbitFirmwareVersion + 5, 2);
     const device = new SpikerbitDevice(serialDevice, conn);
@@ -87,19 +102,32 @@ describe("SpikerbitDevice", () => {
   });
 
   it("routes servo writes through the connection once streaming", async () => {
-    const serialDevice = new SerialDevice();
+    const serialDevice = makeSerialDevice();
     const conn = new FakeConnection();
     conn.respondHello = helloLine(kSpikerbitFirmwareVersion);
     const device = new SpikerbitDevice(serialDevice, conn);
 
     await device.connectAndStream("HEX");
-    serialDevice.writeLine("90");
+    serialDevice.writeToOutForServo(90, "Servo");
 
-    expect(conn.written).toContain("90\n");
+    expect(conn.written.some(w => /^servo:90\*[0-9A-F]{2}\n$/.test(w))).toBe(true);
+  });
+
+  it("sends open once streaming", async () => {
+    const serialDevice = makeSerialDevice();
+    const conn = new FakeConnection();
+    conn.respondHello = helloLine(kSpikerbitFirmwareVersion);
+    const device = new SpikerbitDevice(serialDevice, conn);
+
+    await device.connectAndStream("HEX");
+
+    const opens = conn.written.filter(w => w.startsWith("open"));
+    expect(opens).toHaveLength(1);
+    expect(opens[0]).toMatch(/^open session:\d+ #\d+\*[0-9A-F]{2}\n$/);
   });
 
   it("routes inbound EMG through SerialDevice.receive to the matching channel", async () => {
-    const serialDevice = new SerialDevice();
+    const serialDevice = makeSerialDevice();
     const conn = new FakeConnection();
     conn.respondHello = helloLine(kSpikerbitFirmwareVersion);
     const channel = { channelId: "emg", value: 0 } as any;
@@ -107,15 +135,15 @@ describe("SpikerbitDevice", () => {
 
     serialDevice.registerChannelSource(() => [channel]);
     await device.connectAndStream("HEX");
-    // Data arriving after setActiveDevice flows transport.onData -> receive ->
-    // parseKeyValueData (spikerbit maps to the keyValue protocol).
+    // Data arriving after setActiveDevice flows transport.onData -> receive -> the session.
+    // The fake board acknowledged the open when it was written.
     conn.emitSerial("emg:57\r\n");
 
     expect(channel.value).toBe(57);
   });
 
   it("disconnects the connection when connecting fails after the link opens", async () => {
-    const serialDevice = new SerialDevice();
+    const serialDevice = makeSerialDevice();
     const conn = new FakeConnection();
     conn.respondHello = null;
     conn.flash = jest.fn().mockRejectedValue(new Error("flash failed"));
@@ -129,7 +157,7 @@ describe("SpikerbitDevice", () => {
   });
 
   it("disconnect closes the connection", async () => {
-    const serialDevice = new SerialDevice();
+    const serialDevice = makeSerialDevice();
     const conn = new FakeConnection();
     conn.respondHello = helloLine(kSpikerbitFirmwareVersion);
     const disconnect = jest.spyOn(conn, "disconnect");
@@ -142,7 +170,7 @@ describe("SpikerbitDevice", () => {
   });
 
   it("clears the store's transport on disconnect", async () => {
-    const serialDevice = new SerialDevice();
+    const serialDevice = makeSerialDevice();
     const conn = new FakeConnection();
     conn.respondHello = helloLine(kSpikerbitFirmwareVersion);
     const device = new SpikerbitDevice(serialDevice, conn);

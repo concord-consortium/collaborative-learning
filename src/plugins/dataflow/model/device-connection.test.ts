@@ -233,6 +233,9 @@ describe("DeviceConnection", () => {
     await connection.connect("arduino");
 
     const disconnecting = connection.disconnect();
+    // Let disconnect reach the pending close, which comes after ending the session.
+    await new Promise(resolve => setTimeout(resolve, 0));
+    expect(first.close).toHaveBeenCalled();
     serialDevice.setActiveDevice("arduino", second);
     finishClose();
     await disconnecting;
@@ -340,6 +343,29 @@ describe("DeviceConnection", () => {
     expect(transport.close).toHaveBeenCalled();
     expect(serialDevice.isConnected()).toBe(false);
     expect(connection.connectedLabel).toBeUndefined();
+  });
+
+  it("ends the device session before closing the transport", async () => {
+    const transport = makeTransport();
+    const { serialDevice, connection } = setup([transport]);
+    await connection.connect("arduino");
+    const order: string[] = [];
+    jest.spyOn(serialDevice, "endSession").mockImplementation(async () => { order.push("endSession"); });
+    transport.close.mockImplementation(async () => { order.push("close"); });
+    await connection.disconnect();
+    expect(order).toEqual(["endSession", "close"]);
+  });
+
+  it("still closes the transport when ending the session fails", async () => {
+    const transport = makeTransport();
+    const { serialDevice, connection } = setup([transport]);
+    await connection.connect("arduino");
+    jest.spyOn(serialDevice, "endSession").mockRejectedValue(new Error("write failed"));
+    const consoleError = jest.spyOn(console, "error").mockImplementation(() => undefined);
+    await connection.disconnect();
+    expect(transport.close).toHaveBeenCalled();
+    expect(serialDevice.isConnected()).toBe(false);
+    consoleError.mockRestore();
   });
 
   it("starts with the connect tutorial dismissed when a device is already connected", () => {

@@ -39,8 +39,10 @@ export class MicrobitUsbTransport implements IDeviceTransport {
     });
   }
 
+  // Resolves when the write finishes, so a caller can wait for its last line to reach the board.
+  // A failure is logged, not thrown.
   write(line: string) {
-    this.connection.serialWrite(`${line}\n`)
+    return this.connection.serialWrite(`${line}\n`)
       .catch((e) => console.warn("Spiker:bit serialWrite failed", e));
   }
 
@@ -87,8 +89,8 @@ export class SpikerbitDevice {
 
     // Route servo writes and inbound EMG through this WebUSB transport and mark the shared
     // store connected. setActiveDevice wires transport.onData -> receive (spikerbit maps to
-    // the keyValue protocol -> parseKeyValueData) and transport.onDisconnect, replacing
-    // the connect-time firmware handler.
+    // the ccDevice protocol -> CcDeviceSession) and transport.onDisconnect, replacing
+    // the connect-time firmware handler, and starts the session.
     this.serialDevice.setActiveDevice("spikerbit", this.transport);
   }
 
