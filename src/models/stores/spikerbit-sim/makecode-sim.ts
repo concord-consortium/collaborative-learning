@@ -13,17 +13,22 @@ import * as ts from "typescript";
 // fiber calls `fn`. `basic.pause(ms)` throws a yield signal that ends the call and wakes the
 // fiber `ms` later, so a loop may pause only as its last statement: the next pass is a fresh call
 // of `fn`, and code after a pause never runs. A background loop therefore keeps its state outside
-// the function. A `forever` body that returns without pausing waits 20 ms, as MakeCode's does; an
-// `inBackground` function that returns ends its fiber.
+// the function. MakeCode's forever loop sleeps 20 ms after every pass, so a `forever` fiber wakes
+// 20 ms after its pass ends, on top of any pause the body made. An `inBackground` function that
+// returns ends its fiber.
 //
 // Events (serial input and buttons) run their handler synchronously and must not pause.
+//
+// Serial input goes through a receive buffer of MakeCode's size, as described at `sendSerial`.
 
 type Thunk = () => void;
 type ButtonName = "A" | "B";
 type ButtonEventName = "click" | "longClick";
 
-// How long MakeCode's forever loop waits after a body that returns without pausing.
-const kForeverIdleMs = 20;
+// How long MakeCode's forever loop sleeps after each pass of its body.
+const kForeverSleepMs = 20;
+// The receive buffer's capacity until the program calls serial.setRxBufferSize.
+const kDefaultRxBufferSize = 20;
 // The shortest pause. A fiber that yields with pause(0) still lets this much time pass, about one
 // pass of the firmware's sampler on a V2, so a free-running loop can't stop the clock.
 const kMinPauseMs = 2;
@@ -80,6 +85,7 @@ export class MakeCodeSim {
   private fibers: Fiber[] = [];
   private nextOrder = 0;
   private serialInput = "";
+  private rxBufferSize = kDefaultRxBufferSize;
   private serialOutput = "";
   private serialHandler: { delimiters: string, handler: Thunk } | undefined;
   private buttonHandlers = new Map<string, Thunk>();
@@ -129,9 +135,12 @@ export class MakeCodeSim {
     this._now = until;
   }
 
+  // Follows codal-core's Serial::dataReceived: the receive buffer holds `rxBufferSize` characters
+  // and drops any that arrive while it is full. A delimiter raises the data-received event even
+  // when it is dropped, because CODAL checks for delimiters before it checks for room.
   sendSerial(text: string) {
     for (const char of text) {
-      this.serialInput += char;
+      if (this.serialInput.length < this.rxBufferSize) this.serialInput += char;
       if (this.serialHandler?.delimiters.includes(char)) {
         this.runEvent(this.serialHandler.handler);
       }
@@ -189,15 +198,17 @@ export class MakeCodeSim {
   }
 
   private runFiber(fiber: Fiber) {
+    let pausedMs: number | undefined;
     try {
       fiber.body();
     } catch (e) {
       if (!(e instanceof YieldSignal)) throw e;
-      this.schedule(fiber, e.ms);
-      return;
+      pausedMs = e.ms;
     }
     if (fiber.forever) {
-      this.schedule(fiber, kForeverIdleMs);
+      this.schedule(fiber, (pausedMs ?? 0) + kForeverSleepMs);
+    } else if (pausedMs !== undefined) {
+      this.schedule(fiber, pausedMs);
     } else {
       this.fibers = this.fibers.filter(f => f !== fiber);
     }
@@ -214,9 +225,19 @@ export class MakeCodeSim {
 
   private readUntil(delimiters: string) {
     const index = [...this.serialInput].findIndex(char => delimiters.includes(char));
-    if (index < 0) throw notSimulated("serial.readUntil with no delimiter in the input");
-    const text = this.serialInput.slice(0, index);
-    this.serialInput = this.serialInput.slice(index + 1);
+    if (index >= 0) {
+      const line = this.serialInput.slice(0, index);
+      this.serialInput = this.serialInput.slice(index + 1);
+      return line;
+    }
+    // No delimiter in the buffer: the line overflowed it and its delimiter was dropped. On the
+    // board, readUntil then waits for the next delimiter event and returns the buffer up to its
+    // last character, consuming that character as if it were the delimiter (codal-core's
+    // Serial::readUntil in SYNC_SLEEP mode, which MakeCode uses). Handlers can't wait here, so
+    // the sim returns that text at once. The board loses the next line too, which fills the
+    // still-full buffer while readUntil waits; the sim reads that line normally.
+    const text = this.serialInput.slice(0, -1);
+    this.serialInput = "";
     return text;
   }
 
@@ -256,6 +277,12 @@ export class MakeCodeSim {
       }),
       serial: namespace("serial", {
         setWriteLinePadding: (padding: number) => undefined,
+        setRxBufferSize: (size: number) => {
+          // CODAL takes the size as a uint8_t, holds at most 254 characters, and empties the buffer.
+          const byte = size % 256;
+          this.rxBufferSize = byte === 255 ? 254 : byte;
+          this.serialInput = "";
+        },
         writeLine: (text: string) => { this.serialOutput += `${text}\r\n`; },
         onDataReceived: (delimiters: string, handler: Thunk) => { this.serialHandler = { delimiters, handler }; },
         delimiters: (delimiter: string) => delimiter,

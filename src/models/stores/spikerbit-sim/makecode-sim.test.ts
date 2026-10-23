@@ -92,9 +92,10 @@ describe("MakeCodeSim runtime", () => {
       })
     `);
     expect(s.now).toBe(0);
-    s.advance(120);
-    expect(s.now).toBe(120);
-    expect(s.takeSerialLines()).toEqual(["start 0", "1 at 0 / 0", "2 at 50 / 50000", "3 at 100 / 100000"]);
+    s.advance(150);
+    expect(s.now).toBe(150);
+    // Each pass takes its 50 ms pause plus the 20 ms forever sleeps after every pass.
+    expect(s.takeSerialLines()).toEqual(["start 0", "1 at 0 / 0", "2 at 70 / 70000", "3 at 140 / 140000"]);
   });
 
   it("waits 20 ms after a forever body that doesn't pause, and ends a background fiber that returns", () => {
@@ -111,7 +112,7 @@ describe("MakeCodeSim runtime", () => {
       basic.forever(function () { serial.writeLine("one"); basic.pause(10) })
       basic.forever(function () { serial.writeLine("two"); basic.pause(10) })
     `);
-    s.advance(10);
+    s.advance(30);
     expect(s.takeSerialLines()).toEqual(["one", "two", "one", "two"]);
   });
 
@@ -125,6 +126,28 @@ describe("MakeCodeSim runtime", () => {
     expect(s.takeSerialLines()).toEqual(["got [a]"]);
     s.sendSerial("c\nd\n");
     expect(s.takeSerialLines()).toEqual(["got [bc]", "got [d]"]);
+  });
+
+  const echoLines = `
+    serial.onDataReceived(serial.delimiters(Delimiters.NewLine), function () {
+      serial.writeLine("got [" + serial.readUntil(serial.delimiters(Delimiters.NewLine)) + "]")
+    })
+  `;
+  const line30 = "abcdefghijklmnopqrstuvwxyz0123";
+
+  it("truncates a line longer than the default 20-character receive buffer", () => {
+    const s = load(echoLines);
+    s.sendSerial(`${line30}\n`);
+    // The buffer keeps the first 20 characters and drops the rest, the newline included. The
+    // dropped newline still raises the event, and the board's readUntil then takes the 20th
+    // character as the delimiter.
+    expect(s.takeSerialLines()).toEqual([`got [${line30.slice(0, 19)}]`]);
+  });
+
+  it("delivers a 30-character line whole after setRxBufferSize(64)", () => {
+    const s = load(`serial.setRxBufferSize(64)\n${echoLines}`);
+    s.sendSerial(`${line30}\n`);
+    expect(s.takeSerialLines()).toEqual([`got [${line30}]`]);
   });
 
   it("refuses a pause inside an event handler", () => {

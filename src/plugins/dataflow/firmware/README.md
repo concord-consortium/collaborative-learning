@@ -82,7 +82,10 @@ a pin, and check the servo angle, the icon shown and the sounds played.
   its last statement, a background loop (`while (true) { ...; basic.pause(n) }`) keeps its
   state outside the function, and event handlers don't pause at all. The header of
   `spikerbit-clue.ts` states the same rule.
-- `basic.pause(0)` lets 2 ms pass, about one pass of the sampler on a V2.
+- `basic.pause(0)` lets 2 ms pass, about one pass of the sampler on a V2, and the `forever`
+  loop sleeps 20 ms after every pass, as MakeCode's does.
+- **The serial receive buffer** holds 20 characters unless the firmware calls
+  `serial.setRxBufferSize`, and a longer line is truncated, as on the board.
 
 These tests check the program's logic, not its timing on the board or the compiled hex.
 
