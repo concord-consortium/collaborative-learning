@@ -111,6 +111,10 @@ export interface UnitConfiguration extends ProblemConfiguration {
   aiEvaluation?: "categorize-design" | "mock" | "custom";
   // If aiEvaluation is "custom", this defines the prompt strings to use for the AI evaluation
   aiPrompt?: SnapshotIn<typeof AIPromptModel>;
+  // if true, aiEvaluation also runs automatically when the student's session ends (the document
+  // closes or the connection drops), not only when they ask for ideas. Evaluating every session
+  // costs real money, so a unit opts in; unset means only explicit requests are evaluated.
+  aiEvaluateOnSessionEnd?: boolean;
   // optional per-unit AI chat tutor prompt overrides: replaceGenericPrompt swaps out the
   // server's built-in generic tutor prompt; appendToGenericPrompt is added after the
   // (possibly replaced) generic prompt

@@ -115,6 +115,8 @@ A document with no content at all is an exception: it is evaluated anyway, and o
 
 An `aiPrompt` may still carry a `summarizer` property, written by older versions of the authoring interface to choose between sending text and sending a picture. It is ignored.
 
+`aiEvaluateOnSessionEnd`: (boolean | undefined) When true, `aiEvaluation` also runs automatically at the end of every session — when the student closes the document or their connection drops — in addition to the evaluations they request with the ideas button. Defaults to false: a unit with `aiEvaluation` set evaluates only what students ask for, since evaluating every session costs real money. Setting this has no effect without `aiEvaluation`.
+
 `showIdeasButton`: (boolean | undefined) If set the ideas button visibility is determined by the value. If undefined the existing logic is used
 which checks if the the aiEvaluation is set or if there are invisible exemplar documents.
 
