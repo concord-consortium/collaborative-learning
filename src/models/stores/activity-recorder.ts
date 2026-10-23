@@ -1,5 +1,4 @@
 import firebase from "firebase/app";
-import { reaction, IReactionDisposer } from "mobx";
 import { escapeKey } from "../../lib/fire-utils";
 import { Firestore } from "../../lib/firestore";
 import { AppMode } from "./store-types";
@@ -9,13 +8,12 @@ import { isPlanningType, isProblemType } from "../document/document-types";
 import { HistoryEntryType } from "../history/history";
 import { TreeManagerType } from "../history/tree-manager";
 
-// Must equal the floor in firestore.rules' researcher_dashboard block, which refuses a write sooner
-// than this after the stored lastActivityAt. activity-recorder.test.ts reads the rule to check.
+// The least time between the acknowledgment of one write and the start of the next.
 export const kActivityWriteFloorMs = 5000;
 // How long a change whose history has been uploaded waits for a content save that covers it.
 export const kActivitySaveTimeoutMs = 30000;
-// Consecutive refused writes after which the recorder waits for the next change.
-export const kActivityMaxRefusals = 3;
+// Each consecutive failed write doubles the wait before the next, up to this.
+export const kActivityMaxRetryDelayMs = 60000;
 
 // Entries a running Simulator or DataFlow tile records on its own, every step. They are not activity.
 const kTickEntries: Array<{ model: string, actionSuffix: string }> = [
@@ -49,23 +47,20 @@ interface IPendingChange {
  */
 export class ActivityRecorder {
   private pending: IPendingChange[] = [];
+  private savedIds = new WeakMap<DocumentModelType, string>();
   private inFlight = false;
   private lastAckAt: number | undefined;
-  private refusals = 0;
-  private stopped = false;
+  private failures = 0;
+  private listening = false;
   private timer: ReturnType<typeof setTimeout> | undefined;
   private timerDueAt: number | undefined;
-  private saveReactions = new Map<DocumentModelType, IReactionDisposer>();
 
-  constructor(private stores: IActivityRecorderStores) {
-    window.addEventListener("pagehide", this.handlePageHide);
-  }
+  constructor(private stores: IActivityRecorderStores) {}
 
   dispose() {
     window.removeEventListener("pagehide", this.handlePageHide);
+    this.listening = false;
     this.clearTimer();
-    this.saveReactions.forEach(dispose => dispose());
-    this.saveReactions.clear();
   }
 
   get isEnabled() {
@@ -86,32 +81,28 @@ export class ActivityRecorder {
 
   onLocalEntryUploaded(document: DocumentModelType, entry: HistoryEntryType) {
     if (!this.isEnabled || isTickEntry(entry)) return;
-    this.stopped = false;
-    this.refusals = 0;
+    if (!this.listening) {
+      window.addEventListener("pagehide", this.handlePageHide);
+      this.listening = true;
+    }
     this.pending.push({
       entryId: entry.id, document, inLaunchOffering: this.isInLaunchOffering(document), uploadedAt: Date.now()
     });
-    this.watchSaves(document);
     this.schedule();
   }
 
-  private watchSaves(document: DocumentModelType) {
-    if (this.saveReactions.has(document)) return;
-    this.saveReactions.set(document, reaction(() => document.savedLastHistoryEntryId, () => this.schedule()));
-  }
-
-  private unwatchSettledDocuments() {
-    this.saveReactions.forEach((dispose, document) => {
-      if (!this.pending.some(change => change.document === document)) {
-        dispose();
-        this.saveReactions.delete(document);
-      }
-    });
+  /**
+   * Called when this client's content save of the document succeeds, with the history entry id stamped on it.
+   * The id is kept because an entry's upload can land after the save that covers it.
+   */
+  onContentSaved(document: DocumentModelType, lastHistoryEntryId: string) {
+    this.savedIds.set(document, lastHistoryEntryId);
+    this.schedule();
   }
 
   private isSaved(change: IPendingChange) {
     const { document, entryId } = change;
-    const savedId = document.savedLastHistoryEntryId;
+    const savedId = this.savedIds.get(document);
     if (!savedId) return false;
     const history = (document.treeManagerAPI as TreeManagerType | undefined)?.document.history;
     if (!history) return false;
@@ -142,14 +133,15 @@ export class ActivityRecorder {
   }
 
   private schedule() {
-    if (this.inFlight || this.stopped || this.pending.length === 0) return;
+    if (this.inFlight || this.pending.length === 0) return;
     const now = Date.now();
     const landed = this.pending.filter(change => this.hasLanded(change, now));
     if (landed.length === 0) {
       this.setTimer(Math.min(...this.pending.map(change => change.uploadedAt + kActivitySaveTimeoutMs)));
       return;
     }
-    const dueAt = this.lastAckAt === undefined ? now : this.lastAckAt + kActivityWriteFloorMs;
+    const wait = Math.min(kActivityWriteFloorMs * 2 ** this.failures, kActivityMaxRetryDelayMs);
+    const dueAt = this.lastAckAt === undefined ? now : this.lastAckAt + wait;
     if (now < dueAt) {
       this.setTimer(dueAt);
       return;
@@ -161,7 +153,6 @@ export class ActivityRecorder {
     const { user, db } = this.stores;
     const { FieldValue } = firebase.firestore;
     this.pending = this.pending.filter(change => !changes.includes(change));
-    this.unwatchSettledDocuments();
     const data: Record<string, any> = {
       lastActivityAt: FieldValue.serverTimestamp(),
       writeCount: FieldValue.increment(1)
@@ -172,15 +163,11 @@ export class ActivityRecorder {
     this.inFlight = true;
     db.firestore.documentRef(this.documentPath).set(data, { merge: true })
       .then(() => {
-        this.refusals = 0;
+        this.failures = 0;
       })
       .catch(error => {
-        // Refused by the rule's floor (another tab wrote) or otherwise failed: keep the changes for the
-        // next write.
         this.pending = [...changes, ...this.pending];
-        changes.forEach(change => this.watchSaves(change.document));
-        this.refusals++;
-        if (this.refusals >= kActivityMaxRefusals) this.stopped = true;
+        this.failures++;
         console.warn("Could not record researcher dashboard activity", error);
       })
       .finally(() => {

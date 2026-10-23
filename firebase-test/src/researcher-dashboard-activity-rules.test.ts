@@ -76,9 +76,9 @@ const own = `${activityUsers(thisClass)}/${studentId}`;
 const first = () => ({ lastActivityAt: ts(), writeCount: 1, changed: { [offeringId]: ts() } });
 const next = (changed?: Record<string, unknown>) =>
   ({ lastActivityAt: ts(), writeCount: FV.increment(1), ...(changed ? { changed } : {}) });
-const sleep = (ms: number) => new Promise(r => setTimeout(r, ms));
 const ok = (p: Promise<any>) => assertSucceeds(p);
 const no = (p: Promise<any>) => assertFails(p);
+const storedWriteCount = async () => (await initFirestore(researcherAuth).doc(own).get()).get("writeCount");
 const seedOld = () => adminWriteDoc(own, {
   lastActivityAt: new Date(Date.now() - 60000), writeCount: 3,
   changed: { "1500": new Date(Date.now() - 60000), [offeringId]: new Date(Date.now() - 60000) }
@@ -129,17 +129,20 @@ describe("researcher dashboard activity learner writes", () => {
     await no(db.doc(own).set({ lastActivityAt: ts(), writeCount: 5 }, { merge: true }));
   });
 
-  it("refuses a second write inside 5 seconds and allows one after", async () => {
+  it("accepts writes in quick succession", async () => {
     const db = initFirestore(learnerAuth);
     await ok(db.doc(own).set(first(), { merge: true }));
-    await no(db.doc(own).set({ lastActivityAt: ts(), writeCount: FV.increment(1), changed: { [offeringId]: ts() } },
-      { merge: true }));
-    await sleep(5200);
-    await ok(db.doc(own).set({ lastActivityAt: ts(), writeCount: FV.increment(1), changed: { [offeringId]: ts() } },
-      { merge: true }));
-    await sleep(5200);
-    await ok(db.doc(own).set({ lastActivityAt: ts(), writeCount: FV.increment(1) }, { merge: true }));
-  }, 20000);
+    await ok(db.doc(own).set(next({ [offeringId]: ts() }), { merge: true }));
+    await ok(db.doc(own).set(next(), { merge: true }));
+    expect(await storedWriteCount()).toBe(3);
+  });
+
+  it("accepts two tabs writing at once, counting both", async () => {
+    await ok(initFirestore(learnerAuth).doc(own).set(first(), { merge: true }));
+    const write = () => initFirestore(learnerAuth).doc(own).set(next({ [offeringId]: ts() }), { merge: true });
+    await Promise.all([ok(write()), ok(write())]);
+    expect(await storedWriteCount()).toBe(3);
+  });
 
   it("refuses an update that changes a stored key of another offering", async () => {
     await adminWriteDoc(own, {
@@ -232,39 +235,4 @@ describe("researcher dashboard activity learner writes", () => {
     const db = initFirestore({ ...learnerAuth, uid: "evil", platform_id: "https://learn_concord.org/" });
     await no(db.doc(own).set(first(), { merge: true }));
   });
-
-  it("refuses an existing document that has no lastActivityAt", async () => {
-    await adminWriteDoc(own, { writeCount: 1 });
-    const db = initFirestore(learnerAuth);
-    await no(db.doc(own).set({ lastActivityAt: ts(), writeCount: 2 }, { merge: true }));
-  });
-});
-
-describe("researcher dashboard activity write floor", () => {
-  const write = (db: firebase.firestore.Firestore) => db.doc(own).set(next({ [offeringId]: ts() }), { merge: true });
-  beforeEach(prepareEachTest);
-  afterAll(() => tearDownTests());
-
-  it("accepts a write 5000 ms after the previous acknowledgment, 10 times running", async () => {
-    const db = initFirestore(learnerAuth);
-    await assertSucceeds(write(db));
-    for (let i = 0; i < 10; i++) {
-      await sleep(5000);
-      await assertSucceeds(write(db));
-    }
-  }, 90000);
-
-  it("refuses a write 4900 ms after the acknowledgment", async () => {
-    const db = initFirestore(learnerAuth);
-    await assertSucceeds(write(db));
-    await sleep(4900);
-    await assertFails(write(db));
-  }, 20000);
-
-  it("accepts exactly one of two tabs writing at once", async () => {
-    await assertSucceeds(write(initFirestore(learnerAuth)));
-    await sleep(5200);
-    const results = await Promise.allSettled([write(initFirestore(learnerAuth)), write(initFirestore(learnerAuth))]);
-    expect(results.filter(r => r.status === "fulfilled").length).toBe(1);
-  }, 20000);
 });

@@ -1,12 +1,10 @@
-import fs from "fs";
-import path from "path";
 import { nanoid } from "nanoid";
 import { createDocumentModel, DocumentModelType } from "../document/document";
 import { HistoryEntry } from "../history/history";
 import { TreeManagerType } from "../history/tree-manager";
 import { UserModel } from "./user";
 import {
-  ActivityRecorder, IActivityRecorderStores, kActivitySaveTimeoutMs, kActivityWriteFloorMs
+  ActivityRecorder, IActivityRecorderStores, kActivityMaxRetryDelayMs, kActivitySaveTimeoutMs, kActivityWriteFloorMs
 } from "./activity-recorder";
 
 jest.mock("firebase/app", () => ({
@@ -36,12 +34,6 @@ const addEntry = (document: DocumentModelType, model = "TextContent",
   return entry;
 };
 
-const addSavedEntry = (document: DocumentModelType) => {
-  const entry = addEntry(document);
-  document.setSavedLastHistoryEntryId(entry.id);
-  return entry;
-};
-
 const flush = async () => { for (let i = 0; i < 5; i++) await Promise.resolve(); };
 
 const setVisibility = (state: DocumentVisibilityState) => {
@@ -51,6 +43,16 @@ const setVisibility = (state: DocumentVisibilityState) => {
 
 describe("ActivityRecorder", () => {
   let recorder: ActivityRecorder;
+
+  const addSavedEntry = (document: DocumentModelType) => {
+    const entry = addEntry(document);
+    recorder.onContentSaved(document, entry.id);
+    return entry;
+  };
+  const advance = async (ms: number) => {
+    jest.advanceTimersByTime(ms);
+    await flush();
+  };
 
   beforeEach(() => {
     jest.useFakeTimers();
@@ -71,7 +73,7 @@ describe("ActivityRecorder", () => {
     const df = addEntry(doc, "DataflowProgram", "/content/tileMap/d/content/program/tickAndProcess");
     recorder.onLocalEntryUploaded(doc, tick);
     recorder.onLocalEntryUploaded(doc, df);
-    doc.setSavedLastHistoryEntryId(df.id);
+    recorder.onContentSaved(doc, df.id);
     jest.advanceTimersByTime(kActivitySaveTimeoutMs * 2);
     await flush();
     expect(mockSet).not.toHaveBeenCalled();
@@ -82,11 +84,11 @@ describe("ActivityRecorder", () => {
     const doc = makeDocument();
     const first = addEntry(doc);
     const second = addEntry(doc);
-    doc.setSavedLastHistoryEntryId(first.id);
+    recorder.onContentSaved(doc, first.id);
     recorder.onLocalEntryUploaded(doc, second);
     await flush();
     expect(mockSet).not.toHaveBeenCalled();
-    doc.setSavedLastHistoryEntryId(second.id);
+    recorder.onContentSaved(doc, second.id);
     await flush();
     expect(mockDocumentRef).toHaveBeenCalledWith("researcher_dashboard/learn_concord_org/activity/cls/users/7");
     expect(mockSet.mock.calls).toEqual([[
@@ -168,24 +170,60 @@ describe("ActivityRecorder", () => {
     expect(mockSet).toHaveBeenCalledTimes(2);
   });
 
-  it("retries a refused write after the floor and stops after three refusals", async () => {
-    mockSet.mockRejectedValue(new Error("permission-denied"));
+  it("retries a failed write after a wait that doubles with each failure, and a success resets it", async () => {
+    mockSet.mockRejectedValue(new Error("unavailable"));
     jest.spyOn(console, "warn").mockImplementation(() => undefined);
     recorder = new ActivityRecorder(makeStores());
     const doc = makeDocument();
     recorder.onLocalEntryUploaded(doc, addSavedEntry(doc));
     await flush();
     expect(mockSet).toHaveBeenCalledTimes(1);
-    jest.advanceTimersByTime(kActivityWriteFloorMs - 1);
+    const waits = [2, 4, 8].map(n => n * kActivityWriteFloorMs).concat(kActivityMaxRetryDelayMs);
+    for (const [i, wait] of waits.entries()) {
+      if (i === waits.length - 1) mockSet.mockResolvedValue(undefined);
+      await advance(wait - 1);
+      expect(mockSet).toHaveBeenCalledTimes(i + 1);
+      await advance(1);
+      expect(mockSet).toHaveBeenCalledTimes(i + 2);
+    }
+    recorder.onLocalEntryUploaded(doc, addSavedEntry(doc));
+    await advance(kActivityWriteFloorMs - 1);
+    expect(mockSet).toHaveBeenCalledTimes(5);
+    await advance(1);
+    expect(mockSet).toHaveBeenCalledTimes(6);
+  });
+
+  it("keeps a save reported before the entry's upload lands", async () => {
+    recorder = new ActivityRecorder(makeStores());
+    const doc = makeDocument();
+    const entry = addSavedEntry(doc);
+    recorder.onLocalEntryUploaded(doc, entry);
     await flush();
     expect(mockSet).toHaveBeenCalledTimes(1);
-    jest.advanceTimersByTime(1);
-    for (let i = 0; i < 5; i++) {
-      await flush();
-      jest.advanceTimersByTime(kActivityWriteFloorMs);
-    }
+  });
+
+  it("ignores the saved id loaded with the document and another document's save", async () => {
+    recorder = new ActivityRecorder(makeStores());
+    const doc = makeDocument();
+    const other = makeDocument();
+    const entry = addEntry(doc);
+    doc.setSavedLastHistoryEntryId(entry.id);
+    recorder.onContentSaved(other, entry.id);
+    recorder.onLocalEntryUploaded(doc, entry);
     await flush();
-    expect(mockSet).toHaveBeenCalledTimes(3);
+    expect(mockSet).not.toHaveBeenCalled();
+  });
+
+  it("listens for pagehide only once it records a change", () => {
+    const addListener = jest.spyOn(window, "addEventListener");
+    const pagehideListeners = () => addListener.mock.calls.filter(([type]) => String(type) === "pagehide").length;
+    recorder = new ActivityRecorder(makeStores());
+    expect(pagehideListeners()).toBe(0);
+    const doc = makeDocument();
+    recorder.onLocalEntryUploaded(doc, addEntry(doc));
+    recorder.onLocalEntryUploaded(doc, addEntry(doc));
+    expect(pagehideListeners()).toBe(1);
+    addListener.mockRestore();
   });
 
   it.each([
@@ -217,56 +255,5 @@ describe("ActivityRecorder", () => {
     recorder.onLocalEntryUploaded(doc, addSavedEntry(doc));
     window.dispatchEvent(new Event("pagehide"));
     expect(mockSet).not.toHaveBeenCalled();
-  });
-
-  it("after stopping, writes again on the next counted change", async () => {
-    mockSet.mockRejectedValue(new Error("permission-denied"));
-    jest.spyOn(console, "warn").mockImplementation(() => undefined);
-    recorder = new ActivityRecorder(makeStores());
-    const doc = makeDocument();
-    recorder.onLocalEntryUploaded(doc, addSavedEntry(doc));
-    for (let i = 0; i < 5; i++) {
-      await flush();
-      jest.advanceTimersByTime(kActivityWriteFloorMs);
-    }
-    await flush();
-    expect(mockSet).toHaveBeenCalledTimes(3);
-    mockSet.mockResolvedValue(undefined);
-    recorder.onLocalEntryUploaded(doc, addSavedEntry(doc));
-    await flush();
-    expect(mockSet).toHaveBeenCalledTimes(4);
-  });
-
-  it("counts only consecutive refusals: a success in between resets the count", async () => {
-    const refuse = () => Promise.reject(new Error("permission-denied"));
-    mockSet.mockImplementationOnce(refuse).mockImplementationOnce(refuse)
-      .mockImplementationOnce(() => Promise.resolve()).mockImplementationOnce(refuse);
-    jest.spyOn(console, "warn").mockImplementation(() => undefined);
-    recorder = new ActivityRecorder(makeStores());
-    const doc = makeDocument();
-    const saved = addSavedEntry(doc);
-    const unsaved = addEntry(doc);
-    recorder.onLocalEntryUploaded(doc, unsaved);
-    recorder.onLocalEntryUploaded(doc, saved);
-    for (let i = 0; i < 3; i++) {
-      await flush();
-      jest.advanceTimersByTime(kActivityWriteFloorMs);
-    }
-    await flush();
-    expect(mockSet).toHaveBeenCalledTimes(3);
-    doc.setSavedLastHistoryEntryId(unsaved.id);
-    for (let i = 0; i < 3; i++) {
-      await flush();
-      jest.advanceTimersByTime(kActivityWriteFloorMs);
-    }
-    await flush();
-    expect(mockSet).toHaveBeenCalledTimes(5);
-  });
-
-  it("uses the same floor as firestore.rules", () => {
-    const rules = fs.readFileSync(path.join(__dirname, "../../../firestore.rules"), "utf8");
-    const block = rules.slice(rules.indexOf("match /researcher_dashboard/"));
-    const seconds = block.match(/duration\.value\((\d+), "s"\)/)?.[1];
-    expect(Number(seconds) * 1000).toBe(kActivityWriteFloorMs);
   });
 });

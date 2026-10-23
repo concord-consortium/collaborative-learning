@@ -65,10 +65,10 @@ uploaded and a content save covering it has succeeded, or 30 seconds after the u
 is confirmed; a change still waiting when the page closes is written then. A change whose history
 upload fails, or that is rolled back after a conflicting edit in a group or class document, is never
 recorded. The steps a running Simulator or DataFlow tile records on its own (`SimulatorTool`
-`.../step`, `DataflowProgram` `.../tickAndProcess`) do not count. Writes are at least 5 seconds apart:
-the Firestore rule refuses a sooner one, and limits a student to their own document, their own class
-and portal, their launch offering's key and the server's clock. Only a researcher token for the class
-can read them. Nothing deletes them.
+`.../step`, `DataflowProgram` `.../tickAndProcess`) do not count. Each tab writes at most every 5
+seconds; a student with several tabs open can write more often. The Firestore rule limits a student to
+their own document, their own class and portal, their launch offering's key and the server's clock.
+Only a researcher token for the class can read them. Nothing deletes them.
 
 Activity is recorded only for students on a CLUE release that includes the recorder, launched from an
 offering that uses the current version: an offering pinned to a `/version/` URL records nothing until it

@@ -26,9 +26,9 @@ CLUE-693 was first built as a Cloud Function on history writes (branch `CLUE-693
 ### When it writes
 
 - **R4.** A counted entry is written only after both its history upload has resolved and an RTDB content save whose `lastHistoryEntryId` is the entry or a later entry of the same document's history has succeeded. If no such save is confirmed within 30 s while the tab stays open, it is written anyway. An entry whose upload fails (the metadata document never appears, or the write is rejected) or which the concurrent manager rolls back after a fork is dropped and never written, `pagehide` included.
-- **R5.** Throttle: the first counted change after a quiet period is written as soon as R4 allows; later changes wait until 5 s after the previous write's acknowledgment; each write covers every change that has landed by then, and a trailing write always follows the last change of a burst. At most one write is in flight. The recorder never debounces. On `visibilitychange` to hidden, changes that have landed are written as soon as the 5 s floor allows, and unconfirmed ones keep waiting. On `pagehide`, every pending change is written at once without waiting for its save or the floor. A close within 5 s of the previous write is refused by the rule and lost, and a write started in `pagehide` may not complete; that is the design's known loss.
+- **R5.** Throttle: the first counted change after a quiet period is written as soon as R4 allows; later changes wait until 5 s after the previous write's acknowledgment (the floor, per tab); each write covers every change that has landed by then, and a trailing write always follows the last change of a burst. At most one write is in flight. The recorder never debounces. On `visibilitychange` to hidden, changes that have landed are written as soon as the 5 s floor allows, and unconfirmed ones keep waiting. On `pagehide`, every pending change is written at once without waiting for its save or the floor. A write started in `pagehide` may not complete; that is the design's known loss.
   - *(The hidden-tab behavior needs no `visibilitychange` handler: every upload, save and timer already schedules the next write.)*
-- **R6.** A write refused inside the 5 s window (another tab wrote) keeps the change pending and retries 5 s later; after 3 consecutive refusals the recorder stops until the next counted change.
+- **R6.** A failed write keeps its changes pending. The wait before the next write doubles with each consecutive failure (10 s, 20 s, 40 s), up to 60 s, and a success resets it to the 5 s floor.
 
 ### The document
 
@@ -37,29 +37,28 @@ CLUE-693 was first built as a Cloud Function on history writes (branch `CLUE-693
 
 ### Rules and index
 
-- **R9.** Keep the researcher read rule. Add the learner write rule: own `uid` (`platform_user_id`), `class_hash` and token portal (`platform_id`'s host labels equal `{portal}` split on `_`, report-service's comparison); only `lastActivityAt`, `writeCount` and `changed`; times equal `request.time`; `writeCount` up by exactly one; only the token's `offering_id` key changes in `changed`; at least 5 s since the stored `lastActivityAt`. No delete. The block's comment says who writes the documents and under what limits.
+- **R9.** Keep the researcher read rule. Add the learner write rule: own `uid` (`platform_user_id`), `class_hash` and token portal (`platform_id`'s host labels equal `{portal}` split on `_`, report-service's comparison); only `lastActivityAt`, `writeCount` and `changed`; times equal `request.time`; `writeCount` up by exactly one; only the token's `offering_id` key changes in `changed`. No time floor: each tab throttles itself, and a student's tabs share one document. No delete. The block's comment says who writes the documents and under what limits.
 - **R10.** `firestore.indexes.json` gains a field override exempting `changed` on the `users` collection group from indexing (`indexes: []`), as report-service's does. Nothing queries the map.
 
 ### Tests
 
-- **R11.** Rules tests in `firebase-test/src/researcher-dashboard-activity-rules.test.ts`, using a `learnerAuth` fixture in `setup-rules-tests.ts` with the real `user_type: "learner"` and `offering_id` and `platform_id` claims: 19 write cases, 3 floor-timing cases (5,000 ms accepted 10 times running, 4,900 ms refused, two tabs give exactly one success), and the existing client-write refusal test renamed for the researcher, teacher and student-claim tokens it covers.
-- **R12.** Recorder unit tests on fake timers, each named for the line it guards: ticks, the upload-and-save condition, the timeout, leading and trailing writes, no debounce, hidden and `pagehide`, refusals and the stop and restart, the key per document type, and the R1 gate per app mode, role, and missing class hash or offering. A test asserts the client interval equals the rule's floor. History-manager tests show an entry is reported only once its upload is accepted.
+- **R11.** Rules tests in `firebase-test/src/researcher-dashboard-activity-rules.test.ts`, using a `learnerAuth` fixture in `setup-rules-tests.ts` with the real `user_type: "learner"` and `offering_id` and `platform_id` claims: 19 write cases, including writes in quick succession and two tabs writing at once, both accepted, and the existing client-write refusal test renamed for the researcher, teacher and student-claim tokens it covers.
+- **R12.** Recorder unit tests on fake timers, each named for the line it guards: ticks, the upload-and-save condition, the timeout, leading and trailing writes, no debounce, hidden and `pagehide`, the retry backoff and its reset, the key per document type, and the R1 gate per app mode, role, and missing class hash or offering. History-manager tests show an entry is reported only once its upload is accepted.
 - **R13.** Staging check: a staging student with `firebaseEnv=staging` edits a text tile and their activity document appears within seconds with the offering key; a running EMG simulation alone writes nothing more; and opening a problem document without editing it is recorded, to measure how often tiles' writes on open set `changed`. *(A post-deploy check, not code; see Not Yet Implemented.)*
 
 ### Docs
 
-- **R14.** `docs/firestore-schema.md` gains a "Researcher dashboard activity" section holding the contract: path, fields, what counts, who writes, the 5 s floor, that a launch without `firebaseEnv=staging` writes to production Firebase, and that an offering pinned to a `/version/` URL records nothing until it is repointed. The list of top-level collections gains `researcher_dashboard`.
+- **R14.** `docs/firestore-schema.md` gains a "Researcher dashboard activity" section holding the contract: path, fields, what counts, who writes, the 5 s per-tab interval, that a launch without `firebaseEnv=staging` writes to production Firebase, and that an offering pinned to a `/version/` URL records nothing until it is repointed. The list of top-level collections gains `researcher_dashboard`.
 
 ## Technical Notes
 
-- **Where it lives.** `src/models/stores/activity-recorder.ts` (the recorder); `FirestoreHistoryManager` and `FirestoreHistoryManagerConcurrent` report each landed local entry through `onLocalEntryUploaded`; `DocumentsModel` passes that callback, with the document, into both managers; `useDocumentSyncToFirebase` sets `DocumentModel.savedLastHistoryEntryId` on each successful content save; `Stores` creates one recorder where it sets the documents' Firestore.
+- **Where it lives.** `src/models/stores/activity-recorder.ts` (the recorder); `FirestoreHistoryManager` and `FirestoreHistoryManagerConcurrent` report each landed local entry through `onLocalEntryUploaded`; `DocumentsModel` passes that callback, with the document, into both managers; `useDocumentSyncToFirebase` reports each successful content save's stamped id through an `onContentSaved` callback, which `EditableDocumentContent` points at the recorder; the recorder keeps the latest per document. `Stores` creates the recorder in its constructor and hands it to `DocumentsModel`; it listens for `pagehide` only once it records a change.
 - **The save can carry the previous entry's id.** For a plain tile edit the entry completes before the leading save's `transform` runs, so that save carries the new entry's id. For an edit to a shared model, `recordAction`'s extra `startExchange` await completes the entry after the leading save captured its id, so the leading save carries the previous entry's id and the trailing save covers it. This is why R4 compares positions in the history, with the 30 s timeout as a backstop.
 - **Retried saves.** react-query retries by calling the mutation again with the same snapshot, so `transform` would stamp the old content with a newer entry. The hook keeps each snapshot's first-attempt id in a `WeakMap`.
 - **Ticks.** `src/plugins/simulator/model/simulator-content.ts` (`SimulatorTool`, `step`) and `src/plugins/dataflow/model/dataflow-program-model.ts` (`DataflowProgram`, `tickAndProcess`). The entry's `model` is the action's model name and its `action` the full path, so it ends with `/step` or `/tickAndProcess`. The PR names both so a later rename (Scott Cytacki's tick work) updates the recorder too.
 - **Group documents** are type `axes`, owned by `group_<offeringId>_<groupId>`; R7 compares the document's `uid` with `user.userIdForGroupDocuments`. Class documents are owned by `class_<classHash>`.
-- **The token's offering.** The rule takes the key from the token's `offering_id`; the client from `user.offeringId`. Both come from the same launch. A mismatch would have every write refused: R6's stop lasts only until the next counted change, so a student who keeps editing makes one refused write and one console warning every 5 s.
+- **The token's offering.** The rule takes the key from the token's `offering_id`; the client from `user.offeringId`. Both come from the same launch. A mismatch would have every write refused: R6's backoff then retries once a minute, each with a console warning.
 - **The `{portal}` segment** is `escapeKey(user.portal)`, the escaping CLUE's own `authed/{portal}` root uses, which equals report-service's segment for real portal hosts.
-- **The floor.** Both the client's 5 s and the rule's `duration.value(5, "s")` compare server times: the client measures from the previous write's acknowledgment, which follows the server's `request.time` for it. `activity-recorder.test.ts` reads the floor out of `firestore.rules` to keep the two equal.
 - **Deploy timing:** rules before and indexes before the client release (the released client never writes this path; the exemption must exist before the first write). No functions deploy. Order: staging indexes then rules through `releasing-clue` (compare deployed rules with `master` first), a branch build against staging Firebase for R13, production indexes and rules, then the CLUE release.
 - **Review.** Scott Cytacki reviews the PR: the history-manager and save-hook changes and the tick-name coupling.
 
@@ -120,13 +119,14 @@ CLUE-693 was first built as a Cloud Function on history writes (branch `CLUE-693
 
 ---
 
-### Reuse `savedLastHistoryEntryId` or add a field for the last saved entry
-**Context**: The sketch asked for a volatile last-saved history entry id; `DocumentModel.savedLastHistoryEntryId` already held the loaded envelope's id.
+### Where the recorder learns which entry the last save covered
+**Context**: The sketch asked for a volatile last-saved history entry id. The first version kept `DocumentModel.savedLastHistoryEntryId`, the envelope's id loaded for the drift check, current on every save. Scott Cytacki's review: the drift check stayed correct only because the history manager copies the value in its constructor, nothing guards that, and the planned settled-state work needs the loaded id.
 **Options considered**:
-- A) A new volatile field beside it.
-- B) Keep the existing field current on every save.
+- A) Keep the existing field current on every save.
+- B) A second volatile field on `DocumentModel` for the last saved entry.
+- C) The save hook reports each successful save to the recorder, which keeps the latest id per document.
 
-**Decision**: B. Both hold the id stamped on the content now in RTDB. The drift check reads the history manager's own copy, taken at load, so updating the field later cannot affect it.
+**Decision**: C (Scott's Option 2). The document model and `savedLastHistoryEntryId` stay as on master; the "last saved" state lives in the one place that uses it, so nothing else can read it as RTDB's id (for a group document it is only this client's last save). It also drops the MobX reaction per document.
 
 ---
 
@@ -134,9 +134,9 @@ CLUE-693 was first built as a Cloud Function on history writes (branch `CLUE-693
 **Context**: The sketch said `stores.ts` creates the recorder when R1 holds.
 **Options considered**:
 - A) Create it after authentication, only for a launched student.
-- B) Create it where `Stores` sets the documents' Firestore, and check R1 on each entry.
+- B) Create it with the other services in the `Stores` constructor, and check R1 on each entry.
 
-**Decision**: B. The user is authenticated and their offering known only after the stores exist, and `setAppMode` can change the mode; a per-entry check needs no second hook into authentication. The behavior is R1's either way.
+**Decision**: B. The user is authenticated and their offering known only after the stores exist, and `setAppMode` can change the mode; a per-entry check needs no second hook into authentication. The behavior is R1's either way. Every test store builds a recorder, so it adds its `pagehide` listener only when it first records a change.
 
 ---
 
@@ -171,7 +171,7 @@ CLUE-693 was first built as a Cloud Function on history writes (branch `CLUE-693
 ---
 
 ### A retried older save can move the saved id backwards
-**Context**: An older save can succeed after a newer one and set `savedLastHistoryEntryId` to an earlier entry.
+**Context**: An older save can succeed after a newer one and move the recorder's saved id to an earlier entry.
 **Options considered**:
 - A) Guard against it in the hook.
 - B) Accept it: an entry already written is unaffected, and a pending one waits for the next save or the 30 s timeout.
@@ -190,23 +190,23 @@ CLUE-693 was first built as a Cloud Function on history writes (branch `CLUE-693
 
 ---
 
-### R6's stop does not stop a student who keeps editing
-**Context**: With every write refused and a change every 4 s, a throwaway test gave 12 refused writes a minute: each counted change clears the stop, as R6 says.
+### A 5 s floor in the rule
+**Context**: The first version's rule refused a write within 5 s of the stored `lastActivityAt`. The document is per learner, so a student's tabs share it: one tab's writes were refused, three refusals stopped it, its `changed` key waited, and a `pagehide` write could be lost. Scott Cytacki's review.
 **Options considered**:
-- A) Make the stop permanent for the session.
-- B) Keep R6 and state the rate instead of saying the recorder "stops".
+- A) Keep the floor, with R6's refusal retry and stop, and a test keeping the client's constant equal to the rule's.
+- B) Drop it and rely on each tab's own throttle.
 
-**Decision**: B. The cost of a token mismatch is one refused write and one warning every 5 s, which the Technical Notes now give.
+**Decision**: B. An honest client never writes faster than 5 s per tab, and a student who wanted to flood the document can already write unlimited history and content. The rest of the rule protects the data. R6 becomes a backoff for any failed write.
 
 ---
 
 ### Recorder lines no test guarded
-**Context**: Mutating the recorder left the suite green for four lines: the class and offering gate, clearing the stopped state on a new change, resetting refusals on success, and `pagehide` ignoring the floor. A later review found the refusal test did not pin the retry to the floor either.
+**Context**: Mutating the recorder left the suite green for lines including the class and offering gate and `pagehide` ignoring the floor.
 **Options considered**:
 - A) Add a test for each.
 - B) Leave them unguarded.
 
-**Decision**: A. Each new test fails exactly its mutation, and the refusal test asserts no retry before the floor. The recorder has 27 tests.
+**Decision**: A. Each new test fails exactly its mutation.
 
 ---
 

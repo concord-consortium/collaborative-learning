@@ -709,30 +709,33 @@ describe("useDocumentSyncToFirebase hook", () => {
     };
     const contentUpdates = () => mockUpdate.mock.calls.map(([value]) => value).filter(value => "content" in value);
 
-    it("records the saved history entry id on the document when a content save succeeds", async () => {
+    it("reports the saved history entry id when a content save succeeds, leaving the loaded id alone", async () => {
+      const onContentSaved = jest.fn();
       const { user, fb, firestore, document } = specArgs(ProblemDocument, "xyz");
+      document.setSavedLastHistoryEntryId("loaded");
       addHistoryEntry(document, "e1");
-      renderHook(() => useDocumentSyncToFirebase(user, fb, firestore, document));
-      expect(document.savedLastHistoryEntryId).toBeUndefined();
+      renderHook(() => useDocumentSyncToFirebase(user, fb, firestore, document, false, onContentSaved));
+      expect(onContentSaved).not.toHaveBeenCalled();
 
       document.content?.addTile("text");
       jest.runAllTimers();
-      await waitFor(() => expect(document.savedLastHistoryEntryId).toBe("e1"));
+      await waitFor(() => expect(onContentSaved).toHaveBeenCalledWith(document, "e1"));
       expect(contentUpdates().map(value => value.lastHistoryEntryId)).toEqual(["e1"]);
+      expect(document.savedLastHistoryEntryId).toBe("loaded");
     });
 
-    it("leaves the saved history entry id unchanged when a content save fails", async () => {
+    it("reports nothing when a content save fails", async () => {
       mockUpdate.mockImplementationOnce(() => Promise.reject("No save for you!"));
+      const onContentSaved = jest.fn();
       const { user, fb, firestore, document } = specArgs(ProblemDocument, "xyz");
-      document.setSavedLastHistoryEntryId("e0");
       addHistoryEntry(document, "e1");
-      renderHook(() => useDocumentSyncToFirebase(user, fb, firestore, document));
+      renderHook(() => useDocumentSyncToFirebase(user, fb, firestore, document, false, onContentSaved));
 
       await jestSpyConsole("warn", async spy => {
         document.content?.addTile("text");
         await waitFor(() => expect(spy).toHaveBeenCalledTimes(1));
         expect(contentUpdates().map(value => value.lastHistoryEntryId)).toEqual(["e1"]);
-        expect(document.savedLastHistoryEntryId).toBe("e0");
+        expect(onContentSaved).not.toHaveBeenCalled();
         jest.runAllTimers();
         await waitFor(() => expect(contentUpdates()).toHaveLength(2));
       });
@@ -766,9 +769,10 @@ describe("useDocumentSyncToFirebase hook", () => {
         }
       }));
       try {
+        const onContentSaved = jest.fn();
         const { user, fb, firestore, document } = specArgs(ProblemDocument, "xyz");
         addHistoryEntry(document, "e0");
-        renderHook(() => useDocumentSyncToFirebase(user, fb, firestore, document));
+        renderHook(() => useDocumentSyncToFirebase(user, fb, firestore, document, false, onContentSaved));
 
         document.content?.addTile("text");
         document.content?.addTile("text");
@@ -776,13 +780,13 @@ describe("useDocumentSyncToFirebase hook", () => {
         addHistoryEntry(document, "e2");
         await waitFor(() => expect(contentUpdates()).toHaveLength(1));
         expect(contentUpdates()[0].lastHistoryEntryId).toBe("e0");
-        await waitFor(() => expect(document.savedLastHistoryEntryId).toBe("e0"));
+        await waitFor(() => expect(onContentSaved).toHaveBeenLastCalledWith(document, "e0"));
 
         jest.runAllTimers();
         await waitFor(() => expect(contentUpdates()).toHaveLength(2));
         const latestId = (document.treeManagerAPI as TreeManagerType).latestDocumentHistoryEntry?.id;
         expect(contentUpdates()[1].lastHistoryEntryId).toBe(latestId);
-        await waitFor(() => expect(document.savedLastHistoryEntryId).toBe(latestId));
+        await waitFor(() => expect(onContentSaved).toHaveBeenLastCalledWith(document, latestId));
       } finally {
         mockUseMutation.mockImplementation(synchronous);
       }

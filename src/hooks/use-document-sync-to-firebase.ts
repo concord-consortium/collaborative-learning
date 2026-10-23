@@ -41,7 +41,8 @@ export function useDocumentSyncToFirebase(
   firebase: Firebase,
   firestore: Firestore,
   document: DocumentModelType,
-  readOnly = false
+  readOnly = false,
+  onContentSaved?: (document: DocumentModelType, lastHistoryEntryId: string) => void
 ) {
   const { key, type, uid, contentStatus } = document;
   const { content: contentPath, metadata, typedMetadata } = firebase.getDocumentPaths(user, document);
@@ -239,7 +240,7 @@ export function useDocumentSyncToFirebase(
       debugLog(`DEBUG: Updated document content for ${type} document ${key}:`, document.changeCount);
       const seq = context?.seq ?? 0;
       if (seq > savedSeqRef.current) savedSeqRef.current = seq;
-      if (lastHistoryEntryId) document.setSavedLastHistoryEntryId(lastHistoryEntryId);
+      if (lastHistoryEntryId) onContentSaved?.(document, lastHistoryEntryId);
       // Only signal "saved" when no newer changes are pending.
       if (savedSeqRef.current === dirtySeqRef.current) {
         document.setSaveState(SaveState.Saved);
