@@ -11,7 +11,7 @@
 // README.md in this directory.
 //
 // PROTOCOL: the board speaks the CC Device Protocol (see
-// src/plugins/dataflow-tool/serial-protocols.md). One ASCII line per message, ending "\r\n"
+// src/plugins/dataflow/docs/serial-protocols.md). One ASCII line per message, ending "\r\n"
 // from the board and "\n" or "\r\n" from the host; any line may end in "*hh", the XOR of
 // every byte before the "*" as two hex digits. The board puts one on every line it writes and
 // checks one on every line it reads, accepting a line without one.

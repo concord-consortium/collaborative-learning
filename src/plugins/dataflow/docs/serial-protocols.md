@@ -351,7 +351,7 @@ From `src/plugins/dataflow/firmware/spikerbit-clue.ts`:
 - P8 and P9 are held low to put the Spiker:bit's analog front end in EMG mode.
 
 The design and the reasoning behind it are recorded in
-[the design spec](../../../docs/superpowers/specs/2026-10-20-clue-728-spikerbit-firmware-protocol-design.md).
+[the design spec](../../../../docs/superpowers/specs/2026-10-20-clue-728-spikerbit-firmware-protocol-design.md).
 
 ## What `keyValue` and `radioHub` don't do
 

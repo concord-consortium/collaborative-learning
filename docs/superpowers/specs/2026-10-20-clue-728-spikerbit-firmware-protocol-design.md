@@ -7,7 +7,7 @@ this story (the "connection stopped" display and the "Is it alive?" button) is d
 separately; it builds on the connect pane CLUE-716 added.
 
 The current wire protocols are documented in
-[serial-protocols.md](../../../src/plugins/dataflow-tool/serial-protocols.md). Read it first.
+[serial-protocols.md](../../../src/plugins/dataflow/docs/serial-protocols.md). Read it first.
 
 ## Why
 
@@ -293,7 +293,7 @@ with `err #n unknown`.
 ### Worked example: the radio hub
 
 A test of whether the protocol can grow without a new version: the radio-hub micro:bit
-setup (see `radioHub` in [serial-protocols.md](../../../src/plugins/dataflow-tool/serial-protocols.md))
+setup (see `radioHub` in [serial-protocols.md](../../../src/plugins/dataflow/docs/serial-protocols.md))
 could move to this protocol later using only the rules above. It isn't part of CLUE-728.
 
 | radioHub needs | Today | CC Device Protocol |
@@ -493,7 +493,7 @@ back and forth between those two builds reflashes it each time.
 
 ## Docs to update with the firmware
 
-- [serial-protocols.md](../../../src/plugins/dataflow-tool/serial-protocols.md): a section on
+- [serial-protocols.md](../../../src/plugins/dataflow/docs/serial-protocols.md): a section on
   the new protocol.
 - The firmware [README](../../../src/plugins/dataflow/firmware/README.md) and the header
   comment in `spikerbit-clue.ts`, which both describe the v3 protocol.

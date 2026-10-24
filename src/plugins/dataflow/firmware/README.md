@@ -6,7 +6,7 @@ on P0. The DataFlow tile flashes it automatically over WebUSB (via
 `@microbit/microbit-connection`) when a connected micro:bit is not already running it.
 
 It speaks the CC Device Protocol, described in
-[`serial-protocols.md`](../../dataflow-tool/serial-protocols.md): one text line per message,
+[`serial-protocols.md`](../docs/serial-protocols.md): one text line per message,
 each ending in an XOR checksum (`*hh`). `?` gets a `hello` line naming the protocol and the
 firmware version, which is how Dataflow decides whether to flash. `open session:<id>` starts a
 session that sends an `emg:<value>` reading every 100 ms and ends on `close`, or when no
