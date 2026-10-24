@@ -11,10 +11,10 @@
 // README.md in this directory.
 //
 // PROTOCOL: the board speaks the CC Device Protocol (see user-guide.md in this directory,
-// and src/plugins/dataflow/docs/serial-protocols.md for the protocol itself). One ASCII line per message, ending "\r\n"
-// from the board and "\n" or "\r\n" from the host; any line may end in "*hh", the XOR of
-// every byte before the "*" as two hex digits. The board puts one on every line it writes and
-// checks one on every line it reads, accepting a line without one.
+// and src/plugins/dataflow/docs/serial-protocols.md for the protocol itself). One ASCII line
+// per message, ending "\r\n" from the board and "\n" or "\r\n" from the host; any line may
+// end in "*hh", the XOR of every byte before the "*" as two hex digits. The board puts one on
+// every line it writes and checks one on every line it reads, accepting a line without one.
 //   - "?" answers with the HELLO line below, in any state.
 //   - "open session:<id> [timeout:<ms>]" starts a session, which streams "emg:<int>" every
 //     100 ms until "close session:<id>", or until no "ping session:<id>" has arrived for the
@@ -134,7 +134,7 @@ const HEX_DIGITS = "0123456789ABCDEF"
 
 /**
  * @display Waiting
- * Shown at power-up, when a session ends, and when free-run stops. The board is idle and nothing has spoken to it since.
+ * Shown at power-up, when a session ends, and when free-run stops. The board is idle and no `?` has arrived since.
  */
 const WAITING_ICON = IconNames.Asleep
 /**
@@ -144,7 +144,7 @@ const WAITING_ICON = IconNames.Asleep
 const FOUND_ICON = IconNames.Surprised
 /**
  * @display Connected
- * Shown for 3 seconds after `open` starts a session. The display is then cleared and stays blank for the rest of the session.
+ * Shown for 3 seconds after `open` starts a session. The display is then cleared and stays blank for the rest of the session, unless an `identify` arrives.
  */
 const CONNECTED_ICON = IconNames.Yes
 /**

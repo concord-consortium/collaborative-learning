@@ -112,7 +112,7 @@ nothing.
 
 ## Commands
 
-Any command can end in `#n`, which adds an `ok #n` to its reply. Any line can also get
+Any command but `?` can end in `#n`, which adds an `ok #n` to its reply. Any line can also get
 `err unknown`, `err checksum` or `err value` for the reasons in [Errors](#errors).
 
 | Command | What it does | Replies |
@@ -123,7 +123,7 @@ Any command can end in `#n`, which adds an `ok #n` to its reply. Any line can al
 | `ping` | A liveness check, in any state. It touches no session. | `ok #n` (nothing without `#n`) |
 | `close session:<id>` | Ends the session with that id at once. | `ok #n`, or `err value`, `err nosession` or `err othersession` |
 | `identify` | Shows the identify icon and plays a short sound, in any state, to draw attention to the board. | `ok #n` |
-| `servo:<angle>` | Sets the servo on P0, in any state. The angle may have a sign and a fraction; it is rounded and clamped to 0–180. | `ok #n`, or `err value` |
+| `servo:<angle>` | Sets the servo on P0, in any state. The angle is a number with an optional leading `-` and an optional fraction with digits on both sides of the `.` (`90`, `-5`, `45.5`); it is rounded and clamped to 0–180. | `ok #n`, or `err value` |
 | `stream` | Starts free-run from idle. In free-run it changes nothing. | `ok #n`, or `err insession` |
 | `stop` | Stops free-run, back to idle. In idle it changes nothing. | `ok #n`, or `err insession` |
 
@@ -153,7 +153,7 @@ it. `ok` and `err` lines contain no `:`, so plotters skip them.
 | --- | --- | --- |
 | `checksum` | The line's `*hh` doesn't match its contents, or isn't two hex digits. Sent without `#n`, since the line's `#n` can't be trusted. | any line |
 | `unknown` | A command the board doesn't know, or a `name:value` (or a bare word) the command doesn't take, such as `stream servo:90`. | any line |
-| `value` | A value the board can't use. | `open` with a missing or out-of-range `session` or `timeout`; `ping session:` or `close session:` with an id that isn't a whole number in range; `servo:` with a value that isn't a number; and any line whose `#` isn't followed by digits (sent without `#n`) |
+| `value` | A value the board can't use. | `open` with a missing or out-of-range `session`, or a `timeout` that isn't a whole number in range; `close` with no `session`; `ping session:` or `close session:` with an id that isn't a whole number in range; `servo:` with a value that isn't a number in the form above (`+90`, `.5` and `90.` are not); and any line whose `#` isn't followed by digits (sent without `#n`) |
 | `insession` | Not allowed during a session. | `stream`, `stop` |
 | `nosession` | No session is running, for example because it timed out. The host must `open` again. | `ping session:<id>`, `close session:<id>` |
 | `othersession` | A session with a different id is running. Nothing changes, so a stale or second host can't keep alive or close a session it doesn't own. | `ping session:<id>`, `close session:<id>` |
@@ -181,9 +181,9 @@ it. `ok` and `err` lines contain no `:`, so plotters skip them.
 <!-- Generated from spikerbit-clue.ts by npm run build:firmware. Edit the comments there, not this section. -->
 | Display | When it shows |
 | --- | --- |
-| <img src="guide-images/display-waiting.svg" alt="Waiting icon" width="160"><br>**Waiting** | Shown at power-up, when a session ends, and when free-run stops. The board is idle and nothing has spoken to it since. |
+| <img src="guide-images/display-waiting.svg" alt="Waiting icon" width="160"><br>**Waiting** | Shown at power-up, when a session ends, and when free-run stops. The board is idle and no `?` has arrived since. |
 | <img src="guide-images/display-found.svg" alt="Found icon" width="160"><br>**Found** | Shown after a `?` arrives while idle: a host has found the board but hasn't opened a session. If it stays, Dataflow's version check or flashing didn't finish. |
-| <img src="guide-images/display-connected.svg" alt="Connected icon" width="160"><br>**Connected** | Shown for 3 seconds after `open` starts a session. The display is then cleared and stays blank for the rest of the session. |
+| <img src="guide-images/display-connected.svg" alt="Connected icon" width="160"><br>**Connected** | Shown for 3 seconds after `open` starts a session. The display is then cleared and stays blank for the rest of the session, unless an `identify` arrives. |
 | <img src="guide-images/display-identify.svg" alt="Identify icon" width="160"><br>**Identify** | Shown for 3 seconds after `identify`, in any state, along with a short sound on a micro:bit V2. The display then goes back to what the state calls for. |
 | <img src="guide-images/display-streaming.svg" alt="Streaming icon" width="160"><br>**Streaming** | Shown in free-run, which `stream` or a long press of button A starts. |
 <!-- end generated: displays -->
@@ -217,7 +217,7 @@ a sound.
 | P8, P9 | Held low, to put the Spiker:bit's analog front end in EMG mode |
 | Button A | A long press starts or stops free-run (see [States](#states)) |
 
-The firmware uses no other pins. The [README](README.md#spikerbit-hardware-reference-pinout--power)
+Apart from the pins the LED display and buttons use, the firmware uses no other pins. The [README](README.md#spikerbit-hardware-reference-pinout--power)
 lists the Spiker:bit's full pinout, including the free P2.
 
 ## Driving it from your own app
@@ -226,8 +226,9 @@ Any program that can open the micro:bit's serial port at 115200 baud can drive t
 host does this:
 
 1. **Send `?` and check the `hello` line:** `protocol:CCDeviceProtocol`, `version:1` and
-   `device:spikerbit`. Send this `?` without a checksum, so firmware older than version 4,
-   which answers only a bare `?`, still replies and can be recognized.
+   `device:spikerbit`. Send this `?` without a checksum, so firmware older than version 4
+   (it answers `?` with `CLUE-SPIKERBIT v<N>`), which answers only a bare `?`, still replies and can
+   be recognized.
 2. **Send `open session:<id> #n` with a random id,** and send it again if no `ok #n` arrives.
    Dataflow retries every 2 seconds.
 3. **Send `ping session:<id> #n` every second,** well inside the default timeout in
