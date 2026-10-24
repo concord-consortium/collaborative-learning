@@ -1,26 +1,11 @@
 # Spiker:bit DataFlow firmware
 
-`spikerbit-clue.hex` is a universal micro:bit hex (V1+V2) authored in MakeCode. It
-reads the Spiker:bit's EMG signal, sends its envelope over USB serial, and drives a servo
-on P0. The DataFlow tile flashes it automatically over WebUSB (via
-`@microbit/microbit-connection`) when a connected micro:bit is not already running it.
+What the firmware does, its commands, its LED displays and how to try it on a board are in the
+[user guide](user-guide.md). This page is for developers changing the firmware.
 
-It speaks the CC Device Protocol, described in
-[`serial-protocols.md`](../docs/serial-protocols.md): one text line per message,
-each ending in an XOR checksum (`*hh`). `?` gets a `hello` line naming the protocol and the
-firmware version, which is how Dataflow decides whether to flash. `open session:<id>` starts a
-session that sends an `emg:<value>` reading every 100 ms and ends on `close`, or when no
-`ping session:<id>` has arrived for its timeout (5 s unless `open` asks for another).
-`stream` and `stop` turn the same readings on and off without a session, for a plotter or a
-terminal, and so does a long press of button A, outside a session. `identify` shows an icon and
-plays a short sound on the built-in speaker (a V1 has no speaker, so it only shows the icon).
-`servo:<angle>` sets the servo. A trailing `#n` asks for an `ok #n` reply, and errors are sent
-either way.
-
-The LED display shows how far a connection got: a waiting icon at power-up and after a session
-ends, a "found" icon once Dataflow has sent `?`, a connected icon for 3 s after `open`, then
-nothing for the rest of the session, and a streaming icon in free-run. `serial-protocols.md`
-lists the icons.
+`spikerbit-clue.hex` is a universal micro:bit hex (V1+V2) authored in MakeCode. The DataFlow
+tile flashes it automatically over WebUSB (via `@microbit/microbit-connection`) when a
+connected micro:bit is not already running it.
 
 **The board is silent until it is spoken to.** It sends no startup banner and no readings
 until a session or `stream` starts them, so a board nobody is talking to doesn't fill the USB
@@ -70,6 +55,15 @@ Behavior changes still need a bench test on real hardware; the checks only prove
 was built from the source. `npm run bench:spikerbit -- --flash` flashes a
 plugged-in board and checks its protocol replies (see [`scripts/spikerbit-bench/`](../../../../scripts/spikerbit-bench/)).
 
+### The user guide
+
+`npm run build:firmware` also regenerates the marked sections of
+[`user-guide.md`](user-guide.md) (the LED displays and the timing and limits) and the board
+pictures in `guide-images/`. They come from the `@display` and `@guide` comments in
+`spikerbit-clue.ts`, so edit those comments, not the sections. `npm run check:firmware` and the
+`CI Firmware` workflow fail when the committed sections or pictures are stale. Everything
+outside the `<!-- generated: ... -->` markers is written by hand.
+
 ### Prototyping in the MakeCode editor
 
 Importing `spikerbit-clue.hex` into <https://makecode.microbit.org> opens its embedded source.
@@ -84,46 +78,6 @@ Change `pxt-core` and `pxt-microbit` in `scripts/spikerbit-firmware/package.json
 (exact versions; the micro:bit target's `package.json` names the `pxt-core` it was built
 with), run `npm --prefix scripts/spikerbit-firmware install`, rebuild, and bench test. The
 build records the versions in the hex itself.
-
-## Talking to the board by hand
-
-Every command can be typed, so a serial terminal is the quickest way to try the firmware on a
-board. [serialterminal.com](https://serialterminal.com) works well: it runs in Chrome or Edge
-(it uses Web Serial), and it sends a whole line at a time, so typing mistakes can be fixed
-before sending.
-
-1. Close anything else using the board, such as a connected Dataflow tab. Only one program can
-   have the port open.
-2. Set the baud rate to **115200** and connect, picking the micro:bit in the browser's list.
-3. Leave "send with /n" checked. The firmware ignores the `\r` that "send with \r" adds.
-4. Type a command and press Enter. Checksums are optional when typing, for example:
-
-```
-?
-open session:7 timeout:60000 #1
-servo:90
-identify #2
-close session:7 #3
-```
-
-`npm run bench:spikerbit` checks every command's reply automatically (see
-[`scripts/spikerbit-bench/`](../../../../scripts/spikerbit-bench/)).
-
-### Plotting readings in MakeCode
-
-The MakeCode editor can plot the EMG readings, because each one is a `name:value` line. Its
-plotter button only appears once the board sends data, and the board is silent until it's
-spoken to, so start free-run first.
-
-1. Close anything else using the board, as above.
-2. Open any project at [makecode.microbit.org](https://makecode.microbit.org) (not the home
-   page) and pair the board with **Connect device**. Don't download the project to the board:
-   that replaces this firmware.
-3. Long-press button A until the streaming icon shows.
-4. Click **Show data Device** under the simulator (some MakeCode versions call it **Show console
-   Device**). It appears within a second or two of the first reading.
-
-Long-press button A again to stop the readings.
 
 ## Testing the firmware in Jest
 

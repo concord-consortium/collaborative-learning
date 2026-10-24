@@ -125,13 +125,17 @@ For example `ca11`: hub A, relay 1, on. Built by `writeToOutForMicroBitRelayHub`
 
 ## CC Device Protocol
 
-A line protocol for Concord devices, spoken by the Spiker:bit firmware from version 4. On the
-wire its name is `CCDeviceProtocol`; in Dataflow's `DeviceProtocol` union it is `ccDevice`.
-This is protocol version 1. Every command can be typed by hand in a serial terminal at
-115200 baud, and readings plot in the MakeCode and Arduino IDE serial plotters.
+A line protocol for Concord devices. On the wire its name is `CCDeviceProtocol`; in Dataflow's
+`DeviceProtocol` union it is `ccDevice`. This is protocol version 1. Every command can be typed
+by hand in a serial terminal, and readings plot in the MakeCode and Arduino IDE serial
+plotters.
+
+This section describes what every device and host must agree on. Each device adds its own
+commands, outputs and states on top, and documents them; for the Spiker:bit, see
+[The Spiker:bit firmware](#the-spikerbit-firmware).
 
 The host code is `src/models/stores/cc-device-protocol.ts` (parsing and checksums) and
-`src/models/stores/cc-device-session.ts` (the session). The device code is
+`src/models/stores/cc-device-session.ts` (the session). The Spiker:bit's device code is
 `src/plugins/dataflow/firmware/spikerbit-clue.ts`.
 
 A connection, with the checksums written out:
@@ -200,11 +204,16 @@ changing the version. The version changes only for an incompatible change.
 
 ### States
 
+Every device has these two states:
+
 | State | Entered by | Behavior |
 |---|---|---|
-| **Idle** | power-up; a session ending; `stop` or a long press in free-run | Sends nothing unless asked. Answers commands. |
+| **Idle** | power-up; a session ending | Sends nothing unless asked. Answers commands. |
 | **Session** | `open` | Streams readings. Ends on `close`, or when no `ping` carrying its session id has arrived for the session timeout. |
-| **Free-run** | `stream`, or a long press of button A, from idle | Streams readings with no keepalive, for plotters and terminals. |
+
+A device may add states of its own outside a session. The Spiker:bit's free-run, for example,
+streams readings with no keepalive, for plotters and terminals; its
+[user guide](../firmware/user-guide.md#states) describes it.
 
 - The device starts idle and sends nothing, not even a startup banner, until it is spoken to.
   The micro:bit's USB interface chip holds about 1 KB of output when nobody reads it, so
@@ -219,36 +228,34 @@ changing the version. The version changes only for an incompatible change.
 - If a session with a different id is running, a `ping` or `close` with the old id gets
   `err #n othersession` and changes nothing, so a stale host (an old page's timer, or a
   second host) can't keep alive or close a session it doesn't own.
-- An `open` in free-run starts a session; when it ends, the device goes to idle. An `open`
-  during a session starts a fresh one, with settings back to their defaults.
-- `stream`, `stop` and the long press do nothing during a session (`stream` and `stop` reply
-  `err #n insession`), so a student pressing buttons during a Dataflow program changes
+- An `open` in a device's own state starts a session; when it ends, the device goes to idle.
+  An `open` during a session starts a fresh one, with settings back to their defaults.
+- A command the device doesn't allow during a session gets `err #n insession` and changes
   nothing.
-- When a session ends, readings stop, every setting returns to its default, any sound stops,
-  and the display shows the waiting icon. The servo keeps its position.
+- When a session ends, readings stop and every setting returns to its default. What else
+  changes, such as the display, is up to the device.
 
 ### Commands and replies
 
 | Host sends | Device does | Reply |
 |---|---|---|
 | `?` | Identifies itself, in any state. Changes nothing. | the `hello` line |
-| `open session:<id> [timeout:<ms>] [#n]` | Starts a session with that id. `session` is required. `timeout` is how long the session lasts without a `ping`: default 5000, allowed 1000–60000. | `ok #n`, or `err #n value` for a missing or out-of-range value |
+| `open session:<id> [timeout:<ms>] [#n]` | Starts a session with that id. `session` is required. `timeout` is how long the session lasts without a `ping`; the device's documentation gives its default and the range it accepts. | `ok #n`, or `err #n value` for a missing or out-of-range value |
 | `ping session:<id> [#n]` | Extends the session with that id. | `ok #n`, or `err #n nosession` / `err #n othersession` |
 | `ping #n` | A liveness check only, in any state. Without `#n` it does nothing. | `ok #n` |
 | `close session:<id> [#n]` | Ends that session at once. | `ok #n`, or `err #n nosession` / `err #n othersession` |
-| `identify [#n]` | Shows the identify icon and plays a short sound, in any state, to draw attention to the device. | `ok #n` |
-| `servo:<angle> [#n]` | Sets the servo on P0. The angle may have a sign and a fraction; it is rounded and clamped to 0–180. | `ok #n`, or `err #n value` |
-| `stream [#n]` | Idle → free-run. | `ok #n`, or `err #n insession` |
-| `stop [#n]` | Free-run → idle. | `ok #n`, or `err #n insession` |
+| `identify [#n]` | Optional: a device may support it. Draws attention to the device, in any state, for example with an icon or a sound. A device without it answers `err #n unknown`. | `ok #n` |
+
+Every device answers `?`, `open`, `ping` and `close`. A device adds its own commands and
+outputs, such as the Spiker:bit's `servo`, `stream` and `stop`; see its documentation.
 
 `ok #n` is sent only when the command had a `#n`. Only `open`, `ping` and `close` carry the
 session id; outputs such as `servo` don't, since they are sent on every tick and the
 transports allow one host at a time.
 
-**Readings:** `emg:<int>`, the smoothed EMG envelope, every 100 ms in a session and in
-free-run. One reading per line, so both serial plotters plot it: MakeCode reads only the
-first `name:value` on a line, and the Arduino IDE ignores the `*hh` after the number. Reply
-lines contain no `:`, so neither plots them.
+**Readings:** one `name:value` reading per line, so both serial plotters plot it: MakeCode
+reads only the first `name:value` on a line, and the Arduino IDE ignores the `*hh` after the
+number. Reply lines contain no `:`, so neither plots them.
 
 **Replies:**
 
@@ -256,13 +263,15 @@ lines contain no `:`, so neither plots them.
   been applied.
 - `err [#n] <reason>`, sent even without `#n` so a person typing in a terminal sees it. The
   reasons are `checksum`, `unknown` (a verb or name the device doesn't know), `value` (a
-  value it can't use), `insession` (not allowed during a session), `nosession` (no session is
-  running) and `othersession` (a session with a different id is running).
+  value it can't use), `insession` (a command the device doesn't allow during a session),
+  `nosession` (no session is running) and `othersession` (a session with a different id is
+  running).
 - A line is checked as a whole before any of it is applied, so one bad value on a line with
   several assignments changes nothing.
 
 **The `hello` line** names the protocol (`protocol:CCDeviceProtocol`), its version
-(`version:1`), the device (`device:spikerbit`) and its firmware build (`firmware:4`).
+(`version:1`), the device (`device:<name>`, such as `device:spikerbit`) and its firmware build
+(`firmware:<n>`).
 `firmware` changes with every firmware release, which is how Dataflow keeps boards up to
 date; `version` changes only for an incompatible protocol change.
 
@@ -270,10 +279,9 @@ date; `version` changes only for an incompatible protocol change.
 
 - Dataflow sends `ping session:<id> #n` every 1 s during a session, and re-sends an
   unanswered `open` every 2 s.
-- The device ends a session after its timeout without a `ping` carrying its id: 5 s unless
-  `open` asks for another value (1000–60000 ms).
-- Readings come every 100 ms.
-- The connected and identify icons show for 3 s.
+- A device's own timeouts and intervals, such as its default session timeout, the range
+  `open` accepts and how often it sends readings, are in its documentation. The Spiker:bit's
+  are in [its user guide](../firmware/user-guide.md#timing-and-limits).
 
 Chrome slows timers in hidden tabs, so a session can lapse while its tab is hidden. That is
 recoverable: the next `ping` gets `err nosession`, and Dataflow opens a new session.
@@ -324,33 +332,10 @@ stamps its `lastMessageReceivedAt`; other lines are ignored.
 
 ### The Spiker:bit firmware
 
-From `src/plugins/dataflow/firmware/spikerbit-clue.ts`:
-
-| Display | Shown when |
-|---|---|
-| Waiting (`Asleep`) | power-up, a session ending, or leaving free-run |
-| Found (`Surprised`) | a `?` while idle: Dataflow saw the board but hasn't opened a session. If it stays, look at the version check and flashing. |
-| Connected (`Yes`) | `open`, for 3 s; then the display is cleared |
-| Identify (`Heart`) | `identify`, for 3 s; then the display goes back to what the state calls for |
-| Streaming (`Chessboard`) | free-run |
-
-- After the connected icon clears, the firmware doesn't touch the display until the session
-  ends or an `identify` arrives.
-- `identify` plays the `hello` sound on the built-in speaker only. The edge-pin audio output is
-  turned off at startup, because P0 drives the servo and the sound would make it twitch. A
-  micro:bit V1 has no speaker, so there it shows the icon without a sound; the hex stays
-  universal (V1 and V2).
-- **Button A:** a long press (held for a second or more) switches between idle and free-run,
-  like `stream` and `stop`, and does nothing during a session. A click does nothing.
-- A background fiber samples P1 as fast as the scheduler allows (measured at 250 Hz on a V2)
-  and keeps the smoothed envelope. The output loop reports the latest value every 100 ms.
-- **All serial writes happen in the `basic.forever` loop.** The input handler parses and
-  applies a line and queues its reply, so a reply can never land inside a reading.
-- `serial.setWriteLinePadding(0)` turns off MakeCode's default padding of each line to 32
-  bytes, and the receive buffer is 128 characters, enough for the longest command.
-- P8 and P9 are held low to put the Spiker:bit's analog front end in EMG mode.
-
-The design and the reasoning behind it are recorded in
+The Spiker:bit firmware is the first device to speak the protocol. Its commands, displays and
+timing are in its [user guide](../firmware/user-guide.md), and its internals in the header of
+[`spikerbit-clue.ts`](../firmware/spikerbit-clue.ts). The design and the reasoning behind it
+are recorded in
 [the design spec](../../../../docs/superpowers/specs/2026-10-20-clue-728-spikerbit-firmware-protocol-design.md).
 
 ## What `keyValue` and `radioHub` don't do
