@@ -4,8 +4,8 @@ import { decompress } from "lzma";
 import { kSpikerbitFirmwareVersion } from "./spikerbit-device";
 
 // Guards against the committed firmware artifacts drifting out of sync:
-//  - the MakeCode source's VERSION vs kSpikerbitFirmwareVersion (pure source),
-//  - the compiled .hex vs that version, and
+//  - the firmware version in the MakeCode source's HELLO line vs kSpikerbitFirmwareVersion,
+//  - the compiled .hex vs that HELLO line, and
 //  - the source MakeCode embedded in the .hex vs spikerbit-clue.ts, which fails when the
 //    source changed but the hex wasn't rebuilt with `npm run build:firmware`.
 // The files are read from disk (not imported) so the .hex isn't the Jest fileMock stub.
@@ -22,11 +22,17 @@ const hexPath = path.join(firmwareDir, "spikerbit-clue.hex");
 // metadata, then the LZMA-compressed project.
 const kSourceEmbedMagic = new Uint8Array([0x41, 0x14, 0x0E, 0x2F, 0xB8, 0x2F, 0xA2, 0xBB]);
 
-// Extract N from `const VERSION = "CLUE-SPIKERBIT vN"` in the MakeCode source.
+// The identification line, from `const HELLO = "..."` in the MakeCode source.
+function helloFromSource(): string {
+  const match = /const HELLO = "([^"]+)"/.exec(fs.readFileSync(sourcePath, "utf8"));
+  if (!match) throw new Error("Could not find HELLO in spikerbit-clue.ts");
+  return match[1];
+}
+
+// N from the `firmware:N` field of the HELLO line.
 function versionFromSource(): number {
-  const src = fs.readFileSync(sourcePath, "utf8");
-  const match = /VERSION = "CLUE-SPIKERBIT v(\d+)"/.exec(src);
-  if (!match) throw new Error("Could not find VERSION in spikerbit-clue.ts");
+  const match = /firmware:(\d+)/.exec(helloFromSource());
+  if (!match) throw new Error("HELLO in spikerbit-clue.ts has no firmware field");
   return Number(match[1]);
 }
 
@@ -47,8 +53,8 @@ function hexRecordBytes(hex: string, recordTypes: string[]): Buffer {
   return Buffer.from(bytes);
 }
 
-// The program bytes as a latin1 string, so embedded ASCII string literals (like the version
-// banner) can be searched. MakeCode stores string literals as plain ASCII in the image.
+// The program bytes as a latin1 string, so embedded ASCII string literals (like the HELLO
+// line) can be searched. MakeCode stores string literals as plain ASCII in the image.
 function decodeHexData(): string {
   return hexRecordBytes(fs.readFileSync(hexPath, "utf8"), ["00"]).toString("latin1");
 }
@@ -71,13 +77,17 @@ function embeddedProjectFiles(hex: string): Record<string, string> {
 }
 
 describe("Spiker:bit firmware consistency", () => {
-  it("VERSION in the MakeCode source matches kSpikerbitFirmwareVersion", () => {
+  it("the firmware version in the MakeCode source's HELLO matches kSpikerbitFirmwareVersion", () => {
     expect(versionFromSource()).toBe(kSpikerbitFirmwareVersion);
   });
 
-  it("the committed hex embeds the current firmware version string", () => {
+  it("the committed hex embeds the current HELLO line", () => {
     // Fails if the .hex wasn't rebuilt after the source/version changed.
-    expect(decodeHexData()).toContain(`CLUE-SPIKERBIT v${kSpikerbitFirmwareVersion}`);
+    expect(decodeHexData()).toContain(helloFromSource());
+  });
+
+  it("the firmware never sends the legacy banner text", () => {
+    expect(fs.readFileSync(sourcePath, "utf8")).not.toContain("CLUE-SPIKERBIT v");
   });
 
   it("the committed hex embeds spikerbit-clue.ts as its main.ts", () => {
