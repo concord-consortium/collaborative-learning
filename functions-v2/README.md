@@ -24,6 +24,37 @@ the `deploy:` scripts target, so `getAiContent` is called as `getAiContent_v2`.
 |_generateClassData_|Callable. Rebuilds a class-and-unit data doc on demand, which in turn triggers _onClassDataDocWritten_. The daily scheduled task normally does this; the callable exists so development and testing don't have to wait for it|
 |_getAiContent_|Callable. Generates tile content from an LLM, given a client-supplied prompt plus the current summary of the class's work. Caches the response until the prompt or the summary changes|
 |_chatTutorOnWrite_|Answers the AI chat tutor. Watches each conversation's `messages` subcollection, and on a student message assembles the context, calls OpenAI, and writes the assistant's reply back|
+|_clueExport_|HTTPS. Serves CLUE documents, their history and their content to report-server's CLUE document export, one page per POST. Read-only and gated by a bearer; see [clueExport](#clueexport)|
+
+## clueExport
+
+report-server's CLUE document export (`/api/v1/reports/:id/clue/documents`, `/clue/history` and
+`/clue/content`) reads CLUE's stores through this function, since report-server has no access to
+them. report-server decides which owners a run covers; the function only walks the owners it is
+sent, one page per POST, and answers `owners` with the group owners of a class's offerings.
+
+- **Bearer.** Every request carries `Authorization: Bearer <token>`, checked against the
+  `CLUE_EXPORT_BEARER` secret in constant time. A bearer sent as a query or body value is refused.
+  The secret is shared with report-server's `CLUE_EXPORT_TOKEN` (the stack's `ClueExportToken`
+  parameter) and nothing else. The function is deployed with a public invoker, so the bearer is the
+  only gate.
+- **Portals.** `CLUE_EXPORT_PORTALS` lists the portal hosts each project answers for (see
+  `.env.example`). A request for any other portal is refused.
+- **Read-only.** It runs as the service account `clue-export-reader@<project>.iam.gserviceaccount.com`,
+  which holds only `roles/datastore.viewer`, `roles/firebasedatabase.viewer` and
+  `roles/secretmanager.secretAccessor` on `CLUE_EXPORT_BEARER`, so a write is refused by IAM.
+
+Before the first deploy to a project, create the service account with `roles/datastore.viewer` and
+`roles/firebasedatabase.viewer`, create the secret with a fresh random value, a different one in
+each project (`npx firebase functions:secrets:set CLUE_EXPORT_BEARER --project <project>`), and
+grant the account `roles/secretmanager.secretAccessor` on it. After deploying, check that the
+function runs as `clue-export-reader`.
+
+To call it under the functions emulator, add `CLUE_EXPORT_BEARER=<any value>` to `.secret.local` and
+set `CLUE_EXPORT_PORTALS` in `.env.local` (see `.env.example`).
+
+The request checks run without the emulator (`test/clue-export-request.test.ts`); the walk runs
+against it (`test/clue-export-emulator.test.ts`).
 
 ## Operations
 
