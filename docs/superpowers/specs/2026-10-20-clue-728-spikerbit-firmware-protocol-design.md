@@ -347,7 +347,7 @@ session, so clearing is enough.
 The alive check plays a short sound on the **built-in speaker only**. On a micro:bit V2,
 MakeCode may also send sound to the P0 edge pin, and P0 drives the servo, so the sound could
 make the servo twitch. Turn the P0 audio output off (something like
-`pins.setAudioPinEnabled(false)`), and test on a board with a servo attached. 
+`pins.setAudioPinEnabled(false)`), and test on a board with a servo attached.
 
 **Decision (Claude's call): the hex stays universal (V1 and V2), as it is today.** V1 has no
 built-in speaker, so on a V1 the alive check shows the icon with no sound. If the V2 speaker
