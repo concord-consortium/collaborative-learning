@@ -153,6 +153,11 @@ describe("replaceGuideSections and readGuideSections", () => {
     expect(() => replaceGuideSections(guide, { displays: "x" })).toThrow("values");
   });
 
+  it("throws for two start markers with the same name", () => {
+    const twice = [kStart("displays"), "a", kEnd("displays"), kStart("displays"), "b", kEnd("displays")].join("\n");
+    expect(() => replaceGuideSections(twice, { displays: "x" })).toThrow("two generated sections");
+  });
+
   it("throws for an unclosed start marker", () => {
     const unclosed = `${kStart("displays")}\nold\n`;
     expect(() => replaceGuideSections(unclosed, { displays: "x" })).toThrow("displays");
@@ -162,14 +167,50 @@ describe("replaceGuideSections and readGuideSections", () => {
 describe("the firmware's guide", () => {
   const firmwareDir = path.join(__dirname, "../../plugins/dataflow/firmware");
   const source = fs.readFileSync(path.join(firmwareDir, "spikerbit-clue.ts"), "utf8");
+  const guide = fs.readFileSync(path.join(firmwareDir, "user-guide.md"), "utf8");
 
   it("the committed guide's generated sections match spikerbit-clue.ts", () => {
-    const guide = fs.readFileSync(path.join(firmwareDir, "user-guide.md"), "utf8");
     expect(readGuideSections(guide)).toEqual(renderGuideSections(collectGuideTags(source)));
   });
 
   it("describes the Waiting, Found, Connected, Identify and Streaming displays, in that order", () => {
     expect(collectGuideTags(source).displays.map(display => display.title))
       .toEqual(["Waiting", "Found", "Connected", "Identify", "Streaming"]);
+  });
+
+  it("contains the firmware's hello line", () => {
+    const hello = /const HELLO = "([^"]+)"/.exec(source)?.[1];
+    expect(hello).toBeTruthy();
+    expect(guide).toContain(hello!);
+  });
+
+  it("writes only valid checksums in its code blocks", () => {
+    const codeLines: string[] = [];
+    let inCode = false;
+    for (const line of guide.split("\n")) {
+      if (line.startsWith("```")) inCode = !inCode;
+      else if (inCode) codeLines.push(line);
+    }
+    const checksummed = codeLines
+      .map(line => line.replace(/^(Dataflow|Spiker:bit):\s+/, "").trim())
+      .map(line => /^(.*)\*([0-9A-Fa-f]{2})$/.exec(line))
+      .filter(match => match !== null) as RegExpExecArray[];
+    expect(checksummed.length).toBeGreaterThan(0);
+    for (const [, body, checksum] of checksummed) {
+      let xor = 0;
+      // eslint-disable-next-line no-bitwise
+      for (let i = 0; i < body.length; i++) xor ^= body.charCodeAt(i);
+      expect({ body, checksum: checksum.toUpperCase() })
+        .toEqual({ body, checksum: xor.toString(16).toUpperCase().padStart(2, "0") });
+    }
+  });
+
+  it("states the icon time the firmware uses for the Connected and Identify displays", () => {
+    const { displays, values } = collectGuideTags(source);
+    const iconMs = values.find(value => value.constName === "ICON_MS")!.value;
+    for (const title of ["Connected", "Identify"]) {
+      expect(displays.find(display => display.title === title)!.description)
+        .toContain(`${iconMs / 1000} seconds`);
+    }
   });
 });
