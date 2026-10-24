@@ -71,7 +71,7 @@ function generateGuide() {
 
 function listGuideImages() {
   return fs.existsSync(guideImageDir)
-    ? fs.readdirSync(guideImageDir).map(name => path.join(guideImageDir, name))
+    ? fs.readdirSync(guideImageDir).filter(name => !name.startsWith(".")).map(name => path.join(guideImageDir, name))
     : [];
 }
 

@@ -228,7 +228,7 @@ streams readings with no keepalive, for plotters and terminals; its
 - If a session with a different id is running, a `ping` or `close` with the old id gets
   `err #n othersession` and changes nothing, so a stale host (an old page's timer, or a
   second host) can't keep alive or close a session it doesn't own.
-- An `open` in a device's own state starts a session; when it ends, the device goes to idle.
+- An `open` from a device-specific state (such as the Spiker:bit's free-run) starts a session; when it ends, the device goes to idle.
   An `open` during a session starts a fresh one, with settings back to their defaults.
 - A command the device doesn't allow during a session gets `err #n insession` and changes
   nothing.
@@ -288,8 +288,8 @@ recoverable: the next `ping` gets `err nosession`, and Dataflow opens a new sess
 
 ### Reserved
 
-Defined so that they fit later, and not built yet. Firmware 4 answers them with
-`err #n unknown`.
+Defined so that they fit later, and not built yet. A device that doesn't support one
+answers `err #n unknown`.
 
 - **`caps`**: one `cap` line per sensor and per output, then `ok #n`, something like
   `cap sensor:emg min:0 max:1023 rate:100`. The fields are settled when it is built.

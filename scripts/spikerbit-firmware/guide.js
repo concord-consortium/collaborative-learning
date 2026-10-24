@@ -3,7 +3,8 @@
 const ts = require("typescript");
 
 const kGuideImageDir = "guide-images";
-const kNote = "<!-- Generated from spikerbit-clue.ts by npm run build:firmware. Edit the comments there, not this section. -->";
+const kNote = "<!-- Generated from spikerbit-clue.ts by npm run build:firmware. " +
+  "Edit the comments there, not this section. -->";
 const kStartMarker = /^<!-- generated: (\S+) -->$/;
 const kIconSize = 25;
 
@@ -99,7 +100,7 @@ function displayImageName(display) {
 const escapeCell = text => text.replace(/\|/g, "\\|");
 
 function formatValue(value) {
-  return value >= 1000 ? value.toLocaleString("en-US") : String(value);
+  return value >= 1000 ? String(value).replace(/\B(?=(\d{3})+(?!\d))/g, ",") : String(value);
 }
 
 function renderGuideSections(tags) {
@@ -121,6 +122,7 @@ function findMarkerPairs(lines) {
     const match = kStartMarker.exec(line);
     if (!match) return;
     const name = match[1];
+    if (name in pairs) throw new Error(`The guide has two generated sections named "${name}"`);
     const end = lines.indexOf(`<!-- end generated: ${name} -->`, index + 1);
     if (end < 0) throw new Error(`The generated section "${name}" has no end marker`);
     pairs[name] = { start: index, end };
