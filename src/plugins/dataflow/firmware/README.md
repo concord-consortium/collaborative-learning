@@ -85,6 +85,46 @@ Change `pxt-core` and `pxt-microbit` in `scripts/spikerbit-firmware/package.json
 with), run `npm --prefix scripts/spikerbit-firmware install`, rebuild, and bench test. The
 build records the versions in the hex itself.
 
+## Talking to the board by hand
+
+Every command can be typed, so a serial terminal is the quickest way to try the firmware on a
+board. [serialterminal.com](https://serialterminal.com) works well: it runs in Chrome or Edge
+(it uses Web Serial), and it sends a whole line at a time, so typing mistakes can be fixed
+before sending.
+
+1. Close anything else using the board, such as a connected Dataflow tab. Only one program can
+   have the port open.
+2. Set the baud rate to **115200** and connect, picking the micro:bit in the browser's list.
+3. Leave "send with /n" checked. The firmware ignores the `\r` that "send with \r" adds.
+4. Type a command and press Enter. Checksums are optional when typing, for example:
+
+```
+?
+open session:7 timeout:60000 #1
+servo:90
+identify #2
+close session:7 #3
+```
+
+`npm run bench:spikerbit` checks every command's reply automatically (see
+[`scripts/spikerbit-bench/`](../../../../scripts/spikerbit-bench/)).
+
+### Plotting readings in MakeCode
+
+The MakeCode editor can plot the EMG readings, because each one is a `name:value` line. Its
+plotter button only appears once the board sends data, and the board is silent until it's
+spoken to, so start free-run first.
+
+1. Close anything else using the board, as above.
+2. Open any project at [makecode.microbit.org](https://makecode.microbit.org) (not the home
+   page) and pair the board with **Connect device**. Don't download the project to the board:
+   that replaces this firmware.
+3. Long-press button A until the streaming icon shows.
+4. Click **Show data Device** under the simulator (some MakeCode versions call it **Show console
+   Device**). It appears within a second or two of the first reading.
+
+Long-press button A again to stop the readings.
+
 ## Testing the firmware in Jest
 
 The MakeCode simulator can't receive serial input, and no emulator runs a micro:bit V2 hex,
