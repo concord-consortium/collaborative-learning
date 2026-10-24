@@ -1,3 +1,5 @@
+import fs from "fs";
+import path from "path";
 import {
   collectGuideTags, displayImageName, iconPatterns, readGuideSections, renderGuideSections,
   replaceGuideSections
@@ -154,5 +156,20 @@ describe("replaceGuideSections and readGuideSections", () => {
   it("throws for an unclosed start marker", () => {
     const unclosed = `${kStart("displays")}\nold\n`;
     expect(() => replaceGuideSections(unclosed, { displays: "x" })).toThrow("displays");
+  });
+});
+
+describe("the firmware's guide", () => {
+  const firmwareDir = path.join(__dirname, "../../plugins/dataflow/firmware");
+  const source = fs.readFileSync(path.join(firmwareDir, "spikerbit-clue.ts"), "utf8");
+
+  it("the committed guide's generated sections match spikerbit-clue.ts", () => {
+    const guide = fs.readFileSync(path.join(firmwareDir, "user-guide.md"), "utf8");
+    expect(readGuideSections(guide)).toEqual(renderGuideSections(collectGuideTags(source)));
+  });
+
+  it("describes the Waiting, Found, Connected, Identify and Streaming displays, in that order", () => {
+    expect(collectGuideTags(source).displays.map(display => display.title))
+      .toEqual(["Waiting", "Found", "Connected", "Identify", "Streaming"]);
   });
 });
