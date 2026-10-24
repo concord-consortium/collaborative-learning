@@ -382,6 +382,7 @@ export class FirestoreHistoryManagerConcurrent extends FirestoreHistoryManager {
         if (lastUploaded) {
           this.setExpectedRemoteHead(lastUploaded.id);
         }
+        entriesToUpload.forEach(entry => this.onLocalEntryUploaded?.(entry));
       }
     } finally {
       this.uploadInProgress = false;

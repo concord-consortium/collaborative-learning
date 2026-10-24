@@ -6,7 +6,7 @@ import { Firestore } from "../../lib/firestore";
 import { UserContextProvider } from "../stores/user-context-provider";
 import { getLastHistoryEntry, IFirestoreHistoryEntryDoc, loadHistory } from "./history-firestore";
 import { CDocument, CDocumentType, TreeManagerType } from "./tree-manager";
-import { HistoryEntry, HistoryEntrySnapshot } from "./history";
+import { HistoryEntry, HistoryEntrySnapshot, HistoryEntryType } from "./history";
 
 const seekIncompleteMessage = (historyId: string) =>
   `Could not show this document at the requested point in its history (id: ${historyId}): ` +
@@ -42,6 +42,9 @@ export interface IFirestoreHistoryManagerArgs {
   // setting the document content into an error state. Keeping this as a
   // callback avoids the history layer having to import DocumentModel.
   onContentDrift?: (message: string) => void;
+  // Invoked once for each local entry after Firestore has accepted its upload. Not invoked for an entry
+  // whose upload fails or that is rolled back before it is uploaded.
+  onLocalEntryUploaded?: (entry: HistoryEntryType) => void;
 }
 
 /**
@@ -61,6 +64,7 @@ export class FirestoreHistoryManager {
   firestoreHistoryInfoPromise: Promise<IFirestoreHistoryInfo> | undefined;
   savedLastHistoryEntryId: string | undefined;
   onContentDrift: ((message: string) => void) | undefined;
+  onLocalEntryUploaded: ((entry: HistoryEntryType) => void) | undefined;
   driftChecked = false;
   // Why a requested history entry could not be shown, for the playback UI to
   // display. Undefined when no request has failed.
@@ -73,7 +77,8 @@ export class FirestoreHistoryManager {
     uploadLocalHistory,
     syncRemoteHistory,
     savedLastHistoryEntryId,
-    onContentDrift
+    onContentDrift,
+    onLocalEntryUploaded
   }: IFirestoreHistoryManagerArgs) {
     this.firestore = firestore;
     this.userContextProvider = userContextProvider;
@@ -81,6 +86,7 @@ export class FirestoreHistoryManager {
     this.uploadLocalHistory = uploadLocalHistory;
     this.savedLastHistoryEntryId = savedLastHistoryEntryId;
     this.onContentDrift = onContentDrift;
+    this.onLocalEntryUploaded = onLocalEntryUploaded;
 
     if (syncRemoteHistory) {
       this.subscribeToFirestoreHistory();
@@ -247,12 +253,13 @@ export class FirestoreHistoryManager {
     // If there was no last entry in Firestore, prepareFirestoreHistoryInfo sets
     // lastEntryIndex to -1
     const index = lastEntryIndex + 1 + newLocalIndex;
-    docRef.set({
+    await docRef.set({
       index,
       created: firestore.timestamp(),
       previousEntryId,
       entry: JSON.stringify(snapshot)
     });
+    this.onLocalEntryUploaded?.(entry);
   }
 
   get historyStatus() : HistoryStatus {

@@ -36,9 +36,9 @@ service cloud.firestore {
       return isAuthed() && request.auth.token.platform_user_id != null;
     }
 
-    // function matchUserId(userId) {
-    //   return hasUserId() && string(request.auth.token.platform_user_id) == userId;
-    // }
+    function matchUserId(userId) {
+      return hasUserId() && string(request.auth.token.platform_user_id) == userId;
+    }
 
     function matchFirebaseUserId(userId) {
       return isAuthed() && request.auth.uid == userId;
@@ -50,6 +50,10 @@ service cloud.firestore {
 
     function isAuthedResearcher() {
       return hasUserId() && hasRole("researcher");
+    }
+
+    function isAuthedLearner() {
+      return hasUserId() && hasRole("learner");
     }
 
     // uid of submitted document must match user's platform_user_id
@@ -796,6 +800,33 @@ service cloud.firestore {
           (request.auth.token.class_hash == classHash || teacherIsInClass(classHash)) &&
           isValidCommentTagRequest(classHash, unit, tagId);
       }
+    }
+
+    // The researcher dashboard's per-learner activity documents. The CLUE app writes the launched
+    // learner's own document after each saved change. A researcher of the class may read them.
+    match /researcher_dashboard/{portal}/activity/{classHash}/users/{uid} {
+      // Same label comparison report-service uses for its activity documents.
+      function tokenPortalIs() {
+        return request.auth.token.platform_id.split('://')[1].split('/')[0].split('\\.') == portal.split('_');
+      }
+      function isOwnLearnerWrite() {
+        return isAuthedLearner() && matchUserId(uid)
+          && request.auth.token.class_hash == classHash
+          && tokenPortalIs();
+      }
+      function isValidActivityRequest() {
+        let d = request.resource.data;
+        let before = resource == null ? {} : resource.data;
+        let offering = string(request.auth.token.offering_id);
+        let keys = d.get("changed", {}).diff(before.get("changed", {})).affectedKeys();
+        return d.keys().hasOnly(["lastActivityAt", "writeCount", "changed"])
+          && d.lastActivityAt == request.time
+          && d.writeCount == before.get("writeCount", 0) + 1
+          && keys.hasOnly([offering])
+          && (!(offering in keys) || d.changed[offering] == request.time);
+      }
+      allow get, list: if isAuthedResearcher() && request.auth.token.class_hash == classHash;
+      allow create, update: if isOwnLearnerWrite() && isValidActivityRequest();
     }
 
     //

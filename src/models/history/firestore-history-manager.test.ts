@@ -11,7 +11,7 @@ import { getLastHistoryEntry as _getLastHistoryEntry,
   LastHistoryEntry,
   loadHistory as _loadHistory } from "./history-firestore";
 import { when } from "mobx";
-import { HistoryEntrySnapshot } from "./history";
+import { HistoryEntry, HistoryEntrySnapshot } from "./history";
 import { FirestoreHistoryManager, HistoryStatus } from "./firestore-history-manager";
 import { UserContextProvider } from "../stores/user-context-provider";
 
@@ -516,5 +516,66 @@ describe("history loading", () => {
       expect(warnSpy).toHaveBeenCalled();
       jest.useRealTimers();
     });
+  });
+});
+
+describe("onHistoryEntryCompleted", () => {
+  function setupUploadingManager(set: jest.Mock, uploadLocalHistory = true) {
+    const { treeManager } = setupDocument();
+    const firestore = {
+      ...makeFirestoreMock(),
+      documentRef: jest.fn(() => ({ set })),
+      timestamp: jest.fn(() => new Date())
+    } as unknown as Firestore;
+    const historyManager = new FirestoreHistoryManager({
+      firestore,
+      userContextProvider: makeUserContextProviderMock(),
+      treeManager,
+      uploadLocalHistory,
+      syncRemoteHistory: false
+    });
+    historyManager.firestoreHistoryInfoPromise =
+      Promise.resolve({ documentPath: "d", lastEntryIndex: -1, lastEntryId: null });
+    historyManager.onLocalEntryUploaded = jest.fn();
+    const entry = HistoryEntry.create({ id: "e1", tree: "test", model: "TestTile", action: "/setFlag" });
+    return { treeManager, historyManager, entry };
+  }
+
+  it("reports the entry after its set resolves", async () => {
+    const setResult = deferred<void>();
+    const set = jest.fn(() => setResult.promise);
+    const { treeManager, historyManager, entry } = setupUploadingManager(set);
+    const completed = historyManager.onHistoryEntryCompleted(treeManager.document, entry, 0);
+    await new Promise(process.nextTick);
+    expect(set).toHaveBeenCalledTimes(1);
+    expect(historyManager.onLocalEntryUploaded).not.toHaveBeenCalled();
+    setResult.resolve();
+    await completed;
+    expect(historyManager.onLocalEntryUploaded).toHaveBeenCalledTimes(1);
+    expect(historyManager.onLocalEntryUploaded).toHaveBeenCalledWith(entry);
+  });
+
+  it("does not report an entry whose set rejects", async () => {
+    const set = jest.fn(() => Promise.reject(new Error("permission-denied")));
+    const { treeManager, historyManager, entry } = setupUploadingManager(set);
+    await expect(historyManager.onHistoryEntryCompleted(treeManager.document, entry, 0)).rejects.toThrow();
+    expect(historyManager.onLocalEntryUploaded).not.toHaveBeenCalled();
+  });
+
+  it("does not report an entry when uploadLocalHistory is false", async () => {
+    const set = jest.fn(() => Promise.resolve());
+    const { treeManager, historyManager, entry } = setupUploadingManager(set, false);
+    await historyManager.onHistoryEntryCompleted(treeManager.document, entry, 0);
+    expect(set).not.toHaveBeenCalled();
+    expect(historyManager.onLocalEntryUploaded).not.toHaveBeenCalled();
+  });
+
+  it("does not report an entry when the metadata document never appears", async () => {
+    const set = jest.fn(() => Promise.resolve());
+    const { treeManager, historyManager, entry } = setupUploadingManager(set);
+    historyManager.firestoreHistoryInfoPromise = Promise.reject(new Error("metadata document not found"));
+    await expect(historyManager.onHistoryEntryCompleted(treeManager.document, entry, 0)).rejects.toThrow();
+    expect(set).not.toHaveBeenCalled();
+    expect(historyManager.onLocalEntryUploaded).not.toHaveBeenCalled();
   });
 });
