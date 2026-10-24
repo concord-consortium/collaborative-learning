@@ -86,14 +86,15 @@ export function parseCcDeviceLine(line: string): CcDeviceLine | null {
   return { kind: "unknown" };
 }
 
-// Splits complete lines (ending in "\n", with any "\r" removed) off the front of `buffer`.
+// Splits complete lines (ending in "\n", and without the "\r" of a "\r\n" ending) off the front
+// of `buffer`. Any other "\r" stays in the line, so a line corrupted by one fails its checksum.
 // A partial line, including one that ends in a lone "\r" or inside "*hh", stays in `remaining`.
 export function splitLines(buffer: string): { lines: string[]; remaining: string } {
   const lines: string[] = [];
   let start = 0;
   let end = buffer.indexOf("\n", start);
   while (end !== -1) {
-    lines.push(buffer.substring(start, end).replace(/\r/g, ""));
+    lines.push(buffer.substring(start, end).replace(/\r$/, ""));
     start = end + 1;
     end = buffer.indexOf("\n", start);
   }

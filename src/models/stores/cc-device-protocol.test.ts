@@ -50,6 +50,11 @@ describe("splitLines", () => {
     expect(splitLines("emg:1\r")).toEqual({ lines: [], remaining: "emg:1\r" });
     expect(splitLines("emg:1\r\nok #2\r\nemg")).toEqual({ lines: ["emg:1", "ok #2"], remaining: "emg" });
   });
+  it("removes only the \\r that ends a line, so a corrupted line still fails its checksum", () => {
+    const { lines } = splitLines("emg:1\r2*56\r\n");
+    expect(lines).toEqual(["emg:1\r2*56"]);
+    expect(parseCcDeviceLine(lines[0])).toBeNull();
+  });
 });
 
 describe("parseHello", () => {
