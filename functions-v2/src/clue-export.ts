@@ -5,8 +5,8 @@ import {logger} from "firebase-functions/v2";
 import {onRequest} from "firebase-functions/v2/https";
 import {defineSecret, defineString} from "firebase-functions/params";
 import {
-  ExportOwner, InnerCursor, isObject, kGroupUid, kMaxLimits, kSegment, OwnersClass, OwnersRequest, readGroupOwners,
-  walk, WalkRequest,
+  ExportOwner, InnerCursor, isObject, kGroupUid, kMaxLimits, kSegment, OwnersClass, OwnersRequest, OwnerType,
+  readGroupOwners, walk, WalkRequest,
 } from "./clue-export-walk";
 
 const exportBearer = defineSecret("CLUE_EXPORT_BEARER");
@@ -16,9 +16,8 @@ const kMaxOwners = kMaxLimits.owner_limit;
 const kMaxClasses = 1000;
 const kMaxOfferings = 1000;
 const kClassHash = /^[0-9a-f]{48}$/;
-const kStudentUid = /^\d+$/;
+const kUserUid = /^\d+$/;
 const kWalkOperations = ["documents", "history", "content"];
-const kKinds = ["student", "group", "class"];
 
 class InvalidRequest extends Error {}
 
@@ -45,26 +44,24 @@ const checkOfferings = (value: unknown, field: string) => {
 const checkClassHash = (value: unknown, field: string) =>
   typeof value === "string" && kClassHash.test(value) ? value : fail(field);
 
-const isOwnerUid = (kind: unknown, uid: unknown, classHash: string) => {
-  if (typeof uid !== "string") return false;
-  switch (kind) {
-  case "student": return kStudentUid.test(uid);
-  case "group": return kGroupUid.test(uid);
-  default: return uid === `class_${classHash}`;
-  }
+const ownerTypeOf = (uid: unknown, classHash: string): OwnerType | undefined => {
+  if (typeof uid !== "string") return undefined;
+  if (kUserUid.test(uid)) return "user";
+  if (kGroupUid.test(uid)) return "group";
+  if (uid === `class_${classHash}`) return "class";
+  return undefined;
 };
 
 const checkOwner = (value: unknown, field: string): ExportOwner => {
   if (!isObject(value)) return fail(field);
   const classHash = checkClassHash(value.class_hash, `${field}.class_hash`);
-  if (typeof value.kind !== "string" || !kKinds.includes(value.kind)) fail(`${field}.kind`);
-  if (!isOwnerUid(value.kind, value.uid, classHash)) fail(`${field}.uid`);
+  const ownerType = ownerTypeOf(value.uid, classHash) ?? fail(`${field}.uid`);
   if (!isIntegerIn(value.portal_class_id, 1, Number.MAX_SAFE_INTEGER)) fail(`${field}.portal_class_id`);
   const offerings = checkOfferings(value.offerings, `${field}.offerings`);
   return {
     class_hash: classHash,
     uid: value.uid as string,
-    kind: value.kind as ExportOwner["kind"],
+    owner_type: ownerType,
     portal_class_id: value.portal_class_id as number,
     offerings,
   };

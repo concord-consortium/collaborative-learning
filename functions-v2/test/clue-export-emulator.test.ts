@@ -31,13 +31,13 @@ const kEntries = [
 const kEntriesInOrder = ["e-g", "e-c", "e-d", "e-a", "e-b", "e-f", "e-e"];
 const entryJson = (id: string) => JSON.stringify({id, created: 1700000000000, model: "TreeManager", records: [{}]});
 
-const student = (uid: string, offerings: number[], classHash = kHash): ExportOwner =>
-  ({class_hash: classHash, uid, kind: "student", portal_class_id: 601, offerings});
-const kStudentOwner = student(kStudent, [701]);
+const userOwner = (uid: string, offerings: number[], classHash = kHash): ExportOwner =>
+  ({class_hash: classHash, uid, owner_type: "user", portal_class_id: 601, offerings});
+const kUserOwner = userOwner(kStudent, [701]);
 const kGroupOwner: ExportOwner =
-  {class_hash: kHash, uid: "group_701_3", kind: "group", portal_class_id: 601, offerings: [701]};
+  {class_hash: kHash, uid: "group_701_3", owner_type: "group", portal_class_id: 601, offerings: [701]};
 const kClassOwner: ExportOwner =
-  {class_hash: kHash, uid: `class_${kHash}`, kind: "class", portal_class_id: 601, offerings: [701]};
+  {class_hash: kHash, uid: `class_${kHash}`, owner_type: "class", portal_class_id: 601, offerings: [701]};
 
 const usersPath = (classHash = kHash) => `/authed/portals/${kPortalKey}/classes/${classHash}/users`;
 const documentsPath = `authed/${kPortalKey}/documents`;
@@ -171,12 +171,12 @@ describe("clueExport walk", () => {
   });
 
   it("documents keeps the owner's offering and offering-less documents from either store", async () => {
-    const page = await walk(stores(), request("documents", [kStudentOwner]));
+    const page = await walk(stores(), request("documents", [kUserOwner]));
     expect(page.items.map((item) => item.doc_id))
       .toEqual([kHistoryDoc, "docdisagree", "docnone", "fsonly", "rtdbonly"]);
     const byId = Object.fromEntries(page.items.map((item) => [item.doc_id, item]));
     expect(byId[kHistoryDoc]).toMatchObject({
-      uid: kStudent, context_id: kHash, portal_class_id: 601, owner_kind: "student", offering_id: 701,
+      uid: kStudent, context_id: kHash, portal_class_id: 601, owner_type: "user", offering_id: 701,
       title: "Problem 1.1", tools: ["Text"], created_at: 1700000000000, metadata_sources: ["firestore", "rtdb"],
       visibility: "private", unit: "msa", investigation: "1", problem: "1", network: "net1", group_id: null,
     });
@@ -190,18 +190,18 @@ describe("clueExport walk", () => {
   });
 
   it("documents reads numeric offerings, dropping one outside the owner's set and non-integers", async () => {
-    const page = await walk(stores(), request("documents", [student("88", [701])]));
+    const page = await walk(stores(), request("documents", [userOwner("88", [701])]));
     expect(page.items.map((item) => [item.doc_id, item.offering_id])).toEqual([["num701", 701]]);
   });
 
   it("documents reads RTDB metadata whose keys are all integers", async () => {
-    const page = await walk(stores(), request("documents", [student("99", [701])]));
+    const page = await walk(stores(), request("documents", [userOwner("99", [701])]));
     expect(page.items.map((item) => [item.doc_id, item.metadata_sources])).toEqual([["0", ["rtdb"]], ["1", ["rtdb"]]]);
   });
 
   it("documents reads a group's offering from metadata and keeps one with none", async () => {
     const page = await walk(stores(), request("documents", [kGroupOwner, kClassOwner]));
-    expect(page.items.map((item) => [item.doc_id, item.owner_kind, item.offering_id]))
+    expect(page.items.map((item) => [item.doc_id, item.owner_type, item.offering_id]))
       .toEqual([["gdoc701", "group", 701], ["gdocbare", "group", null], ["cdoc", "class", null]]);
     const otherGroup = {...kGroupOwner, uid: "group_702_4", offerings: [702]};
     expect((await walk(stores(), request("documents", [otherGroup]))).items.map((item) => item.doc_id))
@@ -214,9 +214,9 @@ describe("clueExport walk", () => {
 
   it("the handler answers a walk and owners with the wire contract's envelopes", async () => {
     const headers = {Authorization: `Bearer ${kBearer}`};
-    const documents = await callClueExport({headers, body: request("documents", [kStudentOwner])});
+    const documents = await callClueExport({headers, body: request("documents", [kUserOwner])});
     expect(documents.status).toBe(200);
-    expect(documents.body).toEqual(await walk(stores(), request("documents", [kStudentOwner])));
+    expect(documents.body).toEqual(await walk(stores(), request("documents", [kUserOwner])));
 
     const owners = await callClueExport({headers, body: {operation: "owners", portal: kPortal,
       classes: [{class_hash: kHash, offerings: [701]}]}});
@@ -224,8 +224,21 @@ describe("clueExport walk", () => {
       body: {success: true, groups: [{class_hash: kHash, uid: "group_701_3", offering: 701}]}});
   });
 
+  it("the handler derives each owner's type from its uid", async () => {
+    const owners = [kUserOwner, kGroupOwner, kClassOwner].map((owner) => {
+      const untyped: Partial<ExportOwner> = {...owner};
+      delete untyped.owner_type;
+      return untyped;
+    });
+    const answer = await callClueExport({headers: {Authorization: `Bearer ${kBearer}`},
+      body: {...request("documents", []), owners}});
+    expect(answer.status).toBe(200);
+    expect([...new Set(answer.body.items.map((item: any) => `${item.uid} ${item.owner_type}`))])
+      .toEqual([`${kStudent} user`, "group_701_3 group", `class_${kHash} class`]);
+  });
+
   it("history walked three at a time returns every entry once, in order, unsplit", async () => {
-    const pages = await walkAll(request("history", [kStudentOwner], {limit: 3}));
+    const pages = await walkAll(request("history", [kUserOwner], {limit: 3}));
     const items = pages.flatMap((page) => page.items);
     expect(items.map((item) => item.entry_id)).toEqual(kEntriesInOrder);
     items.forEach((item) => expect(item.entry_json).toBe(entryJson(item.entry_id as string)));
@@ -241,7 +254,7 @@ describe("clueExport walk", () => {
   });
 
   it("history stops inside a document at the read limit and resumes with no gap", async () => {
-    const owner = student("77", [701], kOtherHash);
+    const owner = userOwner("77", [701], kOtherHash);
     const first = await walk(stores(), request("history", [owner], {read_limit: 4}));
     expect(first.owner_exhausted).toBe(false);
     expect(first.items.length).toBeLessThan(kEntries.length);
@@ -251,15 +264,15 @@ describe("clueExport walk", () => {
   });
 
   it("documents stops at the item limit inside an owner and resumes from its cursor", async () => {
-    const page = await walk(stores(), request("documents", [kStudentOwner], {limit: 2}));
+    const page = await walk(stores(), request("documents", [kUserOwner], {limit: 2}));
     expect(page.items.map((item) => item.doc_id)).toEqual([kHistoryDoc, "docdisagree"]);
     expect(page).toMatchObject({stop_owner_offset: 0, owner_exhausted: false, inner_cursor: {docId: "docdisagree"}});
-    const rest = await walk(stores(), request("documents", [kStudentOwner], {inner_cursor: page.inner_cursor}));
+    const rest = await walk(stores(), request("documents", [kUserOwner], {inner_cursor: page.inner_cursor}));
     expect(rest.items.map((item) => item.doc_id)).toEqual(["docnone", "fsonly", "rtdbonly"]);
   });
 
   it("history resumes across documents inside one owner with no gap", async () => {
-    const pages = await walkAll(request("history", [student("77", [701], kOtherHash)], {limit: 3}));
+    const pages = await walkAll(request("history", [userOwner("77", [701], kOtherHash)], {limit: 3}));
     const items = pages.flatMap((page) => page.items);
     expect(items.map((item) => [item.doc_id, item.entry_id])).toEqual([
       ...kEntriesInOrder.map((id) => ["solo", id]), ...kEntriesInOrder.map((id) => ["solo2", id]),
@@ -268,19 +281,19 @@ describe("clueExport walk", () => {
 
   it("content stops at the read limit", async () => {
     // The candidate read costs 8: seven Firestore documents and one RTDB node.
-    const page = await walk(stores(), request("content", [kStudentOwner], {read_limit: 9}));
+    const page = await walk(stores(), request("content", [kUserOwner], {read_limit: 9}));
     expect(page.items.map((item) => item.doc_id)).toEqual([kHistoryDoc]);
     expect(page).toMatchObject({owner_exhausted: false, inner_cursor: {docId: kHistoryDoc}});
   });
 
   it("history still reads one entry when the candidate reads already exceed the read limit", async () => {
-    const page = await walk(stores(), request("history", [student("77", [701], kOtherHash)], {read_limit: 1}));
+    const page = await walk(stores(), request("history", [userOwner("77", [701], kOtherHash)], {read_limit: 1}));
     expect(page.items.map((item) => item.entry_id)).toEqual(["e-g"]);
     expect(page).toMatchObject({owner_exhausted: false, inner_cursor: {docId: "solo", index: 0, entryId: "e-g"}});
   });
 
   it("a budget stop at an owner boundary hands the next owner a fresh start", async () => {
-    const owners = [student("1", [701]), student("2", [701])];
+    const owners = [userOwner("1", [701]), userOwner("2", [701])];
     const full = await walk(stores(), request("documents", owners));
     expect(full.items.map((item) => item.doc_id)).toEqual(["m", "n", "a", "b"]);
     const twoRows = full.items.slice(0, 2).reduce((sum, item) => sum + Buffer.byteLength(JSON.stringify(item)), 0);
@@ -299,7 +312,7 @@ describe("clueExport walk", () => {
   });
 
   it("a stop inside a later owner names that owner with its cursor", async () => {
-    const owners = [student("1", [701]), student("2", [701])];
+    const owners = [userOwner("1", [701]), userOwner("2", [701])];
     const page = await walk(stores(), request("documents", owners, {limit: 3}));
     expect(page.items.map((item) => item.doc_id)).toEqual(["m", "n", "a"]);
     expect(page).toMatchObject({stop_owner_offset: 1, owner_exhausted: false, inner_cursor: {docId: "a"},
@@ -310,14 +323,14 @@ describe("clueExport walk", () => {
 
   it("documents stops at the read limit before the next owner", async () => {
     // Owner "1" costs three reads: two Firestore documents and one RTDB node.
-    const owners = [student("1", [701]), student("2", [701])];
+    const owners = [userOwner("1", [701]), userOwner("2", [701])];
     const page = await walk(stores(), request("documents", owners, {read_limit: 3}));
     expect(page.items.map((item) => item.doc_id)).toEqual(["m", "n"]);
     expect(page).toMatchObject({stop_owner_offset: 0, owner_exhausted: true, inner_cursor: null});
   });
 
   it("orders RTDB keys as strings and resumes past each one", async () => {
-    const owner = student("98", [701]);
+    const owner = userOwner("98", [701]);
     const page = await walk(stores(), request("documents", [owner]));
     expect(page.items.map((item) => item.doc_id)).toEqual(["10", "9"]);
     const pages = await walkAll(request("documents", [owner], {limit: 1}));
@@ -325,20 +338,20 @@ describe("clueExport walk", () => {
   });
 
   it("stops after owner_limit owners", async () => {
-    const owners = [student("1", [701]), student("2", [701]), kStudentOwner];
+    const owners = [userOwner("1", [701]), userOwner("2", [701]), kUserOwner];
     const page = await walk(stores(), request("documents", owners, {owner_limit: 2}));
     expect(page.items.map((item) => item.doc_id)).toEqual(["m", "n", "a", "b"]);
     expect(page).toMatchObject({stop_owner_offset: 1, owner_exhausted: true, inner_cursor: null});
   });
 
   it("served_owner_offsets leaves out an owner that served nothing", async () => {
-    const owners = [student("1", [701]), student("1", [999]), student("2", [701])];
+    const owners = [userOwner("1", [701]), userOwner("1", [999]), userOwner("2", [701])];
     const page = await walk(stores(), request("documents", owners));
     expect(page.served_owner_offsets).toEqual([0, 2]);
   });
 
   it("content reports a missing node and admits an oversized one whole and alone", async () => {
-    const page = await walk(stores(), request("content", [kStudentOwner]), 1000);
+    const page = await walk(stores(), request("content", [kUserOwner]), 1000);
     expect(page.items).toHaveLength(1);
     expect(page.items[0]).toMatchObject({doc_id: kHistoryDoc, found: true, type: "problem", version: "1.0",
       change_count: 3, last_history_entry_id: "e-e",
@@ -346,7 +359,7 @@ describe("clueExport walk", () => {
     expect(page.items[0].content_json).toBe(kBigContent);
     expect(page).toMatchObject({stop_owner_offset: 0, owner_exhausted: false, inner_cursor: {docId: kHistoryDoc}});
 
-    const rest = await walk(stores(), request("content", [kStudentOwner], {inner_cursor: {docId: kHistoryDoc}}));
+    const rest = await walk(stores(), request("content", [kUserOwner], {inner_cursor: {docId: kHistoryDoc}}));
     const byId = Object.fromEntries(rest.items.map((item) => [item.doc_id, item]));
     expect(Object.keys(byId)).toEqual(["docdisagree", "docnone", "fsonly", "rtdbonly"]);
     expect(byId.docnone).toMatchObject({found: true, content_json: "{}"});
@@ -355,7 +368,7 @@ describe("clueExport walk", () => {
   });
 
   it("content reports a node with no content string as found with null content", async () => {
-    const page = await walk(stores(), request("content", [student("99", [701])]));
+    const page = await walk(stores(), request("content", [userOwner("99", [701])]));
     expect(page.items.map((item) => [item.doc_id, item.found, item.type, item.content_json]))
       .toEqual([["0", true, "learningLog", null], ["1", false, null, null]]);
   });
@@ -370,7 +383,7 @@ describe("clueExport walk", () => {
 
   it("never writes", async () => {
     const before = await snapshotStores();
-    const owners = [kStudentOwner, kGroupOwner, kClassOwner, student("1", [701]), student("2", [701])];
+    const owners = [kUserOwner, kGroupOwner, kClassOwner, userOwner("1", [701]), userOwner("2", [701])];
     for (const operation of ["documents", "history", "content"] as const) {
       await walkAll(request(operation, owners, {limit: 2}));
     }

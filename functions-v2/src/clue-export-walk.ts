@@ -3,12 +3,12 @@ import {Database} from "firebase-admin/database";
 import {escapeKey} from "../../shared/shared";
 
 export type WalkOperation = "documents" | "history" | "content";
-export type OwnerKind = "student" | "group" | "class";
+export type OwnerType = "user" | "group" | "class";
 
 export interface ExportOwner {
   class_hash: string;
   uid: string;
-  kind: OwnerKind;
+  owner_type: OwnerType;
   portal_class_id: number;
   offerings: number[];
 }
@@ -128,7 +128,7 @@ function toDocumentRow(owner: ExportOwner, candidate: Candidate) {
     uid: owner.uid,
     context_id: owner.class_hash,
     portal_class_id: owner.portal_class_id,
-    owner_kind: owner.kind,
+    owner_type: owner.owner_type,
     type: fieldOf(firestore, rtdb, "type"),
     visibility: fieldOf(firestore, rtdb, "visibility"),
     title: fieldOf(firestore, rtdb, "title"),

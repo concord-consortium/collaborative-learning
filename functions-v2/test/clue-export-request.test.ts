@@ -28,7 +28,7 @@ const call = callClueExport;
 const authorized = {Authorization: `Bearer ${kBearer}`};
 
 const owner = (overrides: Record<string, unknown> = {}) => ({
-  class_hash: kHash, uid: "1234", kind: "student", portal_class_id: 601, offerings: [701], ...overrides,
+  class_hash: kHash, uid: "1234", portal_class_id: 601, offerings: [701], ...overrides,
 });
 
 const walkBody = (overrides: Record<string, unknown> = {}) => ({
@@ -88,12 +88,13 @@ describe("clueExport request handling", () => {
     ["owners[0]", walkBody({owners: ["1234"]})],
     ["owners[0].class_hash", walkBody({owners: [owner({class_hash: "A".repeat(48)})]})],
     ["owners[0].class_hash", walkBody({owners: [owner({class_hash: "a".repeat(47)})]})],
-    ["owners[0].kind", walkBody({owners: [owner({kind: "teacher"})]})],
     ["owners[0].uid", walkBody({owners: [owner({uid: "12a"})]})],
     ["owners[0].uid", walkBody({owners: [owner({uid: 1234})]})],
-    ["owners[0].uid", walkBody({owners: [owner({kind: "group", uid: "group_x_3"})]})],
-    ["owners[0].uid", walkBody({owners: [owner({kind: "group", uid: "group_701_a.b"})]})],
-    ["owners[0].uid", walkBody({owners: [owner({kind: "class", uid: `class_${"b".repeat(48)}`})]})],
+    ["owners[0].uid", walkBody({owners: [owner({uid: "group_x_3"})]})],
+    ["owners[0].uid", walkBody({owners: [owner({uid: "group_701_a.b"})]})],
+    ["owners[0].uid", walkBody({owners: [owner({uid: `class_${"b".repeat(48)}`})]})],
+    ["owners[0].uid", walkBody({owners: [owner({uid: "group_701_"})]})],
+    ["owners[0].uid", walkBody({owners: [owner({uid: "teacher"})]})],
     ["owners[0].portal_class_id", walkBody({owners: [owner({portal_class_id: 0})]})],
     ["owners[0].portal_class_id", walkBody({owners: [owner({portal_class_id: "601"})]})],
     ["owners[0].offerings", walkBody({owners: [owner({offerings: "701"})]})],
@@ -127,11 +128,11 @@ describe("clueExport request handling", () => {
     await expectInvalid(body, field);
   });
 
-  it("accepts each owner kind's uid shape and the second portal on the list", async () => {
+  it("accepts each owner type's uid shape and the second portal on the list", async () => {
     // A valid request reaches the store reads, which the mocks above refuse.
     const answer = await call({headers: authorized, body: walkBody({
       portal: "learn.concord.org",
-      owners: [owner(), owner({kind: "group", uid: "group_701_3"}), owner({kind: "class", uid: `class_${kHash}`})],
+      owners: [owner(), owner({uid: "group_701_3"}), owner({uid: `class_${kHash}`})],
     })});
     expect(answer).toEqual({status: 500, body: {success: false, error: "read failed"}});
     const calls = (logger.error as jest.Mock).mock.calls;
