@@ -1,12 +1,15 @@
 import { SerialDevice } from "./serial";
-import { detectSpikerbitVersion } from "./serial-protocol";
+import { detectFirmwareReply, FirmwareReply, shouldFlash } from "./serial-protocol";
 import { IDeviceTransport } from "./device-transport";
 
 // The version of the firmware bundled at src/plugins/dataflow/firmware/spikerbit-clue.hex.
-// Bump together with the VERSION constant in the MakeCode source.
-export const kSpikerbitFirmwareVersion = 3;
+// Bump together with the firmware number in the MakeCode source's HELLO line.
+export const kSpikerbitFirmwareVersion = 4;
 
-// How long to wait for a "?" version reply before deciding to flash.
+// The `device` field of the hello a Spiker:bit sends.
+const kSpikerbitDeviceName = "spikerbit";
+
+// How long to wait for a "?" firmware reply before deciding to flash.
 const kVersionQueryTimeoutMs = 1500;
 
 // Minimal subset of @microbit/microbit-connection's MicrobitUSBConnection that
@@ -39,8 +42,10 @@ export class MicrobitUsbTransport implements IDeviceTransport {
     });
   }
 
+  // Resolves when the write finishes, so a caller can wait for its last line to reach the board.
+  // A failure is logged, not thrown.
   write(line: string) {
-    this.connection.serialWrite(`${line}\n`)
+    return this.connection.serialWrite(`${line}\n`)
       .catch((e) => console.warn("Spiker:bit serialWrite failed", e));
   }
 
@@ -58,7 +63,7 @@ export class SpikerbitDevice {
   private connection: IMicrobitUsbConnection;
   private transport: MicrobitUsbTransport;
   private buffer = "";
-  private detectedVersion: number | null = null;
+  private detectedReply: FirmwareReply | null = null;
   private versionQueryTimeoutMs: number;
 
   constructor(serialDevice: SerialDevice, connection: IMicrobitUsbConnection, options?: SpikerbitDeviceOptions) {
@@ -72,24 +77,24 @@ export class SpikerbitDevice {
     flashDataSource: unknown,
     progress?: (stage: string, pct?: number) => void
   ){
-    // During connect, inbound data feeds only version detection. EMG parsing begins once
+    // During connect, inbound data feeds only firmware detection. EMG parsing begins once
     // setActiveDevice repoints the transport's onData at SerialDevice.receive (below).
-    this.transport.onData = this.handleVersionData;
+    this.transport.onData = this.handleFirmwareData;
 
     try {
       await this.connectAndCheckFirmware(flashDataSource, progress);
     } catch (e) {
       // Close the link so a failed attempt doesn't leave the board open and still feeding
-      // the version handler.
+      // the firmware handler.
       await this.disconnect().catch((err) => console.warn("Spiker:bit disconnect failed", err));
       throw e;
     }
 
     // Route servo writes and inbound EMG through this WebUSB transport and mark the shared
     // store connected. setActiveDevice wires transport.onData -> receive (spikerbit maps to
-    // the keyValue protocol -> parseKeyValueData) and transport.onDisconnect, replacing
-    // the connect-time version handler.
-    this.serialDevice.setActiveDevice("spikerbit", this.transport);
+    // the ccDevice protocol -> CcDeviceSession) and transport.onDisconnect, replacing
+    // the connect-time firmware handler, and starts the session.
+    this.serialDevice.setActiveDevice(kSpikerbitDeviceName, this.transport);
   }
 
   // Closes the WebUSB link. The library connection's status event then clears the store's
@@ -106,48 +111,49 @@ export class SpikerbitDevice {
   ) {
     await this.connection.connect();
 
-    const running = await this.queryVersion();
-    if (running == null || running < kSpikerbitFirmwareVersion) {
-      // Flash when the board is running no known firmware (no reply) or an out-of-date
-      // version. USB connection stays Connected through a flash (DAPLink interface chip is
-      // untouched) and serial auto-reinitializes, so no explicit reconnect here.
+    const running = await this.queryFirmware();
+    if (shouldFlash(running, kSpikerbitDeviceName, kSpikerbitFirmwareVersion)) {
+      // Flash when the board answers with no recognized reply, the legacy banner, a protocol
+      // Dataflow doesn't speak, or older firmware. USB connection stays Connected through a
+      // flash (DAPLink interface chip is untouched) and serial auto-reinitializes, so no explicit
+      // reconnect here.
       await this.connection.flash(flashDataSource, { partial: true, progress });
       // Re-query to confirm the flash took, but proceed regardless: the board was just written
       // with the known-good bundled hex, so a null/stale reply here is far more likely a serial
       // re-init timing artifact than bad firmware, and aborting would discard a good flash while
       // showing the user nothing. We warn rather than fail so a genuinely halted board (e.g. a
       // partial flash whose reset was swallowed) still leaves a trace.
-      const confirmed = await this.queryVersion();
-      if (confirmed == null || confirmed < kSpikerbitFirmwareVersion) {
+      const confirmed = await this.queryFirmware();
+      if (shouldFlash(confirmed, kSpikerbitDeviceName, kSpikerbitFirmwareVersion)) {
         console.warn(
-          `Spiker:bit firmware version not confirmed after flash (got ${confirmed}, ` +
-          `expected ${kSpikerbitFirmwareVersion}); connecting anyway.`
+          `Spiker:bit firmware not confirmed after flash (got ${JSON.stringify(confirmed)}, ` +
+          `expected version ${kSpikerbitFirmwareVersion}); connecting anyway.`
         );
       }
     }
   }
 
-  // Connect-time only: scan inbound data for the firmware version reply, surfaced via
-  // detectedVersion for queryVersion. EMG parsing does not happen here — it runs through
-  // SerialDevice.receive once the transport becomes the active device.
-  private handleVersionData = (data: string) => {
+  // Connect-time only: scan inbound data for the firmware reply, surfaced via detectedReply
+  // for queryFirmware. EMG parsing does not happen here; it runs through SerialDevice.receive
+  // once the transport becomes the active device.
+  private handleFirmwareData = (data: string) => {
     this.buffer += data;
-    const detected = detectSpikerbitVersion(this.buffer);
-    if (detected.version != null) {
-      this.detectedVersion = detected.version;
+    const detected = detectFirmwareReply(this.buffer);
+    if (detected.reply) {
+      this.detectedReply = detected.reply;
       this.buffer = detected.remaining;
     }
   };
 
-  // Sends "?" and waits up to the timeout for a version reply (surfaced via
-  // handleVersionData setting detectedVersion). Returns the version or null.
-  private async queryVersion(): Promise<number | null> {
-    this.detectedVersion = null;
+  // Sends "?" and waits up to the timeout for a firmware reply (surfaced via handleFirmwareData
+  // setting detectedReply). Returns the reply or null.
+  private async queryFirmware(): Promise<FirmwareReply | null> {
+    this.detectedReply = null;
     await this.connection.serialWrite("?\n");
-    return new Promise<number | null>((resolve) => {
+    return new Promise<FirmwareReply | null>((resolve) => {
       const started = Date.now();
       const poll = () => {
-        if (this.detectedVersion != null) return resolve(this.detectedVersion);
+        if (this.detectedReply) return resolve(this.detectedReply);
         if (Date.now() - started >= this.versionQueryTimeoutMs) return resolve(null);
         setTimeout(poll, 50);
       };

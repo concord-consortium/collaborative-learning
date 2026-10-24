@@ -1,0 +1,11 @@
+{
+  "name": "spikerbit-bench",
+  "private": true,
+  "description": "Checks a real Spiker:bit's replies to the CC Device Protocol over USB serial",
+  "scripts": {
+    "bench": "node bench.mjs"
+  },
+  "dependencies": {
+    "serialport": "13.0.0"
+  }
+}

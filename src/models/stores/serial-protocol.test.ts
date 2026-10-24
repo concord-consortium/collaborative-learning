@@ -1,5 +1,8 @@
 import { NodeChannelInfo } from "../../plugins/dataflow/model/utilities/channel";
-import { parseKeyValueData, detectSpikerbitVersion } from "./serial-protocol";
+import {
+  parseKeyValueData, detectSpikerbitVersion, detectFirmwareReply, shouldFlash, FirmwareReply
+} from "./serial-protocol";
+import { withChecksum } from "./cc-device-protocol";
 
 function emgChannel(): NodeChannelInfo {
   return {
@@ -97,5 +100,43 @@ describe("detectSpikerbitVersion", () => {
     const { version, remaining } = detectSpikerbitVersion("CLUE-SPIKERBIT v1              \r\nemg:5\r\n");
     expect(version).toBe(1);
     expect(remaining).toBe("emg:5\r\n");
+  });
+});
+
+describe("detectFirmwareReply", () => {
+  const hello = "hello protocol:CCDeviceProtocol version:1 device:spikerbit firmware:4";
+  it("finds a hello line after stale readings", () => {
+    const { reply, remaining } = detectFirmwareReply(`emg:5\r\n${withChecksum(hello)}\r\nemg:6`);
+    expect(reply).toEqual({
+      kind: "ccDevice",
+      hello: { protocol: "CCDeviceProtocol", version: 1, device: "spikerbit", firmware: 4 }
+    });
+    expect(remaining).toBe("emg:6");
+  });
+  it("waits for a hello split across chunks", () => {
+    expect(detectFirmwareReply("hello protocol:CCDevice").reply).toBeNull();
+  });
+  it("still recognizes the padded legacy banner", () => {
+    expect(detectFirmwareReply("CLUE-SPIKERBIT v2      \r\n").reply).toEqual({ kind: "legacy", firmware: 2 });
+  });
+  it("ignores a hello with a bad checksum", () => {
+    expect(detectFirmwareReply(`${hello}*00\r\n`).reply).toBeNull();
+  });
+});
+
+describe("shouldFlash", () => {
+  const cc = (version: number, firmware: number, protocol = "CCDeviceProtocol", device = "spikerbit"): FirmwareReply =>
+    ({ kind: "ccDevice", hello: { protocol, version, device, firmware } });
+  it.each([
+    ["no reply", null, true],
+    ["a legacy banner", { kind: "legacy", firmware: 3 } as FirmwareReply, true],
+    ["another protocol", cc(1, 4, "Other"), true],
+    ["a newer protocol version, even with newer firmware", cc(2, 9), true],
+    ["another device on the same protocol, even with newer firmware", cc(1, 9, "CCDeviceProtocol", "other"), true],
+    ["older firmware", cc(1, 3), true],
+    ["the same firmware", cc(1, 4), false],
+    ["newer firmware", cc(1, 5), false],
+  ])("%s", (_label, reply, expected) => {
+    expect(shouldFlash(reply, "spikerbit", 4)).toBe(expected);
   });
 });

@@ -4,6 +4,7 @@ import { NodeLiveOutputTypes } from "../../plugins/dataflow/model/utilities/node
 import { parseKeyValueData } from "./serial-protocol";
 import { deviceProtocol } from "../../plugins/dataflow/model/utilities/device-capabilities";
 import { IDeviceTransport } from "./device-transport";
+import { CcDeviceSession } from "./cc-device-session";
 
 function log(message: string) {
   // eslint-disable-next-line no-console
@@ -17,6 +18,8 @@ export class SerialDevice {
   deviceFamily: string | undefined;
   // The active write transport (Web Serial or WebUSB). writeLine routes here.
   activeTransport: IDeviceTransport | undefined;
+  // The CC Device Protocol session of the active device, when it speaks that protocol.
+  ccDeviceSession: CcDeviceSession | undefined;
   // Functions that each return the channels of one tile. Inbound data is delivered to the
   // channels of every registered source.
   private channelSources = new Set<() => NodeChannelInfo[]>();
@@ -31,6 +34,7 @@ export class SerialDevice {
     this.localBuffer = "";
     makeObservable(this, {
       activeTransport: observable.ref,
+      ccDeviceSession: observable.ref,
       deviceFamily: observable,
       setActiveDevice: action,
       clearActiveDevice: action
@@ -68,14 +72,30 @@ export class SerialDevice {
     // Start each session with an empty parse buffer so a partial line left by a prior
     // connection can't combine with new data into a spurious message.
     this.localBuffer = "";
+    this.ccDeviceSession?.stop();
+    this.ccDeviceSession = undefined;
     this.activeTransport = transport;
     this.deviceFamily = deviceFamily;
     transport.onData = (chunk: string) => { if (this.activeTransport === transport) this.receive(chunk); };
     transport.onDisconnect = () => { if (this.activeTransport === transport) this.clearActiveDevice(); };
+    if (deviceProtocol(deviceFamily) === "ccDevice") {
+      // Assigned before start() so a reply that arrives during the first write is routed.
+      const session = new CcDeviceSession(line => transport.write(line));
+      this.ccDeviceSession = session;
+      session.start();
+    }
     this.updateConnectionInfo(Date.now(), "connect");
   }
 
+  // Ends the CC Device Protocol session politely: writes `close` if the device acknowledged the
+  // open. Resolves at once when there is no session.
+  public async endSession(): Promise<void> {
+    await this.ccDeviceSession?.close();
+  }
+
   public clearActiveDevice(){
+    this.ccDeviceSession?.stop();
+    this.ccDeviceSession = undefined;
     this.activeTransport = undefined;
     this.deviceFamily = undefined;
     this.localBuffer = "";
@@ -91,6 +111,7 @@ export class SerialDevice {
     const protocol = deviceProtocol(this.deviceFamily);
     if (protocol === "keyValue") this.handleKeyValueStreamObj(chunk, this.allChannels);
     if (protocol === "radioHub") this.handleRadioHubStreamObj(chunk, this.allChannels);
+    if (protocol === "ccDevice") this.ccDeviceSession?.receive(chunk, this.allChannels);
   }
 
   public handleRadioHubStreamObj(value: string, channels: Array<NodeChannelInfo>){
@@ -163,7 +184,11 @@ export class SerialDevice {
     if (this.isConnected() && outputConfig?.angleOffset !== undefined){
       const scaledAngle = (outputConfig.angleScale * n) + outputConfig.angleOffset;
       const roundedScaled = Math.round(scaledAngle);
-      this.writeLine(roundedScaled.toString());
+      if (deviceProtocol(this.deviceFamily) === "ccDevice") {
+        this.ccDeviceSession?.sendOutput("servo", roundedScaled);
+      } else {
+        this.writeLine(roundedScaled.toString());
+      }
     }
   }
 }

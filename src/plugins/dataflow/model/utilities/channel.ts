@@ -18,7 +18,8 @@ export interface NodeChannelInfo {
   outputTargetActuator?: string;
   timeFactor?: number;
   // The wire protocol this channel's data uses (see DeviceProtocol): "keyValue" or
-  // "radioHub". A connected device satisfies this channel when its protocol matches.
+  // "radioHub". A connected device satisfies this channel when it lists the channel's id in its
+  // `channels`, or, without such a list, when its protocol matches.
   protocol?: string | undefined;
   lastMessageReceivedAt?: number | null;
   relaysState?: number[];

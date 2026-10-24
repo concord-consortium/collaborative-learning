@@ -4,7 +4,7 @@
 // the transport becomes active; a transport that manages its own inbound path need not
 // use them.
 export interface IDeviceTransport {
-  write(line: string): void;   // implementation supplies its own line framing (\n)
+  write(line: string): void | Promise<void>;   // implementation supplies its own line framing (\n)
   close(): Promise<void>;
   onData?: (chunk: string) => void;
   onDisconnect?: () => void;
