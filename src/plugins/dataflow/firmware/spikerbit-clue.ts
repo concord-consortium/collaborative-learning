@@ -10,8 +10,8 @@
 // WebUSB when a connected micro:bit is not already running it. To rebuild the hex, see
 // README.md in this directory.
 //
-// PROTOCOL: the board speaks the CC Device Protocol (see
-// src/plugins/dataflow/docs/serial-protocols.md). One ASCII line per message, ending "\r\n"
+// PROTOCOL: the board speaks the CC Device Protocol (see user-guide.md in this directory,
+// and src/plugins/dataflow/docs/serial-protocols.md for the protocol itself). One ASCII line per message, ending "\r\n"
 // from the board and "\n" or "\r\n" from the host; any line may end in "*hh", the XOR of
 // every byte before the "*" as two hex digits. The board puts one on every line it writes and
 // checks one on every line it reads, accepting a line without one.
@@ -27,11 +27,9 @@
 // "stop". During a session it does nothing, and a click does nothing in any state, so a student
 // pressing buttons during a Dataflow program changes nothing.
 //
-// LED STATUS: the display shows how far a connection got. Waiting (power-up, or a session
-// ending), found (a "?" while idle: Dataflow saw the board but hasn't opened a session),
-// connected (an "open", for 3 s, then cleared), streaming (free-run), and identify (for 3 s,
-// then back to what the state calls for). After the connected icon clears, the firmware doesn't
-// touch the display until the session ends or an identify arrives.
+// LED STATUS: the display shows how far a connection got. Each icon constant below says when it
+// shows; user-guide.md in this directory is generated from those comments and from the @guide
+// constants by npm run build:firmware.
 //
 // SOUND: identify plays on the built-in speaker only. P0 drives the servo, so the edge-pin
 // audio output is turned off before anything plays: the first sound connects the audio output
@@ -79,23 +77,51 @@
 // V2-tuned (float math); the universal hex still boots on V1 but isn't tuned for it.
 //
 // serial.setWriteLinePadding(0) disables writeLine's default 32-byte space padding, so
-// lines are clean ("emg:12*0B\r\n" not "emg:12*0B<spaces>\r\n").
+// lines are clean ("emg:12*56\r\n" not "emg:12*56<spaces>\r\n").
 //
 // Keep HELLO's firmware number in sync with kSpikerbitFirmwareVersion in
 // src/models/stores/spikerbit-device.ts whenever this program changes.
 
 const HELLO = "hello protocol:CCDeviceProtocol version:1 device:spikerbit firmware:4"
 
+/**
+ * @guide
+ * How often a reading is sent, in a session or in free-run.
+ */
 const READING_INTERVAL_MS = 100
+/**
+ * @guide
+ * How long a session lasts without a `ping`, when `open` doesn't give a `timeout`.
+ */
 const DEFAULT_TIMEOUT_MS = 5000
+/**
+ * @guide
+ * The shortest `timeout` that `open` accepts.
+ */
 const MIN_TIMEOUT_MS = 1000
+/**
+ * @guide
+ * The longest `timeout` that `open` accepts.
+ */
 const MAX_TIMEOUT_MS = 60000
+/**
+ * @guide
+ * The largest session id; ids start at 1.
+ */
 const MAX_SESSION_ID = 65535
-// How long the connected and identify icons stay.
+/**
+ * @guide
+ * How long the connected and identify icons show.
+ */
 const ICON_MS = 3000
-// The receive buffer drops whatever arrives while it is full, and its default is 20. The
-// longest command, "open session:65535 timeout:60000 #999*hh", is 41 characters with its
-// newline; this leaves room for more lines arriving before the handler has read the first.
+/**
+ * @guide
+ * The serial receive buffer, in characters. A longer line is cut off.
+ *
+ * The receive buffer drops whatever arrives while it is full, and its default is 20. The
+ * longest command, "open session:65535 timeout:60000 #999*hh", is 41 characters with its
+ * newline; this leaves room for more lines arriving before the handler has read the first.
+ */
 const RX_BUFFER_SIZE = 128
 
 // Smoothing time constants (milliseconds). Derived from the alphas bench-validated at
@@ -106,10 +132,30 @@ const TAU_BASELINE_MS = 800  // baseline: slow enough to ignore the EMG AC, trac
 
 const HEX_DIGITS = "0123456789ABCDEF"
 
+/**
+ * @display Waiting
+ * Shown at power-up, when a session ends, and when free-run stops. The board is idle and nothing has spoken to it since.
+ */
 const WAITING_ICON = IconNames.Asleep
+/**
+ * @display Found
+ * Shown after a `?` arrives while idle: a host has found the board but hasn't opened a session. If it stays, Dataflow's version check or flashing didn't finish.
+ */
 const FOUND_ICON = IconNames.Surprised
+/**
+ * @display Connected
+ * Shown for 3 seconds after `open` starts a session. The display is then cleared and stays blank for the rest of the session.
+ */
 const CONNECTED_ICON = IconNames.Yes
+/**
+ * @display Identify
+ * Shown for 3 seconds after `identify`, in any state, along with a short sound on a micro:bit V2. The display then goes back to what the state calls for.
+ */
 const IDENTIFY_ICON = IconNames.Heart
+/**
+ * @display Streaming
+ * Shown in free-run, which `stream` or a long press of button A starts.
+ */
 const STREAMING_ICON = IconNames.Chessboard
 
 // On a V1, hardwareVersion() is "1"; on a V2 it is "2.0", "2.2" or "2.X".
