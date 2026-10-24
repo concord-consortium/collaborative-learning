@@ -243,8 +243,8 @@ host does this:
    at once rather than after the timeout.
 
 The reference implementation is Dataflow's `CcDeviceSession`, in
-`src/models/stores/cc-device-session.ts`. Line parsing and checksums are in
-[`cc-device-protocol.ts`](../../../models/stores/cc-device-protocol.ts).
+[`cc-device-session.ts`](../../../models/stores/cc-device-session.ts). Line parsing and
+checksums are in [`cc-device-protocol.ts`](../../../models/stores/cc-device-protocol.ts).
 
 ## Going further
 
