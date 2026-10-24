@@ -26,9 +26,9 @@ CLUE-693 was first built as a Cloud Function on history writes (branch `CLUE-693
 ### When it writes
 
 - **R4.** A counted entry is written only after both its history upload has resolved and an RTDB content save whose `lastHistoryEntryId` is the entry or a later entry of the same document's history has succeeded. If no such save is confirmed within 30 s while the tab stays open, it is written anyway. An entry whose upload fails (the metadata document never appears, or the write is rejected) or which the concurrent manager rolls back after a fork is dropped and never written, `pagehide` included.
-- **R5.** Throttle: the first counted change after a quiet period is written as soon as R4 allows; later changes wait until 5 s after the previous write's acknowledgment (the floor, per tab); each write covers every change that has landed by then, and a trailing write always follows the last change of a burst. At most one write is in flight. The recorder never debounces. On `visibilitychange` to hidden, changes that have landed are written as soon as the 5 s floor allows, and unconfirmed ones keep waiting. On `pagehide`, every pending change is written at once without waiting for its save or the floor. A write started in `pagehide` may not complete; that is the design's known loss.
+- **R5.** Throttle: the first counted change after a quiet period is written as soon as R4 allows; later changes wait until 5 s after the previous write's acknowledgment (the throttle, per tab); each write covers every change that has landed by then, and a trailing write always follows the last change of a burst. At most one write is in flight. The recorder never debounces. On `visibilitychange` to hidden, changes that have landed are written as soon as the 5 s throttle allows, and unconfirmed ones keep waiting. On `pagehide`, every pending change is written at once without waiting for its save or the throttle. A write started in `pagehide` may not complete; that is the design's known loss.
   - *(The hidden-tab behavior needs no `visibilitychange` handler: every upload, save and timer already schedules the next write.)*
-- **R6.** A failed write keeps its changes pending. The wait before the next write doubles with each consecutive failure (10 s, 20 s, 40 s), up to 60 s, and a success resets it to the 5 s floor.
+- **R6.** A failed write keeps its changes for the next write, folded into one retry that keeps whether any was in the launch offering. The wait before the next write doubles with each consecutive failure (10 s, 20 s, 40 s), up to 60 s, and a success resets it to the 5 s throttle.
 
 ### The document
 
@@ -53,7 +53,7 @@ CLUE-693 was first built as a Cloud Function on history writes (branch `CLUE-693
 ## Technical Notes
 
 - **Where it lives.** `src/models/stores/activity-recorder.ts` (the recorder); `FirestoreHistoryManager` and `FirestoreHistoryManagerConcurrent` report each landed local entry through `onLocalEntryUploaded`; `DocumentsModel` passes that callback, with the document, into both managers; `useDocumentSyncToFirebase` reports each successful content save's stamped id through an `onContentSaved` callback, which `EditableDocumentContent` points at the recorder; the recorder keeps the latest per document. `Stores` creates the recorder in its constructor and hands it to `DocumentsModel`; it listens for `pagehide` only once it records a change.
-- **The save can carry the previous entry's id.** For a plain tile edit the entry completes before the leading save's `transform` runs, so that save carries the new entry's id. For an edit to a shared model, `recordAction`'s extra `startExchange` await completes the entry after the leading save captured its id, so the leading save carries the previous entry's id and the trailing save covers it. This is why R4 compares positions in the history, with the 30 s timeout as a backstop.
+- **The save can carry the previous entry's id.** For a plain tile edit the entry completes before the leading save's `transform` runs, so that save carries the new entry's id. For an edit to a shared model, `recordAction`'s extra `startExchange` await completes the entry after the leading save captured its id, so the leading save carries the previous entry's id. A trailing save covers it only when the follow-up action changes content; otherwise no snapshot follows the entry and it waits for the next save or the 30 s timeout. This is why R4 compares positions in the history, with the 30 s timeout as a backstop.
 - **Retried saves.** react-query retries by calling the mutation again with the same snapshot, so `transform` would stamp the old content with a newer entry. The hook keeps each snapshot's first-attempt id in a `WeakMap`.
 - **Ticks.** `src/plugins/simulator/model/simulator-content.ts` (`SimulatorTool`, `step`) and `src/plugins/dataflow/model/dataflow-program-model.ts` (`DataflowProgram`, `tickAndProcess`). The entry's `model` is the action's model name and its `action` the full path, so it ends with `/step` or `/tickAndProcess`. The PR names both so a later rename (Scott Cytacki's tick work) updates the recorder too.
 - **Group documents** are type `axes`, owned by `group_<offeringId>_<groupId>`; R7 compares the document's `uid` with `user.userIdForGroupDocuments`. Class documents are owned by `class_<classHash>`.
@@ -95,7 +95,7 @@ CLUE-693 was first built as a Cloud Function on history writes (branch `CLUE-693
 - B) Skip every non-undoable entry except undo and redo, which also drops data card navigation and `noUndo` shared-variable edits.
 - C) Add these actions to the tick list.
 
-**Decision**: A (Doug). They are real content changes and mostly one-time, and the 5 s floor folds the rest into about one write per open.
+**Decision**: A (Doug). They are real content changes and mostly one-time, and the 5 s throttle folds the rest into about one write per open.
 
 ---
 
@@ -170,13 +170,13 @@ CLUE-693 was first built as a Cloud Function on history writes (branch `CLUE-693
 
 ---
 
-### A retried older save can move the saved id backwards
-**Context**: An older save can succeed after a newer one and move the recorder's saved id to an earlier entry.
+### An older save's success can move the saved id backwards
+**Context**: An older save's `onSuccess` can arrive after a newer one's and move the recorder's saved id to an earlier entry: on a retry, or because each save also waits on the Firestore `tools` update, which can resolve out of order.
 **Options considered**:
 - A) Guard against it in the hook.
 - B) Accept it: an entry already written is unaffected, and a pending one waits for the next save or the 30 s timeout.
 
-**Decision**: B. It only delays a write, and the older save also wrote the older content last, so the id still matches what is in RTDB.
+**Decision**: B. The id can then name an earlier entry than RTDB holds, which only delays a write.
 
 ---
 
@@ -201,7 +201,7 @@ CLUE-693 was first built as a Cloud Function on history writes (branch `CLUE-693
 ---
 
 ### Recorder lines no test guarded
-**Context**: Mutating the recorder left the suite green for lines including the class and offering gate and `pagehide` ignoring the floor.
+**Context**: Mutating the recorder left the suite green for lines including the class and offering gate and `pagehide` ignoring the throttle.
 **Options considered**:
 - A) Add a test for each.
 - B) Leave them unguarded.

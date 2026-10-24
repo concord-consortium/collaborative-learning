@@ -8,8 +8,8 @@ import { isPlanningType, isProblemType } from "../document/document-types";
 import { HistoryEntryType } from "../history/history";
 import { TreeManagerType } from "../history/tree-manager";
 
-// The least time between the acknowledgment of one write and the start of the next.
-export const kActivityWriteFloorMs = 5000;
+// Each tab's least time between the acknowledgment of one write and the start of the next.
+export const kActivityWriteIntervalMs = 5000;
 // How long a change whose history has been uploaded waits for a content save that covers it.
 export const kActivitySaveTimeoutMs = 30000;
 // Each consecutive failed write doubles the wait before the next, up to this.
@@ -43,10 +43,12 @@ interface IPendingChange {
  * Keeps the launched student's researcher dashboard activity document,
  * researcher_dashboard/{portal}/activity/{classHash}/users/{uid}, current. A change counts once its
  * history entry has been uploaded and a content save covering it has succeeded; writes are at least
- * kActivityWriteFloorMs apart and each covers every change that has landed by then.
+ * kActivityWriteIntervalMs apart and each covers every change that has landed by then.
  */
 export class ActivityRecorder {
   private pending: IPendingChange[] = [];
+  // The changes of failed writes, which have all landed, kept as whether any was in the launch offering.
+  private failed: { inLaunchOffering: boolean } | undefined;
   private savedIds = new WeakMap<DocumentModelType, string>();
   private inFlight = false;
   private lastAckAt: number | undefined;
@@ -132,15 +134,19 @@ export class ActivityRecorder {
     this.timerDueAt = undefined;
   }
 
+  private get hasWork() {
+    return this.pending.length > 0 || !!this.failed;
+  }
+
   private schedule() {
-    if (this.inFlight || this.pending.length === 0) return;
+    if (this.inFlight || !this.hasWork) return;
     const now = Date.now();
     const landed = this.pending.filter(change => this.hasLanded(change, now));
-    if (landed.length === 0) {
+    if (landed.length === 0 && !this.failed) {
       this.setTimer(Math.min(...this.pending.map(change => change.uploadedAt + kActivitySaveTimeoutMs)));
       return;
     }
-    const wait = Math.min(kActivityWriteFloorMs * 2 ** this.failures, kActivityMaxRetryDelayMs);
+    const wait = Math.min(kActivityWriteIntervalMs * 2 ** this.failures, kActivityMaxRetryDelayMs);
     const dueAt = this.lastAckAt === undefined ? now : this.lastAckAt + wait;
     if (now < dueAt) {
       this.setTimer(dueAt);
@@ -153,11 +159,13 @@ export class ActivityRecorder {
     const { user, db } = this.stores;
     const { FieldValue } = firebase.firestore;
     this.pending = this.pending.filter(change => !changes.includes(change));
+    const inLaunchOffering = !!this.failed?.inLaunchOffering || changes.some(change => change.inLaunchOffering);
+    this.failed = undefined;
     const data: Record<string, any> = {
       lastActivityAt: FieldValue.serverTimestamp(),
       writeCount: FieldValue.increment(1)
     };
-    if (changes.some(change => change.inLaunchOffering)) {
+    if (inLaunchOffering) {
       data.changed = { [user.offeringId]: FieldValue.serverTimestamp() };
     }
     this.inFlight = true;
@@ -166,7 +174,7 @@ export class ActivityRecorder {
         this.failures = 0;
       })
       .catch(error => {
-        this.pending = [...changes, ...this.pending];
+        this.failed = { inLaunchOffering: inLaunchOffering || !!this.failed?.inLaunchOffering };
         this.failures++;
         console.warn("Could not record researcher dashboard activity", error);
       })
@@ -178,7 +186,7 @@ export class ActivityRecorder {
   }
 
   private handlePageHide = () => {
-    if (!this.isEnabled || this.pending.length === 0) return;
+    if (!this.isEnabled || !this.hasWork) return;
     this.clearTimer();
     this.write([...this.pending]);
   };

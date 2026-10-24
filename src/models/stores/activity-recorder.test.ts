@@ -4,7 +4,7 @@ import { HistoryEntry } from "../history/history";
 import { TreeManagerType } from "../history/tree-manager";
 import { UserModel } from "./user";
 import {
-  ActivityRecorder, IActivityRecorderStores, kActivityMaxRetryDelayMs, kActivitySaveTimeoutMs, kActivityWriteFloorMs
+  ActivityRecorder, IActivityRecorderStores, kActivityMaxRetryDelayMs, kActivitySaveTimeoutMs, kActivityWriteIntervalMs
 } from "./activity-recorder";
 
 jest.mock("firebase/app", () => ({
@@ -109,7 +109,7 @@ describe("ActivityRecorder", () => {
     expect(mockSet).toHaveBeenCalledTimes(1);
   });
 
-  it("gives one leading and one trailing write inside the floor, the trailing covering a change made in flight",
+  it("gives one leading and one trailing write inside the interval, the trailing covering a change made in flight",
   async () => {
     let resolveSet: () => void = () => undefined;
     mockSet.mockImplementationOnce(() => new Promise<void>(r => { resolveSet = r; }));
@@ -121,7 +121,7 @@ describe("ActivityRecorder", () => {
     expect(mockSet).toHaveBeenCalledTimes(1);
     resolveSet();
     await flush();
-    jest.advanceTimersByTime(kActivityWriteFloorMs - 1);
+    jest.advanceTimersByTime(kActivityWriteIntervalMs - 1);
     await flush();
     expect(mockSet).toHaveBeenCalledTimes(1);
     jest.advanceTimersByTime(1);
@@ -129,7 +129,7 @@ describe("ActivityRecorder", () => {
     expect(mockSet).toHaveBeenCalledTimes(2);
   });
 
-  it("keeps writing every floor interval under a steady stream of changes", async () => {
+  it("keeps writing every interval under a steady stream of changes", async () => {
     recorder = new ActivityRecorder(makeStores());
     const doc = makeDocument();
     for (let second = 0; second < 16; second++) {
@@ -157,7 +157,7 @@ describe("ActivityRecorder", () => {
     expect(mockSet).toHaveBeenCalledTimes(1);
   });
 
-  it("on pagehide writes inside the floor of the previous write", async () => {
+  it("on pagehide writes inside the interval of the previous write", async () => {
     recorder = new ActivityRecorder(makeStores());
     const doc = makeDocument();
     recorder.onLocalEntryUploaded(doc, addSavedEntry(doc));
@@ -178,7 +178,7 @@ describe("ActivityRecorder", () => {
     recorder.onLocalEntryUploaded(doc, addSavedEntry(doc));
     await flush();
     expect(mockSet).toHaveBeenCalledTimes(1);
-    const waits = [2, 4, 8].map(n => n * kActivityWriteFloorMs).concat(kActivityMaxRetryDelayMs);
+    const waits = [2, 4, 8].map(n => n * kActivityWriteIntervalMs).concat(kActivityMaxRetryDelayMs);
     for (const [i, wait] of waits.entries()) {
       if (i === waits.length - 1) mockSet.mockResolvedValue(undefined);
       await advance(wait - 1);
@@ -187,10 +187,28 @@ describe("ActivityRecorder", () => {
       expect(mockSet).toHaveBeenCalledTimes(i + 2);
     }
     recorder.onLocalEntryUploaded(doc, addSavedEntry(doc));
-    await advance(kActivityWriteFloorMs - 1);
+    await advance(kActivityWriteIntervalMs - 1);
     expect(mockSet).toHaveBeenCalledTimes(5);
     await advance(1);
     expect(mockSet).toHaveBeenCalledTimes(6);
+  });
+
+  it("a retry keeps the offering key of a failed write's changes", async () => {
+    mockSet.mockRejectedValueOnce(new Error("unavailable"));
+    jest.spyOn(console, "warn").mockImplementation(() => undefined);
+    recorder = new ActivityRecorder(makeStores());
+    const problem = makeDocument("problem");
+    recorder.onLocalEntryUploaded(problem, addSavedEntry(problem));
+    await flush();
+    const personal = makeDocument("personal");
+    recorder.onLocalEntryUploaded(personal, addSavedEntry(personal));
+    await advance(2 * kActivityWriteIntervalMs);
+    expect(mockSet).toHaveBeenCalledTimes(2);
+    expect("changed" in mockSet.mock.calls[1][0]).toBe(true);
+    recorder.onLocalEntryUploaded(personal, addSavedEntry(personal));
+    await advance(kActivityWriteIntervalMs);
+    expect(mockSet).toHaveBeenCalledTimes(3);
+    expect("changed" in mockSet.mock.calls[2][0]).toBe(false);
   });
 
   it("keeps a save reported before the entry's upload lands", async () => {
