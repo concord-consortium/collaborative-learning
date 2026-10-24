@@ -71,7 +71,7 @@ const kPageBudgetBytes = 8 * 1024 * 1024;
 
 const kSegmentChars = "[^/.#$[\\]]";
 export const kSegment = new RegExp(`^${kSegmentChars}+$`);
-export const kGroupUid = new RegExp(`^group_(\\d+)_${kSegmentChars}+$`);
+export const kGroupUid = new RegExp(`^group_\\d+_${kSegmentChars}+$`);
 
 type Metadata = Record<string, unknown>;
 
@@ -94,9 +94,8 @@ const parseOffering = (value: unknown): number | undefined => {
   return undefined;
 };
 
-const documentOffering = (owner: ExportOwner, firestore: Metadata | null, rtdb: Metadata | null) => {
-  const groupOffering = owner.kind === "group" ? kGroupUid.exec(owner.uid)?.[1] : undefined;
-  const value = [rtdb?.offeringId, firestore?.offeringId, groupOffering].find(isPresent);
+const documentOffering = (firestore: Metadata | null, rtdb: Metadata | null) => {
+  const value = [rtdb?.offeringId, firestore?.offeringId].find(isPresent);
   return value === undefined ? null : parseOffering(value);
 };
 
@@ -239,7 +238,7 @@ export async function walk(stores: ExportStores, request: WalkRequest, budgetByt
     });
     const candidates: Candidate[] = [];
     for (const [docId, {firestore, rtdb}] of byId) {
-      const offering = documentOffering(owner, firestore, rtdb);
+      const offering = documentOffering(firestore, rtdb);
       if (offering === undefined) continue;
       if (offering !== null && !owner.offerings.includes(offering)) continue;
       candidates.push({docId, firestore, rtdb, offering});

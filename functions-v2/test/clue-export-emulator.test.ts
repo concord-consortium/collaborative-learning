@@ -95,9 +95,12 @@ const seed = async () => {
   await seedDocument({uid: kStudent, docId: "fsonly", firestore: {type: "personal", title: "Only Firestore"}});
   await seedHistory(kHistoryDoc);
 
-  await seedDocument({uid: "group_701_3", docId: "gdoc701", firestore: {type: "group"}, rtdb: {type: "group"}});
+  await seedDocument({uid: "group_701_3", docId: "gdoc701", firestore: {type: "group", offeringId: "701"},
+    rtdb: {type: "group"}});
+  await seedDocument({uid: "group_701_3", docId: "gdocbare", firestore: {type: "group"}, rtdb: {type: "group"}});
   await seedDocument({uid: "group_701_3", docId: "gdocstamped", rtdb: {type: "group", offeringId: "702"}});
-  await seedDocument({uid: "group_702_4", docId: "gdoc702", firestore: {type: "group"}, rtdb: {type: "group"}});
+  await seedDocument({uid: "group_702_4", docId: "gdoc702", firestore: {type: "group", offeringId: "702"},
+    rtdb: {type: "group"}});
   await seedDocument({uid: "group_7010_9", docId: "gdoc7010", rtdb: {type: "group"}});
   await seedDocument({uid: `class_${kHash}`, docId: "cdoc", firestore: {type: "class"}});
 
@@ -196,16 +199,17 @@ describe("clueExport walk", () => {
     expect(page.items.map((item) => [item.doc_id, item.metadata_sources])).toEqual([["0", ["rtdb"]], ["1", ["rtdb"]]]);
   });
 
-  it("documents takes a group's offering from its uid and serves the class owner", async () => {
+  it("documents reads a group's offering from metadata and keeps one with none", async () => {
     const page = await walk(stores(), request("documents", [kGroupOwner, kClassOwner]));
     expect(page.items.map((item) => [item.doc_id, item.owner_kind, item.offering_id]))
-      .toEqual([["gdoc701", "group", 701], ["cdoc", "class", null]]);
+      .toEqual([["gdoc701", "group", 701], ["gdocbare", "group", null], ["cdoc", "class", null]]);
     const otherGroup = {...kGroupOwner, uid: "group_702_4", offerings: [702]};
     expect((await walk(stores(), request("documents", [otherGroup]))).items.map((item) => item.doc_id))
       .toEqual(["gdoc702"]);
     expect((await walk(stores(), request("documents", [{...otherGroup, offerings: [701]}]))).items).toEqual([]);
     const stamped = await walk(stores(), request("documents", [{...kGroupOwner, offerings: [702]}]));
-    expect(stamped.items.map((item) => [item.doc_id, item.offering_id])).toEqual([["gdocstamped", 702]]);
+    expect(stamped.items.map((item) => [item.doc_id, item.offering_id]))
+      .toEqual([["gdocbare", null], ["gdocstamped", 702]]);
   });
 
   it("the handler answers a walk and owners with the wire contract's envelopes", async () => {
