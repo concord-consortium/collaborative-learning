@@ -7,7 +7,9 @@
     "check": "node build.mjs --check"
   },
   "dependencies": {
+    "jsdom": "26.1.0",
     "pxt-core": "13.0.4",
-    "pxt-microbit": "9.0.5"
+    "pxt-microbit": "9.0.5",
+    "typescript": "5.9.3"
   }
 }

@@ -1,7 +1,7 @@
 name: CI Firmware
-# Rebuilds the Spiker:bit firmware hex with the pinned MakeCode toolchain and fails when it
-# differs from the committed spikerbit-clue.hex, i.e. when spikerbit-clue.ts changed but the
-# hex wasn't rebuilt. See src/plugins/dataflow/firmware/README.md.
+# Rebuilds the Spiker:bit firmware hex, and the user guide sections and images generated from
+# the firmware source, with the pinned MakeCode toolchain. It fails when any of them differs
+# from what is committed, i.e. when spikerbit-clue.ts changed but they weren't rebuilt. See src/plugins/dataflow/firmware/README.md.
 
 # pull_request, not push, for branches: its path filter compares the whole PR with its base
 # branch, so every new head of a PR that touches the firmware gets the check. A push filter
@@ -23,7 +23,7 @@ on:
 
 jobs:
   firmware:
-    name: Check Spiker:bit firmware hex
+    name: Check Spiker:bit firmware hex and guide
     runs-on: ubuntu-latest
     timeout-minutes: 15
     permissions:
@@ -49,3 +49,18 @@ jobs:
         run: |
           echo "// stale" >> ../../src/plugins/dataflow/firmware/spikerbit-clue.ts
           if npm run check; then echo "check passed with a stale source" >&2; exit 1; fi
+      - name: Check that a hand-edited guide fails
+        working-directory: ./scripts/spikerbit-firmware
+        run: |
+          # Undo the previous step's edit so that it can't be what fails this check.
+          git checkout -- ../../src/plugins/dataflow/firmware/spikerbit-clue.ts
+          # Append to the last line of the generated values section, a table row.
+          node -e '
+            const fs = require("fs");
+            const file = "../../src/plugins/dataflow/firmware/user-guide.md";
+            const lines = fs.readFileSync(file, "utf8").split("\n");
+            const end = lines.indexOf("<!-- end generated: values -->");
+            lines[end - 1] += "x";
+            fs.writeFileSync(file, lines.join("\n"));
+          '
+          if npm run check; then echo "check passed with a hand-edited guide" >&2; exit 1; fi
