@@ -17,8 +17,18 @@ const kIdentifyAttempts = 5;
 const kDriveDir = "/Volumes/MICROBIT";
 const kHexPath = path.resolve(path.dirname(fileURLToPath(import.meta.url)),
   "../../src/plugins/dataflow/firmware/spikerbit-clue.hex");
+const kSourcePath = path.resolve(path.dirname(fileURLToPath(import.meta.url)),
+  "../../src/plugins/dataflow/firmware/spikerbit-clue.ts");
 const kReadingPattern = /^[a-z0-9_/]+:-?\d+(\.\d+)?$/;
 const kLegacyPattern = /CLUE-SPIKERBIT v(\d+)/;
+
+// The identification line, from `const HELLO = "..."` in the MakeCode source, so a firmware
+// version bump doesn't leave the bench's first check expecting the old line.
+function readExpectedHello() {
+  const match = /const HELLO = "([^"]+)"/.exec(fs.readFileSync(kSourcePath, "utf8"));
+  if (!match) throw new Error(`Could not find const HELLO = "..." in ${kSourcePath}`);
+  return match[1];
+}
 
 const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -227,8 +237,7 @@ function checkReadings(lines, ms, min, max) {
 // `#n` in a `send` string is the next sequence number.
 function buildChecks() {
   return [
-    { name: "? identifies the board", send: "?",
-      reply: "hello protocol:CCDeviceProtocol version:1 device:spikerbit firmware:4" },
+    { name: "? identifies the board", send: "?", reply: readExpectedHello() },
     { name: "open with a session id", send: ctx => `open session:${ctx.id} #n`, reply: ctx => `ok #${ctx.n}` },
     { name: "readings arrive about every 100 ms in a session",
       run: async (board) => {
