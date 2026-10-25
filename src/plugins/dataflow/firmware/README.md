@@ -1,9 +1,9 @@
-# Spiker:bit DataFlow firmware
+# Spiker:bit Dataflow firmware
 
 What the firmware does, its commands, its LED displays and how to try it on a board are in the
 [user guide](user-guide.md). This page is for developers changing the firmware.
 
-`spikerbit-clue.hex` is a universal micro:bit hex (V1+V2) authored in MakeCode. The DataFlow
+`spikerbit-clue.hex` is a universal micro:bit hex (V1+V2) authored in MakeCode. The Dataflow
 tile flashes it automatically over WebUSB (via `@microbit/microbit-connection`) when a
 connected micro:bit is not already running it.
 
