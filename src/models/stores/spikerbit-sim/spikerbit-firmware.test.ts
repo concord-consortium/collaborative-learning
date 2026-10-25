@@ -311,6 +311,7 @@ describe("Spiker:bit firmware", () => {
     expect(exchange(sim, "servo:60.6")).toEqual([]);
     expect(sim.servoAngle("P0")).toBe(61);
     expect(exchange(sim, "servo:abc")).toEqual(["err value"]);
+    expect(exchange(sim, "servo:.5")).toEqual(["err value"]);
     expect(exchange(sim, "servo: #3")).toEqual(["err #3 value"]);
     expect(sim.servoAngle("P0")).toBe(61);
   });
@@ -333,6 +334,9 @@ describe("Spiker:bit firmware", () => {
     expect(replies(run(sim, 100))).toEqual(["err checksum"]);
     sim.sendSerial("servo:45 #3*zz\n");
     expect(replies(run(sim, 100))).toEqual(["err checksum"]);
+    // The right checksum, 7C, with a third digit: a checksum is exactly two.
+    sim.sendSerial("servo:48 #4*7C0\n");
+    expect(replies(run(sim, 100))).toEqual(["err checksum"]);
     expect(sim.servoAngle("P0")).toBeUndefined();
 
     sim.sendSerial("servo:45 #3\n");
@@ -345,9 +349,10 @@ describe("Spiker:bit firmware", () => {
     expect(sim.servoAngle("P0")).toBe(48);
   });
 
-  it("refuses an unknown verb, adding #n only when the command had one", () => {
+  it("refuses an unknown verb, adding #n only when the command had one, and a #n that isn't a number", () => {
     const sim = boot();
     expect(exchange(sim, "foo #9")).toEqual(["err #9 unknown"]);
+    expect(exchange(sim, "ping #abc")).toEqual(["err value"]);
     expect(exchange(sim, "foo")).toEqual(["err unknown"]);
     expect(exchange(sim, "caps #10")).toEqual(["err #10 unknown"]);
     expect(exchange(sim, "identify extra:1 #11")).toEqual(["err #11 unknown"]);
