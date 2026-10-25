@@ -81,7 +81,7 @@ describe("MakeCodeSim runtime", () => {
     return MakeCodeSim.load(file, { hardwareVersion });
   };
 
-  it("reports an API the firmware uses but the sim doesn't fake", () => {
+  it("reports an API a program uses but the sim doesn't fake", () => {
     expect(() => load(`radio.sendString("hi")`)).toThrow("not simulated: radio.sendString");
     expect(() => load(`serial.readString()`)).toThrow("not simulated: serial.readString");
     expect(() => load(`basic.showIcon(IconNames.Unicorn, 0)`)).toThrow("not simulated: IconNames.Unicorn");
