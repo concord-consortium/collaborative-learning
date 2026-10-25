@@ -25,10 +25,12 @@ describe("parseCcDeviceLine", () => {
     expect(parseCcDeviceLine("emg:512*00")).toBeNull();
     expect(parseCcDeviceLine("emg:8*6d")).toEqual({ kind: "reading", name: "emg", value: 8 });
   });
-  it("parses ok and err with and without #n", () => {
+  it("parses ok #n, and err with and without #n", () => {
     expect(parseCcDeviceLine("ok #12")).toEqual({ kind: "ok", seq: 12 });
     expect(parseCcDeviceLine("err #3 nosession")).toEqual({ kind: "err", seq: 3, reason: "nosession" });
     expect(parseCcDeviceLine("err checksum")).toEqual({ kind: "err", reason: "checksum" });
+    // An err without a reason still answers its command.
+    expect(parseCcDeviceLine("err #3")).toEqual({ kind: "err", seq: 3, reason: "" });
   });
   it("parses hello fields", () => {
     expect(parseCcDeviceLine("hello protocol:CCDeviceProtocol version:1 device:spikerbit firmware:4"))
@@ -41,6 +43,11 @@ describe("parseCcDeviceLine", () => {
     expect(parseCcDeviceLine("cap sensor:emg")).toEqual({ kind: "unknown" });
     expect(parseCcDeviceLine("emg:abc")).toEqual({ kind: "unknown" });
     expect(parseCcDeviceLine("CLUE-SPIKERBIT v3")).toEqual({ kind: "unknown" });
+    // Reading names are lowercase.
+    expect(parseCcDeviceLine("EMG:1")).toEqual({ kind: "unknown" });
+    // An ok always carries the #n it answers, and nothing after it.
+    expect(parseCcDeviceLine("ok")).toEqual({ kind: "unknown" });
+    expect(parseCcDeviceLine("ok #3 junk")).toEqual({ kind: "unknown" });
   });
 });
 
@@ -65,5 +72,10 @@ describe("parseHello", () => {
   it("rejects missing or non-numeric fields", () => {
     expect(parseHello({ protocol: "CCDeviceProtocol", version: "1", device: "spikerbit" })).toBeNull();
     expect(parseHello({ protocol: "CCDeviceProtocol", version: "x", device: "spikerbit", firmware: "4" })).toBeNull();
+    expect(parseHello({ protocol: "CCDeviceProtocol", version: "", device: "spikerbit", firmware: "4" })).toBeNull();
+  });
+  it("rejects a number too large to hold", () => {
+    const firmware = "9".repeat(400);
+    expect(parseHello({ protocol: "CCDeviceProtocol", version: "1", device: "spikerbit", firmware })).toBeNull();
   });
 });

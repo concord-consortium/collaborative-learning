@@ -5,7 +5,7 @@ export const kCcDeviceProtocolVersion = 1;
 
 export type CcDeviceLine =
   | { kind: "reading"; name: string; value: number }
-  | { kind: "ok"; seq?: number }
+  | { kind: "ok"; seq: number }
   | { kind: "err"; seq?: number; reason: string }
   | { kind: "hello"; fields: Record<string, string> }
   | { kind: "unknown" };
@@ -62,7 +62,6 @@ export function parseCcDeviceLine(line: string): CcDeviceLine | null {
         return { kind: "reading", name, value: Number(valueText) };
       }
     }
-    if (first === "ok") return { kind: "ok" };
     return { kind: "unknown" };
   }
 
@@ -101,7 +100,7 @@ export function splitLines(buffer: string): { lines: string[]; remaining: string
   return { lines, remaining: buffer.substring(start) };
 }
 
-// Returns null if any field is missing or not a number where one is expected.
+// Returns null if any field is missing, or if version or firmware isn't a finite number.
 export function parseHello(fields: Record<string, string>): CcDeviceHello | null {
   const { protocol, version, device, firmware } = fields;
   if (protocol === undefined || version === undefined || device === undefined || firmware === undefined) {
