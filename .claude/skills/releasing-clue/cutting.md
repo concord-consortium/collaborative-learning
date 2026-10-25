@@ -207,8 +207,10 @@ Run the portal launch spec against a release assignment on staging. It launches 
 checks the edit persists, and checks the teacher sees it. It runs twice: here, against an
 assignment whose resource is on `branch/v<X.Y>.x/`, and after the tag against one on
 `version/v<X.Y.Z>/`. Each needs its own resource, teacher report and offering for the test class,
-since the spec checks the report's CLUE path matches the resource's. If staging has no
-branch-pinned smoke-test assignment yet, the first branch-first release creates one (below).
+since the spec checks the report's CLUE path matches the resource's. The previous release's
+smoke-test set has both, assigned in the developer's class and created by the admin API user:
+resources named "(vX.Y.Z, staging FB)" and "(vX.Y.x branch, staging FB)", with the matching
+teacher reports. `GET /api/v1/classes/<id>` lists the class's offerings with their URLs.
 
 First check the assignment's resource URL is on the expected path (`branch/v<X.Y>.x/` here) and
 includes `firebaseEnv=staging` (the resource's edit page, or the portal API). On the branch the
