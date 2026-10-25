@@ -1,8 +1,8 @@
 # Spiker:bit protocol bench
 
 A Node script that talks to a real Spiker:bit over its USB serial port and checks the firmware's
-replies to every CC Device Protocol command. It checks replies
-only. It can't see sensors, the display, sound or the servo, so those checks stay with a person.
+replies to every CC Device Protocol command. It checks replies only: sensors, the display,
+sound and the servo still need a person.
 
 ## Running
 
@@ -19,11 +19,11 @@ npm run bench:spikerbit -- [--port <path>] [--flash]
   can block while the board reprograms. If the copy hasn't finished after 30 s the script says
   "flash copy is stuck; unplug and replug the board" and exits 1.
 
-The first thing it does is send `?`. If the board answers with the old `CLUE-SPIKERBIT v<N>`
-banner, the script stops with "running v<N> firmware; rerun with --flash".
+The first thing it does is send `?`. If the board answers with the v1–v3 banner,
+`CLUE-SPIKERBIT v<N>`, the script stops with "running v<N> firmware; rerun with --flash".
 
-Each check prints `PASS` or `FAIL` and its name; a failure also shows what was sent and what came
-back. The exit code is 0 when every check passes and 1 otherwise. The checks are the array
+Each check prints `PASS` or `FAIL` and its name; a failed send/reply check also shows what was
+sent and what came back. The exit code is 0 when every check passes and 1 otherwise. The checks are the array
 returned by `buildChecks` in `bench.mjs`. The script ends with `close` so the board is left idle.
 
 ## Notes
