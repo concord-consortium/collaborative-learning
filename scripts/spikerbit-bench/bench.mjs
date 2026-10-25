@@ -289,7 +289,8 @@ function buildChecks() {
         const lines = await board.collect(500);
         return lines.length ? `expected silence after stop, got ${describeLines(lines)}` : null;
       } },
-    { name: "open for the stream/servo checks", send: ctx => `open session:${ctx.id} #n`, reply: ctx => `ok #${ctx.n}` },
+    { name: "open for the stream/servo checks",
+      send: ctx => `open session:${ctx.id} #n`, reply: ctx => `ok #${ctx.n}` },
     { name: "stream during a session -> err insession", send: "stream #n", reply: ctx => `err #${ctx.n} insession` },
     { name: "servo:90 -> ok", send: "servo:90 #n", reply: ctx => `ok #${ctx.n}` },
     { name: "servo:abc -> err value", send: "servo:abc #n", reply: ctx => `err #${ctx.n} value` },
@@ -364,7 +365,8 @@ async function main() {
       hello = firstLines.some(line => verifiedBody(line)?.startsWith("hello "));
     }
     if (!hello) {
-      console.log(`no reply to ?; is the board running this firmware? rerun with --flash (got ${describeLines(firstLines)})`);
+      console.log("no reply to ?; is the board running this firmware? rerun with --flash " +
+        `(got ${describeLines(firstLines)})`);
       failed = 1;
       return;
     }
@@ -375,7 +377,8 @@ async function main() {
         failed++;
         console.log(`FAIL ${check.name}`);
         if (sent) console.log(`     sent: ${JSON.stringify(sent)}`);
-        console.log(`     ${failure}${got !== undefined && got !== null ? ` (came back: ${JSON.stringify(got)})` : ""}`);
+        const cameBack = got !== undefined && got !== null ? ` (came back: ${JSON.stringify(got)})` : "";
+        console.log(`     ${failure}${cameBack}`);
       } else {
         console.log(`PASS ${check.name}`);
       }
