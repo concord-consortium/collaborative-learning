@@ -35,6 +35,7 @@ describe("MakeCodeSim running the Spiker:bit firmware", () => {
   it("drives the servo from servo:<angle>", () => {
     const s = sim();
     s.sendSerial(`${withChecksum("servo:90")}\n`);
+    s.advance(0);
     expect(s.servoAngle("P0")).toBe(90);
   });
 
@@ -121,18 +122,6 @@ describe("MakeCodeSim runtime", () => {
     expect(s.takeSerialLines()).toEqual(["one", "two", "one", "two"]);
   });
 
-  it("runs onDataReceived once per delimiter, handing each call the text before it", () => {
-    const s = load(`
-      serial.onDataReceived(serial.delimiters(Delimiters.NewLine), function () {
-        serial.writeLine("got [" + serial.readUntil(serial.delimiters(Delimiters.NewLine)) + "]")
-      })
-    `);
-    s.sendSerial("a\nb");
-    expect(s.takeSerialLines()).toEqual(["got [a]"]);
-    s.sendSerial("c\nd\n");
-    expect(s.takeSerialLines()).toEqual(["got [bc]", "got [d]"]);
-  });
-
   const echoLines = `
     serial.onDataReceived(serial.delimiters(Delimiters.NewLine), function () {
       serial.writeLine("got [" + serial.readUntil(serial.delimiters(Delimiters.NewLine)) + "]")
@@ -140,9 +129,30 @@ describe("MakeCodeSim runtime", () => {
   `;
   const line30 = "abcdefghijklmnopqrstuvwxyz0123";
 
+  it("runs onDataReceived at the next scheduler step, once per delimiter, handing each call its line", () => {
+    const s = load(echoLines);
+    s.sendSerial("a\nb");
+    expect(s.takeSerialLines()).toEqual([]);
+    s.advance(0);
+    expect(s.takeSerialLines()).toEqual(["got [a]"]);
+    s.sendSerial("c\nd\n");
+    s.advance(0);
+    expect(s.takeSerialLines()).toEqual(["got [bc]", "got [d]"]);
+  });
+
+  it("holds every line of one write in the receive buffer before the handler reads the first", () => {
+    const s = load(echoLines);
+    // The first two lines take 12 of the default 20 characters, so the buffer keeps 8 of the third
+    // and drops the rest, and the board's readUntil takes the last one kept as its delimiter.
+    s.sendSerial("abcde\nfghij\nklmnopqrstu\n");
+    s.advance(0);
+    expect(s.takeSerialLines()).toEqual(["got [abcde]", "got [fghij]", "got [klmnopq]"]);
+  });
+
   it("truncates a line longer than the default 20-character receive buffer", () => {
     const s = load(echoLines);
     s.sendSerial(`${line30}\n`);
+    s.advance(0);
     // The buffer keeps the first 20 characters and drops the rest, the newline included. The
     // dropped newline still raises the event, and the board's readUntil then takes the 20th
     // character as the delimiter.
@@ -152,6 +162,7 @@ describe("MakeCodeSim runtime", () => {
   it("delivers a 30-character line whole after setRxBufferSize(64)", () => {
     const s = load(`serial.setRxBufferSize(64)\n${echoLines}`);
     s.sendSerial(`${line30}\n`);
+    s.advance(0);
     expect(s.takeSerialLines()).toEqual([`got [${line30}]`]);
   });
 
@@ -159,7 +170,8 @@ describe("MakeCodeSim runtime", () => {
     const s = load(`
       serial.onDataReceived(serial.delimiters(Delimiters.NewLine), function () { basic.pause(10) })
     `);
-    expect(() => s.sendSerial("x\n")).toThrow("event handlers must not pause");
+    s.sendSerial("x\n");
+    expect(() => s.advance(0)).toThrow("event handlers must not pause");
   });
 
   it("raises a button's click or long-click event for the handlers registered for it", () => {

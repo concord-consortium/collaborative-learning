@@ -103,7 +103,9 @@ if the program turns the speaker on or plays a sound expression.
 - `basic.pause(0)` lets 2 ms pass, about one pass of the sampler on a V2, and the `forever`
   loop sleeps 20 ms after every pass, as MakeCode's does.
 - **The serial receive buffer** holds 20 characters unless the firmware calls
-  `serial.setRxBufferSize`, and a longer line is truncated, as on the board.
+  `serial.setRxBufferSize`, and a longer line is truncated, as on the board. The handler
+  runs at the next scheduler step, as the board's message bus queues it, so all the lines of
+  one `sendSerial` share the buffer before the first is read.
 
 These tests check the program's logic, not its timing on the board or the compiled hex.
 

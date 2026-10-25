@@ -25,7 +25,15 @@ function boot(hardwareVersion?: string) {
   return sim;
 }
 
+// The board reads a line at its next scheduler step, so lines sent with no `run` between them
+// arrive together.
 const send = (sim: MakeCodeSim, command: string) => sim.sendSerial(`${withChecksum(command)}\n`);
+
+// Sends one command and lets the board handle it without moving the clock.
+function handle(sim: MakeCodeSim, command: string) {
+  send(sim, command);
+  sim.advance(0);
+}
 
 const isReading = (line: string) => parseCcDeviceLine(line)?.kind === "reading";
 
@@ -301,6 +309,20 @@ describe("Spiker:bit firmware", () => {
     expect(replies(run(sim, 100))).toEqual(["ok #1", "ok #2", "ok #3"]);
   });
 
+  it("answers every line of a burst that arrives before it reads the first", () => {
+    const sim = boot();
+    const commands = [
+      "open session:7 timeout:60000 #1", "servo:90 #2", "ping session:7 #3", "identify #4", "ping #5",
+      "servo:45.5 #6", "?"
+    ];
+    const burst = commands.map(command => `${withChecksum(command)}\n`).join("");
+    // Nearly fills the 128-character receive buffer.
+    expect(burst.length).toBeGreaterThan(110);
+    sim.sendSerial(burst);
+    expect(replies(run(sim, 100))).toEqual(["ok #1", "ok #2", "ok #3", "ok #4", "ok #5", "ok #6", kHello]);
+    expect(sim.servoAngle("P0")).toBe(46);
+  });
+
   it("leaves the servo where it was when a session ends", () => {
     const sim = inSession(1000);
     send(sim, "servo:120");
@@ -328,7 +350,7 @@ describe("Spiker:bit firmware display, sound and buttons", () => {
   it("shows the connected icon on open for 3000 ms, then draws nothing for the rest of the session", () => {
     const sim = boot();
     exchange(sim, "?");
-    send(sim, "open session:7 #1");
+    handle(sim, "open session:7 #1");
     expect(sim.shownIcon()).toBe(kConnectedIcon);
     run(sim, kIconMs - 10);
     expect(sim.shownIcon()).toBe(kConnectedIcon);
@@ -348,7 +370,7 @@ describe("Spiker:bit firmware display, sound and buttons", () => {
     const sim = inSession();
     expect(exchange(sim, "identify #2")).toEqual(["ok #2"]);
     expect(sim.soundsStopped).toBe(0);
-    send(sim, "close session:7");
+    handle(sim, "close session:7");
     expect(sim.shownIcon()).toBe(kWaitingIcon);
     expect(sim.soundsStopped).toBe(1);
     // The identify icon's time running out doesn't change the display.
@@ -364,7 +386,7 @@ describe("Spiker:bit firmware display, sound and buttons", () => {
   it("answers identify with its icon and one sound from the speaker alone, then shows what the state calls for", () => {
     const identify = (sim: MakeCodeSim, command: string, reply: string[], after: string | undefined) => {
       const soundsBefore = sim.sounds.length;
-      send(sim, command);
+      handle(sim, command);
       expect(sim.shownIcon()).toBe(kIdentifyIcon);
       expect(replies(run(sim, kIconMs - 10))).toEqual(reply);
       expect(sim.shownIcon()).toBe(kIdentifyIcon);
@@ -398,7 +420,7 @@ describe("Spiker:bit firmware display, sound and buttons", () => {
     expect(sim.audioPinEnabled).toBe(false);
 
     send(sim, "open session:7 #5");
-    send(sim, "close session:7 #6");
+    handle(sim, "close session:7 #6");
     expect(sim.soundsStopped).toBe(0);
   });
 

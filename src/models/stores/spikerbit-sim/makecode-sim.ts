@@ -19,8 +19,9 @@ import * as ts from "typescript";
 // though the board runs it once, so a program times one-off waits (such as how long an icon
 // stays) from its forever loop with `control.millis()` deadlines instead.
 //
-// Events (serial input and buttons) run their handler synchronously and must not pause. A button
-// raises the events CODAL does: a click, or a long click when it was held for a second or more.
+// Event handlers must not pause. A button runs its handler at once, raising the events CODAL
+// does: a click, or a long click when it was held for a second or more. Serial input is queued,
+// as described at `sendSerial`.
 //
 // `control.hardwareVersion()` reports a micro:bit V2 ("2.0") unless the sim is loaded with another
 // version; a V1 reports "1". A V1 has no speaker, so on one, turning the speaker on or playing a
@@ -106,6 +107,8 @@ export class MakeCodeSim {
   private rxBufferSize = kDefaultRxBufferSize;
   private serialOutput = "";
   private serialHandler: { delimiters: string, handler: Thunk } | undefined;
+  // Serial events raised since the last scheduler step, one per delimiter.
+  private serialEvents: Thunk[] = [];
   private eventHandlers = new Map<string, Thunk>();
   private analog = new Map<string, () => number>();
   private servos = new Map<string, number>();
@@ -156,8 +159,10 @@ export class MakeCodeSim {
     return this._soundsStopped;
   }
 
+  // Runs the board for `ms`. Queued serial events run first, at the current time.
   advance(ms: number) {
     const until = this._now + ms;
+    this.runSerialEvents();
     for (let fiber = this.nextDue(until); fiber; fiber = this.nextDue(until)) {
       this._now = fiber.wakeAt;
       this.runFiber(fiber);
@@ -168,12 +173,15 @@ export class MakeCodeSim {
   // Follows codal-core's Serial::dataReceived: the receive buffer holds `rxBufferSize` characters
   // and drops any that arrive while it is full. A delimiter raises the data-received event even
   // when it is dropped, because CODAL checks for delimiters before it checks for room.
+  //
+  // The handler doesn't run here. pxt-microbit registers it with QUEUE_IF_BUSY, so on the board
+  // each event waits for the scheduler while the UART keeps filling the buffer. The sim queues one
+  // event per delimiter and runs them at the next `advance`, so every character of one
+  // `sendSerial` is in the buffer before the handler reads the first line.
   sendSerial(text: string) {
     for (const char of text) {
       if (this.serialInput.length < this.rxBufferSize) this.serialInput += char;
-      if (this.serialHandler?.delimiters.includes(char)) {
-        this.runEvent(this.serialHandler.handler);
-      }
+      if (this.serialHandler?.delimiters.includes(char)) this.serialEvents.push(this.serialHandler.handler);
     }
   }
 
@@ -241,6 +249,12 @@ export class MakeCodeSim {
       this.schedule(fiber, pausedMs);
     } else {
       this.fibers = this.fibers.filter(f => f !== fiber);
+    }
+  }
+
+  private runSerialEvents() {
+    while (this.serialEvents.length > 0) {
+      this.runEvent(this.serialEvents.shift()!);
     }
   }
 
