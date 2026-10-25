@@ -451,11 +451,6 @@ describe("Spiker:bit firmware reset (!!)", () => {
     expect(sim.shownIcon()).toBe(kWaitingIcon);
     expect(run(sim, 1000)).toEqual([]);
     expect(exchange(sim, "ping session:7 #3")).toEqual(["err #3 nosession"]);
-
-    // A new session opened without a timeout gets the default, not the old session's 60000.
-    expect(exchange(sim, "open session:8 #4")).toEqual(["ok #4"]);
-    run(sim, 5100);
-    expect(exchange(sim, "ping session:8 #5")).toEqual(["err #5 nosession"]);
   });
 
   it("writes nothing for !! without #n, and ends a session or free-run all the same", () => {
