@@ -129,6 +129,38 @@ describe("Spiker:bit firmware", () => {
     readings(lines).forEach(({ line }) => expect(body(line)).toMatch(/^emg:\d+$/));
   });
 
+  it("keeps readings 100 ms apart on average when the loop's passes run late", () => {
+    const sim = boot();
+    expect(exchange(sim, "stream #1")).toEqual(["ok #1"]);
+    // Each step lets one pass run, then holds the board until 3 ms after the next pass was due,
+    // so passes are 23 ms apart. Restarting the interval from each reading would space them 115.
+    const times: number[] = [];
+    while (times.length < 100) {
+      sim.advance(19);
+      sim.takeSerialLines().filter(isReading).forEach(() => times.push(sim.now));
+      sim.stall(4);
+    }
+    const average = (times[times.length - 1] - times[0]) / (times.length - 1);
+    expect(average).toBeGreaterThan(99.5);
+    expect(average).toBeLessThan(100.5);
+  });
+
+  it("sends one reading after a stall, then readings 100 ms apart from it", () => {
+    const sim = boot();
+    expect(exchange(sim, "stream #1")).toEqual(["ok #1"]);
+    run(sim, 1000);
+    sim.stall(250);
+    const stallEnd = sim.now;
+    const times = readings(run(sim, 1000)).map(l => l.at);
+    // Readings start over from the end of the stall rather than catching up.
+    expect(times.filter(at => at - stallEnd < 100)).toHaveLength(1);
+    expect(times.length).toBeGreaterThanOrEqual(9);
+    times.slice(1).forEach((at, i) => {
+      expect(at - times[i]).toBeGreaterThanOrEqual(80);
+      expect(at - times[i]).toBeLessThanOrEqual(120);
+    });
+  });
+
   it("keeps a session pinged every second alive past its timeout", () => {
     const sim = inSession();
     for (let second = 0; second < 10; second++) {

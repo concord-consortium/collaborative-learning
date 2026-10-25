@@ -86,9 +86,9 @@ so Jest runs `spikerbit-clue.ts` itself on a simulated MakeCode runtime,
 [`MakeCodeSim`](../../../models/stores/spikerbit-sim/makecode-sim.ts). It transpiles the
 source with `typescript`, runs it against fake MakeCode globals on a simulated clock, and
 lets a test send serial input, read serial output, click or long-press a button, set the
-analog input on a pin, and check the servo angle, the icon shown and the sounds played. It acts
-as a micro:bit V2 unless it is loaded with `hardwareVersion: "1"`; then, like a V1, it panics
-if the program turns the speaker on or plays a sound expression.
+analog input on a pin, stall the board, and check the servo angle, the icon shown and the
+sounds played. It acts as a micro:bit V2 unless it is loaded with `hardwareVersion: "1"`;
+then, like a V1, it panics if the program turns the speaker on or plays a sound expression.
 
 - **Only what the firmware uses is faked.** Calling anything else throws
   `not simulated: <name>`; add a fake to `makecode-sim.ts` when the firmware starts using

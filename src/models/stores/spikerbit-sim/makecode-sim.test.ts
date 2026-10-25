@@ -113,6 +113,14 @@ describe("MakeCodeSim runtime", () => {
     expect(s.takeSerialLines()).toEqual(["f 0", "b 0", "f 20", "f 40"]);
   });
 
+  it("runs each fiber that came due during a stall once, late, when the stall ends", () => {
+    const s = load(`basic.forever(function () { serial.writeLine("f " + control.millis()) })`);
+    s.advance(5);
+    s.stall(50);
+    s.advance(30);
+    expect(s.takeSerialLines()).toEqual(["f 0", "f 55", "f 75"]);
+  });
+
   it("runs fibers due at the same time in the order they were scheduled", () => {
     const s = load(`
       basic.forever(function () { serial.writeLine("one"); basic.pause(10) })

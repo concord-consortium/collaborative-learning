@@ -164,10 +164,17 @@ export class MakeCodeSim {
     const until = this._now + ms;
     this.runSerialEvents();
     for (let fiber = this.nextDue(until); fiber; fiber = this.nextDue(until)) {
-      this._now = fiber.wakeAt;
+      // A fiber that came due during a stall runs when the stall ends.
+      this._now = Math.max(this._now, fiber.wakeAt);
       this.runFiber(fiber);
     }
     this._now = until;
+  }
+
+  // Holds the board for `ms` without running anything, as a fiber that runs long without yielding
+  // would. Each fiber that comes due meanwhile runs once, late, when the next `advance` starts.
+  stall(ms: number) {
+    this._now += ms;
   }
 
   // Follows codal-core's Serial::dataReceived: the receive buffer holds `rxBufferSize` characters
