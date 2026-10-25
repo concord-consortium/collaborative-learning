@@ -7,7 +7,7 @@ import { MakeCodeSim } from "./makecode-sim";
 const firmwarePath = path.join(__dirname, "../../../plugins/dataflow/firmware/spikerbit-clue.ts");
 const kHello = "hello protocol:CCDeviceProtocol version:1 device:spikerbit firmware:4";
 
-// The firmware's display stages and its identify sound.
+// The firmware's displays and its identify sound.
 const kWaitingIcon = "Asleep";
 const kFoundIcon = "Surprised";
 const kConnectedIcon = "Yes";
@@ -72,7 +72,7 @@ function inSession(timeout?: number) {
 }
 
 describe("Spiker:bit firmware", () => {
-  it("is silent after power-up and never sends the legacy banner", () => {
+  it("is silent after power-up and never sends the v1–v3 banner", () => {
     const sim = boot();
     sim.advance(1000);
     expect(sim.takeSerialOutput()).toBe("");
