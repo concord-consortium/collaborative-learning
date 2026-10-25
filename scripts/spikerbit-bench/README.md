@@ -19,8 +19,10 @@ npm run bench:spikerbit -- [--port <path>] [--flash]
   can block while the board reprograms. If the copy hasn't finished after 30 s the script says
   "flash copy is stuck; unplug and replug the board" and exits 1.
 
-The first thing it does is send `?`. If the board answers with the v1–v3 banner,
-`CLUE-SPIKERBIT v<N>`, the script stops with "running v<N> firmware; rerun with --flash".
+It connects the way the protocol asks hosts to: `!! #n`, which stops a session or free-run an
+earlier host left running, then a plain `?`. If the board answers with the v1–v3 banner,
+`CLUE-SPIKERBIT v<N>`, the script stops with "running v<N> firmware; rerun with --flash". If
+the `hello` line comes without an `ok` for the `!!`, it stops and asks for `--flash` too.
 
 Each check prints `PASS` or `FAIL` and its name; a failed send/reply check also shows what was
 sent and what came back. The exit code is 0 when every check passes and 1 otherwise. The checks are the array
