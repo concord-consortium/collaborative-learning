@@ -291,9 +291,8 @@ function buildChecks() {
         const wrong = (parseInt(checksum(body), 16) ^ 0x01).toString(16).toUpperCase().padStart(2, "0");
         await board.write(`${body}*${wrong}\n`);
         const line = await board.nextReply();
-        // The board can't trust the #n in a line that failed its checksum, so accept either form.
-        const failure = checkReply(line, "err checksum");
-        return failure && checkReply(line, `err #${n} checksum`) ? failure : null;
+        // The board can't trust the #n in a line that failed its checksum, so it leaves it out.
+        return checkReply(line, "err checksum");
       } },
     { name: "foo -> err unknown", send: "foo #n", reply: ctx => `err #${ctx.n} unknown` },
     { name: "identify #n -> ok", send: "identify #n", reply: ctx => `ok #${ctx.n}` },
