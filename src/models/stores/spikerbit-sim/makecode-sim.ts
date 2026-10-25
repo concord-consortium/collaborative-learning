@@ -185,7 +185,9 @@ export class MakeCodeSim {
   // The handler doesn't run here. pxt-microbit registers it with QUEUE_IF_BUSY, so on the board
   // each event waits for the scheduler while the UART keeps filling the buffer. The sim queues one
   // event per delimiter and runs them at the next `advance`, so every character of one
-  // `sendSerial` is in the buffer before the handler reads the first line.
+  // `sendSerial` is in the buffer, or dropped, before the handler first reads it. A line split over
+  // two `sendSerial` calls with an `advance` between them arrives as on a board whose handler reads
+  // before the rest of the line is in.
   sendSerial(text: string) {
     for (const char of text) {
       if (this.serialInput.length < this.rxBufferSize) this.serialInput += char;
@@ -285,24 +287,6 @@ export class MakeCodeSim {
     this.displayCalls.push(name);
   }
 
-  private readUntil(delimiters: string) {
-    const index = [...this.serialInput].findIndex(char => delimiters.includes(char));
-    if (index >= 0) {
-      const line = this.serialInput.slice(0, index);
-      this.serialInput = this.serialInput.slice(index + 1);
-      return line;
-    }
-    // No delimiter in the buffer: the line overflowed it and its delimiter was dropped. On the
-    // board, readUntil then waits for the next delimiter event and returns the buffer up to its
-    // last character, consuming that character as if it were the delimiter (codal-core's
-    // Serial::readUntil in SYNC_SLEEP mode, which MakeCode uses). Handlers can't wait here, so
-    // the sim returns that text at once. The board loses the next line too, which fills the
-    // still-full buffer while readUntil waits; the sim reads that line normally.
-    const text = this.serialInput.slice(0, -1);
-    this.serialInput = "";
-    return text;
-  }
-
   private globals(): Record<string, unknown> {
     const PlaybackMode = enumeration("music.PlaybackMode", ["UntilDone", "InBackground", "LoopingInBackground"]);
     return {
@@ -346,7 +330,12 @@ export class MakeCodeSim {
         writeLine: (text: string) => { this.serialOutput += `${text}\r\n`; },
         onDataReceived: (delimiters: string, handler: Thunk) => { this.serialHandler = { delimiters, handler }; },
         delimiters: (delimiter: string) => delimiter,
-        readUntil: (delimiters: string) => this.readUntil(delimiters)
+        // Like pxt-microbit's, takes everything in the receive buffer without waiting.
+        readString: () => {
+          const text = this.serialInput;
+          this.serialInput = "";
+          return text;
+        }
       }),
       music: namespace("music", {
         PlaybackMode,

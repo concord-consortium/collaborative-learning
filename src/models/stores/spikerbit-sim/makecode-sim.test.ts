@@ -83,7 +83,7 @@ describe("MakeCodeSim runtime", () => {
 
   it("reports an API a program uses but the sim doesn't fake", () => {
     expect(() => load(`radio.sendString("hi")`)).toThrow("not simulated: radio.sendString");
-    expect(() => load(`serial.readString()`)).toThrow("not simulated: serial.readString");
+    expect(() => load(`serial.readUntil(",")`)).toThrow("not simulated: serial.readUntil");
     expect(() => load(`basic.showIcon(IconNames.Unicorn, 0)`)).toThrow("not simulated: IconNames.Unicorn");
   });
 
@@ -130,48 +130,47 @@ describe("MakeCodeSim runtime", () => {
     expect(s.takeSerialLines()).toEqual(["one", "two", "one", "two"]);
   });
 
+  // Writes what each data-received event reads, with "|" for each newline.
   const echoLines = `
     serial.onDataReceived(serial.delimiters(Delimiters.NewLine), function () {
-      serial.writeLine("got [" + serial.readUntil(serial.delimiters(Delimiters.NewLine)) + "]")
+      serial.writeLine("got [" + serial.readString().split("\\n").join("|") + "]")
     })
   `;
   const line30 = "abcdefghijklmnopqrstuvwxyz0123";
 
-  it("runs onDataReceived at the next scheduler step, once per delimiter, handing each call its line", () => {
+  it("runs onDataReceived at the next scheduler step, once per delimiter, and readString takes all there is", () => {
     const s = load(echoLines);
     s.sendSerial("a\nb");
     expect(s.takeSerialLines()).toEqual([]);
     s.advance(0);
-    expect(s.takeSerialLines()).toEqual(["got [a]"]);
+    expect(s.takeSerialLines()).toEqual(["got [a|b]"]);
     s.sendSerial("c\nd\n");
     s.advance(0);
-    expect(s.takeSerialLines()).toEqual(["got [bc]", "got [d]"]);
+    expect(s.takeSerialLines()).toEqual(["got [c|d|]", "got []"]);
   });
 
-  it("holds every line of one write in the receive buffer before the handler reads the first", () => {
+  it("holds every line of one write in the receive buffer before the handler reads it", () => {
     const s = load(echoLines);
     // The first two lines take 12 of the default 20 characters, so the buffer keeps 8 of the third
-    // and drops the rest, and the board's readUntil takes the last one kept as its delimiter.
+    // and drops the rest. Its dropped newline still raises the event.
     s.sendSerial("abcde\nfghij\nklmnopqrstu\n");
     s.advance(0);
-    expect(s.takeSerialLines()).toEqual(["got [abcde]", "got [fghij]", "got [klmnopq]"]);
+    expect(s.takeSerialLines()).toEqual(["got [abcde|fghij|klmnopqr]", "got []", "got []"]);
   });
 
-  it("truncates a line longer than the default 20-character receive buffer", () => {
+  it("keeps the first 20 characters of a longer line, with the default receive buffer", () => {
     const s = load(echoLines);
     s.sendSerial(`${line30}\n`);
     s.advance(0);
-    // The buffer keeps the first 20 characters and drops the rest, the newline included. The
-    // dropped newline still raises the event, and the board's readUntil then takes the 20th
-    // character as the delimiter.
-    expect(s.takeSerialLines()).toEqual([`got [${line30.slice(0, 19)}]`]);
+    // The buffer drops the rest, the newline included, and the dropped newline raises the event.
+    expect(s.takeSerialLines()).toEqual([`got [${line30.slice(0, 20)}]`]);
   });
 
   it("delivers a 30-character line whole after setRxBufferSize(64)", () => {
     const s = load(`serial.setRxBufferSize(64)\n${echoLines}`);
     s.sendSerial(`${line30}\n`);
     s.advance(0);
-    expect(s.takeSerialLines()).toEqual([`got [${line30}]`]);
+    expect(s.takeSerialLines()).toEqual([`got [${line30}|]`]);
   });
 
   it("refuses a pause inside an event handler", () => {

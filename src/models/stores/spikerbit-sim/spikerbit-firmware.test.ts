@@ -380,6 +380,52 @@ describe("Spiker:bit firmware", () => {
     expect(sim.servoAngle("P0")).toBe(46);
   });
 
+  it("answers a line that overflows the receive buffer with err value, and every line after it as usual", () => {
+    const sim = boot();
+    // The 128-character buffer keeps the first 128 x's and drops the rest, the newline included.
+    sim.sendSerial(`${"x".repeat(130)}\n`);
+    expect(replies(run(sim, 100))).toEqual(["err value"]);
+    expect(exchange(sim, "ping #4")).toEqual(["ok #4"]);
+    expect(exchange(sim, "ping #5")).toEqual(["ok #5"]);
+    send(sim, "ping #6");
+    send(sim, "ping #7");
+    expect(replies(run(sim, 100))).toEqual(["ok #6", "ok #7"]);
+    send(sim, "servo:90");
+    send(sim, "ping #9");
+    expect(replies(run(sim, 100))).toEqual(["ok #9"]);
+    expect(sim.servoAngle("P0")).toBe(90);
+
+    // In a burst that overflows, the lines that fit are handled and the one cut off is answered
+    // err value. The line after it is dropped whole.
+    sim.sendSerial(`${withChecksum("ping #10")}\n${"x".repeat(200)}\n${withChecksum("ping #11")}\n`);
+    expect(replies(run(sim, 100))).toEqual(["ok #10", "err value"]);
+    expect(exchange(sim, "ping #12")).toEqual(["ok #12"]);
+
+    // A line that fills the buffer exactly, with its newline, fits.
+    const fits = `ping${" ".repeat(120)}#13\n`;
+    expect(fits.length).toBe(128);
+    sim.sendSerial(fits);
+    expect(replies(run(sim, 100))).toEqual(["ok #13"]);
+  });
+
+  it("joins a line that arrives over several reads, unless it is too long for the receive buffer", () => {
+    const sim = boot();
+    sim.sendSerial(`${withChecksum("ping #1")}\nping`);
+    expect(replies(run(sim, 100))).toEqual(["ok #1"]);
+    sim.sendSerial(" #2\n");
+    expect(replies(run(sim, 100))).toEqual(["ok #2"]);
+
+    // A 128-character line, which doesn't fit with its newline. The parser skips the spaces, so
+    // only its length keeps it from setting the servo.
+    const spaces = " ".repeat(59);
+    sim.sendSerial(`${withChecksum("ping #3")}\nservo:90${spaces}`);
+    expect(replies(run(sim, 100))).toEqual(["ok #3"]);
+    sim.sendSerial(`${spaces}#4\n`);
+    expect(replies(run(sim, 100))).toEqual(["err value"]);
+    expect(sim.servoAngle("P0")).toBeUndefined();
+    expect(exchange(sim, "ping #5")).toEqual(["ok #5"]);
+  });
+
   it("leaves the servo where it was when a session ends", () => {
     const sim = inSession(1000);
     send(sim, "servo:120");

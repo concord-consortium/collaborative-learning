@@ -33,7 +33,7 @@
 // it can't talk to, instead of flashing its own v3 hex.
 //
 // ONE WRITER: every serial write happens in the forever loop. The serial handler only parses
-// a line, applies it and queues its reply, so a reply can never land inside a reading.
+// lines, applies them and queues their replies, so a reply can never land inside a reading.
 //
 // LOOP RULE: a loop pauses only as its last statement, a background loop
 // (`while (true) { ...; basic.pause(n) }`) keeps its state outside the function, and event
@@ -101,11 +101,13 @@ const MAX_SESSION_ID = 65535
 const ICON_MS = 3000
 /**
  * @guide
- * The serial receive buffer, in characters. A longer line is cut off.
+ * The serial receive buffer, in characters. A line that doesn't fit, with its newline, is
+ * thrown away and answered `err value`, without its `#n`.
  *
- * The receive buffer drops whatever arrives while it is full, and its default is 20. The
- * longest command, "open session:65535 timeout:60000 #999*hh", is 41 characters with its
- * newline; this leaves room for more lines arriving before the handler has read the first.
+ * The receive buffer drops whatever arrives while it is full, and its default is 20.
+ * receiveLines says how an overflow is handled. The longest command,
+ * "open session:65535 timeout:60000 #n*hh", is 38 characters with its newline, plus the digits
+ * of its #n; this leaves room for more lines arriving before the handler has read the first.
  */
 const RX_BUFFER_SIZE = 128
 
@@ -165,6 +167,8 @@ let lastPingAt = 0
 let lastReadingAt = 0
 // Reply lines (without checksums) waiting for the forever loop to write them.
 let replies: string[] = []
+// What has been read of the line now arriving, before its newline.
+let partialLine = ""
 // What idle shows: the waiting icon, or the found icon once "?" has arrived.
 let idleIcon = WAITING_ICON
 // Whether a connected or identify icon is showing, and when it was shown.
@@ -442,9 +446,35 @@ function handleLine(line: string) {
     }
 }
 
-serial.onDataReceived(serial.delimiters(Delimiters.NewLine), function () {
-    handleLine(serial.readUntil(serial.delimiters(Delimiters.NewLine)))
-})
+// Reads what has arrived and handles each whole line. serial.readString takes whatever is in the
+// receive buffer without waiting, so a line can arrive in pieces over several reads. (readUntil
+// would be simpler, but once a call finds no newline in the buffer, codal-core raises the newline
+// event only while a read is waiting, so one overflow would leave the board reading two lines as
+// one until it is reset.)
+//
+// The receive buffer drops what arrives while it is full, newlines included. So a read that
+// fills it may have lost what came next, and any text after its last newline is the start of a
+// broken line. That text is thrown away and answered `err value`, without a #n, which can't be
+// trusted. The broken line's own newline is taken to be among what was lost, so the next newline
+// ends a new line, which is handled as usual. A line too long to fit in the buffer with its
+// newline is answered the same way when it arrives whole over several reads.
+function receiveLines() {
+    const text = serial.readString()
+    partialLine += text
+    let newline = partialLine.indexOf("\n")
+    while (newline >= 0) {
+        if (newline < RX_BUFFER_SIZE) handleLine(partialLine.slice(0, newline))
+        else err("", "value")
+        partialLine = partialLine.slice(newline + 1)
+        newline = partialLine.indexOf("\n")
+    }
+    if (text.length >= RX_BUFFER_SIZE) {
+        if (partialLine.length > 0) err("", "value")
+        partialLine = ""
+    }
+}
+
+serial.onDataReceived(serial.delimiters(Delimiters.NewLine), receiveLines)
 
 // input.onButtonPressed only hears clicks, so the long press is the button's own event.
 control.onEvent(EventBusSource.MICROBIT_ID_BUTTON_A, DAL.MICROBIT_BUTTON_EVT_LONG_CLICK, function () {

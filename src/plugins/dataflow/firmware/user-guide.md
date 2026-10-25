@@ -200,7 +200,7 @@ it. `ok` and `err` lines contain no `:`, so plotters skip them.
 | The longest `timeout` that `open` accepts. | 60,000 ms |
 | The largest session id; ids start at 1. | 65,535 |
 | How long the connected and identify icons show. | 3,000 ms |
-| The serial receive buffer, in characters. A longer line is cut off. | 128 |
+| The serial receive buffer, in characters. A line that doesn't fit, with its newline, is thrown away and answered `err value`, without its `#n`. | 128 |
 <!-- end generated: values -->
 
 ## Sound and pins
