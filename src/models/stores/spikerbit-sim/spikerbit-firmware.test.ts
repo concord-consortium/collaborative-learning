@@ -184,6 +184,26 @@ describe("Spiker:bit firmware", () => {
     expect(exchange(sim, "ping session:7 #3")).toEqual(["err #3 nosession"]);
   });
 
+  it("ends a lapsed session before a ping or long press that arrives ahead of the loop's next pass", () => {
+    // Opens session 7 at 110 ms with a 1000 ms timeout and runs to its lapse at 1110 ms. The loop's
+    // passes fall on multiples of 20 ms, so none has ended the session yet.
+    const atLapse = () => {
+      const sim = boot();
+      run(sim, 110);
+      send(sim, "open session:7 timeout:1000 #1");
+      expect(replies(run(sim, 1000))).toEqual(["ok #1"]);
+      expect(sim.now).toBe(1110);
+      expect(sim.shownIcon()).toBe(kConnectedIcon);
+      return sim;
+    };
+
+    expect(exchange(atLapse(), "ping session:7 #2")).toEqual(["err #2 nosession"]);
+
+    const pressed = atLapse();
+    pressed.pressButton("A", "longClick");
+    expect(pressed.shownIcon()).toBe(kStreamingIcon);
+  });
+
   it("uses the timeout given in open, and rejects one out of range or a missing session", () => {
     const sim = boot();
     run(sim, 100);
