@@ -174,8 +174,8 @@ store, `SpikerbitDevice.connectAndStream` makes sure the board is running a curr
 4. It then calls `setActiveDevice("spikerbit", transport)`, which repoints
    `onData` from version detection to `SerialDevice.receive` and begins EMG streaming.
 
-Bump `kSpikerbitFirmwareVersion` together with the `VERSION` constant in the MakeCode
-source whenever the firmware changes; see
+Keep `kSpikerbitFirmwareVersion` equal to the `firmware:` number in the `HELLO` line of
+`spikerbit-clue.ts`, and bump both whenever the firmware's behavior changes; see
 [the firmware README](../firmware/README.md) for how to rebuild the hex.
 
 ## Inbound: hardware → Sensor node
