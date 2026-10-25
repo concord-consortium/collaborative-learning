@@ -144,8 +144,8 @@ it. `ok` and `err` lines contain no `:`, so plotters skip them.
 - `version:1` is the protocol version. It changes only for a change that older hosts can't
   handle.
 - `device:spikerbit` names the device.
-- `firmware:4` is this firmware's build. It changes with every release, so a host can tell
-  when a board's firmware is out of date.
+- `firmware:4` is this firmware's build. It changes with every release. Dataflow flashes a
+  board whose number is lower than its bundled hex's.
 
 ## Errors
 
@@ -230,6 +230,7 @@ host does this:
    `device:spikerbit`. Send this `?` without a checksum: firmware older than version 4 answers
    only a bare `?`, with the v1–v3 banner, `CLUE-SPIKERBIT v<N>`.
 2. **Send `open session:<id> #n` with a random id,** and send it again if no `ok #n` arrives.
+   Dataflow retries every 2 seconds.
 3. **Send `ping session:<id> #n` every second,** well inside the default timeout in
    [Timing and limits](#timing-and-limits). The `ok` replies show the board is still there.
 4. **Read the `emg:` readings.** Match `ok` and `err` replies by their `#n`, not by their
