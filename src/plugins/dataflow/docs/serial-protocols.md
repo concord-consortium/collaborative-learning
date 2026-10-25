@@ -137,16 +137,20 @@ The host code is `src/models/stores/cc-device-protocol.ts` (parsing and checksum
 `src/models/stores/cc-device-session.ts` (the session). The Spiker:bit's device code is
 `src/plugins/dataflow/firmware/spikerbit-clue.ts`.
 
-A connection, with the checksums written out:
+A connection, with the checksums written out. The device's first line is empty (see
+[Connecting](#connecting)):
 
 ```
+Dataflow:   !! #1*32
+Spiker:bit:
+Spiker:bit: ok #1*36
 Dataflow:   ?
 Spiker:bit: hello protocol:CCDeviceProtocol version:1 device:spikerbit firmware:4*65
-Dataflow:   open session:4821 #1*4D
-Spiker:bit: ok #1*36
-Spiker:bit: emg:12*56
-Dataflow:   ping session:4821 #2*4A
+Dataflow:   open session:4821 #2*4E
 Spiker:bit: ok #2*35
+Spiker:bit: emg:12*56
+Dataflow:   ping session:4821 #3*4B
+Spiker:bit: ok #3*34
 Dataflow:   servo:90*4E
 Dataflow:   close session:4821*1D
 ```
@@ -157,8 +161,10 @@ Dataflow:   close session:4821*1D
   `\n`, and the device accepts either.
 - Tokens are separated by single spaces.
 - **A host line** is an optional verb, then zero or more `name:value` assignments, then an
-  optional `#n`, then an optional `*hh`. **A device line** is a reading, a reply or the
-  `hello` line.
+  optional `#n`, then an optional `*hh`. **A device line** is a reading, a reply, the
+  `hello` line or an empty line.
+- **A device may send empty lines,** and hosts ignore them. An empty line has no checksum. The
+  reply to `!!` starts with one (see [Connecting](#connecting)).
 - **A host line without a verb sets outputs,** and nothing else: `servo:90`. Every other
   command starts with a verb, so a new command can't collide with an output's name.
 - **`#n`** at the end of a host command asks for an acknowledgment, `ok #n`. `n` is a decimal
@@ -180,7 +186,11 @@ Dataflow:   close session:4821*1D
   from its shape.
 - **`.` is reserved for settings of a sensor or output,** `<name>.<setting>`, as in
   `emg.rate`. Settings of the whole device have no `.`.
-- **Values are single tokens:** no spaces, `:`, `#` or `*`. Readings are numbers, with an
+- **`!` is reserved for the reset command, `!!`.** No other verb, name or value contains it, so
+  a cut-off or merged line can't turn into a reset: only a line that is exactly `!!`, with an
+  optional `#n` and an optional `*hh`, resets the device, and any other line whose verb
+  contains `!` (`!`, `!!!`, `!! x:1`) gets `err unknown`.
+- **Values are single tokens:** no spaces, `:`, `#`, `*` or `!`. Readings are numbers, with an
   optional sign and fraction (`-1.5`). Other values may be words, as in the `hello` line.
 - **An output may report its state** as a reading under its own name: a relay set with
   `a/relay1:1` reports `a/relay1:1`.
@@ -207,7 +217,7 @@ Every device has these two states:
 
 | State | Entered by | Behavior |
 |---|---|---|
-| **Idle** | power-up; a session ending | Sends nothing unless asked. Answers commands. |
+| **Idle** | power-up; a session ending; `!!` | Sends nothing unless asked. Answers commands. |
 | **Session** | `open` | Sends readings. Ends on `close`, or when no `ping` carrying its session id has arrived for the session timeout. |
 
 A device may add states of its own outside a session. The Spiker:bit's free-run, for example,
@@ -232,19 +242,29 @@ streams readings with no keepalive, for plotters and terminals; its
   nothing.
 - When a session ends, readings stop and every setting returns to its default. What else
   changes, such as the display, is up to the device.
+- **`!!` resets the device** to its power-up state from any state, without restarting it: it
+  ends any session, with no session id needed, leaves any device-specific state such as
+  free-run, and returns every setting to its default. The device then looks as it did at
+  power-up, apart from outputs such as a servo, which keep their positions as when a session
+  ends. Replies already queued for earlier commands are still sent.
+- **`!!` may end another host's session,** because the transports let only one host hold the
+  device at a time: a host that has just connected owns the device, and any session running
+  belongs to a host that has gone. `othersession` guards against a stale timer in a host that
+  has moved on, not against a new host taking over.
 
 ### Commands and replies
 
 | Host sends | Device does | Reply |
 |---|---|---|
 | `?` | Identifies itself, in any state. Changes nothing. | the `hello` line |
+| `!! [#n]` | Resets the device to its power-up state, in any state. Ends any session without its id. | an empty line, then `ok #n`; nothing without `#n` |
 | `open session:<id> [timeout:<ms>] [#n]` | Starts a session with that id. `session` is required. `timeout` is how long the session lasts without a `ping`; the device's documentation gives its default and the range it accepts. | `ok #n`, or `err #n value` for a missing or out-of-range value |
 | `ping session:<id> [#n]` | Extends the session with that id. | `ok #n`, or `err #n value` / `err #n nosession` / `err #n othersession` |
 | `ping #n` | A liveness check only, in any state. Without `#n` it does nothing. | `ok #n` |
 | `close session:<id> [#n]` | Ends that session at once. | `ok #n`, or `err #n value` / `err #n nosession` / `err #n othersession` |
 | `identify [#n]` | Optional: a device may support it. Draws attention to the device, in any state, for example with an icon or a sound. A device without it answers `err #n unknown`. | `ok #n` |
 
-Every device answers `?`, `open`, `ping` and `close`. A device adds its own commands and
+Every device answers `?`, `!!`, `open`, `ping` and `close`. A device adds its own commands and
 outputs, such as the Spiker:bit's `servo`, `stream` and `stop`; see its documentation.
 
 `ok #n` is sent only when the command had a `#n`. Only `open`, `ping` and `close` carry the
@@ -300,16 +320,40 @@ answers `err #n unknown`.
   text.
 - **New outputs** take the same `name:value` form, such as the LED display and sound.
 
+### Connecting
+
+While nobody reads a device's output, it can pile up between the device and the host. On a
+micro:bit V2, the USB interface chip keeps about 500 bytes; once that is full it keeps the
+oldest bytes and drops the rest, so the backlog usually ends in a cut-off line. A host that
+connects reads that backlog first, and a reply it is waiting for can arrive glued onto the
+fragment and fail its checksum. A device still streaming, in a session whose host has gone or
+in a state of its own such as the Spiker:bit's free-run, keeps the backlog full until a host
+stops it.
+
+So a host's first write after connecting is two lines, `!! #n` and then `?`, sent bare,
+without a checksum, so that older firmware answers too (see
+[Recognizing the firmware](#recognizing-the-firmware)). The `!!` stops whatever the device was
+doing, and the empty line before its `ok` ends any cut-off line, so the `ok` and the `hello`
+line after it each start a line of their own. Then:
+
+- **`ok #n` followed by a valid `hello` line:** the device is reset and identified.
+- **Older firmware** ignores `!!` and answers `?` its own way.
+- **If neither arrives,** the replies may have been dropped while the device's output buffer
+  was still full. Once that backlog has been read, the host writes `!! #m` and `?` again.
+
+The `hello` line gets no empty line before it: after `!!`, the `ok`'s empty line has already
+ended any fragment.
+
 ### Recognizing the firmware
 
-Before it starts a session, `SpikerbitDevice.connectAndStream` sends `?` and decides from
-the reply whether to flash the bundled hex; see
-[Spiker:bit version check and flashing](serial.md#spikerbit-version-check-and-flashing). It
-sends that `?` without a checksum, because older Spiker:bit firmware compares the whole line
-to `?`. Firmware v1–v3 spoke `keyValue` and identified itself with the v1–v3 banner,
-`CLUE-SPIKERBIT v<N>`, which Dataflow recognizes so that it flashes those boards. Firmware 4
-never sends that banner's text, so a Dataflow build that knows only v3 flashes its own hex
-rather than accept a board it can't talk to.
+A host recognizes the firmware by sending `?`, after `!!` (see [Connecting](#connecting)),
+and reading the reply. It sends that `?` without a checksum, because Spiker:bit firmware older
+than 4 compares the whole line to `?`, and ignores `!!`. Firmware v1–v3 spoke `keyValue` and
+answered with the v1–v3 banner, `CLUE-SPIKERBIT v<N>`, which Dataflow recognizes so that it
+flashes those boards; see
+[Spiker:bit version check and flashing](serial.md#spikerbit-version-check-and-flashing).
+Firmware 4 never sends that banner's text, so a Dataflow build that knows only v3 flashes its
+own hex rather than accept a board it can't talk to.
 
 ### Dataflow's session
 

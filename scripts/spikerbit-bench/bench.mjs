@@ -228,6 +228,22 @@ function checkReadings(lines, ms, min, max) {
     : `got ${lines.length} readings in ${ms} ms, expected ${min}-${max}`;
 }
 
+// Sends `!! #n` and checks that the board answers with an empty line and then `ok #n`, and that
+// no readings follow.
+async function checkReset(board, ctx) {
+  const n = ctx.nextSeq();
+  board.clear();
+  await board.send(`!! #${n}`);
+  const empty = await board.nextReply();
+  if (empty === null) return `no reply within ${kReplyTimeoutMs} ms, expected an empty line`;
+  if (empty !== "") return `got ${JSON.stringify(empty)}, expected an empty line before the ok`;
+  const failure = checkReply(await board.nextReply(), `ok #${n}`);
+  if (failure) return failure;
+  board.clear();
+  const lines = await board.collect(500);
+  return lines.length ? `expected silence after !!, got ${describeLines(lines)}` : null;
+}
+
 // The checks, run in order against one board; the state each leaves behind is the state the
 // next one starts in. A check has a name and either:
 //   send + reply: send that line (a function of the context, or a string) and expect one
@@ -287,6 +303,30 @@ function buildChecks() {
         board.clear();
         const lines = await board.collect(500);
         return lines.length ? `expected silence after stop, got ${describeLines(lines)}` : null;
+      } },
+    { name: "!! #n in free-run -> empty line, ok, then silence",
+      run: async (board, ctx) => {
+        const n = ctx.nextSeq();
+        board.clear();
+        await board.send(`stream #${n}`);
+        const failure = checkReply(await board.nextReply(), `ok #${n}`);
+        if (failure) return `stream: ${failure}`;
+        await sleep(300);
+        return checkReset(board, ctx);
+      } },
+    { name: "!! #n in a session -> empty line, ok, silence, then ping -> err nosession",
+      run: async (board, ctx) => {
+        const n = ctx.nextSeq();
+        board.clear();
+        await board.send(`open session:${ctx.id} #${n}`);
+        const openFailure = checkReply(await board.nextReply(), `ok #${n}`);
+        if (openFailure) return `open: ${openFailure}`;
+        await sleep(300);
+        const resetFailure = await checkReset(board, ctx);
+        if (resetFailure) return resetFailure;
+        const pingN = ctx.nextSeq();
+        await board.send(`ping session:${ctx.id} #${pingN}`);
+        return checkReply(await board.nextReply(), `err #${pingN} nosession`);
       } },
     { name: "open for the stream/servo checks",
       send: ctx => `open session:${ctx.id} #n`, reply: ctx => `ok #${ctx.n}` },

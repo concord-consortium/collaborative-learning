@@ -440,6 +440,105 @@ describe("Spiker:bit firmware", () => {
   });
 });
 
+describe("Spiker:bit firmware reset (!!)", () => {
+  it("ends a session on !! #n, writing an empty line and then the ok", () => {
+    const sim = inSession(60000);
+    run(sim, 300);
+    sim.takeSerialOutput();
+    send(sim, "!! #2");
+    sim.advance(100);
+    expect(sim.takeSerialOutput()).toBe(`\r\n${withChecksum("ok #2")}\r\n`);
+    expect(sim.shownIcon()).toBe(kWaitingIcon);
+    expect(run(sim, 1000)).toEqual([]);
+    expect(exchange(sim, "ping session:7 #3")).toEqual(["err #3 nosession"]);
+  });
+
+  it("writes nothing for !! without #n, and ends a session or free-run all the same", () => {
+    const session = inSession();
+    run(session, 300);
+    send(session, "!!");
+    expect(run(session, 1000)).toEqual([]);
+    expect(session.shownIcon()).toBe(kWaitingIcon);
+
+    const freeRun = boot();
+    expect(exchange(freeRun, "stream #1")).toEqual(["ok #1"]);
+    expect(readings(run(freeRun, 500)).length).toBeGreaterThanOrEqual(4);
+    send(freeRun, "!!");
+    expect(run(freeRun, 1000)).toEqual([]);
+    expect(freeRun.shownIcon()).toBe(kWaitingIcon);
+
+    const idle = boot();
+    send(idle, "!!");
+    expect(run(idle, 500)).toEqual([]);
+  });
+
+  it("shows the waiting icon on !! while idle with the found icon", () => {
+    const sim = boot();
+    expect(exchange(sim, "?")).toEqual([kHello]);
+    expect(sim.shownIcon()).toBe(kFoundIcon);
+    handle(sim, "!!");
+    expect(sim.shownIcon()).toBe(kWaitingIcon);
+  });
+
+  it("stops the identify sound and icon on !!", () => {
+    const sim = boot();
+    handle(sim, "identify");
+    expect(sim.shownIcon()).toBe(kIdentifyIcon);
+    expect(sim.soundsStopped).toBe(0);
+    handle(sim, "!!");
+    expect(sim.soundsStopped).toBe(1);
+    expect(sim.shownIcon()).toBe(kWaitingIcon);
+    run(sim, kIconMs);
+    expect(sim.shownIcon()).toBe(kWaitingIcon);
+  });
+
+  it("checks the checksum on !!", () => {
+    expect(withChecksum("!!")).toBe("!!*00");
+    const wrong = inSession();
+    run(wrong, 300);
+    wrong.sendSerial("!!*01\n");
+    expect(replies(run(wrong, 100))).toEqual(["err checksum"]);
+    expect(readings(run(wrong, 500)).length).toBeGreaterThanOrEqual(4);
+
+    const right = inSession();
+    run(right, 300);
+    right.sendSerial("!!*00\n");
+    expect(run(right, 1000)).toEqual([]);
+  });
+
+  it("refuses any other line whose verb contains ! with err unknown, changing nothing", () => {
+    const sim = inSession();
+    expect(exchange(sim, "! #2")).toEqual(["err #2 unknown"]);
+    expect(exchange(sim, "!!! #3")).toEqual(["err #3 unknown"]);
+    expect(exchange(sim, "!! x:1 #4")).toEqual(["err #4 unknown"]);
+    sim.sendSerial("!!!\n");
+    expect(replies(run(sim, 100))).toEqual(["err unknown"]);
+    expect(readings(run(sim, 500)).length).toBeGreaterThanOrEqual(4);
+    expect(exchange(sim, "ping session:7 #5")).toEqual(["ok #5"]);
+  });
+
+  it("still sends the replies to commands that arrived before !! in the same write", () => {
+    const sim = inSession();
+    run(sim, 300);
+    sim.takeSerialOutput();
+    send(sim, "ping session:7 #2");
+    send(sim, "!! #3");
+    sim.advance(100);
+    expect(sim.takeSerialOutput()).toBe(`${withChecksum("ok #2")}\r\n\r\n${withChecksum("ok #3")}\r\n`);
+  });
+
+  it("answers a host's connect sequence, !! #n then a bare ?, from free-run", () => {
+    const sim = boot();
+    expect(exchange(sim, "stream #1")).toEqual(["ok #1"]);
+    run(sim, 500);
+    send(sim, "!! #2");
+    sim.sendSerial("?\n");
+    sim.advance(100);
+    expect(sim.takeSerialOutput()).toBe(`\r\n${withChecksum("ok #2")}\r\n${withChecksum(kHello)}\r\n`);
+    expect(sim.shownIcon()).toBe(kFoundIcon);
+  });
+});
+
 describe("Spiker:bit firmware display, sound and buttons", () => {
   it("shows the waiting icon after power-up and the found icon after ?", () => {
     const sim = boot();

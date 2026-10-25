@@ -99,8 +99,12 @@ avoids "sensor", "serial" and "line". On the wire it is spelled out in full, as
   should add one to every command. A person typing in a terminal can leave it off.
 
 So a host line is: an optional verb, then zero or more `name:value` assignments, then an
-optional `#n`, then an optional `*hh`. A device line is a reading, a reply or the
-`hello` line.
+optional `#n`, then an optional `*hh`. A device line is a reading, a reply, the
+`hello` line or an empty line.
+
+**A device may send empty lines, and hosts ignore them.** An empty line carries no checksum.
+The firmware sends one before the `ok` that answers `!!` (see "Reset and connecting"). Hosts
+already ignore lines they don't recognize, so this costs a host nothing.
 
 **A host line without a verb sets outputs,** and nothing else: `servo:90`. Everything else
 starts with a verb, so a new kind of command is a new verb and can't collide with an
@@ -115,7 +119,12 @@ output's name. Settings use the `set` verb (see "Reserved for later").
 - **`.` is reserved for settings of a sensor or output:** `<name>.<setting>`, as in
   `set emg.rate:50` or `set a/temp.rate:1000`. Settings of the whole device have no `.`, as
   in `set mode:bin`.
-- **Values are single tokens:** no spaces, `:`, `#` or `*`. Readings are numbers, with an
+- **`!` is reserved for the reset command, `!!`.** No other verb, name or value contains it.
+  A line is a reset only when it is exactly `!!`, optionally followed by ` #n`, optionally
+  followed by `*hh` (the usual checksum rules). Any other line whose verb contains `!` (`!`,
+  `!!!`, `!! x:1`) gets `err unknown`, so a truncated or merged command can never become a
+  reset.
+- **Values are single tokens:** no spaces, `:`, `#`, `*` or `!`. Readings are numbers, with an
   optional sign and fraction. Other values may be words, as in the `hello` line.
 - **An output may report its state** as a reading under its own name. A relay set with
   `a/relay1:1` reports `a/relay1:1`.
@@ -161,7 +170,7 @@ contain no `:` so MakeCode doesn't plot them.
 
 | State | Entered by | Behavior |
 |---|---|---|
-| **Idle** | power-up; a session ending; `stop` or a long press in free-run | Sends nothing unless asked. Shows the waiting icon, or the found icon once a `?` has arrived. Answers commands. |
+| **Idle** | power-up; `!!`; a session ending; `stop` or a long press in free-run | Sends nothing unless asked. Shows the waiting icon, or the found icon once a `?` has arrived. Answers commands. |
 | **Session** | `open` | Sends readings. Ends on `close`, or when no `ping` carrying its session id has arrived for the session timeout. |
 | **Free-run** | `stream`, or a long press of button A, from idle | Streams readings with no keepalive. For plotters and terminals. |
 
@@ -188,6 +197,12 @@ contain no `:` so MakeCode doesn't plot them.
   nothing. A long press, not a click or double click, because students tap buttons.
 - When a session ends: readings stop, every setting returns to its default, sound stops, and
   the display shows the waiting icon. The servo keeps its position.
+- **`!!` resets the device to its power-up state, without rebooting,** from any state: it ends
+  any session (no id needed), leaves free-run, returns every setting to its default (today the
+  session timeout), stops any sound, clears the timed icons and shows the waiting icon, with
+  the idle icon back to waiting. The servo keeps its position, as when a session ends. Replies
+  already queued for commands that arrived before it are still sent. See "Reset and
+  connecting" for why.
 
 **Why a keepalive.** Closing the Dataflow tab or disconnecting sends nothing to the board,
 and the USB stays powered, so the only sign that Dataflow left is that its messages stop.
@@ -200,10 +215,9 @@ The keepalive gives:
 - a safe state for outputs when Dataflow disappears mid-program;
 - a round-trip check: the reply shows the board is reading and acting on commands, not just
   writing;
-- no backlog of old readings. The micro:bit's USB interface chip buffers about 1 KB of
-  output when nobody reads (per comments in `@microbit/microbit-connection`'s
-  `cdc-saturation.js`), so a board that streams while idle gives the next connection stale
-  data first;
+- no backlog of old readings. The micro:bit's USB interface chip holds about 500 bytes of
+  output on a V2 when nobody reads (see "Reset and connecting"), so a board that streams
+  while idle gives the next connection stale data first;
 - no streaming into a stalled host, and less power used by a battery-powered board.
 
 ### Commands built in CLUE-728
@@ -211,6 +225,7 @@ The keepalive gives:
 | Host sends | Device does | Reply |
 |---|---|---|
 | `?` | Identifies itself, in any state. Changes nothing. | `hello protocol:CCDeviceProtocol version:1 device:spikerbit firmware:4` |
+| `!! [#n]` | Resets the device to its power-up state, in any state, ending any session without its id (see "Reset and connecting"). | with `#n`, an empty line and then `ok #n`; without it, nothing |
 | `open session:<id> [timeout:<ms>] [#n]` | Starts a session with that id. `session` is required. `timeout` is how long the session lasts without a `ping`: default 5000, allowed 1000–60000. A missing or out-of-range value is `err #n value`. | `ok #n` if `#n` was given |
 | `ping session:<id> [#n]` | Extends the session with that id. | `ok #n` if `#n` was given, or `err #n value` / `err #n nosession` / `err #n othersession` |
 | `ping #n` | Liveness check only; touches no session, in any state. Without `#n` it does nothing at all. | `ok #n` |
@@ -256,6 +271,54 @@ sketch.
 
 **The heartbeat** the story asks for is the `ok` reply to each `ping`. The device doesn't send
 a separate unprompted heartbeat.
+
+### Reset and connecting
+
+**The problem.** The board's serial output goes through the micro:bit's interface chip
+(DAPLink), and Dataflow reads it over WebUSB through `@microbit/microbit-connection`, which
+polls DAPLink's UART buffer. Measured on a V2 (board ID 9906):
+
+- While nobody reads, the buffer holds about 500–570 bytes, not the 1 KB the comments in
+  `@microbit/microbit-connection`'s `cdc-saturation.js` suggest. When it is full it keeps the
+  oldest bytes and drops new ones, so the backlog usually ends in a cut-off line.
+- A host that connects and sends `?` at once gets the backlog first (566 bytes within about
+  15 ms). The `hello` line then arrives glued onto the fragment, as
+  `emhello protocol:CCDeviceProtocol version:1 device:spikerbit firmware:4*65`. That fails its
+  checksum, so Dataflow would reflash a board that is already current. This happened in 3 of 3
+  runs with the board left in free-run for 15 s.
+- The buffer fills whenever the board streams with nobody reading: free-run left alone, or a
+  session whose tab closed (until its 5 s timeout). `stop` can't end a session
+  (`err insession`), and a new host can't `close` a session whose id it doesn't know.
+- Opening or closing the plain USB serial (CDC) port, as serialport, `screen` and
+  serialterminal.com do, restarted the micro:bit on macOS: a 60 s session was gone after a 2 s
+  close and reopen. So a terminal user starts from an idle board, and the backlog is a
+  WebUSB problem.
+
+**The reset command, `!!`.** It puts the board back in its power-up state from any state (see
+"Device states"), so whatever an earlier host left running stops before the new host asks
+anything. It works during a session, without the session id: WebUSB lets only one page claim
+the board at a time, so whoever has just connected owns it, and a running session belongs to a
+host that has gone. The `othersession` check guards against a stale timer in a host that has
+moved on, not against a new host taking over. `!` is reserved for it (see "Names and values"),
+so a cut-off or merged line can't turn into a reset.
+
+**The reply.** With `#n`, an empty line and then `ok #n`: on the wire, `\r\n` followed by
+`ok #n*hh\r\n`. The empty line ends any fragment already in the interface chip's buffer, so
+the `ok` always starts a line. Without `#n`, no reply, as with other commands; errors as
+usual. `?` is unchanged: its `hello` line gets no empty line first, because the host sends
+`!!` before `?`, and the `ok`'s empty line has already started it cleanly. The firmware keeps
+the one-writer rule: the empty line and the `ok` are queued and written by the forever loop,
+the empty line as a bare `\r\n` with no checksum.
+
+**Connecting.** A host's first write after connecting is `!! #n` followed by `?` (a bare `?`,
+without a checksum, so that v1–v3 firmware answers too; they ignore `!!`). Then:
+
+- `ok #n` followed by a valid `hello` line: the device is reset and identified.
+- Older firmware ignores `!!` and answers `?` its own way.
+- If neither arrives, the replies may have been dropped while the device's output buffer was
+  still full: once that backlog has been read, the host writes `!! #m` and `?` again.
+
+The firmware stays `firmware:4`, since v4 hasn't been released.
 
 ### Timing
 
@@ -487,7 +550,8 @@ back and forth between those two builds reflashes it each time.
   `MakeCodeSim` (`src/models/stores/spikerbit-sim/makecode-sim.ts`), a fake MakeCode runtime
   with a simulated clock, serial port, buttons, pins, display and speaker. The tests cover
   every command and reply, each error reason, checksums, sessions opening, lapsing and being
-  replaced, free-run by command and by long press, the reading cadence, the displays and
+  replaced, `!!` in each state (its exact bytes, the reserved `!` and its checksum),
+  free-run by command and by long press, the reading cadence, the displays and
   their timing, the identify sound, and a V1 running without a speaker. `makecode-sim.test.ts`
   tests the sim itself.
 - **Jest, Dataflow side:** in #3056, the parser (checksums right, wrong and absent; readings
@@ -507,9 +571,11 @@ back and forth between those two builds reflashes it each time.
   opening, sending readings, closing and lapsing (with a custom `timeout`), `ping` with the
   session id, a bare `ping`, `ping` with another id, idle staying silent, free-run by `stream`
   and `stop`, `stream` refused during a session, `servo` with a good and a bad value, a wrong
-  checksum, an unknown command, and `identify`. With `--flash` it first flashes the hex. What
-  it can't see stays a manual check: the displays, the identify sound, the long press (and
-  that it does nothing during a session), and `identify` with a servo attached (no twitch).
+  checksum, an unknown command, `!!` in free-run and in a session (the empty line, the `ok`,
+  then no readings and `err nosession`), and `identify`. With `--flash` it first flashes the
+  hex. What it can't see stays a manual check: the displays, the identify sound, the long press
+  (and that it does nothing during a session), and `identify` with a servo attached (no
+  twitch).
 - **The EMG sampling rate:** v3 and v4 both measure 250 Hz on a V2, so the protocol work
   doesn't slow sampling. The earlier figure of about 500 Hz for v3 was wrong.
 - **Plotters:** free-run readings appear in the MakeCode serial plotter.
