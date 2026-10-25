@@ -406,12 +406,17 @@ async function main() {
   let failed = 0;
 
   try {
-    // Plain `?`, with no checksum: firmware v1–v3 compares the whole line to "?" and answers
-    // with the v1–v3 banner. A board that has just rebooted may need a few tries to answer.
+    // Connect as the protocol asks hosts to: `!!` stops a session or free-run that an earlier
+    // host left running, then a plain `?`, with no checksum, identifies the board. Firmware v1–v3
+    // ignores `!!`, compares the whole line to "?" and answers with the v1–v3 banner. A board
+    // that has just rebooted may need a few tries to answer.
     let firstLines = [];
     let hello = false;
+    let resetSeq = 0;
     for (let attempt = 0; attempt < kIdentifyAttempts && !hello; attempt++) {
       board.clear();
+      resetSeq = ctx.nextSeq();
+      await board.send(`!! #${resetSeq}`);
       await board.send("?", { checksummed: false });
       firstLines = await board.collect(1000);
       const banner = firstLines.map(line => kV1ToV3BannerPattern.exec(line)).find(Boolean);
@@ -425,6 +430,11 @@ async function main() {
     if (!hello) {
       console.log("no reply to ?; is the board running this firmware? rerun with --flash " +
         `(got ${describeLines(firstLines)})`);
+      failed = 1;
+      return;
+    }
+    if (!firstLines.some(line => verifiedBody(line) === `ok #${resetSeq}`)) {
+      console.log(`no ok for !! #${resetSeq}; rerun with --flash (got ${describeLines(firstLines)})`);
       failed = 1;
       return;
     }
