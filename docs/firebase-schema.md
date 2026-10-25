@@ -41,6 +41,7 @@ The core design elements of the schema are:
               // request's write landing after a newer one's, and would hand every new listener
               // the previous request's status the moment it subscribes. The client subscribes
               // only to its own request's child.
+              // "automatic" requests come only from units that set aiEvaluateOnSessionEnd
               {key: requestId, or "automatic" for a request with none (onDisconnect, sync-hook)}
                 outcome: "skipped-empty" | "commented" | "failed"
                 requestId?: string (echoed from the request, when it had one)

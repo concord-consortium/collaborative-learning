@@ -99,18 +99,12 @@ describe("AISettings", () => {
     expect("summarizer" in mockDraft.config.aiPrompt).toBe(false);
   });
 
-  it("shows session-end evaluation as off for a unit that has not opted in", () => {
-    mockConfig.aiEvaluation = "custom";
-    render(<AISettings />);
-
-    expect(screen.getByLabelText("Evaluate At Session End")).not.toBeChecked();
-  });
-
   it("turns session-end evaluation on", async () => {
     mockConfig.aiEvaluation = "custom";
     mockConfig.aiPrompt = aiPromptFields;
     render(<AISettings />);
 
+    expect(screen.getByLabelText("Evaluate At Session End")).not.toBeChecked();
     fireEvent.click(screen.getByLabelText("Evaluate At Session End"));
     save();
 
@@ -134,5 +128,22 @@ describe("AISettings", () => {
       aiEvaluation: "custom", aiPrompt: aiPromptFields, aiEvaluateOnSessionEnd: true
     });
     expect(mockDraft.config.aiEvaluateOnSessionEnd).toBe(false);
+  });
+
+  // An author editing a prompt on one of the CMP units saves the whole form; the box they never
+  // touched must not quietly turn their unit's session-end evaluation off.
+  it("leaves session-end evaluation on when the form is saved untouched", async () => {
+    mockConfig.aiEvaluation = "custom";
+    mockConfig.aiPrompt = aiPromptFields;
+    mockConfig.aiEvaluateOnSessionEnd = true;
+    render(<AISettings />);
+
+    save();
+
+    await waitFor(() => expect(mockSetUnitConfig).toHaveBeenCalled());
+    const mockDraft = applyLastUpdater({
+      aiEvaluation: "custom", aiPrompt: aiPromptFields, aiEvaluateOnSessionEnd: true
+    });
+    expect(mockDraft.config.aiEvaluateOnSessionEnd).toBe(true);
   });
 });

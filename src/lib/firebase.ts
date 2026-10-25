@@ -225,8 +225,10 @@ export class Firebase {
   /**
    * Set up Firebase onDisconnect handlers.
    * All documents get one to update the lastEditedAt timestamp when the user disconnects.
-   * A dropped connection ends the session, so the evaluation request is added only for units that
-   * opted into evaluating every session.
+   * The evaluation handler is added only for units that turned on `aiEvaluateOnSessionEnd`. Note
+   * that Firebase runs these on any loss of connection, not only at the end of a session: a brief
+   * outage fires them, `handlePresenceChange` then clears them, and the next save arms them again.
+   * So such a unit can evaluate the same document more than once while a student works on it.
    */
   public setLastEditedOnDisconnect(user: UserModelType, documentKey: string, userId?: string):
       firebase.database.OnDisconnect[] {
@@ -250,12 +252,11 @@ export class Firebase {
 
   /**
    * Set the lastEditedAt timestamp to the current time, optionally cancelling any onDisconnect handlers.
-   * If the appConfig specifies an AI Evaluation to be run, that timestamp is set as well, alongside
-   * `requestId` (omitted, not just undefined, when not supplied) so the completion status can be
-   * correlated back to this request.
    *
-   * A `requestId` marks an evaluation the student asked for, which always runs. Without one this is
-   * the document's cleanup — the end of the session — which only opted-in units evaluate.
+   * A `requestId` marks an evaluation the student asked for; that one is written whenever the
+   * appConfig specifies an AI Evaluation. Calls without one write an evaluation only for units that
+   * turned on `aiEvaluateOnSessionEnd`. The id is omitted from the write, not written as undefined,
+   * when absent, and the completion status is correlated back through it.
    */
   public setLastEditedNow(user: UserModelType, documentKey: string, userId: string|undefined,
       onDisconnects?: firebase.database.OnDisconnect[], requestId?: string) {

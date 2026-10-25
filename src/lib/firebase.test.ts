@@ -390,8 +390,9 @@ describe("Firebase class", () => {
         });
     });
 
-    // The disconnect handler registers its value when the document opens, so what it carries is
-    // decided here rather than when the connection drops.
+    // The disconnect handler registers its value at the document's first save, so what it carries
+    // — and whether the unit's flag puts it there at all — is decided then, not when the
+    // connection drops.
     it("registers a disconnect write that carries the context", () => {
       const storesWithEvaluation = {
         ...mockStores,
@@ -446,41 +447,6 @@ describe("Firebase class", () => {
         .then(() => {
           expect(mockRef.set).toHaveBeenCalledTimes(1); // only lastEditedAt
         });
-    });
-
-    it("does not evaluate at session end unless the unit opted in", () => {
-      const storesWithoutSessionEnd = {
-        ...mockStores,
-        appConfig: { aiEvaluation: "standard", aiPrompt: undefined }
-      };
-      const firebaseWithoutSessionEnd = new Firebase({ stores: storesWithoutSessionEnd } as unknown as DB);
-      const mockRef = { set: jest.fn().mockResolvedValue(undefined) };
-      jest.spyOn(firebaseWithoutSessionEnd, 'ref').mockReturnValue(mockRef as any);
-
-      return firebaseWithoutSessionEnd.setLastEditedNow(mockUser as any, mockDocumentKey, mockUserId)
-        .then(() => {
-          expect(mockRef.set).toHaveBeenCalledTimes(1); // only lastEditedAt
-        });
-    });
-
-    it("registers no disconnect evaluation unless the unit opted in", () => {
-      const storesWithoutSessionEnd = {
-        ...mockStores,
-        appConfig: { aiEvaluation: "standard", aiPrompt: undefined }
-      };
-      const firebaseWithoutSessionEnd = new Firebase({ stores: storesWithoutSessionEnd } as unknown as DB);
-      const onDisconnectSet = jest.fn().mockResolvedValue(undefined);
-      const mockRef = {
-        set: jest.fn().mockResolvedValue(undefined),
-        onDisconnect: () => ({ set: onDisconnectSet, cancel: jest.fn() })
-      };
-      jest.spyOn(firebaseWithoutSessionEnd, 'ref').mockReturnValue(mockRef as any);
-
-      const onDisconnects =
-        firebaseWithoutSessionEnd.setLastEditedOnDisconnect(mockUser as any, mockDocumentKey, mockUserId);
-
-      expect(onDisconnects).toHaveLength(1); // only the lastEditedAt handler
-      expect(onDisconnectSet).toHaveBeenCalledWith("server-timestamp");
     });
 
     // No aiEvaluateOnSessionEnd here: an evaluation the student asked for runs whatever the unit
@@ -556,6 +522,65 @@ describe("Firebase class", () => {
       await firebaseWithNonCustom.setLastEditedNow(mockUser as any, mockDocumentKey, mockUserId);
 
       expect(evaluationWriteArgs(mockRef)).not.toHaveProperty("requestId");
+    });
+
+    // Whether an unrequested evaluation is written at all. What one carries once written is covered
+    // by the tests above.
+    describe("session-end gate", () => {
+      const evaluationPath = expect.stringContaining("/evaluation/standard");
+
+      const setUp = (aiEvaluateOnSessionEnd?: boolean) => {
+        const stores = {
+          ...mockStores,
+          appConfig: { aiEvaluation: "standard", aiPrompt: undefined, aiEvaluateOnSessionEnd }
+        };
+        const fb = new Firebase({ stores } as unknown as DB);
+        const onDisconnectSet = jest.fn().mockResolvedValue(undefined);
+        const mockRef = {
+          set: jest.fn().mockResolvedValue(undefined),
+          onDisconnect: () => ({ set: onDisconnectSet, cancel: jest.fn() })
+        };
+        const refSpy = jest.spyOn(fb, 'ref').mockReturnValue(mockRef as any);
+        return { fb, mockRef, refSpy, onDisconnectSet };
+      };
+
+      it("writes no evaluation at session end for a unit that did not opt in", async () => {
+        const { fb, mockRef, refSpy } = setUp();
+
+        await fb.setLastEditedNow(mockUser as any, mockDocumentKey, mockUserId);
+
+        expect(refSpy).not.toHaveBeenCalledWith(evaluationPath);
+        expect(mockRef.set).toHaveBeenCalledTimes(1);
+        expect(mockRef.set).toHaveBeenCalledWith("server-timestamp");
+      });
+
+      it("writes an evaluation at session end for a unit that opted in", async () => {
+        const { fb, mockRef, refSpy } = setUp(true);
+
+        await fb.setLastEditedNow(mockUser as any, mockDocumentKey, mockUserId);
+
+        expect(refSpy).toHaveBeenCalledWith(evaluationPath);
+        expect(mockRef.set).toHaveBeenCalledTimes(2);
+      });
+
+      it("registers no disconnect evaluation for a unit that did not opt in", () => {
+        const { fb, refSpy, onDisconnectSet } = setUp();
+
+        const onDisconnects = fb.setLastEditedOnDisconnect(mockUser as any, mockDocumentKey, mockUserId);
+
+        expect(refSpy).not.toHaveBeenCalledWith(evaluationPath);
+        expect(onDisconnects).toHaveLength(1);
+        expect(onDisconnectSet).toHaveBeenCalledWith("server-timestamp");
+      });
+
+      it("registers a disconnect evaluation for a unit that opted in", () => {
+        const { fb, refSpy } = setUp(true);
+
+        const onDisconnects = fb.setLastEditedOnDisconnect(mockUser as any, mockDocumentKey, mockUserId);
+
+        expect(refSpy).toHaveBeenCalledWith(evaluationPath);
+        expect(onDisconnects).toHaveLength(2);
+      });
     });
   });
 

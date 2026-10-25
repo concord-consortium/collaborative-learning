@@ -572,7 +572,9 @@ Not declared in `DBBaseDocumentMetadata` — an undeclared child of the metadata
   names no problem; see [firestore-schema.md](../firestore-schema.md#summaries).
 - **Runtime:** not surfaced on any model
 - **Updated by:** `updateEvaluation` in [`firebase.ts`](../../src/lib/firebase.ts), called from
-  `setLastEditedOnDisconnect` and `setLastEditedNow`
+  `setLastEditedOnDisconnect` and `setLastEditedNow`. Those two write it without a student asking,
+  and do so only for units that set `aiEvaluateOnSessionEnd`; a request the student made through
+  the ideas button carries a `requestId` and is written whenever `aiEvaluation` is set.
 - **Reactive:** No — consumed server-side by the `on-analyzable-doc-written` cloud function trigger.
 
 Also undeclared in `DBBaseDocumentMetadata`.

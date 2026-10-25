@@ -181,7 +181,8 @@ const AISettings: React.FC = () => {
           id="aiEvaluateOnSessionEnd"
           type="checkbox"
           {...register("aiEvaluateOnSessionEnd")}
-        /> Evaluate every document when its session ends, not only when a student asks for ideas
+        /> Also evaluate edited documents when they close or the connection drops, not only when a
+        student asks for ideas
       </div>
       <div>
         <label htmlFor="systemPrompt">System Prompt</label>
