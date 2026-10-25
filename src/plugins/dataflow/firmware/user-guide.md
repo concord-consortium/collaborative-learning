@@ -82,6 +82,11 @@ Long-press button A again to stop the readings.
   never an `ok`, even with `#n`.
 - **`*hh` is an optional checksum** at the very end of a line. The board puts one on every line
   it sends. When sending, leave it off, or add it and the board checks it.
+- **`!!` resets the board** to its power-up state, in any state: it ends any session, without
+  needing its id, and stops free-run. Only a line that is exactly `!!`, with an optional `#n`
+  and checksum, does this; `!` appears in no other command, name or value.
+- **The board may send empty lines.** Ignore them. With `#n`, its reply to `!!` is an empty line
+  and then `ok #n`, so that the `ok` starts a line of its own even after a cut-off line.
 
 To compute a checksum, XOR the bytes of every character before the `*`, and write the result
 as two hex digits (either case). For `emg:12`:
@@ -93,16 +98,20 @@ as two hex digits (either case). For `emg:12`:
 
 So the board sends `emg:12*56`.
 
-A session, with the checksums written out:
+A session, with the checksums written out. The board's first line is the empty line that
+starts its reply to `!!`:
 
 ```
+Dataflow:   !! #1*32
+Spiker:bit:
+Spiker:bit: ok #1*36
 Dataflow:   ?
 Spiker:bit: hello protocol:CCDeviceProtocol version:1 device:spikerbit firmware:4*65
-Dataflow:   open session:4821 #1*4D
-Spiker:bit: ok #1*36
-Spiker:bit: emg:12*56
-Dataflow:   ping session:4821 #2*4A
+Dataflow:   open session:4821 #2*4E
 Spiker:bit: ok #2*35
+Spiker:bit: emg:12*56
+Dataflow:   ping session:4821 #3*4B
+Spiker:bit: ok #3*34
 Dataflow:   servo:90*4E
 Dataflow:   close session:4821*1D
 ```
@@ -118,6 +127,7 @@ Any command but `?` can end in `#n`, which adds an `ok #n` to its reply. Any lin
 | Command | What it does | Replies |
 | --- | --- | --- |
 | `?` | Identifies the board, in any state. In idle it also shows the found icon. | the `hello` line |
+| `!!` | Resets the board to its power-up state, in any state: ends any session without its id, stops free-run, returns the timeout to its default, stops any sound and shows the waiting icon. The servo keeps its position. Replies to earlier commands are still sent. | an empty line, then `ok #n` (nothing without `#n`) |
 | `open session:<id> [timeout:<ms>]` | Starts a session with that id, from any state. An `open` during a session replaces it with a new one. `timeout` is how long the session lasts without a `ping`. | `ok #n`, or `err value` |
 | `ping session:<id>` | Keeps the session with that id alive. | `ok #n`, or `err value`, `err nosession` or `err othersession` |
 | `ping` | A liveness check, in any state. It touches no session. | `ok #n` (nothing without `#n`) |
@@ -152,7 +162,7 @@ it. `ok` and `err` lines contain no `:`, so plotters skip them.
 | Reason | Meaning | Sent for |
 | --- | --- | --- |
 | `checksum` | The line's `*hh` doesn't match its contents, or isn't two hex digits. Sent without `#n`, since the line's `#n` can't be trusted. | any line |
-| `unknown` | A command the board doesn't know, or a `name:value` (or a bare word) the command doesn't take, such as `stream servo:90`. | any line |
+| `unknown` | A command the board doesn't know, or a `name:value` (or a bare word) the command doesn't take, such as `stream servo:90`. A line whose command contains `!` but isn't `!!` alone (`!`, `!!!`, `!! servo:90`) gets it too. | any line |
 | `value` | A value the board can't use. | `open` with a missing or out-of-range `session`, or a `timeout` that isn't a whole number in range; `close` with no `session`; `ping session:` or `close session:` with an id that isn't a whole number in range; `servo:` with a value that isn't a number in the form above (`+90`, `.5` and `90.` are not); and any line whose last token starts with `#` but isn't `#` and digits, or that doesn't fit in the receive buffer with its newline (see [Timing and limits](#timing-and-limits)), both sent without `#n` |
 | `insession` | Not allowed during a session. | `stream`, `stop` |
 | `nosession` | No session is running, for example because it timed out. The host must `open` again. | `ping session:<id>`, `close session:<id>` |
@@ -162,15 +172,19 @@ it. `ok` and `err` lines contain no `:`, so plotters skip them.
 
 | State | Entered by | Left by | What the board does |
 | --- | --- | --- | --- |
-| **Idle** | power-up; a session ending; `stop` or a long press in free-run | `open`, `stream` or a long press | Sends nothing unless spoken to. Answers commands. |
-| **Session** | `open`, from any state | `close`, or no `ping` with its id for the session's timeout; both go to idle. Another `open` starts a new session. | Sends readings. |
-| **Free-run** | `stream` or a long press, from idle | `stop` or a long press, to idle; `open`, to a session | Sends readings with no keepalive, for plotters and terminals. |
+| **Idle** | power-up; `!!`; a session ending; `stop` or a long press in free-run | `open`, `stream` or a long press | Sends nothing unless spoken to. Answers commands. |
+| **Session** | `open`, from any state | `close`, `!!`, or no `ping` with its id for the session's timeout; all go to idle. Another `open` starts a new session. | Sends readings. |
+| **Free-run** | `stream` or a long press, from idle | `stop`, `!!` or a long press, to idle; `open`, to a session | Sends readings with no keepalive, for plotters and terminals. |
 
-- **The board is silent until it is spoken to.** It sends no startup banner. The micro:bit's
-  USB interface chip holds about 1 KB of output that nobody reads, so anything sent then would
-  reach the next host as stale data.
+- **The board is silent until it is spoken to.** It sends no startup banner. While nobody
+  reads, the micro:bit's USB interface chip holds about 500 bytes of output on a V2, keeping
+  the oldest and dropping the rest, so anything sent then would reach the next host as stale
+  data, usually ending in a cut-off line.
 - **When a session ends,** readings stop, the timeout returns to its default, any sound stops,
   and the display shows the waiting icon. The servo keeps its position.
+- **`!!` does the same from any state,** with no session id needed, and stops free-run too. A
+  host sends it when it connects: only one program can hold the port, so the host that has
+  just connected owns the board, and a session still running belongs to a host that has gone.
 - **Button A:** a long press (held about a second) switches between idle and free-run, like
   `stream` and `stop`. It does nothing during a session, and a click does nothing in any
   state, so a student pressing buttons during a Dataflow program changes nothing.
@@ -226,9 +240,15 @@ pinout, including the free P2.
 Any program that can open the micro:bit's serial port at 115200 baud can drive the board. A
 host does this:
 
-1. **Send `?` and check the `hello` line:** `protocol:CCDeviceProtocol`, `version:1` and
-   `device:spikerbit`. Send this `?` without a checksum: firmware older than version 4 answers
-   only a bare `?`, with the v1–v3 banner, `CLUE-SPIKERBIT v<N>`.
+1. **Write `!! #n` and then `?` as soon as you connect,** with no checksum on the `?`:
+   firmware older than version 4 ignores `!!` and answers only a bare `?`, with the v1–v3
+   banner, `CLUE-SPIKERBIT v<N>`. The board may have a backlog of old output, ending in a
+   cut-off line, waiting for you. Then:
+   - **`ok #n` followed by the `hello` line:** the board is reset and identified. Check the
+     `hello` line's `protocol:CCDeviceProtocol`, `version:1` and `device:spikerbit`.
+   - **The v1–v3 banner:** older firmware, which ignored the `!!`.
+   - **Neither:** the replies may have been dropped while the board's output buffer was still
+     full. Once that backlog has been read, write `!! #m` and `?` again.
 2. **Send `open session:<id> #n` with a random id,** and send it again if no `ok #n` arrives.
 3. **Send `ping session:<id> #n` every second,** well inside the default timeout in
    [Timing and limits](#timing-and-limits). The `ok` replies show the board is still there.
