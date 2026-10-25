@@ -466,6 +466,28 @@ describe("Spiker:bit firmware display, sound and buttons", () => {
     identify(freeRun, "identify #7", ["ok #7"], kStreamingIcon);
   });
 
+  it("keeps the identify icon its full time through ? and stream, and the found icon through stop", () => {
+    const idle = boot();
+    handle(idle, "identify");
+    handle(idle, "?");
+    expect(idle.shownIcon()).toBe(kIdentifyIcon);
+    run(idle, kIconMs - 10);
+    expect(idle.shownIcon()).toBe(kIdentifyIcon);
+    run(idle, 40);
+    expect(idle.shownIcon()).toBe(kFoundIcon);
+
+    const freeRun = boot();
+    expect(exchange(freeRun, "stream #1")).toEqual(["ok #1"]);
+    handle(freeRun, "identify");
+    expect(exchange(freeRun, "stream #2")).toEqual(["ok #2"]);
+    expect(freeRun.shownIcon()).toBe(kIdentifyIcon);
+
+    const found = boot();
+    exchange(found, "?");
+    expect(exchange(found, "stop #3")).toEqual(["ok #3"]);
+    expect(found.shownIcon()).toBe(kFoundIcon);
+  });
+
   it("shows the identify icon without a sound on a micro:bit V1, leaving its speaker setting alone", () => {
     const sim = boot("1");
     expect(exchange(sim, "identify #4")).toEqual(["ok #4"]);
