@@ -9,14 +9,24 @@ import { MakeCodeSim } from "./makecode-sim";
 
 const firmwarePath = path.join(__dirname, "../../../plugins/dataflow/firmware/spikerbit-clue.ts");
 
-// A WebUSB connection wired to the sim: writes go to its serial input, and its serial output
-// comes back as serialdata events each time the clocks advance.
+// DAPLink, the micro:bit's USB interface chip, buffers the board's serial output until a host reads
+// it. Once the buffer is full it keeps the oldest bytes and drops new ones. A V2 was measured
+// holding 500–570 bytes.
+const kDaplinkBufferBytes = 512;
+// @microbit/microbit-connection reads that buffer at most 62 bytes at a time.
+const kDaplinkReadBytes = 62;
+
+// A WebUSB connection wired to the sim: writes go to its serial input. Its serial output goes into
+// a model of DAPLink's buffer, which fills while nobody reads, and comes back as serialdata events
+// of at most 62 bytes each, as the library's reads return it.
 class SimConnection implements IMicrobitUsbConnection {
   serialListeners: Array<(d: { data: string }) => void> = [];
   statusListeners: Array<(d: { status: string }) => void> = [];
   flashed = false;
   connected = false;
   written: string[] = [];
+  daplink = "";
+  reads: string[] = [];
 
   constructor(readonly sim: MakeCodeSim) {}
 
@@ -36,9 +46,21 @@ class SimConnection implements IMicrobitUsbConnection {
     this.statusListeners.forEach(l => l({ status: "Disconnected" }));
   }
 
+  // Moves the board's output into DAPLink's buffer, dropping what doesn't fit.
+  collectOutput() {
+    const room = kDaplinkBufferBytes - this.daplink.length;
+    this.daplink += this.sim.takeSerialOutput().slice(0, room);
+  }
+
+  // Reads DAPLink's buffer empty, as the library's polling does while connected.
   deliverOutput() {
-    const data = this.sim.takeSerialOutput();
-    if (data && this.connected) this.serialListeners.forEach(l => l({ data }));
+    if (!this.connected) return;
+    while (this.daplink) {
+      const data = this.daplink.slice(0, kDaplinkReadBytes);
+      this.daplink = this.daplink.slice(kDaplinkReadBytes);
+      this.reads.push(data);
+      this.serialListeners.forEach(l => l({ data }));
+    }
   }
 }
 
@@ -47,11 +69,13 @@ describe("Dataflow and the Spiker:bit firmware", () => {
   let conn: SimConnection;
   let serialDevice: SerialDevice;
 
-  // Advances both clocks in 10 ms steps, delivering the board's output after each step.
+  // Advances both clocks in 10 ms steps. Each step reads what DAPLink holds (nothing while
+  // disconnected), then runs the board, whose output goes into DAPLink's buffer for the next read.
   async function tick(ms: number) {
     for (let elapsed = 0; elapsed < ms; elapsed += 10) {
-      sim.advance(10);
       conn.deliverOutput();
+      sim.advance(10);
+      conn.collectOutput();
       await jest.advanceTimersByTimeAsync(10);
     }
   }
@@ -68,6 +92,35 @@ describe("Dataflow and the Spiker:bit firmware", () => {
 
   const sessionId = () => Number(/^open session:(\d+)/.exec(conn.written.find(w => w.startsWith("open"))!)![1]);
 
+  // A board that streamed with nobody reading has filled DAPLink's buffer, ending in a cut-off
+  // line. The backlog drains in full 62-byte reads, then the empty line ends the fragment, and the
+  // ok and the hello follow.
+  function expectBacklogThenReplies() {
+    const firstReply = conn.reads.findIndex(read => read.startsWith("\r\nok #"));
+    expect(firstReply).toBeGreaterThan(0);
+    const backlog = conn.reads.slice(0, firstReply);
+    expect(backlog.join("").length).toBe(kDaplinkBufferBytes);
+    expect(backlog.slice(0, -1).every(read => read.length === kDaplinkReadBytes)).toBe(true);
+    expect(backlog.join("")).not.toMatch(/\r\n$/);
+  }
+
+  // A 300/700 swing around 500 is a 200-count deviation on every sample.
+  function swingSignal() {
+    let high = false;
+    sim.setAnalog("P1", () => {
+      high = !high;
+      return high ? 700 : 300;
+    });
+  }
+
+  async function expectStreaming() {
+    const channel = { channelId: "emg", value: 0 } as any;
+    serialDevice.registerChannelSource(() => [channel]);
+    await tick(2000);
+    expect(channel.value).toBeGreaterThan(150);
+    expect(serialDevice.ccDeviceSession?.lastHeartbeatAt).toBeGreaterThan(Date.now() - 1500);
+  }
+
   beforeEach(() => {
     jest.useFakeTimers();
     sim = MakeCodeSim.load(firmwarePath);
@@ -81,11 +134,7 @@ describe("Dataflow and the Spiker:bit firmware", () => {
   });
 
   it("connects to v4 firmware without flashing, opens a session and streams emg to a channel", async () => {
-    let high = false;
-    sim.setAnalog("P1", () => {
-      high = !high;
-      return high ? 700 : 300;
-    });
+    swingSignal();
     const channel = { channelId: "emg", value: 0 } as any;
     serialDevice.registerChannelSource(() => [channel]);
 
@@ -94,7 +143,6 @@ describe("Dataflow and the Spiker:bit firmware", () => {
 
     expect(conn.flashed).toBe(false);
     expect(conn.written.filter(w => w.startsWith("open session:"))).toHaveLength(1);
-    // A 300/700 swing around 500 is a 200-count deviation on every sample.
     expect(channel.value).toBeGreaterThan(150);
     expect(channel.lastMessageReceivedAt).toBeGreaterThan(Date.now() - 200);
   });
@@ -135,5 +183,33 @@ describe("Dataflow and the Spiker:bit firmware", () => {
     sim.sendSerial(`${withChecksum(`ping session:${sessionId()} #901`)}\n`);
     sim.advance(100);
     expect(sim.takeSerialLines()).toEqual([withChecksum("err #901 nosession")]);
+  });
+
+  it("connects without flashing to a board left in free-run", async () => {
+    swingSignal();
+    sim.sendSerial("stream\n");
+    await tick(15000);
+    expect(conn.daplink).toHaveLength(kDaplinkBufferBytes);
+
+    await connect();
+
+    expect(conn.flashed).toBe(false);
+    expect(conn.written.filter(w => w.startsWith("!!"))).toHaveLength(1);
+    expectBacklogThenReplies();
+    await expectStreaming();
+  });
+
+  it("connects without flashing to a board still in a session whose host has gone", async () => {
+    // Its host stopped reading. Dataflow connects before the default 5 s timeout ends the session.
+    swingSignal();
+    sim.sendSerial(`${withChecksum("open session:77")}\n`);
+    await tick(4500);
+    expect(conn.daplink).toHaveLength(kDaplinkBufferBytes);
+
+    await connect();
+
+    expect(conn.flashed).toBe(false);
+    expectBacklogThenReplies();
+    await expectStreaming();
   });
 });

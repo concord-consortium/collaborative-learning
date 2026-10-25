@@ -1,3 +1,5 @@
+import { kMaxSeq } from "./cc-device-session";
+import { withChecksum } from "./cc-device-protocol";
 import { SerialDevice } from "./serial";
 import { detectFirmwareReply, FirmwareReply, shouldFlash } from "./serial-protocol";
 import { IDeviceTransport } from "./device-transport";
@@ -9,8 +11,32 @@ export const kSpikerbitFirmwareVersion = 4;
 // The `device` field of the hello a Spiker:bit sends.
 const kSpikerbitDeviceName = "spikerbit";
 
-// How long to wait for a "?" firmware reply before deciding to flash.
+// How long queryFirmware waits in all, both attempts included, for a firmware reply before
+// deciding to flash.
 const kVersionQueryTimeoutMs = 1500;
+
+// The most one "serialdata" event can carry. @microbit/microbit-connection reads the board's
+// output with DAPLink's vendor serial read, whose 64-byte reply spends 2 bytes on its header
+// (`read` in its usb/daplink.js). While a backlog drains, every read comes back full, so the
+// first shorter one means DAPLink's buffer has been emptied. This is only a hint; kDrainQuietMs
+// and the overall timeout are the backstops.
+const kDaplinkReadBytes = 62;
+
+// With no data for this long, the backlog counts as drained even without a short read.
+const kDrainQuietMs = 100;
+
+// How long after the drain queryFirmware waits for a reply before it writes "!!" and "?" again.
+const kRetryAfterDrainMs = 200;
+
+// How often queryFirmware checks for a reply and for the drain.
+const kQueryPollMs = 10;
+
+// The #n of the connect-time "!!". CcDeviceSession numbers its commands from 1 to kMaxSeq, so a
+// connect-time number can never match one of the session's. That matters because a reply to a
+// connect-time "!!" can reach the session: once one attempt has identified the firmware, the
+// session starts while the replies to another attempt (a retry, or a first attempt the device
+// answered late) may still be on their way.
+const kFirstResetSeq = kMaxSeq + 1;
 
 // Minimal subset of @microbit/microbit-connection's MicrobitUSBConnection that
 // this module depends on. Kept as an interface so tests can supply a fake and so
@@ -65,6 +91,11 @@ export class SpikerbitDevice {
   private buffer = "";
   private detectedReply: FirmwareReply | null = null;
   private versionQueryTimeoutMs: number;
+  private resetSeq = kFirstResetSeq;
+  // When the latest connect-time chunk arrived, and when the backlog was first seen to have
+  // drained (a read shorter than kDaplinkReadBytes) since the latest "!!" and "?".
+  private lastDataAt = 0;
+  private shortReadAt: number | undefined;
 
   constructor(serialDevice: SerialDevice, connection: IMicrobitUsbConnection, options?: SpikerbitDeviceOptions) {
     this.serialDevice = serialDevice;
@@ -111,6 +142,7 @@ export class SpikerbitDevice {
   ) {
     await this.connection.connect();
 
+    this.resetSeq = kFirstResetSeq;
     const running = await this.queryFirmware();
     if (shouldFlash(running, kSpikerbitDeviceName, kSpikerbitFirmwareVersion)) {
       // Flash when the board answers with no recognized reply, the legacy banner, a protocol
@@ -137,6 +169,10 @@ export class SpikerbitDevice {
   // for queryFirmware. EMG parsing does not happen here; it runs through SerialDevice.receive
   // once the transport becomes the active device.
   private handleFirmwareData = (data: string) => {
+    this.lastDataAt = Date.now();
+    if (data.length < kDaplinkReadBytes && this.shortReadAt === undefined) {
+      this.shortReadAt = this.lastDataAt;
+    }
     this.buffer += data;
     const detected = detectFirmwareReply(this.buffer);
     if (detected.reply) {
@@ -145,19 +181,45 @@ export class SpikerbitDevice {
     }
   };
 
-  // Sends "?" and waits up to the timeout for a firmware reply (surfaced via handleFirmwareData
-  // setting detectedReply). Returns the reply or null.
+  // Identifies the firmware, right after connecting and again after a flash. A board that nobody
+  // has been reading may have filled DAPLink's buffer with stale output, which arrives first and
+  // usually ends in a cut-off line. So this writes "!! #n" and a bare "?" (firmware v1–v3 answers
+  // only a bare "?") and reads lines until a hello line or a v1–v3 banner. Firmware that knows
+  // "!!" resets to idle and sends an empty line and "ok #n" before its hello; the empty line ends
+  // the cut-off line, so the hello isn't glued onto it. The "ok" needs no handling: the hello
+  // identifies the firmware whether or not an "ok" came first, and shouldFlash decides. If
+  // nothing is identified kRetryAfterDrainMs after the backlog has drained, the replies may have
+  // been dropped while DAPLink's buffer was still full, so it writes "!!" and "?" once more.
+  // Returns null when nothing is identified within versionQueryTimeoutMs.
   private async queryFirmware(): Promise<FirmwareReply | null> {
     this.detectedReply = null;
-    await this.connection.serialWrite("?\n");
+    const started = Date.now();
+    await this.writeResetAndQuery();
+    let retried = false;
     return new Promise<FirmwareReply | null>((resolve) => {
-      const started = Date.now();
       const poll = () => {
         if (this.detectedReply) return resolve(this.detectedReply);
-        if (Date.now() - started >= this.versionQueryTimeoutMs) return resolve(null);
-        setTimeout(poll, 50);
+        const now = Date.now();
+        if (now - started >= this.versionQueryTimeoutMs) return resolve(null);
+        if (!retried) {
+          const drainedAt = this.shortReadAt
+            ?? (now - this.lastDataAt >= kDrainQuietMs ? this.lastDataAt + kDrainQuietMs : undefined);
+          if (drainedAt !== undefined && now - drainedAt >= kRetryAfterDrainMs) {
+            retried = true;
+            this.writeResetAndQuery().catch((e) => console.warn("Spiker:bit serialWrite failed", e));
+          }
+        }
+        setTimeout(poll, kQueryPollMs);
       };
       poll();
     });
+  }
+
+  // Both lines go in one write, so the "?" reaches the board right behind the "!!". The "!!"
+  // carries a checksum, like every command Dataflow sends except the "?".
+  private writeResetAndQuery() {
+    this.lastDataAt = Date.now();
+    this.shortReadAt = undefined;
+    return this.connection.serialWrite(`${withChecksum(`!! #${this.resetSeq++}`)}\n?\n`);
   }
 }

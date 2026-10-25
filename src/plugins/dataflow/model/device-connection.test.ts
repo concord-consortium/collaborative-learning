@@ -62,7 +62,8 @@ function makeUsbConnection(options: { failWrite?: boolean } = {}) {
     flash: jest.fn().mockResolvedValue(undefined),
     serialWrite: jest.fn(async (data: string) => {
       if (options.failWrite) throw new Error("write failed");
-      if (data === "?\n") {
+      // Connecting writes "!! #n" and "?" together; answer the "?".
+      if (data.split("\n").includes("?")) {
         serialListeners.forEach(l => l({ data: `CLUE-SPIKERBIT v${kSpikerbitFirmwareVersion}\r\n` }));
       }
     }),

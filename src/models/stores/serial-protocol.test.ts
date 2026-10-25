@@ -122,6 +122,18 @@ describe("detectFirmwareReply", () => {
   it("ignores a hello with a bad checksum", () => {
     expect(detectFirmwareReply(`${hello}*00\r\n`).reply).toBeNull();
   });
+  it("finds a hello after the empty line and ok that end a cut-off backlog line", () => {
+    // A backlog ending in "em", then the board's reply to "!! #1000" and "?".
+    const buffer = `${withChecksum("emg:512")}\r\nem\r\n${withChecksum("ok #1000")}\r\n${withChecksum(hello)}\r\n`;
+    expect(detectFirmwareReply(buffer).reply).toEqual({
+      kind: "ccDevice",
+      hello: { protocol: "CCDeviceProtocol", version: 1, device: "spikerbit", firmware: 4 }
+    });
+  });
+  it("misses a hello glued onto a cut-off backlog line", () => {
+    // What a lone "?" gets from a board whose backlog ends in a fragment, and what "!!" prevents.
+    expect(detectFirmwareReply(`${withChecksum("emg:512")}\r\nem${withChecksum(hello)}\r\n`).reply).toBeNull();
+  });
 });
 
 describe("shouldFlash", () => {

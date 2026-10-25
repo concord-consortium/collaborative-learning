@@ -8,7 +8,7 @@ export interface CcDeviceSessionOptions {
   randomSessionId?: () => number;
 }
 
-const kMaxSeq = 999;
+export const kMaxSeq = 999;
 
 function defaultRandomSessionId() {
   return 1 + Math.floor(Math.random() * 65535);
