@@ -200,7 +200,8 @@ describe("MakeCodeSim runtime", () => {
   });
 
   it("doesn't fake button event APIs that pxt-microbit doesn't have", () => {
-    expect(() => load(`input.onButtonEvent(Button.A, 4, function () {})`)).toThrow("not simulated: input.onButtonEvent");
+    expect(() => load(`input.onButtonEvent(Button.A, 4, function () {})`))
+      .toThrow("not simulated: input.onButtonEvent");
     expect(() => load(`let e = ButtonEvent.LongClick`)).toThrow("ButtonEvent is not defined");
   });
 
