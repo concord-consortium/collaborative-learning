@@ -165,8 +165,9 @@ Dataflow:   close session:4821*1D
 - **A host line without a verb sets outputs,** and nothing else: `servo:90`. Every other
   command starts with a verb, so a new command can't collide with an output's name.
 - **`#n`** at the end of a host command asks for an acknowledgment, `ok #n`. `n` is a decimal
-  number the host chooses. A command without `#n` gets no `ok`, so an output sent on every tick gets no reply. Errors are sent either
-  way. `?` always gets the `hello` line.
+  number the host chooses. A command without `#n` gets no `ok`, so an output sent on every
+  tick gets no reply. Errors are sent either way. A well-formed `?` gets the `hello` line, and
+  never an `ok`, even with `#n`.
 - **`*hh`** may end any line: the XOR of every byte before the `*`, as two hex digits, either
   case (as in NMEA 0183). A receiver that finds one checks it and drops the line if it's
   wrong; a line without one is accepted. The device puts one on every line it sends. A host
@@ -210,15 +211,13 @@ Every device has these two states:
 | State | Entered by | Behavior |
 |---|---|---|
 | **Idle** | power-up; a session ending | Sends nothing unless asked. Answers commands. |
-| **Session** | `open` | Streams readings. Ends on `close`, or when no `ping` carrying its session id has arrived for the session timeout. |
+| **Session** | `open` | Sends readings. Ends on `close`, or when no `ping` carrying its session id has arrived for the session timeout. |
 
 A device may add states of its own outside a session. The Spiker:bit's free-run, for example,
 streams readings with no keepalive, for plotters and terminals; its
 [user guide](../firmware/user-guide.md#states) describes it.
 
 - The device starts idle and sends nothing, not even a startup banner, until it is spoken to.
-  The micro:bit's USB interface chip holds about 1 KB of output when nobody reads it, so
-  anything sent while nobody listens reaches the next host as stale data.
 - **Only `open` starts a session,** and the host names it with a **session id**, an integer
   from 1 to 65535. A host picks one at random for each `open`, so a stale host's id is
   unlikely to match a newer session's. The device only stores and compares it.
@@ -229,8 +228,9 @@ streams readings with no keepalive, for plotters and terminals; its
 - If a session with a different id is running, a `ping` or `close` with the old id gets
   `err #n othersession` and changes nothing, so a stale host (an old page's timer, or a
   second host) can't keep alive or close a session it doesn't own.
-- An `open` from a device-specific state (such as the Spiker:bit's free-run) starts a session; when it ends, the device goes to idle.
-  An `open` during a session starts a fresh one, with settings back to their defaults.
+- An `open` from a device-specific state (such as the Spiker:bit's free-run) starts a session;
+  when it ends, the device goes to idle. An `open` during a session starts a fresh one, with
+  settings back to their defaults.
 - A command the device doesn't allow during a session gets `err #n insession` and changes
   nothing.
 - When a session ends, readings stop and every setting returns to its default. What else
@@ -242,9 +242,9 @@ streams readings with no keepalive, for plotters and terminals; its
 |---|---|---|
 | `?` | Identifies itself, in any state. Changes nothing. | the `hello` line |
 | `open session:<id> [timeout:<ms>] [#n]` | Starts a session with that id. `session` is required. `timeout` is how long the session lasts without a `ping`; the device's documentation gives its default and the range it accepts. | `ok #n`, or `err #n value` for a missing or out-of-range value |
-| `ping session:<id> [#n]` | Extends the session with that id. | `ok #n`, or `err #n nosession` / `err #n othersession` |
+| `ping session:<id> [#n]` | Extends the session with that id. | `ok #n`, or `err #n value` / `err #n nosession` / `err #n othersession` |
 | `ping #n` | A liveness check only, in any state. Without `#n` it does nothing. | `ok #n` |
-| `close session:<id> [#n]` | Ends that session at once. | `ok #n`, or `err #n nosession` / `err #n othersession` |
+| `close session:<id> [#n]` | Ends that session at once. | `ok #n`, or `err #n value` / `err #n nosession` / `err #n othersession` |
 | `identify [#n]` | Optional: a device may support it. Draws attention to the device, in any state, for example with an icon or a sound. A device without it answers `err #n unknown`. | `ok #n` |
 
 Every device answers `?`, `open`, `ping` and `close`. A device adds its own commands and
@@ -324,8 +324,8 @@ are recorded in
 ## What `keyValue` and `radioHub` don't do
 
 The gaps in the two older protocols, as facts about their wire format. The CC Device
-Protocol fills the liveness, acknowledgment and identification gaps and the integrity, output
-and value-range gaps; capability discovery (`caps`) and configuration (`set`) are reserved.
+Protocol fills the liveness, acknowledgment, identification, output, integrity and value-range
+gaps, and reserves `caps` and `set` for discovery and configuration.
 
 - **No liveness signal.** Dataflow can only infer that data stopped from the per-channel
   `lastMessageReceivedAt` stamps. Nothing distinguishes a quiet device from a lost
