@@ -20,9 +20,9 @@ const kHexPath = path.resolve(path.dirname(fileURLToPath(import.meta.url)),
 const kSourcePath = path.resolve(path.dirname(fileURLToPath(import.meta.url)),
   "../../src/plugins/dataflow/firmware/spikerbit-clue.ts");
 const kReadingPattern = /^[a-z0-9_/]+:-?\d+(\.\d+)?$/;
-const kLegacyPattern = /CLUE-SPIKERBIT v(\d+)/;
+const kV1ToV3BannerPattern = /CLUE-SPIKERBIT v(\d+)/;
 
-// The identification line, from `const HELLO = "..."` in the MakeCode source, so a firmware
+// The `hello` line, from `const HELLO = "..."` in the MakeCode source, so a firmware
 // version bump doesn't leave the bench's first check expecting the old line.
 function readExpectedHello() {
   const match = /const HELLO = "([^"]+)"/.exec(fs.readFileSync(kSourcePath, "utf8"));
@@ -124,7 +124,7 @@ async function waitForBoard(requestedPort) {
       const board = new Board(port);
       await board.send("?", { checksummed: false });
       const lines = await board.collect(1000);
-      if (lines.some(line => kLegacyPattern.test(line) || verifiedBody(line)?.startsWith("hello "))) return;
+      if (lines.some(line => kV1ToV3BannerPattern.test(line) || verifiedBody(line)?.startsWith("hello "))) return;
     } catch {
       await sleep(1000);
     } finally {
@@ -231,8 +231,7 @@ function checkReadings(lines, ms, min, max) {
 // The checks, run in order against one board; the state each leaves behind is the state the
 // next one starts in. A check has a name and either:
 //   send + reply: send that line (a function of the context, or a string) and expect one
-//     reply line whose body is `reply`. `checksummed: false` sends the line without a checksum
-//     so it can be wrong on purpose; `raw` sends exactly that text.
+//     reply line whose body is `reply`.
 //   run(board, ctx): custom steps; returns null when it passes or a failure message.
 // `#n` in a `send` string is the next sequence number.
 function buildChecks() {
@@ -348,17 +347,17 @@ async function main() {
   let failed = 0;
 
   try {
-    // Plain `?`, with no checksum: the old firmware compares the whole line to "?". A board
-    // that has just rebooted may need a few tries to answer.
+    // Plain `?`, with no checksum: firmware v1–v3 compares the whole line to "?" and answers
+    // with the v1–v3 banner. A board that has just rebooted may need a few tries to answer.
     let firstLines = [];
     let hello = false;
     for (let attempt = 0; attempt < kIdentifyAttempts && !hello; attempt++) {
       board.clear();
       await board.send("?", { checksummed: false });
       firstLines = await board.collect(1000);
-      const legacy = firstLines.map(line => kLegacyPattern.exec(line)).find(Boolean);
-      if (legacy) {
-        console.log(`running v${legacy[1]} firmware; rerun with --flash`);
+      const banner = firstLines.map(line => kV1ToV3BannerPattern.exec(line)).find(Boolean);
+      if (banner) {
+        console.log(`running v${banner[1]} firmware; rerun with --flash`);
         failed = 1;
         return;
       }
