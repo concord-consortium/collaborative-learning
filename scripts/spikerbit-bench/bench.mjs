@@ -17,8 +17,18 @@ const kIdentifyAttempts = 5;
 const kDriveDir = "/Volumes/MICROBIT";
 const kHexPath = path.resolve(path.dirname(fileURLToPath(import.meta.url)),
   "../../src/plugins/dataflow/firmware/spikerbit-clue.hex");
+const kSourcePath = path.resolve(path.dirname(fileURLToPath(import.meta.url)),
+  "../../src/plugins/dataflow/firmware/spikerbit-clue.ts");
 const kReadingPattern = /^[a-z0-9_/]+:-?\d+(\.\d+)?$/;
-const kLegacyPattern = /CLUE-SPIKERBIT v(\d+)/;
+const kV1ToV3BannerPattern = /CLUE-SPIKERBIT v(\d+)/;
+
+// The `hello` line, from `const HELLO = "..."` in the MakeCode source, so a firmware
+// version bump doesn't leave the bench's first check expecting the old line.
+function readExpectedHello() {
+  const match = /const HELLO = "([^"]+)"/.exec(fs.readFileSync(kSourcePath, "utf8"));
+  if (!match) throw new Error(`Could not find const HELLO = "..." in ${kSourcePath}`);
+  return match[1];
+}
 
 const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -114,7 +124,7 @@ async function waitForBoard(requestedPort) {
       const board = new Board(port);
       await board.send("?", { checksummed: false });
       const lines = await board.collect(1000);
-      if (lines.some(line => kLegacyPattern.test(line) || verifiedBody(line)?.startsWith("hello "))) return;
+      if (lines.some(line => kV1ToV3BannerPattern.test(line) || verifiedBody(line)?.startsWith("hello "))) return;
     } catch {
       await sleep(1000);
     } finally {
@@ -221,14 +231,12 @@ function checkReadings(lines, ms, min, max) {
 // The checks, run in order against one board; the state each leaves behind is the state the
 // next one starts in. A check has a name and either:
 //   send + reply: send that line (a function of the context, or a string) and expect one
-//     reply line whose body is `reply`. `checksummed: false` sends the line without a checksum
-//     so it can be wrong on purpose; `raw` sends exactly that text.
+//     reply line whose body is `reply`.
 //   run(board, ctx): custom steps; returns null when it passes or a failure message.
 // `#n` in a `send` string is the next sequence number.
 function buildChecks() {
   return [
-    { name: "? identifies the board", send: "?",
-      reply: "hello protocol:CCDeviceProtocol version:1 device:spikerbit firmware:4" },
+    { name: "? identifies the board", send: "?", reply: readExpectedHello() },
     { name: "open with a session id", send: ctx => `open session:${ctx.id} #n`, reply: ctx => `ok #${ctx.n}` },
     { name: "readings arrive about every 100 ms in a session",
       run: async (board) => {
@@ -280,7 +288,8 @@ function buildChecks() {
         const lines = await board.collect(500);
         return lines.length ? `expected silence after stop, got ${describeLines(lines)}` : null;
       } },
-    { name: "open for the stream/servo checks", send: ctx => `open session:${ctx.id} #n`, reply: ctx => `ok #${ctx.n}` },
+    { name: "open for the stream/servo checks",
+      send: ctx => `open session:${ctx.id} #n`, reply: ctx => `ok #${ctx.n}` },
     { name: "stream during a session -> err insession", send: "stream #n", reply: ctx => `err #${ctx.n} insession` },
     { name: "servo:90 -> ok", send: "servo:90 #n", reply: ctx => `ok #${ctx.n}` },
     { name: "servo:abc -> err value", send: "servo:abc #n", reply: ctx => `err #${ctx.n} value` },
@@ -291,11 +300,29 @@ function buildChecks() {
         const wrong = (parseInt(checksum(body), 16) ^ 0x01).toString(16).toUpperCase().padStart(2, "0");
         await board.write(`${body}*${wrong}\n`);
         const line = await board.nextReply();
-        // The board can't trust the #n in a line that failed its checksum, so accept either form.
-        const failure = checkReply(line, "err checksum");
-        return failure && checkReply(line, `err #${n} checksum`) ? failure : null;
+        // The board can't trust the #n in a line that failed its checksum, so it leaves it out.
+        return checkReply(line, "err checksum");
       } },
     { name: "foo -> err unknown", send: "foo #n", reply: ctx => `err #${ctx.n} unknown` },
+    { name: "a 200-character line -> err value, then later pings, alone or two in one write -> ok",
+      run: async (board, ctx) => {
+        board.clear();
+        // Longer than the 128-character receive buffer, so the board drops its end and newline.
+        await board.write(`${"x".repeat(200)}\n`);
+        const longFailure = checkReply(await board.nextReply(), "err value");
+        if (longFailure) return `200-character line: ${longFailure}`;
+        const n = ctx.nextSeq();
+        await board.send(`ping #${n}`);
+        const pingFailure = checkReply(await board.nextReply(), `ok #${n}`);
+        if (pingFailure) return `ping after it: ${pingFailure}`;
+        const pair = [ctx.nextSeq(), ctx.nextSeq()];
+        await board.write(pair.map(m => `${withChecksum(`ping #${m}`)}\n`).join(""));
+        for (const m of pair) {
+          const failure = checkReply(await board.nextReply(), `ok #${m}`);
+          if (failure) return `two pings in one write: ${failure}`;
+        }
+        return null;
+      } },
     { name: "identify #n -> ok", send: "identify #n", reply: ctx => `ok #${ctx.n}` },
     { name: "close leaves the board idle", send: ctx => `close session:${ctx.id} #n`, reply: ctx => `ok #${ctx.n}` },
   ];
@@ -339,24 +366,25 @@ async function main() {
   let failed = 0;
 
   try {
-    // Plain `?`, with no checksum: the old firmware compares the whole line to "?". A board
-    // that has just rebooted may need a few tries to answer.
+    // Plain `?`, with no checksum: firmware v1–v3 compares the whole line to "?" and answers
+    // with the v1–v3 banner. A board that has just rebooted may need a few tries to answer.
     let firstLines = [];
     let hello = false;
     for (let attempt = 0; attempt < kIdentifyAttempts && !hello; attempt++) {
       board.clear();
       await board.send("?", { checksummed: false });
       firstLines = await board.collect(1000);
-      const legacy = firstLines.map(line => kLegacyPattern.exec(line)).find(Boolean);
-      if (legacy) {
-        console.log(`running v${legacy[1]} firmware; rerun with --flash`);
+      const banner = firstLines.map(line => kV1ToV3BannerPattern.exec(line)).find(Boolean);
+      if (banner) {
+        console.log(`running v${banner[1]} firmware; rerun with --flash`);
         failed = 1;
         return;
       }
       hello = firstLines.some(line => verifiedBody(line)?.startsWith("hello "));
     }
     if (!hello) {
-      console.log(`no reply to ?; is the board running this firmware? rerun with --flash (got ${describeLines(firstLines)})`);
+      console.log("no reply to ?; is the board running this firmware? rerun with --flash " +
+        `(got ${describeLines(firstLines)})`);
       failed = 1;
       return;
     }
@@ -367,7 +395,8 @@ async function main() {
         failed++;
         console.log(`FAIL ${check.name}`);
         if (sent) console.log(`     sent: ${JSON.stringify(sent)}`);
-        console.log(`     ${failure}${got !== undefined && got !== null ? ` (came back: ${JSON.stringify(got)})` : ""}`);
+        const cameBack = got !== undefined && got !== null ? ` (came back: ${JSON.stringify(got)})` : "";
+        console.log(`     ${failure}${cameBack}`);
       } else {
         console.log(`PASS ${check.name}`);
       }

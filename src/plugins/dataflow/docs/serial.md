@@ -184,8 +184,8 @@ store, `SpikerbitDevice.connectAndStream` makes sure the board is running a curr
    Protocol session. The board streams EMG readings once it acknowledges the session's
    `open`.
 
-Bump `kSpikerbitFirmwareVersion` together with the `firmware:` number in the `HELLO` line of
-the MakeCode source whenever the firmware changes; see
+Keep `kSpikerbitFirmwareVersion` equal to the `firmware:` number in the `HELLO` line of
+`spikerbit-clue.ts`, and bump both whenever the firmware's behavior changes; see
 [the firmware README](../firmware/README.md) for how to rebuild the hex.
 
 ## Inbound: hardware → Sensor node

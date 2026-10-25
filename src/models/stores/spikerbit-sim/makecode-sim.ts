@@ -6,8 +6,8 @@ import * as ts from "typescript";
 // can't receive serial input, and no emulator runs a micro:bit V2 hex.
 //
 // The source is transpiled with `typescript` (no type check) and its top level runs against
-// the fake globals below, at simulated time 0. Only what the firmware calls is faked: any other
-// member of a namespace or enum throws `not simulated: <name>`.
+// the fake globals below, at simulated time 0. Little beyond what the firmware calls is faked:
+// any other member of a namespace or enum throws `not simulated: <name>`.
 //
 // Fibers: `basic.forever(fn)` and `control.inBackground(fn)` each become a fiber, and running a
 // fiber calls `fn`. `basic.pause(ms)` throws a yield signal that ends the call and wakes the
@@ -19,8 +19,9 @@ import * as ts from "typescript";
 // though the board runs it once, so a program times one-off waits (such as how long an icon
 // stays) from its forever loop with `control.millis()` deadlines instead.
 //
-// Events (serial input and buttons) run their handler synchronously and must not pause. A button
-// raises the events CODAL does: a click, or a long click when it was held for a second or more.
+// Event handlers must not pause. A button runs its handler at once, raising the events CODAL
+// does: a click, or a long click when it was held for a second or more. Serial input is queued,
+// as described at `sendSerial`.
 //
 // `control.hardwareVersion()` reports a micro:bit V2 ("2.0") unless the sim is loaded with another
 // version; a V1 reports "1". A V1 has no speaker, so on one, turning the speaker on or playing a
@@ -40,8 +41,9 @@ export interface MakeCodeSimOptions {
 const kForeverSleepMs = 20;
 // The receive buffer's capacity until the program calls serial.setRxBufferSize.
 const kDefaultRxBufferSize = 20;
-// The shortest pause. A fiber that yields with pause(0) still lets this much time pass, about one
-// pass of the firmware's sampler on a V2, so a free-running loop can't stop the clock.
+// The shortest pause. A fiber that yields with pause(0) still lets this much time pass, about
+// half a pass of the firmware's sampler (250 Hz on a V2), so a free-running loop can't stop the
+// clock.
 const kMinPauseMs = 2;
 
 class YieldSignal {
@@ -106,6 +108,8 @@ export class MakeCodeSim {
   private rxBufferSize = kDefaultRxBufferSize;
   private serialOutput = "";
   private serialHandler: { delimiters: string, handler: Thunk } | undefined;
+  // Serial events raised since the last scheduler step, one per delimiter.
+  private serialEvents: Thunk[] = [];
   private eventHandlers = new Map<string, Thunk>();
   private analog = new Map<string, () => number>();
   private servos = new Map<string, number>();
@@ -156,24 +160,38 @@ export class MakeCodeSim {
     return this._soundsStopped;
   }
 
+  // Runs the board for `ms`. Queued serial events run first, at the current time.
   advance(ms: number) {
     const until = this._now + ms;
+    this.runSerialEvents();
     for (let fiber = this.nextDue(until); fiber; fiber = this.nextDue(until)) {
-      this._now = fiber.wakeAt;
+      // A fiber that came due during a stall runs when the stall ends.
+      this._now = Math.max(this._now, fiber.wakeAt);
       this.runFiber(fiber);
     }
     this._now = until;
   }
 
+  // Holds the board for `ms` without running anything, as a fiber that runs long without yielding
+  // would. Each fiber that comes due meanwhile runs once, late, when the next `advance` starts.
+  stall(ms: number) {
+    this._now += ms;
+  }
+
   // Follows codal-core's Serial::dataReceived: the receive buffer holds `rxBufferSize` characters
   // and drops any that arrive while it is full. A delimiter raises the data-received event even
   // when it is dropped, because CODAL checks for delimiters before it checks for room.
+  //
+  // The handler doesn't run here. pxt-microbit registers it with QUEUE_IF_BUSY, so on the board
+  // each event waits for the scheduler while the UART keeps filling the buffer. The sim queues one
+  // event per delimiter and runs them at the next `advance`, so every character of one
+  // `sendSerial` is in the buffer, or dropped, before the handler first reads it. A line split over
+  // two `sendSerial` calls with an `advance` between them arrives as on a board whose handler reads
+  // before the rest of the line is in.
   sendSerial(text: string) {
     for (const char of text) {
       if (this.serialInput.length < this.rxBufferSize) this.serialInput += char;
-      if (this.serialHandler?.delimiters.includes(char)) {
-        this.runEvent(this.serialHandler.handler);
-      }
+      if (this.serialHandler?.delimiters.includes(char)) this.serialEvents.push(this.serialHandler.handler);
     }
   }
 
@@ -244,6 +262,12 @@ export class MakeCodeSim {
     }
   }
 
+  private runSerialEvents() {
+    while (this.serialEvents.length > 0) {
+      this.runEvent(this.serialEvents.shift()!);
+    }
+  }
+
   private runEvent(handler: Thunk) {
     try {
       handler();
@@ -261,24 +285,6 @@ export class MakeCodeSim {
   private showIcon(name: string) {
     this.icon = name;
     this.displayCalls.push(name);
-  }
-
-  private readUntil(delimiters: string) {
-    const index = [...this.serialInput].findIndex(char => delimiters.includes(char));
-    if (index >= 0) {
-      const line = this.serialInput.slice(0, index);
-      this.serialInput = this.serialInput.slice(index + 1);
-      return line;
-    }
-    // No delimiter in the buffer: the line overflowed it and its delimiter was dropped. On the
-    // board, readUntil then waits for the next delimiter event and returns the buffer up to its
-    // last character, consuming that character as if it were the delimiter (codal-core's
-    // Serial::readUntil in SYNC_SLEEP mode, which MakeCode uses). Handlers can't wait here, so
-    // the sim returns that text at once. The board loses the next line too, which fills the
-    // still-full buffer while readUntil waits; the sim reads that line normally.
-    const text = this.serialInput.slice(0, -1);
-    this.serialInput = "";
-    return text;
   }
 
   private globals(): Record<string, unknown> {
@@ -324,7 +330,12 @@ export class MakeCodeSim {
         writeLine: (text: string) => { this.serialOutput += `${text}\r\n`; },
         onDataReceived: (delimiters: string, handler: Thunk) => { this.serialHandler = { delimiters, handler }; },
         delimiters: (delimiter: string) => delimiter,
-        readUntil: (delimiters: string) => this.readUntil(delimiters)
+        // Like pxt-microbit's, takes everything in the receive buffer without waiting.
+        readString: () => {
+          const text = this.serialInput;
+          this.serialInput = "";
+          return text;
+        }
       }),
       music: namespace("music", {
         PlaybackMode,

@@ -5,7 +5,7 @@ export const kCcDeviceProtocolVersion = 1;
 
 export type CcDeviceLine =
   | { kind: "reading"; name: string; value: number }
-  | { kind: "ok"; seq?: number }
+  | { kind: "ok"; seq: number }
   | { kind: "err"; seq?: number; reason: string }
   | { kind: "hello"; fields: Record<string, string> }
   | { kind: "unknown" };
@@ -62,7 +62,6 @@ export function parseCcDeviceLine(line: string): CcDeviceLine | null {
         return { kind: "reading", name, value: Number(valueText) };
       }
     }
-    if (first === "ok") return { kind: "ok" };
     return { kind: "unknown" };
   }
 
@@ -86,21 +85,22 @@ export function parseCcDeviceLine(line: string): CcDeviceLine | null {
   return { kind: "unknown" };
 }
 
-// Splits complete lines (ending in "\n", with any "\r" removed) off the front of `buffer`.
+// Splits complete lines (ending in "\n", and without the "\r" of a "\r\n" ending) off the front
+// of `buffer`. Any other "\r" stays in the line, so a line corrupted by one fails its checksum.
 // A partial line, including one that ends in a lone "\r" or inside "*hh", stays in `remaining`.
 export function splitLines(buffer: string): { lines: string[]; remaining: string } {
   const lines: string[] = [];
   let start = 0;
   let end = buffer.indexOf("\n", start);
   while (end !== -1) {
-    lines.push(buffer.substring(start, end).replace(/\r/g, ""));
+    lines.push(buffer.substring(start, end).replace(/\r$/, ""));
     start = end + 1;
     end = buffer.indexOf("\n", start);
   }
   return { lines, remaining: buffer.substring(start) };
 }
 
-// Returns null if any field is missing or not a number where one is expected.
+// Returns null if any field is missing, or if version or firmware isn't a finite number.
 export function parseHello(fields: Record<string, string>): CcDeviceHello | null {
   const { protocol, version, device, firmware } = fields;
   if (protocol === undefined || version === undefined || device === undefined || firmware === undefined) {

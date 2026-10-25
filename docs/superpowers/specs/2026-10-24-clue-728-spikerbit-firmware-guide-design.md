@@ -55,11 +55,12 @@ How it is designed and how it is extended; what any CC device and host must agre
 - `identify`, as an **optional** command a device may support;
 - the reserved extensions (`caps`, `set`, binary mode) and how a new verb, output or setting
   is added;
-- Dataflow's host side: recognizing the firmware and `CcDeviceSession`.
+- how a host recognizes the firmware. Dataflow's session, `CcDeviceSession`, is described
+  there by #3055, which adds it.
 
-Its Spiker:bit material (free-run, `stream`/`stop`, `servo`, the `emg` reading, the display
-table and the firmware notes) moves to the guide and is replaced by a short pointer to it. The
-connection transcript stays as an example.
+The Spiker:bit's own material (free-run, `stream`/`stop`, `servo`, the `emg` reading, the
+displays and the firmware notes) is in the guide, and the protocol section has a short pointer
+to it. The protocol section keeps a connection transcript as an example.
 
 **The guide: this firmware.** It covers:
 
@@ -77,16 +78,16 @@ connection transcript stays as an example.
 - **timing and limits** (generated);
 - the sound rule (built-in speaker only, so the servo doesn't twitch; a V1 shows the icon
   without sound) and the pins it uses;
-- trying it by hand in serialterminal.com, and plotting it in MakeCode (both moved from the
-  README);
+- trying it by hand in serialterminal.com, and plotting it in MakeCode;
 - driving it from your own app: what a host has to do (send `?`, check `hello`, `open`, ping
-  every second, `close`), with `src/models/stores/cc-device-session.ts` as the reference
-  implementation;
+  every second, `close`), with a pointer to Dataflow's parser,
+  `src/models/stores/cc-device-protocol.ts`. #3055 adds `cc-device-session.ts` as the
+  reference implementation;
 - where to go next: the protocol section, the source, the simulator tests, the bench script.
 
-**`src/plugins/dataflow/firmware/README.md`** becomes the developer page: building and
+**`src/plugins/dataflow/firmware/README.md`** is the developer page: building and
 rebuilding the hex, the CI checks, testing in Jest, the bench script, prototyping in MakeCode,
-upgrading MakeCode, and the hardware reference. It links to the guide at the top, and gains a
+upgrading MakeCode, and the hardware reference. It links to the guide at the top, and has a
 short section on regenerating the guide.
 
 ## How the guide is generated
@@ -105,9 +106,8 @@ description:
 const FOUND_ICON = IconNames.Surprised
 ```
 
-The descriptions are Markdown. The five displays today are Waiting, Found, Connected, Identify
-and Streaming; their current descriptions are in the "The Spiker:bit firmware" table of
-`serial-protocols.md`.
+The descriptions are Markdown. The five displays are Waiting, Found, Connected, Identify and
+Streaming.
 
 Each constant that sets a number the guide states (the session timeout default and range, the
 reading interval, how long the connected and identify icons show, the receive buffer size)
@@ -151,9 +151,10 @@ long-click event), not a firmware constant, so the guide states it by hand ("abo
   a board is at hand. Turning a literal into a named constant is in scope; changing a value is
   not.
 - **The generator's output is deterministic:** the same source and toolchain give the same
-  bytes on any machine (stable attribute order, ids and number formatting). A test runs it
-  twice and compares. The check compares bytes exactly. If `MicrobitBoardSvg` doesn't give
-  byte-identical output, **stop and bring the options back to Scott** rather than picking one.
+  bytes on any machine (stable attribute order, ids and number formatting). `build.mjs`
+  renders each picture twice in one process and throws if the two differ. The check compares
+  bytes exactly. If `MicrobitBoardSvg` doesn't give byte-identical output, **stop and bring the
+  options back to Scott** rather than picking one.
   The options known so far:
   - **Normalize the SVGs** with a minimizer (such as SVGO) that strips what varies between runs,
     and commit the normalized output. This is the one to try first.
@@ -164,8 +165,8 @@ long-click event), not a firmware constant, so the guide states it by hand ("abo
 - The firmware still runs in `MakeCodeSim` (`src/models/stores/spikerbit-sim/makecode-sim.ts`);
   any new MakeCode API it uses needs a fake there.
 - The SVGs must read clearly on GitHub in both light and dark themes.
-- Links into the moved sections of `serial-protocols.md` (from `serial.md`, the firmware header
-  comment, the README and the spec) are updated.
+- Links into `serial-protocols.md` (from `serial.md`, the firmware header comment, the README
+  and the spec) point at sections it has.
 - After this lands on `CLUE-728-protocol-firmware`, that branch is merged into
   `CLUE-728-spikerbit-firmware-status` (#3055) again, as before; #3055 also edits these docs,
   so expect conflicts there. They are resolved at that merge; the edits here aren't shaped to

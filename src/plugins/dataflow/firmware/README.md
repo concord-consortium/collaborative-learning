@@ -1,22 +1,18 @@
-# Spiker:bit DataFlow firmware
+# Spiker:bit Dataflow firmware
 
 What the firmware does, its commands, its LED displays and how to try it on a board are in the
 [user guide](user-guide.md). This page is for developers changing the firmware.
 
-`spikerbit-clue.hex` is a universal micro:bit hex (V1+V2) authored in MakeCode. The DataFlow
+`spikerbit-clue.hex` is a universal micro:bit hex (V1+V2) authored in MakeCode. The Dataflow
 tile flashes it automatically over WebUSB (via `@microbit/microbit-connection`) when a
 connected micro:bit is not already running it.
 
-**The board is silent until it is spoken to.** It sends no startup banner and no readings
-until a session or `stream` starts them, so a board nobody is talking to doesn't fill the USB
-interface chip's buffer with stale data for the next connection.
-
-As of v3 the firmware computes the EMG envelope itself — it tracks the DC baseline
+The firmware computes the EMG envelope itself — it tracks the DC baseline
 and full-wave rectifies (`envelope = EMA(|raw - baseline|)`) instead of using the
 `pxt-spikerbit` extension's `musclePowerSignal()`, whose fixed 580 noise floor sits
 above the board's ~511 resting baseline and misses moderate contractions. It reads the
-raw signal on P1 and only needs `P8=0/P9=0` to select EMG mode, so the extension is no
-longer required. See the header of `spikerbit-clue.ts` for the full rationale.
+raw signal on P1 and only needs `P8=0/P9=0` to select EMG mode, so the extension isn't
+needed. See the header of `spikerbit-clue.ts` for the full rationale.
 
 - **Source of record:** [`spikerbit-clue.ts`](./spikerbit-clue.ts) — the MakeCode
   program. This directory is excluded from the CLUE tsconfig/eslint because the
@@ -51,9 +47,10 @@ Two checks keep them in sync:
   build tooling, and on master when a merge changes them. Like `npm run check:firmware`, it
   rebuilds the hex and fails if it differs from the committed one.
 
-Behavior changes still need a bench test on real hardware; the checks only prove the hex
-was built from the source. `npm run bench:spikerbit -- --flash` flashes a
-plugged-in board and checks its protocol replies (see [`scripts/spikerbit-bench/`](../../../../scripts/spikerbit-bench/)).
+Behavior changes also need a bench test on real hardware; the checks only prove the hex
+was built from the source. `npm run bench:spikerbit -- --flash` flashes a plugged-in board
+and checks its protocol replies (see
+[`scripts/spikerbit-bench/`](../../../../scripts/spikerbit-bench/)).
 
 ### The user guide
 
@@ -86,24 +83,16 @@ so Jest runs `spikerbit-clue.ts` itself on a simulated MakeCode runtime,
 [`MakeCodeSim`](../../../models/stores/spikerbit-sim/makecode-sim.ts). It transpiles the
 source with `typescript`, runs it against fake MakeCode globals on a simulated clock, and
 lets a test send serial input, read serial output, click or long-press a button, set the
-analog input on a pin, and check the servo angle, the icon shown and the sounds played. It acts
-as a micro:bit V2 unless it is loaded with `hardwareVersion: "1"`; then, like a V1, it panics
-if the program turns the speaker on or plays a sound expression.
+analog input on a pin, stall the board, and check the servo angle, the icon shown and the
+sounds played. It acts as a micro:bit V2 unless it is loaded with `hardwareVersion: "1"`;
+then, like a V1, it panics if the program turns the speaker on or plays a sound expression.
 
-- **Only what the firmware uses is faked.** Calling anything else throws
+- **Little beyond what the firmware uses is faked.** Calling anything else throws
   `not simulated: <name>`; add a fake to `makecode-sim.ts` when the firmware starts using
   something new.
-- **The loop rule.** `basic.pause` ends the current pass of a `forever` or background loop,
-  and the simulator calls the function again for the next pass. So a loop pauses only as
-  its last statement, a background loop (`while (true) { ...; basic.pause(n) }`) keeps its
-  state outside the function, and event handlers don't pause at all. A one-off wait, such
-  as how long an icon stays, is timed from the `forever` loop with `control.millis()`
-  deadlines, and display calls pass an interval of 0 so they don't pause. The header of
-  `spikerbit-clue.ts` states the same rule.
-- `basic.pause(0)` lets 2 ms pass, about one pass of the sampler on a V2, and the `forever`
-  loop sleeps 20 ms after every pass, as MakeCode's does.
-- **The serial receive buffer** holds 20 characters unless the firmware calls
-  `serial.setRxBufferSize`, and a longer line is truncated, as on the board.
+- **The loop rule:** a loop pauses only as its last statement, and event handlers don't pause.
+- The comments in `makecode-sim.ts` give the details: why the loop rule holds, how long a
+  pause and a `forever` pass take, and how the serial receive buffer fills and overflows.
 
 These tests check the program's logic, not its timing on the board or the compiled hex.
 

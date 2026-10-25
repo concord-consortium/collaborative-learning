@@ -6,8 +6,10 @@ firmware that speaks it, and the Dataflow code that speaks the other end. The Da
 this story (the "connection stopped" display and the "Is it alive?" button) is designed
 separately; it builds on the connect pane CLUE-716 added.
 
-The current wire protocols are documented in
-[serial-protocols.md](../../../src/plugins/dataflow/docs/serial-protocols.md). Read it first.
+The wire protocols, this one included, are documented in
+[serial-protocols.md](../../../src/plugins/dataflow/docs/serial-protocols.md), and the Spiker:bit
+firmware's commands, displays and timing in its
+[user guide](../../../src/plugins/dataflow/firmware/user-guide.md). See "Docs" at the end.
 
 ## Why
 
@@ -33,7 +35,7 @@ sampling.
 ## Scope
 
 **CLUE-728 builds:** the protocol's framing, identification, sessions with keepalive,
-acknowledgments, the alive check, free-run mode, the servo output, EMG readings, and the LED
+acknowledgments, `identify`, free-run mode, the servo output, EMG readings, and the LED
 status icons, in firmware version 4. And the Dataflow side of the protocol: recognizing v4,
 the keepalive, parsing, and sending the servo command (see "Dataflow protocol code"). The
 Dataflow UI comes later, in the same feature branch (see "Delivery").
@@ -74,7 +76,7 @@ large, it is binary only, and it has no standard EMG service.
 **Name: CC Device Protocol** (CC for Concord Consortium), because other Concord applications
 may use it. It covers outputs as well as sensors and will get a binary mode, so the name
 avoids "sensor", "serial" and "line". On the wire it is spelled out in full, as
-`CCDeviceProtocol`, in the identification line. In Dataflow's `DeviceProtocol` union it is
+`CCDeviceProtocol`, in the `hello` line. In Dataflow's `DeviceProtocol` union it is
 `ccDevice`, matching the style of `keyValue` and `radioHub`.
 
 ### Lines
@@ -98,7 +100,7 @@ avoids "sensor", "serial" and "line". On the wire it is spelled out in full, as
 
 So a host line is: an optional verb, then zero or more `name:value` assignments, then an
 optional `#n`, then an optional `*hh`. A device line is a reading, a reply or the
-identification line.
+`hello` line.
 
 **A host line without a verb sets outputs,** and nothing else: `servo:90`. Everything else
 starts with a verb, so a new kind of command is a new verb and can't collide with an
@@ -152,15 +154,15 @@ From their parsing code
 - Arduino IDE 2 plots every `name:value` pair on a line and drops words without a colon.
   It reads values with `parseFloat`, so `*hh` is harmless there too.
 
-Therefore readings go **one per line**, `emg:512*3A`, which plots in both. Reply lines
+Therefore readings go **one per line**, `emg:512*63`, which plots in both. Reply lines
 contain no `:` so MakeCode doesn't plot them.
 
 ### Device states
 
 | State | Entered by | Behavior |
 |---|---|---|
-| **Idle** | power-up; a session ending; `stop` or a long press in free-run | Sends nothing unless asked. Shows the "waiting" icon. Answers commands. |
-| **Session** | `open` | Streams readings. Ends on `close`, or when no `ping` carrying its session id has arrived for the session timeout. |
+| **Idle** | power-up; a session ending; `stop` or a long press in free-run | Sends nothing unless asked. Shows the waiting icon, or the found icon once a `?` has arrived. Answers commands. |
+| **Session** | `open` | Sends readings. Ends on `close`, or when no `ping` carrying its session id has arrived for the session timeout. |
 | **Free-run** | `stream`, or a long press of button A, from idle | Streams readings with no keepalive. For plotters and terminals. |
 
 - The device starts idle: a board nobody is talking to stays quiet.
@@ -210,11 +212,11 @@ The keepalive gives:
 |---|---|---|
 | `?` | Identifies itself, in any state. Changes nothing. | `hello protocol:CCDeviceProtocol version:1 device:spikerbit firmware:4` |
 | `open session:<id> [timeout:<ms>] [#n]` | Starts a session with that id. `session` is required. `timeout` is how long the session lasts without a `ping`: default 5000, allowed 1000–60000. A missing or out-of-range value is `err #n value`. | `ok #n` if `#n` was given |
-| `ping session:<id> [#n]` | Extends the session with that id. | `ok #n` if `#n` was given, or `err #n nosession` / `err #n othersession` |
+| `ping session:<id> [#n]` | Extends the session with that id. | `ok #n` if `#n` was given, or `err #n value` / `err #n nosession` / `err #n othersession` |
 | `ping #n` | Liveness check only; touches no session, in any state. Without `#n` it does nothing at all. | `ok #n` |
-| `close session:<id> [#n]` | Ends that session at once, so the board shows the waiting icon as soon as Dataflow disconnects instead of after the session timeout. | `ok #n` if `#n` was given, or `err #n nosession` / `err #n othersession` |
-| `identify [#n]` | The alive check: shows the alive icon and plays a short sound, in any state. The name comes from Jacdac's control service, whose `identify` draws attention to the device the same way. | `ok #n` if `#n` was given |
-| `servo:<angle> [#n]` | Sets the servo on P0. Values are rounded and clamped to 0–180, as `servoWritePin` already does. | `ok #n` if `#n` was given |
+| `close session:<id> [#n]` | Ends that session at once, so the board shows the waiting icon as soon as Dataflow disconnects instead of after the session timeout. | `ok #n` if `#n` was given, or `err #n value` / `err #n nosession` / `err #n othersession` |
+| `identify [#n]` | Shows the identify icon and plays a short sound, in any state. The name comes from Jacdac's control service, whose `identify` draws attention to the device the same way. | `ok #n` if `#n` was given |
+| `servo:<angle> [#n]` | Sets the servo on P0. The firmware rounds the value and clamps it to 0–180. A value that isn't a number (an optional `-`, digits, and an optional fraction with digits on both sides of the `.`) is `err #n value`. | `ok #n` if `#n` was given, or `err #n value` |
 | `stream [#n]` | Idle → free-run. | `ok #n`, or `err #n insession` |
 | `stop [#n]` | Free-run → idle. | `ok #n`, or `err #n insession` |
 
@@ -239,7 +241,7 @@ throttling turns out to be a problem (see "Timing") without a firmware change.
 - A line with several assignments is checked as a whole before any of it is applied, so one
   bad value means nothing changes.
 
-**The identification line.** `hello` answers `?`, which today's Dataflow already sends.
+**The `hello` line.** `hello` answers `?`, which today's Dataflow already sends.
 It must not contain the text `CLUE-SPIKERBIT v`: a Dataflow build that only knows v3 then
 finds "no known firmware" and flashes its own v3 hex, instead of accepting a board it can't
 talk to. `firmware` continues the existing firmware numbering (`kSpikerbitFirmwareVersion`).
@@ -261,7 +263,7 @@ a separate unprompted heartbeat.
 - The device ends the session after the `open` timeout without a `ping` carrying its id:
   **5 s** unless
   Dataflow asks for another value.
-- The connected icon shows for **3 s**; the alive icon and sound last up to **3 s**.
+- The connected and identify icons show for **3 s**.
 
 These numbers are starting points. Chrome slows timers in hidden tabs; after a tab has been
 hidden for several minutes, chained timers can be limited to about once a minute. The
@@ -317,7 +319,7 @@ between them.
 ### LED status
 
 What the board can know: that it booted, that Dataflow sent `?`, that a session started or
-lapsed, and that an alive check arrived. It cannot tell that a program opened its serial
+lapsed, and that an `identify` arrived. It cannot tell that a program opened its serial
 port. (The micro:bit V2 runtime can ask whether it is powered from USB or a battery,
 `getPowerSource` in CODAL, but that isn't exposed in MakeCode and can't tell a laptop running
 Dataflow from a phone charger.) It also can't draw anything while being flashed: the processor
@@ -325,18 +327,20 @@ is stopped, and the yellow LED on the back flickers instead.
 
 The icons show how far a connection got, so a stuck connection can be diagnosed:
 
-| Stage | Trigger | Display |
+| Display | Trigger | What shows |
 |---|---|---|
-| Waiting | power-up, or a session ending | the waiting icon, steady |
-| Found | first `?` | a "found" icon. If it stays, Dataflow saw the board but never started a session: look at version checking and flashing. |
+| Waiting | power-up, a session ending, or free-run stopping | the waiting icon, steady |
+| Found | any `?` while idle | a "found" icon, until the board leaves idle. If it stays, Dataflow saw the board but never started a session: look at version checking and flashing. |
 | Connected | `open` | the connected icon for 3 s, then the display is cleared |
-| Alive check | `identify` | the alive icon for up to 3 s, then the display goes back to what the state calls for |
-| Free-run | long press or `stream` | a "streaming" icon |
+| Identify | `identify` | the identify icon for 3 s, then the display goes back to what the state calls for |
+| Streaming | long press or `stream` | a "streaming" icon, through free-run |
+
+Idle shows Waiting or Found, depending on whether a `?` has arrived since the board went idle.
 
 **CLUE-715 constraint:** students will control the LED matrix and speaker. The firmware may
-use them only while connecting (until the connected icon clears) or right after an alive
-check. After the connected icon clears, the firmware doesn't touch the display until the
-session ends or an alive check arrives. When CLUE-715 adds a display output, the alive check
+use them only while connecting (until the connected icon clears) or right after an
+`identify`. After the connected icon clears, the firmware doesn't touch the display until the
+session ends or an `identify` arrives. When CLUE-715 adds a display output, `identify`
 has to restore what the student's program last drew; in CLUE-728 nothing else draws during a
 session, so clearing is enough.
 
@@ -344,13 +348,13 @@ session, so clearing is enough.
 
 ### Sound
 
-The alive check plays a short sound on the **built-in speaker only**. On a micro:bit V2,
+`identify` plays a short sound on the **built-in speaker only**. On a micro:bit V2,
 MakeCode may also send sound to the P0 edge pin, and P0 drives the servo, so the sound could
 make the servo twitch. Turn the P0 audio output off (something like
 `pins.setAudioPinEnabled(false)`), and test on a board with a servo attached.
 
 **Decision (Claude's call): the hex stays universal (V1 and V2), as it is today.** V1 has no
-built-in speaker, so on a V1 the alive check shows the icon with no sound. If the V2 speaker
+built-in speaker, so on a V1 `identify` shows the icon with no sound. If the V2 speaker
 calls won't compile into a universal hex, or can't be guarded so that they do nothing on a V1,
 stop and ask rather than switching to a V2-only hex: that would change which boards Dataflow
 can flash.
@@ -379,7 +383,8 @@ The Dataflow end of the protocol, without UI. It is written against master after
 
 - `hello protocol:CCDeviceProtocol version:<P> device:spikerbit firmware:<N>`: the new
   firmware.
-- `CLUE-SPIKERBIT v<N>`: older firmware, always older than 4, so it gets flashed.
+- `CLUE-SPIKERBIT v<N>`, the v1–v3 banner: older firmware, always older than 4, so it gets
+  flashed.
   `detectSpikerbitVersion` stays for this.
 
 What Dataflow does with the reply. The protocol check comes first: a board Dataflow can't
@@ -459,9 +464,17 @@ back and forth between those two builds reflashes it each time.
 
 - **A CLUE-728 feature branch** off master. The firmware isn't released without the UI that
   justifies it: nothing from CLUE-728 merges to master until the UI half is done.
-- **First PR into the feature branch:** the firmware, the Dataflow protocol code and the docs in
-  "Docs to update" at the end. They have to land together: without the protocol code, Dataflow reflashes a v4 board
-  on every connect, never starts a session, can't parse its readings and can't drive its servo.
+- **Two PRs into the feature branch for the protocol:**
+  - **#3056** (`CLUE-728-protocol-firmware`): firmware v4, the line parser and checksums
+    (`cc-device-protocol.ts`), the MakeCode sim and its firmware tests, the bench script, and
+    the docs (see "Docs").
+  - **#3055** (`CLUE-728-spikerbit-firmware-status`, based on #3056's branch): Dataflow's
+    session (`cc-device-session.ts`), recognizing v4 from its `hello` line, and wiring the
+    protocol into `SerialDevice`, the channels and the Live Output node.
+- **Between the two merges** the feature branch has the v4 hex but not the code that talks to
+  it: Dataflow reflashes a v4 board on every connect, never starts a session, can't parse its
+  readings and can't drive its servo. That is acceptable because the feature branch doesn't
+  merge to master until #3055 and the UI half are in.
 - **Later PR into the feature branch:** the UI half.
 - **Bench checkpoint (Claude's call):** stop for a check on a real board once
   identification, sessions, acknowledgments and EMG streaming work, before adding the icons,
@@ -470,30 +483,47 @@ back and forth between those two builds reflashes it each time.
 
 ## Testing
 
-- **Jest, Dataflow side:** the parser (checksums right, wrong and absent; readings with signs
-  and fractions; `ok` and `err`; `hello`); the flash decision (no reply, legacy banner, old
-  `firmware`, unknown protocol version (even with a newer `firmware`), newer `firmware`); `open` then `ping` repeating and stopping, with
-  fake timers; the session id chosen for `open` carried into every `ping`; re-sending an unanswered
-  `open`; re-opening on `err nosession`; stopping without re-opening on `err othersession`;
-  `close` on disconnect; the servo command's format; and `channelSatisfiedBy`
-  with and without a channel list.
-- **On the bench**, through a serial terminal at 115200 baud, since every command can be
-  typed by hand: identification, a session opening, closing and lapsing (with the default and a custom
-  `timeout`), a bare `ping` in every state, `ping` and `close` with a wrong or stale session
-  id, acknowledgments with and
-  without `#n`, each error reason, checksums right and wrong, free-run by command and by long
-  press, the long press doing nothing during a session, and the alive check with a servo
-  attached (no twitch).
-- **Check that the EMG sampling rate doesn't drop** with replies and keepalives flowing,
-  compared with v3 (about 500 Hz).
+- **Jest, the firmware:** `spikerbit-firmware.test.ts` runs `spikerbit-clue.ts` itself on
+  `MakeCodeSim` (`src/models/stores/spikerbit-sim/makecode-sim.ts`), a fake MakeCode runtime
+  with a simulated clock, serial port, buttons, pins, display and speaker. The tests cover
+  every command and reply, each error reason, checksums, sessions opening, lapsing and being
+  replaced, free-run by command and by long press, the reading cadence, the displays and
+  their timing, the identify sound, and a V1 running without a speaker. `makecode-sim.test.ts`
+  tests the sim itself.
+- **Jest, Dataflow side:** in #3056, the parser (checksums right, wrong and absent; readings
+  with signs and fractions; `ok` and `err`; `hello`; lines split across chunks). In #3055, the
+  flash decision (no reply, the v1–v3 banner, old `firmware`, unknown protocol version (even
+  with a newer `firmware`), newer `firmware`); `open` then `ping` repeating and stopping, with
+  fake timers; the session id chosen for `open` carried into every `ping`; re-sending an
+  unanswered `open`; re-opening on `err nosession`; stopping without re-opening on
+  `err othersession`; `close` on disconnect; the servo command's format; and
+  `channelSatisfiedBy` with and without a channel list.
+- **Jest, consistency:** `spikerbit-firmware-consistency.test.ts` reads the `firmware:` number
+  from the `HELLO` line in the source and checks it against `kSpikerbitFirmwareVersion`,
+  checks that the hex embeds that `hello` line and the current source, and checks that the
+  source contains no v1–v3 banner text.
+- **On the bench:** `npm run bench:spikerbit` (`scripts/spikerbit-bench/bench.mjs`) talks to a
+  plugged-in board over USB serial at 115200 baud and checks its replies: `?`, a session
+  opening, sending readings, closing and lapsing (with a custom `timeout`), `ping` with the
+  session id, a bare `ping`, `ping` with another id, idle staying silent, free-run by `stream`
+  and `stop`, `stream` refused during a session, `servo` with a good and a bad value, a wrong
+  checksum, an unknown command, and `identify`. With `--flash` it first flashes the hex. What
+  it can't see stays a manual check: the displays, the identify sound, the long press (and
+  that it does nothing during a session), and `identify` with a servo attached (no twitch).
+- **The EMG sampling rate:** v3 and v4 both measure 250 Hz on a V2, so the protocol work
+  doesn't slow sampling. The earlier figure of about 500 Hz for v3 was wrong.
 - **Plotters:** free-run readings appear in the MakeCode serial plotter.
-- **Jest:** `spikerbit-firmware-consistency.test.ts` reads the version from
-  `VERSION = "CLUE-SPIKERBIT v<N>"` in the source and looks for the same text in the hex. Both
-  change with the new identification line.
 
-## Docs to update with the firmware
+## Docs
 
-- [serial-protocols.md](../../../src/plugins/dataflow/docs/serial-protocols.md): a section on
-  the new protocol.
-- The firmware [README](../../../src/plugins/dataflow/firmware/README.md) and the header
-  comment in `spikerbit-clue.ts`, which both describe the v3 protocol.
+- [serial-protocols.md](../../../src/plugins/dataflow/docs/serial-protocols.md), new: the
+  `keyValue` and `radioHub` wire formats and the CC Device Protocol. Dataflow's serial docs
+  moved with it from `src/plugins/dataflow-tool/` to `src/plugins/dataflow/docs/`.
+- The firmware [user guide](../../../src/plugins/dataflow/firmware/user-guide.md), new: the
+  Spiker:bit firmware's commands, states, displays and timing, for anyone using, extending or
+  driving it. Its displays and timing sections are generated from the firmware source; its
+  design is in
+  [2026-10-24-clue-728-spikerbit-firmware-guide-design.md](2026-10-24-clue-728-spikerbit-firmware-guide-design.md).
+- The firmware [README](../../../src/plugins/dataflow/firmware/README.md), for developers
+  changing the firmware, and the header comment in `spikerbit-clue.ts`, both rewritten for v4.
+- The bench script's [README](../../../scripts/spikerbit-bench/README.md), new.

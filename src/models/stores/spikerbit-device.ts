@@ -3,7 +3,7 @@ import { detectFirmwareReply, FirmwareReply, shouldFlash } from "./serial-protoc
 import { IDeviceTransport } from "./device-transport";
 
 // The version of the firmware bundled at src/plugins/dataflow/firmware/spikerbit-clue.hex.
-// Bump together with the firmware number in the MakeCode source's HELLO line.
+// Keep equal to the `firmware:` number in the HELLO line of spikerbit-clue.ts.
 export const kSpikerbitFirmwareVersion = 4;
 
 // The `device` field of the hello a Spiker:bit sends.

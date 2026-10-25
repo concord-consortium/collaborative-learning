@@ -1,7 +1,9 @@
 name: CI Firmware
 # Rebuilds the Spiker:bit firmware hex, and the user guide sections and images generated from
 # the firmware source, with the pinned MakeCode toolchain. It fails when any of them differs
-# from what is committed, i.e. when spikerbit-clue.ts changed but they weren't rebuilt. See src/plugins/dataflow/firmware/README.md.
+# from what is committed: a source change that wasn't rebuilt, a hand-edited guide section, or
+# an image in guide-images/ that the source doesn't generate. See
+# src/plugins/dataflow/firmware/README.md.
 
 # pull_request, not push, for branches: its path filter compares the whole PR with its base
 # branch, so every new head of a PR that touches the firmware gets the check. A push filter

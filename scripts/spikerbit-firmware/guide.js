@@ -46,8 +46,14 @@ function collectGuideTags(source) {
         const titleText = (newline < 0 ? text : text.slice(0, newline)).trim();
         const description = newline < 0 ? "" : firstParagraph(text.slice(newline + 1));
         if (!description) throw new Error(`${constName}: a @display constant needs a description`);
+        const display = { title: titleText, constName, icon: initializer.name.text, description };
+        const sharing = displays.find(other => displayImageName(other) === displayImageName(display));
+        if (sharing) {
+          throw new Error(`${sharing.constName} and ${constName} are both titled "${titleText}", ` +
+            "so they would share one image; give them different titles");
+        }
         allowedIconRefs.add(initializer);
-        displays.push({ title: titleText, constName, icon: initializer.name.text, description });
+        displays.push(display);
       } else if (tagName === "guide") {
         if (!initializer || !ts.isNumericLiteral(initializer)) {
           throw new Error(`${constName}: a @guide constant must be initialized with a number`);

@@ -7,7 +7,7 @@ import { MakeCodeSim } from "./makecode-sim";
 const firmwarePath = path.join(__dirname, "../../../plugins/dataflow/firmware/spikerbit-clue.ts");
 const kHello = "hello protocol:CCDeviceProtocol version:1 device:spikerbit firmware:4";
 
-// The firmware's display stages and its identify sound.
+// The firmware's displays and its identify sound.
 const kWaitingIcon = "Asleep";
 const kFoundIcon = "Surprised";
 const kConnectedIcon = "Yes";
@@ -25,7 +25,15 @@ function boot(hardwareVersion?: string) {
   return sim;
 }
 
+// The board reads a line at its next scheduler step, so lines sent with no `run` between them
+// arrive together.
 const send = (sim: MakeCodeSim, command: string) => sim.sendSerial(`${withChecksum(command)}\n`);
+
+// Sends one command and lets the board handle it without moving the clock.
+function handle(sim: MakeCodeSim, command: string) {
+  send(sim, command);
+  sim.advance(0);
+}
 
 const isReading = (line: string) => parseCcDeviceLine(line)?.kind === "reading";
 
@@ -64,7 +72,7 @@ function inSession(timeout?: number) {
 }
 
 describe("Spiker:bit firmware", () => {
-  it("is silent after power-up and never sends the legacy banner", () => {
+  it("is silent after power-up and never sends the v1–v3 banner", () => {
     const sim = boot();
     sim.advance(1000);
     expect(sim.takeSerialOutput()).toBe("");
@@ -121,6 +129,38 @@ describe("Spiker:bit firmware", () => {
     readings(lines).forEach(({ line }) => expect(body(line)).toMatch(/^emg:\d+$/));
   });
 
+  it("keeps readings 100 ms apart on average when the loop's passes run late", () => {
+    const sim = boot();
+    expect(exchange(sim, "stream #1")).toEqual(["ok #1"]);
+    // Each step lets one pass run, then holds the board until 3 ms after the next pass was due,
+    // so passes are 23 ms apart. Restarting the interval from each reading would space them 115.
+    const times: number[] = [];
+    while (times.length < 100) {
+      sim.advance(19);
+      sim.takeSerialLines().filter(isReading).forEach(() => times.push(sim.now));
+      sim.stall(4);
+    }
+    const average = (times[times.length - 1] - times[0]) / (times.length - 1);
+    expect(average).toBeGreaterThan(99.5);
+    expect(average).toBeLessThan(100.5);
+  });
+
+  it("sends one reading after a stall, then readings 100 ms apart from it", () => {
+    const sim = boot();
+    expect(exchange(sim, "stream #1")).toEqual(["ok #1"]);
+    run(sim, 1000);
+    sim.stall(250);
+    const stallEnd = sim.now;
+    const times = readings(run(sim, 1000)).map(l => l.at);
+    // Readings start over from the end of the stall rather than catching up.
+    expect(times.filter(at => at - stallEnd < 100)).toHaveLength(1);
+    expect(times.length).toBeGreaterThanOrEqual(9);
+    times.slice(1).forEach((at, i) => {
+      expect(at - times[i]).toBeGreaterThanOrEqual(80);
+      expect(at - times[i]).toBeLessThanOrEqual(120);
+    });
+  });
+
   it("keeps a session pinged every second alive past its timeout", () => {
     const sim = inSession();
     for (let second = 0; second < 10; second++) {
@@ -142,6 +182,26 @@ describe("Spiker:bit firmware", () => {
     expect(times[times.length - 1]).toBeLessThanOrEqual(openedAt + 5000);
     expect(run(sim, 1000)).toEqual([]);
     expect(exchange(sim, "ping session:7 #3")).toEqual(["err #3 nosession"]);
+  });
+
+  it("ends a lapsed session before a ping or long press that arrives ahead of the loop's next pass", () => {
+    // Opens session 7 at 110 ms with a 1000 ms timeout and runs to its lapse at 1110 ms. The loop's
+    // passes fall on multiples of 20 ms, so none has ended the session yet.
+    const atLapse = () => {
+      const sim = boot();
+      run(sim, 110);
+      send(sim, "open session:7 timeout:1000 #1");
+      expect(replies(run(sim, 1000))).toEqual(["ok #1"]);
+      expect(sim.now).toBe(1110);
+      expect(sim.shownIcon()).toBe(kConnectedIcon);
+      return sim;
+    };
+
+    expect(exchange(atLapse(), "ping session:7 #2")).toEqual(["err #2 nosession"]);
+
+    const pressed = atLapse();
+    pressed.pressButton("A", "longClick");
+    expect(pressed.shownIcon()).toBe(kStreamingIcon);
   });
 
   it("uses the timeout given in open, and rejects one out of range or a missing session", () => {
@@ -251,6 +311,7 @@ describe("Spiker:bit firmware", () => {
     expect(exchange(sim, "servo:60.6")).toEqual([]);
     expect(sim.servoAngle("P0")).toBe(61);
     expect(exchange(sim, "servo:abc")).toEqual(["err value"]);
+    expect(exchange(sim, "servo:.5")).toEqual(["err value"]);
     expect(exchange(sim, "servo: #3")).toEqual(["err #3 value"]);
     expect(sim.servoAngle("P0")).toBe(61);
   });
@@ -273,6 +334,9 @@ describe("Spiker:bit firmware", () => {
     expect(replies(run(sim, 100))).toEqual(["err checksum"]);
     sim.sendSerial("servo:45 #3*zz\n");
     expect(replies(run(sim, 100))).toEqual(["err checksum"]);
+    // The right checksum, 7C, with a third digit: a checksum is exactly two.
+    sim.sendSerial("servo:48 #4*7C0\n");
+    expect(replies(run(sim, 100))).toEqual(["err checksum"]);
     expect(sim.servoAngle("P0")).toBeUndefined();
 
     sim.sendSerial("servo:45 #3\n");
@@ -285,9 +349,10 @@ describe("Spiker:bit firmware", () => {
     expect(sim.servoAngle("P0")).toBe(48);
   });
 
-  it("refuses an unknown verb, adding #n only when the command had one", () => {
+  it("refuses an unknown verb, adding #n only when the command had one, and a #n that isn't a number", () => {
     const sim = boot();
     expect(exchange(sim, "foo #9")).toEqual(["err #9 unknown"]);
+    expect(exchange(sim, "ping #abc")).toEqual(["err value"]);
     expect(exchange(sim, "foo")).toEqual(["err unknown"]);
     expect(exchange(sim, "caps #10")).toEqual(["err #10 unknown"]);
     expect(exchange(sim, "identify extra:1 #11")).toEqual(["err #11 unknown"]);
@@ -299,6 +364,66 @@ describe("Spiker:bit firmware", () => {
     sim.sendSerial(`${withChecksum("ping #2")}\n`);
     sim.sendSerial("ping #3\r\n");
     expect(replies(run(sim, 100))).toEqual(["ok #1", "ok #2", "ok #3"]);
+  });
+
+  it("answers every line of a burst that arrives before it reads the first", () => {
+    const sim = boot();
+    const commands = [
+      "open session:7 timeout:60000 #1", "servo:90 #2", "ping session:7 #3", "identify #4", "ping #5",
+      "servo:45.5 #6", "?"
+    ];
+    const burst = commands.map(command => `${withChecksum(command)}\n`).join("");
+    // Nearly fills the 128-character receive buffer.
+    expect(burst.length).toBeGreaterThan(110);
+    sim.sendSerial(burst);
+    expect(replies(run(sim, 100))).toEqual(["ok #1", "ok #2", "ok #3", "ok #4", "ok #5", "ok #6", kHello]);
+    expect(sim.servoAngle("P0")).toBe(46);
+  });
+
+  it("answers a line that overflows the receive buffer with err value, and every line after it as usual", () => {
+    const sim = boot();
+    // The 128-character buffer keeps the first 128 x's and drops the rest, the newline included.
+    sim.sendSerial(`${"x".repeat(130)}\n`);
+    expect(replies(run(sim, 100))).toEqual(["err value"]);
+    expect(exchange(sim, "ping #4")).toEqual(["ok #4"]);
+    expect(exchange(sim, "ping #5")).toEqual(["ok #5"]);
+    send(sim, "ping #6");
+    send(sim, "ping #7");
+    expect(replies(run(sim, 100))).toEqual(["ok #6", "ok #7"]);
+    send(sim, "servo:90");
+    send(sim, "ping #9");
+    expect(replies(run(sim, 100))).toEqual(["ok #9"]);
+    expect(sim.servoAngle("P0")).toBe(90);
+
+    // In a burst that overflows, the lines that fit are handled and the one cut off is answered
+    // err value. The line after it is dropped whole.
+    sim.sendSerial(`${withChecksum("ping #10")}\n${"x".repeat(200)}\n${withChecksum("ping #11")}\n`);
+    expect(replies(run(sim, 100))).toEqual(["ok #10", "err value"]);
+    expect(exchange(sim, "ping #12")).toEqual(["ok #12"]);
+
+    // A line that fills the buffer exactly, with its newline, fits.
+    const fits = `ping${" ".repeat(120)}#13\n`;
+    expect(fits.length).toBe(128);
+    sim.sendSerial(fits);
+    expect(replies(run(sim, 100))).toEqual(["ok #13"]);
+  });
+
+  it("joins a line that arrives over several reads, unless it is too long for the receive buffer", () => {
+    const sim = boot();
+    sim.sendSerial(`${withChecksum("ping #1")}\nping`);
+    expect(replies(run(sim, 100))).toEqual(["ok #1"]);
+    sim.sendSerial(" #2\n");
+    expect(replies(run(sim, 100))).toEqual(["ok #2"]);
+
+    // A 128-character line, which doesn't fit with its newline. The parser skips the spaces, so
+    // only its length keeps it from setting the servo.
+    const spaces = " ".repeat(59);
+    sim.sendSerial(`${withChecksum("ping #3")}\nservo:90${spaces}`);
+    expect(replies(run(sim, 100))).toEqual(["ok #3"]);
+    sim.sendSerial(`${spaces}#4\n`);
+    expect(replies(run(sim, 100))).toEqual(["err value"]);
+    expect(sim.servoAngle("P0")).toBeUndefined();
+    expect(exchange(sim, "ping #5")).toEqual(["ok #5"]);
   });
 
   it("leaves the servo where it was when a session ends", () => {
@@ -328,7 +453,7 @@ describe("Spiker:bit firmware display, sound and buttons", () => {
   it("shows the connected icon on open for 3000 ms, then draws nothing for the rest of the session", () => {
     const sim = boot();
     exchange(sim, "?");
-    send(sim, "open session:7 #1");
+    handle(sim, "open session:7 #1");
     expect(sim.shownIcon()).toBe(kConnectedIcon);
     run(sim, kIconMs - 10);
     expect(sim.shownIcon()).toBe(kConnectedIcon);
@@ -348,7 +473,7 @@ describe("Spiker:bit firmware display, sound and buttons", () => {
     const sim = inSession();
     expect(exchange(sim, "identify #2")).toEqual(["ok #2"]);
     expect(sim.soundsStopped).toBe(0);
-    send(sim, "close session:7");
+    handle(sim, "close session:7");
     expect(sim.shownIcon()).toBe(kWaitingIcon);
     expect(sim.soundsStopped).toBe(1);
     // The identify icon's time running out doesn't change the display.
@@ -364,7 +489,7 @@ describe("Spiker:bit firmware display, sound and buttons", () => {
   it("answers identify with its icon and one sound from the speaker alone, then shows what the state calls for", () => {
     const identify = (sim: MakeCodeSim, command: string, reply: string[], after: string | undefined) => {
       const soundsBefore = sim.sounds.length;
-      send(sim, command);
+      handle(sim, command);
       expect(sim.shownIcon()).toBe(kIdentifyIcon);
       expect(replies(run(sim, kIconMs - 10))).toEqual(reply);
       expect(sim.shownIcon()).toBe(kIdentifyIcon);
@@ -387,6 +512,28 @@ describe("Spiker:bit firmware display, sound and buttons", () => {
     identify(freeRun, "identify #7", ["ok #7"], kStreamingIcon);
   });
 
+  it("keeps the identify icon its full time through ? and stream, and the found icon through stop", () => {
+    const idle = boot();
+    handle(idle, "identify");
+    handle(idle, "?");
+    expect(idle.shownIcon()).toBe(kIdentifyIcon);
+    run(idle, kIconMs - 10);
+    expect(idle.shownIcon()).toBe(kIdentifyIcon);
+    run(idle, 40);
+    expect(idle.shownIcon()).toBe(kFoundIcon);
+
+    const freeRun = boot();
+    expect(exchange(freeRun, "stream #1")).toEqual(["ok #1"]);
+    handle(freeRun, "identify");
+    expect(exchange(freeRun, "stream #2")).toEqual(["ok #2"]);
+    expect(freeRun.shownIcon()).toBe(kIdentifyIcon);
+
+    const found = boot();
+    exchange(found, "?");
+    expect(exchange(found, "stop #3")).toEqual(["ok #3"]);
+    expect(found.shownIcon()).toBe(kFoundIcon);
+  });
+
   it("shows the identify icon without a sound on a micro:bit V1, leaving its speaker setting alone", () => {
     const sim = boot("1");
     expect(exchange(sim, "identify #4")).toEqual(["ok #4"]);
@@ -398,7 +545,7 @@ describe("Spiker:bit firmware display, sound and buttons", () => {
     expect(sim.audioPinEnabled).toBe(false);
 
     send(sim, "open session:7 #5");
-    send(sim, "close session:7 #6");
+    handle(sim, "close session:7 #6");
     expect(sim.soundsStopped).toBe(0);
   });
 

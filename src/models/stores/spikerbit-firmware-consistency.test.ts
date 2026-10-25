@@ -22,7 +22,7 @@ const hexPath = path.join(firmwareDir, "spikerbit-clue.hex");
 // metadata, then the LZMA-compressed project.
 const kSourceEmbedMagic = new Uint8Array([0x41, 0x14, 0x0E, 0x2F, 0xB8, 0x2F, 0xA2, 0xBB]);
 
-// The identification line, from `const HELLO = "..."` in the MakeCode source.
+// The `hello` line, from `const HELLO = "..."` in the MakeCode source.
 function helloFromSource(): string {
   const match = /const HELLO = "([^"]+)"/.exec(fs.readFileSync(sourcePath, "utf8"));
   if (!match) throw new Error("Could not find HELLO in spikerbit-clue.ts");
@@ -86,7 +86,7 @@ describe("Spiker:bit firmware consistency", () => {
     expect(decodeHexData()).toContain(helloFromSource());
   });
 
-  it("the firmware never sends the legacy banner text", () => {
+  it("the firmware source contains no v1–v3 banner text", () => {
     expect(fs.readFileSync(sourcePath, "utf8")).not.toContain("CLUE-SPIKERBIT v");
   });
 
