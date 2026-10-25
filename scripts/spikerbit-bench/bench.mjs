@@ -304,6 +304,25 @@ function buildChecks() {
         return checkReply(line, "err checksum");
       } },
     { name: "foo -> err unknown", send: "foo #n", reply: ctx => `err #${ctx.n} unknown` },
+    { name: "a 200-character line -> err value, then later pings, alone or two in one write -> ok",
+      run: async (board, ctx) => {
+        board.clear();
+        // Longer than the 128-character receive buffer, so the board drops its end and newline.
+        await board.write(`${"x".repeat(200)}\n`);
+        const longFailure = checkReply(await board.nextReply(), "err value");
+        if (longFailure) return `200-character line: ${longFailure}`;
+        const n = ctx.nextSeq();
+        await board.send(`ping #${n}`);
+        const pingFailure = checkReply(await board.nextReply(), `ok #${n}`);
+        if (pingFailure) return `ping after it: ${pingFailure}`;
+        const pair = [ctx.nextSeq(), ctx.nextSeq()];
+        await board.write(pair.map(m => `${withChecksum(`ping #${m}`)}\n`).join(""));
+        for (const m of pair) {
+          const failure = checkReply(await board.nextReply(), `ok #${m}`);
+          if (failure) return `two pings in one write: ${failure}`;
+        }
+        return null;
+      } },
     { name: "identify #n -> ok", send: "identify #n", reply: ctx => `ok #${ctx.n}` },
     { name: "close leaves the board idle", send: ctx => `close session:${ctx.id} #n`, reply: ctx => `ok #${ctx.n}` },
   ];
