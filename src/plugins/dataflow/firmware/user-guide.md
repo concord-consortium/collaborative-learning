@@ -78,8 +78,8 @@ Long-press button A again to stop the readings.
 - **`#n` asks for an acknowledgment.** End a command with `#` and a number, and the board
   replies `ok #n` once the command has been applied: `identify #2` gets `ok #2`. Without
   `#n` a command gets no `ok`. Errors are sent either way, as `err #n <reason>`, or
-  `err <reason>` when the command had no `#n`. `?` always gets the `hello` line and never an
-  `ok`.
+  `err <reason>` when the command had no `#n`. A well-formed `?` gets the `hello` line, and
+  never an `ok`, even with `#n`.
 - **`*hh` is an optional checksum** at the very end of a line. The board puts one on every line
   it sends. When sending, leave it off, or add it and the board checks it.
 
@@ -153,7 +153,7 @@ it. `ok` and `err` lines contain no `:`, so plotters skip them.
 | --- | --- | --- |
 | `checksum` | The line's `*hh` doesn't match its contents, or isn't two hex digits. Sent without `#n`, since the line's `#n` can't be trusted. | any line |
 | `unknown` | A command the board doesn't know, or a `name:value` (or a bare word) the command doesn't take, such as `stream servo:90`. | any line |
-| `value` | A value the board can't use. | `open` with a missing or out-of-range `session`, or a `timeout` that isn't a whole number in range; `close` with no `session`; `ping session:` or `close session:` with an id that isn't a whole number in range; `servo:` with a value that isn't a number in the form above (`+90`, `.5` and `90.` are not); and any line whose `#` isn't followed by digits (sent without `#n`) |
+| `value` | A value the board can't use. | `open` with a missing or out-of-range `session`, or a `timeout` that isn't a whole number in range; `close` with no `session`; `ping session:` or `close session:` with an id that isn't a whole number in range; `servo:` with a value that isn't a number in the form above (`+90`, `.5` and `90.` are not); and any line whose last token starts with `#` but isn't `#` and digits (sent without `#n`) |
 | `insession` | Not allowed during a session. | `stream`, `stop` |
 | `nosession` | No session is running, for example because it timed out. The host must `open` again. | `ping session:<id>`, `close session:<id>` |
 | `othersession` | A session with a different id is running. Nothing changes, so a stale or second host can't keep alive or close a session it doesn't own. | `ping session:<id>`, `close session:<id>` |
@@ -217,8 +217,9 @@ a sound.
 | P8, P9 | Held low, to put the Spiker:bit's analog front end in EMG mode |
 | Button A | A long press starts or stops free-run (see [States](#states)) |
 
-Apart from the pins the LED display and buttons use, the firmware uses no other pins. The [README](README.md#spikerbit-hardware-reference-pinout--power)
-lists the Spiker:bit's full pinout, including the free P2.
+Apart from the pins the LED display and buttons use, the firmware uses no other pins. The
+[README](README.md#spikerbit-hardware-reference-pinout--power) lists the Spiker:bit's full
+pinout, including the free P2.
 
 ## Driving it from your own app
 
@@ -226,9 +227,8 @@ Any program that can open the micro:bit's serial port at 115200 baud can drive t
 host does this:
 
 1. **Send `?` and check the `hello` line:** `protocol:CCDeviceProtocol`, `version:1` and
-   `device:spikerbit`. Send this `?` without a checksum, so firmware older than version 4
-   (it answers `?` with `CLUE-SPIKERBIT v<N>`), which answers only a bare `?`, still replies and can
-   be recognized.
+   `device:spikerbit`. Send this `?` without a checksum: firmware older than version 4 answers
+   only a bare `?`, with the v1–v3 banner, `CLUE-SPIKERBIT v<N>`.
 2. **Send `open session:<id> #n` with a random id,** and send it again if no `ok #n` arrives.
 3. **Send `ping session:<id> #n` every second,** well inside the default timeout in
    [Timing and limits](#timing-and-limits). The `ok` replies show the board is still there.
