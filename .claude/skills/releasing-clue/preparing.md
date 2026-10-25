@@ -34,8 +34,10 @@ Agree on these with the developer first and put them at the top of the release r
      `<dev-templates>/scripts/.env`. The developer writes that file themselves; never read it or
      ask for the token. To check it without reading values, list its key names:
      `grep -o '^[A-Z_]*=' <dev-templates>/scripts/.env`. No GitHub token is needed (see below).
-  5. Confirm it works by running the triage report below; the scripts check the Jira token when
-     they start. Atlassian tokens expire, so an existing setup may need a new token.
+  5. Confirm the Jira token first with `GET /rest/api/3/myself` (see "Jira REST" below), then run
+     the triage report. Atlassian tokens expire, so an existing setup may need a new token. An
+     expired token makes other endpoints, such as the versions list, return 404 rather than 401,
+     which looks like a missing project.
 - **Release scripts:** `npm --prefix scripts ci` in each checkout that runs `scripts/` (this one,
   and later the release worktree). The scripts import packages from `scripts/node_modules`.
 - **Release story and next version:** check that Jira has the release story for this version, and
@@ -51,7 +53,9 @@ Agree on these with the developer first and put them at the top of the release r
   to `gh auth token`. A `GITHUB_TOKEN` in their `.env` is often stale.
 - **Other logins:** `gh auth status`; `gcloud auth print-access-token` (for reading deployed rules;
   `gcloud auth login` if it fails); `npx firebase projects:list`; the Atlassian and Slack
-  connections in this session. If a connection drops, it takes a new session or `/mcp`.
+  connections in this session. If a connection drops, it takes a new session or `/mcp`. gcloud
+  logins can expire partway through a release, so check it again at the start of each session. If a
+  Slack post fails, read the channel before retrying, so a post that went through isn't sent twice.
 - **Slack IDs:** channel and user IDs aren't recorded here because the repository is public. Look
   up #clue-dev, #clue, #releases and each person you'll mention with the Slack search tools.
 
@@ -75,10 +79,11 @@ Sort each story into one of these, and propose an action for each:
 | Code merged, story not Done | Ask the assignee or approver whether it can be marked Done (in the status post **[approve]**); transition it when they agree **[approve]** |
 | Story is done once something is deployed (e.g. a backend) | Check the deployed state; propose Done, and removing any blocker link, once it's deployed **[approve]** |
 | Waiting on code or project-team review | Name the people it's waiting on, for the status post |
-| Merged PR with no story | Create a Chore **[approve]**: fix version, current sprint, assignee = PR author, a remote link to the PR, "relates to" any other Jira key the PR names, then Done |
+| Merged PR with no story | Create an issue **[approve]**: fix version, current sprint, assignee = PR author, a remote link to the PR, "relates to" any other Jira key the PR names, then Done. Read the PR description before proposing the type: usually a Chore, but a Bug if the PR fixes a real problem in the app, even one first seen as a flaky test |
+| Story has the fix version but isn't ready (no PR, or PR open) | Ask its owner whether it can wait for the next release; remove the fix version when they agree **[approve]** |
 | PR and story connected, but the script missed it | Add a remote link to the PR on the story **[approve]** |
 | Story Done, PR still open, PR not needed for the release | Keep the story Done, and move the PR to its own story **[approve]**: no fix version, a remote link to the PR, "relates to" the old story, the new key in the PR title, the old key reworded in the PR body, a comment on the old story, and a note in the release-status thread |
-| Missing fix version | Ask; add it **[approve]** |
+| Missing fix version | Ask; add it **[approve]**. A story with a merged PR in range belongs in the release unless there's a reason it shouldn't |
 | Sprint suggests another release | Show the sprint; never move a story because of it |
 | Script output looks wrong | Note it in the record, as a dev-templates fix |
 
@@ -95,12 +100,35 @@ Other rules:
   a small script in `scripts/local/` that reads the dev-templates `.env`.
 
 **Status post in #clue-dev [approve]:** a new top-level message per round. It lists what's done
-since the last post, then each open item with what it's waiting on and who (mention them). Before
-drafting, read the replies in the previous status thread. Show the draft, and let the developer
-edit it. Later replies and nudges go in the latest status post's thread.
+since the last post, then each open item with what it's waiting on and who. Show the draft, and
+let the developer edit it. Updates between rounds, replies and nudges go in the latest status
+post's thread.
 
-When the next step waits on someone's reply, schedule a reminder in the developer's self-DM so the
-work picks up again.
+Mention whoever has the next move:
+- A PR whose author answered a review but hasn't re-requested it waits on the author, not the
+  reviewer. The PR timeline (`gh api repos/{owner}/{repo}/issues/<n>/timeline`: `reviewed`,
+  `committed` and `review_requested` events) shows this; "changes requested by" alone doesn't.
+- A merged story that needs project team review and isn't there yet: ask the PR author to move it
+  there, rather than tagging the reviewers. Chores and other internal work usually skip project
+  team review; ask whether they can be marked Done (the triage table).
+- A story already in project team review: tag its Project Team Approver. If none is set, ask the
+  developer whom to tag.
+
+Things change between drafting and posting, sometimes within minutes. Before drafting, read the
+replies in the previous status thread and re-run the triage report, or at least list the fix
+version's stories: people add stories to the version between rounds. Right before posting, read
+the thread again, and re-read in Jira the status of every story the post lists. If a post waits on
+an event (a merge, a branch), agree with the developer beforehand what to do with stories that
+have moved on (for example, drop ones now Done without another preview); any other change means
+a new preview.
+
+**Merge freeze [approve]:** once the remaining work is known, propose to the developer a freeze in
+the status post: no merges to master without checking with them until the release branch exists.
+Others can still merge, so check merges since the last triage before cutting anyway (cutting.md).
+The post that says the branch exists lifts the freeze.
+
+When the next step waits on someone's reply, make sure something brings the work back: a
+background timer within the session, or a reminder in the developer's self-DM for a later one.
 
 ## Deploy timing
 
@@ -127,7 +155,9 @@ What's deployed (read-only; projects are `staging` = collaborative-learning-stag
 `production` = collaborative-learning-ec215):
 - **Functions:** `npx firebase functions:list --project <project> --json`.
   `source.storageSource.generation` is the deploy time in microseconds, and
-  `environmentVariables` shows each function's non-secret params. For 1st-gen functions use
+  `environmentVariables` shows each function's non-secret params. 1st-gen functions have no
+  `storageSource.generation`; besides the v1 codebase, they include `chatTutorOnWrite` in
+  functions-v2 and authoring-api's `api`. For those use
   `gcloud functions describe <fn> --project <project> --region us-central1 --format='value(updateTime)'`.
   Compare deploy times with `git log --first-parent <range> -- functions-v2 shared` to see which
   merges each project is missing. This compares times, not code, so a function deployed from an
@@ -136,8 +166,9 @@ What's deployed (read-only; projects are `staging` = collaborative-learning-stag
   `functions-v1`; a `functions-v1` deploy to production needs a decision about that first.
 - **Indexes:** `npx firebase firestore:indexes --project <project>`. Strip the implicit `__name__`
   field before comparing with `firestore.indexes.json`.
-- **Firestore rules:** the Firebase Rules API (`releases/cloud.firestore`) with a gcloud token.
-  A diff with only comment changes doesn't need a deploy.
+- **Firestore rules:** the Firebase Rules API (`releases/cloud.firestore`) with a gcloud token
+  and the header `x-goog-user-project: <project>`; without the header it returns 403 asking for a
+  quota project. A diff with only comment changes doesn't need a deploy.
 - **RTDB rules:** `https://<instance>.firebaseio.com/.settings/rules.json`, with instances
   `collaborative-learning-staging-default-rtdb` (staging) and `collaborative-learning-ec215`
   (production). Deployed RTDB rules can include console-only rules that aren't in
@@ -153,8 +184,9 @@ A part whose strictest timing is `before` doesn't need to wait for release day, 
 out already. Unless the deployed state above shows it is already live, deploy it while the release
 is being prepared:
 - to staging, then production, each part and project its own **[approve]**;
-- from a clean, detached checkout of `origin/master` (`git switch --detach origin/master` after a
-  fetch), never a local branch that may hold unpushed or unmerged work;
+- from a separate worktree detached at `origin/master` (`git worktree add --detach ../<dir>
+  origin/master` after a fetch), never the developer's checkout or a local branch that may hold
+  unpushed or unmerged work;
 - with the commands in "Staging Firebase" (cutting.md), using that checkout as `<worktree>`;
 - then read each one back, as above, and compare it with that checkout.
 
@@ -177,6 +209,9 @@ that turn the feature on.
 
 ## Release notes
 
+These and the pre-announcement can be finished after the release branch is made, while it's
+tested; both must be done before the tag (cutting.md).
+
 ```bash
 npm --prefix <dev-templates>/scripts run -s release-notes-jira CLUE <version>
 ```
@@ -188,25 +223,32 @@ Show the developer the full notes first and ask what they'd change, so every ite
 look, not just the ones you flag. Then review for jargon titles (`SPIKE:`, code identifiers),
 near-duplicates, items in the wrong section, internal stories that belong under the hood, and
 stories not yet Done. Propose fixes:
-- **A blurb:** a `Blurb: …` paragraph at the top of the description replaces the title in the
-  notes. A bug's blurb describes the fix; a story's describes the new capability.
+- **A blurb:** a `Blurb: …` paragraph at the end of the description replaces the title in the
+  notes. A bug's blurb describes the fix; a story's describes the new capability. The script
+  takes the first top-level paragraph that starts with `Blurb:`, wherever it is, so check the
+  description doesn't already have one.
 - **The `under-the-hood` label.**
 - **The issue type:** the section comes from the type, so moving an item between Features and Bug
   Fixes means changing its type in Jira (a story logged as a bug, or the reverse).
+- **Epic subheadings:** the script groups every section by epic. A subheading helps only when its
+  epic has several stories, so ask the developer which sections to flatten (usually Bug Fixes and
+  Under the Hood, where most epics have one or two). The script has no option for this, so remove
+  those sections' epic lines by hand in the Slack posts and the GitHub release body.
 
 The only way to leave an item out of the notes is to remove its fix version, which also changes
 Jira's record of what shipped. Say so if the developer wants an item left out.
 
 Apply the ones the developer approves **[approve]**, and read each one back. To add a blurb
-without disturbing the description, use REST: get the description (ADF), prepend a paragraph, put
-it back, then check the paragraph count went up by one. Don't rewrite the whole description.
+without disturbing the description, use REST: get the description (ADF), append a paragraph, put
+it back, then check the node count went up by one and the last node is the blurb. Don't rewrite
+the whole description.
 
 ## Pre-announce in #clue [approve]
 
 A top-level post, so projects running CLUE can prepare:
 1. An intro line with the planned timing (day, and morning, afternoon or evening), and a
    one-sentence summary.
-2. The `slack` release notes.
+2. The `slack` release notes, with the sections the developer chose flattened.
 3. "The GitHub release link will be added here when <version> is released."
 
 Preview it in the developer's self-DM first. The Slack tool takes standard markdown, so convert the
