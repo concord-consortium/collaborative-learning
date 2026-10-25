@@ -144,8 +144,8 @@ it. `ok` and `err` lines contain no `:`, so plotters skip them.
 - `version:1` is the protocol version. It changes only for a change that older hosts can't
   handle.
 - `device:spikerbit` names the device.
-- `firmware:4` is this firmware's build. It changes with every release. Dataflow flashes a
-  board whose number is lower than its bundled hex's.
+- `firmware:4` is this firmware's build. It changes with every release, so a host can tell
+  when a board's firmware is out of date.
 
 ## Errors
 
@@ -230,7 +230,6 @@ host does this:
    (it answers `?` with `CLUE-SPIKERBIT v<N>`), which answers only a bare `?`, still replies and can
    be recognized.
 2. **Send `open session:<id> #n` with a random id,** and send it again if no `ok #n` arrives.
-   Dataflow retries every 2 seconds.
 3. **Send `ping session:<id> #n` every second,** well inside the default timeout in
    [Timing and limits](#timing-and-limits). The `ok` replies show the board is still there.
 4. **Read the `emg:` readings.** Match `ok` and `err` replies by their `#n`, not by their
@@ -242,8 +241,7 @@ host does this:
 8. **Send `close session:<id>` when done,** so the board goes idle and shows the waiting icon
    at once rather than after the timeout.
 
-The reference implementation is Dataflow's `CcDeviceSession`, in
-`src/models/stores/cc-device-session.ts`. Line parsing and checksums are in
+Dataflow's line parsing and checksums are in
 [`cc-device-protocol.ts`](../../../models/stores/cc-device-protocol.ts).
 
 ## Going further
