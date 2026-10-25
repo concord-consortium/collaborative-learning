@@ -181,7 +181,7 @@ it. `ok` and `err` lines contain no `:`, so plotters skip them.
 <!-- Generated from spikerbit-clue.ts by npm run build:firmware. Edit the comments there, not this section. -->
 | Display | When it shows |
 | --- | --- |
-| <img src="guide-images/display-waiting.svg" alt="Waiting icon" width="160"><br>**Waiting** | Shown at power-up, when a session ends, and when free-run stops. The board is idle and no `?` has arrived since. |
+| <img src="guide-images/display-waiting.svg" alt="Waiting icon" width="160"><br>**Waiting** | Shown at power-up, after `!!`, when a session ends, and when free-run stops. The board is idle and no `?` has arrived since. |
 | <img src="guide-images/display-found.svg" alt="Found icon" width="160"><br>**Found** | Shown after a `?` arrives while idle: a host has found the board but hasn't opened a session. If it stays, Dataflow's version check or flashing didn't finish. |
 | <img src="guide-images/display-connected.svg" alt="Connected icon" width="160"><br>**Connected** | Shown for 3 seconds after `open` starts a session. The display is then cleared and stays blank for the rest of the session, unless an `identify` arrives. |
 | <img src="guide-images/display-identify.svg" alt="Identify icon" width="160"><br>**Identify** | Shown for 3 seconds after `identify`, in any state, along with a short sound on a micro:bit V2. The display then goes back to what the state calls for. |

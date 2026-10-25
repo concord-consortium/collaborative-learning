@@ -25,12 +25,21 @@
 // speaker (turning one on there stops the program with a panic), so the speaker calls run only
 // on a V2 and a V1 shows the identify icon without a sound.
 //
-// No startup banner: an idle board is silent until it is spoken to. The micro:bit's USB
-// interface chip holds about 1 KB of output when nobody reads it, so anything sent while
-// nobody listens reaches the next host as stale data. Dataflow sends "?" to find the firmware.
+// No startup banner: an idle board is silent until it is spoken to. While nobody reads, the
+// micro:bit's USB interface chip holds about 500 bytes of output on a V2. Once that is full it
+// keeps the oldest bytes and drops the rest, so anything sent while nobody listens reaches the
+// next host as stale data, usually ending in a cut-off line. A host sends "!!" and then "?" when
+// it connects (see RESET); the "?" finds the firmware.
+//
 // Nothing this program sends may contain the v1–v3 banner's text (the "CLUE-SPIKERBIT" name,
 // a space and "v"): a Dataflow that only knows v3 would then take the board for newer firmware
 // it can't talk to, instead of flashing its own v3 hex.
+//
+// RESET: "!!" puts the board back in its power-up state, from any state and without a session
+// id, so a host that has just connected starts from a known state whatever an earlier host left
+// running. No other verb, name or value contains "!", and the line must be "!!" with nothing but
+// an optional #n, so a cut-off or merged line can't become a reset. Its "ok" goes out after an
+// empty line, which ends any cut-off line still in the interface chip's buffer.
 //
 // ONE WRITER: every serial write happens in the forever loop. The serial handler only parses
 // lines, applies them and queues their replies, so a reply can never land inside a reading.
@@ -121,8 +130,8 @@ const HEX_DIGITS = "0123456789ABCDEF"
 
 /**
  * @display Waiting
- * Shown at power-up, when a session ends, and when free-run stops. The board is idle and no
- * `?` has arrived since.
+ * Shown at power-up, after `!!`, when a session ends, and when free-run stops. The board is
+ * idle and no `?` has arrived since.
  */
 const WAITING_ICON = IconNames.Asleep
 /**
@@ -165,7 +174,8 @@ let sessionTimeoutMs = DEFAULT_TIMEOUT_MS
 let lastPingAt = 0
 // The time the latest reading was due. Readings are due every READING_INTERVAL_MS from here.
 let lastReadingAt = 0
-// Reply lines (without checksums) waiting for the forever loop to write them.
+// Reply lines (without checksums) waiting for the forever loop to write them. An empty one is
+// written as an empty line.
 let replies: string[] = []
 // What has been read of the line now arriving, before its newline.
 let partialLine = ""
@@ -301,7 +311,10 @@ function goIdle() {
     showState()
 }
 
-function endSession() {
+// Ends any session and leaves free-run, returning the board to its power-up state: idle, every
+// setting at its default, no sound, no timed icon and the waiting icon. The servo keeps its
+// position. A session ends this way, and "!!" does this in any state.
+function resetToPowerUp() {
     sessionId = 0
     sessionTimeoutMs = DEFAULT_TIMEOUT_MS
     if (HAS_SPEAKER) music.stopAllSounds()
@@ -309,7 +322,7 @@ function endSession() {
 }
 
 function endSessionIfLapsed() {
-    if (state == State.Session && control.millis() - lastPingAt >= sessionTimeoutMs) endSession()
+    if (state == State.Session && control.millis() - lastPingAt >= sessionTimeoutMs) resetToPowerUp()
 }
 
 // The value given for `name` on a line, or "" when it has none. The last one wins.
@@ -368,7 +381,7 @@ function handleLine(line: string) {
     if (verb == "open") allowed = ["session", "timeout"]
     else if (verb == "ping" || verb == "close") allowed = ["session"]
     else if (verb == "") allowed = ["servo"]
-    else if (verb != "?" && verb != "identify" && verb != "stream" && verb != "stop") {
+    else if (verb != "?" && verb != "!!" && verb != "identify" && verb != "stream" && verb != "stop") {
         err(seq, "unknown")
         return
     }
@@ -386,7 +399,15 @@ function handleLine(line: string) {
 
     endSessionIfLapsed()
 
-    if (verb == "?") {
+    if (verb == "!!") {
+        resetToPowerUp()
+        if (seq != "") {
+            // The empty line ends any cut-off line already in the interface chip's buffer, so the
+            // ok starts a line of its own.
+            replies.push("")
+            ok(seq)
+        }
+    } else if (verb == "?") {
         replies.push(HELLO)
         if (state == State.Idle) {
             idleIcon = FOUND_ICON
@@ -422,7 +443,7 @@ function handleLine(line: string) {
             err(seq, "value")
         } else if (isThisSession(id, seq)) {
             if (verb == "ping") lastPingAt = control.millis()
-            else endSession()
+            else resetToPowerUp()
             ok(seq)
         }
     } else if (verb == "stream" || verb == "stop") {
@@ -491,7 +512,9 @@ basic.forever(function () {
     endSessionIfLapsed()
     if (timedIcon && control.millis() - timedIconAt >= ICON_MS) showState()
     while (replies.length > 0) {
-        serial.writeLine(withChecksum(replies.shift()))
+        const reply = replies.shift()
+        // An empty line goes out without a checksum, so that it stays empty.
+        serial.writeLine(reply == "" ? "" : withChecksum(reply))
     }
     if (state != State.Idle) {
         const now = control.millis()
