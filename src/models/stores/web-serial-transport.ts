@@ -9,11 +9,6 @@ function log(message: string) {
   console.log(`[WebSerialTransport] ${message}`);
 }
 
-// Authentic Arduinos report this productId and are the only tested boards that raise the
-// browser `connect` event, which the UI uses to track physical connection independently
-// of port state.
-const kArduinoUsbProductId = 67;
-
 export type WebSerialOpenResult = "opened" | "canceled" | "failed";
 
 export class WebSerialTransport implements IDeviceTransport {
@@ -32,12 +27,6 @@ export class WebSerialTransport implements IDeviceTransport {
   private activeReader: ReadableStreamDefaultReader<Uint8Array> | undefined;
   private reading = false;
   private readonly READ_TIMEOUT_MS = 2000;
-
-  // Whether this board raises the browser `connect`/`disconnect` events (see
-  // initWebSerialConnectionEvents). Only authentic Arduinos were observed to raise them.
-  get raisesWebSerialConnect(){
-    return this.deviceInfo?.usbProductId === kArduinoUsbProductId;
-  }
 
   private hasOpenPort(){
     return this.port != null && this.port.readable != null;
@@ -186,21 +175,13 @@ export class WebSerialTransport implements IDeviceTransport {
 }
 
 /**
- * Some serial devices fire the `connect` event before we call requestPort (the browser raises
- * it for devices the origin already has permission for), so we register handlers at CLUE
- * startup to catch this event and improve the connect-button UI. Not every board does this —
- * see raisesWebSerialConnect in WebSerialTransport.
- *
- * The disconnect handler tears down the active connection on unplug. It is guarded so it only
- * fires while a WebSerialTransport is active and can't kill a live WebUSB (Spiker:bit) session.
+ * Registers, when the stores are created, a handler that tears down the active connection when
+ * the browser raises `disconnect` (the board was unplugged). It acts only while a
+ * WebSerialTransport is active, so it can't kill a live WebUSB (Spiker:bit) session.
  */
 export function initWebSerialConnectionEvents(serialDevice: SerialDevice){
-  navigator.serial?.addEventListener("connect", (e) => {
-    serialDevice.updateConnectionInfo(e.timeStamp, e.type);
-  });
-  navigator.serial?.addEventListener("disconnect", (e) => {
+  navigator.serial?.addEventListener("disconnect", () => {
     if (serialDevice.activeTransport instanceof WebSerialTransport) {
-      serialDevice.updateConnectionInfo(e.timeStamp, e.type);
       serialDevice.clearActiveDevice();
     }
   });
