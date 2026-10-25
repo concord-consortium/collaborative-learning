@@ -6,30 +6,18 @@
 // control, input, music, AnalogPin, DigitalPin, Delimiters, IconNames, ...) only exist in the
 // MakeCode runtime.
 //
-// It is the source of record for spikerbit-clue.hex, which the DataFlow tile flashes over
+// It is the source of record for spikerbit-clue.hex, which the Dataflow tile flashes over
 // WebUSB when a connected micro:bit is not already running it. To rebuild the hex, see
 // README.md in this directory.
 //
-// PROTOCOL: the board speaks the CC Device Protocol (see user-guide.md in this directory,
-// and src/plugins/dataflow/docs/serial-protocols.md for the protocol itself). One ASCII line
-// per message, ending "\r\n" from the board and "\n" or "\r\n" from the host; any line may
-// end in "*hh", the XOR of every byte before the "*" as two hex digits. The board puts one on
-// every line it writes and checks one on every line it reads, accepting a line without one.
-//   - "?" answers with the HELLO line below, in any state.
-//   - "open session:<id> [timeout:<ms>]" starts a session, which streams "emg:<int>" every
-//     100 ms until "close session:<id>", or until no "ping session:<id>" has arrived for the
-//     timeout. "stream" and "stop" turn the same readings on and off outside a session.
-//   - "identify" shows the identify icon and plays a short sound, in any state.
-//   - A line with no verb sets outputs: "servo:<angle>" drives the servo on P0.
-//   - A trailing "#n" asks for "ok #n". Errors ("err [#n] <reason>") are sent either way. The
-//     whole line is checked before any of it is applied, so a bad line changes nothing.
-// A long press of button A starts or stops free-run outside a session, like "stream" and
-// "stop". During a session it does nothing, and a click does nothing in any state, so a student
-// pressing buttons during a Dataflow program changes nothing.
+// PROTOCOL: the board speaks the CC Device Protocol. Its commands, replies, states and button
+// are in user-guide.md in this directory, and the protocol itself is in
+// src/plugins/dataflow/docs/serial-protocols.md. handleLine checks a whole line before it
+// applies any of it, so a bad line changes nothing.
 //
 // LED STATUS: the display shows how far a connection got. Each icon constant below says when it
-// shows; user-guide.md in this directory is generated from those comments and from the @guide
-// constants by npm run build:firmware.
+// shows. npm run build:firmware generates the LED displays and Timing and limits sections of
+// user-guide.md from these comments and the @guide constants.
 //
 // SOUND: identify plays on the built-in speaker only. P0 drives the servo, so the edge-pin
 // audio output is turned off before anything plays: the first sound connects the audio output
@@ -47,15 +35,12 @@
 // ONE WRITER: every serial write happens in the forever loop. The serial handler only parses
 // a line, applies it and queues its reply, so a reply can never land inside a reading.
 //
-// LOOP RULE: a loop pauses only as its last statement, and a background loop
-// (`while (true) { ...; basic.pause(n) }`) keeps its state outside the function. Event
-// handlers (serial, buttons) don't pause at all. Jest tests run this source on a simulated
-// MakeCode runtime (src/models/stores/spikerbit-sim) that ends a pass at the pause and calls
-// the function again for the next one, so code after a pause would never run there. For the
-// same reason there is no one-off background function that pauses (show an icon, pause, clear):
-// the sim would run it again from the top. The forever loop times the 3 s icons with
-// control.millis() deadlines instead, and every display call passes an interval of 0, so none
-// of them pauses.
+// LOOP RULE: a loop pauses only as its last statement, a background loop
+// (`while (true) { ...; basic.pause(n) }`) keeps its state outside the function, and event
+// handlers (serial, buttons) don't pause at all. So the forever loop times the 3 s icons with
+// control.millis() deadlines, and every display call passes an interval of 0. The Jest tests
+// run this source on a simulated MakeCode runtime that needs the rule; its header, in
+// src/models/stores/spikerbit-sim/makecode-sim.ts, explains why.
 //
 // SIGNAL PROCESSING: we compute the EMG envelope OURSELVES rather than using the
 // Backyard Brains pxt-spikerbit extension's spikerbit.musclePowerSignal(). That function
@@ -65,7 +50,7 @@
 // track the DC baseline and FULL-wave rectify around it:  envelope = EMA( |raw - baseline| ).
 // Bench-validated on micro:bit V2.
 //
-// We don't call the extension at all. Its startMuscleRecording() did exactly one thing
+// We don't call the extension at all. Its startMuscleRecording() does exactly one thing
 // to the hardware — drive P8=0, P9=0 to put the board's analog front-end in EMG mode
 // (P9=1 would select EEG) — so we just do that ourselves below and read the raw signal on
 // P1. (The MakeCode project therefore doesn't need the pxt-spikerbit extension added.)
@@ -79,8 +64,8 @@
 // serial.setWriteLinePadding(0) disables writeLine's default 32-byte space padding, so
 // lines are clean ("emg:12*56\r\n" not "emg:12*56<spaces>\r\n").
 //
-// Keep HELLO's firmware number in sync with kSpikerbitFirmwareVersion in
-// src/models/stores/spikerbit-device.ts whenever this program changes.
+// Keep HELLO's firmware number equal to kSpikerbitFirmwareVersion in
+// src/models/stores/spikerbit-device.ts, and bump both whenever this program's behavior changes.
 
 const HELLO = "hello protocol:CCDeviceProtocol version:1 device:spikerbit firmware:4"
 
@@ -134,22 +119,26 @@ const HEX_DIGITS = "0123456789ABCDEF"
 
 /**
  * @display Waiting
- * Shown at power-up, when a session ends, and when free-run stops. The board is idle and no `?` has arrived since.
+ * Shown at power-up, when a session ends, and when free-run stops. The board is idle and no
+ * `?` has arrived since.
  */
 const WAITING_ICON = IconNames.Asleep
 /**
  * @display Found
- * Shown after a `?` arrives while idle: a host has found the board but hasn't opened a session. If it stays, Dataflow's version check or flashing didn't finish.
+ * Shown after a `?` arrives while idle: a host has found the board but hasn't opened a session.
+ * If it stays, Dataflow's version check or flashing didn't finish.
  */
 const FOUND_ICON = IconNames.Surprised
 /**
  * @display Connected
- * Shown for 3 seconds after `open` starts a session. The display is then cleared and stays blank for the rest of the session, unless an `identify` arrives.
+ * Shown for 3 seconds after `open` starts a session. The display is then cleared and stays
+ * blank for the rest of the session, unless an `identify` arrives.
  */
 const CONNECTED_ICON = IconNames.Yes
 /**
  * @display Identify
- * Shown for 3 seconds after `identify`, in any state, along with a short sound on a micro:bit V2. The display then goes back to what the state calls for.
+ * Shown for 3 seconds after `identify`, in any state, along with a short sound on a micro:bit
+ * V2. The display then goes back to what the state calls for.
  */
 const IDENTIFY_ICON = IconNames.Heart
 /**
@@ -194,7 +183,7 @@ pins.setAudioPinEnabled(false)
 if (HAS_SPEAKER) music.setBuiltInSpeakerEnabled(true)
 
 // Put the Spiker:bit analog front-end in EMG mode (what the extension's startMuscleRecording
-// did). Held the whole time; nothing else drives these pins.
+// does). Held the whole time; nothing else drives these pins.
 pins.digitalWritePin(DigitalPin.P8, 0)
 pins.digitalWritePin(DigitalPin.P9, 0)
 
@@ -209,7 +198,7 @@ control.inBackground(function () {
         const now = input.runningTimeMicros()
         let dtMs = (now - lastMicros) / 1000
         lastMicros = now
-        // Guard against the first iteration, scheduler hiccups, and the ~1.2 h micros wrap.
+        // Guard against the first iteration, scheduler hiccups, and the ~18 min micros wrap.
         if (dtMs <= 0 || dtMs > 100) dtMs = 4
 
         const raw = pins.analogReadPin(AnalogPin.P1)
@@ -292,13 +281,13 @@ function showTimedIcon(icon: IconNames) {
     timedIconAt = control.millis()
 }
 
-function startStreaming(next: State) {
+function startReadings(next: State) {
     if (state == State.Idle) lastReadingAt = control.millis()
     state = next
 }
 
 function startFreeRun() {
-    startStreaming(State.FreeRun)
+    startReadings(State.FreeRun)
     showState()
 }
 
@@ -414,7 +403,7 @@ function handleLine(line: string) {
             err(seq, "value")
             return
         }
-        startStreaming(State.Session)
+        startReadings(State.Session)
         sessionId = id
         sessionTimeoutMs = timeoutMs
         lastPingAt = control.millis()
