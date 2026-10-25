@@ -27,7 +27,7 @@
 
 import {
   PortalSession, PortalError, isPortalName, portalNames, PortalName,
-  readFormField, readCheckedValues, collectAdminIndexIds
+  readFormField, readFormCheckbox, readCheckedValues, collectAdminIndexIds
 } from "./lib/portal-api.js";
 import {
   IUrlOptions, buildUrls, defaultName, describeCluePath, firebaseLabel
@@ -250,6 +250,15 @@ async function claimActivityByUrl(portal: PortalSession, url: string) {
 }
 
 /**
+ * Whether an existing activity already has `append_auth_token` set, read from its edit page.
+ * A read, unlike claimActivityByUrl, so a dry run can report the real setting.
+ */
+async function readAuthTokenSetting(portal: PortalSession, id: number) {
+  const editPage = await portal.getText(`/eresources/${id}/edit`);
+  return readFormCheckbox(editPage, "external_activity_append_auth_token");
+}
+
+/**
  * The external activity this run should assign, and whether `append_auth_token` was set on it.
  *
  * `--activity-id` names the activity that already lives at this url — it is the recovery path
@@ -281,7 +290,8 @@ async function ensureActivity(portal: PortalSession, options: IOptions, url: str
         `${found}. Re-run with --activity-id ${found}, or drop the flag.`
       );
     }
-    return { id: options.activityId, created: false, authTokenSet: !options.dryRun };
+    const authTokenSet = options.dryRun ? await readAuthTokenSetting(portal, options.activityId) : true;
+    return { id: options.activityId, created: false, authTokenSet };
   }
 
   // A dry run may not write, and the only existence probe the portal offers is a write. So
@@ -289,7 +299,8 @@ async function ensureActivity(portal: PortalSession, options: IOptions, url: str
   // than reporting a create that may turn out to be a reuse.
   if (options.dryRun) {
     const foundId = await findActivityIdByUrl(portal, url);
-    return { id: foundId ?? 0, created: !foundId, uncertain: !foundId, authTokenSet: false };
+    const authTokenSet = foundId ? await readAuthTokenSetting(portal, foundId) : false;
+    return { id: foundId ?? 0, created: !foundId, uncertain: !foundId, authTokenSet };
   }
 
   const exists = await claimActivityByUrl(portal, url);
@@ -454,8 +465,8 @@ async function main() {
       "(a dry run cannot tell — the read-only search covers only recent materials)");
   } else {
     const state = activity.created ? "created" : "reused";
-    // Only a run that actually set the flag says it is set. A dry run reaching here has
-    // written nothing, so the most it can say is what a real run would do.
+    // A real run has just set the flag. A dry run has written nothing, so it reports the
+    // existing activity's setting as read from its edit page, or what a real run would do.
     const flag = activity.authTokenSet ? "append_auth_token=true" : "would set append_auth_token";
     console.log(`Activity ${activity.id}: ${state}, ${flag}`);
   }
