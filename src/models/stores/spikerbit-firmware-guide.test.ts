@@ -57,6 +57,12 @@ describe("collectGuideTags", () => {
       .toThrow("EMPTY_ICON");
   });
 
+  it("throws naming both constants when two displays would share an image", () => {
+    const source = "/**\n * @display Found\n * One.\n */\nconst A_ICON = IconNames.Yes\n" +
+      "/**\n * @display Found\n * Two.\n */\nconst B_ICON = IconNames.No";
+    expect(() => collectGuideTags(source)).toThrow(/A_ICON.*B_ICON/);
+  });
+
   it("throws when an icon is used without a tagged constant", () => {
     expect(() => collectGuideTags("basic.showIcon(IconNames.Heart, 0)")).toThrow("IconNames");
   });
