@@ -6,8 +6,8 @@ import * as ts from "typescript";
 // can't receive serial input, and no emulator runs a micro:bit V2 hex.
 //
 // The source is transpiled with `typescript` (no type check) and its top level runs against
-// the fake globals below, at simulated time 0. Only what the firmware calls is faked: any other
-// member of a namespace or enum throws `not simulated: <name>`.
+// the fake globals below, at simulated time 0. Little beyond what the firmware calls is faked:
+// any other member of a namespace or enum throws `not simulated: <name>`.
 //
 // Fibers: `basic.forever(fn)` and `control.inBackground(fn)` each become a fiber, and running a
 // fiber calls `fn`. `basic.pause(ms)` throws a yield signal that ends the call and wakes the
@@ -41,8 +41,9 @@ export interface MakeCodeSimOptions {
 const kForeverSleepMs = 20;
 // The receive buffer's capacity until the program calls serial.setRxBufferSize.
 const kDefaultRxBufferSize = 20;
-// The shortest pause. A fiber that yields with pause(0) still lets this much time pass, about one
-// pass of the firmware's sampler on a V2, so a free-running loop can't stop the clock.
+// The shortest pause. A fiber that yields with pause(0) still lets this much time pass, about
+// half a pass of the firmware's sampler (250 Hz on a V2), so a free-running loop can't stop the
+// clock.
 const kMinPauseMs = 2;
 
 class YieldSignal {
