@@ -102,16 +102,16 @@ A session, with the checksums written out. The board's first line is the empty l
 starts its reply to `!!`:
 
 ```
-Dataflow:   !! #1*32
+Dataflow:   !! #1000*02
 Spiker:bit:
-Spiker:bit: ok #1*36
+Spiker:bit: ok #1000*06
 Dataflow:   ?
 Spiker:bit: hello protocol:CCDeviceProtocol version:1 device:spikerbit firmware:4*65
-Dataflow:   open session:4821 #2*4E
-Spiker:bit: ok #2*35
+Dataflow:   open session:4821 #1*4D
+Spiker:bit: ok #1*36
 Spiker:bit: emg:12*56
-Dataflow:   ping session:4821 #3*4B
-Spiker:bit: ok #3*34
+Dataflow:   ping session:4821 #2*4A
+Spiker:bit: ok #2*35
 Dataflow:   servo:90*4E
 Dataflow:   close session:4821*1D
 ```
@@ -248,7 +248,9 @@ host does this:
      `hello` line's `protocol:CCDeviceProtocol`, `version:1` and `device:spikerbit`.
    - **The v1–v3 banner:** older firmware, which ignored the `!!`.
    - **Neither:** the replies may have been dropped while the board's output buffer was still
-     full. Once that backlog has been read, write `!! #m` and `?` again.
+     full. Once that backlog has been read, write `!! #m` and `?` again. Dataflow does this
+     200 ms after the backlog has drained, and flashes the board if 1.5 seconds pass with
+     neither.
 2. **Send `open session:<id> #n` with a random id,** and send it again if no `ok #n` arrives.
    Dataflow retries every 2 seconds.
 3. **Send `ping session:<id> #n` every second,** well inside the default timeout in
@@ -262,9 +264,11 @@ host does this:
 8. **Send `close session:<id>` when done,** so the board goes idle and shows the waiting icon
    at once rather than after the timeout.
 
-The reference implementation is Dataflow's `CcDeviceSession`, in
-[`cc-device-session.ts`](../../../models/stores/cc-device-session.ts). Line parsing and
-checksums are in [`cc-device-protocol.ts`](../../../models/stores/cc-device-protocol.ts).
+The reference implementation is Dataflow's: `SpikerbitDevice.queryFirmware`, in
+[`spikerbit-device.ts`](../../../models/stores/spikerbit-device.ts), for step 1, and
+`CcDeviceSession`, in [`cc-device-session.ts`](../../../models/stores/cc-device-session.ts), for
+the session. Line parsing and checksums are in
+[`cc-device-protocol.ts`](../../../models/stores/cc-device-protocol.ts).
 
 ## Going further
 

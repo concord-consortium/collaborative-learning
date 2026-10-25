@@ -100,11 +100,12 @@ drive the top-bar menu's physical-connection UI with it when we think we are get
 
 **Spiker:bit:** each Connect disconnects any earlier `SpikerbitDevice` and constructs a new
 one with a new `@microbit/microbit-connection` USB connection, so the browser's chooser
-shows every time. `connectAndStream` connects over WebUSB, checks and if needed flashes the
-firmware (see [Spiker:bit version check and flashing](#spikerbit-version-check-and-flashing)
-below), then calls `setActiveDevice("spikerbit", transport)`. If any step fails after the
-link opens, `connectAndStream` disconnects the library connection before it rethrows, so a
-failed attempt doesn't leave the board open.
+shows every time. `connectAndStream` connects over WebUSB, resets the board with `!!`, checks
+and if needed flashes the firmware (see
+[Spiker:bit version check and flashing](#spikerbit-version-check-and-flashing) below), then
+calls `setActiveDevice("spikerbit", transport)`. If any step fails after the link opens,
+`connectAndStream` disconnects the library connection before it rethrows, so a failed attempt
+doesn't leave the board open.
 
 **Reconnect.** `reconnect()` repeats the last device choice, so the user doesn't pick a
 device type again. For a Web Serial board it tries the last port
@@ -168,18 +169,36 @@ store, `SpikerbitDevice.connectAndStream` makes sure the board is running a curr
 1. It points the transport's `onData` at a connect-time handler (`handleFirmwareData`) that
    scans inbound data with `detectFirmwareReply`, recording the reply. A reply is either a
    CC Device Protocol `hello` line (with a valid checksum), or the legacy
-   `CLUE-SPIKERBIT v<N>` banner that older firmware sends. Stale readings before the reply
-   and a reply split across chunks are handled; a `hello` with a bad checksum is ignored.
-2. `queryFirmware` writes `?` and waits up to ~1.5s (`kVersionQueryTimeoutMs`) for a reply.
-3. `shouldFlash` decides. It flashes the bundled hex (a partial flash, reporting progress)
+   `CLUE-SPIKERBIT v<N>` banner that older firmware sends. Stale readings, empty lines and
+   `ok` lines before the reply, and a reply split across chunks, are handled; a `hello` with a
+   bad checksum is ignored.
+2. `queryFirmware` writes `!! #n` and a bare `?` in one write (see
+   [Connecting](serial-protocols.md#connecting)). A board that nobody has been reading may have
+   filled the DAPLink interface chip's buffer, about 500 bytes on a V2, with old output. That
+   backlog arrives first and usually ends in a cut-off line. Firmware 4 answers `!!` by going
+   idle and sending an empty line and `ok #n`, so its `hello` starts a line of its own instead
+   of being glued onto the fragment. The `ok` needs no handling: a valid `hello` identifies the
+   firmware whether or not an `ok` came first, so a `hello` from firmware that ignores `!!` is
+   accepted too, and firmware v1–v3 answers with its banner.
+3. If nothing is identified 200 ms (`kRetryAfterDrainMs`) after the backlog has drained, the
+   replies may have been dropped while DAPLink's buffer was still full, so `queryFirmware`
+   writes `!!` and `?` once more. Each `serialdata` event carries one DAPLink read, at most 62
+   bytes (`kDaplinkReadBytes`), and a backlog drains in full reads, so the first shorter read
+   counts as drained. That is only a hint: 100 ms with no data (`kDrainQuietMs`) counts too. If
+   nothing is identified within 1.5 s (`kVersionQueryTimeoutMs`) in all, there is no reply.
+4. The connect-time `!!` counts from 1000, above the 1 to 999 that `CcDeviceSession` uses. A
+   late reply to it can reach the session, for example the reply to the first write when the
+   retry has already identified the board, and this way it can't be taken for the `ok` to the
+   session's `open` or a `ping`.
+5. `shouldFlash` decides. It flashes the bundled hex (a partial flash, reporting progress)
    and queries again when there is no recognized reply, the reply is a legacy banner, the
    `hello` names a protocol or protocol version Dataflow doesn't speak (even if its firmware
    is newer), or its firmware is older than `kSpikerbitFirmwareVersion`. It connects without
    flashing when the protocol is `CCDeviceProtocol` version 1 and the firmware is the same
    or newer. The USB connection stays Connected across the flash: the DAPLink interface chip
    is untouched and serial auto-reinitializes, so no explicit reconnect is needed. The
-   re-query after the flash uses the same rule, and only warns.
-4. It then calls `setActiveDevice("spikerbit", transport)`, which repoints
+   re-query after the flash uses the same sequence and the same rule, and only warns.
+6. It then calls `setActiveDevice("spikerbit", transport)`, which repoints
    `onData` from firmware detection to `SerialDevice.receive` and starts a CC Device
    Protocol session. The board streams EMG readings once it acknowledges the session's
    `open`.

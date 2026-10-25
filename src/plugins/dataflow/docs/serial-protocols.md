@@ -141,16 +141,16 @@ A connection, with the checksums written out. The device's first line is empty (
 [Connecting](#connecting)):
 
 ```
-Dataflow:   !! #1*32
+Dataflow:   !! #1000*02
 Spiker:bit:
-Spiker:bit: ok #1*36
+Spiker:bit: ok #1000*06
 Dataflow:   ?
 Spiker:bit: hello protocol:CCDeviceProtocol version:1 device:spikerbit firmware:4*65
-Dataflow:   open session:4821 #2*4E
-Spiker:bit: ok #2*35
+Dataflow:   open session:4821 #1*4D
+Spiker:bit: ok #1*36
 Spiker:bit: emg:12*56
-Dataflow:   ping session:4821 #3*4B
-Spiker:bit: ok #3*34
+Dataflow:   ping session:4821 #2*4A
+Spiker:bit: ok #2*35
 Dataflow:   servo:90*4E
 Dataflow:   close session:4821*1D
 ```
@@ -168,7 +168,9 @@ Dataflow:   close session:4821*1D
 - **A host line without a verb sets outputs,** and nothing else: `servo:90`. Every other
   command starts with a verb, so a new command can't collide with an output's name.
 - **`#n`** at the end of a host command asks for an acknowledgment, `ok #n`. `n` is a decimal
-  number the host chooses; Dataflow counts from 1 to 999 and wraps to 1. A command without `#n` gets no `ok`, so an output sent on every
+  number the host chooses. Dataflow's session counts from 1 to 999 and wraps to 1, and the
+  `!!` Dataflow sends when it connects counts from 1000, so a late reply to that `!!` can't be
+  taken for the session's. A command without `#n` gets no `ok`, so an output sent on every
   tick gets no reply. Errors are sent either way. A well-formed `?` gets the `hello` line, and
   never an `ok`, even with `#n`.
 - **`*hh`** may end any line: the XOR of every byte before the `*`, as two hex digits, either
@@ -343,6 +345,11 @@ line after it each start a line of their own. Then:
 
 The `hello` line gets no empty line before it: after `!!`, the `ok`'s empty line has already
 ended any fragment.
+
+Dataflow counts the backlog as read at the first WebUSB read shorter than the 62 bytes one read
+can return, or after 100 ms with no data. It writes `!!` and `?` again if nothing is identified
+200 ms after that, and flashes the board if nothing is identified within 1.5 s; see
+[Spiker:bit version check and flashing](serial.md#spikerbit-version-check-and-flashing).
 
 ### Recognizing the firmware
 
