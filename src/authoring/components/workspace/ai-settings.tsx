@@ -68,6 +68,11 @@ const AISettings: React.FC = () => {
   // disable AI-related fields if aiEvaluation is not set in initial settings
   const [disableAiFields, setDisableAiFields] = useState(settings.aiEvaluation !== "custom");
 
+  // Session-end evaluation does nothing without an evaluation method, but unlike the prompt fields
+  // it applies to every method, not just "custom". Disabled rather than cleared, so a unit whose
+  // method is switched off and back on keeps the author's choice.
+  const disableSessionEnd = !currentAiEvaluation;
+
   // when aiEvaluation changes, revalidate the form to ensure required fields are filled in
   useEffect(() => {
     setDisableAiFields(currentAiEvaluation !== "custom");
@@ -181,6 +186,7 @@ const AISettings: React.FC = () => {
           id="aiEvaluateOnSessionEnd"
           type="checkbox"
           {...register("aiEvaluateOnSessionEnd")}
+          disabled={disableSessionEnd}
         /> Also evaluate edited documents when they close or the connection drops, not only when a
         student asks for ideas
       </div>
