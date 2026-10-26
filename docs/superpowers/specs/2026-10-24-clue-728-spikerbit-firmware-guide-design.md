@@ -60,8 +60,8 @@ How it is designed and how it is extended; what any CC device and host must agre
   there by #3055, which adds it.
 
 The Spiker:bit's own material (`servo`, the `emg` reading, button A, the displays and the
-firmware notes) is in the guide, and the protocol page has a short pointer
-to it. The protocol page keeps a connection transcript as an example.
+firmware notes) is in the guide, and `cc-device-protocol.md` has a short pointer
+to it. `cc-device-protocol.md` keeps a connection transcript as an example.
 
 **The guide: this firmware.** It covers:
 
@@ -84,7 +84,7 @@ to it. The protocol page keeps a connection transcript as an example.
   every second, `close`), with a pointer to Dataflow's parser,
   `src/models/stores/cc-device-protocol.ts`. #3055 adds `cc-device-session.ts` as the
   reference implementation;
-- where to go next: the protocol page, the source, the simulator tests, the bench script.
+- where to go next: `cc-device-protocol.md`, the source, the simulator tests, the bench script.
 
 **`src/plugins/dataflow/firmware/README.md`** is the developer page: building and
 rebuilding the hex, the CI checks, testing in Jest, the bench script, prototyping in MakeCode,

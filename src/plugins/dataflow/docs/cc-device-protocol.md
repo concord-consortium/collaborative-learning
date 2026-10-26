@@ -218,8 +218,8 @@ connects reads that backlog first, and a reply it is waiting for can arrive glue
 fragment and fail its checksum. A device still streaming, in free-run or in a session whose
 host has gone, keeps the backlog full until a host stops it.
 
-So a host's first write after connecting is two lines, `!! #n` and then `?`, sent bare,
-without a checksum, so that older firmware answers too (see
+So a host's first write after connecting is two lines: `!! #n` with its checksum, and then a
+bare `?` without one, so that older firmware answers too (see
 [Recognizing the firmware](#recognizing-the-firmware)). The `!!` stops whatever the device was
 doing, and the empty line before its `ok` ends any cut-off line, so the `ok` and the `hello`
 line after it each start a line of their own. Then:
