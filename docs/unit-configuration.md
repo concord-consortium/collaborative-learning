@@ -104,6 +104,10 @@ These properties are configurable at the application (built into the code) or th
 }
 ```
 
+**What each prompt produces.** The comment a student and teacher read is the `discussion` the AI returns, followed by "Your work shows:" and the `keyIndicators` it returned, joined by commas. `categorizationDescription` and `categories` decide the tag instead, which is what the Sort Work view groups by.
+
+Each of the three is optional, and leaving one out removes its field from what the AI is asked for. Omitting `discussionPrompt` is the way to get a comment that is only the evidence for the tag, with no general advice attached — the CMP math units do this. Blanking the field in the authoring interface has the same effect and removes the key from the unit's JSON. At least one of the three has to remain, since an evaluation with nothing to return would fail.
+
 **What the AI is sent.** Every evaluation sends a text summary of the document and a screenshot of it in one request. Which of the two arrive depends on the document, not on any setting.
 
 - The **summary** is sent when it would carry the student's work. That means the student typed something, or the document holds something the summary describes in detail — a drawing with at least one object, for instance, is summarized as a table of those objects. A tile that is empty, or one the summary can only name rather than describe, does not count.
