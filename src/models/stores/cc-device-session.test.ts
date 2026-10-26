@@ -155,12 +155,57 @@ describe("CcDeviceSession", () => {
     expect(lastBody()).toBe("close session:4242");
   });
 
-  it("close without an open session just stops", async () => {
+  it("sends close for an open that hasn't been acknowledged yet", async () => {
     const s = make();
     s.start();
     await s.close();
     jest.advanceTimersByTime(5000);
-    expect(bodies()).toEqual(["open session:4242 #1"]);
+    expect(bodies()).toEqual(["open session:4242 #1", "close session:4242"]);
+  });
+
+  it("close without a session, before start or after othersession, just stops", async () => {
+    const warn = jest.spyOn(console, "warn").mockImplementation(() => undefined);
+    const s = make();
+    await s.close();
+    s.start();
+    s.receive("ok #1\r\n", []);
+    jest.advanceTimersByTime(1000);
+    s.receive("err #2 othersession\r\n", []);
+    await s.close();
+    expect(bodies()).toEqual(["open session:4242 #1", "ping session:4242 #2"]);
+    warn.mockRestore();
+  });
+
+  it("doesn't re-send an open acknowledged while it was being written", () => {
+    const s = make();
+    write.mockImplementation((line: string) => {
+      const seq = /^open .* #(\d+)\*/.exec(line)?.[1];
+      if (seq) s.receive(`ok #${seq}\r\n`, []);
+    });
+    s.start();
+    jest.advanceTimersByTime(5000);
+    expect(bodies().filter(b => b.startsWith("open"))).toHaveLength(1);
+    expect(bodies().filter(b => b.startsWith("ping"))).toHaveLength(5);
+    s.stop();
+  });
+
+  it("ignores a late nosession or othersession for a ping from before a re-open", () => {
+    const ids = [1, 2];
+    const s = make(() => ids.shift() as number);
+    s.start();
+    s.receive("ok #1\r\n", []);
+    jest.advanceTimersByTime(2000);
+    expect(bodies().slice(1)).toEqual(["ping session:1 #2", "ping session:1 #3"]);
+    s.receive("err #2 nosession\r\n", []);
+    expect(lastBody()).toBe("open session:2 #4");
+    s.receive("ok #4\r\n", []);
+    // Replies may arrive late and out of order; these answer ping #3, sent to the old session.
+    s.receive("err #3 nosession\r\n", []);
+    s.receive("err #3 othersession\r\n", []);
+    jest.advanceTimersByTime(1000);
+    expect(bodies().filter(b => b.startsWith("open"))).toHaveLength(2);
+    expect(lastBody()).toBe("ping session:2 #5");
+    s.stop();
   });
 
   it("stop writes nothing and clears the timers", () => {

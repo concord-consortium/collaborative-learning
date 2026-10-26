@@ -61,7 +61,9 @@ export class CcDeviceSession {
   }
 
   async close() {
-    if (this.opened) {
+    // An open still waiting for its ok may have reached the device. A close for a session the
+    // device doesn't have changes nothing there.
+    if (this.opened || this.openTimer) {
       const id = this.sessionId;
       this.stop();
       try {
@@ -117,9 +119,14 @@ export class CcDeviceSession {
   }
 
   private handleErr(seq: number | undefined, reason: string) {
+    if (reason === "nosession" || reason === "othersession") {
+      // Only an answer to a ping still pending changes the session. Reopening clears the pending
+      // pings, so the errors for other pings in flight, or late ones for an earlier session,
+      // change nothing.
+      if (seq === undefined || this.pending.get(seq) !== "ping") return;
+      this.pending.delete(seq);
+    }
     if (reason === "nosession") {
-      // Pings in flight may each bring their own nosession; only the first reopens.
-      if (!this.opened) return;
       this.clearTimers();
       this.pending.clear();
       this.opened = false;
@@ -134,8 +141,9 @@ export class CcDeviceSession {
 
   private openSession() {
     this.sessionId = this.randomSessionId();
-    this.sendOpen();
+    // The timer goes first, so an ok that arrives while the open is being written cancels it.
     this.openTimer = setInterval(() => this.sendOpen(), this.openRetryMs);
+    this.sendOpen();
   }
 
   private sendOpen() {
