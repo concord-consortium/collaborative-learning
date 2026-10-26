@@ -185,7 +185,7 @@ store, `SpikerbitDevice.connectAndStream` makes sure the board is running a curr
    writes `!!` and `?` once more. Each `serialdata` event carries one DAPLink read, at most 62
    bytes (`kDaplinkReadBytes`), and a backlog drains in full reads, so the first shorter read
    counts as drained. That is only a hint: 100 ms with no data (`kDrainQuietMs`) counts too. If
-   nothing is identified within 1.5 s (`kVersionQueryTimeoutMs`) in all, there is no reply.
+   nothing is identified within 1.5 s (`kFirmwareQueryTimeoutMs`) in all, there is no reply.
 4. The connect-time `!!` counts from 1000, above the 1 to 999 that `CcDeviceSession` uses. A
    late reply to it can reach the session, for example the reply to the first write when the
    retry has already identified the board, and this way it can't be taken for the `ok` to the
@@ -197,7 +197,7 @@ store, `SpikerbitDevice.connectAndStream` makes sure the board is running a curr
    flashing when the protocol is `CCDeviceProtocol` version 1 and the firmware is the same
    or newer. The USB connection stays Connected across the flash: the DAPLink interface chip
    is untouched and serial auto-reinitializes, so no explicit reconnect is needed. The
-   re-query after the flash uses the same sequence and the same rule, and only warns.
+   re-query after the flash uses the same steps and the same rule, and only warns.
 6. It then calls `setActiveDevice("spikerbit", transport)`, which repoints
    `onData` from firmware detection to `SerialDevice.receive` and starts a CC Device
    Protocol session. The board streams EMG readings once it acknowledges the session's

@@ -114,19 +114,19 @@ describe("SpikerbitDevice", () => {
     expect(serialDevice.isConnected()).toBe(true);
   });
 
-  it("flashes when no version reply arrives", async () => {
+  it("flashes when no firmware reply arrives", async () => {
     const serialDevice = makeSerialDevice();
     const conn = new FakeConnection();
     conn.knowsReset = false;
     conn.respondHello = null; // never answers "?"
-    const device = new SpikerbitDevice(serialDevice, conn, { versionQueryTimeoutMs: 50 });
+    const device = new SpikerbitDevice(serialDevice, conn, { firmwareQueryTimeoutMs: 50 });
 
     await device.connectAndStream("HEX");
 
     expect(conn.flashed).toBe(true);
   });
 
-  it("flashes (auto-updates) when the board reports an out-of-date version", async () => {
+  it("flashes (auto-updates) when the board reports out-of-date firmware", async () => {
     const serialDevice = makeSerialDevice();
     const conn = new FakeConnection();
     conn.respondHello = helloLine(kSpikerbitFirmwareVersion - 1); // older firmware still running
@@ -208,7 +208,7 @@ describe("SpikerbitDevice", () => {
     conn.respondHello = null;
     conn.flash = jest.fn().mockRejectedValue(new Error("flash failed"));
     const disconnect = jest.spyOn(conn, "disconnect");
-    const device = new SpikerbitDevice(serialDevice, conn, { versionQueryTimeoutMs: 50 });
+    const device = new SpikerbitDevice(serialDevice, conn, { firmwareQueryTimeoutMs: 50 });
 
     await expect(device.connectAndStream("HEX")).rejects.toThrow("flash failed");
 
@@ -416,7 +416,7 @@ describe("SpikerbitDevice", () => {
       warn.mockRestore();
     });
 
-    it("re-queries with the same sequence after a flash, with numbers of its own", async () => {
+    it("re-queries with the same steps after a flash, with numbers of its own", async () => {
       const warn = jest.spyOn(console, "warn").mockImplementation(() => undefined);
       const conn = new FakeConnection();
       conn.backlog = freeRunBacklog();

@@ -8,12 +8,13 @@ import { IDeviceTransport } from "./device-transport";
 // Keep equal to the `firmware:` number in the HELLO line of spikerbit-clue.ts.
 export const kSpikerbitFirmwareVersion = 4;
 
-// The `device` field of the hello a Spiker:bit sends.
+// The `device` field of the hello a Spiker:bit sends, and also its deviceFamily key in
+// kDeviceCapabilities.
 const kSpikerbitDeviceName = "spikerbit";
 
 // How long queryFirmware waits in all, both attempts included, for a firmware reply before
 // deciding to flash.
-const kVersionQueryTimeoutMs = 1500;
+const kFirmwareQueryTimeoutMs = 1500;
 
 // The most one "serialdata" event can carry. @microbit/microbit-connection reads the board's
 // output with DAPLink's vendor serial read, whose 64-byte reply spends 2 bytes on its header
@@ -81,7 +82,7 @@ export class MicrobitUsbTransport implements IDeviceTransport {
 }
 
 export interface SpikerbitDeviceOptions {
-  versionQueryTimeoutMs?: number;
+  firmwareQueryTimeoutMs?: number;
 }
 
 export class SpikerbitDevice {
@@ -90,7 +91,7 @@ export class SpikerbitDevice {
   private transport: MicrobitUsbTransport;
   private buffer = "";
   private detectedReply: FirmwareReply | null = null;
-  private versionQueryTimeoutMs: number;
+  private firmwareQueryTimeoutMs: number;
   private resetSeq = kFirstResetSeq;
   // When the latest connect-time chunk arrived, and when the backlog was first seen to have
   // drained (a read shorter than kDaplinkReadBytes) since the latest "!!" and "?".
@@ -101,7 +102,7 @@ export class SpikerbitDevice {
     this.serialDevice = serialDevice;
     this.connection = connection;
     this.transport = new MicrobitUsbTransport(connection);
-    this.versionQueryTimeoutMs = options?.versionQueryTimeoutMs ?? kVersionQueryTimeoutMs;
+    this.firmwareQueryTimeoutMs = options?.firmwareQueryTimeoutMs ?? kFirmwareQueryTimeoutMs;
   }
 
   public async connectAndStream(
@@ -159,7 +160,7 @@ export class SpikerbitDevice {
       if (shouldFlash(confirmed, kSpikerbitDeviceName, kSpikerbitFirmwareVersion)) {
         console.warn(
           `Spiker:bit firmware not confirmed after flash (got ${JSON.stringify(confirmed)}, ` +
-          `expected version ${kSpikerbitFirmwareVersion}); connecting anyway.`
+          `expected firmware ${kSpikerbitFirmwareVersion}); connecting anyway.`
         );
       }
     }
@@ -190,7 +191,7 @@ export class SpikerbitDevice {
   // identifies the firmware whether or not an "ok" came first, and shouldFlash decides. If
   // nothing is identified kRetryAfterDrainMs after the backlog has drained, the replies may have
   // been dropped while DAPLink's buffer was still full, so it writes "!!" and "?" once more.
-  // Returns null when nothing is identified within versionQueryTimeoutMs.
+  // Returns null when nothing is identified within firmwareQueryTimeoutMs.
   private async queryFirmware(): Promise<FirmwareReply | null> {
     this.detectedReply = null;
     const started = Date.now();
@@ -200,7 +201,7 @@ export class SpikerbitDevice {
       const poll = () => {
         if (this.detectedReply) return resolve(this.detectedReply);
         const now = Date.now();
-        if (now - started >= this.versionQueryTimeoutMs) return resolve(null);
+        if (now - started >= this.firmwareQueryTimeoutMs) return resolve(null);
         if (!retried) {
           const drainedAt = this.shortReadAt
             ?? (now - this.lastDataAt >= kDrainQuietMs ? this.lastDataAt + kDrainQuietMs : undefined);
