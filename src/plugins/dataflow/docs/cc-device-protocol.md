@@ -69,8 +69,9 @@ aren't corrupted on the cable. They can be lost at either end, though. The micro
 interface chip drops bytes that arrive while its buffer is full (see [Connecting](#connecting)),
 and the device drops bytes that arrive while its own receive buffer is full. A line with a lost
 byte can still parse: `emg:1234` missing a digit becomes `emg:124`. The checksum catches any
-single lost byte. It also catches two lines run together when the end of one and the start of the
-next were lost. It doesn't catch a line lost whole: a command's `#n` covers that, since its `ok`
+single lost byte. It almost always catches two lines run together when the end of one and the
+start of the next were lost: about 1 in 256 such lines still passes, when the lost bytes happen to
+XOR to the same value. It doesn't catch a line lost whole: a command's `#n` covers that, since its `ok`
 never arrives. It also misses two equal bytes lost from the same line, because they cancel out in
 the XOR.
 
