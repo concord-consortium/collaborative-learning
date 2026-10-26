@@ -153,7 +153,8 @@ export interface IAiPrompt {
   categorizationDescription: string;
   categories: string[];
   keyIndicatorsPrompt: string;
-  discussionPrompt: string;
+  // Optional, matching `AIPromptModel` and the shared `IAiPrompt`; its three siblings above are not.
+  discussionPrompt?: string;
   // Accepted in existing unit JSON and ignored: every evaluation sends both representations.
   summarizer?: string;
 }

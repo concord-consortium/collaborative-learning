@@ -3,7 +3,7 @@ import * as logger from "firebase-functions/logger";
 import * as admin from "firebase-admin";
 // Modular import: admin.firestore.FieldValue is undefined in the functions emulator.
 import {FieldValue} from "firebase-admin/firestore";
-import {getAnalysisQueueFirestorePath, getSummaryPath} from "./utils";
+import {buildEvaluationComment, getAnalysisQueueFirestorePath, getSummaryPath} from "./utils";
 import {
   type DocumentMetadata, type DocumentRepresentations, type MetadataGap, categorizeRepresentations,
 } from "../lib/src/ai-categorize-document";
@@ -221,9 +221,7 @@ export const onAnalysisDocumentImaged =
           return;
         }
         tags = reply.parsed.category && reply.parsed.category !== "unknown" ? [reply.parsed.category] : [];
-        const indicators = reply.parsed.keyIndicators && reply.parsed.keyIndicators.length ?
-          ` Your work shows: ${reply.parsed.keyIndicators.join(", ")}` : "";
-        message = (reply.parsed.discussion || "") + indicators;
+        message = buildEvaluationComment(reply.parsed.discussion, reply.parsed.keyIndicators);
         fullResponse = JSON.stringify(completion);
       } else {
         await error(`Unexpected value for evaluator: ${queueDoc?.evaluator}`, event);

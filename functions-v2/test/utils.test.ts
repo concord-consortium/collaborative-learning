@@ -1,5 +1,5 @@
 import {escapeKey} from "../../shared/shared";
-import {getSummaryPath} from "../src/utils";
+import {buildEvaluationComment, getSummaryPath} from "../src/utils";
 
 describe("getSummaryPath", () => {
   it("builds the path from the realm root, the space, and the document key", () => {
@@ -57,4 +57,32 @@ describe("getSummaryPath", () => {
    * trigger logs and skips, and the next analysis run creates a record at the key-derived id.
    * Nothing is migrated, and nothing needs to be — the collection holds one demo record.
    */
+});
+
+describe("buildEvaluationComment", () => {
+  it("separates the discussion from the indicators with one space", () => {
+    expect(buildEvaluationComment("Try a table.", ["you wrote 3:4"]))
+      .toBe("Try a table. Your work shows: you wrote 3:4");
+  });
+
+  // A unit that omits discussionPrompt gets no discussion field at all. The separator belongs
+  // between the two halves, so with nothing on the left it must not survive as a leading space.
+  it("does not start with a space when there is no discussion", () => {
+    expect(buildEvaluationComment(undefined, ["you wrote 3:4"]))
+      .toBe("Your work shows: you wrote 3:4");
+  });
+
+  it("joins several indicators with commas", () => {
+    expect(buildEvaluationComment(undefined, ["one", "two"]))
+      .toBe("Your work shows: one, two");
+  });
+
+  it("is the discussion alone when there are no indicators", () => {
+    expect(buildEvaluationComment("Try a table.", [])).toBe("Try a table.");
+    expect(buildEvaluationComment("Try a table.", undefined)).toBe("Try a table.");
+  });
+
+  it("is empty when the reply carried neither", () => {
+    expect(buildEvaluationComment(undefined, undefined)).toBe("");
+  });
 });

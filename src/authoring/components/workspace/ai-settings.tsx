@@ -81,7 +81,6 @@ const AISettings: React.FC = () => {
     // we need to wait until after the state has been updated
     // before triggering the validations
     setTimeout(() => {
-      trigger("aiPrompt.discussionPrompt");
       trigger("aiPrompt.keyIndicatorsPrompt");
       trigger("aiPrompt.categorizationDescription");
       trigger("aiPrompt.mainPrompt");
@@ -106,7 +105,11 @@ const AISettings: React.FC = () => {
         const categories = config.commentTags ? Object.keys(config.commentTags) : [];
 
         if (!config.aiPrompt) {
-          config.aiPrompt = { ...data.aiPrompt, categories };
+          const { discussionPrompt, ...rest } = data.aiPrompt;
+          config.aiPrompt = {
+            ...rest, categories,
+            ...(discussionPrompt?.trim() ? { discussionPrompt } : {})
+          };
         } else {
           const aiPrompt = config.aiPrompt;
           const {
@@ -118,7 +121,13 @@ const AISettings: React.FC = () => {
           aiPrompt.categorizationDescription = categorizationDescription;
           aiPrompt.categories = categories;
           aiPrompt.keyIndicatorsPrompt = keyIndicatorsPrompt;
-          aiPrompt.discussionPrompt = discussionPrompt;
+          // An empty discussion prompt is the absence of one: it removes the `discussion` field
+          // from the response schema either way, so the key is dropped rather than stored as "".
+          if (discussionPrompt?.trim()) {
+            aiPrompt.discussionPrompt = discussionPrompt;
+          } else {
+            delete aiPrompt.discussionPrompt;
+          }
           // The analysis pipeline ignores summarizer, so drop it from configs that still carry it.
           delete aiPrompt.summarizer;
         }
@@ -263,9 +272,7 @@ const AISettings: React.FC = () => {
                 <textarea
                   id="discussionPrompt"
                   defaultValue={settings.aiPrompt.discussionPrompt}
-                  {...register("aiPrompt.discussionPrompt", {
-                    validate: validateAiFields
-                  })}
+                  {...register("aiPrompt.discussionPrompt")}
                   disabled={disableAiFields}
                 />
                 {errors.aiPrompt?.discussionPrompt &&
