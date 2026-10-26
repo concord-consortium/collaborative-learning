@@ -252,9 +252,16 @@ async function claimActivityByUrl(portal: PortalSession, url: string) {
 /**
  * Whether an existing activity already has `append_auth_token` set, read from its edit page.
  * A read, unlike claimActivityByUrl, so a dry run can report the real setting.
+ *
+ * An absent checkbox reads as unchecked, and getText follows redirects, so a page that turns out
+ * not to be the activity's edit form (a login page, say) would report the flag unset. The url
+ * field is there on every edit form, so its absence means the page wasn't one.
  */
 async function readAuthTokenSetting(portal: PortalSession, id: number) {
   const editPage = await portal.getText(`/eresources/${id}/edit`);
+  if (readFormField(editPage, "external_activity_url") === undefined) {
+    throw new Error(`Could not read activity ${id}'s edit form at /eresources/${id}/edit.`);
+  }
   return readFormCheckbox(editPage, "external_activity_append_auth_token");
 }
 
