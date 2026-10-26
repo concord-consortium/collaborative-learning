@@ -74,12 +74,14 @@ branch's code, without a PR:
 date -u +%Y-%m-%dT%H:%M:%SZ                                        # <dispatched>, before the run
 gh workflow run manual-regression.yml --ref master -f branch=v<X.Y>.x -f browser=chrome -f test=all
 gh run list --workflow manual-regression.yml --event workflow_dispatch \
-  --json databaseId,createdAt --jq '.[] | select(.createdAt >= "<dispatched>") | .databaseId'
+  --json databaseId,createdAt,displayTitle --jq '.[] | select(.createdAt >= "<dispatched>"
+    and .displayTitle == "Manual Regression on v<X.Y>.x (all)") | .databaseId'
 gh run watch <id> --exit-status
 ```
 
-`--ref master` picks the workflow file; `branch=` picks the code it tests. Find the run id as for
-Release Staging: repeat the `gh run list` until it prints an id created after `<dispatched>`. It
+`--ref master` picks the workflow file; `branch=` picks the code it tests. Other developers
+dispatch this workflow too, often for a single spec, so match the run's title, which names its
+branch and test, as well as its time. Repeat the `gh run list` until it prints an id. It
 must pass before the tag; it can run alongside the steps below. If it fails, tell the developer
 what failed. To retry a flake, re-run all its jobs **[approve]** (`gh run rerun <id>`, never
 `--failed`, since Cypress Cloud splits the specs across the jobs). A real failure is a fix on the

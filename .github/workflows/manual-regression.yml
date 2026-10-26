@@ -1,4 +1,6 @@
 name: Manual Regression
+# Names each run after its inputs, so a run on one branch or spec can be told from another's.
+run-name: Manual Regression on ${{ inputs.branch }} (${{ inputs.test }})
 
 on:
   workflow_dispatch:
