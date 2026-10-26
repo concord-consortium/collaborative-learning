@@ -4,7 +4,7 @@ import fs from "node:fs";
 import { spawn } from "node:child_process";
 import path from "node:path";
 import { SerialPort } from "serialport";
-import { ccChecksum, withChecksum } from "../../src/models/stores/cc-device-protocol";
+import { ccChecksum, parseCcDeviceLine, withChecksum } from "../../src/models/stores/cc-device-protocol";
 
 const kBaudRate = 115200;
 const kReplyTimeoutMs = 500;
@@ -17,7 +17,6 @@ const kIdentifyAttempts = 5;
 const kDriveDir = "/Volumes/MICROBIT";
 const kHexPath = path.resolve(__dirname, "../../src/plugins/dataflow/firmware/spikerbit-clue.hex");
 const kSourcePath = path.resolve(__dirname, "../../src/plugins/dataflow/firmware/spikerbit-clue.ts");
-const kReadingPattern = /^[a-z0-9_/]+:-?\d+(\.\d+)?$/;
 const kV1ToV3BannerPattern = /CLUE-SPIKERBIT v(\d+)/;
 
 // The `hello` line, from `const HELLO = "..."` in the MakeCode source, so a firmware
@@ -106,6 +105,8 @@ async function waitForBoard(requestedPort: string | undefined) {
   console.log(`Waiting ${kSettleMs / 1000} s for the board to reprogram`);
   await sleep(kSettleMs);
   const deadline = Date.now() + kBoardWaitMs;
+  // Why the port last failed to open or answer, for the message if the board never does.
+  let lastError = "";
   while (Date.now() < deadline) {
     let port: SerialPort | undefined;
     try {
@@ -116,14 +117,16 @@ async function waitForBoard(requestedPort: string | undefined) {
       await board.send("?", { checksummed: false });
       const lines = await board.collect(1000);
       if (lines.some(line => kV1ToV3BannerPattern.test(line) || verifiedBody(line)?.startsWith("hello "))) return;
-    } catch {
+    } catch (err) {
+      lastError = err instanceof Error ? err.message : String(err);
       await sleep(1000);
     } finally {
       const opened = port;
       if (opened?.isOpen) await new Promise<void>(resolve => opened.close(() => resolve()));
     }
   }
-  throw new Error(`The board didn't answer ? within ${kBoardWaitMs / 1000} s of the flash copy`);
+  throw new Error(`The board didn't answer ? within ${kBoardWaitMs / 1000} s of the flash copy` +
+    (lastError ? ` (last error: ${lastError})` : ""));
 }
 
 // DAPLink writes FAIL.TXT to the drive when programming fails. Returns its text, or null.
@@ -195,10 +198,8 @@ class Board {
   }
 }
 
-function isReading(line: string) {
-  const body = verifiedBody(line);
-  return body !== null && kReadingPattern.test(body);
-}
+// parseCcDeviceLine requires the checksum, so only a reading that arrived whole counts.
+const isReading = (line: string) => parseCcDeviceLine(line)?.kind === "reading";
 
 const describeLines = (lines: string[]) => (lines.length ? lines.map(l => JSON.stringify(l)).join(", ") : "nothing");
 
@@ -342,6 +343,7 @@ function buildChecks(): Check[] {
         return checkReply(line, "err checksum");
       } },
     { name: "foo -> err unknown", send: "foo #n", reply: ctx => `err #${ctx.n} unknown` },
+    { name: "#n alone -> err unknown", send: "#n", reply: ctx => `err #${ctx.n} unknown` },
     { name: "a 200-character line -> err value, then later pings, alone or two in one write -> ok",
       run: async (board, ctx) => {
         board.clear();
@@ -371,7 +373,8 @@ async function runCheck(board: Board, check: Check, ctx: Context):
   try {
     if ("run" in check) return { failure: await check.run(board, ctx), sent: null };
     const n = ctx.nextSeq();
-    const resolve = (value: Template) => (typeof value === "function" ? value({ ...ctx, n }) : value).replace("#n", `#${n}`);
+    const resolve = (value: Template) =>
+      (typeof value === "function" ? value({ ...ctx, n }) : value).replace("#n", `#${n}`);
     const sent = resolve(check.send);
     const expected = resolve(check.reply);
     board.clear();
@@ -408,11 +411,13 @@ async function main() {
     // Connect as the protocol asks hosts to: `!!` stops a session or free-run that an earlier
     // host left running, then a plain `?`, with no checksum, identifies the board. Firmware v1–v3
     // ignores `!!`, compares the whole line to "?" and answers with the v1–v3 banner. A board
-    // that has just rebooted may need a few tries to answer.
+    // that is still restarting (opening the port restarts it on macOS) may miss or damage the
+    // first lines, so this tries until one attempt gets both the ok and the hello.
     let firstLines: string[] = [];
     let hello = false;
+    let reset = false;
     let resetSeq = 0;
-    for (let attempt = 0; attempt < kIdentifyAttempts && !hello; attempt++) {
+    for (let attempt = 0; attempt < kIdentifyAttempts && !(hello && reset); attempt++) {
       board.clear();
       resetSeq = ctx.nextSeq();
       await board.send(`!! #${resetSeq}`);
@@ -425,6 +430,7 @@ async function main() {
         return;
       }
       hello = firstLines.some(line => verifiedBody(line)?.startsWith("hello "));
+      reset = firstLines.some(line => verifiedBody(line) === `ok #${resetSeq}`);
     }
     if (!hello) {
       console.log("no reply to ?; is the board running this firmware? rerun with --flash " +
@@ -432,7 +438,7 @@ async function main() {
       failed = 1;
       return;
     }
-    if (!firstLines.some(line => verifiedBody(line) === `ok #${resetSeq}`)) {
+    if (!reset) {
       console.log(`no ok for !! #${resetSeq}; rerun with --flash (got ${describeLines(firstLines)})`);
       failed = 1;
       return;

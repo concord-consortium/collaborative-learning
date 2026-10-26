@@ -10,6 +10,9 @@ sound and the servo still need a person.
 npm run bench:spikerbit -- [--port <path>] [--flash]
 ```
 
+Finding the port and `--flash` work only on macOS. Elsewhere, pass `--port` and flash the board
+another way first.
+
 - `--port <path>`: the serial device. Without it, the script uses the only `/dev/cu.usbmodem*`;
   zero or several is an error that names what it found.
 - `--flash`: first flashes `src/plugins/dataflow/firmware/spikerbit-clue.hex` by running
@@ -21,8 +24,9 @@ npm run bench:spikerbit -- [--port <path>] [--flash]
 
 It connects the way the protocol asks hosts to: `!! #n`, which stops a session or free-run an
 earlier host left running, then a plain `?`. If the board answers with the v1–v3 banner,
-`CLUE-SPIKERBIT v<N>`, the script stops with "running v<N> firmware; rerun with --flash". If
-the `hello` line comes without an `ok` for the `!!`, it stops and asks for `--flash` too.
+`CLUE-SPIKERBIT v<N>`, the script stops with "running v<N> firmware; rerun with --flash". A
+board that is still restarting can miss the first lines, so it tries up to 5 times until one
+attempt gets both the `ok` and the `hello` line. If none does, it stops and asks for `--flash`.
 
 Each check prints `PASS` or `FAIL` and its name; a failed send/reply check also shows what was
 sent and what came back. The exit code is 0 when every check passes and 1 otherwise. The checks are the array
