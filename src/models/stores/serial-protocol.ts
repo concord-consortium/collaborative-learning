@@ -76,9 +76,9 @@ export function detectFirmwareReply(buffer: string): { reply: FirmwareReply | nu
   return { reply: null, remaining: buffer };
 }
 
-// Whether Dataflow should flash the bundled firmware: no recognized reply, a legacy banner, a
-// protocol or protocol version Dataflow doesn't speak, another device (firmware numbers are per
-// device), or older firmware.
+// Whether a board should be flashed with the expected firmware: no recognized reply, a legacy
+// banner, a protocol or protocol version other than kCcDeviceProtocolName and
+// kCcDeviceProtocolVersion, another device (firmware numbers are per device), or older firmware.
 export function shouldFlash(reply: FirmwareReply | null, expectedDevice: string, expectedFirmware: number): boolean {
   if (reply?.kind !== "ccDevice") return true;
   const { protocol, version, device, firmware } = reply.hello;

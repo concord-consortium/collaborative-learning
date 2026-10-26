@@ -4,8 +4,7 @@ import { NodeChannelInfo } from "./channel";
 // wire format, not the hardware: "keyValue" is labeled `channelId:number` lines (spoken
 // by the Arduino); "radioHub" is the multi-hub radio framing (spoken by the radio-hub
 // micro:bit); "ccDevice" is the CC Device Protocol, a checksummed, session-based line
-// protocol (spoken by the Spiker:bit). A device that lists `channels` provides only those
-// channel ids; one without the list satisfies every channel that shares its protocol.
+// protocol (spoken by the Spiker:bit).
 export type DeviceProtocol = "keyValue" | "radioHub" | "ccDevice";
 
 // The categories of live output a device can drive.

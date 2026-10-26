@@ -87,8 +87,8 @@ export class SerialDevice {
     this.updateConnectionInfo(Date.now(), "connect");
   }
 
-  // Ends the CC Device Protocol session politely: writes `close` if the device acknowledged the
-  // open. Resolves at once when there is no session.
+  // Ends the CC Device Protocol session: writes `close` when a session is open or an open is
+  // still pending. Resolves at once when there is no session.
   public async endSession(): Promise<void> {
     await this.ccDeviceSession?.close();
   }

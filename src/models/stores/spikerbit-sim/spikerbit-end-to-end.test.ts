@@ -11,7 +11,7 @@ const firmwarePath = path.join(__dirname, "../../../plugins/dataflow/firmware/sp
 
 // DAPLink, the micro:bit's USB interface chip, buffers the board's serial output until a host reads
 // it. Once the buffer is full it keeps the oldest bytes and drops new ones. A V2 was measured
-// holding 500–570 bytes.
+// holding 500–578 bytes.
 const kDaplinkBufferBytes = 512;
 // @microbit/microbit-connection reads that buffer at most 62 bytes at a time.
 const kDaplinkReadBytes = 62;
@@ -170,7 +170,7 @@ describe("Dataflow and the Spiker:bit firmware", () => {
     const device = await connect();
     await tick(1000);
 
-    // What DeviceConnection.disconnect does.
+    // As DeviceConnection.disconnect does: end the session, then close the link.
     await serialDevice.endSession();
     await device.disconnect();
     expect(serialDevice.isConnected()).toBe(false);

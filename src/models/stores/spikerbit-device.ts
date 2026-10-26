@@ -146,10 +146,8 @@ export class SpikerbitDevice {
     this.resetSeq = kFirstResetSeq;
     const running = await this.queryFirmware();
     if (shouldFlash(running, kSpikerbitDeviceName, kSpikerbitFirmwareVersion)) {
-      // Flash when the board answers with no recognized reply, the legacy banner, a protocol
-      // Dataflow doesn't speak, or older firmware. USB connection stays Connected through a
-      // flash (DAPLink interface chip is untouched) and serial auto-reinitializes, so no explicit
-      // reconnect here.
+      // USB connection stays Connected through a flash (DAPLink interface chip is untouched) and
+      // serial auto-reinitializes, so no explicit reconnect here.
       await this.connection.flash(flashDataSource, { partial: true, progress });
       // Re-query to confirm the flash took, but proceed regardless: the board was just written
       // with the known-good bundled hex, so a null/stale reply here is far more likely a serial
@@ -182,16 +180,11 @@ export class SpikerbitDevice {
     }
   };
 
-  // Identifies the firmware, right after connecting and again after a flash. A board that nobody
-  // has been reading may have filled DAPLink's buffer with stale output, which arrives first and
-  // usually ends in a cut-off line. So this writes "!! #n" and a bare "?" (firmware v1–v3 answers
-  // only a bare "?") and reads lines until a hello line or a v1–v3 banner. Firmware that knows
-  // "!!" resets to idle and sends an empty line and "ok #n" before its hello; the empty line ends
-  // the cut-off line, so the hello isn't glued onto it. The "ok" needs no handling: the hello
-  // identifies the firmware whether or not an "ok" came first, and shouldFlash decides. If
-  // nothing is identified kRetryAfterDrainMs after the backlog has drained, the replies may have
-  // been dropped while DAPLink's buffer was still full, so it writes "!!" and "?" once more.
-  // Returns null when nothing is identified within firmwareQueryTimeoutMs.
+  // Identifies the firmware, right after connecting and again after a flash: writes "!! #n" and a
+  // bare "?", reads lines until a hello or a v1–v3 banner, and writes both once more
+  // kRetryAfterDrainMs after the backlog drains, in case DAPLink's full buffer dropped the
+  // replies. Returns null when nothing is identified within firmwareQueryTimeoutMs. Why "!!" comes
+  // first: cc-device-protocol.md, "Connecting".
   private async queryFirmware(): Promise<FirmwareReply | null> {
     this.detectedReply = null;
     const started = Date.now();

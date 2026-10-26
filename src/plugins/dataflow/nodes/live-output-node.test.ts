@@ -1,9 +1,10 @@
 import { LiveOutputNode, servoDisplayMessage } from "./live-output-node";
 import { NodeLiveOutputTypes, resolveAllowedOutputTypes } from "../model/utilities/node";
 
-// Minimal fake SerialDevice that records which output writer the node invoked. The combined keyValue and
-// ccDevice branch of sendDataToSerialDevice reads only this.model and the device's deviceFamily, so an
-// Object.create stub of the node (as the rete-manager tests do) exercises the gate directly.
+// Minimal fake SerialDevice that records which output writer the node invoked. The combined
+// keyValue and ccDevice branch of sendDataToSerialDevice reads only this.model and the device's
+// deviceFamily, so an Object.create stub of the node (as the rete-manager tests do) exercises the
+// gate directly.
 function fakeSerialDevice(deviceFamily: string) {
   return {
     deviceFamily,
@@ -34,8 +35,8 @@ describe("LiveOutputNode.sendDataToSerialDevice output gating (CLUE-567 #1)", ()
   });
 
   it("does not write a gripper command to a Spiker:bit, whose only output is a servo", () => {
-    // Regression for the protocol-only gate: gating on protocol alone would let gripper
-    // commands reach a device whose only output is a servo.
+    // Gating on protocol alone would let gripper commands reach a device whose only output is a
+    // servo.
     const device = fakeSerialDevice("spikerbit");
     send(makeNode(130, "Gripper 2.0"), device);
     expect(device.gripperWrites).toEqual([]);
