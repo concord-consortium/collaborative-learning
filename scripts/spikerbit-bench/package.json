@@ -3,9 +3,10 @@
   "private": true,
   "description": "Checks a real Spiker:bit's replies to the CC Device Protocol over USB serial",
   "scripts": {
-    "bench": "node bench.mjs"
+    "bench": "tsx bench.ts"
   },
   "dependencies": {
-    "serialport": "13.0.0"
+    "serialport": "13.0.0",
+    "tsx": "4.16.2"
   }
 }

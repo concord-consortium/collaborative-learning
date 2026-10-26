@@ -26,7 +26,7 @@ the `hello` line comes without an `ok` for the `!!`, it stops and asks for `--fl
 
 Each check prints `PASS` or `FAIL` and its name; a failed send/reply check also shows what was
 sent and what came back. The exit code is 0 when every check passes and 1 otherwise. The checks are the array
-returned by `buildChecks` in `bench.mjs`. The script ends with `close` so the board is left idle.
+returned by `buildChecks` in `bench.ts`. The script ends with `close` so the board is left idle.
 
 ## Notes
 
