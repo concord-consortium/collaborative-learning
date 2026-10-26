@@ -60,8 +60,8 @@ How it is designed and how it is extended; what any CC device and host must agre
   there by #3055, which adds it.
 
 The Spiker:bit's own material (`servo`, the `emg` reading, button A, the displays and the
-firmware notes) is in the guide, and the protocol page has a short pointer
-to it. The protocol page keeps a connection transcript as an example.
+firmware notes) is in the guide, and `cc-device-protocol.md` has a short pointer
+to it. `cc-device-protocol.md` keeps a connection transcript as an example.
 
 **The guide: this firmware.** It covers:
 
@@ -84,7 +84,7 @@ to it. The protocol page keeps a connection transcript as an example.
   every second, `close`), with a pointer to Dataflow's parser,
   `src/models/stores/cc-device-protocol.ts`. #3055 adds `cc-device-session.ts` as the
   reference implementation;
-- where to go next: the protocol page, the source, the simulator tests, the bench script.
+- where to go next: `cc-device-protocol.md`, the source, the simulator tests, the bench script.
 
 **`src/plugins/dataflow/firmware/README.md`** is the developer page: building and
 rebuilding the hex, the CI checks, testing in Jest, the bench script, prototyping in MakeCode,
@@ -152,7 +152,7 @@ long-click event), not a firmware constant, so the guide states it by hand ("abo
   a board is at hand. Turning a literal into a named constant is in scope; changing a value is
   not.
 - **The generator's output is deterministic:** the same source and toolchain give the same
-  bytes on any machine (stable attribute order, ids and number formatting). `build.mjs`
+  bytes on any machine (stable attribute order, ids and number formatting). `build.ts`
   renders each picture twice in one process and throws if the two differ. The check compares
   bytes exactly. If `MicrobitBoardSvg` doesn't give byte-identical output, **stop and bring the
   options back to Scott** rather than picking one.
@@ -182,7 +182,7 @@ long-click event), not a firmware constant, so the guide states it by hand ("abo
 - The guide's file name and the images folder's name (the controller's suggestion:
   `src/plugins/dataflow/firmware/user-guide.md` and `firmware/guide-images/`).
 - The exact marker syntax, the generated table layouts, and the `@guide` constant names.
-- Whether the generator is part of `build.mjs` or its own module that `build.mjs` calls.
+- Whether the generator is part of `build.ts` or its own module that `build.ts` calls.
 - Where the unit-tested parsing code lives so that both Jest and the build can load it. Note
   that the root Jest config ignores `/scripts/spikerbit-firmware/`, and that `build:firmware`
   installs that folder with `npm ci`, so any dependency the generator adds there goes in its

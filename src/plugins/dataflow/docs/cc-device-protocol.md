@@ -64,6 +64,16 @@ Dataflow:   close session:4821*1D
   [Recognizing the firmware](#recognizing-the-firmware)). A device answers a line with a bad
   checksum with `err checksum`, without the line's `#n`, which can't be trusted.
 
+**Why a checksum over USB.** USB checks every packet it carries and retries a bad one, so bytes
+aren't corrupted on the cable. They can be lost at either end, though. The micro:bit's USB
+interface chip drops bytes that arrive while its buffer is full (see [Connecting](#connecting)),
+and the device drops bytes that arrive while its own receive buffer is full. A line with a lost
+byte can still parse: `emg:1234` missing a digit becomes `emg:124`. The checksum catches any
+single lost byte. It also catches two lines run together when the end of one and the start of the
+next were lost. It doesn't catch a line lost whole: a command's `#n` covers that, since its `ok`
+never arrives. It also misses two equal bytes lost from the same line, because they cancel out in
+the XOR.
+
 ## Names and values
 
 - **Names are opaque paths** of lowercase letters, digits, `_` and `/`. `/` separates a
@@ -220,8 +230,8 @@ connects reads that backlog first, and a reply it is waiting for can arrive glue
 fragment and fail its checksum. A device still streaming, in free-run or in a session whose
 host has gone, keeps the backlog full until a host stops it.
 
-So a host's first write after connecting is two lines, `!! #n` and then `?`, sent bare,
-without a checksum, so that older firmware answers too (see
+So a host's first write after connecting is two lines: `!! #n` with its checksum, and then a
+bare `?` without one, so that older firmware answers too (see
 [Recognizing the firmware](#recognizing-the-firmware)). The `!!` stops whatever the device was
 doing, and the empty line before its `ok` ends any cut-off line, so the `ok` and the `hello`
 line after it each start a line of their own. Then:
@@ -245,7 +255,7 @@ own hex rather than accept a board it can't talk to.
 ## The Spiker:bit firmware
 
 The Spiker:bit firmware is the first device to speak the protocol. Its commands, displays and
-timing are in its [user guide](../firmware/user-guide.md), and its internals in the header of
+timing are in its [user guide](../firmware/user-guide.md), and its source is
 [`spikerbit-clue.ts`](../firmware/spikerbit-clue.ts). The design and the reasoning behind it
 are recorded in
 [the design spec](../../../../docs/superpowers/specs/2026-10-20-clue-728-spikerbit-firmware-protocol-design.md).

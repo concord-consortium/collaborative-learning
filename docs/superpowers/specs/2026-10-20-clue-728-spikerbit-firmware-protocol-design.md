@@ -568,7 +568,7 @@ back and forth between those two builds reflashes it each time.
   from the `HELLO` line in the source and checks it against `kSpikerbitFirmwareVersion`,
   checks that the hex embeds that `hello` line and the current source, and checks that the
   source contains no v1–v3 banner text.
-- **On the bench:** `npm run bench:spikerbit` (`scripts/spikerbit-bench/bench.mjs`) talks to a
+- **On the bench:** `npm run bench:spikerbit` (`scripts/spikerbit-bench/bench.ts`) talks to a
   plugged-in board over USB serial at 115200 baud and checks its replies: `?`, a session
   opening, sending readings, closing and lapsing (with a custom `timeout`), `ping` with the
   session id, a bare `ping`, `ping` with another id, idle staying silent, free-run by `stream`

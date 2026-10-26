@@ -9,10 +9,13 @@ connected micro:bit is not already running it.
 
 The firmware computes the EMG envelope itself — it tracks the DC baseline
 and full-wave rectifies (`envelope = EMA(|raw - baseline|)`) instead of using the
-`pxt-spikerbit` extension's `musclePowerSignal()`, whose fixed 580 noise floor sits
-above the board's ~511 resting baseline and misses moderate contractions. It reads the
-raw signal on P1 and only needs `P8=0/P9=0` to select EMG mode, so the extension isn't
-needed. See the header of `spikerbit-clue.ts` for the full rationale.
+`pxt-spikerbit` extension's `musclePowerSignal()`. That function subtracts a fixed noise
+floor of 580 and half-wave rectifies, but the board's resting baseline is ~511, so moderate
+contractions, which oscillate around 511 and rarely reach 580, come out near 0 and only
+hard flexes register. The extension's `startMuscleRecording()` only drives `P8=0/P9=0` to
+put the analog front end in EMG mode, so the firmware does that itself, reads the raw
+signal on P1, and the MakeCode project doesn't need the extension. The smoothing time
+constants are in `spikerbit-clue.ts`, next to the sampler.
 
 - **Source of record:** [`spikerbit-clue.ts`](./spikerbit-clue.ts) — the MakeCode
   program. This directory is excluded from the CLUE tsconfig/eslint because the

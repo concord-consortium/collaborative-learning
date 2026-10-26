@@ -274,8 +274,8 @@ the session. Line parsing and checksums are in
 
 - [The CC Device Protocol](../docs/cc-device-protocol.md): how the protocol
   is designed and how it is extended with new commands, outputs and settings.
-- [`spikerbit-clue.ts`](spikerbit-clue.ts): the firmware source. Its header explains the
-  signal processing and the rules the program follows.
+- [`spikerbit-clue.ts`](spikerbit-clue.ts): the firmware source. Its header lists the rules
+  the program follows.
 - [`README.md`](README.md): building the hex, the CI checks, testing in Jest, and
   prototyping in MakeCode.
 - [`scripts/spikerbit-bench/`](../../../../scripts/spikerbit-bench/): a script that checks a
