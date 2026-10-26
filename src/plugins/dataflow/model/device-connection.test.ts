@@ -3,9 +3,7 @@ import {
   IMicrobitUsbConnection, kSpikerbitFirmwareVersion, SpikerbitDevice
 } from "../../../models/stores/spikerbit-device";
 import { WebSerialOpenResult, WebSerialTransport } from "../../../models/stores/web-serial-transport";
-import {
-  DeviceConnection, getDeviceConnection, IDeviceConnectionDeps, kEndSessionTimeoutMs
-} from "./device-connection";
+import { DeviceConnection, getDeviceConnection, IDeviceConnectionDeps } from "./device-connection";
 
 function makePort(usbVendorId: number, usbProductId: number) {
   return { getInfo: () => ({ usbVendorId, usbProductId }) } as unknown as SerialPort;
@@ -379,7 +377,8 @@ describe("DeviceConnection", () => {
       await connection.connect("arduino");
       jest.spyOn(serialDevice, "endSession").mockImplementation(() => new Promise<void>(() => undefined));
       const disconnecting = connection.disconnect();
-      await jest.advanceTimersByTimeAsync(kEndSessionTimeoutMs);
+      // A literal, so a longer timeout, which would hang Disconnect on a stalled port, fails here.
+      await jest.advanceTimersByTimeAsync(500);
       await disconnecting;
       expect(transport.close).toHaveBeenCalled();
       expect(serialDevice.isConnected()).toBe(false);
