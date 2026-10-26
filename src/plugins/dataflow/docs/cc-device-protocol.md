@@ -243,7 +243,7 @@ own hex rather than accept a board it can't talk to.
 ## The Spiker:bit firmware
 
 The Spiker:bit firmware is the first device to speak the protocol. Its commands, displays and
-timing are in its [user guide](../firmware/user-guide.md), and its internals in the header of
+timing are in its [user guide](../firmware/user-guide.md), and its source is
 [`spikerbit-clue.ts`](../firmware/spikerbit-clue.ts). The design and the reasoning behind it
 are recorded in
 [the design spec](../../../../docs/superpowers/specs/2026-10-20-clue-728-spikerbit-firmware-protocol-design.md).

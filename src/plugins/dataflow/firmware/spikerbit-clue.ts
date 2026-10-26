@@ -1,81 +1,29 @@
-// CLUE Spiker:bit EMG firmware — v4  (source of record)
+// CLUE Spiker:bit EMG firmware, v4: the MakeCode (static TypeScript) source of
+// spikerbit-clue.hex, which the Dataflow tile flashes over WebUSB. It uses MakeCode-only globals,
+// so CLUE's tsconfig and eslint skip this directory.
 //
-// This is MakeCode (static TypeScript), compiled into spikerbit-clue.hex by `npm run build:firmware`.
-// The CLUE app build doesn't compile it — the `src/plugins/dataflow/firmware` directory
-// is excluded from tsconfig.json and eslint, because these globals (serial, pins, basic,
-// control, input, music, AnalogPin, DigitalPin, Delimiters, IconNames, ...) only exist in the
-// MakeCode runtime.
+// What the board does (its commands, states, displays, timing, sound and pins) is in
+// user-guide.md in this directory, and the protocol it speaks is in
+// src/plugins/dataflow/docs/cc-device-protocol.md. README.md covers building the hex, testing,
+// and why the firmware computes the EMG envelope itself. The @display and @guide comments below
+// generate parts of user-guide.md.
 //
-// It is the source of record for spikerbit-clue.hex, which the Dataflow tile flashes over
-// WebUSB when a connected micro:bit is not already running it. To rebuild the hex, see
-// README.md in this directory.
-//
-// PROTOCOL: the board speaks the CC Device Protocol. Its commands, replies, states and button
-// are in user-guide.md in this directory, and the protocol itself is in
-// src/plugins/dataflow/docs/cc-device-protocol.md. handleLine checks a whole line before it
-// applies any of it, so a bad line changes nothing.
-//
-// LED STATUS: the display shows how far a connection got. Each icon constant below says when it
-// shows. npm run build:firmware generates the LED displays and Timing and limits sections of
-// user-guide.md from these comments and the @guide constants.
-//
-// SOUND: identify plays on the built-in speaker only. P0 drives the servo, so the edge-pin
-// audio output is turned off before anything plays: the first sound connects the audio output
-// to every enabled pin, which would make the servo twitch. The hex is universal, and a V1 has no
-// speaker (turning one on there stops the program with a panic), so the speaker calls run only
-// on a V2 and a V1 shows the identify icon without a sound.
-//
-// No startup banner: an idle board is silent until it is spoken to. While nobody reads, the
-// micro:bit's USB interface chip holds about 500 bytes of output on a V2. Once that is full it
-// keeps the oldest bytes and drops the rest, so anything sent while nobody listens reaches the
-// next host as stale data, usually ending in a cut-off line. A host sends "!!" and then "?" when
-// it connects (see RESET); the "?" finds the firmware.
-//
-// Nothing this program sends may contain the v1–v3 banner's text (the "CLUE-SPIKERBIT" name,
-// a space and "v"): a Dataflow that only knows v3 would then take the board for newer firmware
-// it can't talk to, instead of flashing its own v3 hex.
-//
-// RESET: "!!" puts the board back in its power-up state, from any state and without a session
-// id, so a host that has just connected starts from a known state whatever an earlier host left
-// running. No other verb, name or value contains "!", and the line must be "!!" with nothing but
-// an optional #n, so a cut-off or merged line can't become a reset. Its "ok" goes out after an
-// empty line, which ends any cut-off line still in the interface chip's buffer.
-//
-// ONE WRITER: every serial write happens in the forever loop. The serial handler only parses
-// lines, applies them and queues their replies, so a reply can never land inside a reading.
-//
-// LOOP RULE: a loop pauses only as its last statement, a background loop
-// (`while (true) { ...; basic.pause(n) }`) keeps its state outside the function, and event
-// handlers (serial, buttons) don't pause at all. So the forever loop times the 3 s icons with
-// control.millis() deadlines, and every display call passes an interval of 0. The Jest tests
-// run this source on a simulated MakeCode runtime that needs the rule; its header, in
-// src/models/stores/spikerbit-sim/makecode-sim.ts, explains why.
-//
-// SIGNAL PROCESSING: we compute the EMG envelope OURSELVES rather than using the
-// Backyard Brains pxt-spikerbit extension's spikerbit.musclePowerSignal(). That function
-// subtracts a fixed noise floor of 580 and HALF-wave rectifies, but the Spiker:bit's
-// resting baseline is ~511 — so moderate contractions (which oscillate around 511 and
-// rarely reach 580) collapse to ~0 and only hard, rail-to-rail flexes register. Instead we
-// track the DC baseline and FULL-wave rectify around it:  envelope = EMA( |raw - baseline| ).
-// Bench-validated on micro:bit V2.
-//
-// We don't call the extension at all. Its startMuscleRecording() does exactly one thing
-// to the hardware — drive P8=0, P9=0 to put the board's analog front-end in EMG mode
-// (P9=1 would select EEG) — so we just do that ourselves below and read the raw signal on
-// P1. (The MakeCode project therefore doesn't need the pxt-spikerbit extension added.)
-//
-// The EMA coefficients are computed from the measured per-sample dt, so the smoothing has a
-// FIXED time constant (~76 ms envelope, ~800 ms baseline) regardless of the achieved sample
-// rate — the background loop free-runs as fast as the scheduler allows (measured at 250 Hz on
-// a V2) and the envelope behaves the same whatever that rate turns out to be.
-// V2-tuned (float math); the universal hex still boots on V1 but isn't tuned for it.
-//
-// serial.setWriteLinePadding(0) disables writeLine's default 32-byte space padding, so
-// lines are clean ("emg:12*56\r\n" not "emg:12*56<spaces>\r\n").
-//
-// Keep HELLO's firmware number equal to kSpikerbitFirmwareVersion in
-// src/models/stores/spikerbit-device.ts, and bump both whenever this program's behavior changes.
+// Rules for changing this program:
+// - ONE WRITER: every serial write happens in the forever loop. The serial handler only parses
+//   lines, applies them and queues their replies, so a reply can never land inside a reading.
+// - LOOP RULE: a loop pauses only as its last statement, a background loop
+//   (`while (true) { ...; basic.pause(n) }`) keeps its state outside the function, and event
+//   handlers (serial, buttons) don't pause at all. So the forever loop times the 3 s icons with
+//   control.millis() deadlines, and every display call passes an interval of 0. The Jest tests
+//   run this source on a simulated MakeCode runtime that needs the rule; its header, in
+//   src/models/stores/spikerbit-sim/makecode-sim.ts, explains why.
+// - handleLine checks a whole line before it applies any of it, so a bad line changes nothing.
+// - Nothing this program sends may contain the v1–v3 banner's text (the "CLUE-SPIKERBIT" name,
+//   a space and "v"): a Dataflow that only knows v3 would take the board for newer firmware it
+//   can't talk to, instead of flashing its own v3 hex.
 
+// Keep the firmware number equal to kSpikerbitFirmwareVersion in
+// src/models/stores/spikerbit-device.ts, and bump both whenever this program's behavior changes.
 const HELLO = "hello protocol:CCDeviceProtocol version:1 device:spikerbit firmware:4"
 
 /**
@@ -122,7 +70,8 @@ const RX_BUFFER_SIZE = 128
 
 // Smoothing time constants (milliseconds). Derived from the alphas bench-validated at
 // ~250 Hz (aEnv 0.05, aBase 0.005 → tau = dt*(1-a)/a at dt=4 ms), but applied per-sample
-// via the measured dt so the behavior is independent of the actual sample rate.
+// via the measured dt so the behavior is independent of the actual sample rate. Tuned on a V2;
+// the universal hex still runs on a V1 but isn't tuned for it.
 const TAU_ENV_MS = 76        // envelope: fast enough to feel responsive
 const TAU_BASELINE_MS = 800  // baseline: slow enough to ignore the EMG AC, track only DC drift
 
@@ -188,11 +137,15 @@ let timedIconAt = 0
 // Latest smoothed envelope, produced by the background sampler and read by the forever loop.
 let latestEnvelope = 0
 
+// writeLine pads every line with spaces to 32 bytes unless this is 0, so lines stay
+// "emg:12*56\r\n".
 serial.setWriteLinePadding(0)
 serial.setRxBufferSize(RX_BUFFER_SIZE)
 
-// Before anything plays (see SOUND above). Turning the audio pin off is safe on a V1, where it
-// only keeps music off P0.
+// The first sound connects the audio output to every enabled pin, P0 included, which would make
+// the servo twitch, so the edge-pin audio output is turned off before anything plays. Turning it
+// off is safe on a V1, where it only keeps music off P0. A V1 has no speaker, and turning one on
+// there stops the program with a panic, so only a V2 uses the speaker.
 pins.setAudioPinEnabled(false)
 if (HAS_SPEAKER) music.setBuiltInSpeakerEnabled(true)
 
