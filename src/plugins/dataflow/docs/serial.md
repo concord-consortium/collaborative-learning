@@ -207,6 +207,29 @@ Keep `kSpikerbitFirmwareVersion` equal to the `firmware:` number in the `HELLO` 
 `spikerbit-clue.ts`, and bump both whenever the firmware's behavior changes; see
 [the firmware README](../firmware/README.md) for how to rebuild the hex.
 
+## The CC Device Protocol session
+
+`SerialDevice.setActiveDevice` starts a `CcDeviceSession` for a device whose protocol is
+`ccDevice`. The session speaks the [CC Device Protocol](cc-device-protocol.md):
+
+1. It sends `open session:<id> #n` with a random id, and re-sends it every 2 s until an
+   `ok` arrives.
+2. It then sends `ping session:<id> #n` every second. Each `ok` stamps `lastHeartbeatAt`,
+   which stops advancing when the board stops answering.
+3. On `err nosession` it opens a new session with a new id. Chrome slows timers in hidden
+   tabs, so this is how a session that lapsed while its tab was hidden recovers. On
+   `err othersession` it stops, since another host owns the board.
+4. Disconnecting sends `close session:<id>` (`SerialDevice.endSession`), so the board shows
+   the waiting icon at once instead of after the timeout.
+
+Its `#n` counts from 1 to 999 and wraps to 1, below the connect-time `!!`'s 1000 and up (see
+[Spiker:bit version check and flashing](#spikerbit-version-check-and-flashing)). Every line
+Dataflow sends has a checksum, except the connect-time `?`.
+
+A Live Output servo node sends `servo:<angle>` on every tick, without `#n`. Each reading
+updates every channel whose `channelId` is the reading's name, in every registered tile, and
+stamps its `lastMessageReceivedAt`; other lines are ignored.
+
 ## Inbound: hardware → Sensor node
 
 ![Inbound: hardware to Sensor node](images/dataflow-hardware-inbound.svg)

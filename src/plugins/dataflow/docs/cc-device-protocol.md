@@ -1,7 +1,7 @@
 # CC Device Protocol
 
-A line protocol for Concord devices. On the wire its name is `CCDeviceProtocol`; in Dataflow's
-`DeviceProtocol` union it is `ccDevice`. This is protocol version 1. Every command can be typed by hand in a serial terminal, and readings plot
+A line protocol for Concord devices. On the wire its name is `CCDeviceProtocol`. This is
+protocol version 1. Every command can be typed by hand in a serial terminal, and readings plot
 in the MakeCode and Arduino IDE serial plotters.
 
 This page describes what every device and host must agree on. Each device adds its own
@@ -9,18 +9,19 @@ commands, outputs and states on top, and documents them; for the Spiker:bit, see
 [The Spiker:bit firmware](#the-spikerbit-firmware).
 
 The Spiker:bit firmware (`spikerbit-clue.hex`, firmware 4) speaks it over WebUSB
-(`@microbit/microbit-connection`) at 115200 baud, the micro:bit default. The host code is
-`src/models/stores/cc-device-protocol.ts` (parsing and checksums) and
-`src/models/stores/cc-device-session.ts` (the session); see
-[Dataflow's session](#dataflows-session). The Spiker:bit's device code is
-`src/plugins/dataflow/firmware/spikerbit-clue.ts`.
+(`@microbit/microbit-connection`) at 115200 baud, the micro:bit default. Dataflow's code for it
+is `src/models/stores/cc-device-protocol.ts` (parsing and checksums) and
+`src/models/stores/cc-device-session.ts` (the session); how Dataflow connects and runs a
+session is in [serial.md](serial.md#the-cc-device-protocol-session). The Spiker:bit's device
+code is `src/plugins/dataflow/firmware/spikerbit-clue.ts`.
 
 Dataflow's two older protocols, `keyValue` and `radioHub`, and the gaps this protocol fills, are
 in [serial-protocols.md](serial-protocols.md). For how bytes move through the browser and into
 the tile, see [serial.md](serial.md).
 
 A connection, with the checksums written out. The device's first line is empty (see
-[Connecting](#connecting)):
+[Connecting](#connecting)). Dataflow numbers the `#n` on its connect-time `!!` from 1000; see
+[serial.md](serial.md#spikerbit-version-check-and-flashing).
 
 ```
 Dataflow:   !! #1000*02
@@ -53,16 +54,13 @@ Dataflow:   close session:4821*1D
 - **A host line without a verb sets outputs,** and nothing else: `servo:90`. Every other
   command starts with a verb, so a new command can't collide with an output's name.
 - **`#n`** at the end of a host command asks for an acknowledgment, `ok #n`. `n` is a decimal
-  number the host chooses. Dataflow's session counts from 1 to 999 and wraps to 1, and the
-  `!!` Dataflow sends when it connects counts from 1000, so a late reply to that `!!` can't be
-  taken for the session's. A command without `#n` gets no `ok`, so an output sent on every
+  number the host chooses. A command without `#n` gets no `ok`, so an output sent on every
   tick gets no reply. Errors are sent either way. A well-formed `?` gets the `hello` line, and
   never an `ok`, even with `#n`.
 - **`*hh`** may end any line: the XOR of every byte before the `*`, as two hex digits, either
   case (as in NMEA 0183). A receiver that finds one checks it and drops the line if it's
   wrong; a line without one is accepted. The device puts one on every line it sends. A host
-  should put one on every command except the `?` that recognizes the firmware, and Dataflow
-  does (see
+  should put one on every command except the `?` that recognizes the firmware (see
   [Recognizing the firmware](#recognizing-the-firmware)). A device answers a line with a bad
   checksum with `err checksum`, without the line's `#n`, which can't be trusted.
 
@@ -115,8 +113,8 @@ offer its own way into and out of free-run, such as the Spiker:bit's button.
 
 - The device starts idle and sends nothing, not even a startup banner, until it is spoken to.
 - **Only `open` starts a session,** and the host names it with a **session id**, an integer
-  from 1 to 65535. A host picks one at random for each `open`, as Dataflow does, so a stale
-  host's id is unlikely to match a newer session's. The device only stores and compares it.
+  from 1 to 65535. A host picks one at random for each `open`, so a stale host's id is
+  unlikely to match a newer session's. The device only stores and compares it.
 - `ping session:<id>` keeps that session alive. A bare `ping` is a liveness check that touches
   no session.
 - If the session has lapsed, a `ping` or `close` with its id gets `err #n nosession`: the
@@ -184,21 +182,19 @@ number. Reply lines contain no `:`, so neither plots them.
 (`version:1`), the device (`device:<name>`, such as `device:spikerbit`) and its firmware build
 (`firmware:<n>`).
 `firmware` changes with every firmware release, so a host can tell when a board's firmware is
-out of date, which is how Dataflow keeps boards up to date; `version` changes only for an
-incompatible protocol change.
+out of date; `version` changes only for an incompatible protocol change.
 
 ## Timing
 
 - A host sends `ping session:<id> #n` well inside the session timeout, and re-sends an `open`
-  that gets no `ok`. Dataflow pings every 1 s during a session, and re-sends an unanswered
-  `open` every 2 s.
+  that gets no `ok`.
 - A device's own timeouts and intervals, such as its default session timeout, the range
   `open` accepts and how often it sends readings, are in its documentation. The Spiker:bit's
   are in [its user guide](../firmware/user-guide.md#timing-and-limits).
 
 Chrome slows timers in hidden tabs, so a browser host's session can lapse while its tab is
 hidden. That is recoverable: the next `ping` gets `err nosession`, and the host opens a new
-session, as Dataflow does.
+session.
 
 ## Reserved
 
@@ -235,11 +231,6 @@ line after it each start a line of their own. Then:
 - **If neither arrives,** the replies may have been dropped while the device's output buffer
   was still full. Once that backlog has been read, the host writes `!! #m` and `?` again.
 
-Dataflow counts the backlog as read at the first WebUSB read shorter than the 62 bytes one read
-can return, or after 100 ms with no data. It writes `!!` and `?` again if nothing is identified
-200 ms after that, and flashes the board if nothing is identified within 1.5 s; see
-[Spiker:bit version check and flashing](serial.md#spikerbit-version-check-and-flashing).
-
 ## Recognizing the firmware
 
 A host recognizes the firmware by sending `?`, after `!!` (see [Connecting](#connecting)),
@@ -250,24 +241,6 @@ flashes those boards; see
 [Spiker:bit version check and flashing](serial.md#spikerbit-version-check-and-flashing).
 Firmware 4 never sends that banner's text, so a Dataflow build that knows only v3 flashes its
 own hex rather than accept a board it can't talk to.
-
-## Dataflow's session
-
-`SerialDevice.setActiveDevice` starts a `CcDeviceSession` for a device whose protocol is
-`ccDevice`:
-
-1. It sends `open session:<id> #n` with a random id, and re-sends it every 2 s until an
-   `ok` arrives.
-2. It then sends `ping session:<id> #n` every second. Each `ok` stamps `lastHeartbeatAt`,
-   which stops advancing when the board stops answering.
-3. On `err nosession` it opens a new session with a new id; on `err othersession` it stops,
-   since another host owns the board.
-4. Disconnecting sends `close session:<id>` (`SerialDevice.endSession`), so the board shows
-   the waiting icon at once instead of after the timeout.
-
-A Live Output servo node sends `servo:<angle>` on every tick, without `#n`. Each reading
-updates every channel whose `channelId` is the reading's name, in every registered tile, and
-stamps its `lastMessageReceivedAt`; other lines are ignored.
 
 ## The Spiker:bit firmware
 
