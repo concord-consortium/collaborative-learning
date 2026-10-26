@@ -1,5 +1,4 @@
 import { LiveOutputNode } from "./live-output-node";
-import { servoDisplayMessage } from "./utilities/servo";
 import { NodeLiveOutputTypes, resolveAllowedOutputTypes } from "../model/utilities/node";
 
 // Minimal fake SerialDevice that records which output writer the node invoked. The keyValue
@@ -67,19 +66,6 @@ function stubbedNode(model: any, settings: Record<string, any> = {}) {
   node.saveOutputStatus = () => { /* noop */ };
   return node as LiveOutputNode;
 }
-
-describe("servoDisplayMessage (CLUE-581)", () => {
-  it("shows the rounded integer degree by default", () => {
-    expect(servoDisplayMessage(90, false)).toBe("90°");
-    expect(servoDisplayMessage(0, false)).toBe("0°");
-    expect(servoDisplayMessage(95, false)).toBe("95°"); // rounds to the degree, not the nearest 10
-  });
-  it("shows % rotation in proportion mode", () => {
-    expect(servoDisplayMessage(0, true)).toBe("0% rotation");
-    expect(servoDisplayMessage(90, true)).toBe("50% rotation");
-    expect(servoDisplayMessage(180, true)).toBe("100% rotation");
-  });
-});
 
 describe("Servo input mode scaling in data() (settings.dataflow.servoInputMode)", () => {
   it("degrees mode (default): stores the input as-is, clamped to 0-180", () => {

@@ -1,4 +1,4 @@
-import { kServoMaxAngle, kServoMinAngle, servoAngleForValue } from "./servo";
+import { kServoMaxAngle, kServoMinAngle, servoAngleForValue, servoDisplayMessage } from "./servo";
 
 describe("servoAngleForValue", () => {
   describe("in degrees mode", () => {
@@ -24,5 +24,18 @@ describe("servoAngleForValue", () => {
       expect(servoAngleForValue(-0.5, true)).toBe(kServoMinAngle);
       expect(servoAngleForValue(2, true)).toBe(kServoMaxAngle);
     });
+  });
+});
+
+describe("servoDisplayMessage", () => {
+  it("shows the rounded integer degree by default", () => {
+    expect(servoDisplayMessage(90, false)).toBe("90°");
+    expect(servoDisplayMessage(0, false)).toBe("0°");
+    expect(servoDisplayMessage(95, false)).toBe("95°"); // rounds to the degree, not the nearest 10
+  });
+  it("shows % rotation in proportion mode", () => {
+    expect(servoDisplayMessage(0, true)).toBe("0% rotation");
+    expect(servoDisplayMessage(90, true)).toBe("50% rotation");
+    expect(servoDisplayMessage(180, true)).toBe("100% rotation");
   });
 });
