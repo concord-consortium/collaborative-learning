@@ -2,14 +2,10 @@
 // under jsdom. The output has no dates, random values or platform-dependent numbers, so the
 // same pattern always gives the same bytes.
 import fs from "node:fs";
-import { createRequire } from "node:module";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
+import { DOMWindow, JSDOM } from "jsdom";
 
-const toolDir = path.dirname(fileURLToPath(import.meta.url));
-const nodeModulesDir = path.join(toolDir, "node_modules");
-const require = createRequire(path.join(toolDir, "package.json"));
-const { JSDOM } = require("jsdom");
+const nodeModulesDir = path.join(__dirname, "node_modules");
 
 const kSimScripts = [
   "pxt-core/built/pxtsim.js",
@@ -17,16 +13,19 @@ const kSimScripts = [
   "pxt-microbit/built/sim.js"
 ];
 
-let simWindow;
+// pxsim is MakeCode's simulator, defined by the scripts below; this file uses only a little of it.
+type SimWindow = DOMWindow & { pxsim: any };
+
+let simWindow: SimWindow | undefined;
 
 // The simulator scripts are large, so they load once per process.
-function getSimWindow() {
+function getSimWindow(): SimWindow {
   if (!simWindow) {
     const dom = new JSDOM("<!doctype html><html><body></body></html>", { runScripts: "outside-only" });
     for (const script of kSimScripts) {
       dom.window.eval(fs.readFileSync(path.join(nodeModulesDir, script), "utf8"));
     }
-    simWindow = dom.window;
+    simWindow = dom.window as SimWindow;
   }
   return simWindow;
 }
@@ -35,7 +34,7 @@ function getSimWindow() {
  * @param pattern 25 characters, row by row: `#` for a lit LED, `.` for an unlit one.
  * @returns the board as a standalone SVG document, ending with a newline.
  */
-export function renderBoardSvg(pattern) {
+export function renderBoardSvg(pattern: string): string {
   const pixels = pattern.replace(/\s+/g, "");
   if (!/^[#.]{25}$/.test(pixels)) {
     throw new Error(`An LED pattern needs 25 characters of # and ., got "${pattern}"`);
@@ -45,7 +44,7 @@ export function renderBoardSvg(pattern) {
   // A fixed theme: the board's default theme is picked at random.
   const board = new pxsim.visuals.MicrobitBoardSvg({ theme: pxsim.visuals.themes[0] });
   // Lights each LED the way the simulator's own LED matrix update does.
-  board.leds.forEach((led, i) => {
+  board.leds.forEach((led: SVGElement, i: number) => {
     const on = pixels[i] === "#";
     led.style.opacity = on ? "1" : "0";
     if (on) {

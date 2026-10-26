@@ -1,16 +1,21 @@
 // Builds the generated sections of the Spiker:bit firmware user guide from the tagged comments in
 // spikerbit-clue.ts. Requires only typescript, so Jest can load it without the MakeCode toolchain.
-const ts = require("typescript");
+import ts from "typescript";
 
-const kGuideImageDir = "guide-images";
+export interface GuideDisplay { title: string; constName: string; icon: string; description: string }
+export interface GuideValue { constName: string; description: string; value: number }
+export interface GuideTags { displays: GuideDisplay[]; values: GuideValue[] }
+export type GuideSections = Record<string, string>;
+
+export const kGuideImageDir = "guide-images";
 const kNote = "<!-- Generated from spikerbit-clue.ts by npm run build:firmware. " +
   "Edit the comments there, not this section. -->";
 const kStartMarker = /^<!-- generated: (\S+) -->$/;
 const kIconSize = 25;
 
 // The first paragraph of a tag's text, with its lines joined by single spaces.
-function firstParagraph(text) {
-  const lines = [];
+function firstParagraph(text: string) {
+  const lines: string[] = [];
   for (const line of text.split(/\r?\n/)) {
     if (line.trim() === "") {
       if (lines.length) break;
@@ -21,18 +26,18 @@ function firstParagraph(text) {
   return lines.join(" ");
 }
 
-function isIconNamesMember(node) {
+function isIconNamesMember(node: ts.Node): node is ts.PropertyAccessExpression {
   return ts.isPropertyAccessExpression(node) && ts.isIdentifier(node.expression) &&
     node.expression.text === "IconNames";
 }
 
-function collectGuideTags(source) {
+export function collectGuideTags(source: string): GuideTags {
   const sourceFile = ts.createSourceFile("spikerbit-clue.ts", source, ts.ScriptTarget.Latest, true);
-  const displays = [];
-  const values = [];
-  const allowedIconRefs = new Set();
+  const displays: GuideDisplay[] = [];
+  const values: GuideValue[] = [];
+  const allowedIconRefs = new Set<ts.Node>();
 
-  const visitDeclaration = (declaration, tags) => {
+  const visitDeclaration = (declaration: ts.VariableDeclaration, tags: readonly ts.JSDocTag[]) => {
     const constName = declaration.name.getText(sourceFile);
     const initializer = declaration.initializer;
     for (const tag of tags) {
@@ -65,7 +70,7 @@ function collectGuideTags(source) {
     }
   };
 
-  const visit = node => {
+  const visit = (node: ts.Node): void => {
     if (ts.isVariableStatement(node)) {
       for (const declaration of node.declarationList.declarations) {
         if (!ts.isIdentifier(declaration.name)) continue;
@@ -85,10 +90,10 @@ function collectGuideTags(source) {
 }
 
 // Maps each `case IconNames.X: return images.createImage(`...`)` to its 25 pixels as `#` and `.`.
-function iconPatterns(iconsTs) {
-  const patterns = {};
+export function iconPatterns(iconsTs: string): Record<string, string> {
+  const patterns: Record<string, string> = {};
   const pattern = /case IconNames\.(\w+):\s*return images\.createImage\(`([^`]*)`\)/g;
-  let match;
+  let match: RegExpExecArray | null;
   while ((match = pattern.exec(iconsTs))) {
     const pixels = match[2].replace(/[^#.]/g, "");
     if (pixels.length !== kIconSize) {
@@ -99,17 +104,17 @@ function iconPatterns(iconsTs) {
   return patterns;
 }
 
-function displayImageName(display) {
+export function displayImageName(display: GuideDisplay) {
   return `display-${display.title.toLowerCase().replace(/ /g, "-")}.svg`;
 }
 
-const escapeCell = text => text.replace(/\|/g, "\\|");
+const escapeCell = (text: string) => text.replace(/\|/g, "\\|");
 
-function formatValue(value) {
+function formatValue(value: number) {
   return value >= 1000 ? String(value).replace(/\B(?=(\d{3})+(?!\d))/g, ",") : String(value);
 }
 
-function renderGuideSections(tags) {
+export function renderGuideSections(tags: GuideTags): Record<"displays" | "values", string> {
   const displayRows = tags.displays.map(display =>
     `| <img src="${kGuideImageDir}/${displayImageName(display)}" alt="${display.title} icon" width="160">` +
     `<br>**${display.title}** | ${escapeCell(display.description)} |`);
@@ -122,8 +127,8 @@ function renderGuideSections(tags) {
 }
 
 // Finds each marker pair as line indexes: { name: { start, end } }.
-function findMarkerPairs(lines) {
-  const pairs = {};
+function findMarkerPairs(lines: string[]) {
+  const pairs: Record<string, { start: number; end: number }> = {};
   lines.forEach((line, index) => {
     const match = kStartMarker.exec(line);
     if (!match) return;
@@ -136,7 +141,7 @@ function findMarkerPairs(lines) {
   return pairs;
 }
 
-function replaceGuideSections(guide, sections) {
+export function replaceGuideSections(guide: string, sections: GuideSections) {
   const lines = guide.split("\n");
   const pairs = findMarkerPairs(lines);
   for (const name of Object.keys(sections)) {
@@ -153,9 +158,9 @@ function replaceGuideSections(guide, sections) {
   return lines.join("\n");
 }
 
-function readGuideSections(guide) {
+export function readGuideSections(guide: string): GuideSections {
   const lines = guide.split("\n");
-  const sections = {};
+  const sections: GuideSections = {};
   for (const [name, { start, end }] of Object.entries(findMarkerPairs(lines))) {
     const body = lines.slice(start + 1, end);
     if (body[0] === kNote) body.shift();
@@ -163,8 +168,3 @@ function readGuideSections(guide) {
   }
   return sections;
 }
-
-module.exports = {
-  collectGuideTags, iconPatterns, displayImageName, renderGuideSections, replaceGuideSections,
-  readGuideSections, kGuideImageDir
-};

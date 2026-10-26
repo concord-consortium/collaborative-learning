@@ -152,7 +152,7 @@ long-click event), not a firmware constant, so the guide states it by hand ("abo
   a board is at hand. Turning a literal into a named constant is in scope; changing a value is
   not.
 - **The generator's output is deterministic:** the same source and toolchain give the same
-  bytes on any machine (stable attribute order, ids and number formatting). `build.mjs`
+  bytes on any machine (stable attribute order, ids and number formatting). `build.ts`
   renders each picture twice in one process and throws if the two differ. The check compares
   bytes exactly. If `MicrobitBoardSvg` doesn't give byte-identical output, **stop and bring the
   options back to Scott** rather than picking one.
@@ -182,7 +182,7 @@ long-click event), not a firmware constant, so the guide states it by hand ("abo
 - The guide's file name and the images folder's name (the controller's suggestion:
   `src/plugins/dataflow/firmware/user-guide.md` and `firmware/guide-images/`).
 - The exact marker syntax, the generated table layouts, and the `@guide` constant names.
-- Whether the generator is part of `build.mjs` or its own module that `build.mjs` calls.
+- Whether the generator is part of `build.ts` or its own module that `build.ts` calls.
 - Where the unit-tested parsing code lives so that both Jest and the build can load it. Note
   that the root Jest config ignores `/scripts/spikerbit-firmware/`, and that `build:firmware`
   installs that folder with `npm ci`, so any dependency the generator adds there goes in its
