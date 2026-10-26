@@ -55,6 +55,33 @@ function setup(student, opts = {}) {
   }
 }
 
+// GroupUserModel.state shows a group member who isn't in the class roster as new ("**") until
+// the class info is more than this much newer than the member's connectedTimestamp, and as
+// removed after that.
+const kNewUserGraceMs = 1000;
+// The next window computes its class timestamp from its own estimate of the server clock, so
+// leave room for that estimate to be off.
+const kServerClockMarginMs = 500;
+
+// Waits, in the current window, until the server clock is far enough past the student's
+// connectedTimestamp that a window loaded next counts them as removed. CLUE rewrites
+// connectedTimestamp after a join and on every reconnect, so this reads the latest one from the
+// groups store rather than timing from when the student appeared in a group.
+function waitUntilCountedAsRemoved(student) {
+  cy.window()
+    .then(win => win.stores.db.firebase.getServerTimeOffset())
+    .then(serverTimeOffset => {
+      cy.window({ timeout: 10000 }).should(win => {
+        const group = win.stores.groups.groupForUser(student);
+        const groupUser = group?.users.find(user => user.id === student);
+        expect(groupUser, `student ${student} in a group`).to.exist;
+        const serverNow = win.Date.now() + serverTimeOffset;
+        expect(serverNow - groupUser.connectedTimestamp)
+          .to.be.greaterThan(kNewUserGraceMs + kServerClockMarginMs);
+      });
+    });
+}
+
 function setupTeacher(teacher, opts = {}) {
   const options = { ...defaultSetupOptions, ...opts };
   cy.visit('/?appMode=qa&fakeClass=' + fakeClass + '&fakeUser=teacher:' + teacher + '&problem=' + options.problem + '&unit=./demo/units/qa/content.json');
@@ -260,8 +287,7 @@ context('Test student join a group', function () {
                                 .and('contain', 'S' + student4)
                                 .and('contain', 'S' + studentNotInClass);
 
-    // Need to wait more than 1s so the student not in the class is considered removed
-    cy.wait(1500);
+    waitUntilCountedAsRemoved(studentNotInClass);
     // switch back to student 1
     setup(student1, { alreadyInGroup: true });
     clueHeader.getGroupName().should('contain', 'Group 1');
