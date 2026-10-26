@@ -18,6 +18,9 @@ import { DocumentContentSnapshotType } from "src/models/document/document-conten
 import { IArrowAnnotation } from "src/models/annotations/arrow-annotation";
 import { TreeManagerType } from "../models/history/tree-manager";
 
+const latestHistoryEntryId = (document: DocumentModelType) =>
+  (document.treeManagerAPI as TreeManagerType | undefined)?.latestDocumentHistoryEntry?.id;
+
 function debugLog(...args: any[]) {
   // eslint-disable-next-line no-console
   DEBUG_SAVE && console.log(...args);
@@ -38,7 +41,8 @@ export function useDocumentSyncToFirebase(
   firebase: Firebase,
   firestore: Firestore,
   document: DocumentModelType,
-  readOnly = false
+  readOnly = false,
+  onContentSaved?: (document: DocumentModelType, lastHistoryEntryId: string) => void
 ) {
   const { key, type, uid, contentStatus } = document;
   const { content: contentPath, metadata, typedMetadata } = firebase.getDocumentPaths(user, document);
@@ -223,7 +227,8 @@ export function useDocumentSyncToFirebase(
 
   interface SyncContext { seq: number }
   type SyncMutationOptions =
-    Omit<UseMutationOptions<unknown, unknown, SnapshotOut<DocumentContentSnapshotType>, SyncContext>, 'mutationFn'>;
+    Omit<UseMutationOptions<string | undefined, unknown, SnapshotOut<DocumentContentSnapshotType>, SyncContext>,
+      'mutationFn'>;
   const options: SyncMutationOptions = {
     // default is to retry with linear back-off to a maximum
     retry: true,
@@ -231,10 +236,11 @@ export function useDocumentSyncToFirebase(
     // Capture the latest dirty seq at the moment this mutation actually starts (for leading
     // throttle this is when the change happens; for trailing it's when the throttle fires).
     onMutate: () => ({ seq: dirtySeqRef.current }),
-    onSuccess: (data, snapshot, context) => {
+    onSuccess: (lastHistoryEntryId, snapshot, context) => {
       debugLog(`DEBUG: Updated document content for ${type} document ${key}:`, document.changeCount);
       const seq = context?.seq ?? 0;
       if (seq > savedSeqRef.current) savedSeqRef.current = seq;
+      if (lastHistoryEntryId) onContentSaved?.(document, lastHistoryEntryId);
       // Only signal "saved" when no newer changes are pending.
       if (savedSeqRef.current === dirtySeqRef.current) {
         document.setSaveState(SaveState.Saved);
@@ -245,14 +251,27 @@ export function useDocumentSyncToFirebase(
       document.setSaveState(SaveState.Retrying);
     }
   };
-  const transform = (snapshot: DocumentContentSnapshotType) => {
+  // The latest entry when each snapshot was taken. Its own entry completes later, so this can only
+  // under-claim what the snapshot holds.
+  const snapshotIdsRef = useRef(new WeakMap<DocumentContentSnapshotType, string | undefined>());
+  const latestSnapshotRef = useRef<DocumentContentSnapshotType | undefined>(undefined);
+  const stampedIdsRef = useRef(new WeakMap<DocumentContentSnapshotType, string | undefined>());
+  const transform = (snapshot: DocumentContentSnapshotType):
+      { changeCount: number, content: string, lastHistoryEntryId?: string } => {
     // Record the id of the last history entry that had been applied when
     // this content snapshot was captured. The drift check on document load
     // compares this to the Firestore history — if the id isn't present in
     // the history, the content reflects edits that never made it to the
     // history chain.
-    const treeManager = document.treeManagerAPI as TreeManagerType | undefined;
-    const lastHistoryEntryId = treeManager?.latestDocumentHistoryEntry?.id;
+    // The mutation runs a few microtasks after it is queued, so the latest entry may already belong to
+    // a newer snapshot; only the newest snapshot takes it. A retry keeps its first attempt's id.
+    const stampedIds = stampedIdsRef.current;
+    if (!stampedIds.has(snapshot)) {
+      stampedIds.set(snapshot, snapshot === latestSnapshotRef.current
+        ? latestHistoryEntryId(document)
+        : snapshotIdsRef.current.get(snapshot));
+    }
+    const lastHistoryEntryId = stampedIds.get(snapshot);
     const base = {
       changeCount: document.incChangeCount(),
       content: JSON.stringify(snapshot)
@@ -297,8 +316,9 @@ export function useDocumentSyncToFirebase(
     // update tiletypes for metadata document in firestore
     promises.push(updateFirestoreDocumentProp("tools", tools));
 
-    promises.push(firebase.ref(contentPath).update(transform?.(snapshot) ?? snapshot));
-    return Promise.all(promises);
+    const content = transform(snapshot);
+    promises.push(firebase.ref(contentPath).update(content));
+    return Promise.all(promises).then(() => content.lastHistoryEntryId);
   }, options);
 
   const throttledMutate = useMemo(() => _throttle(mutation.mutate, 1000), [mutation.mutate]);
@@ -306,6 +326,8 @@ export function useDocumentSyncToFirebase(
   useEffect(() => {
     const cleanup = enabled
             ? onSnapshot<DocumentContentSnapshotType>(document.content!, snapshot => {
+                snapshotIdsRef.current.set(snapshot, latestHistoryEntryId(document));
+                latestSnapshotRef.current = snapshot;
                 dirtySeqRef.current++;
                 document.setSaveState(SaveState.Saving);
                 // reset (e.g. stop retrying and restart) when value changes

@@ -1,4 +1,4 @@
-import { IAnyType, types, castToSnapshot, getSnapshot } from "mobx-state-tree";
+import { IAnyType, types, castToSnapshot, getSnapshot, onPatch } from "mobx-state-tree";
 import {
   FormulaManager
 } from "@concord-consortium/codap-formulas/models/formula/formula-manager";
@@ -8,7 +8,8 @@ import {
 import {
   AttributeFormulaAdapter
 } from "@concord-consortium/codap-formulas/models/formula/attribute-formula-adapter";
-import { kDefaultColumnWidth } from "../../../components/tiles/table/table-types";
+import { kDefaultColumnWidth, kHeaderControlsWidth, kMaxAutoColumnWidth, kMinColumnWidth }
+  from "../../../components/tiles/table/table-types";
 import { createFormulaDataSetProxy } from "../../../models/data/formula-data-set-proxy";
 import { SharedDataSet, SharedDataSetSnapshotType, SharedDataSetType } from "../../../models/shared/shared-data-set";
 import { ISharedModelManager } from "../../../models/shared/shared-model-manager";
@@ -17,6 +18,56 @@ import { SharedModelType } from "../../shared/shared-model";
 import { defaultTableContent, kTableTileType, TableContentModel, TableContentModelType,
   TableContentSnapshotType, TableMetadataModel } from "./table-content";
 import { TableContentTableImport } from "./table-import";
+
+describe("TableContentModel columnWidth", () => {
+  // jest-canvas-mock measures one pixel per character, so a 40-character heading measures 40.
+  function widthFor(name: string, stored?: number) {
+    const content = TableContentModel.create();
+    addAttributeToDataSet(content.dataSet, { id: "attr", name });
+    if (stored !== undefined) content.setColumnWidth("attr", stored);
+    return content.columnWidth("attr");
+  }
+
+  it("fits the heading, leaving room for the header controls", () => {
+    expect(widthFor("a".repeat(40))).toBe(40 + kHeaderControlsWidth);
+  });
+
+  it("never goes below the minimum", () => {
+    expect(widthFor("x")).toBe(kMinColumnWidth);
+  });
+
+  it("stops at the cap rather than letting one column take over the tile", () => {
+    expect(widthFor("a".repeat(300))).toBe(kMaxAutoColumnWidth);
+  });
+
+  // A column someone has resized is theirs; the heading must not pull it back.
+  it("keeps a stored width, wider or narrower than the heading needs", () => {
+    expect(widthFor("a".repeat(40), 123)).toBe(123);
+    expect(widthFor("a".repeat(40), 90)).toBe(90);
+  });
+
+  // measureText caches by text in a plain object, where these names read a function off
+  // Object.prototype instead of missing the cache, and the arithmetic below it yields NaN.
+  it.each(["constructor", "toString", "valueOf", "__proto__", "hasOwnProperty"])(
+    "measures a column named %s", name => {
+      expect(widthFor(name)).toBe(Math.max(kMinColumnWidth, name.length + kHeaderControlsWidth));
+    });
+
+  // The width is computed on demand, never stored: were it stored, merely opening a document
+  // would dirty it and add an undo entry.
+  it("writes nothing to the document", () => {
+    const content = TableContentModel.create();
+    addAttributeToDataSet(content.dataSet, { id: "attr", name: "a".repeat(40) });
+    const patches: unknown[] = [];
+    onPatch(content, patch => patches.push(patch));
+
+    content.columnWidth("attr");
+
+    expect(patches).toEqual([]);
+    expect(content.columnWidths.size).toBe(0);
+  });
+});
+
 
 // mock Logger calls
 const mockLogTileChangeEvent = jest.fn();

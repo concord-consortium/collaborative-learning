@@ -2,7 +2,9 @@ import { useCallback } from "react";
 import { defaultFont } from "../../constants";
 
 const canvas = document.createElement("canvas");
-const cache: Record<string, Record<string, number>> = {};
+// Prototype-free: the second key is caller-supplied text, and a column named "constructor" or
+// "toString" would otherwise read a function off Object.prototype instead of missing the cache.
+const cache: Record<string, Record<string, number>> = Object.create(null);
 
 export const measureTextExtent = (text: string, font = defaultFont) => {
   const context = canvas.getContext("2d");
@@ -12,7 +14,7 @@ export const measureTextExtent = (text: string, font = defaultFont) => {
 };
 
 export const measureText = (text:string, font = defaultFont) => {
-  cache[font] = cache[font] || {};
+  cache[font] = cache[font] || Object.create(null);
   cache[font][text] = cache[font][text] || Math.ceil(10 * measureTextExtent(text, font).width) / 10;
   return cache[font][text];
 };
@@ -29,13 +31,13 @@ const trimWhitespace = (text:string) => {
 };
 
 // Caches values for measuring lines. First key is font, second is text, third is width, fourth is maxLines.
-const lineCache: Record<string, Record<string, Record<number, Record<number, number>>>> = {};
+const lineCache: Record<string, Record<string, Record<number, Record<number, number>>>> = Object.create(null);
 
 // Approximates the number of lines a given string will take when rendered in a div of the given width
 export const measureTextLines = (text: string, width: number, font = defaultFont, maxLines = 100) => {
-  lineCache[font] = lineCache[font] || {};
-  lineCache[font][text] = lineCache[font][text] || {};
-  lineCache[font][text][width] = lineCache[font][text][width] || {};
+  lineCache[font] = lineCache[font] || Object.create(null);
+  lineCache[font][text] = lineCache[font][text] || Object.create(null);
+  lineCache[font][text][width] = lineCache[font][text][width] || Object.create(null);
   
   if (!(maxLines in lineCache[font][text][width])) {
     const trimmedText = trimWhitespace(text);
