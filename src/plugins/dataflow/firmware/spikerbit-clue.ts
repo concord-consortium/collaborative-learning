@@ -432,6 +432,15 @@ function handleLine(line: string) {
 // trusted. The broken line's own newline is taken to be among what was lost, so the next newline
 // ends a new line, which is handled as usual. A line too long to fit in the buffer with its
 // newline is answered the same way when it arrives whole over several reads.
+//
+// A full read doesn't prove that anything was lost, so this guess can be wrong either way.
+// Discarding through the next newline instead would throw away the next good line after every
+// overflow that did lose the newline. The guess made here is wrong only when the read filled the
+// buffer with nothing lost, and then the rest of the broken line is handled as a line of its
+// own. That rest runs only if it is itself a valid command, and the line it came from had no
+// checksum (a checksum covers the whole line, so the rest fails it) and was one no host sends:
+// no tail of a well-formed line is a command, and since only "!!" contains "!", a tail that is
+// exactly "!!" came from a malformed line or from a real "!!".
 function receiveLines() {
     const text = serial.readString()
     partialLine += text
