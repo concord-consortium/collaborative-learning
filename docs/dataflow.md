@@ -28,7 +28,7 @@ After the program has been recorded, a copy of the program is created and is dis
 
 For how the Sensor and Live Output nodes talk to physical hardware (Arduino, radio-hub
 micro:bit, and the Spiker:bit) over Web Serial and WebUSB, see
-[serial connections to DataFlow](../src/plugins/dataflow-tool/serial.md).
+[serial connections to DataFlow](../src/plugins/dataflow/docs/serial.md).
 
 Nodes can support data flowing through them using the `data` method. This method gets the input values from its input sockets, and needs to return the output values from its output sockets. The input values are arrays since in theory each input socket could have multiple connection to it. We do not support multiple connections to an input socket, so the arrays will always have 0 or 1 values.
 

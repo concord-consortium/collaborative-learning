@@ -3,8 +3,8 @@ import { detectSpikerbitVersion } from "./serial-protocol";
 import { IDeviceTransport } from "./device-transport";
 
 // The version of the firmware bundled at src/plugins/dataflow/firmware/spikerbit-clue.hex.
-// Bump together with the VERSION constant in the MakeCode source.
-export const kSpikerbitFirmwareVersion = 3;
+// Keep equal to the `firmware:` number in the HELLO line of spikerbit-clue.ts.
+export const kSpikerbitFirmwareVersion = 4;
 
 // How long to wait for a "?" version reply before deciding to flash.
 const kVersionQueryTimeoutMs = 1500;

@@ -18,8 +18,8 @@ and **outbound** (a Live Output node → bytes leaving the computer).
 > ```
 > PUPPETEER_EXECUTABLE_PATH="/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" \
 >   npx -y @mermaid-js/mermaid-cli \
->   -i src/plugins/dataflow-tool/serial.md \
->   -o src/plugins/dataflow-tool/images/dataflow-hardware.svg
+>   -i src/plugins/dataflow/docs/serial.md \
+>   -o src/plugins/dataflow/docs/images/dataflow-hardware.svg
 > ```
 >
 > It writes one SVG per Mermaid block in document order (`…-1.svg` = inbound,
@@ -174,9 +174,9 @@ store, `SpikerbitDevice.connectAndStream` makes sure the board is running a curr
 4. It then calls `setActiveDevice("spikerbit", transport)`, which repoints
    `onData` from version detection to `SerialDevice.receive` and begins EMG streaming.
 
-Bump `kSpikerbitFirmwareVersion` together with the `VERSION` constant in the MakeCode
-source whenever the firmware changes; see
-[the firmware README](../dataflow/firmware/README.md) for how to rebuild the hex.
+Keep `kSpikerbitFirmwareVersion` equal to the `firmware:` number in the `HELLO` line of
+`spikerbit-clue.ts`, and bump both whenever the firmware's behavior changes; see
+[the firmware README](../firmware/README.md) for how to rebuild the hex.
 
 ## Inbound: hardware → Sensor node
 
