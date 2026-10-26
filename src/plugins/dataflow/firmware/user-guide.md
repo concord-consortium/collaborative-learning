@@ -266,7 +266,7 @@ Dataflow's line parsing and checksums are in
 
 ## Going further
 
-- [The CC Device Protocol](../docs/serial-protocols.md#cc-device-protocol): how the protocol
+- [The CC Device Protocol](../docs/cc-device-protocol.md): how the protocol
   is designed and how it is extended with new commands, outputs and settings.
 - [`spikerbit-clue.ts`](spikerbit-clue.ts): the firmware source. Its header explains the
   signal processing and the rules the program follows.
