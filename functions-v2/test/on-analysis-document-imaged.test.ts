@@ -384,7 +384,7 @@ describe("functions", () => {
         expect(snapshot.size).toBe(1);
         const comment = snapshot.docs[0].data();
         expect(comment).toEqual({
-          content: "Discussion. Your work shows: key1, key2",
+          content: "Discussion. Evidence: key1, key2",
           tags: ["category"],
           createdAt: expect.any(Object),
           name: "Ada Insight",
@@ -459,7 +459,7 @@ describe("functions", () => {
         expect(snapshot.size).toBe(1);
         const comment = snapshot.docs[0].data();
         expect(comment).toEqual({
-          content: "Discussion. Your work shows: key1, key2",
+          content: "Discussion. Evidence: key1, key2",
           tags: ["category"],
           createdAt: expect.any(Object),
           name: "Ada Insight",
@@ -569,7 +569,7 @@ describe("functions", () => {
         expect(snapshot.size).toBe(1);
         const comment = snapshot.docs[0].data();
         expect(comment).toEqual({
-          content: "Your work shows: key1, key2",
+          content: "Evidence: key1, key2",
           tags: ["category"],
           createdAt: expect.any(Object),
           name: "Ada Insight",

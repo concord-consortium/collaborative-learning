@@ -252,7 +252,7 @@ const AISettings: React.FC = () => {
           <tr>
             <td className="left">
               <div className="stacked">
-                <label htmlFor="keyIndicatorsPrompt">Your Work Shows Prompt</label>
+                <label htmlFor="keyIndicatorsPrompt">Evidence Prompt</label>
                 <textarea
                   id="keyIndicatorsPrompt"
                   defaultValue={settings.aiPrompt.keyIndicatorsPrompt}

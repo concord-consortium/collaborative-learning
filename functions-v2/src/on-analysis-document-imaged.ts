@@ -226,7 +226,7 @@ export const onAnalysisDocumentImaged =
         const commentParts = [];
         if (reply.parsed.discussion) commentParts.push(reply.parsed.discussion);
         if (reply.parsed.keyIndicators?.length) {
-          commentParts.push(`Your work shows: ${reply.parsed.keyIndicators.join(", ")}`);
+          commentParts.push(`Evidence: ${reply.parsed.keyIndicators.join(", ")}`);
         }
         message = commentParts.join(" ");
         fullResponse = JSON.stringify(completion);

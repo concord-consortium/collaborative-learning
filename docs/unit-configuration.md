@@ -109,7 +109,7 @@ These properties are configurable at the application (built into the code) or th
 | Asked for | Requires | Where it ends up |
 |---|---|---|
 | `discussion` | `discussionPrompt` | the first half of the comment |
-| `keyIndicators` | `keyIndicatorsPrompt` | the rest of the comment, after "Your work shows:", joined by commas |
+| `keyIndicators` | `keyIndicatorsPrompt` | the rest of the comment, after "Evidence:", joined by commas |
 | `category` | `categorizationDescription` **and** a non-empty `categories` | the document's tag, which the Sort Work view groups by |
 
 So the comment is built from `discussion` and `keyIndicators` only. **A unit with neither `keyIndicatorsPrompt` nor `discussionPrompt` produces an empty comment** — the evaluation still succeeds and still tags the document, and the student gets a tag with no text. Nothing on the server stops this: the only check rejects an `aiPrompt` that asks for nothing at all, and asking for `category` alone satisfies it.
