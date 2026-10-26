@@ -82,13 +82,29 @@ describe("SerialDevice with a ccDevice device", () => {
     expect(second.written[0]).toMatch(/^open session:/);
   });
 
+  it("leaves no session when an Arduino becomes active after a Spiker:bit", () => {
+    serialDevice.setActiveDevice("spikerbit", transport);
+    serialDevice.setActiveDevice("arduino", new FakeTransport());
+    expect(serialDevice.ccDeviceSession).toBeUndefined();
+  });
+
+  it("routes an ok that arrives while the first open is being written", () => {
+    transport.write = (line: string) => {
+      transport.written.push(line);
+      if (line.startsWith("open")) ack(transport, 1);
+    };
+    serialDevice.setActiveDevice("spikerbit", transport);
+    jest.advanceTimersByTime(2500);
+    expect(transport.written.filter(line => line.startsWith("open"))).toHaveLength(1);
+  });
+
   it("writes servo as servo:<angle> to a ccDevice device", () => {
     serialDevice.setActiveDevice("spikerbit", transport);
     serialDevice.writeToOutForServo(0, "Servo");
     expect(lastBody(transport)).toBe("servo:30");
   });
 
-  it("still writes a bare angle to an Arduino", () => {
+  it("writes a bare angle to an Arduino", () => {
     serialDevice.setActiveDevice("arduino", transport);
     serialDevice.writeToOutForServo(90, "Servo");
     expect(transport.written).toEqual(["90"]);
