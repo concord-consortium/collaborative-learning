@@ -62,6 +62,16 @@ Dataflow:   close session:4821*1D
   [Recognizing the firmware](#recognizing-the-firmware)). A device answers a line with a bad
   checksum with `err checksum`, without the line's `#n`, which can't be trusted.
 
+**Why a checksum over USB.** USB checks every packet it carries and retries a bad one, so bytes
+aren't corrupted on the cable. They can be lost at either end, though. The micro:bit's USB
+interface chip drops bytes that arrive while its buffer is full (see [Connecting](#connecting)),
+and the device drops bytes that arrive while its own receive buffer is full. A line with a lost
+byte can still parse: `emg:1234` missing a digit becomes `emg:124`. The checksum catches any
+single lost byte. It also catches two lines run together when the end of one and the start of the
+next were lost. It doesn't catch a line lost whole: a command's `#n` covers that, since its `ok`
+never arrives. It also misses two equal bytes lost from the same line, because they cancel out in
+the XOR.
+
 ## Names and values
 
 - **Names are opaque paths** of lowercase letters, digits, `_` and `/`. `/` separates a
