@@ -1,11 +1,17 @@
 import * as path from "path";
-import { parseCcDeviceLine, withChecksum } from "../cc-device-protocol";
+import {
+  kCcDeviceProtocolName, kCcDeviceProtocolVersion, parseCcDeviceLine, withChecksum
+} from "../cc-device-protocol";
+import { kSpikerbitFirmwareVersion } from "../spikerbit-device";
 import { MakeCodeSim } from "./makecode-sim";
 
 // The Spiker:bit firmware's side of the CC Device Protocol, run on the simulated MakeCode runtime.
 
 const firmwarePath = path.join(__dirname, "../../../plugins/dataflow/firmware/spikerbit-clue.ts");
-const kHello = "hello protocol:CCDeviceProtocol version:1 device:spikerbit firmware:4";
+// The hello line the firmware must send, built from the constants Dataflow checks it against.
+const kHello =
+  `hello protocol:${kCcDeviceProtocolName} version:${kCcDeviceProtocolVersion} device:spikerbit ` +
+  `firmware:${kSpikerbitFirmwareVersion}`;
 
 // The firmware's displays and its identify sound.
 const kWaitingIcon = "Asleep";

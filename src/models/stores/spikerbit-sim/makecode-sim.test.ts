@@ -1,12 +1,18 @@
 import * as fs from "fs";
 import * as os from "os";
 import * as path from "path";
-import { withChecksum } from "../cc-device-protocol";
+import {
+  kCcDeviceProtocolName, kCcDeviceProtocolVersion, withChecksum
+} from "../cc-device-protocol";
+import { kSpikerbitFirmwareVersion } from "../spikerbit-device";
 import { MakeCodeSim } from "./makecode-sim";
 
 const firmwarePath = path.join(__dirname, "../../../plugins/dataflow/firmware/spikerbit-clue.ts");
 const sim = () => MakeCodeSim.load(firmwarePath);
-const kHello = "hello protocol:CCDeviceProtocol version:1 device:spikerbit firmware:4";
+// The hello line the firmware must send, built from the constants Dataflow checks it against.
+const kHello =
+  `hello protocol:${kCcDeviceProtocolName} version:${kCcDeviceProtocolVersion} device:spikerbit ` +
+  `firmware:${kSpikerbitFirmwareVersion}`;
 
 // The emg values in a batch of serial lines, each ending in its checksum.
 const emgValues = (lines: string[]) =>
