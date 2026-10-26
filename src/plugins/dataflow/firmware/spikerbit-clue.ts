@@ -1,6 +1,6 @@
-// CLUE Spiker:bit EMG firmware, v4: the MakeCode (static TypeScript) source of
-// spikerbit-clue.hex, which the Dataflow tile flashes over WebUSB. It uses MakeCode-only globals,
-// so CLUE's tsconfig and eslint skip this directory.
+// CLUE Spiker:bit EMG firmware: the MakeCode (static TypeScript) source of spikerbit-clue.hex,
+// which the Dataflow tile flashes over WebUSB. It uses MakeCode-only globals, so CLUE's tsconfig
+// and eslint skip this directory.
 //
 // What the board does (its commands, states, displays, timing, sound and pins) is in
 // user-guide.md in this directory, and the protocol it speaks is in
@@ -91,8 +91,8 @@ const WAITING_ICON = IconNames.Asleep
 const FOUND_ICON = IconNames.Surprised
 /**
  * @display Connected
- * Shown for 3 seconds after `open` starts a session. The display is then cleared and stays
- * blank for the rest of the session, unless an `identify` arrives.
+ * Shown for 3 seconds after `open` starts a session. The display is then turned off for the
+ * rest of the session, unless an `identify` arrives.
  */
 const CONNECTED_ICON = IconNames.Yes
 /**
@@ -150,7 +150,8 @@ pins.setAudioPinEnabled(false)
 if (HAS_SPEAKER) music.setBuiltInSpeakerEnabled(true)
 
 // Put the Spiker:bit analog front-end in EMG mode (what the extension's startMuscleRecording
-// does). Held the whole time; nothing else drives these pins.
+// does). Nothing else drives P8. On a V1, P9 is also one of the LED matrix's columns, so the
+// matrix scanning toggles it while the display is on; see showState.
 pins.digitalWritePin(DigitalPin.P8, 0)
 pins.digitalWritePin(DigitalPin.P9, 0)
 
@@ -234,16 +235,28 @@ function err(seq: string, reason: string) {
 }
 
 // Shows what the state calls for: the idle icon, the streaming icon, or nothing in a session.
+// A blank display is also turned off. On a V1 the matrix scans its columns, P9 among them, even
+// with nothing lit, and that makes the EMG readings two to three times noisier; turned off, the
+// matrix lets go of P9, which is driven low again for EMG mode.
 function showState() {
     timedIcon = false
-    if (state == State.Session) basic.clearScreen()
-    else if (state == State.FreeRun) basic.showIcon(STREAMING_ICON, 0)
-    else basic.showIcon(idleIcon, 0)
+    if (state == State.Session) {
+        basic.clearScreen()
+        led.enable(false)
+        pins.digitalWritePin(DigitalPin.P9, 0)
+    } else {
+        showIcon(state == State.FreeRun ? STREAMING_ICON : idleIcon)
+    }
+}
+
+function showIcon(icon: IconNames) {
+    led.enable(true)
+    basic.showIcon(icon, 0)
 }
 
 // Shows an icon until the forever loop shows what the state calls for, ICON_MS later.
 function showTimedIcon(icon: IconNames) {
-    basic.showIcon(icon, 0)
+    showIcon(icon)
     timedIcon = true
     timedIconAt = control.millis()
 }
@@ -349,6 +362,12 @@ function handleLine(line: string) {
         names.push(token.slice(0, colon))
         values.push(token.slice(colon + 1))
     }
+    // A line with no verb sets outputs, so it needs at least one. A bare #n, such as the tail of a
+    // line cut off in the receive buffer, applies nothing and isn't acknowledged.
+    if (verb == "" && names.length == 0) {
+        err(seq, "unknown")
+        return
+    }
 
     endSessionIfLapsed()
 
@@ -408,14 +427,12 @@ function handleLine(line: string) {
             ok(seq)
         }
     } else {
-        if (names.length > 0) {
-            const servo = valueOf(names, values, "servo")
-            if (!isNumber(servo)) {
-                err(seq, "value")
-                return
-            }
-            pins.servoWritePin(AnalogPin.P0, Math.max(0, Math.min(180, Math.round(parseFloat(servo)))))
+        const servo = valueOf(names, values, "servo")
+        if (!isNumber(servo)) {
+            err(seq, "value")
+            return
         }
+        pins.servoWritePin(AnalogPin.P0, Math.max(0, Math.min(180, Math.round(parseFloat(servo)))))
         ok(seq)
     }
 }
@@ -426,21 +443,17 @@ function handleLine(line: string) {
 // event only while a read is waiting, so one overflow would leave the board reading two lines as
 // one until it is reset.)
 //
-// The receive buffer drops what arrives while it is full, newlines included. So a read that
-// fills it may have lost what came next, and any text after its last newline is the start of a
-// broken line. That text is thrown away and answered `err value`, without a #n, which can't be
-// trusted. The broken line's own newline is taken to be among what was lost, so the next newline
-// ends a new line, which is handled as usual. A line too long to fit in the buffer with its
-// newline is answered the same way when it arrives whole over several reads.
+// The receive buffer drops what arrives while it is full, newlines included. So after a read
+// that fills it, the text after its last newline is taken to be the start of a line whose end,
+// newline included, was lost: it is thrown away and answered `err value`, without its #n, which
+// can't be trusted, and the next newline ends a new line. A line too long for the buffer is
+// answered the same way when it arrives whole over several reads.
 //
-// A full read doesn't prove that anything was lost, so this guess can be wrong either way.
-// Discarding through the next newline instead would throw away the next good line after every
-// overflow that did lose the newline. The guess made here is wrong only when the read filled the
-// buffer with nothing lost, and then the rest of the broken line is handled as a line of its
-// own. That rest runs only if it is itself a valid command, and the line it came from had no
-// checksum (a checksum covers the whole line, so the rest fails it) and was one no host sends:
-// no tail of a well-formed line is a command, and since only "!!" contains "!", a tail that is
-// exactly "!!" came from a malformed line or from a real "!!".
+// A full read doesn't prove that anything was lost. If nothing was, the broken line's tail is
+// handled as a line of its own. Discarding through the next newline instead would drop the next
+// good line after every overflow that did lose a newline, so this is the smaller risk: a tail
+// runs only if it is a whole command on its own, and if the line had a checksum, the tail keeps
+// it and fails it about 255 times in 256.
 function receiveLines() {
     const text = serial.readString()
     partialLine += text

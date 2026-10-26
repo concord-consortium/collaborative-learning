@@ -46,9 +46,10 @@ Dataflow:   close session:4821*1D
   (`splitLines` in `src/models/stores/cc-device-protocol.ts`) buffers until it sees a whole
   line: a line split inside its checksum or between `\r` and `\n` waits for the rest.
 - Tokens are separated by single spaces.
-- **A host line** is an optional verb, then zero or more `name:value` assignments, then an
-  optional `#n`, then an optional `*hh`. **A device line** is a reading, a reply, the
-  `hello` line or an empty line.
+- **A host line** is an optional verb, then `name:value` assignments (at least one when there
+  is no verb), then an optional `#n`, then an optional `*hh`. A line with neither a verb nor an
+  assignment, such as a bare `#n`, gets `err unknown`. **A device line** is a reading, a
+  reply, the `hello` line or an empty line.
 - **A device may send empty lines,** and hosts ignore them. An empty line has no checksum. The
   reply to `!!` starts with one (see [Connecting](#connecting)).
 - **A host line without a verb sets outputs,** and nothing else: `servo:90`. Every other
@@ -57,19 +58,22 @@ Dataflow:   close session:4821*1D
   number the host chooses. A command without `#n` gets no `ok`, so an output sent on every
   tick gets no reply. Errors are sent either way. A well-formed `?` gets the `hello` line, and
   never an `ok`, even with `#n`.
-- **`*hh`** may end any line: the XOR of every byte before the `*`, as two hex digits, either
-  case (as in NMEA 0183). A receiver that finds one checks it and drops the line if it's
-  wrong; a line without one is accepted. The device puts one on every line it sends. A host
-  should put one on every command except the `?` that recognizes the firmware (see
-  [Recognizing the firmware](#recognizing-the-firmware)). A device answers a line with a bad
-  checksum with `err checksum`, without the line's `#n`, which can't be trusted.
+- **`*hh`** ends a line: the XOR of every byte before the `*`, as two hex digits, either case
+  (as in NMEA 0183).
+  - **Device lines:** the device puts one on every line it sends except an empty line, and a
+    host drops a non-empty device line that has none or a wrong one.
+  - **Host lines:** a host should put one on every command except the `?` that recognizes the
+    firmware (see [Recognizing the firmware](#recognizing-the-firmware)). A device accepts a host
+    line without one, so commands can be typed by hand. It answers a line with a wrong checksum
+    with `err checksum`, without the line's `#n`, which can't be trusted.
 
 **Why a checksum over USB.** USB checks every packet it carries and retries a bad one, so bytes
 aren't corrupted on the cable. They can be lost at either end, though. The micro:bit's USB
 interface chip drops bytes that arrive while its buffer is full (see [Connecting](#connecting)),
 and the device drops bytes that arrive while its own receive buffer is full. A line with a lost
-byte can still parse: `emg:1234` missing a digit becomes `emg:124`. The checksum catches any
-single lost byte. It almost always catches two lines run together when the end of one and the
+byte can still parse: `emg:1234` missing a digit becomes `emg:124`. Because hosts require a
+checksum on device lines, it catches any single lost byte, the `*` included. It almost always
+catches two lines run together when the end of one and the
 start of the next were lost: about 1 in 256 such lines still passes, when the lost bytes happen to
 XOR to the same value. It doesn't catch a line lost whole: a command's `#n` covers that, since its `ok`
 never arrives. It also misses two equal bytes lost from the same line, because they cancel out in

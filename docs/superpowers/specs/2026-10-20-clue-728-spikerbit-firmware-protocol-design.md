@@ -239,7 +239,7 @@ The keepalive gives:
 
 Only `open`, `ping` and `close` carry the session id. Outputs such as `servo` don't: they are sent
 on every tick, and the transports allow one host at a time, so a stale host sending outputs
-is unlikely enough not to justify the extra bytes. (Claude's call.)
+is unlikely enough not to justify the extra bytes.
 
 Readings: `emg:<int>` every 100 ms, in session and free-run, as in v3.
 
@@ -280,7 +280,7 @@ a separate unprompted heartbeat.
 (DAPLink), and Dataflow reads it over WebUSB through `@microbit/microbit-connection`, which
 polls DAPLink's UART buffer. Measured on a V2 (board ID 9906):
 
-- While nobody reads, the buffer holds about 500–570 bytes, not the 1 KB the comments in
+- While nobody reads, the buffer holds about 500–578 bytes, not the 1 KB the comments in
   `@microbit/microbit-connection`'s `cdc-saturation.js` suggest. When it is full it keeps the
   oldest bytes and drops new ones, so the backlog usually ends in a cut-off line.
 - A host that connects and sends `?` at once gets the backlog first (566 bytes within about
@@ -320,7 +320,7 @@ without a checksum, so that v1–v3 firmware answers too; they ignore `!!`). The
 - If neither arrives, the replies may have been dropped while the device's output buffer was
   still full: once that backlog has been read, the host writes `!! #m` and `?` again.
 
-The firmware stays `firmware:4`, since v4 hasn't been released.
+`!!` is part of firmware 4: it was added before v4 was released, so the number didn't change.
 
 ### Timing
 
@@ -396,7 +396,7 @@ The icons show how far a connection got, so a stuck connection can be diagnosed:
 |---|---|---|
 | Waiting | power-up, a session ending, or free-run stopping | the waiting icon, steady |
 | Found | any `?` while idle | a "found" icon, until the board leaves idle. If it stays, Dataflow saw the board but never started a session: look at version checking and flashing. |
-| Connected | `open` | the connected icon for 3 s, then the display is cleared |
+| Connected | `open` | the connected icon for 3 s, then the display is turned off |
 | Identify | `identify` | the identify icon for 3 s, then the display goes back to what the state calls for |
 | Streaming | long press or `stream` | a "streaming" icon, through free-run |
 
@@ -409,20 +409,27 @@ session ends or an `identify` arrives. When CLUE-715 adds a display output, `ide
 has to restore what the student's program last drew; in CLUE-728 nothing else draws during a
 session, so clearing is enough.
 
-**Builder's call:** the icon designs. They should be easy to tell apart at a glance.
+The icons are MakeCode's built-in Asleep (waiting), Surprised (found), Yes (connected), Heart
+(identify) and Chessboard (streaming), chosen to be easy to tell apart at a glance.
+
+**A blank display is turned off.** On a micro:bit V1, P9 is both a column of the LED matrix and
+the Spiker:bit's EMG/EEG select, and the matrix scans its columns even with nothing lit. Measured
+on a V1 in a Spiker:bit with its electrodes on a salt-water towel, readings at rest were 15–23
+with the display blank and about 6 with it turned off; a V2 read 2.5–4 either way. So the
+firmware turns the display off whenever it would be blank, which is during a session after the
+connected icon, and drives P9 low again. In free-run, with its icon lit, a V1 reads noisier.
 
 ### Sound
 
 `identify` plays a short sound on the **built-in speaker only**. On a micro:bit V2,
 MakeCode may also send sound to the P0 edge pin, and P0 drives the servo, so the sound could
-make the servo twitch. Turn the P0 audio output off (something like
-`pins.setAudioPinEnabled(false)`), and test on a board with a servo attached.
+make the servo twitch. The firmware turns the P0 audio output off
+(`pins.setAudioPinEnabled(false)`) before anything plays; on a board with a servo attached,
+`identify` doesn't make it twitch.
 
-**Decision (Claude's call): the hex stays universal (V1 and V2), as it is today.** V1 has no
-built-in speaker, so on a V1 `identify` shows the icon with no sound. If the V2 speaker
-calls won't compile into a universal hex, or can't be guarded so that they do nothing on a V1,
-stop and ask rather than switching to a V2-only hex: that would change which boards Dataflow
-can flash.
+**The hex stays universal (V1 and V2).** V1 has no built-in speaker, so on a V1 `identify`
+shows the icon with no sound: the speaker calls are guarded so that they run only on a V2. A
+V2-only hex would have changed which boards Dataflow can flash.
 
 ### Structure
 
@@ -432,8 +439,9 @@ line. Replies now need a small queue rather than a single flag. Icons and sound 
 block that loop for long enough to delay readings: play sound in the background. The EMG
 sampling fiber is unchanged.
 
-**Builder's call:** how commands are parsed and queued, the `#n` range, and whether the
-connected and found icons are separate images or one.
+`handleLine` checks a whole line before applying any of it and queues its replies for the main
+loop. A `#n` is any run of digits, echoed as sent. The connected and found icons are separate
+images.
 
 ## Dataflow protocol code
 
@@ -549,10 +557,8 @@ The keepalive, the `#n` counter and the parser live in `CcDeviceSession`, a smal
   readings and can't drive its servo. That is acceptable because the feature branch doesn't
   merge to master until #3055 and the UI half are in.
 - **Later PR into the feature branch:** the UI half.
-- **Bench checkpoint (Claude's call):** stop for a check on a real board once
-  identification, sessions, acknowledgments and EMG streaming work, before adding the icons,
-  sound and long press. The EMG sampling rate and the servo-twitch results could change how
-  those are built.
+- **Bench checkpoint:** a real board was checked once identification, sessions,
+  acknowledgments and EMG streaming worked, before the icons, sound and long press were added.
 
 ## Testing
 

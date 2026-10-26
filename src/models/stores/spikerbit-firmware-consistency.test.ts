@@ -1,10 +1,14 @@
 import * as fs from "fs";
 import * as path from "path";
 import { decompress } from "lzma";
+import {
+  kCcDeviceProtocolName, kCcDeviceProtocolVersion, parseCcDeviceLine, parseHello, withChecksum
+} from "./cc-device-protocol";
 import { kSpikerbitFirmwareVersion } from "./spikerbit-device";
 
 // Guards against the committed firmware artifacts drifting out of sync:
-//  - the firmware version in the MakeCode source's HELLO line vs kSpikerbitFirmwareVersion,
+//  - the MakeCode source's HELLO line vs the protocol's name and version and
+//    kSpikerbitFirmwareVersion,
 //  - the compiled .hex vs that HELLO line, and
 //  - the source MakeCode embedded in the .hex vs spikerbit-clue.ts, which fails when the
 //    source changed but the hex wasn't rebuilt with `npm run build:firmware`.
@@ -29,12 +33,6 @@ function helloFromSource(): string {
   return match[1];
 }
 
-// N from the `firmware:N` field of the HELLO line.
-function versionFromSource(): number {
-  const match = /firmware:(\d+)/.exec(helloFromSource());
-  if (!match) throw new Error("HELLO in spikerbit-clue.ts has no firmware field");
-  return Number(match[1]);
-}
 
 // Concatenate the data bytes of the Intel HEX records of the given types, in file order.
 // Type 00 is ordinary data. A universal hex also uses 0D for the second board's data and
@@ -77,8 +75,16 @@ function embeddedProjectFiles(hex: string): Record<string, string> {
 }
 
 describe("Spiker:bit firmware consistency", () => {
-  it("the firmware version in the MakeCode source's HELLO matches kSpikerbitFirmwareVersion", () => {
-    expect(versionFromSource()).toBe(kSpikerbitFirmwareVersion);
+  it("the source's HELLO names this protocol, its version, the Spiker:bit and kSpikerbitFirmwareVersion", () => {
+    const line = parseCcDeviceLine(withChecksum(helloFromSource()));
+    expect(line?.kind).toBe("hello");
+    const hello = line?.kind === "hello" ? parseHello(line.fields) : null;
+    expect(hello).toEqual({
+      protocol: kCcDeviceProtocolName,
+      version: kCcDeviceProtocolVersion,
+      device: "spikerbit",
+      firmware: kSpikerbitFirmwareVersion
+    });
   });
 
   it("the committed hex embeds the current HELLO line", () => {

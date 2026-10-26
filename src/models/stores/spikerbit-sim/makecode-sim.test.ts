@@ -1,12 +1,18 @@
 import * as fs from "fs";
 import * as os from "os";
 import * as path from "path";
-import { withChecksum } from "../cc-device-protocol";
+import {
+  kCcDeviceProtocolName, kCcDeviceProtocolVersion, withChecksum
+} from "../cc-device-protocol";
+import { kSpikerbitFirmwareVersion } from "../spikerbit-device";
 import { MakeCodeSim } from "./makecode-sim";
 
 const firmwarePath = path.join(__dirname, "../../../plugins/dataflow/firmware/spikerbit-clue.ts");
 const sim = () => MakeCodeSim.load(firmwarePath);
-const kHello = "hello protocol:CCDeviceProtocol version:1 device:spikerbit firmware:4";
+// The hello line the firmware must send, built from the constants Dataflow checks it against.
+const kHello =
+  `hello protocol:${kCcDeviceProtocolName} version:${kCcDeviceProtocolVersion} device:spikerbit ` +
+  `firmware:${kSpikerbitFirmwareVersion}`;
 
 // The emg values in a batch of serial lines, each ending in its checksum.
 const emgValues = (lines: string[]) =>
@@ -171,6 +177,18 @@ describe("MakeCodeSim runtime", () => {
     s.sendSerial(`${line30}\n`);
     s.advance(0);
     expect(s.takeSerialLines()).toEqual([`got [${line30}|]`]);
+  });
+
+  it("takes setRxBufferSize as a byte, as CODAL does, holding at most 254 characters", () => {
+    // 276 wraps to 20, so a firmware asking for more than 255 gets a small buffer.
+    const wrapped = load(`serial.setRxBufferSize(276)\n${echoLines}`);
+    wrapped.sendSerial(`${line30}\n`);
+    wrapped.advance(0);
+    expect(wrapped.takeSerialLines()).toEqual([`got [${line30.slice(0, 20)}]`]);
+    const largest = load(`serial.setRxBufferSize(255)\n${echoLines}`);
+    largest.sendSerial(`${"x".repeat(255)}\n`);
+    largest.advance(0);
+    expect(largest.takeSerialLines()).toEqual([`got [${"x".repeat(254)}]`]);
   });
 
   it("refuses a pause inside an event handler", () => {

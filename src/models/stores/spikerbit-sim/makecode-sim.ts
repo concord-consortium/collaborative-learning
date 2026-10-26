@@ -100,6 +100,8 @@ export class MakeCodeSim {
   readonly sounds: string[] = [];
   // Every display call in order: an icon's name, or "clear".
   readonly displayCalls: string[] = [];
+  // Every pins.digitalWritePin call in order.
+  readonly digitalWrites: Array<{ pin: string; value: number }> = [];
 
   private _now = 0;
   private fibers: Fiber[] = [];
@@ -114,6 +116,7 @@ export class MakeCodeSim {
   private analog = new Map<string, () => number>();
   private servos = new Map<string, number>();
   private icon: string | undefined;
+  private _ledEnabled = true;
   private _speakerEnabled: boolean | undefined;
   private _audioPinEnabled: boolean | undefined;
   private _soundsStopped = 0;
@@ -153,6 +156,11 @@ export class MakeCodeSim {
 
   get audioPinEnabled() {
     return this._audioPinEnabled;
+  }
+
+  // Whether the LED matrix is on (led.enable); it starts on, as on the board.
+  get ledEnabled() {
+    return this._ledEnabled;
   }
 
   // How many times the program called music.stopAllSounds.
@@ -303,6 +311,9 @@ export class MakeCodeSim {
           this.displayCalls.push("clear");
         }
       }),
+      led: namespace("led", {
+        enable: (on: boolean) => { this._ledEnabled = on; }
+      }),
       control: namespace("control", {
         inBackground: (body: Thunk) => this.startFiber(body, false),
         millis: () => this._now,
@@ -314,7 +325,7 @@ export class MakeCodeSim {
         onButtonPressed: (button: number, handler: Thunk) => this.onEvent(button, kButtonEvents.click, handler)
       }),
       pins: namespace("pins", {
-        digitalWritePin: (pin: string, value: number) => undefined,
+        digitalWritePin: (pin: string, value: number) => { this.digitalWrites.push({ pin, value }); },
         analogReadPin: (pin: string) => this.analog.get(pin)?.() ?? 0,
         servoWritePin: (pin: string, angle: number) => { this.servos.set(pin, angle); },
         setAudioPinEnabled: (enabled: boolean) => { this._audioPinEnabled = enabled; }

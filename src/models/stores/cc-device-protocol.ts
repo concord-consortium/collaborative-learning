@@ -1,5 +1,6 @@
-// Line handling for the "CC Device Protocol": newline-terminated text lines, each optionally
-// ending in "*hh" where hh is the XOR checksum of everything before the "*".
+// Line handling for the "CC Device Protocol": newline-terminated text lines ending in "*hh",
+// where hh is the XOR checksum of everything before the "*". A device puts one on every line
+// it sends except an empty line, so a host reading device lines requires it.
 export const kCcDeviceProtocolName = "CCDeviceProtocol";
 export const kCcDeviceProtocolVersion = 1;
 
@@ -37,17 +38,17 @@ function parseSeq(token: string | undefined): number | undefined {
   return match ? Number(match[1]) : undefined;
 }
 
-// Parses one complete line, without its line ending. Returns null when a checksum is
-// present and wrong (or malformed).
+// Parses one complete device line, without its line ending. Returns null when a non-empty
+// line's checksum is missing, malformed or wrong: a line cut off in a backlog ("emg:1") or one
+// that lost its "*" ("emg:1256" from "emg:12*56") would otherwise parse as a reading.
 export function parseCcDeviceLine(line: string): CcDeviceLine | null {
-  let body = line;
+  if (line === "") return { kind: "unknown" };
   const starIndex = line.lastIndexOf("*");
-  if (starIndex !== -1) {
-    body = line.substring(0, starIndex);
-    const checksum = line.substring(starIndex + 1);
-    if (!kChecksumPattern.test(checksum) || checksum.toUpperCase() !== ccChecksum(body)) {
-      return null;
-    }
+  if (starIndex === -1) return null;
+  const body = line.substring(0, starIndex);
+  const checksum = line.substring(starIndex + 1);
+  if (!kChecksumPattern.test(checksum) || checksum.toUpperCase() !== ccChecksum(body)) {
+    return null;
   }
 
   const tokens = body.split(" ");

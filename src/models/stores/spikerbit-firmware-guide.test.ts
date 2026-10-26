@@ -1,5 +1,6 @@
 import fs from "fs";
 import path from "path";
+import { ccChecksum } from "./cc-device-protocol";
 import {
   collectGuideTags, displayImageName, iconPatterns, readGuideSections, renderGuideSections,
   replaceGuideSections
@@ -207,11 +208,7 @@ describe("the firmware's guide", () => {
       .filter(match => match !== null) as RegExpExecArray[];
     expect(checksummed.length).toBeGreaterThan(0);
     for (const [, body, checksum] of checksummed) {
-      let xor = 0;
-      // eslint-disable-next-line no-bitwise
-      for (let i = 0; i < body.length; i++) xor ^= body.charCodeAt(i);
-      expect({ body, checksum: checksum.toUpperCase() })
-        .toEqual({ body, checksum: xor.toString(16).toUpperCase().padStart(2, "0") });
+      expect({ body, checksum: checksum.toUpperCase() }).toEqual({ body, checksum: ccChecksum(body) });
     }
   });
 
