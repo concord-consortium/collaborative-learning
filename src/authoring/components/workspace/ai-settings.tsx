@@ -18,6 +18,7 @@ interface AISettingsFormInputs {
   },
   aiTileAvailable: boolean;
   showIdeasButton: boolean;
+  aiEvaluateOnSessionEnd: boolean;
 }
 
 const isAIAuthorTool = (tool: IAuthorTool | WritableDraft<IAuthorTool>) => {
@@ -52,7 +53,8 @@ const AISettings: React.FC = () => {
         discussionPrompt: aiPrompt?.discussionPrompt ?? "",
       },
       aiTileAvailable,
-      showIdeasButton
+      showIdeasButton,
+      aiEvaluateOnSessionEnd: !!unitConfig?.config?.aiEvaluateOnSessionEnd
     };
   }, [unitConfig]);
 
@@ -65,6 +67,11 @@ const AISettings: React.FC = () => {
 
   // disable AI-related fields if aiEvaluation is not set in initial settings
   const [disableAiFields, setDisableAiFields] = useState(settings.aiEvaluation !== "custom");
+
+  // Session-end evaluation does nothing without an evaluation method, but unlike the prompt fields
+  // it applies to every method, not just "custom". Disabled rather than cleared, so a unit whose
+  // method is switched off and back on keeps the author's choice.
+  const disableSessionEnd = !currentAiEvaluation;
 
   // when aiEvaluation changes, revalidate the form to ensure required fields are filled in
   useEffect(() => {
@@ -136,6 +143,8 @@ const AISettings: React.FC = () => {
         if (data.showIdeasButton !== undefined) {
           config.showIdeasButton = data.showIdeasButton;
         }
+
+        config.aiEvaluateOnSessionEnd = data.aiEvaluateOnSessionEnd;
       }
     });
   };
@@ -170,6 +179,16 @@ const AISettings: React.FC = () => {
           <option value="categorize-design">Categorize Design</option>
         </select>
         {errors.aiEvaluation && <span className="form-error">{errors.aiEvaluation.message}</span>}
+      </div>
+      <div>
+        <label htmlFor="aiEvaluateOnSessionEnd">Evaluate At Session End</label>
+        <input
+          id="aiEvaluateOnSessionEnd"
+          type="checkbox"
+          {...register("aiEvaluateOnSessionEnd")}
+          disabled={disableSessionEnd}
+        /> Also evaluate edited documents when they close or the connection drops, not only when a
+        student asks for ideas
       </div>
       <div>
         <label htmlFor="systemPrompt">System Prompt</label>

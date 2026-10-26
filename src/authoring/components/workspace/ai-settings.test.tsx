@@ -98,4 +98,85 @@ describe("AISettings", () => {
     const mockDraft = applyLastUpdater();
     expect("summarizer" in mockDraft.config.aiPrompt).toBe(false);
   });
+
+  it("turns session-end evaluation on", async () => {
+    mockConfig.aiEvaluation = "custom";
+    mockConfig.aiPrompt = aiPromptFields;
+    render(<AISettings />);
+
+    expect(screen.getByLabelText("Evaluate At Session End")).not.toBeChecked();
+    fireEvent.click(screen.getByLabelText("Evaluate At Session End"));
+    save();
+
+    await waitFor(() => expect(mockSetUnitConfig).toHaveBeenCalled());
+    const mockDraft = applyLastUpdater({ aiEvaluation: "custom", aiPrompt: aiPromptFields });
+    expect(mockDraft.config.aiEvaluateOnSessionEnd).toBe(true);
+  });
+
+  it("turns session-end evaluation back off", async () => {
+    mockConfig.aiEvaluation = "custom";
+    mockConfig.aiPrompt = aiPromptFields;
+    mockConfig.aiEvaluateOnSessionEnd = true;
+    render(<AISettings />);
+
+    expect(screen.getByLabelText("Evaluate At Session End")).toBeChecked();
+    fireEvent.click(screen.getByLabelText("Evaluate At Session End"));
+    save();
+
+    await waitFor(() => expect(mockSetUnitConfig).toHaveBeenCalled());
+    const mockDraft = applyLastUpdater({
+      aiEvaluation: "custom", aiPrompt: aiPromptFields, aiEvaluateOnSessionEnd: true
+    });
+    expect(mockDraft.config.aiEvaluateOnSessionEnd).toBe(false);
+  });
+
+  it("disables session-end evaluation when no evaluation method is set", () => {
+    render(<AISettings />);
+
+    expect(screen.getByLabelText("Evaluate At Session End")).toBeDisabled();
+  });
+
+  // Not just "custom": session-end evaluation applies to every method.
+  it("enables session-end evaluation for a non-custom evaluation method", () => {
+    mockConfig.aiEvaluation = "categorize-design";
+    render(<AISettings />);
+
+    expect(screen.getByLabelText("Evaluate At Session End")).toBeEnabled();
+  });
+
+  // Disabling the box must not clear what it holds, or switching the method off and back on would
+  // silently drop the author's choice.
+  it("keeps the session-end choice when the evaluation method is switched off", async () => {
+    mockConfig.aiEvaluation = "custom";
+    mockConfig.aiPrompt = aiPromptFields;
+    mockConfig.aiEvaluateOnSessionEnd = true;
+    render(<AISettings />);
+
+    fireEvent.change(screen.getByLabelText("AI Evaluation Method"), { target: { value: "" } });
+    expect(screen.getByLabelText("Evaluate At Session End")).toBeDisabled();
+    save();
+
+    await waitFor(() => expect(mockSetUnitConfig).toHaveBeenCalled());
+    const mockDraft = applyLastUpdater({
+      aiEvaluation: "custom", aiPrompt: aiPromptFields, aiEvaluateOnSessionEnd: true
+    });
+    expect(mockDraft.config.aiEvaluateOnSessionEnd).toBe(true);
+  });
+
+  // An author editing a prompt on one of the CMP units saves the whole form; the box they never
+  // touched must not quietly turn their unit's session-end evaluation off.
+  it("leaves session-end evaluation on when the form is saved untouched", async () => {
+    mockConfig.aiEvaluation = "custom";
+    mockConfig.aiPrompt = aiPromptFields;
+    mockConfig.aiEvaluateOnSessionEnd = true;
+    render(<AISettings />);
+
+    save();
+
+    await waitFor(() => expect(mockSetUnitConfig).toHaveBeenCalled());
+    const mockDraft = applyLastUpdater({
+      aiEvaluation: "custom", aiPrompt: aiPromptFields, aiEvaluateOnSessionEnd: true
+    });
+    expect(mockDraft.config.aiEvaluateOnSessionEnd).toBe(true);
+  });
 });
