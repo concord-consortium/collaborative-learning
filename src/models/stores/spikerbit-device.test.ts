@@ -229,6 +229,27 @@ describe("SpikerbitDevice", () => {
     expect(disconnect).toHaveBeenCalled();
   });
 
+  it("ends the session only once the close write has finished", async () => {
+    const serialDevice = makeSerialDevice();
+    const conn = new FakeConnection();
+    conn.respondHello = helloLine(kSpikerbitFirmwareVersion);
+    let finishClose: () => void = () => undefined;
+    const write = conn.serialWrite.bind(conn);
+    conn.serialWrite = async (data: string) => {
+      await write(data);
+      if (data.startsWith("close")) await new Promise<void>(resolve => { finishClose = resolve; });
+    };
+    await new SpikerbitDevice(serialDevice, conn).connectAndStream("HEX");
+
+    let ended = false;
+    const ending = serialDevice.endSession().then(() => { ended = true; });
+    await new Promise(resolve => setTimeout(resolve, 20));
+    expect(ended).toBe(false);
+    finishClose();
+    await ending;
+    expect(ended).toBe(true);
+  });
+
   it("clears the store's transport on disconnect", async () => {
     const serialDevice = makeSerialDevice();
     const conn = new FakeConnection();
@@ -325,6 +346,27 @@ describe("SpikerbitDevice", () => {
 
       expect(conn.flashed).toBe(false);
       expect(resetSeqs(conn)).toEqual([1000, 1001]);
+    });
+
+    it("counts the backlog as drained at a read shorter than 62 bytes, not at a full one", async () => {
+      const conn = new FakeConnection();
+      conn.respondHello = helloLine(kSpikerbitFirmwareVersion);
+      conn.holdReplies = 1;
+      const connecting = new SpikerbitDevice(makeSerialDevice(), conn).connectAndStream("HEX");
+      await jest.advanceTimersByTimeAsync(0);
+      // Full reads 50 ms apart, too close together for the 100 ms quiet rule to end the backlog.
+      for (let i = 0; i < 8; i++) {
+        conn.emitSerial("x".repeat(kReadBytes));
+        await jest.advanceTimersByTimeAsync(50);
+      }
+      expect(conn.resetWrites()).toHaveLength(1);
+      conn.emitSerial("x".repeat(kReadBytes - 1));
+      await jest.advanceTimersByTimeAsync(190);
+      expect(conn.resetWrites()).toHaveLength(1);
+      await jest.advanceTimersByTimeAsync(30);
+      expect(conn.resetWrites()).toHaveLength(2);
+      await jest.advanceTimersByTimeAsync(5000);
+      await connecting;
     });
 
     it("writes !! and ? again 300 ms after the write when no data arrives at all", async () => {
