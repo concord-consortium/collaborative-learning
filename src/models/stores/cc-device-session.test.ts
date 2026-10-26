@@ -1,3 +1,4 @@
+import { autorun } from "mobx";
 import { NodeChannelInfo } from "../../plugins/dataflow/model/utilities/channel";
 import { CcDeviceSession } from "./cc-device-session";
 import { withChecksum } from "./cc-device-protocol";
@@ -23,6 +24,13 @@ describe("CcDeviceSession", () => {
     s.start();
     expect(write).toHaveBeenCalledWith(withChecksum("open session:4242 #1"));
     s.stop();
+  });
+
+  it("picks session ids from 1 to 65535, the range the protocol allows", () => {
+    const random = jest.spyOn(Math, "random").mockReturnValueOnce(0).mockReturnValueOnce(0.9999999999);
+    [new CcDeviceSession(write), new CcDeviceSession(write)].forEach(s => { s.start(); s.stop(); });
+    random.mockRestore();
+    expect(bodies()).toEqual(["open session:1 #1", "open session:65535 #1"]);
   });
 
   it("doesn't ping until the open is acknowledged, then pings every second", () => {
@@ -54,6 +62,19 @@ describe("CcDeviceSession", () => {
     s.receive("ok #2\r\n", []);
     expect(s.lastHeartbeatAt).toBe(Date.now());
     s.stop();
+  });
+
+  it("lastHeartbeatAt is observable", () => {
+    const s = make();
+    const seen: Array<number | undefined> = [];
+    const dispose = autorun(() => { seen.push(s.lastHeartbeatAt); });
+    s.start();
+    s.receive("ok #1\r\n", []);
+    jest.advanceTimersByTime(1000);
+    s.receive("ok #2\r\n", []);
+    dispose();
+    s.stop();
+    expect(seen).toEqual([undefined, Date.now()]);
   });
 
   it("re-opens with a new id on err nosession, once", () => {
@@ -155,11 +176,34 @@ describe("CcDeviceSession", () => {
     expect(lastBody()).toBe("close session:4242");
   });
 
-  it("sends close for an open that hasn't been acknowledged yet", async () => {
+  it("sends close for an open that hasn't been acknowledged yet, and ignores the open's late ok", async () => {
     const s = make();
     s.start();
     await s.close();
+    // The device handles the open before the close, so the open's ok arrives after close().
+    s.receive("ok #1\r\n", []);
     jest.advanceTimersByTime(5000);
+    expect(bodies()).toEqual(["open session:4242 #1", "close session:4242"]);
+  });
+
+  it("doesn't re-open on the err nosession that answers a close, which has no #n", async () => {
+    const s = make();
+    s.start();
+    s.receive("ok #1\r\n", []);
+    await s.close();
+    s.receive("err nosession\r\n", []);
+    jest.advanceTimersByTime(5000);
+    expect(bodies()).toEqual(["open session:4242 #1", "close session:4242"]);
+  });
+
+  it("stops pinging before the close write settles", () => {
+    const s = make();
+    s.start();
+    s.receive("ok #1\r\n", []);
+    // A write to a stalled port may never settle.
+    write.mockImplementation(() => new Promise(() => undefined));
+    void s.close();
+    jest.advanceTimersByTime(3000);
     expect(bodies()).toEqual(["open session:4242 #1", "close session:4242"]);
   });
 
