@@ -116,13 +116,17 @@ describe("detectFirmwareReply", () => {
   it("waits for a hello split across chunks", () => {
     expect(detectFirmwareReply("hello protocol:CCDevice").reply).toBeNull();
   });
-  it("still recognizes the padded legacy banner", () => {
+  it("recognizes the padded legacy banner", () => {
     expect(detectFirmwareReply("CLUE-SPIKERBIT v2      \r\n").reply).toEqual({ kind: "legacy", firmware: 2 });
   });
   it("ignores a hello with a bad checksum", () => {
     expect(detectFirmwareReply(`${hello}*00\r\n`).reply).toBeNull();
   });
-  it("finds a hello after the empty line and ok that end a cut-off backlog line", () => {
+  it("ignores a hello whose checksum is right but which has no firmware field", () => {
+    const noFirmware = withChecksum("hello protocol:CCDeviceProtocol version:1 device:spikerbit");
+    expect(detectFirmwareReply(`${noFirmware}\r\n`).reply).toBeNull();
+  });
+  it("finds a hello after a cut-off backlog line, the empty line that ends it and an ok", () => {
     // A backlog ending in "em", then the board's reply to "!! #1000" and "?".
     const buffer = `${withChecksum("emg:512")}\r\nem\r\n${withChecksum("ok #1000")}\r\n${withChecksum(hello)}\r\n`;
     expect(detectFirmwareReply(buffer).reply).toEqual({
@@ -142,6 +146,7 @@ describe("shouldFlash", () => {
   it.each([
     ["no reply", null, true],
     ["a legacy banner", { kind: "legacy", firmware: 3 } as FirmwareReply, true],
+    ["a legacy banner claiming newer firmware", { kind: "legacy", firmware: 9 } as FirmwareReply, true],
     ["another protocol", cc(1, 4, "Other"), true],
     ["a newer protocol version, even with newer firmware", cc(2, 9), true],
     ["another device on the same protocol, even with newer firmware", cc(1, 9, "CCDeviceProtocol", "other"), true],
