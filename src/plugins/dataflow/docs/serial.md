@@ -48,7 +48,7 @@ is distinct from a channel's **protocol** tag (`channel.protocol`: `keyValue` /
 `radioHub`). `kDeviceCapabilities` (`.../model/utilities/device-capabilities.ts`) maps
 identity → `{ protocol, displayName, outputs, channels? }`: the Arduino speaks `keyValue`,
 the radio-hub micro:bit `radioHub`, and the Spiker:bit `ccDevice` (the CC Device Protocol;
-see [serial-protocols.md](serial-protocols.md)). A device with a `channels` list provides
+see [cc-device-protocol.md](cc-device-protocol.md)). A device with a `channels` list provides
 only those channel ids, whatever their tag: the Spiker:bit lists `emg`, so it provides the
 `emg` channel, which is tagged `keyValue`.
 
@@ -173,7 +173,7 @@ store, `SpikerbitDevice.connectAndStream` makes sure the board is running a curr
    `ok` lines before the reply, and a reply split across chunks, are handled; a `hello` with a
    bad checksum is ignored.
 2. `queryFirmware` writes `!! #n` and a bare `?` in one write (see
-   [Connecting](serial-protocols.md#connecting)). A board that nobody has been reading may have
+   [Connecting](cc-device-protocol.md#connecting)). A board that nobody has been reading may have
    filled the DAPLink interface chip's buffer, about 500 bytes on a V2, with old output. That
    backlog arrives first and usually ends in a cut-off line. Firmware 4 answers `!!` by going
    idle and sending an empty line and `ok #n`, so its `hello` starts a line of its own instead

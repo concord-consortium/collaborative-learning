@@ -18,7 +18,7 @@ usual ~25 files; that was accepted.
 ## Goals
 
 - **The guide stands alone.** A reader can understand, flash, try and drive the firmware from
-  the guide without opening `serial-protocols.md`. Facts both docs state are duplicated, not
+  the guide without opening `cc-device-protocol.md`. Facts both docs state are duplicated, not
   linked.
 - **Each LED display is shown as a picture** of a micro:bit with that display's LEDs lit,
   with a description of when it is shown.
@@ -44,13 +44,14 @@ usual ~25 files; that was accepted.
 
 ## The two documents
 
-**`src/plugins/dataflow/docs/serial-protocols.md`, CC Device Protocol section: the protocol.**
+**`src/plugins/dataflow/docs/cc-device-protocol.md`: the protocol.**
 How it is designed and how it is extended; what any CC device and host must agree on. It keeps:
 
 - the line format, checksums, `#n`, `ok`/`err` and the error reasons;
 - the name and value rules, and the compatibility rules;
 - the states every device has: **idle** and **session**;
-- the core commands every device answers: `?` and its `hello` line, `open`, `ping` and
+- **free-run**, as an **optional** state, with its commands `stream` and `stop`;
+- the core commands every device answers: `?` and its `hello` line, `!!`, `open`, `ping` and
   `close`;
 - `identify`, as an **optional** command a device may support;
 - the reserved extensions (`caps`, `set`, binary mode) and how a new verb, output or setting
@@ -58,9 +59,9 @@ How it is designed and how it is extended; what any CC device and host must agre
 - how a host recognizes the firmware. Dataflow's session, `CcDeviceSession`, is described
   there by #3055, which adds it.
 
-The Spiker:bit's own material (free-run, `stream`/`stop`, `servo`, the `emg` reading, the
-displays and the firmware notes) is in the guide, and the protocol section has a short pointer
-to it. The protocol section keeps a connection transcript as an example.
+The Spiker:bit's own material (`servo`, the `emg` reading, button A, the displays and the
+firmware notes) is in the guide, and the protocol page has a short pointer
+to it. The protocol page keeps a connection transcript as an example.
 
 **The guide: this firmware.** It covers:
 
@@ -83,7 +84,7 @@ to it. The protocol section keeps a connection transcript as an example.
   every second, `close`), with a pointer to Dataflow's parser,
   `src/models/stores/cc-device-protocol.ts`. #3055 adds `cc-device-session.ts` as the
   reference implementation;
-- where to go next: the protocol section, the source, the simulator tests, the bench script.
+- where to go next: the protocol page, the source, the simulator tests, the bench script.
 
 **`src/plugins/dataflow/firmware/README.md`** is the developer page: building and
 rebuilding the hex, the CI checks, testing in Jest, the bench script, prototyping in MakeCode,
@@ -142,7 +143,7 @@ long-click event), not a firmware constant, so the guide states it by hand ("abo
 
 ## Constraints
 
-- No Jira ids in the guide, the README, `serial-protocols.md`, code comments or test names.
+- No Jira ids in the guide, the README, `cc-device-protocol.md`, code comments or test names.
 - US spelling.
 - The firmware source changes (comments and constants), so the builder rebuilds the hex
   locally with `npm run build:firmware` and commits it with the source, and
@@ -165,8 +166,8 @@ long-click event), not a firmware constant, so the guide states it by hand ("abo
 - The firmware still runs in `MakeCodeSim` (`src/models/stores/spikerbit-sim/makecode-sim.ts`);
   any new MakeCode API it uses needs a fake there.
 - The SVGs must read clearly on GitHub in both light and dark themes.
-- Links into `serial-protocols.md` (from `serial.md`, the firmware header comment, the README
-  and the spec) point at sections it has.
+- Links into `cc-device-protocol.md` (from `serial-protocols.md`, the firmware header
+  comment, the guide and the spec) point at sections it has.
 - After this lands on `CLUE-728-protocol-firmware`, that branch is merged into
   `CLUE-728-spikerbit-firmware-status` (#3055) again, as before; #3055 also edits these docs,
   so expect conflicts there. They are resolved at that merge; the edits here aren't shaped to

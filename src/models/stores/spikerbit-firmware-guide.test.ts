@@ -190,10 +190,10 @@ describe("the firmware's guide", () => {
     expect(guide).toContain(hello!);
   });
 
-  // The guide and serial-protocols.md both write out a connection transcript with checksums.
+  // The guide and cc-device-protocol.md both write out a connection transcript with checksums.
   it.each([
     ["the guide", path.join(firmwareDir, "user-guide.md")],
-    ["serial-protocols.md", path.join(__dirname, "../../plugins/dataflow/docs/serial-protocols.md")]
+    ["cc-device-protocol.md", path.join(__dirname, "../../plugins/dataflow/docs/cc-device-protocol.md")]
   ])("%s writes only valid checksums in its code blocks", (_name, file) => {
     const codeLines: string[] = [];
     let inCode = false;

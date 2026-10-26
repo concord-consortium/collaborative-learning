@@ -6,7 +6,9 @@ firmware that speaks it, and the Dataflow code that speaks the other end. The Da
 this story (the "connection stopped" display and the "Is it alive?" button) is designed
 separately; it builds on the connect pane CLUE-716 added.
 
-The wire protocols, this one included, are documented in
+This protocol is documented in
+[cc-device-protocol.md](../../../src/plugins/dataflow/docs/cc-device-protocol.md), the older
+wire protocols in
 [serial-protocols.md](../../../src/plugins/dataflow/docs/serial-protocols.md), and the Spiker:bit
 firmware's commands, displays and timing in its
 [user guide](../../../src/plugins/dataflow/firmware/user-guide.md). See "Docs" at the end.
@@ -583,8 +585,10 @@ back and forth between those two builds reflashes it each time.
 ## Docs
 
 - [serial-protocols.md](../../../src/plugins/dataflow/docs/serial-protocols.md), new: the
-  `keyValue` and `radioHub` wire formats and the CC Device Protocol. Dataflow's serial docs
+  `keyValue` and `radioHub` wire formats and what they don't do. Dataflow's serial docs
   moved with it from `src/plugins/dataflow-tool/` to `src/plugins/dataflow/docs/`.
+- [cc-device-protocol.md](../../../src/plugins/dataflow/docs/cc-device-protocol.md), new: the
+  CC Device Protocol.
 - The firmware [user guide](../../../src/plugins/dataflow/firmware/user-guide.md), new: the
   Spiker:bit firmware's commands, states, displays and timing, for anyone using, extending or
   driving it. Its displays and timing sections are generated from the firmware source; its

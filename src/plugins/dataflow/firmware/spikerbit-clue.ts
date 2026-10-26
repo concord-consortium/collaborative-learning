@@ -12,7 +12,7 @@
 //
 // PROTOCOL: the board speaks the CC Device Protocol. Its commands, replies, states and button
 // are in user-guide.md in this directory, and the protocol itself is in
-// src/plugins/dataflow/docs/serial-protocols.md. handleLine checks a whole line before it
+// src/plugins/dataflow/docs/cc-device-protocol.md. handleLine checks a whole line before it
 // applies any of it, so a bad line changes nothing.
 //
 // LED STATUS: the display shows how far a connection got. Each icon constant below says when it
