@@ -331,11 +331,11 @@ The firmware stays `firmware:4`, since v4 hasn't been released.
 - The connected and identify icons show for **3 s**.
 
 These numbers are starting points. Chrome slows timers in hidden tabs; after a tab has been
-hidden for several minutes, chained timers can be limited to about once a minute. The
-Dataflow half has to check whether a page with an open WebUSB connection is exempt. If it
-isn't, either Dataflow asks for a longer timeout in `open`, or the session lapses in a hidden
-tab. A lapse is acceptable: the next `ping` gets `err nosession`, and Dataflow sends `open`
-again, followed by any settings it needs.
+hidden for several minutes, chained timers can be limited to about once a minute. Dataflow
+sends no `timeout` in `open`, so if a page with an open WebUSB connection isn't exempt, the
+session lapses in a hidden tab. A lapse is acceptable: the next `ping` gets `err nosession`,
+and Dataflow sends `open` again, followed by any settings it needs. Whether such a page is
+exempt is left for the UI half to check.
 
 ### Reserved for later
 
@@ -444,7 +444,11 @@ The Dataflow end of the protocol, without UI. It is written against master after
 
 ### Recognizing the firmware
 
-`SpikerbitDevice.queryVersion` still sends `?`, and now recognizes two replies:
+`SpikerbitDevice.queryFirmware` writes `!! #n` (numbered from 1000) and a bare `?` in one write,
+then reads lines until it recognizes one of two replies. If nothing is identified 200 ms after
+the board's backlog has drained (the first read shorter than 62 bytes, or 100 ms with no data),
+it writes both once more; after 1.5 s in all there is no reply. See "Reset and connecting" for
+why. The two replies:
 
 - `hello protocol:CCDeviceProtocol version:<P> device:spikerbit firmware:<N>`: the new
   firmware.
@@ -460,6 +464,7 @@ talk to gets flashed with Dataflow's own firmware, even if that firmware is olde
 | none, or not recognized | flashes |
 | `CLUE-SPIKERBIT v<N>` | flashes |
 | a `protocol` and `version` pair Dataflow doesn't speak (a newer protocol version, for example) | flashes, even if `firmware` is newer than its own |
+| a pair it speaks, another `device` | flashes, even if `firmware` is newer than its own |
 | a pair it speaks, `firmware` older than `kSpikerbitFirmwareVersion` | flashes |
 | a pair it speaks, `firmware` the same or newer | connects, as a newer version is accepted today |
 
@@ -480,7 +485,9 @@ back and forth between those two builds reflashes it each time.
   otherwise the protocol comparison applies as today. This is the static version of what
   `caps` will report later. A side effect: with a Spiker:bit connected, the `fsr`, `tmp` and
   `a1` channels show as missing right away, instead of after the 7 s freshness timeout.
-- `SerialDevice.receive` dispatches the new protocol to a new parser in `serial-protocol.ts`.
+- `SerialDevice.receive` hands the new protocol's data to the active `CcDeviceSession`
+  (`cc-device-session.ts`), which parses lines with `cc-device-protocol.ts`.
+  `serial-protocol.ts` gains `detectFirmwareReply` and `shouldFlash`.
 
 ### Parsing device lines
 
@@ -489,41 +496,42 @@ back and forth between those two builds reflashes it each time.
   `lastMessageReceivedAt`, as `parseKeyValueData` does. Unlike `keyValue`, accept a sign and
   a fraction, and **don't round**.
 - **`ok #n`** answering the latest `open` (matched by `#n`): start pinging.
-- **`ok #n`** answering a `ping`: record the time of the latest one as an observable on
-  `SerialDevice` (for example `lastHeartbeatAt`). The UI half uses it to show that the
-  connection stopped.
-- **`err #n nosession`** answering a `ping`: the session lapsed. Send `open` again (see
+- **`ok #n`** answering a `ping`: record the time of the latest one as the observable
+  `lastHeartbeatAt` on the `CcDeviceSession` (`serialDevice.ccDeviceSession`). The UI half uses
+  it to show that the connection stopped.
+- **`err #n nosession`** answering a pending `ping`: the session lapsed. Send `open` again (see
   "Keepalive").
-- **`err #n othersession`** answering a `ping`: another session has taken the board. Stop
+- **`err #n othersession`** answering a pending `ping`: another session has taken the board. Stop
   pinging and log it; don't `open` again, or two hosts would keep taking the board from each
   other. The UI half decides what to show.
 - **Any other `err`**: log it with `console.warn`. CLUE-727 decides what reaches the log.
 - Ignore `hello` and anything unrecognized, following the compatibility rules: names may
-  contain `/`, and replies may arrive late or out of order.
+  contain `/`, and replies may arrive late or out of order. A `nosession` or `othersession`
+  whose `#n` isn't a pending ping (a late reply for an earlier session, say) changes nothing.
 
 ### Keepalive
 
-- When a device on the new protocol becomes active (`setActiveDevice`), pick a random session id
-  and send `open session:<id> #n`, with no `timeout` (the 5 s default) unless testing shows
-  Dataflow needs longer. Once it's acknowledged, send `ping session:<id> #n` every 1 s. Stop when the device is
-  cleared.
-- If `open` gets no reply within a couple of seconds (a dropped line, for example), send it
-  again.
-- On `err nosession`, send `open` again, with a new random id. CLUE-728 has no settings to restore afterward;
-  once settings exist, they're re-sent after the new `open`.
-- On Disconnect, send `close session:<id>` before closing the connection.
-- `#n` counts up and wraps. **Builder's call:** the range.
+- When a device on the new protocol becomes active (`setActiveDevice`), pick a random session
+  id from 1 to 65535 and send `open session:<id> #n`, with no `timeout` (the 5 s default). Once
+  it's acknowledged, send `ping session:<id> #n` every 1 s. Stop when the device is cleared.
+- If `open` gets no reply, send it again every 2 s (a dropped line, for example).
+- On `err nosession`, send `open` again, with a new random id. CLUE-728 has no settings to
+  restore afterward; once settings exist, they're re-sent after the new `open`.
+- On Disconnect, send `close session:<id>` before closing the connection, also while an `open`
+  is still waiting for its `ok`, and wait at most 500 ms for the write.
+- `#n` counts from 1 to 999 and wraps to 1. The connect-time `!!` counts from 1000, so a late
+  reply to it can't be taken for the session's.
 
 ### Writing commands
 
-- Every command gets a `*hh` checksum.
+- Every command gets a `*hh` checksum, except the connect-time `?`.
 - The servo: for the new protocol, the Live Output node sends `servo:<angle>` with no `#n`,
   using the same scaling as `writeToOutForServo`. `sendDataToSerialDevice` in
   `live-output-node.ts` routes by protocol and needs a branch for the new one. The gripper
   output stays Arduino only.
 
-**Builder's call:** whether the keepalive, the `#n` counter and the parser live in
-`SerialDevice` or in a small class it owns for the new protocol.
+The keepalive, the `#n` counter and the parser live in `CcDeviceSession`, a small class that
+`SerialDevice` owns for the new protocol.
 
 ## Delivery
 
@@ -557,13 +565,27 @@ back and forth between those two builds reflashes it each time.
   their timing, the identify sound, and a V1 running without a speaker. `makecode-sim.test.ts`
   tests the sim itself.
 - **Jest, Dataflow side:** in #3056, the parser (checksums right, wrong and absent; readings
-  with signs and fractions; `ok` and `err`; `hello`; lines split across chunks). In #3055, the
-  flash decision (no reply, the v1–v3 banner, old `firmware`, unknown protocol version (even
-  with a newer `firmware`), newer `firmware`); `open` then `ping` repeating and stopping, with
-  fake timers; the session id chosen for `open` carried into every `ping`; re-sending an
-  unanswered `open`; re-opening on `err nosession`; stopping without re-opening on
-  `err othersession`; `close` on disconnect; the servo command's format; and
-  `channelSatisfiedBy` with and without a channel list.
+  with signs and fractions; `ok` and `err`; `hello`; lines split across chunks). In #3055:
+  - the flash decision (no reply, the v1–v3 banner, old `firmware`, an unknown protocol
+    version or another device even with a newer `firmware`, and newer `firmware`);
+  - the session (`cc-device-session.test.ts`), with fake timers: `open` then `ping` repeating
+    and stopping, the session id (from 1 to 65535) carried into every `ping`, re-sending an
+    unanswered `open`, re-opening on `err nosession`, stopping on `err othersession`, late
+    errors for earlier pings ignored, `close` on disconnect (also while the `open` is pending),
+    `#n` wrapping, and `lastHeartbeatAt` being observable;
+  - the store (`serial-cc-device.test.ts`): starting, routing and stopping the session, and the
+    servo command's format;
+  - the connect sequence (`spikerbit-device.test.ts`): `!!` and a bare `?` in one write, a
+    backlog in 62-byte reads, replies packed across reads, the retry after the backlog drains
+    or after quiet, the 1.5 s flash, the re-query after a flash, and late replies not reaching
+    the session;
+  - `DeviceConnection` ending the session before closing the transport, including when ending
+    fails or times out;
+  - `channelSatisfiedBy` with and without a channel list.
+- **Jest, end to end:** `spikerbit-end-to-end.test.ts` runs Dataflow's `SpikerbitDevice` and
+  `SerialDevice` against the firmware on `MakeCodeSim`, with a model of DAPLink's buffer: a
+  board left in free-run, a session whose host has gone, and a disconnect leaving the board
+  idle.
 - **Jest, consistency:** `spikerbit-firmware-consistency.test.ts` reads the `firmware:` number
   from the `HELLO` line in the source and checks it against `kSpikerbitFirmwareVersion`,
   checks that the hex embeds that `hello` line and the current source, and checks that the
@@ -597,3 +619,7 @@ back and forth between those two builds reflashes it each time.
 - The firmware [README](../../../src/plugins/dataflow/firmware/README.md), for developers
   changing the firmware, and the header comment in `spikerbit-clue.ts`, both rewritten for v4.
 - The bench script's [README](../../../scripts/spikerbit-bench/README.md), new.
+- In #3055, [serial.md](../../../src/plugins/dataflow/docs/serial.md) describes the new connect
+  steps and gets a section on Dataflow's side of the session, with its diagrams re-exported;
+  `cc-device-protocol.md` and `serial-protocols.md` point to it; and the user guide names
+  Dataflow's code as a reference implementation.
