@@ -170,10 +170,10 @@ store, `SpikerbitDevice.connectAndStream` makes sure the board is running a curr
 
 1. It points the transport's `onData` at a connect-time handler (`handleFirmwareData`) that
    scans inbound data with `detectFirmwareReply`, recording the reply. A reply is either a
-   CC Device Protocol `hello` line (whose checksum, if it has one, is right), or the legacy
-   `CLUE-SPIKERBIT v<N>` banner that older firmware sends. Stale readings, empty lines and
-   `ok` lines before the reply, and a reply split across chunks, are handled; a `hello` with a
-   bad checksum is ignored.
+   CC Device Protocol `hello` line with a valid checksum, or the legacy `CLUE-SPIKERBIT v<N>`
+   banner that older firmware sends. Stale readings, empty lines and `ok` lines before the
+   reply, and a reply split across chunks, are handled; a `hello` with a missing or bad
+   checksum is ignored.
 2. `queryFirmware` writes `!! #n` and a bare `?` in one write, so that the `hello` starts a
    line of its own after any backlog of old output (see
    [Connecting](cc-device-protocol.md#connecting)). The `ok` to the `!!` needs no handling: a
@@ -304,8 +304,8 @@ Walkthrough:
   and forwards each chunk to `onData`, which `SerialDevice.setActiveDevice` wired to
   `SerialDevice.receive` — exactly like the Web Serial path. The Spiker:bit's `deviceFamily`
   maps to the `ccDevice` protocol, so `receive` hands the chunk to the active
-  `CcDeviceSession`, which drops lines with a wrong checksum, handles `ok` and `err` itself,
-  and writes each reading to the channels with its name. During connect (before
+  `CcDeviceSession`, which drops lines with a missing or wrong checksum, handles `ok` and
+  `err` itself, and writes each reading to the channels with its name. During connect (before
   `setActiveDevice`), `SpikerbitDevice` temporarily points `onData` at a firmware-detection
   handler to decide whether to flash; EMG parsing begins once the transport becomes the
   active device.

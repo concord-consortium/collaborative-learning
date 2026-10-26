@@ -6,7 +6,7 @@ import {
 // Parser for the "keyValue" protocol: consumes complete "key:value\r\n" lines from
 // `buffer`, updating every channel with the matching id, and returns the unconsumed
 // remainder. Unparseable complete lines are discarded to recover from corrupted serial data.
-// Shared by the Web Serial and WebUSB paths. The `[ \t]*` before the line ending tolerates
+// Used for the Arduino over Web Serial. The `[ \t]*` before the line ending tolerates
 // trailing whitespace: Spiker:bit firmware v1 and v2 pad each line with spaces (e.g.
 // "emg:57            \r\n") — which detectSpikerbitVersion must also parse — while v3
 // disables padding (setWriteLinePadding(0)) and the Arduino never padded; all parse correctly.

@@ -487,7 +487,7 @@ back and forth between those two builds reflashes it each time.
 - **Channel matching has to change.** `channelSatisfiedBy` currently compares the device's
   protocol with the channel's `protocol` tag, and the `emg` channel is tagged `keyValue`.
   Switching the Spiker:bit's protocol without changing this would mark its EMG channel
-  missing (`rete-manager.tsx`, `updateChannels`). **Decision (Claude's call):** give
+  missing (`rete-manager.tsx`, `updateChannels`). **Decision:** give
   `DeviceCapability` an optional list of the channel ids the device provides
   (`spikerbit: ["emg"]`). When the list is present, a channel is satisfied if its id is in it;
   otherwise the protocol comparison applies as today. This is the static version of what
