@@ -48,7 +48,7 @@ describe("SerialDevice with a ccDevice device", () => {
     serialDevice.registerChannelSource(() => [emgChannel]);
     serialDevice.setActiveDevice("spikerbit", transport);
     ack(transport, 1);
-    transport.onData?.("emg:33\r\n");
+    transport.onData?.(`${withChecksum("emg:33")}\r\n`);
     expect(emgChannel.value).toBe(33);
   });
 

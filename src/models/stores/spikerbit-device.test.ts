@@ -197,7 +197,7 @@ describe("SpikerbitDevice", () => {
     await device.connectAndStream("HEX");
     // Data arriving after setActiveDevice flows transport.onData -> receive -> the session.
     // The fake board acknowledged the open when it was written.
-    conn.emitSerial("emg:57\r\n");
+    conn.emitSerial(`${withChecksum("emg:57")}\r\n`);
 
     expect(channel.value).toBe(57);
   });
