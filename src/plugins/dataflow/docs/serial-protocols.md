@@ -24,8 +24,8 @@ the host.
 
 - **Device to Dataflow:** each message is one line ending in `\r\n`. Arduino's
   `Serial.println` and MakeCode's `serial.writeLine` both end lines this way.
-- **Dataflow to device:** each message is one line ending in `\n`. Both transports append
-  the `\n` (`WebSerialTransport.write`, `MicrobitUsbTransport.write`).
+- **Dataflow to device:** each message is one line ending in `\n`, which
+  `WebSerialTransport.write` appends.
 
 Inbound data arrives in chunks that ignore line boundaries (`emg:1`, `23\r`, `\nfsr:2\r\n`),
 so the parsers buffer until they see a whole line. See "Reconstituting messages from the

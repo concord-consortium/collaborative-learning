@@ -31,7 +31,7 @@ and **outbound** (a Live Output node → bytes leaving the computer).
 |---|---|---|
 | `WebSerialTransport` | `src/models/stores/web-serial-transport.ts` | Owns the Web Serial port + read loop; `write()` out, `onData` in. `open(port?)` resolves `"opened"`, `"canceled"` or `"failed"`, and skips the chooser when given a port. `lastPort` survives `close()`. |
 | `MicrobitUsbTransport` | `src/models/stores/spikerbit-device.ts` | `IDeviceTransport` over a micro:bit WebUSB connection: `write()` out, `serialdata` → `onData` in, `status` → `onDisconnect`. |
-| `SpikerbitDevice` | `src/models/stores/spikerbit-device.ts` | Spiker:bit connect/version/flash state machine; taps `onData` for connect-time version detection, then hands the transport to the store. |
+| `SpikerbitDevice` | `src/models/stores/spikerbit-device.ts` | Spiker:bit connect, reset, firmware check and flash; taps `onData` for connect-time firmware detection, then hands the transport to the store. |
 | `SerialDevice` | `src/models/stores/serial.ts` | Transport-agnostic connection store: holds the active transport and the registered channel sources, routes writes (`writeLine`) and inbound parsing (`receive`). `isConnected()` is observable. |
 | `DeviceConnection` | `src/plugins/dataflow/model/device-connection.ts` | App-wide connect, reconnect and disconnect; one instance per `SerialDevice`, from `getDeviceConnection`. Tracks `lastChoice`, `busyChoice` and `connectTutorialDismissal`. |
 | tile device actions | `src/plugins/dataflow/utilities/device-actions.ts` | Wrap `DeviceConnection` for one tile: they reset the clicking tile's program, log the change, and record a failed attempt's message on the tile. |
@@ -119,7 +119,9 @@ chooser. If that fails, for example because the board was unplugged and plugged 
 disconnects that device and falls back to a new one, which shows the chooser. CLUE doesn't
 call the library's `initialize()`, so it doesn't watch for the board being unplugged.
 
-**Disconnect** closes the transport and clears the active device. For a Spiker:bit, closing
+**Disconnect** ends any CC Device Protocol session (`SerialDevice.endSession`, waiting at most
+500 ms, `kEndSessionTimeoutMs`), then closes the transport and clears the active device. For a
+Spiker:bit, closing
 the transport disconnects the library connection; the device is kept for Reconnect.
 
 **Tile device actions.** The pane, the top-bar menu and the `reset` button call the tile device
@@ -168,18 +170,15 @@ store, `SpikerbitDevice.connectAndStream` makes sure the board is running a curr
 
 1. It points the transport's `onData` at a connect-time handler (`handleFirmwareData`) that
    scans inbound data with `detectFirmwareReply`, recording the reply. A reply is either a
-   CC Device Protocol `hello` line (with a valid checksum), or the legacy
+   CC Device Protocol `hello` line (whose checksum, if it has one, is right), or the legacy
    `CLUE-SPIKERBIT v<N>` banner that older firmware sends. Stale readings, empty lines and
    `ok` lines before the reply, and a reply split across chunks, are handled; a `hello` with a
    bad checksum is ignored.
-2. `queryFirmware` writes `!! #n` and a bare `?` in one write (see
-   [Connecting](cc-device-protocol.md#connecting)). A board that nobody has been reading may have
-   filled the DAPLink interface chip's buffer, about 500 bytes on a V2, with old output. That
-   backlog arrives first and usually ends in a cut-off line. Firmware 4 answers `!!` by going
-   idle and sending an empty line and `ok #n`, so its `hello` starts a line of its own instead
-   of being glued onto the fragment. The `ok` needs no handling: a valid `hello` identifies the
-   firmware whether or not an `ok` came first, so a `hello` from firmware that ignores `!!` is
-   accepted too, and firmware v1–v3 answers with its banner.
+2. `queryFirmware` writes `!! #n` and a bare `?` in one write, so that the `hello` starts a
+   line of its own after any backlog of old output (see
+   [Connecting](cc-device-protocol.md#connecting)). The `ok` to the `!!` needs no handling: a
+   valid `hello` identifies the firmware whether or not an `ok` came first, so a `hello` with no
+   `ok` before it is accepted too, and firmware v1–v3 answers with its banner.
 3. If nothing is identified 200 ms (`kRetryAfterDrainMs`) after the backlog has drained, the
    replies may have been dropped while DAPLink's buffer was still full, so `queryFirmware`
    writes `!!` and `?` once more. Each `serialdata` event carries one DAPLink read, at most 62
@@ -187,15 +186,15 @@ store, `SpikerbitDevice.connectAndStream` makes sure the board is running a curr
    counts as drained. That is only a hint: 100 ms with no data (`kDrainQuietMs`) counts too. If
    nothing is identified within 1.5 s (`kFirmwareQueryTimeoutMs`) in all, there is no reply.
 4. The connect-time `!!` counts from 1000, above the 1 to 999 that `CcDeviceSession` uses. A
-   late reply to it can reach the session, for example the reply to the first write when the
-   retry has already identified the board, and this way it can't be taken for the `ok` to the
-   session's `open` or a `ping`.
+   late reply to it can reach the session, such as the reply to the first write after the retry
+   has identified the board. Its `#n` can't be taken for the `ok` to the session's `open` or a
+   `ping`.
 5. `shouldFlash` decides. It flashes the bundled hex (a partial flash, reporting progress)
    and queries again when there is no recognized reply, the reply is a legacy banner, the
-   `hello` names a protocol or protocol version Dataflow doesn't speak (even if its firmware
-   is newer), or its firmware is older than `kSpikerbitFirmwareVersion`. It connects without
-   flashing when the protocol is `CCDeviceProtocol` version 1 and the firmware is the same
-   or newer. The USB connection stays Connected across the flash: the DAPLink interface chip
+   `hello` names a protocol or protocol version Dataflow doesn't speak or another device (even
+   if its firmware is newer), or its firmware is older than `kSpikerbitFirmwareVersion`. It
+   connects without flashing when the `hello` names `CCDeviceProtocol` version 1 and
+   `device:spikerbit`, and the firmware is the same or newer. The USB connection stays Connected across the flash: the DAPLink interface chip
    is untouched and serial auto-reinitializes, so no explicit reconnect is needed. The
    re-query after the flash uses the same steps and the same rule, and only warns.
 6. It then calls `setActiveDevice("spikerbit", transport)`, which repoints
@@ -214,21 +213,29 @@ Keep `kSpikerbitFirmwareVersion` equal to the `firmware:` number in the `HELLO` 
 
 1. It sends `open session:<id> #n` with a random id, and re-sends it every 2 s until an
    `ok` arrives.
-2. It then sends `ping session:<id> #n` every second. Each `ok` stamps `lastHeartbeatAt`,
-   which stops advancing when the board stops answering.
-3. On `err nosession` it opens a new session with a new id. Chrome slows timers in hidden
-   tabs, so this is how a session that lapsed while its tab was hidden recovers. On
-   `err othersession` it stops, since another host owns the board.
-4. Disconnecting sends `close session:<id>` (`SerialDevice.endSession`), so the board shows
-   the waiting icon at once instead of after the timeout.
+2. It then sends `ping session:<id> #n` every second. Each `ok` to a ping stamps
+   `lastHeartbeatAt`, which stops advancing when the board stops answering.
+3. When a pending ping gets `err nosession`, it opens a new session with a new id. Chrome slows
+   timers in hidden tabs, so this is how a session that lapsed while its tab was hidden
+   recovers. When one gets `err othersession`, it stops, since another host owns the board.
+   Errors that answer anything else, such as a ping from before a re-open, change nothing.
+4. Disconnecting sends `close session:<id>` (`SerialDevice.endSession`), also while an `open`
+   is still waiting for its `ok`, so the board shows the waiting icon at once instead of after
+   the timeout.
 
-Its `#n` counts from 1 to 999 and wraps to 1, below the connect-time `!!`'s 1000 and up (see
+Its `#n` counts from 1 to 999 and wraps to 1 (see
 [Spiker:bit version check and flashing](#spikerbit-version-check-and-flashing)). Every line
 Dataflow sends has a checksum, except the connect-time `?`.
 
+An `open` re-sent because its `ok` was late, not lost, reaches a board that has already started
+the session, and the board starts it afresh, with its settings back to their defaults. There are
+no settings yet; once there are, they should be sent only after every pending `open` is
+answered.
+
 A Live Output servo node sends `servo:<angle>` on every tick, without `#n`. Each reading
 updates every channel whose `channelId` is the reading's name, in every registered tile, and
-stamps its `lastMessageReceivedAt`; other lines are ignored.
+stamps its `lastMessageReceivedAt`. `ok` and `err` drive the session; `hello` and lines it
+doesn't recognize are ignored.
 
 ## Inbound: hardware → Sensor node
 
@@ -297,8 +304,8 @@ Walkthrough:
   and forwards each chunk to `onData`, which `SerialDevice.setActiveDevice` wired to
   `SerialDevice.receive` — exactly like the Web Serial path. The Spiker:bit's `deviceFamily`
   maps to the `ccDevice` protocol, so `receive` hands the chunk to the active
-  `CcDeviceSession`, which checks each line's checksum, routes `ok` and `err` replies to the
-  session, and writes each reading to the channels with its name. During connect (before
+  `CcDeviceSession`, which drops lines with a wrong checksum, handles `ok` and `err` itself,
+  and writes each reading to the channels with its name. During connect (before
   `setActiveDevice`), `SpikerbitDevice` temporarily points `onData` at a firmware-detection
   handler to decide whether to flash; EMG parsing begins once the transport becomes the
   active device.
@@ -318,13 +325,13 @@ Walkthrough:
 The read loop hands each parser a raw string chunk decoded from the port. A chunk is a
 malformed representation of any number of whole or partial serial messages, chomped off
 the stream at unpredictable spots that do not respect the original message boundaries. So
-the parser cannot assume a chunk is one clean line. Each parser (`parseKeyValueData`,
-`handleRadioHubStreamObj`, `CcDeviceSession.receive`) therefore appends the chunk to a
-**local buffer**, then scans
-the buffer for a complete, legitimate value using a regular expression closely paired to
-the devices and the sensors/actuators DataFlow supports. On a match it parses out the
-value plus an indicator of which channel the value belongs to, finds that channel, and
-sets the value on it — leaving any trailing partial line in the buffer for the next chunk.
+the parser cannot assume a chunk is one clean line. Each parser therefore appends the chunk to
+a **local buffer** and leaves any trailing partial line there for the next chunk.
+`parseKeyValueData` and `handleRadioHubStreamObj` scan the buffer for a complete, legitimate
+value using a regular expression closely paired to the devices and the sensors/actuators
+DataFlow supports. On a match they parse out the value plus an indicator of which channel the
+value belongs to, find that channel, and set the value on it. `CcDeviceSession.receive` instead
+splits whole lines off its buffer (`splitLines`) and parses each with `parseCcDeviceLine`.
 
 ## Outbound: Live Output node → hardware
 
