@@ -42,11 +42,13 @@ import { ExemplarControllerModel, ExemplarControllerModelType } from "./exemplar
 import { SectionDocuments } from "./section-docs-store";
 import { Portal } from "./portal";
 import { SeismicQueryService } from "./seismic/seismic-query-service";
+import { ActivityRecorder } from "./activity-recorder";
 
 export interface IStores extends IBaseStores {
   problemPath: string;
   problemOrdinal: string;
   userContextProvider: UserContextProvider;
+  activityRecorder: ActivityRecorder;
   tabsToDisplay: NavTabModelType[];
   displayedActiveNavTab: string | undefined;
   documentToDisplay?: string;
@@ -109,6 +111,7 @@ class Stores implements IStores{
   selection: SelectionStoreModelType;
   serialDevice: SerialDevice;
   userContextProvider: UserContextProvider;
+  activityRecorder: ActivityRecorder;
   documentMetadata: DocumentMetadataStore;
   sortedDocuments: SortedDocuments;
   sectionDocuments: SectionDocuments;
@@ -182,6 +185,7 @@ class Stores implements IStores{
     });
     this.persistentUI.setProblemPath(this.problemPath);
     this.userContextProvider = new UserContextProvider(this);
+    this.activityRecorder = new ActivityRecorder(this);
     this.bookmarks = new Bookmarks({db: this.db});
     this.commentTags = new CommentTags({db: this.db});
     this.documentMetadata = new DocumentMetadataStore(this);
@@ -409,6 +413,7 @@ class Stores implements IStores{
       this.documents.setAppConfig(appConfig);
       this.documents.setFirestore(this.db.firestore);
       this.documents.setUserContextProvider(this.userContextProvider);
+      this.documents.setActivityRecorder(this.activityRecorder);
 
       if (investigation && problem) {
         this.investigation = investigation;
