@@ -104,9 +104,17 @@ These properties are configurable at the application (built into the code) or th
 }
 ```
 
-**What each prompt produces.** The comment a student and teacher read is the `discussion` the AI returns, followed by "Your work shows:" and the `keyIndicators` it returned, joined by commas. `categorizationDescription` and `categories` decide the tag instead, which is what the Sort Work view groups by.
+**What each prompt produces.** The AI is asked for up to three things, and each one is requested only if the prompt fields behind it are present:
 
-Each of the three is optional, and leaving one out removes its field from what the AI is asked for. Omitting `discussionPrompt` is the way to get a comment that is only the evidence for the tag, with no general advice attached — the CMP math units do this. Blanking the field in the authoring interface has the same effect and removes the key from the unit's JSON. At least one of the three has to remain, since an evaluation with nothing to return would fail.
+| Asked for | Requires | Where it ends up |
+|---|---|---|
+| `discussion` | `discussionPrompt` | the first half of the comment |
+| `keyIndicators` | `keyIndicatorsPrompt` | the rest of the comment, after "Your work shows:", joined by commas |
+| `category` | `categorizationDescription` **and** a non-empty `categories` | the document's tag, which the Sort Work view groups by |
+
+So the comment is built from `discussion` and `keyIndicators` only. **A unit with neither `keyIndicatorsPrompt` nor `discussionPrompt` produces an empty comment** — the evaluation still succeeds and still tags the document, and the student gets a tag with no text. Nothing on the server stops this: the only check rejects an `aiPrompt` that asks for nothing at all, and asking for `category` alone satisfies it.
+
+The authoring interface is what prevents it, and it only lets you blank `discussionPrompt`. Doing that is how a unit gets a comment that is just the evidence for its tag, with no general advice attached — the CMP math units do this, and blanking the field removes the key from the unit's JSON. `categorizationDescription` and `keyIndicatorsPrompt` stay required there. Editing the JSON by hand bypasses that guard, so a unit written by hand needs at least one of `keyIndicatorsPrompt` and `discussionPrompt` to say anything to the student.
 
 **What the AI is sent.** Every evaluation sends a text summary of the document and a screenshot of it in one request. Which of the two arrive depends on the document, not on any setting.
 

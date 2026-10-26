@@ -4,24 +4,6 @@ export function isArrayEqual(array1: string[] | undefined, array2: string[]) {
   return array1?.length === array2.length && array1.every((value, index) => value === array2[index]);
 }
 
-/**
- * The comment text a categorization produces, as the student and teacher read it.
- *
- * The space between the two halves is a separator rather than part of either, so a unit that omits
- * `discussionPrompt` — and therefore gets no `discussion` field in the response — does not open
- * every comment with a stray space.
- *
- * @param {string} discussion the reply's discussion, absent when the unit omits discussionPrompt
- * @param {string[]} keyIndicators the reply's indicators, shown after "Your work shows:"
- * @return {string} the comment text, empty when the reply carried neither
- */
-export function buildEvaluationComment(discussion?: string, keyIndicators?: string[]) {
-  const parts: string[] = [];
-  if (discussion) parts.push(discussion);
-  if (keyIndicators?.length) parts.push(`Your work shows: ${keyIndicators.join(", ")}`);
-  return parts.join(" ");
-}
-
 export function isKnownEvaluator(evaluator?: string) {
   const knownEvaluators = ["categorize-design", "custom", "mock"];
   return evaluator && knownEvaluators.includes(evaluator);

@@ -141,6 +141,8 @@ describe("AISettings", () => {
     save();
 
     await waitFor(() => expect(mockSetUnitConfig).toHaveBeenCalled());
+    const mockDraft = applyLastUpdater({ aiEvaluation: "custom", aiPrompt: { ...withoutDiscussion } });
+    expect("discussionPrompt" in mockDraft.config.aiPrompt).toBe(false);
   });
 
   it("removes an emptied discussion prompt rather than storing an empty string", async () => {

@@ -81,7 +81,9 @@ function mockCategorizeResponse({
   metadata,
   metadataGap,
 }: {
-  parsed?: { category: string, discussion: string, keyIndicators: string[] },
+  // `discussion` is absent for a unit that omits discussionPrompt, which drops the field from the
+  // response schema entirely.
+  parsed?: { category: string, discussion?: string, keyIndicators: string[] },
   usage?: { prompt_tokens: number, completion_tokens: number },
   refusal?: string,
   messageShape?: string,
@@ -534,6 +536,41 @@ describe("functions", () => {
         expect(comment).toEqual({
           content: "Discussion.",
           tags: [],
+          createdAt: expect.any(Object),
+          name: "Ada Insight",
+          uid: "ada_insight_1",
+        });
+      });
+    });
+
+    // A unit that omits discussionPrompt gets no discussion field back. The space between the two
+    // halves is a separator, so the comment must not begin with one.
+    test("creates a comment of indicators alone when the reply has no discussion", async () => {
+      mockCategorizeResponse({
+        parsed: {
+          category: "category",
+          keyIndicators: ["key1", "key2"],
+        },
+      });
+      const wrapped = fft.wrap(onAnalysisDocumentImaged);
+      const firestore = admin.firestore();
+
+      await wrapped({
+        data: makeDocumentSnapshot(sampleDoc, "analysis/queue/imaged/testdoc1"),
+        params: {
+          docId: "testdoc1",
+        },
+      });
+
+      expect(logger.warn).not.toHaveBeenCalled();
+
+      const comments = firestore.collection("demo/AI/documents/testdoc1/comments");
+      await comments.get().then((snapshot) => {
+        expect(snapshot.size).toBe(1);
+        const comment = snapshot.docs[0].data();
+        expect(comment).toEqual({
+          content: "Your work shows: key1, key2",
+          tags: ["category"],
           createdAt: expect.any(Object),
           name: "Ada Insight",
           uid: "ada_insight_1",

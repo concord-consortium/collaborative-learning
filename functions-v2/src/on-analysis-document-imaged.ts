@@ -3,7 +3,7 @@ import * as logger from "firebase-functions/logger";
 import * as admin from "firebase-admin";
 // Modular import: admin.firestore.FieldValue is undefined in the functions emulator.
 import {FieldValue} from "firebase-admin/firestore";
-import {buildEvaluationComment, getAnalysisQueueFirestorePath, getSummaryPath} from "./utils";
+import {getAnalysisQueueFirestorePath, getSummaryPath} from "./utils";
 import {
   type DocumentMetadata, type DocumentRepresentations, type MetadataGap, categorizeRepresentations,
 } from "../lib/src/ai-categorize-document";
@@ -221,7 +221,14 @@ export const onAnalysisDocumentImaged =
           return;
         }
         tags = reply.parsed.category && reply.parsed.category !== "unknown" ? [reply.parsed.category] : [];
-        message = buildEvaluationComment(reply.parsed.discussion, reply.parsed.keyIndicators);
+        // The space is a separator between the two halves, so a unit that omits discussionPrompt --
+        // and gets no discussion field back -- does not open every comment with one.
+        const commentParts = [];
+        if (reply.parsed.discussion) commentParts.push(reply.parsed.discussion);
+        if (reply.parsed.keyIndicators?.length) {
+          commentParts.push(`Your work shows: ${reply.parsed.keyIndicators.join(", ")}`);
+        }
+        message = commentParts.join(" ");
         fullResponse = JSON.stringify(completion);
       } else {
         await error(`Unexpected value for evaluator: ${queueDoc?.evaluator}`, event);

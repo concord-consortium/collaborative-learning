@@ -275,9 +275,6 @@ const AISettings: React.FC = () => {
                   {...register("aiPrompt.discussionPrompt")}
                   disabled={disableAiFields}
                 />
-                {errors.aiPrompt?.discussionPrompt &&
-                  <span className="form-error">{errors.aiPrompt?.discussionPrompt?.message}</span>
-                }
               </div>
             </td>
           </tr>
