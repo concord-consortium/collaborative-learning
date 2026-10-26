@@ -364,6 +364,13 @@ describe("Spiker:bit firmware", () => {
     expect(exchange(sim, "identify extra:1 #11")).toEqual(["err #11 unknown"]);
   });
 
+  it("refuses a bare #n, which sets no output, instead of acknowledging it", () => {
+    // The tail of a line cut off in the receive buffer can be just " #5".
+    const sim = inSession();
+    expect(exchange(sim, "#5")).toEqual(["err #5 unknown"]);
+    expect(exchange(sim, "servo:90 #6")).toEqual(["ok #6"]);
+  });
+
   it("accepts \\r\\n and \\n line endings", () => {
     const sim = boot();
     sim.sendSerial(`${withChecksum("ping #1")}\r\n`);
@@ -553,6 +560,37 @@ describe("Spiker:bit firmware display, sound and buttons", () => {
     expect(sim.shownIcon()).toBe(kWaitingIcon);
     expect(exchange(sim, "?")).toEqual([kHello]);
     expect(sim.shownIcon()).toBe(kFoundIcon);
+  });
+
+  it("holds P8 and P9 low for EMG mode from power-up, and writes nothing else to them", () => {
+    const sim = boot();
+    expect(sim.digitalWrites.slice(0, 2)).toEqual([{ pin: "P8", value: 0 }, { pin: "P9", value: 0 }]);
+    exchange(sim, "open session:7 #1");
+    run(sim, kIconMs + 100);
+    exchange(sim, "close session:7");
+    const emgPins = sim.digitalWrites.filter(write => write.pin === "P8" || write.pin === "P9");
+    expect(emgPins.every(write => write.value === 0)).toBe(true);
+  });
+
+  it("turns the display off once a session's connected icon has cleared, and on to show an icon", () => {
+    // On a V1, the matrix's scanning of P9 makes the EMG readings noisier, even with nothing lit.
+    const sim = boot();
+    expect(sim.ledEnabled).toBe(true);
+    handle(sim, "open session:7 timeout:60000 #1");
+    expect(sim.ledEnabled).toBe(true);
+    const writes = sim.digitalWrites.length;
+    run(sim, kIconMs + 30);
+    expect(sim.ledEnabled).toBe(false);
+    // Turned off, the matrix lets go of P9, so it is driven low again for EMG mode.
+    expect(sim.digitalWrites.slice(writes)).toEqual([{ pin: "P9", value: 0 }]);
+    handle(sim, "identify #2");
+    expect(sim.ledEnabled).toBe(true);
+    run(sim, kIconMs + 30);
+    expect(sim.ledEnabled).toBe(false);
+    handle(sim, "close session:7");
+    run(sim, 30);
+    expect(sim.ledEnabled).toBe(true);
+    expect(sim.shownIcon()).toBe(kWaitingIcon);
   });
 
   it("shows the connected icon on open for 3000 ms, then draws nothing for the rest of the session", () => {

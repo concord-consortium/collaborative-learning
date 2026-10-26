@@ -179,6 +179,18 @@ describe("MakeCodeSim runtime", () => {
     expect(s.takeSerialLines()).toEqual([`got [${line30}|]`]);
   });
 
+  it("takes setRxBufferSize as a byte, as CODAL does, holding at most 254 characters", () => {
+    // 276 wraps to 20, so a firmware asking for more than 255 gets a small buffer.
+    const wrapped = load(`serial.setRxBufferSize(276)\n${echoLines}`);
+    wrapped.sendSerial(`${line30}\n`);
+    wrapped.advance(0);
+    expect(wrapped.takeSerialLines()).toEqual([`got [${line30.slice(0, 20)}]`]);
+    const largest = load(`serial.setRxBufferSize(255)\n${echoLines}`);
+    largest.sendSerial(`${"x".repeat(255)}\n`);
+    largest.advance(0);
+    expect(largest.takeSerialLines()).toEqual([`got [${"x".repeat(254)}]`]);
+  });
+
   it("refuses a pause inside an event handler", () => {
     const s = load(`
       serial.onDataReceived(serial.delimiters(Delimiters.NewLine), function () { basic.pause(10) })

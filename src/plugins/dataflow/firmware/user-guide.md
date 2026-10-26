@@ -13,7 +13,9 @@ The firmware runs on a micro:bit plugged into a Backyard Brains Spiker:bit. It:
 - speaks a text protocol, the CC Device Protocol, over USB serial at 115200 baud, so every
   command can be typed by hand;
 - is a universal hex, `spikerbit-clue.hex`, that runs on a micro:bit V1 or V2. The signal
-  processing is tuned for a V2.
+  processing is tuned for a V2. On a V1 the LED display makes the readings noisier, two to
+  three times at rest, so the display is off during a session; in free-run, with its icon lit,
+  a V1's readings are noisier.
 
 Dataflow flashes it automatically. When Dataflow connects to a micro:bit that isn't running
 this firmware, or is running an older version, it writes the bundled hex to the board over
@@ -38,7 +40,7 @@ before sending.
 1. Close anything else using the board, such as a connected Dataflow tab. Only one program can
    have the port open.
 2. Set the baud rate to **115200** and connect, picking the micro:bit in the browser's list.
-3. Leave "send with /n" checked. The firmware ignores the `\r` that "send with \r" adds.
+3. Leave "send with /n" checked. The firmware ignores the `\r` that "send with /r" adds.
 4. Type a command and press Enter. Checksums are optional when typing. A long `timeout` keeps
    the session open while you type, for example:
 
@@ -80,8 +82,9 @@ Long-press button A again to stop the readings.
   `#n` a command gets no `ok`. Errors are sent either way, as `err #n <reason>`, or
   `err <reason>` when the command had no `#n`. A well-formed `?` gets the `hello` line, and
   never an `ok`, even with `#n`.
-- **`*hh` is an optional checksum** at the very end of a line. The board puts one on every line
-  it sends. When sending, leave it off, or add it and the board checks it.
+- **`*hh` is a checksum** at the very end of a line. The board puts one on every line it sends
+  except an empty line, so a program reading the board should drop a non-empty line that has
+  none or a wrong one. When sending, leave it off, or add it and the board checks it.
 - **`!!` resets the board** to its power-up state, in any state: it ends any session, without
   needing its id, and stops free-run. Only a line that is exactly `!!`, with an optional `#n`
   and checksum, does this; `!` appears in no other command, name or value.
@@ -162,7 +165,7 @@ it. `ok` and `err` lines contain no `:`, so plotters skip them.
 | Reason | Meaning | Sent for |
 | --- | --- | --- |
 | `checksum` | The line's `*hh` doesn't match its contents, or isn't two hex digits. Sent without `#n`, since the line's `#n` can't be trusted. | any line |
-| `unknown` | A command the board doesn't know, or a `name:value` (or a bare word) the command doesn't take, such as `stream servo:90`. A line whose command contains `!` but isn't `!!` alone (`!`, `!!!`, `!! servo:90`) gets it too. | any line |
+| `unknown` | A command the board doesn't know, or a `name:value` (or a bare word) the command doesn't take, such as `stream servo:90`. A line whose command contains `!` but isn't `!!` alone (`!`, `!!!`, `!! servo:90`) gets it too, and so does a line with nothing but `#n`. | any line |
 | `value` | A value the board can't use. | `open` with a missing or out-of-range `session`, or a `timeout` that isn't a whole number in range; `close` with no `session`; `ping session:` or `close session:` with an id that isn't a whole number in range; `servo:` with a value that isn't a number in the form above (`+90`, `.5` and `90.` are not); and any line whose last token starts with `#` but isn't `#` and digits, or that doesn't fit in the receive buffer with its newline (see [Timing and limits](#timing-and-limits)), both sent without `#n` |
 | `insession` | Not allowed during a session. | `stream`, `stop` |
 | `nosession` | No session is running, for example because it timed out. The host must `open` again. | `ping session:<id>`, `close session:<id>` |
@@ -197,7 +200,7 @@ it. `ok` and `err` lines contain no `:`, so plotters skip them.
 | --- | --- |
 | <img src="guide-images/display-waiting.svg" alt="Waiting icon" width="160"><br>**Waiting** | Shown at power-up, after `!!`, when a session ends, and when free-run stops. The board is idle and no `?` has arrived since. |
 | <img src="guide-images/display-found.svg" alt="Found icon" width="160"><br>**Found** | Shown after a `?` arrives while idle: a host has found the board but hasn't opened a session. If it stays, Dataflow's version check or flashing didn't finish. |
-| <img src="guide-images/display-connected.svg" alt="Connected icon" width="160"><br>**Connected** | Shown for 3 seconds after `open` starts a session. The display is then cleared and stays blank for the rest of the session, unless an `identify` arrives. |
+| <img src="guide-images/display-connected.svg" alt="Connected icon" width="160"><br>**Connected** | Shown for 3 seconds after `open` starts a session. The display is then turned off for the rest of the session, unless an `identify` arrives. |
 | <img src="guide-images/display-identify.svg" alt="Identify icon" width="160"><br>**Identify** | Shown for 3 seconds after `identify`, in any state, along with a short sound on a micro:bit V2. The display then goes back to what the state calls for. |
 | <img src="guide-images/display-streaming.svg" alt="Streaming icon" width="160"><br>**Streaming** | Shown in free-run, which `stream` or a long press of button A starts. |
 <!-- end generated: displays -->
@@ -241,7 +244,7 @@ Any program that can open the micro:bit's serial port at 115200 baud can drive t
 host does this:
 
 1. **Write `!! #n` and then `?` as soon as you connect,** with no checksum on the `?`:
-   firmware older than version 4 ignores `!!` and answers only a bare `?`, with the v1–v3
+   firmware before 4 ignores `!!` and answers only a bare `?`, with the v1–v3
    banner, `CLUE-SPIKERBIT v<N>`. The board may have a backlog of old output, ending in a
    cut-off line, waiting for you. Then:
    - **`ok #n` followed by the `hello` line:** the board is reset and identified. Check the
@@ -252,8 +255,9 @@ host does this:
 2. **Send `open session:<id> #n` with a random id,** and send it again if no `ok #n` arrives.
 3. **Send `ping session:<id> #n` every second,** well inside the default timeout in
    [Timing and limits](#timing-and-limits). The `ok` replies show the board is still there.
-4. **Read the `emg:` readings.** Match `ok` and `err` replies by their `#n`, not by their
-   position, and ignore lines you don't recognize.
+4. **Read the `emg:` readings.** Drop any non-empty line whose checksum is missing or wrong.
+   Match `ok` and `err` replies by their `#n`, not by their position, and ignore lines you
+   don't recognize.
 5. **On `err nosession`, open a new session** with a new id. The session lapsed, for example
    because the browser slowed timers in a hidden tab.
 6. **On `err othersession`, stop.** Another host owns the board.
