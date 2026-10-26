@@ -16,6 +16,7 @@ import { SerialDevice } from "../../../models/stores/serial";
 import { deviceProtocol, deviceDisplayName, deviceSupportsOutput } from "../model/utilities/device-capabilities";
 import { simulatedHub, simulatedHubName } from "../model/utilities/simulated-output";
 import { getValueOrZero } from "./utilities/view-utilities";
+import { servoAngleForValue, servoDisplayMessage } from "./utilities/servo";
 
 export const LiveOutputTickEntry = BaseTickEntry.named("LiveOutputTickEntry")
 .props({
@@ -452,17 +453,14 @@ export class LiveOutputNode extends BaseNode<
       this.saveNodeValue(newValue);
       this.saveOutputStatus("");
     } else if (kServoOutputTypes.includes(outputType)) {
-      // In proportion mode (unit setting) the Servo accepts 0–1 and we scale to the full 0–180 sweep;
-      // the stored value stays in degrees so the serial/hardware path is unchanged. Out-of-range angles
-      // clamp to the nearest valid angle.
-      const scaled = this.servoProportionMode ? value * 180 : value;
-      const newValue = Math.min(Math.max(scaled, 0), 180);
+      // The stored value is degrees, so the serial/hardware path is unchanged whichever units the
+      // unit's servoInputMode gives us.
 
       // alternative: out of range value will not move sim servo
       // const isValidServoValue = value >= 0 && value <= 180;
       // const newValue = isValidServoValue ? value : this.getLastValidServoValue();
 
-      this.saveNodeValue(newValue);
+      this.saveNodeValue(servoAngleForValue(value, this.servoProportionMode));
       this.saveOutputStatus("");
     } else {
       // We shouldn't hit this case but if we do then just pass the value through
@@ -492,12 +490,4 @@ function getPercentageAsInt(num: number){
   if (num > 1)  return 100;
   if (num < 0)  return 0;
   return Math.round(num * 100);
-}
-
-// The Servo output field label. The stored value is always the angle in degrees (0–180). In degrees
-// mode (default) it's shown as degrees; in proportion mode it's shown as % of full rotation, mirroring
-// the gripper's "% closed".
-export function servoDisplayMessage(value: number, proportionMode: boolean) {
-  if (proportionMode) return `${Math.round((value / 180) * 100)}% rotation`;
-  return `${Math.round(value)}°`;
 }
