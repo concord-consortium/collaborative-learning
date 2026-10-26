@@ -20,6 +20,12 @@ export const studentIdNumeric = 1;
 export const studentId = `${studentIdNumeric}`;
 export const studentName = "Sam Student";
 export const studentAuth = { uid: studentId, platform_user_id: studentIdNumeric, user_type: "student", class_hash: thisClass, offering_id: offeringIdNumeric };
+// The claims the portal really mints for a launched student. studentAuth's user_type "student" is the
+// client-side remap, which no rule sees; rules that grant learners must be tested with this.
+export const learnerAuth = {
+  uid: "learner-firebase-uid", platform_user_id: studentIdNumeric, user_type: "learner", class_hash: thisClass,
+  offering_id: offeringIdNumeric, platform_id: "https://learn.concord.org/"
+};
 export const student2IdNumeric = 2;
 export const student2Id = `${student2IdNumeric}`;
 export const student2Auth = { uid: student2Id, platform_user_id: student2IdNumeric, user_type: "student", class_hash: otherClass, offering_id: offeringIdNumeric };
