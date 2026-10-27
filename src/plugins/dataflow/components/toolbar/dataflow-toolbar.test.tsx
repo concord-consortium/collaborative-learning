@@ -589,6 +589,7 @@ describe("Dataflow connect button and pane", () => {
       fireEvent.click(aliveButton());
       expect(r.identify).toHaveBeenCalledTimes(1);
       expect(within(pane()).getByText("Checking the Spiker:bit… look for the heart.")).toBeInTheDocument();
+      expect(within(pane()).queryByText("The Spiker:bit is not responding.")).toBeNull();
       expect(isDisabled(aliveButton())).toBe(true);
       await r.answer("answered");
       expect(within(pane()).getByText("The Spiker:bit answered.")).toBeInTheDocument();
