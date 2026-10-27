@@ -112,6 +112,8 @@ export class MicrobitUsbTransport implements IDeviceTransport {
 
 export interface SpikerbitDeviceOptions {
   firmwareQueryTimeoutMs?: number;
+  // Where unplugs are reported. Defaults to navigator.usb.
+  usb?: IUsbDisconnectSource;
 }
 
 export class SpikerbitDevice {
@@ -130,7 +132,7 @@ export class SpikerbitDevice {
   constructor(serialDevice: SerialDevice, connection: IMicrobitUsbConnection, options?: SpikerbitDeviceOptions) {
     this.serialDevice = serialDevice;
     this.connection = connection;
-    this.transport = new MicrobitUsbTransport(connection);
+    this.transport = new MicrobitUsbTransport(connection, options?.usb);
     this.firmwareQueryTimeoutMs = options?.firmwareQueryTimeoutMs ?? kFirmwareQueryTimeoutMs;
   }
 

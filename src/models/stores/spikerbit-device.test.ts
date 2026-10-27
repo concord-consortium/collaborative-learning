@@ -357,6 +357,14 @@ describe("SpikerbitDevice", () => {
       expect(usb.count()).toBe(0);
     });
 
+    it("disposing the device removes its transport's unplug listener", () => {
+      const usb = makeUsbSource();
+      const device = new SpikerbitDevice(makeSerialDevice(), new FakeConnection(), { usb });
+      expect(usb.count()).toBe(1);
+      device.dispose();
+      expect(usb.count()).toBe(0);
+    });
+
     it("a failed write and then the unplug end as unplugged", () => {
       const serialDevice = makeSerialDevice();
       const conn = new FakeConnection();
