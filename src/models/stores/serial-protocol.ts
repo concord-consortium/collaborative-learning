@@ -3,13 +3,10 @@ import {
   CcDeviceHello, kCcDeviceProtocolName, kCcDeviceProtocolVersion, parseCcDeviceLine, parseHello
 } from "./cc-device-protocol";
 
-// Parser for the "keyValue" protocol: consumes complete "key:value\r\n" lines from
-// `buffer`, updating every channel with the matching id, and returns the unconsumed
-// remainder. Unparseable complete lines are discarded to recover from corrupted serial data.
-// Used for the Arduino over Web Serial. The `[ \t]*` before the line ending tolerates
-// trailing whitespace: Spiker:bit firmware v1 and v2 pad each line with spaces (e.g.
-// "emg:57            \r\n") — which detectSpikerbitVersion must also parse — while v3
-// disables padding (setWriteLinePadding(0)) and the Arduino never padded; all parse correctly.
+// Parser for the "keyValue" protocol, used for the Arduino over Web Serial: consumes complete
+// "key:value\r\n" lines from `buffer`, updating every channel with the matching id, and returns
+// the unconsumed remainder. Unparseable complete lines are discarded to recover from corrupted
+// serial data. Spaces or tabs before the line ending are allowed.
 export function parseKeyValueData(buffer: string, channels: NodeChannelInfo[]): string {
   const pattern = /([a-z0-9]+):([0-9.]+)[ \t]*[\r][\n]/;
   // eslint-disable-next-line no-constant-condition
@@ -21,7 +18,7 @@ export function parseKeyValueData(buffer: string, channels: NodeChannelInfo[]): 
       channels.filter((c: NodeChannelInfo) => c.channelId === channel).forEach(targetChannel => {
         targetChannel.value = Math.round(Number(numStr));
         // Stamp arrival time so the rete-manager freshness check can flip a channel to
-        // `missing` when its device stops sending it (e.g. a Spiker:bit never emits fsr/a1).
+        // `missing` when its device stops sending it.
         targetChannel.lastMessageReceivedAt = Date.now();
       });
     } else {

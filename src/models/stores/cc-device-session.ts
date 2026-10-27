@@ -3,12 +3,14 @@ import { NodeChannelInfo } from "../../plugins/dataflow/model/utilities/channel"
 import { parseCcDeviceLine, splitLines, withChecksum } from "./cc-device-protocol";
 
 export interface CcDeviceSessionOptions {
-  pingIntervalMs?: number;
-  openRetryMs?: number;
   randomSessionId?: () => number;
 }
 
 export const kMaxSeq = 999;
+
+// How often an open session is pinged, and how long an unanswered open waits before it's re-sent.
+export const kPingIntervalMs = 1000;
+export const kOpenRetryMs = 2000;
 
 // How many commands in a row can go unanswered before the device counts as not responding.
 export const kNotRespondingAfter = 3;
@@ -33,8 +35,6 @@ export class CcDeviceSession {
   notResponding = false;
 
   private write: (line: string) => void | Promise<void>;
-  private pingIntervalMs: number;
-  private openRetryMs: number;
   private randomSessionId: () => number;
 
   private sessionId = 0;
@@ -53,8 +53,6 @@ export class CcDeviceSession {
 
   constructor(write: (line: string) => void | Promise<void>, options: CcDeviceSessionOptions = {}) {
     this.write = write;
-    this.pingIntervalMs = options.pingIntervalMs ?? 1000;
-    this.openRetryMs = options.openRetryMs ?? 2000;
     this.randomSessionId = options.randomSessionId ?? defaultRandomSessionId;
     makeObservable<CcDeviceSession>(this, {
       lastHeartbeatAt: observable,
@@ -161,7 +159,7 @@ export class CcDeviceSession {
       if (this.opened) return;
       this.opened = true;
       this.clearTimers();
-      this.pingTimer = setInterval(() => this.ping(), this.pingIntervalMs);
+      this.pingTimer = setInterval(() => this.ping(), kPingIntervalMs);
     } else {
       this.setLastHeartbeatAt(Date.now());
     }
@@ -194,7 +192,7 @@ export class CcDeviceSession {
   private openSession() {
     this.sessionId = this.randomSessionId();
     // The timer goes first, so an ok that arrives while the open is being written cancels it.
-    this.openTimer = setInterval(() => this.sendOpen(), this.openRetryMs);
+    this.openTimer = setInterval(() => this.sendOpen(), kOpenRetryMs);
     this.sendOpen();
   }
 

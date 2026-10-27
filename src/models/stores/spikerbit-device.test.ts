@@ -106,6 +106,7 @@ function makeSerialDevice() {
 describe("SpikerbitDevice", () => {
   afterEach(() => {
     serialDevices.splice(0).forEach(d => d.clearActiveDevice());
+    jest.useRealTimers();
   });
 
   it("does NOT flash when the board reports the current firmware version", async () => {
@@ -143,7 +144,8 @@ describe("SpikerbitDevice", () => {
     expect(conn.flashed).toBe(true);
   });
 
-  it("flashes a board answering with the legacy banner", async () => {
+  it("flashes a board answering with the legacy banner as soon as the banner arrives", async () => {
+    jest.useFakeTimers();
     const serialDevice = makeSerialDevice();
     const conn = new FakeConnection();
     // Firmware v1–v3 ignores "!!".
@@ -151,9 +153,12 @@ describe("SpikerbitDevice", () => {
     conn.respondHello = "CLUE-SPIKERBIT v3\r\n";
     const device = new SpikerbitDevice(serialDevice, conn);
 
-    await device.connectAndStream("HEX");
-
+    const connecting = device.connectAndStream("HEX");
+    // Well before kFirmwareQueryTimeoutMs, after which a board that doesn't answer is flashed too.
+    await jest.advanceTimersByTimeAsync(100);
     expect(conn.flashed).toBe(true);
+    await jest.advanceTimersByTimeAsync(5000);
+    await connecting;
   });
 
   it("flashes a board speaking a newer protocol version, even with newer firmware", async () => {
@@ -254,6 +259,18 @@ describe("SpikerbitDevice", () => {
     finishClose();
     await ending;
     expect(ended).toBe(true);
+  });
+
+  it("logs a write that throws before returning a promise, as the library does once the board is gone", async () => {
+    const warn = jest.spyOn(console, "warn").mockImplementation(() => undefined);
+    const conn = new FakeConnection();
+    conn.serialWrite = () => { throw new Error("not connected"); };
+    const transport = new MicrobitUsbTransport(conn);
+
+    await expect(transport.write("servo:90")).resolves.toBeUndefined();
+
+    expect(warn).toHaveBeenCalledWith("Spiker:bit serialWrite failed", expect.any(Error));
+    warn.mockRestore();
   });
 
   it("clears the store's transport on disconnect", async () => {
@@ -495,6 +512,28 @@ describe("SpikerbitDevice", () => {
       await connecting;
       // The re-query after the flash got no hello either, so it warned and connected anyway.
       expect(warn).toHaveBeenCalledWith(expect.stringMatching(/not confirmed after flash/));
+      warn.mockRestore();
+    });
+
+    it("still flashes when writing !! and ? again throws before returning a promise", async () => {
+      const warn = jest.spyOn(console, "warn").mockImplementation(() => undefined);
+      const conn = new FakeConnection();
+      conn.respondHello = null;
+      const write = conn.serialWrite.bind(conn);
+      conn.serialWrite = (data: string) => {
+        if (data.startsWith("!!") && conn.resetWrites().length === 1) {
+          conn.written.push(data);
+          throw new Error("not connected");
+        }
+        return write(data);
+      };
+      const connecting = new SpikerbitDevice(makeSerialDevice(), conn).connectAndStream("HEX");
+
+      await jest.advanceTimersByTimeAsync(5000);
+      await connecting;
+
+      expect(conn.flashed).toBe(true);
+      expect(warn).toHaveBeenCalledWith("Spiker:bit serialWrite failed", expect.any(Error));
       warn.mockRestore();
     });
 

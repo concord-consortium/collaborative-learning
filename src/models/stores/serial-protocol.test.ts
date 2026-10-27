@@ -69,8 +69,8 @@ describe("parseKeyValueData", () => {
   });
 
   it("leaves lastMessageReceivedAt stale on a channel the stream never sends", () => {
-    // A Spiker:bit satisfies fsr by protocol but never emits it; the seeded-stale timestamp
-    // must not be refreshed, so the freshness check flips fsr to `missing`.
+    // A device that never sends fsr: its seeded-stale timestamp must not be refreshed, so the
+    // freshness check flips fsr to `missing`.
     const emg = emgChannel();
     const fsr: NodeChannelInfo = { ...emgChannel(), name: "fsr", channelId: "fsr", lastMessageReceivedAt: 1000 };
     parseKeyValueData("emg:512\r\n", [emg, fsr]);

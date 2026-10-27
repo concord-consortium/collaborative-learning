@@ -37,9 +37,9 @@ const emgSensorChannel: NodeChannelInfo = {
   usesSerial: true,
   serialConnected: null,
   protocol: "keyValue",
-  // Seed as already-stale so a keyValue channel a connected device never sends (e.g. fsr/a1
-  // on a Spiker:bit) times out to `missing` instead of showing present at 0; parseKeyValueData
-  // refreshes this on each message, so channels the device does send stay present.
+  // Seed as already-stale so a channel the connected device never sends times out to `missing`
+  // instead of showing present at 0. Each reading refreshes this (parseKeyValueData for the
+  // Arduino, CcDeviceSession for the Spiker:bit), so channels the device does send stay present.
   lastMessageReceivedAt: Date.now()
 };
 

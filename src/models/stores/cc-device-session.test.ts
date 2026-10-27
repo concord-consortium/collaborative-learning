@@ -41,16 +41,36 @@ describe("CcDeviceSession", () => {
     jest.advanceTimersByTime(1500);
     expect(bodies()).toEqual(["open session:4242 #1"]);
     s.receive(deviceLine("ok #1"), []);
-    jest.advanceTimersByTime(2000);
+    jest.advanceTimersByTime(999);
+    expect(bodies()).toEqual(["open session:4242 #1"]);
+    jest.advanceTimersByTime(1);
+    expect(bodies()).toEqual(["open session:4242 #1", "ping session:4242 #2"]);
+    jest.advanceTimersByTime(1000);
     expect(bodies()).toEqual(["open session:4242 #1", "ping session:4242 #2", "ping session:4242 #3"]);
     s.stop();
   });
 
-  it("re-sends an unanswered open after openRetryMs", () => {
+  it("re-sends an unanswered open every 2 seconds", () => {
     const s = make();
     s.start();
-    jest.advanceTimersByTime(2000);
-    expect(bodies().filter(b => b.startsWith("open"))).toHaveLength(2);
+    const opens = () => bodies().filter(b => b.startsWith("open"));
+    jest.advanceTimersByTime(1999);
+    expect(opens()).toHaveLength(1);
+    jest.advanceTimersByTime(1);
+    expect(opens()).toHaveLength(2);
+    s.stop();
+  });
+
+  it("logs a write that throws and keeps the session going", () => {
+    const warn = jest.spyOn(console, "warn").mockImplementation(() => undefined);
+    write.mockImplementationOnce(() => { throw new Error("not connected"); });
+    const s = make();
+    expect(() => s.start()).not.toThrow();
+    expect(warn).toHaveBeenCalledWith("CC Device write failed", expect.any(Error));
+    s.receive(deviceLine("ok #1"), []);
+    jest.advanceTimersByTime(1000);
+    expect(lastBody()).toBe("ping session:4242 #2");
+    warn.mockRestore();
     s.stop();
   });
 

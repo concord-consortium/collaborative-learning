@@ -32,11 +32,8 @@ const kRetryAfterDrainMs = 200;
 // How often queryFirmware checks for a reply and for the drain.
 const kQueryPollMs = 10;
 
-// The #n of the connect-time "!!". CcDeviceSession numbers its commands from 1 to kMaxSeq, so a
-// connect-time number can never match one of the session's. That matters because a reply to a
-// connect-time "!!" can reach the session: once one attempt has identified the firmware, the
-// session starts while the replies to another attempt (a retry, or a first attempt the device
-// answered late) may still be on their way.
+// Above CcDeviceSession's 1..kMaxSeq, so a late reply to a connect-time "!!" can't match a session
+// command.
 const kFirstResetSeq = kMaxSeq + 1;
 
 // Minimal subset of @microbit/microbit-connection's MicrobitUSBConnection that
@@ -94,10 +91,14 @@ export class MicrobitUsbTransport implements IDeviceTransport {
   };
 
   // Resolves when the write finishes, so a caller can wait for its last line to reach the board.
-  // A failure is logged, not thrown.
-  write(line: string) {
-    return this.connection.serialWrite(`${line}\n`)
-      .catch((e) => console.warn("Spiker:bit serialWrite failed", e));
+  // A failure is logged, not thrown. It's async because serialWrite throws before returning a
+  // promise when the board is gone.
+  async write(line: string) {
+    try {
+      await this.connection.serialWrite(`${line}\n`);
+    } catch (e) {
+      console.warn("Spiker:bit serialWrite failed", e);
+    }
   }
 
   close() {
@@ -133,8 +134,6 @@ export class SpikerbitDevice {
     flashDataSource: unknown,
     progress?: (stage: string, pct?: number) => void
   ){
-    // During connect, inbound data feeds only firmware detection. EMG parsing begins once
-    // setActiveDevice repoints the transport's onData at SerialDevice.receive (below).
     this.transport.onData = this.handleFirmwareData;
 
     try {
@@ -146,10 +145,6 @@ export class SpikerbitDevice {
       throw e;
     }
 
-    // Route servo writes and inbound EMG through this WebUSB transport and mark the shared
-    // store connected. setActiveDevice wires transport.onData -> receive (spikerbit maps to
-    // the ccDevice protocol -> CcDeviceSession) and transport.onDisconnect, replacing
-    // the connect-time firmware handler, and starts the session.
     this.serialDevice.setActiveDevice(kSpikerbitDeviceName, this.transport);
   }
 
@@ -239,10 +234,11 @@ export class SpikerbitDevice {
   }
 
   // Both lines go in one write, so the "?" reaches the board right behind the "!!". The "!!"
-  // carries a checksum, like every command Dataflow sends except the "?".
-  private writeResetAndQuery() {
+  // carries a checksum, like every command Dataflow sends except the "?". Async so that a
+  // serialWrite that throws before returning a promise rejects instead.
+  private async writeResetAndQuery() {
     this.lastDataAt = Date.now();
     this.shortReadAt = undefined;
-    return this.connection.serialWrite(`${withChecksum(`!! #${this.resetSeq++}`)}\n?\n`);
+    await this.connection.serialWrite(`${withChecksum(`!! #${this.resetSeq++}`)}\n?\n`);
   }
 }

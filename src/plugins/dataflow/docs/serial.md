@@ -116,8 +116,9 @@ isn't offered for an unplugged board: the pane shows the device choices, and Con
 the chooser. For a Spiker:bit it runs `connectAndStream` again on the known
 `SpikerbitDevice`, whose library connection remembers the board and reopens it without the
 chooser. If that fails, for example because the board was unplugged and plugged back in, it
-disconnects that device and falls back to a new one, which shows the chooser. CLUE doesn't
-call the library's `initialize()`, so it doesn't watch for the board being unplugged.
+disconnects that device and falls back to a new one, which shows the chooser. A Spiker:bit
+unplug is noticed by `navigator.usb`'s `disconnect` event, or else by the next write to the board
+failing (see "Why a device went away").
 
 **Disconnect** ends any CC Device Protocol session (`SerialDevice.endSession`, waiting at most
 500 ms, `kEndSessionTimeoutMs`), then closes the transport and clears the active device. For a
@@ -461,6 +462,13 @@ so it survives the pane closing and never shows an earlier board's answer.
 A Spiker:bit connect that fails because another tab or app has claimed the board (the library's
 `device-in-use` error) returns `"inUse"`, which the pane reports as "Another app is using the
 Spiker:bit."
+
+CLUE doesn't call the library's `initialize()`, which is where the library itself would listen for
+`navigator.usb`'s `disconnect` event, because `initialize()` also pauses the connection in a hidden
+tab. `MicrobitUsbTransport` listens instead. Without that event, an unplug would be noticed only
+when a write fails: the session's `ping` every second, a re-sent `open`, or a servo command. After
+`err othersession` the session stops pinging, so the event is then the only way it's noticed unless
+a program is writing to the servo.
 
 ## Summary
 
