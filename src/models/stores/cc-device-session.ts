@@ -154,7 +154,7 @@ export class CcDeviceSession {
     const kind = seq === undefined ? undefined : this.pending.get(seq);
     if (seq === undefined || !kind) return;
     this.pending.delete(seq);
-    this.answered();
+    this.heardReply();
     if (kind === "open") {
       if (this.opened) return;
       this.opened = true;
@@ -175,7 +175,7 @@ export class CcDeviceSession {
     // A reply to a pending command, other than `othersession`, shows the device is answering.
     if (seq !== undefined && kind) {
       this.pending.delete(seq);
-      if (reason !== "othersession") this.answered();
+      if (reason !== "othersession") this.heardReply();
     }
     if (reason === "nosession") {
       this.clearTimers();
@@ -206,7 +206,7 @@ export class CcDeviceSession {
     this.sendCommand(`ping session:${this.sessionId}`, "ping");
   }
 
-  private answered() {
+  private heardReply() {
     this.unanswered = 0;
     this.setNotResponding(false);
   }

@@ -249,8 +249,8 @@ export const ConnectDeviceButton = observer(function ConnectDeviceButton({ name 
   const isOpen = !!content?.connectPaneOpen;
   const paneRef = useRef<HTMLDivElement | null>(null);
 
-  // Pulses when a device is lost while this toolbar is showing, not for a loss from before it mounted.
-  // The class stays until the next connect attempt clears the loss; its animation plays once.
+  // Pulses when a device goes away while this toolbar is showing, not for a loss from before it
+  // mounted. The class stays until the next connect attempt clears the loss.
   const lossAtMount = useRef(connection.lossAt).current;
   const lossPulse = connection.lossAt !== undefined && connection.lossAt !== lossAtMount;
 

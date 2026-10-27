@@ -26,7 +26,7 @@
       }
     }
 
-    // Pulses three times when a device is lost, then shows whatever the button's state calls for.
+    // Pulses three times when a device goes away, then shows whatever the button's state calls for.
     &.connect-loss-pulse {
       animation: connect-slowpulse 1.5s linear 3;
 

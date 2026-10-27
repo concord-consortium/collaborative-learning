@@ -63,9 +63,10 @@ export interface IUsbDisconnectSource {
 // IDeviceTransport over a micro:bit WebUSB serial connection. Like WebSerialTransport,
 // it owns the connection's inbound events: it forwards serial chunks to onData and fires
 // onDisconnect on a lost/deauthorized connection, so SerialDevice can receive centrally.
-// The library disconnects itself after any failed WebUSB call, which reports the loss as "lost".
-// It listens for navigator.usb's disconnect event only in its initialize(), which CLUE doesn't call
-// because it also pauses the connection in a hidden tab, so this listens for unplugs itself.
+// The library disconnects itself after any failed WebUSB call, and its Disconnected status is
+// reported as "lost". It listens for navigator.usb's disconnect only in initialize(), which CLUE
+// doesn't call because initialize() also pauses the connection in a hidden tab, so this transport
+// listens for unplugs itself.
 export class MicrobitUsbTransport implements IDeviceTransport {
   onData?: (chunk: string) => void;
   onDisconnect?: (loss: DeviceLoss) => void;

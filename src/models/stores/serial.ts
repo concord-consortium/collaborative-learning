@@ -6,7 +6,7 @@ import { deviceProtocol } from "../../plugins/dataflow/model/utilities/device-ca
 import { DeviceLoss, IDeviceTransport } from "./device-transport";
 import { CcDeviceSession } from "./cc-device-session";
 
-// The device lost most recently without the user asking, and when.
+// The most recent loss of a device the user didn't ask for, and when.
 export interface IDeviceLossRecord {
   reason: DeviceLoss;
   transport: IDeviceTransport;

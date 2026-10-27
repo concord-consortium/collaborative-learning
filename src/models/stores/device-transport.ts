@@ -1,4 +1,4 @@
-// Why a transport lost its device without being asked to close: "unplugged" when the browser
+// Why a transport's device went away without being asked to close: "unplugged" when the browser
 // reported the device removed, "lost" for any other failure.
 export type DeviceLoss = "unplugged" | "lost";
 

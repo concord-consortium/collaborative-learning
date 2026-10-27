@@ -78,8 +78,8 @@ export class DeviceConnection {
   // connection remembers the board, so Reconnect reopens it without the chooser. Connect
   // replaces it with a fresh one, which shows the chooser.
   private spikerbitDevice: SpikerbitDevice | undefined;
-  // The latest "Is it alive?" check, with the session it asked. It counts only while that session is
-  // the active one, so a reconnect or a new device never shows an earlier board's answer.
+  // The latest "Is it alive?" check, with the CcDeviceSession it asked. It counts only while that
+  // object is the active one, so a reconnect or a new device never shows an earlier board's answer.
   private identifyCheck: IIdentifyCheck | undefined = undefined;
 
   constructor(serialDevice: SerialDevice, deps?: Partial<IDeviceConnectionDeps>) {

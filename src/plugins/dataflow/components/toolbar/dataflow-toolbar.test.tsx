@@ -649,7 +649,7 @@ describe("Dataflow connect button and pane", () => {
     });
   });
 
-  describe("when a device is lost", () => {
+  describe("after a loss", () => {
     const pulsing = (r: ReturnType<typeof renderConnect>) =>
       getTrigger(r.container).classList.contains("connect-loss-pulse");
     const lose = (r: ReturnType<typeof renderConnect>, loss: "lost" | "unplugged") => {
@@ -657,7 +657,7 @@ describe("Dataflow connect button and pane", () => {
       act(() => transport.onDisconnect!(loss));
     };
 
-    // The pulse is the class's CSS animation, which plays once when the class is added and then
+    // The pulse is the class's CSS animation, which runs once when the class is added and then
     // shows the state's own look.
     it("the button gets the pulse class over its normal look, kept until the next connect attempt", () => {
       jest.useFakeTimers();
