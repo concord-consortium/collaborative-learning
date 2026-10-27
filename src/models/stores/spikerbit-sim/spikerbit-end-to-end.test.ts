@@ -147,7 +147,7 @@ describe("Dataflow and the Spiker:bit firmware", () => {
     expect(channel.lastMessageReceivedAt).toBeGreaterThan(Date.now() - 200);
   });
 
-  it("moves the servo from a Live Output", async () => {
+  it("moves the servo for a servo output", async () => {
     await connect();
     serialDevice.writeToOutForServo(0, "Servo");
     await tick(100);
