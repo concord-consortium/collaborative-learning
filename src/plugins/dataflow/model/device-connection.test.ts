@@ -565,6 +565,17 @@ describe("DeviceConnection", () => {
         serialDevice.clearActiveDevice();
       });
 
+      it("an earlier session's late answer doesn't replace a newer check", async () => {
+        const { serialDevice, connection, answer } = await setupCheck();
+        void connection.identify();
+        serialDevice.setActiveDevice("spikerbit", { write: jest.fn(), close: jest.fn() });
+        jest.spyOn(serialDevice.ccDeviceSession!, "identify").mockImplementation(() => new Promise(() => undefined));
+        void connection.identify();
+        await answer("noAnswer");
+        expect(connection.check).toBe("checking");
+        serialDevice.clearActiveDevice();
+      });
+
       it("a new check isn't cleared by the timer of the one before it", async () => {
         const { serialDevice, connection, answer } = await setupCheck();
         void connection.identify();
