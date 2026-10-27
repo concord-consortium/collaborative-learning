@@ -679,6 +679,8 @@ describe("Dataflow connect button and pane", () => {
       lose(first, "unplugged");
       const second = renderConnect({ stores: first.stores });
       expect(pulsing(second)).toBe(false);
+      act(() => first.stores.serialDevice.clearLastLoss());
+      expect(pulsing(second)).toBe(false);
     });
 
     it("an unplug confirming the loss doesn't pulse again", () => {
