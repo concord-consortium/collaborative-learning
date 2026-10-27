@@ -217,8 +217,9 @@ Keep `kSpikerbitFirmwareVersion` equal to the `firmware:` number in the `HELLO` 
    `lastHeartbeatAt`, which stops advancing when the board stops answering.
 3. When a pending ping gets `err nosession`, it opens a new session with a new id. Chrome slows
    timers in hidden tabs, so this is how a session that lapsed while its tab was hidden
-   recovers. When one gets `err othersession`, it stops, since another host owns the board.
-   Errors that answer anything else, such as a ping from before a re-open, change nothing.
+   recovers. When one gets `err othersession`, it stops, since another host owns the board, and
+   counts as not responding (below). Errors that answer anything else, such as a ping from
+   before a re-open, change nothing.
 4. Disconnecting sends `close session:<id>` (`SerialDevice.endSession`), also while an `open`
    is still waiting for its `ok`, so the board shows the waiting icon at once instead of after
    the timeout.
@@ -231,6 +232,18 @@ An `open` re-sent because its `ok` was late, not lost, reaches a board that has 
 the session, and the board starts it afresh, with its settings back to their defaults. There are
 no settings yet; once there are, they should be sent only after every pending `open` is
 answered.
+
+**Not responding.** The session counts the `open`s and `ping`s it has sent since the last reply
+to one of them. When a fourth would go out with three still unanswered, about 3 s after the
+board went quiet, it sets the observable `notResponding`; any reply, `ok` or `err nosession`,
+clears it, and the count starts over. `err othersession` sets it too, and it stays set until a
+new session. The count is in commands, not seconds, and it pauses while the page is hidden and
+starts over when it's visible again: in a hidden tab the browser slows the library's serial
+reads below the rate the readings arrive, so replies fall behind and would look missing.
+
+**Identify.** `identify()` sends `identify #n` and resolves `"answered"` on any reply carrying
+that `#n`, `ok` or `err`, or `"noAnswer"` after 2 s. It works whatever state the session is in,
+and its reply doesn't count as an answer to the session's commands.
 
 A Live Output servo node sends `servo:<angle>` on every tick, without `#n`. Each reading
 updates every channel whose `channelId` is the reading's name, in every registered tile, and

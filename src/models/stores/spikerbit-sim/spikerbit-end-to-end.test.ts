@@ -166,6 +166,26 @@ describe("Dataflow and the Spiker:bit firmware", () => {
     expect(sim.takeSerialLines()).toContain(withChecksum("ok #900"));
   });
 
+  it("is not responding while the board is stalled, and recovers", async () => {
+    await connect();
+    await tick(2000);
+    expect(serialDevice.ccDeviceSession?.notResponding).toBe(false);
+    // Dataflow's timers run on while the board does nothing.
+    await jest.advanceTimersByTimeAsync(4000);
+    expect(serialDevice.ccDeviceSession?.notResponding).toBe(true);
+    await tick(2000);
+    expect(serialDevice.ccDeviceSession?.notResponding).toBe(false);
+  });
+
+  it("identify gets the board's answer and shows the heart", async () => {
+    await connect();
+    await tick(500);
+    const result = serialDevice.ccDeviceSession!.identify();
+    await tick(200);
+    await expect(result).resolves.toBe("answered");
+    expect(sim.shownIcon()).toBe("Heart");
+  });
+
   it("leaves the board idle and silent after a disconnect", async () => {
     const device = await connect();
     await tick(1000);

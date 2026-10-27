@@ -13,6 +13,11 @@ export const kMaxSeq = 999;
 // How many commands in a row can go unanswered before the device counts as not responding.
 export const kNotRespondingAfter = 3;
 
+// How long identify waits for the device's reply.
+export const kIdentifyTimeoutMs = 2000;
+
+export type IdentifyResult = "answered" | "noAnswer";
+
 function defaultRandomSessionId() {
   return 1 + Math.floor(Math.random() * 65535);
 }
@@ -36,6 +41,9 @@ export class CcDeviceSession {
   private seq = 0;
   private opened = false;
   private pending = new Map<number, "open" | "ping">();
+  // Resolvers for identify commands still waiting, by #n. Kept apart from `pending` so stopping the
+  // session doesn't drop them and their replies don't count as the session's.
+  private identifies = new Map<number, (result: IdentifyResult) => void>();
   private buffer = "";
   // Commands sent since the last reply. Not counted while the page is hidden: the browser slows
   // the library's serial reads there, so replies fall behind the readings.
@@ -102,6 +110,21 @@ export class CcDeviceSession {
     this.send(`${name}:${value}`);
   }
 
+  // Asks the device to draw attention to itself. Any reply to it, ok or err, means it answered.
+  identify(timeoutMs = kIdentifyTimeoutMs): Promise<IdentifyResult> {
+    const seq = this.nextSeq();
+    return new Promise(resolve => {
+      const timer = setTimeout(() => finish("noAnswer"), timeoutMs);
+      const finish = (result: IdentifyResult) => {
+        clearTimeout(timer);
+        this.identifies.delete(seq);
+        resolve(result);
+      };
+      this.identifies.set(seq, finish);
+      this.send(`identify #${seq}`);
+    });
+  }
+
   private handleLine(line: string, channels: NodeChannelInfo[]) {
     const parsed = parseCcDeviceLine(line);
     if (!parsed) return;
@@ -121,7 +144,15 @@ export class CcDeviceSession {
     }
   }
 
+  // Resolves the identify a reply answers. Returns whether there was one.
+  private answerIdentify(seq: number | undefined) {
+    const finish = seq === undefined ? undefined : this.identifies.get(seq);
+    finish?.("answered");
+    return !!finish;
+  }
+
   private handleOk(seq: number | undefined) {
+    if (this.answerIdentify(seq)) return;
     const kind = seq === undefined ? undefined : this.pending.get(seq);
     if (seq === undefined || !kind) return;
     this.pending.delete(seq);
@@ -137,6 +168,7 @@ export class CcDeviceSession {
   }
 
   private handleErr(seq: number | undefined, reason: string) {
+    if (this.answerIdentify(seq)) return;
     if (reason === "nosession" || reason === "othersession") {
       // Only an answer to a ping still pending changes the session. Reopening clears the pending
       // pings, so the errors for other pings in flight, or late ones for an earlier session,
@@ -188,9 +220,14 @@ export class CcDeviceSession {
       if (this.unanswered >= kNotRespondingAfter) this.setNotResponding(true);
       this.unanswered++;
     }
+    const seq = this.nextSeq();
+    this.pending.set(seq, kind);
+    this.send(`${command} #${seq}`);
+  }
+
+  private nextSeq() {
     this.seq = this.seq >= kMaxSeq ? 1 : this.seq + 1;
-    this.pending.set(this.seq, kind);
-    this.send(`${command} #${this.seq}`);
+    return this.seq;
   }
 
   private clearTimers() {

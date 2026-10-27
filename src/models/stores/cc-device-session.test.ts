@@ -297,6 +297,59 @@ describe("CcDeviceSession", () => {
     s.stop();
   });
 
+  describe("identify", () => {
+    it("sends identify #n and resolves answered on its ok", async () => {
+      const s = make();
+      s.start();
+      s.receive(deviceLine("ok #1"), []);
+      const result = s.identify();
+      expect(write).toHaveBeenLastCalledWith(withChecksum("identify #2"));
+      s.receive(deviceLine("ok #2"), []);
+      await expect(result).resolves.toBe("answered");
+      s.stop();
+    });
+
+    it("resolves noAnswer when no reply comes within 2 s", async () => {
+      const s = make();
+      s.start();
+      s.receive(deviceLine("ok #1"), []);
+      let settled: string | undefined;
+      void s.identify().then(r => { settled = r; });
+      await jest.advanceTimersByTimeAsync(1999);
+      expect(settled).toBeUndefined();
+      await jest.advanceTimersByTimeAsync(1);
+      expect(settled).toBe("noAnswer");
+      s.stop();
+    });
+
+    it("counts an err reply as answered", async () => {
+      const warn = jest.spyOn(console, "warn").mockImplementation(() => undefined);
+      const s = make();
+      s.start();
+      s.receive(deviceLine("ok #1"), []);
+      const result = s.identify();
+      s.receive(deviceLine("err #2 unknown"), []);
+      await expect(result).resolves.toBe("answered");
+      warn.mockRestore();
+      s.stop();
+    });
+
+    it("still works after othersession has stopped the session", async () => {
+      const warn = jest.spyOn(console, "warn").mockImplementation(() => undefined);
+      const s = make();
+      s.start();
+      s.receive(deviceLine("ok #1"), []);
+      jest.advanceTimersByTime(1000);
+      s.receive(deviceLine("err #2 othersession"), []);
+      const result = s.identify();
+      expect(write).toHaveBeenLastCalledWith(withChecksum("identify #3"));
+      s.receive(deviceLine("ok #3"), []);
+      await expect(result).resolves.toBe("answered");
+      warn.mockRestore();
+      s.stop();
+    });
+  });
+
   describe("not responding", () => {
     const setHidden = (hidden: boolean) => {
       Object.defineProperty(document, "visibilityState", {
@@ -381,6 +434,18 @@ describe("CcDeviceSession", () => {
       expect(s.notResponding).toBe(true);
       expect(write.mock.calls.length).toBe(count);
       warn.mockRestore();
+      s.stop();
+    });
+
+    it("identify's ok doesn't end not responding", async () => {
+      const s = make();
+      s.start();
+      s.receive(deviceLine("ok #1"), []);
+      jest.advanceTimersByTime(4000);
+      const result = s.identify();
+      s.receive(deviceLine(`ok #${latestSeq()}`), []);
+      await expect(result).resolves.toBe("answered");
+      expect(s.notResponding).toBe(true);
       s.stop();
     });
 
