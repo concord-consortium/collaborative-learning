@@ -495,6 +495,19 @@ describe("Dataflow connect button and pane", () => {
     expect(connect).not.toHaveBeenCalled();
   });
 
+  it("the button turns yellow when the board stops responding, and green when it answers again", () => {
+    const r = renderConnect();
+    fakeConnected(r);
+    const trigger = getTrigger(r.container);
+    const session = r.stores.serialDevice.ccDeviceSession!;
+    act(() => session.setNotResponding(true));
+    expect(trigger.classList.contains("connect-attention")).toBe(true);
+    expect(trigger.getAttribute("aria-label")).toBe("The Spiker:bit is not responding. Click for details.");
+    act(() => session.setNotResponding(false));
+    expect(trigger.classList.contains("connect-connected")).toBe(true);
+    act(() => r.stores.serialDevice.clearActiveDevice());
+  });
+
   it("the button shows the attention state when the program needs a device", () => {
     const content = DataflowContentModel.create();
     content.setNeedsDevice(true);

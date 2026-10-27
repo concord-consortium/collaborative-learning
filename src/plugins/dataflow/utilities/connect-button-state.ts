@@ -10,19 +10,24 @@ export function toolbarShowsConnect(tools: unknown): boolean {
   return Array.isArray(tools) && tools.includes("connect");
 }
 
-export function connectButtonState(o: {
-  connected: boolean; needsDevice: boolean; unseenError: boolean;
-}): ConnectButtonState {
-  if (o.connected) return "connected";
+interface IConnectButtonInput {
+  connected: boolean;
+  needsDevice: boolean;
+  unseenError: boolean;
+  // Connected, but the board has stopped answering.
+  notResponding: boolean;
+}
+
+export function connectButtonState(o: IConnectButtonInput): ConnectButtonState {
+  if (o.connected) return o.notResponding ? "attention" : "connected";
   return o.needsDevice || o.unseenError ? "attention" : "idle";
 }
 
-export function connectButtonTooltip(o: {
-  connected: boolean; connectedLabel?: string; needsDevice: boolean; unseenError: boolean;
-}): string {
+export function connectButtonTooltip(o: IConnectButtonInput & { connectedLabel?: string }): string {
   switch (connectButtonState(o)) {
     case "connected": return `Connected: ${o.connectedLabel}`;
     case "attention":
+      if (o.connected) return `The ${o.connectedLabel} is not responding. Click for details.`;
       return o.unseenError
         ? "Couldn't connect. Click for details."
         : "This program needs a device. Click to connect.";

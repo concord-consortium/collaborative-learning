@@ -258,7 +258,8 @@ export const ConnectDeviceButton = observer(function ConnectDeviceButton({ name 
   const stateInput = {
     connected: connection.isConnected,
     needsDevice: !!content?.needsDevice,
-    unseenError: !!content?.unseenConnectError
+    unseenError: !!content?.unseenConnectError,
+    notResponding: connection.notResponding
   };
   const state = connectButtonState(stateInput);
   const title = connectButtonTooltip({ ...stateInput, connectedLabel: connection.connectedLabel });
