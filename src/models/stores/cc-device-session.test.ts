@@ -61,6 +61,19 @@ describe("CcDeviceSession", () => {
     s.stop();
   });
 
+  it("logs a write that throws and keeps the session going", () => {
+    const warn = jest.spyOn(console, "warn").mockImplementation(() => undefined);
+    write.mockImplementationOnce(() => { throw new Error("not connected"); });
+    const s = make();
+    expect(() => s.start()).not.toThrow();
+    expect(warn).toHaveBeenCalledWith("CC Device write failed", expect.any(Error));
+    s.receive(deviceLine("ok #1"), []);
+    jest.advanceTimersByTime(1000);
+    expect(lastBody()).toBe("ping session:4242 #2");
+    warn.mockRestore();
+    s.stop();
+  });
+
   it("records lastHeartbeatAt for an ok to a ping", () => {
     const s = make();
     s.start();

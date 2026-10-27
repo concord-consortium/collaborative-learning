@@ -1,7 +1,9 @@
 import { SerialDevice } from "./serial";
 import { withChecksum } from "./cc-device-protocol";
 import { kMaxSeq } from "./cc-device-session";
-import { SpikerbitDevice, IMicrobitUsbConnection, kSpikerbitFirmwareVersion } from "./spikerbit-device";
+import {
+  SpikerbitDevice, IMicrobitUsbConnection, kSpikerbitFirmwareVersion, MicrobitUsbTransport
+} from "./spikerbit-device";
 
 const helloLine = (firmware: number, version = 1) =>
   `${withChecksum(`hello protocol:CCDeviceProtocol version:${version} device:spikerbit firmware:${firmware}`)}\r\n`;
@@ -250,6 +252,18 @@ describe("SpikerbitDevice", () => {
     expect(ended).toBe(true);
   });
 
+  it("logs a write that throws before returning a promise, as the library does once the board is gone", async () => {
+    const warn = jest.spyOn(console, "warn").mockImplementation(() => undefined);
+    const conn = new FakeConnection();
+    conn.serialWrite = () => { throw new Error("not connected"); };
+    const transport = new MicrobitUsbTransport(conn);
+
+    await expect(transport.write("servo:90")).resolves.toBeUndefined();
+
+    expect(warn).toHaveBeenCalledWith("Spiker:bit serialWrite failed", expect.any(Error));
+    warn.mockRestore();
+  });
+
   it("clears the store's transport on disconnect", async () => {
     const serialDevice = makeSerialDevice();
     const conn = new FakeConnection();
@@ -413,6 +427,28 @@ describe("SpikerbitDevice", () => {
       await connecting;
       // The re-query after the flash got no hello either, so it warned and connected anyway.
       expect(warn).toHaveBeenCalledWith(expect.stringMatching(/not confirmed after flash/));
+      warn.mockRestore();
+    });
+
+    it("still flashes when writing !! and ? again throws before returning a promise", async () => {
+      const warn = jest.spyOn(console, "warn").mockImplementation(() => undefined);
+      const conn = new FakeConnection();
+      conn.respondHello = null;
+      const write = conn.serialWrite.bind(conn);
+      conn.serialWrite = (data: string) => {
+        if (data.startsWith("!!") && conn.resetWrites().length === 1) {
+          conn.written.push(data);
+          throw new Error("not connected");
+        }
+        return write(data);
+      };
+      const connecting = new SpikerbitDevice(makeSerialDevice(), conn).connectAndStream("HEX");
+
+      await jest.advanceTimersByTimeAsync(5000);
+      await connecting;
+
+      expect(conn.flashed).toBe(true);
+      expect(warn).toHaveBeenCalledWith("Spiker:bit serialWrite failed", expect.any(Error));
       warn.mockRestore();
     });
 

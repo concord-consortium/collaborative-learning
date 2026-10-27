@@ -70,10 +70,14 @@ export class MicrobitUsbTransport implements IDeviceTransport {
   }
 
   // Resolves when the write finishes, so a caller can wait for its last line to reach the board.
-  // A failure is logged, not thrown.
-  write(line: string) {
-    return this.connection.serialWrite(`${line}\n`)
-      .catch((e) => console.warn("Spiker:bit serialWrite failed", e));
+  // A failure is logged, not thrown. It's async because serialWrite throws before returning a
+  // promise when the board is gone.
+  async write(line: string) {
+    try {
+      await this.connection.serialWrite(`${line}\n`);
+    } catch (e) {
+      console.warn("Spiker:bit serialWrite failed", e);
+    }
   }
 
   close() {
@@ -210,10 +214,11 @@ export class SpikerbitDevice {
   }
 
   // Both lines go in one write, so the "?" reaches the board right behind the "!!". The "!!"
-  // carries a checksum, like every command Dataflow sends except the "?".
-  private writeResetAndQuery() {
+  // carries a checksum, like every command Dataflow sends except the "?". Async so that a
+  // serialWrite that throws before returning a promise rejects instead.
+  private async writeResetAndQuery() {
     this.lastDataAt = Date.now();
     this.shortReadAt = undefined;
-    return this.connection.serialWrite(`${withChecksum(`!! #${this.resetSeq++}`)}\n?\n`);
+    await this.connection.serialWrite(`${withChecksum(`!! #${this.resetSeq++}`)}\n?\n`);
   }
 }
