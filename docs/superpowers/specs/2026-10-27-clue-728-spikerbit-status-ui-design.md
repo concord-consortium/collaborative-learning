@@ -188,7 +188,9 @@ A Web Serial device can be lost by two paths, and both have to record it:
   `initialize()` also pauses the connection when the tab is hidden, which CLUE doesn't want.
   `MicrobitUsbTransport` (or `SpikerbitDevice`) adds its own `navigator.usb` `disconnect`
   listener, fires `onDisconnect` when the event's device is this connection's device, and removes
-  the listener when the device is disconnected or replaced.
+  the listener when the device is replaced or a connect attempt with it fails. It stays while the
+  board is kept for Reconnect: the library keeps its device after disconnecting itself, so an
+  unplug that comes after a failed write still upgrades "lost" to "unplugged".
 - **WebUSB, a failed write (already happening).** Without that listener an unplug is still
   noticed today, within about a second: since #3055 a `ping` is written every second, the
   write to an unplugged board fails, the library's `withEnrichedErrors` calls

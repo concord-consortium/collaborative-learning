@@ -198,16 +198,19 @@ export function initWebSerialConnectionEvents(serialDevice: SerialDevice){
   navigator.serial?.addEventListener("connect", (e) => {
     serialDevice.updateConnectionInfo(e.timeStamp, e.type);
   });
-  // The event doesn't say which port was removed, so it's taken to be the Web Serial device's.
+  // The browser fires disconnect at the removed SerialPort, and it bubbles here, so `e.target` says
+  // which port was unplugged; any other port's unplug leaves the device alone.
   navigator.serial?.addEventListener("disconnect", (e) => {
+    const isUnplugged = (transport: unknown): transport is WebSerialTransport =>
+      transport instanceof WebSerialTransport && transport.lastPort === e.target;
     const active = serialDevice.activeTransport;
-    if (active instanceof WebSerialTransport) {
+    if (isUnplugged(active)) {
       serialDevice.updateConnectionInfo(e.timeStamp, e.type);
       serialDevice.recordUnplug(active);
     } else {
       // The read loop may have given up on the port first and recorded it as lost.
       const lost = serialDevice.lastLoss?.transport;
-      if (lost instanceof WebSerialTransport) serialDevice.recordUnplug(lost);
+      if (isUnplugged(lost)) serialDevice.recordUnplug(lost);
     }
   });
 }

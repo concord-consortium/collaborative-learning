@@ -234,14 +234,22 @@ describe("initWebSerialConnectionEvents", () => {
   });
   afterEach(() => { delete (navigator as any).serial; });
 
-  const unplug = () => listeners.disconnect({ timeStamp: 1, type: "disconnect" } as Event);
+  // The browser fires disconnect at the removed SerialPort, and it bubbles to navigator.serial.
+  const unplug = (port: unknown) =>
+    listeners.disconnect({ timeStamp: 1, type: "disconnect", target: port } as unknown as Event);
+  const transportOn = (port: unknown) => {
+    const transport = new WebSerialTransport();
+    transport.lastPort = port as SerialPort;
+    return transport;
+  };
 
   it("the browser's disconnect event records an unplug of the active Web Serial device", () => {
     const serialDevice = new SerialDevice();
     initWebSerialConnectionEvents(serialDevice);
-    const transport = new WebSerialTransport();
+    const port = {};
+    const transport = transportOn(port);
     serialDevice.setActiveDevice("arduino", transport);
-    unplug();
+    unplug(port);
     expect(serialDevice.isConnected()).toBe(false);
     expect(serialDevice.lastLoss?.reason).toBe("unplugged");
     expect(serialDevice.lastLoss?.transport).toBe(transport);
@@ -250,11 +258,31 @@ describe("initWebSerialConnectionEvents", () => {
   it("upgrades a loss the read loop recorded first", () => {
     const serialDevice = new SerialDevice();
     initWebSerialConnectionEvents(serialDevice);
-    const transport = new WebSerialTransport();
+    const port = {};
+    const transport = transportOn(port);
     serialDevice.setActiveDevice("arduino", transport);
     transport.onDisconnect?.("lost");
-    unplug();
+    unplug(port);
     expect(serialDevice.lastLoss?.reason).toBe("unplugged");
+  });
+
+  it("an unplug of another port leaves the active device connected", () => {
+    const serialDevice = new SerialDevice();
+    initWebSerialConnectionEvents(serialDevice);
+    serialDevice.setActiveDevice("arduino", transportOn({}));
+    unplug({});
+    expect(serialDevice.isConnected()).toBe(true);
+    expect(serialDevice.lastLoss).toBeUndefined();
+  });
+
+  it("an unplug of another port doesn't upgrade a loss", () => {
+    const serialDevice = new SerialDevice();
+    initWebSerialConnectionEvents(serialDevice);
+    const transport = transportOn({});
+    serialDevice.setActiveDevice("arduino", transport);
+    transport.onDisconnect?.("lost");
+    unplug({});
+    expect(serialDevice.lastLoss?.reason).toBe("lost");
   });
 
   it("ignores the event when no Web Serial device is or was connected", () => {
@@ -262,7 +290,7 @@ describe("initWebSerialConnectionEvents", () => {
     initWebSerialConnectionEvents(serialDevice);
     const transport = { write: jest.fn(), close: jest.fn() };
     serialDevice.setActiveDevice("spikerbit", transport);
-    unplug();
+    unplug({});
     expect(serialDevice.isConnected()).toBe(true);
     serialDevice.clearActiveDevice();
   });

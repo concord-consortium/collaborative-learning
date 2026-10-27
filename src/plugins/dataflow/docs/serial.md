@@ -430,8 +430,9 @@ The browser's own `navigator.serial` `connect`/`disconnect` events are wired onc
 creation by `initWebSerialConnectionEvents` (`web-serial-transport.ts`), keeping
 `navigator.serial` out of `SerialDevice`. Authentic Arduinos raise `connect` before the user
 clicks, so the top-bar menu can note a board is present. The `disconnect` handler only tears down
-the store when a `WebSerialTransport` currently owns the connection, so an unrelated Web Serial
-disconnect cannot kill a live WebUSB (Spiker:bit) session.
+the store when a `WebSerialTransport` currently owns the connection and the event's target is that
+transport's port, so unplugging another serial device can't end the connection, and an unrelated
+Web Serial disconnect cannot kill a live WebUSB (Spiker:bit) session.
 
 ### Why a device went away
 
@@ -442,7 +443,7 @@ Transports report it through `onDisconnect(loss)`, which `setActiveDevice` wires
 
 | Transport | `"unplugged"` | `"lost"` |
 |---|---|---|
-| Web Serial | `navigator.serial`'s `disconnect` event, from `initWebSerialConnectionEvents`. Only authentic Arduinos raise it. | the read loop giving up on a port that stopped being readable, a few seconds later |
+| Web Serial | `navigator.serial`'s `disconnect` event for the device's port, from `initWebSerialConnectionEvents`. Only authentic Arduinos raise it. | the read loop giving up on a port that stopped being readable, a few seconds later |
 | WebUSB (Spiker:bit) | `navigator.usb`'s `disconnect` event for the library connection's device, which `MicrobitUsbTransport` listens for itself | the library's `Disconnected` status. The library disconnects itself after any failed WebUSB call, and the session writes a `ping` every second, so an unplug is noticed this way within a second even without the event. |
 
 Each unplug has two paths, and either can come first. The second finds the device already
