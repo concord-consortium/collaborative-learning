@@ -448,6 +448,19 @@ describe("DeviceConnection", () => {
       expect(connection.lossMessage).toBeUndefined();
     });
 
+    it("after Disconnect and Reconnect of the same Spiker:bit, a loss is recorded again", async () => {
+      const serialDevice = new SerialDevice();
+      const usbConnection = makeUsbConnection({ reportsDisconnect: true });
+      const connection = new DeviceConnection(serialDevice, realSpikerbitDeps(usbConnection));
+      await connection.connect("spikerbit");
+      await connection.disconnect();
+      await connection.reconnect();
+      // The library disconnecting itself, as it does after a failed WebUSB call.
+      await usbConnection.disconnect();
+      expect(serialDevice.isConnected()).toBe(false);
+      expect(serialDevice.lastLoss?.reason).toBe("lost");
+    });
+
     it("an unplug gives the unplugged message with the device's label", async () => {
       const { serialDevice, connection } = setup([makeTransport()]);
       await connection.connect("arduino");

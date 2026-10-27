@@ -4,9 +4,10 @@ export type DeviceLoss = "unplugged" | "lost";
 
 // A device's write path plus optional inbound callbacks. Both Web Serial and WebUSB
 // (micro:bit) implement this so SerialDevice routes writes through one active transport
-// and receives inbound data centrally. onData/onDisconnect are wired by the store when
+// and receives inbound data centrally. onData/onDisconnect are wired by the store each time
 // the transport becomes active; a transport that manages its own inbound path need not
-// use them.
+// use them. A requested disconnect clears onDisconnect before closing, so the close isn't
+// recorded as a loss. A transport reused by Reconnect gets it back when it's made active again.
 export interface IDeviceTransport {
   write(line: string): void | Promise<void>;   // implementation supplies its own line framing (\n)
   close(): Promise<void>;
