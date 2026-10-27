@@ -296,4 +296,104 @@ describe("CcDeviceSession", () => {
     expect(pings[998]).toBe("ping session:4242 #1");
     s.stop();
   });
+
+  describe("not responding", () => {
+    const setHidden = (hidden: boolean) => {
+      Object.defineProperty(document, "visibilityState", {
+        configurable: true, get: () => hidden ? "hidden" : "visible"
+      });
+      document.dispatchEvent(new Event("visibilitychange"));
+    };
+    afterEach(() => setHidden(false));
+
+    // The #n of the latest command written.
+    const latestSeq = () => Number(/#(\d+)$/.exec(lastBody())![1]);
+
+    it("is not responding once three pings in a row go unanswered", () => {
+      const s = make();
+      s.start();
+      s.receive(deviceLine("ok #1"), []);
+      jest.advanceTimersByTime(3000);
+      expect(s.notResponding).toBe(false);
+      jest.advanceTimersByTime(1000);
+      expect(s.notResponding).toBe(true);
+      s.stop();
+    });
+
+    it("any reply ends not responding", () => {
+      const s = make();
+      s.start();
+      s.receive(deviceLine("ok #1"), []);
+      jest.advanceTimersByTime(4000);
+      expect(s.notResponding).toBe(true);
+      s.receive(deviceLine(`ok #${latestSeq()}`), []);
+      expect(s.notResponding).toBe(false);
+      s.stop();
+    });
+
+    it("err nosession is an answer", () => {
+      const s = make();
+      s.start();
+      s.receive(deviceLine("ok #1"), []);
+      jest.advanceTimersByTime(2000);
+      s.receive(deviceLine("err #3 nosession"), []);
+      expect(lastBody()).toMatch(/^open /);
+      jest.advanceTimersByTime(2000);
+      expect(s.notResponding).toBe(false);
+      s.stop();
+    });
+
+    it("counts unanswered opens too", () => {
+      const s = make();
+      s.start();
+      jest.advanceTimersByTime(4000);
+      expect(s.notResponding).toBe(false);
+      jest.advanceTimersByTime(2000);
+      expect(s.notResponding).toBe(true);
+      s.stop();
+    });
+
+    it("doesn't count while the tab is hidden, and starts over when it's visible", () => {
+      const s = make();
+      s.start();
+      s.receive(deviceLine("ok #1"), []);
+      setHidden(true);
+      jest.advanceTimersByTime(10000);
+      expect(s.notResponding).toBe(false);
+      setHidden(false);
+      jest.advanceTimersByTime(3000);
+      expect(s.notResponding).toBe(false);
+      jest.advanceTimersByTime(1000);
+      expect(s.notResponding).toBe(true);
+      s.stop();
+    });
+
+    it("err othersession makes it not responding at once, and it stays so", () => {
+      const warn = jest.spyOn(console, "warn").mockImplementation(() => undefined);
+      const s = make();
+      s.start();
+      s.receive(deviceLine("ok #1"), []);
+      jest.advanceTimersByTime(1000);
+      s.receive(deviceLine("err #2 othersession"), []);
+      expect(s.notResponding).toBe(true);
+      const count = write.mock.calls.length;
+      jest.advanceTimersByTime(5000);
+      expect(s.notResponding).toBe(true);
+      expect(write.mock.calls.length).toBe(count);
+      warn.mockRestore();
+      s.stop();
+    });
+
+    it("notResponding is observable", () => {
+      const s = make();
+      const seen: boolean[] = [];
+      const dispose = autorun(() => { seen.push(s.notResponding); });
+      s.start();
+      s.receive(deviceLine("ok #1"), []);
+      jest.advanceTimersByTime(4000);
+      dispose();
+      expect(seen).toEqual([false, true]);
+      s.stop();
+    });
+  });
 });

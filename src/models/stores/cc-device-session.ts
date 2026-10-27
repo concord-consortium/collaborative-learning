@@ -10,6 +10,9 @@ export interface CcDeviceSessionOptions {
 
 export const kMaxSeq = 999;
 
+// How many commands in a row can go unanswered before the device counts as not responding.
+export const kNotRespondingAfter = 3;
+
 function defaultRandomSessionId() {
   return 1 + Math.floor(Math.random() * 65535);
 }
@@ -20,6 +23,9 @@ function defaultRandomSessionId() {
  */
 export class CcDeviceSession {
   lastHeartbeatAt: number | undefined;
+  // Set when kNotRespondingAfter commands in a row have gone unanswered, or another host has taken
+  // the device. Cleared by the next reply.
+  notResponding = false;
 
   private write: (line: string) => void | Promise<void>;
   private pingIntervalMs: number;
@@ -31,6 +37,9 @@ export class CcDeviceSession {
   private opened = false;
   private pending = new Map<number, "open" | "ping">();
   private buffer = "";
+  // Commands sent since the last reply. Not counted while the page is hidden: the browser slows
+  // the library's serial reads there, so replies fall behind the readings.
+  private unanswered = 0;
   private pingTimer: ReturnType<typeof setInterval> | undefined;
   private openTimer: ReturnType<typeof setInterval> | undefined;
 
@@ -41,7 +50,9 @@ export class CcDeviceSession {
     this.randomSessionId = options.randomSessionId ?? defaultRandomSessionId;
     makeObservable<CcDeviceSession>(this, {
       lastHeartbeatAt: observable,
-      setLastHeartbeatAt: action
+      notResponding: observable,
+      setLastHeartbeatAt: action,
+      setNotResponding: action
     });
   }
 
@@ -49,12 +60,18 @@ export class CcDeviceSession {
     this.lastHeartbeatAt = time;
   }
 
+  setNotResponding(value: boolean) {
+    this.notResponding = value;
+  }
+
   start() {
     this.stop();
+    document.addEventListener("visibilitychange", this.handleVisibilityChange);
     this.openSession();
   }
 
   stop() {
+    document.removeEventListener("visibilitychange", this.handleVisibilityChange);
     this.clearTimers();
     this.pending.clear();
     this.opened = false;
@@ -108,6 +125,7 @@ export class CcDeviceSession {
     const kind = seq === undefined ? undefined : this.pending.get(seq);
     if (seq === undefined || !kind) return;
     this.pending.delete(seq);
+    this.answered();
     if (kind === "open") {
       if (this.opened) return;
       this.opened = true;
@@ -126,6 +144,7 @@ export class CcDeviceSession {
       if (seq === undefined || this.pending.get(seq) !== "ping") return;
       this.pending.delete(seq);
     }
+    if (reason === "nosession") this.answered();
     if (reason === "nosession") {
       this.clearTimers();
       this.pending.clear();
@@ -134,6 +153,7 @@ export class CcDeviceSession {
     } else if (reason === "othersession") {
       console.warn("CC Device: another host owns the session; giving up");
       this.stop();
+      this.setNotResponding(true);
     } else {
       console.warn(`CC Device error${seq !== undefined ? ` #${seq}` : ""}: ${reason}`);
     }
@@ -154,7 +174,20 @@ export class CcDeviceSession {
     this.sendCommand(`ping session:${this.sessionId}`, "ping");
   }
 
+  private answered() {
+    this.unanswered = 0;
+    this.setNotResponding(false);
+  }
+
+  private handleVisibilityChange = () => {
+    if (document.visibilityState === "visible") this.unanswered = 0;
+  };
+
   private sendCommand(command: string, kind: "open" | "ping") {
+    if (document.visibilityState !== "hidden") {
+      if (this.unanswered >= kNotRespondingAfter) this.setNotResponding(true);
+      this.unanswered++;
+    }
     this.seq = this.seq >= kMaxSeq ? 1 : this.seq + 1;
     this.pending.set(this.seq, kind);
     this.send(`${command} #${this.seq}`);
