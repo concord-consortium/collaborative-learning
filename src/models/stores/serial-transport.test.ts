@@ -28,9 +28,9 @@ describe("SerialDevice active-transport routing", () => {
     const written: string[] = [];
     device.setActiveDevice("arduino", fakeTransport(written));
 
-    // Servo config: angleScale 2/3, angleOffset 30 -> for n=90: 2/3*90+30 = 90
-    device.writeToOutForServo(90, "Servo");
-    expect(written).toEqual(["90"]);
+    // Servo config: angleScale 2/3, angleOffset 30 -> for n=0: 2/3*0+30 = 30
+    device.writeToOutForServo(0, "Servo");
+    expect(written).toEqual(["30"]);
   });
 
   it("clearActiveDevice disconnects", () => {
