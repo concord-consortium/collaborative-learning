@@ -9,29 +9,31 @@ commands, outputs and states on top, and documents them; for the Spiker:bit, see
 [The Spiker:bit firmware](#the-spikerbit-firmware).
 
 The Spiker:bit firmware (`spikerbit-clue.hex`, firmware 4) speaks it over WebUSB
-(`@microbit/microbit-connection`) at 115200 baud, the micro:bit default. Dataflow parses lines
-and computes checksums in `src/models/stores/cc-device-protocol.ts`; the rest of Dataflow's side
-of it isn't built yet. The Spiker:bit's device code is
-`src/plugins/dataflow/firmware/spikerbit-clue.ts`.
+(`@microbit/microbit-connection`) at 115200 baud, the micro:bit default. Dataflow's code for it
+is `src/models/stores/cc-device-protocol.ts` (parsing and checksums) and
+`src/models/stores/cc-device-session.ts` (the session); how Dataflow connects and runs a
+session is in [serial.md](serial.md#the-cc-device-protocol-session). The Spiker:bit's device
+code is `src/plugins/dataflow/firmware/spikerbit-clue.ts`.
 
 Dataflow's two older protocols, `keyValue` and `radioHub`, and the gaps this protocol fills, are
 in [serial-protocols.md](serial-protocols.md). For how bytes move through the browser and into
 the tile, see [serial.md](serial.md).
 
 A connection, with the checksums written out. The device's first line is empty (see
-[Connecting](#connecting)):
+[Connecting](#connecting)). Dataflow numbers the `#n` on its connect-time `!!` from 1000; see
+[serial.md](serial.md#spikerbit-version-check-and-flashing).
 
 ```
-Dataflow:   !! #1*32
+Dataflow:   !! #1000*02
 Spiker:bit:
-Spiker:bit: ok #1*36
+Spiker:bit: ok #1000*06
 Dataflow:   ?
 Spiker:bit: hello protocol:CCDeviceProtocol version:1 device:spikerbit firmware:4*65
-Dataflow:   open session:4821 #2*4E
-Spiker:bit: ok #2*35
+Dataflow:   open session:4821 #1*4D
+Spiker:bit: ok #1*36
 Spiker:bit: emg:12*56
-Dataflow:   ping session:4821 #3*4B
-Spiker:bit: ok #3*34
+Dataflow:   ping session:4821 #2*4A
+Spiker:bit: ok #2*35
 Dataflow:   servo:90*4E
 Dataflow:   close session:4821*1D
 ```

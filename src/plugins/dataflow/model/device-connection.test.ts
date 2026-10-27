@@ -3,6 +3,7 @@ import {
   IMicrobitUsbConnection, kSpikerbitFirmwareVersion, SpikerbitDevice
 } from "../../../models/stores/spikerbit-device";
 import { WebSerialOpenResult, WebSerialTransport } from "../../../models/stores/web-serial-transport";
+import { withChecksum } from "../../../models/stores/cc-device-protocol";
 import { DeviceConnection, getDeviceConnection, IDeviceConnectionDeps } from "./device-connection";
 
 function makePort(usbVendorId: number, usbProductId: number) {
@@ -60,9 +61,18 @@ function makeUsbConnection(options: { failWrite?: boolean } = {}) {
     flash: jest.fn().mockResolvedValue(undefined),
     serialWrite: jest.fn(async (data: string) => {
       if (options.failWrite) throw new Error("write failed");
-      if (data === "?\n") {
-        serialListeners.forEach(l => l({ data: `CLUE-SPIKERBIT v${kSpikerbitFirmwareVersion}\r\n` }));
-      }
+      const send = (line: string) => serialListeners.forEach(l => l({ data: `${line}\r\n` }));
+      // Answers as firmware 4 does: "!! #n" with an empty line and its ok, "?" with the hello
+      // line, and a session's open with its ok.
+      data.split("\n").forEach(line => {
+        const seq = /^(?:!!|open session:\d+) #(\d+)\*/.exec(line)?.[1];
+        if (line.startsWith("!!") && seq) send("");
+        if (seq) send(withChecksum(`ok #${seq}`));
+        if (line === "?") {
+          send(withChecksum(
+            `hello protocol:CCDeviceProtocol version:1 device:spikerbit firmware:${kSpikerbitFirmwareVersion}`));
+        }
+      });
     }),
     disconnect: jest.fn().mockResolvedValue(undefined)
   };
@@ -233,6 +243,9 @@ describe("DeviceConnection", () => {
     await connection.connect("arduino");
 
     const disconnecting = connection.disconnect();
+    // Let disconnect reach the pending close, which comes after ending the session.
+    await new Promise(resolve => setTimeout(resolve, 0));
+    expect(first.close).toHaveBeenCalled();
     serialDevice.setActiveDevice("arduino", second);
     finishClose();
     await disconnecting;
@@ -304,13 +317,17 @@ describe("DeviceConnection", () => {
     expect(serialDevice.isConnected()).toBe(false);
   });
 
-  it("disconnect closes a Spiker:bit connection", async () => {
+  it("connects to a current Spiker:bit without flashing; disconnect closes its session and link", async () => {
     const serialDevice = new SerialDevice();
     const usbConnection = makeUsbConnection();
     const connection = new DeviceConnection(serialDevice, realSpikerbitDeps(usbConnection));
     expect(await connection.connect("spikerbit")).toBe("connected");
+    expect(usbConnection.flash).not.toHaveBeenCalled();
+    const written = () => usbConnection.serialWrite.mock.calls.map(([data]) => data as string);
+    expect(written().some(data => data.startsWith("open session:"))).toBe(true);
     expect(usbConnection.disconnect).not.toHaveBeenCalled();
     await connection.disconnect();
+    expect(written().some(data => data.startsWith("close session:"))).toBe(true);
     expect(usbConnection.disconnect).toHaveBeenCalled();
     expect(serialDevice.isConnected()).toBe(false);
   });
@@ -330,6 +347,8 @@ describe("DeviceConnection", () => {
     expect(usbConnection.disconnect.mock.invocationCallOrder[0])
       .toBeLessThan(usbConnection.connect.mock.invocationCallOrder[1]);
     expect(serialDevice.activeTransport).toBeDefined();
+    // The session pings on a timer.
+    serialDevice.clearActiveDevice();
   });
 
   it("disconnect closes the transport and clears the active device", async () => {
@@ -340,6 +359,48 @@ describe("DeviceConnection", () => {
     expect(transport.close).toHaveBeenCalled();
     expect(serialDevice.isConnected()).toBe(false);
     expect(connection.connectedLabel).toBeUndefined();
+  });
+
+  it("ends the device session before closing the transport", async () => {
+    const transport = makeTransport();
+    const { serialDevice, connection } = setup([transport]);
+    await connection.connect("arduino");
+    const order: string[] = [];
+    jest.spyOn(serialDevice, "endSession").mockImplementation(async () => { order.push("endSession"); });
+    transport.close.mockImplementation(async () => { order.push("close"); });
+    await connection.disconnect();
+    expect(order).toEqual(["endSession", "close"]);
+  });
+
+  it("still closes the transport when ending the session fails", async () => {
+    const transport = makeTransport();
+    const { serialDevice, connection } = setup([transport]);
+    await connection.connect("arduino");
+    jest.spyOn(serialDevice, "endSession").mockRejectedValue(new Error("write failed"));
+    const consoleError = jest.spyOn(console, "error").mockImplementation(() => undefined);
+    await connection.disconnect();
+    expect(transport.close).toHaveBeenCalled();
+    expect(serialDevice.isConnected()).toBe(false);
+    consoleError.mockRestore();
+  });
+
+  it("still closes the transport when ending the session never settles", async () => {
+    jest.useFakeTimers();
+    try {
+      const transport = makeTransport();
+      const { serialDevice, connection } = setup([transport]);
+      await connection.connect("arduino");
+      jest.spyOn(serialDevice, "endSession").mockImplementation(() => new Promise<void>(() => undefined));
+      const disconnecting = connection.disconnect();
+      // A literal, so a longer timeout, which would hang Disconnect on a stalled port, fails here.
+      await jest.advanceTimersByTimeAsync(500);
+      await disconnecting;
+      expect(transport.close).toHaveBeenCalled();
+      expect(serialDevice.isConnected()).toBe(false);
+      expect(connection.busyChoice).toBeUndefined();
+    } finally {
+      jest.useRealTimers();
+    }
   });
 
   it("starts with the connect tutorial dismissed when a device is already connected", () => {

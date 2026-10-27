@@ -4,28 +4,28 @@ What actually goes over the wire between Dataflow and the hardware it talks to. 
 those bytes move through the browser and into the tile (transports, `SerialDevice`, the
 parsers, flashing), see [serial.md](serial.md).
 
-Dataflow speaks two wire protocols, named in
+Dataflow speaks three wire protocols, named in
 `src/plugins/dataflow/model/utilities/device-capabilities.ts`:
 
 | Protocol | Spoken by | Transport | Baud |
 |---|---|---|---|
 | `keyValue` | Arduino running `ccemgfsr.ino` | Web Serial | 9600 |
 | `radioHub` | micro:bit running the "communicator" program, relaying to radio hubs | Web Serial | 9600 |
+| `ccDevice` ([CC Device Protocol](cc-device-protocol.md)) | Spiker:bit (micro:bit running `spikerbit-clue.hex`, firmware 4) | WebUSB (`@microbit/microbit-connection`) | 115200, the micro:bit default |
 
-Both are line-based ASCII, with no checksums, no acknowledgments and no heartbeat, and
-neither side waits for a reply.
+This page describes `keyValue` and `radioHub`. Both are line-based ASCII, with no checksums,
+no acknowledgments and no heartbeat, and neither side waits for a reply.
 
-A third, the [CC Device Protocol](cc-device-protocol.md), is defined on its own page. It is
-line-based ASCII too, and adds checksums, acknowledgments, identification and a session kept
-alive by the host. The Spiker:bit firmware (`spikerbit-clue.hex`, firmware 4) speaks it over
-WebUSB. Dataflow's side of it, beyond parsing and checksums, isn't built yet.
+The [CC Device Protocol](cc-device-protocol.md) is defined on its own page. It is line-based
+ASCII too, and adds checksums, acknowledgments, identification and a session kept alive by
+the host.
 
 ## Line framing
 
 - **Device to Dataflow:** each message is one line ending in `\r\n`. Arduino's
   `Serial.println` and MakeCode's `serial.writeLine` both end lines this way.
-- **Dataflow to device:** each message is one line ending in `\n`. Both transports append
-  the `\n` (`WebSerialTransport.write`, `MicrobitUsbTransport.write`).
+- **Dataflow to device:** each message is one line ending in `\n`, which
+  `WebSerialTransport.write` appends.
 
 Inbound data arrives in chunks that ignore line boundaries (`emg:1`, `23\r`, `\nfsr:2\r\n`),
 so the parsers buffer until they see a whole line. See "Reconstituting messages from the

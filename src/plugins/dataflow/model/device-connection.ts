@@ -21,6 +21,10 @@ export const kDeviceChoiceLabels: Record<DeviceChoice, string> = {
   spikerbit: "Spiker:bit"
 };
 
+// How long disconnect waits for the board to take the `close` write before closing the transport
+// anyway. A write to a stalled port may never settle.
+export const kEndSessionTimeoutMs = 500;
+
 export type ConnectResult = "connected" | "canceled" | "failed";
 
 // What dismissed the connect tutorial: OK in one tile, or any connection.
@@ -122,6 +126,19 @@ export class DeviceConnection {
 
   async disconnect(): Promise<void> {
     const transport = this.serialDevice.activeTransport;
+    // Tell the board the session is over before its transport closes.
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    try {
+      const timedOut = new Promise<"timeout">(resolve => {
+        timer = setTimeout(() => resolve("timeout"), kEndSessionTimeoutMs);
+      });
+      const result = await Promise.race([this.serialDevice.endSession(), timedOut]);
+      if (result === "timeout") console.error("Device session end timed out; closing the transport anyway");
+    } catch (e) {
+      console.error("Device session end failed", e);
+    } finally {
+      clearTimeout(timer);
+    }
     try {
       await transport?.close();
     } catch (e) {

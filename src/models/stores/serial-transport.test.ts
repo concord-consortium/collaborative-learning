@@ -5,7 +5,7 @@ import { NodeChannelInfo } from "../../plugins/dataflow/model/utilities/channel"
 
 function fakeTransport(sink: string[]): IDeviceTransport {
   return {
-    write: (line: string) => sink.push(line),
+    write: (line: string) => { sink.push(line); },
     close: async () => undefined,
   };
 }
@@ -14,10 +14,10 @@ describe("SerialDevice active-transport routing", () => {
   it("routes writeLine through the active transport", () => {
     const device = new SerialDevice();
     const written: string[] = [];
-    device.setActiveDevice("spikerbit", fakeTransport(written));
+    device.setActiveDevice("arduino", fakeTransport(written));
 
     expect(device.isConnected()).toBe(true);
-    expect(device.deviceFamily).toBe("spikerbit");
+    expect(device.deviceFamily).toBe("arduino");
 
     device.writeLine("90");
     expect(written).toEqual(["90"]);
@@ -26,11 +26,11 @@ describe("SerialDevice active-transport routing", () => {
   it("writeToOutForServo scales and writes through the active transport", () => {
     const device = new SerialDevice();
     const written: string[] = [];
-    device.setActiveDevice("spikerbit", fakeTransport(written));
+    device.setActiveDevice("arduino", fakeTransport(written));
 
-    // Servo config: angleScale 2/3, angleOffset 30 -> for n=90: 2/3*90+30 = 90
-    device.writeToOutForServo(90, "Servo");
-    expect(written).toEqual(["90"]);
+    // Servo config: angleScale 2/3, angleOffset 30 -> for n=0: 2/3*0+30 = 30
+    device.writeToOutForServo(0, "Servo");
+    expect(written).toEqual(["30"]);
   });
 
   it("clearActiveDevice disconnects", () => {
@@ -56,14 +56,14 @@ describe("SerialDevice active-transport routing", () => {
     const transportB = fakeTransport([]);
 
     device.setActiveDevice("arduino", transportA);
-    device.setActiveDevice("spikerbit", transportB);
+    device.setActiveDevice("microbit", transportB);
 
     // Simulate transportA's read loop finally giving up long after transportB took over.
     transportA.onDisconnect?.();
 
     expect(device.isConnected()).toBe(true);
     expect(device.activeTransport).toBe(transportB);
-    expect(device.deviceFamily).toBe("spikerbit");
+    expect(device.deviceFamily).toBe("microbit");
   });
 });
 
@@ -94,7 +94,7 @@ describe("SerialDevice.receive protocol routing", () => {
     const b = arduinoChannel();
     device.registerChannelSource(() => [a]);
     device.registerChannelSource(() => [b]);
-    device.deviceFamily = "spikerbit";
+    device.deviceFamily = "arduino";
     device.receive("emg:7\r\n");
     expect(a.value).toBe(7);
     expect(b.value).toBe(7);
@@ -118,7 +118,7 @@ describe("SerialDevice.receive protocol routing", () => {
     const b = arduinoChannel();
     const disposeA = device.registerChannelSource(() => [a]);
     device.registerChannelSource(() => [b]);
-    device.deviceFamily = "spikerbit";
+    device.deviceFamily = "arduino";
     disposeA();
     device.receive("emg:7\r\n");
     expect(a.value).toBe(0);
@@ -127,7 +127,7 @@ describe("SerialDevice.receive protocol routing", () => {
 
   it("a source registered after connecting receives data", () => {
     const device = new SerialDevice();
-    device.setActiveDevice("spikerbit", fakeTransport([]));
+    device.setActiveDevice("arduino", fakeTransport([]));
     const ch = arduinoChannel();
     device.registerChannelSource(() => [ch]);
     device.receive("emg:5\r\n");
