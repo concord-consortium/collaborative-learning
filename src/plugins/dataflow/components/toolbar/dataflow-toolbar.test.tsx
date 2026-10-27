@@ -8,6 +8,7 @@ import { ModalProvider } from "react-modal-hook";
 import { ReadOnlyContext } from "../../../../components/document/read-only-context";
 import { SerialDevice } from "../../../../models/stores/serial";
 import { ConnectResult, getDeviceConnection } from "../../model/device-connection";
+import { kLossPulseMs } from "./dataflow-connect-button";
 import { TileModelContext } from "../../../../components/tiles/tile-api";
 import { ITileModel, TileModel } from "../../../../models/tiles/tile-model";
 import { specStores } from "../../../../models/stores/spec-stores";
@@ -326,11 +327,12 @@ describe("Dataflow pan split button (CLUE-573)", () => {
 });
 
 describe("Dataflow connect button and pane", () => {
-  function renderConnect(opts: RenderOptions = {}) {
+  // Pass `stores` to render a second toolbar sharing the first one's device connection.
+  function renderConnect(opts: RenderOptions & { stores?: ReturnType<typeof specStores> } = {}) {
     const info = getToolbarButtonInfo("dataflow", "connect");
     if (!info) throw new Error("connect is not registered");
     const Component = info.component;
-    const stores = specStores();
+    const stores = opts.stores ?? specStores();
     const content = opts.content ?? DataflowContentModel.create();
     const model = TileModel.create({ content });
     const connection = getDeviceConnection(stores.serialDevice);
@@ -506,6 +508,57 @@ describe("Dataflow connect button and pane", () => {
     act(() => session.setNotResponding(false));
     expect(trigger.classList.contains("connect-connected")).toBe(true);
     act(() => r.stores.serialDevice.clearActiveDevice());
+  });
+
+  describe("when a device is lost", () => {
+    beforeEach(() => jest.useFakeTimers());
+    afterEach(() => jest.useRealTimers());
+
+    const pulsing = (r: ReturnType<typeof renderConnect>) =>
+      getTrigger(r.container).classList.contains("connect-loss-pulse");
+    const lose = (r: ReturnType<typeof renderConnect>, loss: "lost" | "unplugged") => {
+      const transport = r.stores.serialDevice.activeTransport ?? r.stores.serialDevice.lastLoss!.transport;
+      act(() => transport.onDisconnect!(loss));
+    };
+
+    it("the button pulses once, then shows its normal look", () => {
+      const r = renderConnect();
+      fakeConnected(r);
+      lose(r, "lost");
+      expect(pulsing(r)).toBe(true);
+      expect(getTrigger(r.container).classList.contains("connect-idle")).toBe(true);
+      act(() => { jest.advanceTimersByTime(kLossPulseMs); });
+      expect(pulsing(r)).toBe(false);
+    });
+
+    it("a toolbar shown after the loss doesn't pulse", () => {
+      const first = renderConnect();
+      fakeConnected(first);
+      lose(first, "unplugged");
+      const second = renderConnect({ stores: first.stores });
+      expect(pulsing(second)).toBe(false);
+    });
+
+    it("an unplug confirming the loss doesn't pulse again", () => {
+      const r = renderConnect();
+      fakeConnected(r);
+      lose(r, "lost");
+      act(() => { jest.advanceTimersByTime(kLossPulseMs); });
+      lose(r, "unplugged");
+      expect(r.stores.serialDevice.lastLoss?.reason).toBe("unplugged");
+      expect(pulsing(r)).toBe(false);
+    });
+
+    it("a later loss pulses again", () => {
+      const r = renderConnect();
+      fakeConnected(r);
+      lose(r, "lost");
+      act(() => { jest.advanceTimersByTime(kLossPulseMs); });
+      act(() => { jest.advanceTimersByTime(1); });
+      fakeConnected(r);
+      lose(r, "lost");
+      expect(pulsing(r)).toBe(true);
+    });
   });
 
   it("the button shows the attention state when the program needs a device", () => {

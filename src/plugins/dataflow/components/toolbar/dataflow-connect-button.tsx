@@ -24,6 +24,9 @@ import ConnectIcon from "../../assets/icons/connect-icon.svg";
 
 import "./dataflow-connect-pane.scss";
 
+// How long the pulse after a lost device runs: connect-loss-pulse's animation, three 1.5 s cycles.
+export const kLossPulseMs = 4500;
+
 // How each navigation key moves focus: by a signed number of controls, or to the first or last one.
 const kFocusSteps: Record<string, number | "first" | "last"> = {
   ArrowDown: 1, ArrowRight: 1, ArrowUp: -1, ArrowLeft: -1, Home: "first", End: "last"
@@ -236,6 +239,22 @@ export const ConnectDeviceButton = observer(function ConnectDeviceButton({ name 
   const isOpen = !!content?.connectPaneOpen;
   const paneRef = useRef<HTMLDivElement | null>(null);
 
+  // Pulses once when a device is lost while this toolbar is showing. A loss from before it mounted
+  // doesn't pulse; the pane still explains it.
+  const { lossAt } = connection;
+  const seenLossAt = useRef(lossAt);
+  const [lossPulse, setLossPulse] = useState(false);
+  useEffect(() => {
+    if (lossAt === undefined || lossAt === seenLossAt.current) return;
+    seenLossAt.current = lossAt;
+    setLossPulse(true);
+    const timer = setTimeout(() => setLossPulse(false), kLossPulseMs);
+    return () => {
+      clearTimeout(timer);
+      setLossPulse(false);
+    };
+  }, [lossAt]);
+
   // Deselecting the tile unmounts the toolbar; the model volatile would otherwise stay open. Deleting
   // the tile destroys the content before this runs.
   useEffect(() => () => {
@@ -270,7 +289,8 @@ export const ConnectDeviceButton = observer(function ConnectDeviceButton({ name 
     : undefined;
 
   return (
-    <TileToolbarButton name={name} title={title} colorClass={`connect-${state}`} expanded={isOpen}
+    <TileToolbarButton name={name} title={title} expanded={isOpen}
+        colorClass={classNames(`connect-${state}`, { "connect-loss-pulse": lossPulse })}
         dataTestId="connect-device-button" disabled={readOnly || !content}
         disabledMessage="Connecting a device isn't available in a read-only view"
         onClick={() => content?.setConnectPaneOpen(!isOpen)} extraContent={pane}>
