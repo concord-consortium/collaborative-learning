@@ -1,8 +1,8 @@
 // This lives in the DataFlow plugin, not src/models/stores, because it imports the Spiker:bit
 // firmware hex, which has to stay in the DataFlow chunk.
-import { makeAutoObservable, reaction, runInAction } from "mobx";
+import { makeAutoObservable, observable, reaction, runInAction } from "mobx";
 import { SerialDevice } from "../../../models/stores/serial";
-import { IdentifyResult } from "../../../models/stores/cc-device-session";
+import { CcDeviceSession, IdentifyResult } from "../../../models/stores/cc-device-session";
 import { SpikerbitDevice } from "../../../models/stores/spikerbit-device";
 import {
   createSpikerbitConnection, makeSpikerbitFlashDataSource
@@ -27,6 +27,17 @@ export const kDeviceChoiceLabels: Record<DeviceChoice, string> = {
 export const kEndSessionTimeoutMs = 500;
 
 // "inUse": another tab or app has claimed the board.
+// How long the answer to "Is it alive?" stays before the check is cleared.
+export const kIdentifyResultMs = 3000;
+
+// An "Is it alive?" check: waiting for the board, or its answer.
+export type IdentifyCheckState = "checking" | IdentifyResult;
+
+interface IIdentifyCheck {
+  session: CcDeviceSession;
+  state: IdentifyCheckState;
+}
+
 export type ConnectResult = "connected" | "canceled" | "failed" | "inUse";
 
 // What dismissed the connect tutorial: OK in one tile, or any connection.
@@ -67,6 +78,10 @@ export class DeviceConnection {
   // connection remembers the board, so Reconnect reopens it without the chooser. Connect
   // replaces it with a fresh one, which shows the chooser.
   private spikerbitDevice: SpikerbitDevice | undefined;
+  // The latest "Is it alive?" check, with the session it asked. It counts only while that session is
+  // the active one, so a reconnect or a new device never shows an earlier board's answer.
+  private identifyCheck: IIdentifyCheck | undefined = undefined;
+  private identifyTimer: ReturnType<typeof setTimeout> | undefined;
 
   constructor(serialDevice: SerialDevice, deps?: Partial<IDeviceConnectionDeps>) {
     this.serialDevice = serialDevice;
@@ -76,13 +91,16 @@ export class DeviceConnection {
       getSpikerbitFlashDataSource: () => makeSpikerbitFlashDataSource(spikerbitHex),
       ...deps
     };
-    makeAutoObservable<DeviceConnection, "serialDevice" | "deps" | "lastWebSerialTransport" | "spikerbitDevice">(
+    makeAutoObservable<DeviceConnection,
+        "serialDevice" | "deps" | "lastWebSerialTransport" | "spikerbitDevice" | "identifyCheck" | "identifyTimer">(
       this,
       {
         serialDevice: false,
         deps: false,
         lastWebSerialTransport: false,
         spikerbitDevice: false,
+        identifyCheck: observable.ref,
+        identifyTimer: false,
         connect: false,
         reconnect: false,
         disconnect: false,
@@ -118,8 +136,29 @@ export class DeviceConnection {
     return this.isConnected && !!this.serialDevice.ccDeviceSession;
   }
 
-  identify(): Promise<IdentifyResult> {
-    return this.serialDevice.ccDeviceSession?.identify() ?? Promise.resolve("noAnswer");
+  // The "Is it alive?" check for the connected device, as every tile's pane shows it.
+  get check(): IdentifyCheckState | undefined {
+    const check = this.identifyCheck;
+    return this.isConnected && check?.session === this.serialDevice.ccDeviceSession ? check?.state : undefined;
+  }
+
+  // Asks the device to identify itself, and keeps `check` up to date: checking, then the answer for
+  // kIdentifyResultMs.
+  async identify(): Promise<IdentifyResult> {
+    const session = this.serialDevice.ccDeviceSession;
+    if (!session) return "noAnswer";
+    clearTimeout(this.identifyTimer);
+    const checking: IIdentifyCheck = { session, state: "checking" };
+    runInAction(() => { this.identifyCheck = checking; });
+    const result = await session.identify();
+    // A newer check replaces this one, and its answer stands.
+    if (this.identifyCheck !== checking) return result;
+    const answered: IIdentifyCheck = { session, state: result };
+    runInAction(() => { this.identifyCheck = answered; });
+    this.identifyTimer = setTimeout(() => {
+      runInAction(() => { if (this.identifyCheck === answered) this.identifyCheck = undefined; });
+    }, kIdentifyResultMs);
+    return result;
   }
 
   // Why the last device went away without the user asking, until the next connect attempt.

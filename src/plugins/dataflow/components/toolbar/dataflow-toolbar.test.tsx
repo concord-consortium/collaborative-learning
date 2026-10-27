@@ -7,8 +7,8 @@ import { ModalProvider } from "react-modal-hook";
 
 import { ReadOnlyContext } from "../../../../components/document/read-only-context";
 import { SerialDevice } from "../../../../models/stores/serial";
-import { ConnectResult, getDeviceConnection } from "../../model/device-connection";
-import { kIdentifyResultMs, kLossPulseMs } from "./dataflow-connect-button";
+import { ConnectResult, getDeviceConnection, kIdentifyResultMs } from "../../model/device-connection";
+import { kLossPulseMs } from "./dataflow-connect-button";
 import { IdentifyResult } from "../../../../models/stores/cc-device-session";
 import { TileModelContext } from "../../../../components/tiles/tile-api";
 import { ITileModel, TileModel } from "../../../../models/tiles/tile-model";
@@ -328,8 +328,9 @@ describe("Dataflow pan split button (CLUE-573)", () => {
 });
 
 describe("Dataflow connect button and pane", () => {
-  // Pass `stores` to render a second toolbar sharing the first one's device connection.
-  function renderConnect(opts: RenderOptions & { stores?: ReturnType<typeof specStores> } = {}) {
+  // Pass `stores` to render a second toolbar sharing the first one's device connection, and
+  // `strict` to render it in React.StrictMode, which mounts, unmounts and remounts it.
+  function renderConnect(opts: RenderOptions & { stores?: ReturnType<typeof specStores>, strict?: boolean } = {}) {
     const info = getToolbarButtonInfo("dataflow", "connect");
     if (!info) throw new Error("connect is not registered");
     const Component = info.component;
@@ -337,7 +338,7 @@ describe("Dataflow connect button and pane", () => {
     const content = opts.content ?? DataflowContentModel.create();
     const model = TileModel.create({ content });
     const connection = getDeviceConnection(stores.serialDevice);
-    const result = render(
+    const tree = (
       <ModalProvider>
         <Provider stores={stores}>
           <ReadOnlyContext.Provider value={!!opts.readOnly}>
@@ -350,6 +351,7 @@ describe("Dataflow connect button and pane", () => {
         </Provider>
       </ModalProvider>
     );
+    const result = render(opts.strict ? <React.StrictMode>{tree}</React.StrictMode> : tree);
     return { ...result, content, stores, connection, model, tileId: model.id };
   }
 
@@ -359,7 +361,7 @@ describe("Dataflow connect button and pane", () => {
     return trigger;
   }
 
-  function openPane(opts: RenderOptions = {}) {
+  function openPane(opts: Parameters<typeof renderConnect>[0] = {}) {
     const r = renderConnect(opts);
     fireEvent.click(getTrigger(r.container));
     return r;
@@ -551,12 +553,12 @@ describe("Dataflow connect button and pane", () => {
     const pane = () => screen.getByRole("group", { name: "Device connection" });
     const aliveButton = () => within(pane()).getByRole("button", { name: "Is it alive?" });
 
-    // Opens the pane on a connected Spiker:bit whose identify waits for the test to answer.
-    function setupCheck() {
-      const r = openPane();
+    // Opens the pane on a connected Spiker:bit whose session's identify waits for the test to answer.
+    function setupCheck(opts: { strict?: boolean } = {}) {
+      const r = openPane(opts);
       fakeConnected(r);
       const answers: Array<(result: IdentifyResult) => void> = [];
-      const identify = jest.spyOn(r.connection, "identify")
+      const identify = jest.spyOn(r.stores.serialDevice.ccDeviceSession!, "identify")
         .mockImplementation(() => new Promise(resolve => { answers.push(resolve); }));
       const answer = async (result: IdentifyResult) => {
         await act(async () => { answers.shift()!(result); });
@@ -623,7 +625,7 @@ describe("Dataflow connect button and pane", () => {
       act(() => r.stores.serialDevice.clearActiveDevice());
     });
 
-    it("closing the pane during a check doesn't update it later", async () => {
+    it("the answer is still there when the pane is closed during the check and opened again", async () => {
       const consoleError = jest.spyOn(console, "error");
       const r = setupCheck();
       fireEvent.click(aliveButton());
@@ -631,9 +633,18 @@ describe("Dataflow connect button and pane", () => {
       expect(r.content.connectPaneOpen).toBe(false);
       await r.answer("answered");
       fireEvent.click(getTrigger(r.container));
-      expect(within(pane()).queryByText("The Spiker:bit answered.")).toBeNull();
+      expect(within(pane()).getByText("The Spiker:bit answered.")).toBeInTheDocument();
       expect(consoleError).not.toHaveBeenCalled();
       consoleError.mockRestore();
+      act(() => r.stores.serialDevice.clearActiveDevice());
+    });
+
+    it("works in React.StrictMode", async () => {
+      const r = setupCheck({ strict: true });
+      fireEvent.click(aliveButton());
+      await r.answer("answered");
+      expect(within(pane()).getByText("The Spiker:bit answered.")).toBeInTheDocument();
+      expect(isDisabled(aliveButton())).toBe(false);
       act(() => r.stores.serialDevice.clearActiveDevice());
     });
   });

@@ -455,6 +455,9 @@ requested close also raises the library's `Disconnected`. A connect attempt clea
 `DeviceConnection` turns this into what the connect pane shows: `lossMessage` ("The Spiker:bit was
 unplugged." or "The connection to the Spiker:bit was lost."), `lossAt` (a new value pulses the
 connect button once), and, while connected, `notResponding` and `canIdentify` from the session.
+`identify()` runs the "Is it alive?" check, and `check` reports it: `"checking"`, then the answer
+for 3 s. The check remembers the session it asked and counts only while that session is active,
+so it survives the pane closing and never shows an earlier board's answer.
 A Spiker:bit connect that fails because another tab or app has claimed the board (the library's
 `device-in-use` error) returns `"inUse"`, which the pane reports as "Another app is using the
 Spiker:bit."

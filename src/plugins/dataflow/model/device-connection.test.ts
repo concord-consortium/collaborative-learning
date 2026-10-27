@@ -4,7 +4,10 @@ import {
 } from "../../../models/stores/spikerbit-device";
 import { WebSerialOpenResult, WebSerialTransport } from "../../../models/stores/web-serial-transport";
 import { withChecksum } from "../../../models/stores/cc-device-protocol";
-import { DeviceConnection, getDeviceConnection, IDeviceConnectionDeps } from "./device-connection";
+import {
+  DeviceConnection, getDeviceConnection, IDeviceConnectionDeps, kIdentifyResultMs
+} from "./device-connection";
+import { IdentifyResult } from "../../../models/stores/cc-device-session";
 
 function makePort(usbVendorId: number, usbProductId: number) {
   return { getInfo: () => ({ usbVendorId, usbProductId }) } as unknown as SerialPort;
@@ -516,6 +519,64 @@ describe("DeviceConnection", () => {
       await connection.connect("arduino");
       expect(connection.canIdentify).toBe(false);
       await expect(connection.identify()).resolves.toBe("noAnswer");
+    });
+
+    describe("the Is it alive? check", () => {
+      beforeEach(() => jest.useFakeTimers());
+      afterEach(() => jest.useRealTimers());
+
+      // A connected Spiker:bit whose session's identify waits for the test to answer.
+      async function setupCheck() {
+        const serialDevice = new SerialDevice();
+        const connection = new DeviceConnection(serialDevice, realSpikerbitDeps(makeUsbConnection()));
+        await connection.connect("spikerbit");
+        const answers: Array<(result: IdentifyResult) => void> = [];
+        jest.spyOn(serialDevice.ccDeviceSession!, "identify")
+          .mockImplementation(() => new Promise(resolve => { answers.push(resolve); }));
+        const answer = async (result: IdentifyResult) => {
+          answers.shift()!(result);
+          await jest.advanceTimersByTimeAsync(0);
+        };
+        return { serialDevice, connection, answer };
+      }
+
+      it("is checking, then the answer, then nothing after 3 s", async () => {
+        const { serialDevice, connection, answer } = await setupCheck();
+        expect(connection.check).toBeUndefined();
+        const result = connection.identify();
+        expect(connection.check).toBe("checking");
+        await answer("answered");
+        await expect(result).resolves.toBe("answered");
+        expect(connection.check).toBe("answered");
+        await jest.advanceTimersByTimeAsync(kIdentifyResultMs - 1);
+        expect(connection.check).toBe("answered");
+        await jest.advanceTimersByTimeAsync(1);
+        expect(connection.check).toBeUndefined();
+        serialDevice.clearActiveDevice();
+      });
+
+      it("isn't shown for another session, even when its answer comes later", async () => {
+        const { serialDevice, connection, answer } = await setupCheck();
+        void connection.identify();
+        serialDevice.setActiveDevice("spikerbit", { write: jest.fn(), close: jest.fn() });
+        expect(connection.check).toBeUndefined();
+        await answer("answered");
+        expect(connection.check).toBeUndefined();
+        serialDevice.clearActiveDevice();
+      });
+
+      it("a new check isn't cleared by the timer of the one before it", async () => {
+        const { serialDevice, connection, answer } = await setupCheck();
+        void connection.identify();
+        await answer("answered");
+        await jest.advanceTimersByTimeAsync(kIdentifyResultMs - 1000);
+        void connection.identify();
+        await jest.advanceTimersByTimeAsync(1000);
+        expect(connection.check).toBe("checking");
+        await answer("noAnswer");
+        expect(connection.check).toBe("noAnswer");
+        serialDevice.clearActiveDevice();
+      });
     });
 
     it("identify asks the session", async () => {

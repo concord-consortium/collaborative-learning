@@ -103,6 +103,10 @@ This is what CLUE-716 expected.
   short sound on a micro:bit V2.
 - **The pane stays open.** Unlike Connect and Disconnect, success doesn't close it, so the student
   sees the result. Focus stays on the control.
+- **The check belongs to the connection, not the pane.** `DeviceConnection` keeps it, with the
+  session it asked, and shows it only while that session is active. Closing and reopening the
+  pane keeps the answer, every tile's pane shows the same check, and a new device or session
+  never shows an earlier board's answer.
 - The second line shows, in order:
   1. `Checking the Spiker:bit… look for the heart.` while waiting for the reply;
   2. `The Spiker:bit answered.` when its `ok #n` arrives, or `The Spiker:bit didn't answer.` if
