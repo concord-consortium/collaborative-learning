@@ -130,6 +130,44 @@ describe("AISettings", () => {
     expect(mockDraft.config.aiEvaluateOnSessionEnd).toBe(false);
   });
 
+  // The 17 CMP math units omit discussionPrompt so the AI stops producing generic next-steps
+  // advice. The runtime treats it as optional, so the form must not demand one.
+  it("saves a custom-evaluation unit that has no discussion prompt", async () => {
+    const { discussionPrompt, ...withoutDiscussion } = aiPromptFields;
+    mockConfig.aiEvaluation = "custom";
+    mockConfig.aiPrompt = withoutDiscussion;
+    render(<AISettings />);
+
+    save();
+
+    await waitFor(() => expect(mockSetUnitConfig).toHaveBeenCalled());
+    const mockDraft = applyLastUpdater({ aiEvaluation: "custom", aiPrompt: { ...withoutDiscussion } });
+    expect("discussionPrompt" in mockDraft.config.aiPrompt).toBe(false);
+  });
+
+  it("removes an emptied discussion prompt rather than storing an empty string", async () => {
+    mockConfig.aiEvaluation = "custom";
+    mockConfig.aiPrompt = aiPromptFields;
+    render(<AISettings />);
+
+    fireEvent.change(screen.getByLabelText("Discussion Prompt"), { target: { value: "" } });
+    save();
+
+    await waitFor(() => expect(mockSetUnitConfig).toHaveBeenCalled());
+    const mockDraft = applyLastUpdater({ aiEvaluation: "custom", aiPrompt: { ...aiPromptFields } });
+    expect("discussionPrompt" in mockDraft.config.aiPrompt).toBe(false);
+  });
+
+  it("creates an aiPrompt without an empty discussion prompt", async () => {
+    render(<AISettings />);
+
+    save();
+
+    await waitFor(() => expect(mockSetUnitConfig).toHaveBeenCalled());
+    const mockDraft = applyLastUpdater();
+    expect("discussionPrompt" in mockDraft.config.aiPrompt).toBe(false);
+  });
+
   it("disables session-end evaluation when no evaluation method is set", () => {
     render(<AISettings />);
 

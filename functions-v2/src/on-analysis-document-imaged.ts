@@ -221,9 +221,14 @@ export const onAnalysisDocumentImaged =
           return;
         }
         tags = reply.parsed.category && reply.parsed.category !== "unknown" ? [reply.parsed.category] : [];
-        const indicators = reply.parsed.keyIndicators && reply.parsed.keyIndicators.length ?
-          ` Your work shows: ${reply.parsed.keyIndicators.join(", ")}` : "";
-        message = (reply.parsed.discussion || "") + indicators;
+        // The space is a separator between the two halves, so a unit that omits discussionPrompt --
+        // and gets no discussion field back -- does not open every comment with one.
+        const commentParts = [];
+        if (reply.parsed.discussion) commentParts.push(reply.parsed.discussion);
+        if (reply.parsed.keyIndicators?.length) {
+          commentParts.push(`Evidence: ${reply.parsed.keyIndicators.join(", ")}`);
+        }
+        message = commentParts.join(" ");
         fullResponse = JSON.stringify(completion);
       } else {
         await error(`Unexpected value for evaluator: ${queueDoc?.evaluator}`, event);
