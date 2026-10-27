@@ -479,6 +479,16 @@ describe("CcDeviceSession", () => {
       s.stop();
     });
 
+    it("stop removes the visibility listener", () => {
+      const remove = jest.spyOn(document, "removeEventListener");
+      const s = make();
+      s.start();
+      remove.mockClear();
+      s.stop();
+      expect(remove).toHaveBeenCalledWith("visibilitychange", expect.any(Function));
+      remove.mockRestore();
+    });
+
     it("err othersession makes it not responding at once, and it stays so", () => {
       const warn = jest.spyOn(console, "warn").mockImplementation(() => undefined);
       const s = make();
