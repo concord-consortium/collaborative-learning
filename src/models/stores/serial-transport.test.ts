@@ -59,11 +59,98 @@ describe("SerialDevice active-transport routing", () => {
     device.setActiveDevice("microbit", transportB);
 
     // Simulate transportA's read loop finally giving up long after transportB took over.
-    transportA.onDisconnect?.();
+    transportA.onDisconnect?.("lost");
 
     expect(device.isConnected()).toBe(true);
     expect(device.activeTransport).toBe(transportB);
     expect(device.deviceFamily).toBe("microbit");
+  });
+});
+
+describe("SerialDevice loss records", () => {
+  it("onDisconnect('lost') clears the device and records it as lost", () => {
+    const device = new SerialDevice();
+    const transport = fakeTransport([]);
+    device.setActiveDevice("arduino", transport);
+    transport.onDisconnect?.("lost");
+    expect(device.isConnected()).toBe(false);
+    expect(device.lastLoss?.reason).toBe("lost");
+    expect(device.lastLoss?.transport).toBe(transport);
+  });
+
+  it("onDisconnect('unplugged') clears the device and records it as unplugged", () => {
+    const device = new SerialDevice();
+    const transport = fakeTransport([]);
+    device.setActiveDevice("arduino", transport);
+    transport.onDisconnect?.("unplugged");
+    expect(device.isConnected()).toBe(false);
+    expect(device.lastLoss?.reason).toBe("unplugged");
+  });
+
+  it("an unplug after a loss from the same transport upgrades it, keeping its time", () => {
+    const device = new SerialDevice();
+    const transport = fakeTransport([]);
+    device.setActiveDevice("arduino", transport);
+    transport.onDisconnect?.("lost");
+    const at = device.lastLoss?.at;
+    transport.onDisconnect?.("unplugged");
+    expect(device.lastLoss?.reason).toBe("unplugged");
+    expect(device.lastLoss?.at).toBe(at);
+  });
+
+  it("an unplug from a transport that isn't the last one lost changes nothing", () => {
+    const device = new SerialDevice();
+    const transportA = fakeTransport([]);
+    const transportB = fakeTransport([]);
+    device.setActiveDevice("arduino", transportA);
+    device.setActiveDevice("arduino", transportB);
+    transportB.onDisconnect?.("lost");
+    transportA.onDisconnect?.("unplugged");
+    expect(device.lastLoss?.reason).toBe("lost");
+    expect(device.lastLoss?.transport).toBe(transportB);
+  });
+
+  it("a later lost doesn't undo an unplug", () => {
+    const device = new SerialDevice();
+    const transport = fakeTransport([]);
+    device.setActiveDevice("arduino", transport);
+    transport.onDisconnect?.("unplugged");
+    transport.onDisconnect?.("lost");
+    expect(device.lastLoss?.reason).toBe("unplugged");
+  });
+
+  it("clearActiveDevice() with no reason records no loss", () => {
+    const device = new SerialDevice();
+    device.setActiveDevice("arduino", fakeTransport([]));
+    device.clearActiveDevice();
+    expect(device.lastLoss).toBeUndefined();
+  });
+
+  it("setActiveDevice and clearLastLoss clear the last loss", () => {
+    const device = new SerialDevice();
+    const transport = fakeTransport([]);
+    device.setActiveDevice("arduino", transport);
+    transport.onDisconnect?.("lost");
+    device.clearLastLoss();
+    expect(device.lastLoss).toBeUndefined();
+    transport.onDisconnect?.("unplugged");
+    expect(device.lastLoss).toBeUndefined();
+    device.setActiveDevice("arduino", transport);
+    transport.onDisconnect?.("lost");
+    device.setActiveDevice("arduino", fakeTransport([]));
+    expect(device.lastLoss).toBeUndefined();
+  });
+
+  it("lastLoss is observable", () => {
+    const device = new SerialDevice();
+    const transport = fakeTransport([]);
+    const seen: Array<string | undefined> = [];
+    const dispose = autorun(() => { seen.push(device.lastLoss?.reason); });
+    device.setActiveDevice("arduino", transport);
+    transport.onDisconnect?.("lost");
+    transport.onDisconnect?.("unplugged");
+    dispose();
+    expect(seen).toEqual([undefined, "lost", "unplugged"]);
   });
 });
 

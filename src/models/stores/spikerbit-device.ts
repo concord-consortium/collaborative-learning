@@ -2,7 +2,7 @@ import { kMaxSeq } from "./cc-device-session";
 import { withChecksum } from "./cc-device-protocol";
 import { SerialDevice } from "./serial";
 import { detectFirmwareReply, FirmwareReply, shouldFlash } from "./serial-protocol";
-import { IDeviceTransport } from "./device-transport";
+import { DeviceLoss, IDeviceTransport } from "./device-transport";
 
 // The version of the firmware bundled at src/plugins/dataflow/firmware/spikerbit-clue.hex.
 // Keep equal to the `firmware:` number in the HELLO line of spikerbit-clue.ts.
@@ -53,21 +53,45 @@ export interface IMicrobitUsbConnection {
   ): Promise<void>;
   serialWrite(data: string): Promise<void>;
   disconnect(): Promise<void>;
+  // The library's USBDevice. Typed unknown: it's only compared with the device in an unplug event.
+  getDevice(): unknown;
+}
+
+// The part of navigator.usb that reports a device being unplugged.
+export interface IUsbDisconnectSource {
+  addEventListener(type: "disconnect", listener: (e: { device: unknown }) => void): void;
+  removeEventListener(type: "disconnect", listener: (e: { device: unknown }) => void): void;
 }
 
 // IDeviceTransport over a micro:bit WebUSB serial connection. Like WebSerialTransport,
 // it owns the connection's inbound events: it forwards serial chunks to onData and fires
 // onDisconnect on a lost/deauthorized connection, so SerialDevice can receive centrally.
+// The library disconnects itself after any failed WebUSB call, which reports the loss as "lost".
+// It listens for navigator.usb's disconnect event only in its initialize(), which CLUE doesn't call
+// because it also pauses the connection in a hidden tab, so this listens for unplugs itself.
 export class MicrobitUsbTransport implements IDeviceTransport {
   onData?: (chunk: string) => void;
-  onDisconnect?: () => void;
+  onDisconnect?: (loss: DeviceLoss) => void;
 
-  constructor(private connection: IMicrobitUsbConnection) {
+  constructor(
+    private connection: IMicrobitUsbConnection,
+    private usb: IUsbDisconnectSource | undefined = (navigator as { usb?: IUsbDisconnectSource }).usb
+  ) {
     connection.addEventListener("serialdata", ({ data }) => this.onData?.(data));
     connection.addEventListener("status", ({ status }) => {
-      if (status === "Disconnected" || status === "NoAuthorizedDevice") this.onDisconnect?.();
+      if (status === "Disconnected" || status === "NoAuthorizedDevice") this.onDisconnect?.("lost");
     });
+    usb?.addEventListener("disconnect", this.handleUnplug);
   }
+
+  dispose() {
+    this.usb?.removeEventListener("disconnect", this.handleUnplug);
+  }
+
+  private handleUnplug = (e: { device: unknown }) => {
+    const device = this.connection.getDevice();
+    if (device !== undefined && e.device === device) this.onDisconnect?.("unplugged");
+  };
 
   // Resolves when the write finishes, so a caller can wait for its last line to reach the board.
   // A failure is logged, not thrown.
@@ -135,6 +159,11 @@ export class SpikerbitDevice {
     this.transport.onData = undefined;
     this.buffer = "";
     return this.connection.disconnect();
+  }
+
+  // Stops listening for this board being unplugged. Call when the device is no longer kept.
+  public dispose() {
+    this.transport.dispose();
   }
 
   private async connectAndCheckFirmware(

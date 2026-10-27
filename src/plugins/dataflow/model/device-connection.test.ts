@@ -52,6 +52,7 @@ function makeSpikerbit(serialDevice: SerialDevice) {
 
 // A fake @microbit/microbit-connection USB connection for driving a real SpikerbitDevice.
 function makeUsbConnection(options: { failWrite?: boolean } = {}) {
+  const usbDevice = {};
   const serialListeners: Array<(d: { data: string }) => void> = [];
   const connection = {
     addEventListener: jest.fn((type: string, listener: (d: { data: string }) => void) => {
@@ -74,7 +75,8 @@ function makeUsbConnection(options: { failWrite?: boolean } = {}) {
         }
       });
     }),
-    disconnect: jest.fn().mockResolvedValue(undefined)
+    disconnect: jest.fn().mockResolvedValue(undefined),
+    getDevice: () => usbDevice
   };
   return connection;
 }

@@ -45,6 +45,7 @@ class SimConnection implements IMicrobitUsbConnection {
     this.connected = false;
     this.statusListeners.forEach(l => l({ status: "Disconnected" }));
   }
+  getDevice() { return this.sim; }
 
   // Moves the board's output into DAPLink's buffer, dropping what doesn't fit.
   collectOutput() {

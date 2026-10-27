@@ -1,12 +1,12 @@
 import { NodeChannelInfo } from "../../plugins/dataflow/model/utilities/channel";
 import { withChecksum } from "./cc-device-protocol";
-import { IDeviceTransport } from "./device-transport";
+import { DeviceLoss, IDeviceTransport } from "./device-transport";
 import { SerialDevice } from "./serial";
 
 class FakeTransport implements IDeviceTransport {
   written: string[] = [];
   onData?: (chunk: string) => void;
-  onDisconnect?: () => void;
+  onDisconnect?: (loss: DeviceLoss) => void;
   write(line: string) { this.written.push(line); }
   async close() { /* no-op */ }
 }
@@ -69,7 +69,7 @@ describe("SerialDevice with a ccDevice device", () => {
   it("stops the session on a transport disconnect", () => {
     serialDevice.setActiveDevice("spikerbit", transport);
     ack(transport, 1);
-    transport.onDisconnect?.();
+    transport.onDisconnect?.("lost");
     expectNoMoreWrites(transport);
   });
 

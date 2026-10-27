@@ -1,4 +1,4 @@
-import { IDeviceTransport } from "./device-transport";
+import { DeviceLoss, IDeviceTransport } from "./device-transport";
 import { SerialDevice } from "./serial";
 
 const textEncoder = new TextEncoder();
@@ -18,7 +18,7 @@ export type WebSerialOpenResult = "opened" | "canceled" | "failed";
 
 export class WebSerialTransport implements IDeviceTransport {
   onData?: (chunk: string) => void;
-  onDisconnect?: () => void;
+  onDisconnect?: (loss: DeviceLoss) => void;
 
   deviceFamily: string | undefined;
   private deviceInfo: SerialPortInfo | null = null;
@@ -136,7 +136,7 @@ export class WebSerialTransport implements IDeviceTransport {
       // Release the port so a later connect to it doesn't find it still open.
       await this.closePort();
       this.port = null;
-      this.onDisconnect?.();
+      this.onDisconnect?.("lost");
     }
   }
 
@@ -198,10 +198,16 @@ export function initWebSerialConnectionEvents(serialDevice: SerialDevice){
   navigator.serial?.addEventListener("connect", (e) => {
     serialDevice.updateConnectionInfo(e.timeStamp, e.type);
   });
+  // The event doesn't say which port was removed, so it's taken to be the Web Serial device's.
   navigator.serial?.addEventListener("disconnect", (e) => {
-    if (serialDevice.activeTransport instanceof WebSerialTransport) {
+    const active = serialDevice.activeTransport;
+    if (active instanceof WebSerialTransport) {
       serialDevice.updateConnectionInfo(e.timeStamp, e.type);
-      serialDevice.clearActiveDevice();
+      serialDevice.recordUnplug(active);
+    } else {
+      // The read loop may have given up on the port first and recorded it as lost.
+      const lost = serialDevice.lastLoss?.transport;
+      if (lost instanceof WebSerialTransport) serialDevice.recordUnplug(lost);
     }
   });
 }

@@ -3,8 +3,15 @@ import { NodeChannelInfo } from "src/plugins/dataflow/model/utilities/channel";
 import { NodeLiveOutputTypes } from "../../plugins/dataflow/model/utilities/node";
 import { parseKeyValueData } from "./serial-protocol";
 import { deviceProtocol } from "../../plugins/dataflow/model/utilities/device-capabilities";
-import { IDeviceTransport } from "./device-transport";
+import { DeviceLoss, IDeviceTransport } from "./device-transport";
 import { CcDeviceSession } from "./cc-device-session";
+
+// The device lost most recently without the user asking, and when.
+export interface IDeviceLossRecord {
+  reason: DeviceLoss;
+  transport: IDeviceTransport;
+  at: number;
+}
 
 function log(message: string) {
   // eslint-disable-next-line no-console
@@ -20,6 +27,8 @@ export class SerialDevice {
   activeTransport: IDeviceTransport | undefined;
   // The CC Device Protocol session of the active device, when it speaks that protocol.
   ccDeviceSession: CcDeviceSession | undefined;
+  // Cleared when a device becomes active or a connect attempt starts.
+  lastLoss: IDeviceLossRecord | undefined;
   // Functions that each return the channels of one tile. Inbound data is delivered to the
   // channels of every registered source.
   private channelSources = new Set<() => NodeChannelInfo[]>();
@@ -35,9 +44,12 @@ export class SerialDevice {
     makeObservable(this, {
       activeTransport: observable.ref,
       ccDeviceSession: observable.ref,
+      lastLoss: observable.ref,
       deviceFamily: observable,
       setActiveDevice: action,
-      clearActiveDevice: action
+      clearActiveDevice: action,
+      recordUnplug: action,
+      clearLastLoss: action
     });
   }
 
@@ -74,10 +86,14 @@ export class SerialDevice {
     this.localBuffer = "";
     this.ccDeviceSession?.stop();
     this.ccDeviceSession = undefined;
+    this.lastLoss = undefined;
     this.activeTransport = transport;
     this.deviceFamily = deviceFamily;
     transport.onData = (chunk: string) => { if (this.activeTransport === transport) this.receive(chunk); };
-    transport.onDisconnect = () => { if (this.activeTransport === transport) this.clearActiveDevice(); };
+    transport.onDisconnect = (loss) => {
+      if (loss === "unplugged") this.recordUnplug(transport);
+      else if (this.activeTransport === transport) this.clearActiveDevice(loss);
+    };
     if (deviceProtocol(deviceFamily) === "ccDevice") {
       // Assigned before start() so a reply that arrives during the first write is routed.
       const session = new CcDeviceSession(line => transport.write(line));
@@ -93,7 +109,11 @@ export class SerialDevice {
     await this.ccDeviceSession?.close();
   }
 
-  public clearActiveDevice(){
+  // With a `loss`, records that the active device was lost without the user asking.
+  public clearActiveDevice(loss?: DeviceLoss){
+    if (loss && this.activeTransport) {
+      this.lastLoss = { reason: loss, transport: this.activeTransport, at: Date.now() };
+    }
     this.ccDeviceSession?.stop();
     this.ccDeviceSession = undefined;
     this.activeTransport = undefined;
@@ -103,6 +123,21 @@ export class SerialDevice {
     // never raises the browser connect/disconnect events this flag gates the connect-button UI on.
     this.raisesWebSerialConnect = false;
     this.updateConnectionInfo(Date.now(), "disconnect");
+  }
+
+  // The browser reported `transport`'s device removed. Clears it if it's still active. If another
+  // path already cleared it as lost (a failed write can come first), the loss becomes an unplug,
+  // keeping its time.
+  public recordUnplug(transport: IDeviceTransport){
+    if (this.activeTransport === transport) {
+      this.clearActiveDevice("unplugged");
+    } else if (this.lastLoss?.transport === transport && this.lastLoss.reason === "lost") {
+      this.lastLoss = { ...this.lastLoss, reason: "unplugged" };
+    }
+  }
+
+  public clearLastLoss(){
+    this.lastLoss = undefined;
   }
 
   // Central inbound router: dispatch a serial chunk to the parser for the connected

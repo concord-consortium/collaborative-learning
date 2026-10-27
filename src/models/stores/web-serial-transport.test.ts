@@ -1,4 +1,5 @@
-import { WebSerialTransport } from "./web-serial-transport";
+import { SerialDevice } from "./serial";
+import { initWebSerialConnectionEvents, WebSerialTransport } from "./web-serial-transport";
 
 // Minimal fake SerialPort. `chunks` are delivered by the reader in order, then done.
 function fakePort(info: Partial<SerialPortInfo>, chunks: Uint8Array[] = []) {
@@ -176,8 +177,8 @@ describe("WebSerialTransport", () => {
       await t.open();
       const received: string[] = [];
       t.onData = (c) => received.push(c);
-      const disconnected: boolean[] = [];
-      t.onDisconnect = () => disconnected.push(true);
+      const disconnected: string[] = [];
+      t.onDisconnect = (loss) => disconnected.push(loss);
 
       const readingDone = t.startReading();
       await Promise.resolve();
@@ -185,7 +186,7 @@ describe("WebSerialTransport", () => {
       await readingDone;
 
       expect(received).toContain("emg:7\r\n");
-      expect(disconnected).toEqual([true]);
+      expect(disconnected).toEqual(["lost"]);
     } finally {
       jest.useRealTimers();
     }
@@ -219,5 +220,50 @@ describe("WebSerialTransport", () => {
     await t.startReading();
 
     expect(order).toEqual(["close", "onDisconnect"]);
+  });
+});
+
+describe("initWebSerialConnectionEvents", () => {
+  let listeners: Record<string, (e: Event) => void>;
+
+  beforeEach(() => {
+    listeners = {};
+    (navigator as any).serial = {
+      addEventListener: jest.fn((type: string, l: (e: Event) => void) => { listeners[type] = l; })
+    };
+  });
+  afterEach(() => { delete (navigator as any).serial; });
+
+  const unplug = () => listeners.disconnect({ timeStamp: 1, type: "disconnect" } as Event);
+
+  it("the browser's disconnect event records an unplug of the active Web Serial device", () => {
+    const serialDevice = new SerialDevice();
+    initWebSerialConnectionEvents(serialDevice);
+    const transport = new WebSerialTransport();
+    serialDevice.setActiveDevice("arduino", transport);
+    unplug();
+    expect(serialDevice.isConnected()).toBe(false);
+    expect(serialDevice.lastLoss?.reason).toBe("unplugged");
+    expect(serialDevice.lastLoss?.transport).toBe(transport);
+  });
+
+  it("upgrades a loss the read loop recorded first", () => {
+    const serialDevice = new SerialDevice();
+    initWebSerialConnectionEvents(serialDevice);
+    const transport = new WebSerialTransport();
+    serialDevice.setActiveDevice("arduino", transport);
+    transport.onDisconnect?.("lost");
+    unplug();
+    expect(serialDevice.lastLoss?.reason).toBe("unplugged");
+  });
+
+  it("ignores the event when no Web Serial device is or was connected", () => {
+    const serialDevice = new SerialDevice();
+    initWebSerialConnectionEvents(serialDevice);
+    const transport = { write: jest.fn(), close: jest.fn() };
+    serialDevice.setActiveDevice("spikerbit", transport);
+    unplug();
+    expect(serialDevice.isConnected()).toBe(true);
+    serialDevice.clearActiveDevice();
   });
 });
