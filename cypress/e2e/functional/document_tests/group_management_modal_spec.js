@@ -56,14 +56,11 @@ function setup(student, opts = {}) {
   }
 }
 
-// The next window computes its class timestamp from its own estimate of the server clock, so
-// leave room for that estimate to be off.
+// Both windows estimate the server clock (Date.now() + serverTimeOffset); allow for them to disagree.
 const kServerClockMarginMs = 500;
 
-// Waits, in the current window, until the server clock is far enough past the student's
-// connectedTimestamp that a window loaded next counts them as removed. CLUE rewrites
-// connectedTimestamp after a join and on every reconnect, so this reads the latest one from the
-// groups store rather than timing from when the student appeared in a group.
+// Waits until server time is far enough past the student's latest connectedTimestamp (rewritten
+// on join and every reconnect) that the next window loaded counts them as removed.
 function waitUntilCountedAsRemoved(student) {
   cy.window()
     .then(win => win.stores.db.firebase.getServerTimeOffset())
