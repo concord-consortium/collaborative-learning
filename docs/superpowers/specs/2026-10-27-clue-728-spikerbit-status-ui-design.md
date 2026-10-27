@@ -275,6 +275,25 @@ sends `close`: the board is gone, and `clearActiveDevice` stops the session with
   CLUE tab for `device-in-use`; click "Is it alive?" and see the heart, hear the
   sound on a V2, and read "answered"; leave the tab hidden for several minutes and come back
   without the button turning yellow.
+- **Retests of #3055's code, on the bench.** The review of #3055 asked for these at its head, and
+  they were moved here because this branch contains that code. Report the results in this PR's
+  description, naming the boards and the commit tested.
+  - Spiker:bit V2 and V1, in a Mac browser:
+    - Connect a freshly plugged-in board already running v4: it connects with no flash.
+    - Auto-flash from other firmware, starting from both the v3 banner firmware and a MakeCode
+      program. The MakeCode program doesn't answer, so this takes the 1.5 s timeout path.
+    - After Dataflow flashes a board in the browser, Disconnect, then Connect: no second flash.
+      This is the case from #2929. After the first flash since plug-in, the library pushes 2048
+      dummy bytes into the interface chip's buffers (`cdc-saturation.js`), which the Node runs of
+      #3055 never exercised.
+    - EMG in a Sensor node, the servo from a Live Output, and Disconnect/Reconnect.
+  - Arduino: connect, readings, the servo and gripper outputs, and Disconnect/Reconnect. #3055
+    changed `device-capabilities.ts`, `live-output-node.ts` and `DeviceConnection.disconnect` for
+    every device.
+  - Not the radio hub.
+  - Not on a Chromebook. Connecting there at #3055's head works only some of the time, failing
+    differently than on #3040, and it stays unclear until CLUE-727 adds logging of each connection
+    step.
 
 ## Docs
 
