@@ -236,9 +236,9 @@ answered.
 
 **Not responding.** The session counts the `open`s and `ping`s it has sent since the last reply
 to one of them. When a fourth would go out with three still unanswered, about 3 s after the
-board went quiet, it sets the observable `notResponding`; any reply, `ok` or `err nosession`,
-clears it, and the count starts over. `err othersession` sets it too, and it stays set until a
-new session. The count is in commands, not seconds, and it pauses while the page is hidden and
+board went quiet, it sets the observable `notResponding`; any reply to one of them, `ok` or an
+`err` other than `othersession`, clears it, and the count starts over. `err othersession` sets it
+too, and it stays set until a new session. The count is in commands, not seconds, and it pauses while the page is hidden and
 starts over when it's visible again: in a hidden tab the browser slows the library's serial
 reads below the rate the readings arrive, so replies fall behind and would look missing.
 
@@ -445,7 +445,7 @@ Transports report it through `onDisconnect(loss)`, which `setActiveDevice` wires
 | Transport | `"unplugged"` | `"lost"` |
 |---|---|---|
 | Web Serial | `navigator.serial`'s `disconnect` event for the device's port, from `initWebSerialConnectionEvents`. Only authentic Arduinos raise it. | the read loop giving up on a port that stopped being readable, a few seconds later |
-| WebUSB (Spiker:bit) | `navigator.usb`'s `disconnect` event for the library connection's device, which `MicrobitUsbTransport` listens for itself | the library's `Disconnected` status. The library disconnects itself after any failed WebUSB call, and the session writes a `ping` every second, so an unplug is noticed this way within a second even without the event. |
+| WebUSB (Spiker:bit) | `navigator.usb`'s `disconnect` event for the library connection's device, which `MicrobitUsbTransport` listens for itself. It then closes the library connection, whose status would otherwise stay Connected. | the library's `Disconnected` status. The library disconnects itself after any failed WebUSB call, and the session writes a `ping` every second, so an unplug is noticed this way within a second even without the event. |
 
 Each unplug has two paths, and either can come first. The second finds the device already
 cleared, so the guard in `onDisconnect` ignores a second `"lost"`, and `recordUnplug` turns a

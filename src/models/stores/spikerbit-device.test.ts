@@ -308,6 +308,26 @@ describe("SpikerbitDevice", () => {
       expect(losses).toEqual(["unplugged"]);
     });
 
+    it("an unplug of its own device also closes the library connection", () => {
+      const conn = new FakeConnection();
+      const disconnect = jest.spyOn(conn, "disconnect");
+      const usb = makeUsbSource();
+      new MicrobitUsbTransport(conn, usb);
+      usb.unplug(conn.device);
+      expect(disconnect).toHaveBeenCalledTimes(1);
+    });
+
+    it("the Disconnected status from closing after an unplug leaves it unplugged", () => {
+      const serialDevice = makeSerialDevice();
+      const conn = new FakeConnection();
+      jest.spyOn(conn, "disconnect").mockImplementation(async () => conn.emitStatus("Disconnected"));
+      const usb = makeUsbSource();
+      serialDevice.setActiveDevice("spikerbit", new MicrobitUsbTransport(conn, usb));
+      usb.unplug(conn.device);
+      expect(serialDevice.isConnected()).toBe(false);
+      expect(serialDevice.lastLoss?.reason).toBe("unplugged");
+    });
+
     it("an unplug of another device is ignored", () => {
       const conn = new FakeConnection();
       const usb = makeUsbSource();

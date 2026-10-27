@@ -416,6 +416,32 @@ describe("CcDeviceSession", () => {
       s.stop();
     });
 
+    it("an err with another reason, answering a pending ping, is an answer", () => {
+      const warn = jest.spyOn(console, "warn").mockImplementation(() => undefined);
+      const s = make();
+      s.start();
+      s.receive(deviceLine("ok #1"), []);
+      jest.advanceTimersByTime(3000);
+      s.receive(deviceLine("err #4 value"), []);
+      jest.advanceTimersByTime(1000);
+      expect(s.notResponding).toBe(false);
+      expect(warn).toHaveBeenCalled();
+      warn.mockRestore();
+      s.stop();
+    });
+
+    it("an err with another reason, answering a pending open, is an answer", () => {
+      const warn = jest.spyOn(console, "warn").mockImplementation(() => undefined);
+      const s = make();
+      s.start();
+      jest.advanceTimersByTime(4000);
+      s.receive(deviceLine("err #3 value"), []);
+      jest.advanceTimersByTime(2000);
+      expect(s.notResponding).toBe(false);
+      warn.mockRestore();
+      s.stop();
+    });
+
     it("counts unanswered opens too", () => {
       const s = make();
       s.start();

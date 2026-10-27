@@ -87,7 +87,11 @@ export class MicrobitUsbTransport implements IDeviceTransport {
 
   private handleUnplug = (e: { device: unknown }) => {
     const device = this.connection.getDevice();
-    if (device !== undefined && e.device === device) this.onDisconnect?.("unplugged");
+    if (device === undefined || e.device !== device) return;
+    this.onDisconnect?.("unplugged");
+    // The library doesn't see the unplug, so its status would stay Connected. The Disconnected
+    // status this raises reports "lost", which doesn't undo the unplug already recorded.
+    this.connection.disconnect().catch((err) => console.warn("Spiker:bit disconnect failed", err));
   };
 
   // Resolves when the write finishes, so a caller can wait for its last line to reach the board.

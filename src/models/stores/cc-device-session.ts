@@ -167,14 +167,16 @@ export class CcDeviceSession {
 
   private handleErr(seq: number | undefined, reason: string) {
     if (this.answerIdentify(seq)) return;
-    if (reason === "nosession" || reason === "othersession") {
-      // Only an answer to a ping still pending changes the session. Reopening clears the pending
-      // pings, so the errors for other pings in flight, or late ones for an earlier session,
-      // change nothing.
-      if (seq === undefined || this.pending.get(seq) !== "ping") return;
+    const kind = seq === undefined ? undefined : this.pending.get(seq);
+    // Only an answer to a ping still pending changes the session. Reopening clears the pending
+    // pings, so the errors for other pings in flight, or late ones for an earlier session, change
+    // nothing.
+    if ((reason === "nosession" || reason === "othersession") && kind !== "ping") return;
+    // Any other reply to a pending command shows the device is answering.
+    if (seq !== undefined && kind) {
       this.pending.delete(seq);
+      if (reason !== "othersession") this.answered();
     }
-    if (reason === "nosession") this.answered();
     if (reason === "nosession") {
       this.clearTimers();
       this.pending.clear();
