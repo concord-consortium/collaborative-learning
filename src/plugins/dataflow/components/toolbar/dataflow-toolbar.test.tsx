@@ -8,7 +8,8 @@ import { ModalProvider } from "react-modal-hook";
 import { ReadOnlyContext } from "../../../../components/document/read-only-context";
 import { SerialDevice } from "../../../../models/stores/serial";
 import { ConnectResult, getDeviceConnection } from "../../model/device-connection";
-import { kLossPulseMs } from "./dataflow-connect-button";
+import { kIdentifyResultMs, kLossPulseMs } from "./dataflow-connect-button";
+import { IdentifyResult } from "../../../../models/stores/cc-device-session";
 import { TileModelContext } from "../../../../components/tiles/tile-api";
 import { ITileModel, TileModel } from "../../../../models/tiles/tile-model";
 import { specStores } from "../../../../models/stores/spec-stores";
@@ -508,6 +509,133 @@ describe("Dataflow connect button and pane", () => {
     act(() => session.setNotResponding(false));
     expect(trigger.classList.contains("connect-connected")).toBe(true);
     act(() => r.stores.serialDevice.clearActiveDevice());
+  });
+
+  describe("the second line", () => {
+    const pane = () => screen.getByRole("group", { name: "Device connection" });
+
+    it("says the Spiker:bit is not responding, under Connected", () => {
+      const r = openPane();
+      fakeConnected(r);
+      act(() => r.stores.serialDevice.ccDeviceSession!.setNotResponding(true));
+      expect(within(pane()).getByRole("status")).toHaveTextContent("Connected: Spiker:bit");
+      expect(within(pane()).getByText("The Spiker:bit is not responding.")).toBeInTheDocument();
+      act(() => r.stores.serialDevice.clearActiveDevice());
+    });
+
+    it("says the device was unplugged, or that the connection was lost, under Not connected", () => {
+      const r = openPane();
+      fakeConnected(r);
+      act(() => r.stores.serialDevice.activeTransport!.onDisconnect!("unplugged"));
+      expect(within(pane()).getByRole("status")).toHaveTextContent("Not connected");
+      expect(within(pane()).getByText("The Spiker:bit was unplugged.")).toBeInTheDocument();
+      fakeConnected(r);
+      act(() => r.stores.serialDevice.activeTransport!.onDisconnect!("lost"));
+      expect(within(pane()).getByText("The connection to the Spiker:bit was lost.")).toBeInTheDocument();
+    });
+
+    it("a connect error wins over a loss message", () => {
+      const r = openPane();
+      fakeConnected(r);
+      act(() => r.stores.serialDevice.activeTransport!.onDisconnect!("unplugged"));
+      act(() => r.content.setConnectError("Couldn't connect to Spiker:bit."));
+      expect(within(pane()).getByText("Couldn't connect to Spiker:bit.")).toBeInTheDocument();
+      expect(within(pane()).queryByText("The Spiker:bit was unplugged.")).toBeNull();
+    });
+  });
+
+  describe("Is it alive?", () => {
+    beforeEach(() => jest.useFakeTimers());
+    afterEach(() => jest.useRealTimers());
+
+    const pane = () => screen.getByRole("group", { name: "Device connection" });
+    const aliveButton = () => within(pane()).getByRole("button", { name: "Is it alive?" });
+
+    // Opens the pane on a connected Spiker:bit whose identify waits for the test to answer.
+    function setupCheck() {
+      const r = openPane();
+      fakeConnected(r);
+      const answers: Array<(result: IdentifyResult) => void> = [];
+      const identify = jest.spyOn(r.connection, "identify")
+        .mockImplementation(() => new Promise(resolve => { answers.push(resolve); }));
+      const answer = async (result: IdentifyResult) => {
+        await act(async () => { answers.shift()!(result); });
+      };
+      return { ...r, identify, answer };
+    }
+
+    afterEach(() => {
+      act(() => { jest.runOnlyPendingTimers(); });
+    });
+
+    it("shows only for a connected Spiker:bit", () => {
+      const r = openPane();
+      expect(within(pane()).queryByRole("button", { name: "Is it alive?" })).toBeNull();
+      act(() => {
+        r.stores.serialDevice.setActiveDevice("arduino", fakeTransport());
+        runInAction(() => { r.connection.lastChoice = "arduino"; });
+      });
+      expect(within(pane()).queryByRole("button", { name: "Is it alive?" })).toBeNull();
+      fakeConnected(r);
+      expect(aliveButton()).toBeInTheDocument();
+      act(() => r.stores.serialDevice.clearActiveDevice());
+    });
+
+    it("checks, reports the answer, then goes back to what the line showed", async () => {
+      const r = setupCheck();
+      act(() => r.stores.serialDevice.ccDeviceSession!.setNotResponding(true));
+      aliveButton().focus();
+      fireEvent.click(aliveButton());
+      expect(r.identify).toHaveBeenCalledTimes(1);
+      expect(within(pane()).getByText("Checking the Spiker:bit… look for the heart.")).toBeInTheDocument();
+      expect(isDisabled(aliveButton())).toBe(true);
+      await r.answer("answered");
+      expect(within(pane()).getByText("The Spiker:bit answered.")).toBeInTheDocument();
+      expect(isDisabled(aliveButton())).toBe(false);
+      expect(document.activeElement).toBe(aliveButton());
+      expect(r.content.connectPaneOpen).toBe(true);
+      act(() => { jest.advanceTimersByTime(kIdentifyResultMs); });
+      expect(within(pane()).queryByText("The Spiker:bit answered.")).toBeNull();
+      expect(within(pane()).getByText("The Spiker:bit is not responding.")).toBeInTheDocument();
+      act(() => r.stores.serialDevice.clearActiveDevice());
+    });
+
+    it("reports when the board didn't answer", async () => {
+      const r = setupCheck();
+      fireEvent.click(aliveButton());
+      await r.answer("noAnswer");
+      expect(within(pane()).getByText("The Spiker:bit didn't answer.")).toBeInTheDocument();
+      act(() => r.stores.serialDevice.clearActiveDevice());
+    });
+
+    it("ignores clicks while checking, and a click after the answer starts a new check", async () => {
+      const r = setupCheck();
+      fireEvent.click(aliveButton());
+      fireEvent.click(aliveButton());
+      expect(r.identify).toHaveBeenCalledTimes(1);
+      await r.answer("answered");
+      fireEvent.click(aliveButton());
+      expect(r.identify).toHaveBeenCalledTimes(2);
+      expect(within(pane()).getByText("Checking the Spiker:bit… look for the heart.")).toBeInTheDocument();
+      act(() => { jest.advanceTimersByTime(kIdentifyResultMs); });
+      expect(within(pane()).getByText("Checking the Spiker:bit… look for the heart.")).toBeInTheDocument();
+      await r.answer("answered");
+      act(() => r.stores.serialDevice.clearActiveDevice());
+    });
+
+    it("closing the pane during a check doesn't update it later", async () => {
+      const consoleError = jest.spyOn(console, "error");
+      const r = setupCheck();
+      fireEvent.click(aliveButton());
+      fireEvent.keyDown(aliveButton(), { key: "Escape" });
+      expect(r.content.connectPaneOpen).toBe(false);
+      await r.answer("answered");
+      fireEvent.click(getTrigger(r.container));
+      expect(within(pane()).queryByText("The Spiker:bit answered.")).toBeNull();
+      expect(consoleError).not.toHaveBeenCalled();
+      consoleError.mockRestore();
+      act(() => r.stores.serialDevice.clearActiveDevice());
+    });
   });
 
   describe("when a device is lost", () => {

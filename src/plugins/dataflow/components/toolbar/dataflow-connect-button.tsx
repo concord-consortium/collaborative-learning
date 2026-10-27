@@ -11,6 +11,7 @@ import { IToolbarButtonComponentProps } from "../../../../components/toolbar/too
 import { TileModelContext } from "../../../../components/tiles/tile-api";
 import { useReadOnlyContext } from "../../../../components/document/read-only-context";
 import { useStores } from "../../../../hooks/use-stores";
+import { IdentifyResult } from "../../../../models/stores/cc-device-session";
 import { DataflowContentModelType } from "../../model/dataflow-content";
 import {
   DeviceChoice, DeviceConnection, getDeviceConnection, kDeviceChoiceLabels, kDeviceChoiceOrder
@@ -26,6 +27,9 @@ import "./dataflow-connect-pane.scss";
 
 // How long the pulse after a lost device runs: connect-loss-pulse's animation, three 1.5 s cycles.
 export const kLossPulseMs = 4500;
+
+// How long the answer to "Is it alive?" shows before the pane's line goes back to what it showed.
+export const kIdentifyResultMs = 3000;
 
 // How each navigation key moves focus: by a signed number of controls, or to the first or last one.
 const kFocusSteps: Record<string, number | "first" | "last"> = {
@@ -82,6 +86,24 @@ const ConnectPane = observer(function ConnectPane(
   const { busyChoice, isConnected, connectedLabel } = connection;
   const busy = !!busyChoice;
   const headingId = useId();
+
+  // "Is it alive?": waiting for the board, then its answer for kIdentifyResultMs.
+  const [check, setCheck] = useState<"checking" | IdentifyResult>();
+  const checkTimer = useRef<ReturnType<typeof setTimeout>>();
+  const mounted = useRef(true);
+  useEffect(() => () => {
+    mounted.current = false;
+    clearTimeout(checkTimer.current);
+  }, []);
+  const identify = () => {
+    clearTimeout(checkTimer.current);
+    setCheck("checking");
+    void connection.identify().then(result => {
+      if (!mounted.current) return;
+      setCheck(result);
+      checkTimer.current = setTimeout(() => setCheck(undefined), kIdentifyResultMs);
+    });
+  };
 
   // TileToolbarButton doesn't expose a ref, and the pane has to stay beside the button in the DOM,
   // so the trigger is found from the pane (findTrigger).
@@ -202,6 +224,16 @@ const ConnectPane = observer(function ConnectPane(
     ? `Connecting to ${kDeviceChoiceLabels[busyChoice]}…`
     : isConnected ? `Connected: ${connectedLabel}` : "Not connected";
 
+  // One line under the status: the check's progress, or else what's wrong.
+  const checkNote = !isConnected || !check ? undefined
+    : check === "checking" ? `Checking the ${connectedLabel}… look for the heart.`
+    : check === "answered" ? `The ${connectedLabel} answered.`
+    : `The ${connectedLabel} didn't answer.`;
+  const problem = checkNote ? undefined
+    : isConnected
+      ? connection.notResponding ? `The ${connectedLabel} is not responding.` : undefined
+      : content.connectError ?? connection.lossMessage;
+
   return (
     <div ref={setContainer} className="toolbar-palette dataflow-connect-pane" style={floatingStyles}
         role="group" aria-labelledby={headingId} onKeyDownCapture={handleKeyDownCapture}
@@ -209,13 +241,15 @@ const ConnectPane = observer(function ConnectPane(
       <div className="connect-heading" id={headingId}>Device connection</div>
       <div className="connect-status" role="status">
         <div className="connect-status-line">{status}</div>
-        {!isConnected && content.connectError &&
-          <div className="connect-error">{content.connectError}</div>}
+        {checkNote && <div className="connect-note">{checkNote}</div>}
+        {problem && <div className="connect-error">{problem}</div>}
       </div>
       {isConnected
         ? <div className="connect-actions">
             <PaneControl text="Reconnect" busy={busy} onActivate={reconnect} />
             <PaneControl text="Disconnect" busy={busy} onActivate={disconnect} />
+            {connection.canIdentify &&
+              <PaneControl text="Is it alive?" busy={busy || check === "checking"} onActivate={identify} />}
           </div>
         : <div className="connect-devices">
             {kDeviceChoiceOrder.map(choice => (
