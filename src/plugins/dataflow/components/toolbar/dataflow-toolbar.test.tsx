@@ -8,7 +8,6 @@ import { ModalProvider } from "react-modal-hook";
 import { ReadOnlyContext } from "../../../../components/document/read-only-context";
 import { SerialDevice } from "../../../../models/stores/serial";
 import { ConnectResult, getDeviceConnection, kIdentifyResultMs } from "../../model/device-connection";
-import { kLossPulseMs } from "./dataflow-connect-button";
 import { IdentifyResult } from "../../../../models/stores/cc-device-session";
 import { TileModelContext } from "../../../../components/tiles/tile-api";
 import { ITileModel, TileModel } from "../../../../models/tiles/tile-model";
@@ -650,9 +649,6 @@ describe("Dataflow connect button and pane", () => {
   });
 
   describe("when a device is lost", () => {
-    beforeEach(() => jest.useFakeTimers());
-    afterEach(() => jest.useRealTimers());
-
     const pulsing = (r: ReturnType<typeof renderConnect>) =>
       getTrigger(r.container).classList.contains("connect-loss-pulse");
     const lose = (r: ReturnType<typeof renderConnect>, loss: "lost" | "unplugged") => {
@@ -660,14 +656,20 @@ describe("Dataflow connect button and pane", () => {
       act(() => transport.onDisconnect!(loss));
     };
 
-    it("the button pulses once, then shows its normal look", () => {
+    // The pulse is the class's CSS animation, which plays once when the class is added and then
+    // shows the state's own look.
+    it("the button pulses over its normal look, until the next connect attempt", () => {
+      jest.useFakeTimers();
       const r = renderConnect();
       fakeConnected(r);
       lose(r, "lost");
       expect(pulsing(r)).toBe(true);
       expect(getTrigger(r.container).classList.contains("connect-idle")).toBe(true);
-      act(() => { jest.advanceTimersByTime(kLossPulseMs); });
+      act(() => { jest.advanceTimersByTime(60000); });
+      expect(pulsing(r)).toBe(true);
+      act(() => r.stores.serialDevice.clearLastLoss());
       expect(pulsing(r)).toBe(false);
+      jest.useRealTimers();
     });
 
     it("a toolbar shown after the loss doesn't pulse", () => {
@@ -682,21 +684,30 @@ describe("Dataflow connect button and pane", () => {
       const r = renderConnect();
       fakeConnected(r);
       lose(r, "lost");
-      act(() => { jest.advanceTimersByTime(kLossPulseMs); });
+      const trigger = getTrigger(r.container);
+      const observer = new MutationObserver(() => undefined);
+      observer.observe(trigger, { attributes: true, attributeFilter: ["class"], attributeOldValue: true });
       lose(r, "unplugged");
+      const changes = observer.takeRecords();
+      observer.disconnect();
       expect(r.stores.serialDevice.lastLoss?.reason).toBe("unplugged");
-      expect(pulsing(r)).toBe(false);
+      expect(pulsing(r)).toBe(true);
+      // Taking the class off and putting it back would replay the animation.
+      expect(changes.every(c => c.oldValue?.includes("connect-loss-pulse"))).toBe(true);
     });
 
     it("a later loss pulses again", () => {
+      jest.useFakeTimers();
       const r = renderConnect();
       fakeConnected(r);
       lose(r, "lost");
-      act(() => { jest.advanceTimersByTime(kLossPulseMs); });
-      act(() => { jest.advanceTimersByTime(1); });
+      jest.advanceTimersByTime(1);
       fakeConnected(r);
+      expect(pulsing(r)).toBe(false);
       lose(r, "lost");
       expect(pulsing(r)).toBe(true);
+      act(() => r.stores.serialDevice.clearActiveDevice());
+      jest.useRealTimers();
     });
   });
 
