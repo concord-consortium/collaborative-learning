@@ -62,10 +62,11 @@ The button keeps its three looks: gray (`idle`), green (`connected`) and yellow 
 | **Unplugged**, or the connection **lost** | three pulses, then the normal not-connected look: **solid yellow if the program needs a device, gray if not** | the normal not-connected tooltip |
 
 The unplugged case is new behavior: today the pulses only come with a button that stays yellow.
-It needs a pulse that settles back to gray. The builder chooses how (for example a separate class
-whose animation ends on the idle color).
+It needs a pulse that settles back to gray. It's a separate `connect-loss-pulse` class, whose
+animation runs over the button's normal look. The class is on while a loss recorded after the
+toolbar mounted exists, until a connect attempt clears the loss, with no timer.
 
-The unplug pulse plays once, when the loss happens, in whatever toolbar is showing then. It
+The loss pulse plays when the loss happens, in whatever toolbar is showing then. It
 doesn't replay when a toolbar is shown later, so a user whose toolbar wasn't showing doesn't see
 it; the pane's second line still tells them when they open it. Nothing tracks whether the unplug
 has been seen.
@@ -92,7 +93,7 @@ Web Serial like the Arduino, so it gets the unplugged message with its own label
 cleared today. If a connect attempt fails, its "Couldn't connect" error replaces it.
 
 **Reconnect after an unplug** isn't offered: with nothing connected, the pane lists the devices.
-This is what CLUE-716 expected.
+This is how the connect pane was designed when it was added to the toolbar (CLUE-716).
 
 ### "Is it alive?"
 
@@ -104,16 +105,16 @@ This is what CLUE-716 expected.
 - **The pane stays open.** Unlike Connect and Disconnect, success doesn't close it, so the student
   sees the result. Focus stays on the control.
 - **The check belongs to the connection, not the pane.** `DeviceConnection` keeps it, with the
-  session it asked, and shows it only while that session is active. Closing and reopening the
-  pane keeps the answer, every tile's pane shows the same check, and a new device or session
-  never shows an earlier board's answer.
+  `CcDeviceSession` it asked, and shows it only while that object is active. Closing and reopening
+  the pane keeps the answer, every tile's pane shows the same check, and a new device or a
+  reconnect never shows an earlier board's answer.
 - The second line shows, in order:
   1. `Checking the Spiker:bit… look for the heart.` while waiting for the reply;
-  2. `The Spiker:bit answered.` when its `ok #n` arrives, or `The Spiker:bit didn't answer.` if
-     none arrives within **2 s**;
+  2. `The Spiker:bit answered.` when its reply (`ok #n` or `err #n`) arrives, or
+     `The Spiker:bit didn't answer.` if none arrives within **2 s**;
   3. then, about 3 s after the result appears, whatever the line showed before (nothing, or the
      not-responding message, as the state is then).
-- **The control is disabled while checking**, from the click until the `ok` arrives or the 2 s
+- **The control is disabled while checking**, from the click until the reply arrives or the 2 s
   timeout passes, using the pane's existing disabled look (`PaneControl`'s `busy`, which sets
   `aria-disabled` and keeps the control focusable, so focus isn't lost). Once it re-enables, it
   can be clicked again while the result is still showing, and even while the board is still
@@ -127,13 +128,14 @@ This is what CLUE-716 expected.
 
 `CcDeviceSession` ([cc-device-session.ts](../../../src/models/stores/cc-device-session.ts)) counts
 the commands sent with no reply since the last reply. Any reply, `ok` or `err`, to a pending `open`
-or `ping` resets the count to zero. When **3 in a row** go unanswered, the board is **not
-responding**. The session exposes this as an observable.
+or `ping` resets the count to zero, except `err othersession`, which sets not responding (below).
+When **3 in a row** go unanswered, the board is **not responding**. The session exposes this as an
+observable.
 
 It counts commands, not seconds, on purpose. Chrome slows timers in a tab that has been hidden for
 a while, to as little as about once a minute, so the board's 5 s session lapses. When the student
 comes back, the next `ping` gets `err nosession`, which is an answer, and Dataflow reopens. A
-clock-based check would turn the button yellow every time the student came back.
+count of seconds would turn the button yellow every time the student came back.
 
 **Hidden tabs don't count.** Counting commands isn't enough on its own. The library reads serial
 data on a `setTimeout` chain, 62 bytes per read (`startPolling` in
@@ -142,19 +144,21 @@ throttling reads slower than the EMG readings arrive, so ping replies queue behi
 are lost when DAPLink's buffer overflows. Meanwhile the pings keep going out. **Decision:** while
 `document.visibilityState` is `hidden`, unanswered commands aren't counted, and the count resets to
 zero when the tab becomes visible. Once the backlog drains after the student comes back, the next
-ping is answered. A board that has really stopped is reported 3 pings after the tab is visible
-again. *(My call.)*
+ping is answered. A board that has really stopped is reported when the fourth ping goes out,
+about 4 s after the tab is visible again. *(My call.)*
 
-The existing `lastHeartbeatAt` may then have no reader. The builder keeps or removes it.
+The existing `lastHeartbeatAt` now has no reader. It stays.
 
-`identify`'s `ok` doesn't count toward this: the state is about the session. *(My call.)*
+`identify`'s reply doesn't count toward this: the state is about the session. *(My call.)*
 
-**`err othersession` is shown as not responding.** It means another host has taken the board's
-session. That isn't expected in practice: WebUSB lets only one program claim the board (see
-below), so a second tab or app can't connect to start one. The session already stops pinging
-on `othersession`, so the count would never reach 3; instead the session goes straight to not
-responding and stays there until the session ends (Reconnect or Disconnect). The bench script
-can still produce it, by opening a session with a different id, to check this by hand.
+**`err othersession` is shown as not responding.** It means another host owns the session. That
+isn't expected in practice: WebUSB lets only one program claim the board (see below), so a second
+tab or app can't connect to start one. The session already stops pinging on `othersession`, so the
+count would never reach 3; instead the session goes straight to not responding and stays there
+until the session ends (Reconnect or Disconnect). The bench script checks the firmware's
+`othersession` reply by opening a second session with a different id; it can't hold a session
+alongside CLUE, since only one program can have the port. Dataflow's handling of it is covered by
+Jest.
 
 ### Another app has the board at connect
 
@@ -172,29 +176,31 @@ Arduino's Web Serial "port already open" failure isn't changed.
 
 ### Unplugged or lost
 
-Both transports already report a lost connection through `IDeviceTransport.onDisconnect`, which
-`SerialDevice.setActiveDevice` wires to `clearActiveDevice`
+Both transports report a loss through `IDeviceTransport.onDisconnect(loss)`, which
+`SerialDevice.setActiveDevice` wires to `recordUnplug` for `"unplugged"` and to
+`clearActiveDevice(loss)` for `"lost"`
 ([serial.ts](../../../src/models/stores/serial.ts)).
 
-A Web Serial device can be lost by two paths, and both have to record it:
+A device can be lost by these paths, and each has to record it:
 
 - **Web Serial (Arduino, radio hub), the browser event:** `initWebSerialConnectionEvents` in
   [web-serial-transport.ts](../../../src/models/stores/web-serial-transport.ts) handles
-  `navigator.serial`'s `disconnect` event by calling `serialDevice.clearActiveDevice()` directly.
-  Authentic Arduinos raise it the moment they're unplugged. That clears `activeTransport` first,
-  so the transport's own `onDisconnect`, which arrives later, is ignored by its
-  `activeTransport === transport` guard. This path has to record the loss too.
+  `navigator.serial`'s `disconnect` event, which authentic Arduinos raise the moment they're
+  unplugged. It acts only when the event's target is the `WebSerialTransport`'s `lastPort`, so
+  another port's unplug changes nothing, and records the unplug with `recordUnplug`. Before
+  this change it cleared the device directly for any port.
 - **Web Serial, the read loop:** for boards that don't raise the browser event, the read loop
   calls `onDisconnect` when it gives up on a port that stopped being readable, not after `close()`.
   Its read timeout means it can take a few seconds to notice.
 - **WebUSB (Spiker:bit):** the `@microbit/microbit-connection` library listens for
   `navigator.usb`'s `disconnect` event only in its `initialize()`, which CLUE doesn't call:
   `initialize()` also pauses the connection when the tab is hidden, which CLUE doesn't want.
-  `MicrobitUsbTransport` (or `SpikerbitDevice`) adds its own `navigator.usb` `disconnect`
-  listener, fires `onDisconnect` when the event's device is this connection's device, and removes
-  the listener when the device is replaced or a connect attempt with it fails. It stays while the
-  board is kept for Reconnect: the library keeps its device after disconnecting itself, so an
-  unplug that comes after a failed write still upgrades "lost" to "unplugged".
+  `MicrobitUsbTransport` adds its own `navigator.usb` `disconnect` listener and fires
+  `onDisconnect("unplugged")` when the event's device is this connection's device. It then closes
+  the library connection, whose status would otherwise stay Connected. `SpikerbitDevice.dispose()`
+  removes the listener when the device is replaced or a connect attempt with it fails. It stays
+  while the board is kept for Reconnect: the library keeps its device after disconnecting itself,
+  so an unplug that comes after a failed write still upgrades "lost" to "unplugged".
 - **WebUSB, a failed write (already happening).** Without that listener an unplug is still
   noticed today, within about a second: since #3055 a `ping` is written every second, the
   write to an unplugged board fails, the library's `withEnrichedErrors` calls
@@ -223,59 +229,70 @@ up. A failed write can also come from the `close` that Disconnect writes; that o
 because Disconnect is in progress.
 
 **Decision:** every path that ends the connection without the user asking records why, so the
-record has to be made where all of them go through: a reason passed to `clearActiveDevice` (or
-an equivalent the builder chooses), not only a hook on `onDisconnect`. A Disconnect the user asked
-for, and the clear that a connect attempt does first, record no loss. `MicrobitUsbTransport` also
-fires `onDisconnect` from the library's `Disconnected` status, which a requested close raises, so
-the builder has to keep that from reading as a loss (for example with a flag set during
-`DeviceConnection.disconnect()` and `attempt()`).
+record is made where all of them go through: the reason goes through `onDisconnect(loss)` to
+`clearActiveDevice(loss)` or `recordUnplug`. A Disconnect the user asked for, and the clear that a
+connect attempt does first, record no loss. `MicrobitUsbTransport` also fires `onDisconnect` from
+the library's `Disconnected` status, which a requested close raises, so
+`DeviceConnection.disconnect()` clears the transport's `onDisconnect` before closing it.
+`setActiveDevice` wires it again when the transport is next made active, as Reconnect does with the
+Spiker:bit's.
 
-**Where the state lives:** the unplugged or lost state is app-wide, like the connection itself, so it
-lives on `DeviceConnection`, not on the tile's content. Every tile's pane shows it. An unplug never
-sends `close`: the board is gone, and `clearActiveDevice` stops the session without writing.
+**Where the state lives:** the unplugged or lost state is app-wide, like the connection itself, so
+it isn't on the tile's content. The record is `SerialDevice.lastLoss`, and `DeviceConnection`
+derives `lossMessage` and `lossAt` from it. Every tile's pane shows it. An unplug never sends
+`close`: the board is gone, and `clearActiveDevice` stops the session without writing.
 
 ## Delivery
 
-- A PR into the CLUE-728 feature branch (`CLUE-728-spikerbit-status`), on top of #3055's branch.
+- A PR into the CLUE-728 feature branch (`CLUE-728-spikerbit-status`), which #3055 is merged into.
 - With it in, the feature branch is complete, and its PR to master (#3059) can be reviewed.
 
 ## Testing
 
 - **Jest, the session:** the unanswered count rising with pings and opens, resetting on any reply
-  (an `ok`, `err nosession`), and crossing 3; a reply after crossing clearing the state;
-  `othersession` making the session not responding until a new session; `identify` sending `identify #n`
-  with a checksum and resolving answered on its `ok`, or not answered after 2 s, with fake
-  timers.
+  to one (an `ok`, `err nosession`, or an `err` with another reason), and crossing 3; a reply after
+  crossing clearing the state; `othersession` making the session not responding until a new
+  session; `identify` sending `identify #n` with a checksum and resolving answered on its `ok` or
+  `err`, or not answered after 2 s, with fake timers; `stop()` removing its visibility listener.
 - **Jest, the button state** (`connect-button-state.test.ts`): each row of the button table,
   including unplugged with and without `needsDevice`.
-- **Jest, the pane** (`dataflow-toolbar.test.tsx`): each second line; "Is it alive?" shown only
-  for a Spiker:bit; the check's three messages and the return to the earlier line; the control
-  disabled while checking and re-enabled on the answer or the timeout; the pane staying open; the unplugged line cleared by a connect attempt.
+- **Jest, the pane** (`dataflow-toolbar.test.tsx`): each second line, and only one at a time;
+  "Is it alive?" shown only for a Spiker:bit; the check's three messages and the return to the
+  earlier line; the control disabled while checking and re-enabled on the answer or the timeout;
+  the pane staying open; the answer still there after the pane is closed and opened again; the
+  check working under React.StrictMode.
+- **Jest, the check on `DeviceConnection`:** checking, then the answer, then cleared after 3 s; no
+  answer shown for another session, even when it comes late; an earlier session's late answer not
+  replacing a newer check; a new check not cleared by the previous one's timer.
 - **Jest, unplug detection:** the WebUSB `disconnect` listener firing `onDisconnect` only for its
-  own device and removed afterward; `DeviceConnection` recording a loss from `onDisconnect` but
-  not from a requested Disconnect or the `close` write it makes; `navigator.usb`'s and
-  `navigator.serial`'s `disconnect` events recorded as unplugged; a failed WebUSB write and a Web
-  Serial read loop giving up recorded as lost; a loss recorded as lost upgraded to unplugged by a
-  later event for the same device, and an event followed by a failed write staying unplugged.
-- **Jest, another app at connect:** a `device-in-use` connect error carried to the pane's
-  "Another app is using the Spiker:bit." line, while other connect failures keep "Couldn't
-  connect".
-- **Jest, the unplug pulse:** it plays in a toolbar showing when the loss happens, and not in one
-  shown afterward.
+  own device, closing the library connection, and removed by `MicrobitUsbTransport.dispose()` and
+  `SpikerbitDevice.dispose()`; `DeviceConnection` recording a loss from `onDisconnect` but not
+  from a requested Disconnect or the `close` write it makes, and recording one again after
+  Disconnect and Reconnect of the same Spiker:bit; `navigator.usb`'s and `navigator.serial`'s
+  `disconnect` events recorded as unplugged, the latter only for the device's own port; a failed
+  WebUSB write and a Web Serial read loop giving up recorded as lost; a loss recorded as lost
+  upgraded to unplugged by a later event for the same device, and an event followed by a failed
+  write staying unplugged; a connect attempt clearing the loss.
+- **Jest, another app at connect:** `device-in-use` giving `"inUse"` on Connect and on Reconnect,
+  without falling back to the chooser, and `device-actions.test.ts` turning it into "Another app
+  is using the Spiker:bit." while other connect failures keep "Couldn't connect".
+- **Jest, the loss pulse:** it plays in a toolbar showing when the loss happens; not in one shown
+  afterward, even when that loss is cleared; not again when an unplug confirms a loss; and again
+  on a later loss.
 - **Jest, hidden tabs:** unanswered commands not counted while `document.visibilityState` is
-  `hidden`, and the count reset when it becomes visible.
+  `hidden`, and commands unanswered before the tab was hidden not counted once it's visible.
 - **Jest, end to end** (`spikerbit-end-to-end.test.ts`, on `MakeCodeSim`): a board that stops
   answering turns not responding, and `identify` gets its answer.
-- **Cypress:** the builder decides whether a spec is worth an `it` block under the monthly
-  budget. The Jest tests cover the logic; a Cypress spec can't plug in a board.
-- **On the bench, by hand:** unplug a Spiker:bit and an Arduino while connected; hold a
-  Spiker:bit's reset button (or otherwise stall it) to see not responding and recovery; open a
-  session from the bench script while CLUE has one, for `othersession` showing as not
-  responding; connect from a second
-  CLUE tab for `device-in-use`; click "Is it alive?" and see the heart, hear the
-  sound on a V2, and read "answered"; leave the tab hidden for several minutes and come back
-  without the button turning yellow.
-- **Retests of #3055's code, on the bench.** The review of #3055 asked for these at its head, and
+- **No Cypress spec.** The Jest tests cover the logic, and a Cypress spec can't plug in a board.
+- **By hand, with a board, in the browser:** unplug a Spiker:bit and an Arduino while connected;
+  hold a Spiker:bit's reset button (or otherwise stall it) to see not responding and recovery;
+  connect from a second CLUE tab for `device-in-use`; click "Is it alive?" and see the heart, hear
+  the sound on a V2, and read "answered"; leave the tab hidden for several minutes and come back
+  without the button turning yellow. After a Spiker:bit's connection is lost (unplug and replug
+  it), connect it again in the same tab: the pane shouldn't say "Another app is using the
+  Spiker:bit." The library's disconnect after a failed write might leave this tab's claim on the
+  interface, which Chrome would then refuse as in use.
+- **Retests of #3055's code, on a board.** The review of #3055 asked for these at its head, and
   they were moved here because this branch contains that code. Report the results in this PR's
   description, naming the boards and the commit tested.
   - Spiker:bit V2 and V1, in a Mac browser:
@@ -283,33 +300,34 @@ sends `close`: the board is gone, and `clearActiveDevice` stops the session with
     - Auto-flash from other firmware, starting from both the v3 banner firmware and a MakeCode
       program. The MakeCode program doesn't answer, so this takes the 1.5 s timeout path.
     - After Dataflow flashes a board in the browser, Disconnect, then Connect: no second flash.
-      This is the case from #2929. After the first flash since plug-in, the library pushes 2048
-      dummy bytes into the interface chip's buffers (`cdc-saturation.js`), which the Node runs of
-      #3055 never exercised.
+      This case came up in the original Spiker:bit support (#2929). After the first flash since
+      plug-in, the library pushes 2048 dummy bytes into the interface chip's buffers
+      (`cdc-saturation.js`), which the Node runs of #3055 never exercised.
     - EMG in a Sensor node, the servo from a Live Output, and Disconnect/Reconnect.
   - Arduino: connect, readings, the servo and gripper outputs, and Disconnect/Reconnect. #3055
     changed `device-capabilities.ts`, `live-output-node.ts` and `DeviceConnection.disconnect` for
     every device.
   - Not the radio hub.
   - Not on a Chromebook. Connecting there at #3055's head works only some of the time, failing
-    differently than on #3040, and it stays unclear until CLUE-727 adds logging of each connection
-    step.
+    differently than it did when the connect button moved to the toolbar (#3040), and it stays
+    unclear until CLUE-727 adds logging of each connection step.
 
 ## Docs
 
-- [serial.md](../../../src/plugins/dataflow/docs/serial.md): "Connection status tracking" gains
-  the not-responding count, `device-in-use`, and how each kind of loss is detected and
-  told apart; "The CC Device
-  Protocol session" gains `identify`.
+- [serial.md](../../../src/plugins/dataflow/docs/serial.md): "The CC Device Protocol session"
+  gains the not-responding count and `identify`. A new "Why a device went away" section covers
+  the loss reasons, how each is detected and told apart, the "Is it alive?" check and
+  `device-in-use`. The "Reconnect" paragraph and the Web Serial `disconnect` handler's description
+  change to match.
 - The protocol spec's open question about hidden tabs is answered here: CLUE doesn't pause the
-  connection, sessions may lapse in a hidden tab, and the not-responding check is built to
+  connection, sessions may lapse in a hidden tab, and the not-responding count is built to
   tolerate that.
 
-## Left to the builder
+## Decided while building
 
-- How the pulse-then-gray look is styled.
-- How `DeviceConnection` tells a loss from a requested disconnect, and how the reason reaches
-  `clearActiveDevice`.
-- Whether `lastHeartbeatAt` stays.
-- Exact tooltip wording, within the meaning above.
-- Whether to add a Cypress spec.
+- The pulse is the `connect-loss-pulse` class described above.
+- The loss reason goes through `onDisconnect(loss)`, and `DeviceConnection.disconnect` clears
+  `onDisconnect` before closing, with no flag.
+- `lastHeartbeatAt` stays, with no reader.
+- The not-responding tooltip is "The Spiker:bit is not responding. Click for details."
+- No Cypress spec.
