@@ -30,18 +30,18 @@ and **outbound** (a Live Output node → bytes leaving the computer).
 | Object | File | Role |
 |---|---|---|
 | `WebSerialTransport` | `src/models/stores/web-serial-transport.ts` | Owns the Web Serial port + read loop; `write()` out, `onData` in. `open(port?)` resolves `"opened"`, `"canceled"` or `"failed"`, and skips the chooser when given a port. `lastPort` survives `close()`. |
-| `MicrobitUsbTransport` | `src/models/stores/spikerbit-device.ts` | `IDeviceTransport` over a micro:bit WebUSB connection: `write()` out, `serialdata` → `onData` in, `status` → `onDisconnect`. |
+| `MicrobitUsbTransport` | `src/models/stores/spikerbit-device.ts` | `IDeviceTransport` over a micro:bit WebUSB connection: `write()` out, `serialdata` → `onData` in, `status` → `onDisconnect("lost")`, and `navigator.usb`'s `disconnect` for its device → `onDisconnect("unplugged")`. |
 | `SpikerbitDevice` | `src/models/stores/spikerbit-device.ts` | Spiker:bit connect, reset, firmware check and flash; taps `onData` for connect-time firmware detection, then hands the transport to the store. |
-| `SerialDevice` | `src/models/stores/serial.ts` | Transport-agnostic connection store: holds the active transport and the registered channel sources, routes writes (`writeLine`) and inbound parsing (`receive`). `isConnected()` is observable. |
-| `DeviceConnection` | `src/plugins/dataflow/model/device-connection.ts` | App-wide connect, reconnect and disconnect; one instance per `SerialDevice`, from `getDeviceConnection`. Tracks `lastChoice`, `busyChoice` and `connectTutorialDismissal`. |
+| `SerialDevice` | `src/models/stores/serial.ts` | Transport-agnostic connection store: holds the active transport and the registered channel sources, routes writes (`writeLine`) and inbound parsing (`receive`). `isConnected()` is observable. Keeps `lastLoss`. |
+| `DeviceConnection` | `src/plugins/dataflow/model/device-connection.ts` | App-wide connect, reconnect and disconnect; one instance per `SerialDevice`, from `getDeviceConnection`. Tracks `lastChoice`, `busyChoice` and `connectTutorialDismissal`. Keeps the "Is it alive?" check, and exposes `lossMessage` and `notResponding`. |
 | tile device actions | `src/plugins/dataflow/utilities/device-actions.ts` | Wrap `DeviceConnection` for one tile: they reset the clicking tile's program, log the change, and record a failed attempt's message on the tile. |
 | `parseKeyValueData` | `src/models/stores/serial-protocol.ts` | `keyValue` parser (Arduino): `emg:<n>\r\n` lines → channel values. |
-| `CcDeviceSession` | `src/models/stores/cc-device-session.ts` | One CC Device Protocol session (Spiker:bit): opens it, pings it, parses its lines into channel values, and writes its outputs. Created by `setActiveDevice` for a `ccDevice` device. |
+| `CcDeviceSession` | `src/models/stores/cc-device-session.ts` | One CC Device Protocol session (Spiker:bit): opens it, pings it, parses its lines into channel values, and writes its outputs. Exposes `notResponding` and `identify()`. Created by `setActiveDevice` for a `ccDevice` device. |
 | tile serial channels | `NodeChannelInfo[]` (`.../model/utilities/channel.ts`) | The shared blackboard: parsers write `channel.value`; the Sensor node reads it. Each mounted, editable tile registers its channels with `SerialDevice` as a channel source. |
 | `SensorNode` / `LiveOutputNode` | `.../nodes/sensor-node.ts`, `live-output-node.ts` | DataFlow nodes that read inbound values / emit outbound values each tick. |
 
 `IDeviceTransport` (`src/models/stores/device-transport.ts`) is the shared contract:
-`write(line)`, `close()`, and optional `onData(chunk)` / `onDisconnect()`.
+`write(line)`, `close()`, and optional `onData(chunk)` / `onDisconnect(loss)`.
 
 Device **identity** (`SerialDevice.deviceFamily`: `arduino` / `microbit` / `spikerbit`)
 is distinct from a channel's **protocol** tag (`channel.protocol`: `keyValue` /
@@ -64,7 +64,8 @@ actions below. The log events name the device by the choice the user connected w
 (`lastChoice`, such as `microbitHub`), not by the detected `deviceFamily`.
 
 `DeviceConnection` provides `connect(choice)`, `reconnect()` and `disconnect()`. Connect and
-reconnect resolve `"connected"`, `"canceled"` or `"failed"`. When a device is already
+reconnect resolve `"connected"`, `"canceled"`, `"failed"` or `"inUse"` (see
+[Why a device went away](#why-a-device-went-away)). When a device is already
 connected, both disconnect it first. A Web Serial board and the Spiker:bit take different
 flows, and both end by calling `SerialDevice.setActiveDevice(deviceFamily, transport)`, which
 records the active transport, wires its inbound callbacks, and marks the store connected.
@@ -146,7 +147,7 @@ level of the event.
 
 - A successful Connect or Reconnect logs two events: the device event, then `resetProgram` with
   `trigger` `connect` or `reconnect`.
-- A failed or canceled attempt logs nothing.
+- A failed, refused (`inUse`) or canceled attempt logs nothing.
 - Only a Disconnect the user chooses is logged. An unplug logs nothing, so a `connectDevice` can
   have no matching `disconnectDevice`.
 - One OK or one connection dismisses the tutorial on every tile, so each tile it covered logs a
@@ -218,9 +219,9 @@ Keep `kSpikerbitFirmwareVersion` equal to the `firmware:` number in the `HELLO` 
    `lastHeartbeatAt`, which stops advancing when the board stops answering.
 3. When a pending ping gets `err nosession`, it opens a new session with a new id. Chrome slows
    timers in hidden tabs, so this is how a session that lapsed while its tab was hidden
-   recovers. When one gets `err othersession`, it stops, since another host owns the board, and
-   counts as not responding (below). Errors that answer anything else, such as a ping from
-   before a re-open, change nothing.
+   recovers. When one gets `err othersession`, it stops, since another host owns the session, and
+   counts as not responding (below). A `nosession` or `othersession` that answers anything else,
+   such as a ping from before a re-open, changes nothing.
 4. Disconnecting sends `close session:<id>` (`SerialDevice.endSession`), also while an `open`
    is still waiting for its `ok`, so the board shows the waiting icon at once instead of after
    the timeout.
@@ -235,12 +236,13 @@ no settings yet; once there are, they should be sent only after every pending `o
 answered.
 
 **Not responding.** The session counts the `open`s and `ping`s it has sent since the last reply
-to one of them. When a fourth would go out with three still unanswered, about 3 s after the
-board went quiet, it sets the observable `notResponding`; any reply to one of them, `ok` or an
-`err` other than `othersession`, clears it, and the count starts over. `err othersession` sets it
-too, and it stays set until a new session. The count is in commands, not seconds, and it pauses while the page is hidden and
-starts over when it's visible again: in a hidden tab the browser slows the library's serial
-reads below the rate the readings arrive, so replies fall behind and would look missing.
+to one of them. When a fourth would go out with three still unanswered, about 3–4 s after the
+last reply (about 6 s while still opening), it sets the observable `notResponding`. A reply to
+one of them (`ok`, or any `err` but `othersession`) clears it and restarts the count.
+`err othersession` sets it until the next connect or reconnect. The count is in commands, not
+seconds. It pauses while the page is hidden and restarts when it's visible: in a hidden tab the
+browser slows the transport's reads below the rate the readings arrive, so replies fall behind
+and would look missing.
 
 **Identify.** `identify()` sends `identify #n` and resolves `"answered"` on any reply carrying
 that `#n`, `ok` or `err`, or `"noAnswer"` after 2 s. It works whatever state the session is in,
@@ -430,45 +432,46 @@ device and none is connected as the program opens, the tile shows the connect tu
 The browser's own `navigator.serial` `connect`/`disconnect` events are wired once at store
 creation by `initWebSerialConnectionEvents` (`web-serial-transport.ts`), keeping
 `navigator.serial` out of `SerialDevice`. Authentic Arduinos raise `connect` before the user
-clicks, so the top-bar menu can note a board is present. The `disconnect` handler only tears down
-the store when a `WebSerialTransport` currently owns the connection and the event's target is that
-transport's port, so unplugging another serial device can't end the connection, and an unrelated
-Web Serial disconnect cannot kill a live WebUSB (Spiker:bit) session.
+clicks, so the top-bar menu can note a board is present. The `disconnect` handler acts only on
+the port of a `WebSerialTransport`. It records an unplug of the active one, or upgrades a loss
+already recorded for it, so another device's unplug, serial or WebUSB, changes nothing.
 
 ### Why a device went away
 
-A device lost without the user asking is recorded on `SerialDevice.lastLoss` (observable), with
-a reason: `"unplugged"` when the browser reported the device removed, `"lost"` for anything else.
-Transports report it through `onDisconnect(loss)`, which `setActiveDevice` wires to
-`clearActiveDevice(loss)`:
+A device that goes away without the user asking is recorded on `SerialDevice.lastLoss`
+(observable), with a reason: `"unplugged"` when the browser reported the device removed, `"lost"`
+for anything else. Transports report it through `onDisconnect(loss)`, which `setActiveDevice`
+wires to `recordUnplug` for `"unplugged"` and to `clearActiveDevice(loss)` for `"lost"`:
 
 | Transport | `"unplugged"` | `"lost"` |
 |---|---|---|
-| Web Serial | `navigator.serial`'s `disconnect` event for the device's port, from `initWebSerialConnectionEvents`. Only authentic Arduinos raise it. | the read loop giving up on a port that stopped being readable, a few seconds later |
-| WebUSB (Spiker:bit) | `navigator.usb`'s `disconnect` event for the library connection's device, which `MicrobitUsbTransport` listens for itself. It then closes the library connection, whose status would otherwise stay Connected. | the library's `Disconnected` status. The library disconnects itself after any failed WebUSB call, and the session writes a `ping` every second, so an unplug is noticed this way within a second even without the event. |
+| Web Serial | `navigator.serial`'s `disconnect` event for the device's port, from `initWebSerialConnectionEvents`. Only authentic Arduinos have been seen to raise it. | the read loop giving up on a port that stopped being readable, a few seconds later |
+| WebUSB (Spiker:bit) | `navigator.usb`'s `disconnect` event for the library connection's device, which `MicrobitUsbTransport` listens for itself. It then closes the library connection, whose status would otherwise stay Connected. | the library's `Disconnected` status, which follows any failed WebUSB call (see below) |
 
-Each unplug has two paths, and either can come first. The second finds the device already
+An unplug can be reported by both paths, in either order. The second finds the device already
 cleared, so the guard in `onDisconnect` ignores a second `"lost"`, and `recordUnplug` turns a
 `"lost"` already recorded for the same transport into `"unplugged"`, keeping its time.
 `DeviceConnection.disconnect` unhooks the transport's `onDisconnect` before closing it, because a
 requested close also raises the library's `Disconnected`. A connect attempt clears the record.
 
 `DeviceConnection` turns this into what the connect pane shows: `lossMessage` ("The Spiker:bit was
-unplugged." or "The connection to the Spiker:bit was lost."), `lossAt` (a new value pulses the
-connect button once), and, while connected, `notResponding` and `canIdentify` from the session.
-`identify()` runs the "Is it alive?" check, and `check` reports it: `"checking"`, then the answer
-for 3 s. The check remembers the session it asked and counts only while that session is active,
-so it survives the pane closing and never shows an earlier board's answer.
+unplugged." or "The connection to the Spiker:bit was lost.") and `lossAt` (a new value pulses the
+connect button three times).
+
+`MicrobitUsbTransport` listens for `navigator.usb`'s `disconnect` itself, since CLUE doesn't call
+the library's `initialize()`, where the library would. Without that event, an unplug would be
+noticed only when a write fails: the session's `ping` every second, a re-sent `open`, or a servo
+command. After `err othersession` the session stops pinging, so the event is then the only way
+it's noticed unless a program is writing to the servo.
+
+While connected, `DeviceConnection` also exposes `notResponding` and `canIdentify` from the
+session. `identify()` runs the "Is it alive?" check, and `check` reports it: `"checking"`, then
+the answer for 3 s. The check remembers the `CcDeviceSession` it asked and counts only while that
+object is active, so it survives the pane closing and never shows an earlier board's answer.
+
 A Spiker:bit connect that fails because another tab or app has claimed the board (the library's
 `device-in-use` error) returns `"inUse"`, which the pane reports as "Another app is using the
 Spiker:bit."
-
-CLUE doesn't call the library's `initialize()`, which is where the library itself would listen for
-`navigator.usb`'s `disconnect` event, because `initialize()` also pauses the connection in a hidden
-tab. `MicrobitUsbTransport` listens instead. Without that event, an unplug would be noticed only
-when a write fails: the session's `ping` every second, a re-sent `open`, or a servo command. After
-`err othersession` the session stops pinging, so the event is then the only way it's noticed unless
-a program is writing to the servo.
 
 ## Summary
 
