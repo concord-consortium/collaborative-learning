@@ -81,7 +81,6 @@ export class DeviceConnection {
   // The latest "Is it alive?" check, with the session it asked. It counts only while that session is
   // the active one, so a reconnect or a new device never shows an earlier board's answer.
   private identifyCheck: IIdentifyCheck | undefined = undefined;
-  private identifyTimer: ReturnType<typeof setTimeout> | undefined;
 
   constructor(serialDevice: SerialDevice, deps?: Partial<IDeviceConnectionDeps>) {
     this.serialDevice = serialDevice;
@@ -92,7 +91,7 @@ export class DeviceConnection {
       ...deps
     };
     makeAutoObservable<DeviceConnection,
-        "serialDevice" | "deps" | "lastWebSerialTransport" | "spikerbitDevice" | "identifyCheck" | "identifyTimer">(
+        "serialDevice" | "deps" | "lastWebSerialTransport" | "spikerbitDevice" | "identifyCheck">(
       this,
       {
         serialDevice: false,
@@ -100,7 +99,6 @@ export class DeviceConnection {
         lastWebSerialTransport: false,
         spikerbitDevice: false,
         identifyCheck: observable.ref,
-        identifyTimer: false,
         connect: false,
         reconnect: false,
         disconnect: false,
@@ -147,7 +145,6 @@ export class DeviceConnection {
   async identify(): Promise<IdentifyResult> {
     const session = this.serialDevice.ccDeviceSession;
     if (!session) return "noAnswer";
-    clearTimeout(this.identifyTimer);
     const checking: IIdentifyCheck = { session, state: "checking" };
     runInAction(() => { this.identifyCheck = checking; });
     const result = await session.identify();
@@ -155,7 +152,8 @@ export class DeviceConnection {
     if (this.identifyCheck !== checking) return result;
     const answered: IIdentifyCheck = { session, state: result };
     runInAction(() => { this.identifyCheck = answered; });
-    this.identifyTimer = setTimeout(() => {
+    // A newer check by then keeps its own state.
+    setTimeout(() => {
       runInAction(() => { if (this.identifyCheck === answered) this.identifyCheck = undefined; });
     }, kIdentifyResultMs);
     return result;
