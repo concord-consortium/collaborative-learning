@@ -1,5 +1,6 @@
 import Header from '../../../support/elements/common/Header';
 import ClueHeader from '../../../support/elements/common/cHeader';
+import { kNewGroupUserGraceMs } from '../../../../src/models/stores/group-user-constants';
 
 /**
  * Group Management Modal Tests
@@ -55,18 +56,11 @@ function setup(student, opts = {}) {
   }
 }
 
-// GroupUserModel.state shows a group member who isn't in the class roster as new ("**") until
-// the class info is more than this much newer than the member's connectedTimestamp, and as
-// removed after that.
-const kNewUserGraceMs = 1000;
-// The next window computes its class timestamp from its own estimate of the server clock, so
-// leave room for that estimate to be off.
+// Both windows estimate the server clock (Date.now() + serverTimeOffset); allow for them to disagree.
 const kServerClockMarginMs = 500;
 
-// Waits, in the current window, until the server clock is far enough past the student's
-// connectedTimestamp that a window loaded next counts them as removed. CLUE rewrites
-// connectedTimestamp after a join and on every reconnect, so this reads the latest one from the
-// groups store rather than timing from when the student appeared in a group.
+// Waits until server time is far enough past the student's latest connectedTimestamp (rewritten
+// on join and every reconnect) that the next window loaded counts them as removed.
 function waitUntilCountedAsRemoved(student) {
   cy.window()
     .then(win => win.stores.db.firebase.getServerTimeOffset())
@@ -77,7 +71,7 @@ function waitUntilCountedAsRemoved(student) {
         expect(groupUser, `student ${student} in a group`).to.exist;
         const serverNow = win.Date.now() + serverTimeOffset;
         expect(serverNow - groupUser.connectedTimestamp)
-          .to.be.greaterThan(kNewUserGraceMs + kServerClockMarginMs);
+          .to.be.greaterThan(kNewGroupUserGraceMs + kServerClockMarginMs);
       });
     });
 }
