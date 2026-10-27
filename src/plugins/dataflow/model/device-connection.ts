@@ -26,7 +26,6 @@ export const kDeviceChoiceLabels: Record<DeviceChoice, string> = {
 // anyway. A write to a stalled port may never settle.
 export const kEndSessionTimeoutMs = 500;
 
-// "inUse": another tab or app has claimed the board.
 // How long the answer to "Is it alive?" stays before the check is cleared.
 export const kIdentifyResultMs = 3000;
 
@@ -38,6 +37,7 @@ interface IIdentifyCheck {
   state: IdentifyCheckState;
 }
 
+// "inUse": another tab or app has claimed the board.
 export type ConnectResult = "connected" | "canceled" | "failed" | "inUse";
 
 // What dismissed the connect tutorial: OK in one tile, or any connection.
@@ -120,7 +120,7 @@ export class DeviceConnection {
     return this.isConnected && this.lastChoice ? kDeviceChoiceLabels[this.lastChoice] : undefined;
   }
 
-  // The label of the device last chosen, whether or not it's still connected.
+  // The label of the device last connected, whether or not it still is.
   get label(): string | undefined {
     return this.lastChoice ? kDeviceChoiceLabels[this.lastChoice] : undefined;
   }

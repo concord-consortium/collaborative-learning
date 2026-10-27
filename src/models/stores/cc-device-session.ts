@@ -30,8 +30,8 @@ function defaultRandomSessionId() {
  */
 export class CcDeviceSession {
   lastHeartbeatAt: number | undefined;
-  // Set when kNotRespondingAfter commands in a row have gone unanswered, or another host has taken
-  // the device. Cleared by the next reply.
+  // Set when kNotRespondingAfter commands in a row have gone unanswered, or another host owns the
+  // session. Cleared by the next reply to an open or ping, other than `othersession`.
   notResponding = false;
 
   private write: (line: string) => void | Promise<void>;
@@ -45,8 +45,8 @@ export class CcDeviceSession {
   // session doesn't drop them and their replies don't count as the session's.
   private identifies = new Map<number, (result: IdentifyResult) => void>();
   private buffer = "";
-  // Commands sent since the last reply. Not counted while the page is hidden: the browser slows
-  // the library's serial reads there, so replies fall behind the readings.
+  // Opens and pings sent since the last reply to one. Not counted while the page is hidden: the
+  // browser slows the transport's reads there, so replies fall behind the readings.
   private unanswered = 0;
   private pingTimer: ReturnType<typeof setInterval> | undefined;
   private openTimer: ReturnType<typeof setInterval> | undefined;
@@ -168,11 +168,11 @@ export class CcDeviceSession {
   private handleErr(seq: number | undefined, reason: string) {
     if (this.answerIdentify(seq)) return;
     const kind = seq === undefined ? undefined : this.pending.get(seq);
-    // Only an answer to a ping still pending changes the session. Reopening clears the pending
-    // pings, so the errors for other pings in flight, or late ones for an earlier session, change
-    // nothing.
+    // `nosession` and `othersession` change the session only when they answer a ping still
+    // pending. Reopening clears the pending pings, so the errors for other pings in flight, or late
+    // ones for an earlier session, change nothing.
     if ((reason === "nosession" || reason === "othersession") && kind !== "ping") return;
-    // Any other reply to a pending command shows the device is answering.
+    // A reply to a pending command, other than `othersession`, shows the device is answering.
     if (seq !== undefined && kind) {
       this.pending.delete(seq);
       if (reason !== "othersession") this.answered();

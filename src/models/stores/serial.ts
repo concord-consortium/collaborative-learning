@@ -27,7 +27,7 @@ export class SerialDevice {
   activeTransport: IDeviceTransport | undefined;
   // The CC Device Protocol session of the active device, when it speaks that protocol.
   ccDeviceSession: CcDeviceSession | undefined;
-  // Cleared when a device becomes active or a connect attempt starts.
+  // Cleared by `setActiveDevice` and `clearLastLoss`.
   lastLoss: IDeviceLossRecord | undefined;
   // Functions that each return the channels of one tile. Inbound data is delivered to the
   // channels of every registered source.
@@ -126,8 +126,8 @@ export class SerialDevice {
   }
 
   // The browser reported `transport`'s device removed. Clears it if it's still active. If another
-  // path already cleared it as lost (a failed write can come first), the loss becomes an unplug,
-  // keeping its time.
+  // path already cleared it as lost (a failed write, or the read loop giving up, can come first),
+  // the loss becomes an unplug, keeping its time.
   public recordUnplug(transport: IDeviceTransport){
     if (this.activeTransport === transport) {
       this.clearActiveDevice("unplugged");

@@ -191,8 +191,8 @@ export class WebSerialTransport implements IDeviceTransport {
  * startup to catch this event and improve the connect-button UI. Not every board does this —
  * see raisesWebSerialConnect in WebSerialTransport.
  *
- * The disconnect handler tears down the active connection on unplug. It is guarded so it only
- * fires while a WebSerialTransport is active and can't kill a live WebUSB (Spiker:bit) session.
+ * The disconnect handler records an unplug of the Web Serial port it belongs to; see the comment
+ * on it.
  */
 export function initWebSerialConnectionEvents(serialDevice: SerialDevice){
   navigator.serial?.addEventListener("connect", (e) => {

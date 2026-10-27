@@ -382,7 +382,7 @@ describe("CcDeviceSession", () => {
     // The #n of the latest command written.
     const latestSeq = () => Number(/#(\d+)$/.exec(lastBody())![1]);
 
-    it("is not responding once three pings in a row go unanswered", () => {
+    it("is not responding once a ping goes out with three unanswered", () => {
       const s = make();
       s.start();
       s.receive(deviceLine("ok #1"), []);
@@ -393,7 +393,7 @@ describe("CcDeviceSession", () => {
       s.stop();
     });
 
-    it("any reply ends not responding", () => {
+    it("a reply to a pending ping ends not responding", () => {
       const s = make();
       s.start();
       s.receive(deviceLine("ok #1"), []);

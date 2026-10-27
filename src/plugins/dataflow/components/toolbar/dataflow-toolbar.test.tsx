@@ -659,7 +659,7 @@ describe("Dataflow connect button and pane", () => {
 
     // The pulse is the class's CSS animation, which plays once when the class is added and then
     // shows the state's own look.
-    it("the button pulses over its normal look, until the next connect attempt", () => {
+    it("the button gets the pulse class over its normal look, kept until the next connect attempt", () => {
       jest.useFakeTimers();
       const r = renderConnect();
       fakeConnected(r);

@@ -14,7 +14,7 @@ interface IConnectButtonInput {
   connected: boolean;
   needsDevice: boolean;
   unseenError: boolean;
-  // Connected, but the board has stopped answering.
+  // Connected, but the board isn't answering, or another host owns its session.
   notResponding: boolean;
 }
 
