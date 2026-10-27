@@ -2,6 +2,7 @@
 // firmware hex, which has to stay in the DataFlow chunk.
 import { makeAutoObservable, reaction, runInAction } from "mobx";
 import { SerialDevice } from "../../../models/stores/serial";
+import { IdentifyResult } from "../../../models/stores/cc-device-session";
 import { SpikerbitDevice } from "../../../models/stores/spikerbit-device";
 import {
   createSpikerbitConnection, makeSpikerbitFlashDataSource
@@ -25,7 +26,8 @@ export const kDeviceChoiceLabels: Record<DeviceChoice, string> = {
 // anyway. A write to a stalled port may never settle.
 export const kEndSessionTimeoutMs = 500;
 
-export type ConnectResult = "connected" | "canceled" | "failed";
+// "inUse": another tab or app has claimed the board.
+export type ConnectResult = "connected" | "canceled" | "failed" | "inUse";
 
 // What dismissed the connect tutorial: OK in one tile, or any connection.
 export type ConnectTutorialDismissal = { by: "ok", tileId: string } | { by: "connection" };
@@ -38,8 +40,10 @@ export interface IDeviceConnectionDeps {
 
 const kNoDeviceSelected = "no-device-selected";
 
-function isNoDeviceSelected(error: unknown) {
-  return (error as { code?: string } | null)?.code === kNoDeviceSelected;
+const kDeviceInUse = "device-in-use";
+
+function errorCode(error: unknown) {
+  return (error as { code?: string } | null)?.code;
 }
 
 /**
@@ -81,7 +85,8 @@ export class DeviceConnection {
         spikerbitDevice: false,
         connect: false,
         reconnect: false,
-        disconnect: false
+        disconnect: false,
+        identify: false
       }
     );
     // A connection made any way, from any tile, ends the connect tutorial, so a later disconnect
@@ -97,6 +102,39 @@ export class DeviceConnection {
 
   get connectedLabel(): string | undefined {
     return this.isConnected && this.lastChoice ? kDeviceChoiceLabels[this.lastChoice] : undefined;
+  }
+
+  // The label of the device last chosen, whether or not it's still connected.
+  get label(): string | undefined {
+    return this.lastChoice ? kDeviceChoiceLabels[this.lastChoice] : undefined;
+  }
+
+  get notResponding() {
+    return this.isConnected && !!this.serialDevice.ccDeviceSession?.notResponding;
+  }
+
+  // Only a device speaking the CC Device Protocol can be asked to identify itself.
+  get canIdentify() {
+    return this.isConnected && !!this.serialDevice.ccDeviceSession;
+  }
+
+  identify(): Promise<IdentifyResult> {
+    return this.serialDevice.ccDeviceSession?.identify() ?? Promise.resolve("noAnswer");
+  }
+
+  // Why the last device went away without the user asking, until the next connect attempt.
+  get lossMessage(): string | undefined {
+    const loss = this.serialDevice.lastLoss;
+    if (this.isConnected || !loss) return undefined;
+    const label = this.label ?? "device";
+    return loss.reason === "unplugged"
+      ? `The ${label} was unplugged.`
+      : `The connection to the ${label} was lost.`;
+  }
+
+  // When that loss happened. A new value means a new loss; an unplug confirming a loss keeps it.
+  get lossAt(): number | undefined {
+    return this.serialDevice.lastLoss?.at;
   }
 
   get connectTutorialDismissed() {
@@ -126,6 +164,8 @@ export class DeviceConnection {
 
   async disconnect(): Promise<void> {
     const transport = this.serialDevice.activeTransport;
+    // The close asked for here can be reported back as a loss; it isn't one.
+    if (transport) transport.onDisconnect = undefined;
     // Tell the board the session is over before its transport closes.
     let timer: ReturnType<typeof setTimeout> | undefined;
     try {
@@ -150,6 +190,7 @@ export class DeviceConnection {
 
   private async attempt(choice: DeviceChoice, run: () => Promise<ConnectResult>): Promise<ConnectResult> {
     if (this.busyChoice) return "canceled";
+    this.serialDevice.clearLastLoss();
     runInAction(() => { this.busyChoice = choice; });
     try {
       const result = await run();
@@ -228,10 +269,10 @@ export class DeviceConnection {
       await device.connectAndStream(this.deps.getSpikerbitFlashDataSource());
       return "connected";
     } catch (e) {
-      if (isNoDeviceSelected(e)) return "canceled";
+      if (errorCode(e) === kNoDeviceSelected) return "canceled";
       console.error("Spiker:bit connection failed", e);
       await this.disposeSpikerbit();
-      return "failed";
+      return errorCode(e) === kDeviceInUse ? "inUse" : "failed";
     }
   }
 
@@ -243,6 +284,7 @@ export class DeviceConnection {
     } catch (e) {
       console.error("Spiker:bit disconnect failed", e);
     }
+    device?.dispose();
   }
 }
 

@@ -433,6 +433,31 @@ clicks, so the top-bar menu can note a board is present. The `disconnect` handle
 the store when a `WebSerialTransport` currently owns the connection, so an unrelated Web Serial
 disconnect cannot kill a live WebUSB (Spiker:bit) session.
 
+### Why a device went away
+
+A device lost without the user asking is recorded on `SerialDevice.lastLoss` (observable), with
+a reason: `"unplugged"` when the browser reported the device removed, `"lost"` for anything else.
+Transports report it through `onDisconnect(loss)`, which `setActiveDevice` wires to
+`clearActiveDevice(loss)`:
+
+| Transport | `"unplugged"` | `"lost"` |
+|---|---|---|
+| Web Serial | `navigator.serial`'s `disconnect` event, from `initWebSerialConnectionEvents`. Only authentic Arduinos raise it. | the read loop giving up on a port that stopped being readable, a few seconds later |
+| WebUSB (Spiker:bit) | `navigator.usb`'s `disconnect` event for the library connection's device, which `MicrobitUsbTransport` listens for itself | the library's `Disconnected` status. The library disconnects itself after any failed WebUSB call, and the session writes a `ping` every second, so an unplug is noticed this way within a second even without the event. |
+
+Each unplug has two paths, and either can come first. The second finds the device already
+cleared, so the guard in `onDisconnect` ignores a second `"lost"`, and `recordUnplug` turns a
+`"lost"` already recorded for the same transport into `"unplugged"`, keeping its time.
+`DeviceConnection.disconnect` unhooks the transport's `onDisconnect` before closing it, because a
+requested close also raises the library's `Disconnected`. A connect attempt clears the record.
+
+`DeviceConnection` turns this into what the connect pane shows: `lossMessage` ("The Spiker:bit was
+unplugged." or "The connection to the Spiker:bit was lost."), `lossAt` (a new value pulses the
+connect button once), and, while connected, `notResponding` and `canIdentify` from the session.
+A Spiker:bit connect that fails because another tab or app has claimed the board (the library's
+`device-in-use` error) returns `"inUse"`, which the pane reports as "Another app is using the
+Spiker:bit."
+
 ## Summary
 
 Both directions run through `SerialDevice` and are transport-agnostic: outbound via
