@@ -1,5 +1,6 @@
 import Header from '../../../support/elements/common/Header';
 import ClueHeader from '../../../support/elements/common/cHeader';
+import { kNewGroupUserGraceMs } from '../../../../src/models/stores/group-user-constants';
 
 /**
  * Group Management Modal Tests
@@ -55,10 +56,6 @@ function setup(student, opts = {}) {
   }
 }
 
-// GroupUserModel.state shows a group member who isn't in the class roster as new ("**") until
-// the class info is more than this much newer than the member's connectedTimestamp, and as
-// removed after that.
-const kNewUserGraceMs = 1000;
 // The next window computes its class timestamp from its own estimate of the server clock, so
 // leave room for that estimate to be off.
 const kServerClockMarginMs = 500;
@@ -77,7 +74,7 @@ function waitUntilCountedAsRemoved(student) {
         expect(groupUser, `student ${student} in a group`).to.exist;
         const serverNow = win.Date.now() + serverTimeOffset;
         expect(serverNow - groupUser.connectedTimestamp)
-          .to.be.greaterThan(kNewUserGraceMs + kServerClockMarginMs);
+          .to.be.greaterThan(kNewGroupUserGraceMs + kServerClockMarginMs);
       });
     });
 }
