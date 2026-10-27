@@ -95,10 +95,11 @@ avoids "sensor", "serial" and "line". On the wire it is spelled out in full, as
   replies. Errors are sent either way. Dataflow adds `#n` wherever it needs the reply
   (`open`, `ping`, `identify`). The one exception is `?`, which always replies with the
   `hello` line, since getting it is the command's whole purpose.
-- **`*hh`** may end any line: the XOR of every byte before the `*`, as two hex digits
-  (NMEA style). A receiver that finds one checks it and drops the line if it's wrong; a line
-  without one is accepted. The firmware adds a checksum to every line it sends. Dataflow
-  should add one to every command. A person typing in a terminal can leave it off.
+- **`*hh`** ends a line: the XOR of every byte before the `*`, as two hex digits (NMEA style).
+  The firmware adds one to every non-empty line it sends, and a host drops a non-empty device
+  line that has none or a wrong one. Dataflow adds one to every command except the `?` that
+  recognizes the firmware. A device accepts a host line without one, so a person typing in a
+  terminal can leave it off, and answers a wrong one with `err checksum`.
 
 So a host line is: an optional verb, then zero or more `name:value` assignments, then an
 optional `#n`, then an optional `*hh`. A device line is a reading, a reply, the
@@ -499,11 +500,12 @@ back and forth between those two builds reflashes it each time.
 
 ### Parsing device lines
 
-- Check the `*hh` checksum when present, and drop the line if it's wrong.
+- Check the `*hh` checksum, and drop a non-empty line that has none or a wrong one.
 - **Readings** (`name:value`): update every channel whose `channelId` is `name` and stamp
   `lastMessageReceivedAt`, as `parseKeyValueData` does. Unlike `keyValue`, accept a sign and
   a fraction, and **don't round**.
-- **`ok #n`** answering the latest `open` (matched by `#n`): start pinging.
+- **`ok #n`** answering a pending `open` (matched by `#n`): start pinging. Every re-sent `open`
+  carries the same session id, so it doesn't matter which one is answered.
 - **`ok #n`** answering a `ping`: record the time of the latest one as the observable
   `lastHeartbeatAt` on the `CcDeviceSession` (`serialDevice.ccDeviceSession`). The UI half uses
   it to show that the connection stopped.
