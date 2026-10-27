@@ -32,11 +32,8 @@ const kRetryAfterDrainMs = 200;
 // How often queryFirmware checks for a reply and for the drain.
 const kQueryPollMs = 10;
 
-// The #n of the connect-time "!!". CcDeviceSession numbers its commands from 1 to kMaxSeq, so a
-// connect-time number can never match one of the session's. That matters because a reply to a
-// connect-time "!!" can reach the session: once one attempt has identified the firmware, the
-// session starts while the replies to another attempt (a retry, or a first attempt the device
-// answered late) may still be on their way.
+// Above CcDeviceSession's 1..kMaxSeq, so a late reply to a connect-time "!!" can't match a session
+// command.
 const kFirstResetSeq = kMaxSeq + 1;
 
 // Minimal subset of @microbit/microbit-connection's MicrobitUSBConnection that
@@ -113,8 +110,6 @@ export class SpikerbitDevice {
     flashDataSource: unknown,
     progress?: (stage: string, pct?: number) => void
   ){
-    // During connect, inbound data feeds only firmware detection. EMG parsing begins once
-    // setActiveDevice repoints the transport's onData at SerialDevice.receive (below).
     this.transport.onData = this.handleFirmwareData;
 
     try {
@@ -126,10 +121,6 @@ export class SpikerbitDevice {
       throw e;
     }
 
-    // Route servo writes and inbound EMG through this WebUSB transport and mark the shared
-    // store connected. setActiveDevice wires transport.onData -> receive (spikerbit maps to
-    // the ccDevice protocol -> CcDeviceSession) and transport.onDisconnect, replacing
-    // the connect-time firmware handler, and starts the session.
     this.serialDevice.setActiveDevice(kSpikerbitDeviceName, this.transport);
   }
 
