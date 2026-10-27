@@ -102,6 +102,7 @@ function makeSerialDevice() {
 describe("SpikerbitDevice", () => {
   afterEach(() => {
     serialDevices.splice(0).forEach(d => d.clearActiveDevice());
+    jest.useRealTimers();
   });
 
   it("does NOT flash when the board reports the current firmware version", async () => {
@@ -139,7 +140,8 @@ describe("SpikerbitDevice", () => {
     expect(conn.flashed).toBe(true);
   });
 
-  it("flashes a board answering with the legacy banner", async () => {
+  it("flashes a board answering with the legacy banner as soon as the banner arrives", async () => {
+    jest.useFakeTimers();
     const serialDevice = makeSerialDevice();
     const conn = new FakeConnection();
     // Firmware v1–v3 ignores "!!".
@@ -147,9 +149,12 @@ describe("SpikerbitDevice", () => {
     conn.respondHello = "CLUE-SPIKERBIT v3\r\n";
     const device = new SpikerbitDevice(serialDevice, conn);
 
-    await device.connectAndStream("HEX");
-
+    const connecting = device.connectAndStream("HEX");
+    // Well before kFirmwareQueryTimeoutMs, after which a board that doesn't answer is flashed too.
+    await jest.advanceTimersByTimeAsync(100);
     expect(conn.flashed).toBe(true);
+    await jest.advanceTimersByTimeAsync(5000);
+    await connecting;
   });
 
   it("flashes a board speaking a newer protocol version, even with newer firmware", async () => {
