@@ -467,6 +467,18 @@ describe("CcDeviceSession", () => {
       s.stop();
     });
 
+    it("commands unanswered before the tab was hidden don't count once it's visible again", () => {
+      const s = make();
+      s.start();
+      s.receive(deviceLine("ok #1"), []);
+      jest.advanceTimersByTime(2000);
+      setHidden(true);
+      setHidden(false);
+      jest.advanceTimersByTime(2000);
+      expect(s.notResponding).toBe(false);
+      s.stop();
+    });
+
     it("err othersession makes it not responding at once, and it stays so", () => {
       const warn = jest.spyOn(console, "warn").mockImplementation(() => undefined);
       const s = make();
