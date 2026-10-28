@@ -135,7 +135,6 @@ export class CcDeviceSession {
     }
   }
 
-  // Resolves the identify a reply answers. Returns whether there was one.
   private answerIdentify(seq: number | undefined) {
     const finish = seq === undefined ? undefined : this.identifies.get(seq);
     finish?.("answered");
