@@ -119,7 +119,9 @@ describe("Dataflow and the Spiker:bit firmware", () => {
     serialDevice.registerChannelSource(() => [channel]);
     await tick(2000);
     expect(channel.value).toBeGreaterThan(150);
-    expect(serialDevice.ccDeviceSession?.lastHeartbeatAt).toBeGreaterThan(Date.now() - 1500);
+    const pings = conn.written.flatMap(w => /^ping session:\d+ #(\d+)/.exec(w)?.[1] ?? []);
+    const replies = conn.reads.join("");
+    expect(pings.some(seq => replies.includes(`ok #${seq}*`))).toBe(true);
   }
 
   beforeEach(() => {
@@ -159,7 +161,7 @@ describe("Dataflow and the Spiker:bit firmware", () => {
     await connect();
     await tick(10000);
 
-    expect(serialDevice.ccDeviceSession?.lastHeartbeatAt).toBeGreaterThan(Date.now() - 1500);
+    expect(serialDevice.ccDeviceSession?.notResponding).toBe(false);
     // Ask the board directly: it still has the session Dataflow opened.
     sim.takeSerialOutput();
     sim.sendSerial(`${withChecksum(`ping session:${sessionId()} #900`)}\n`);

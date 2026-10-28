@@ -29,7 +29,6 @@ function defaultRandomSessionId() {
  * recovers when the device forgets it, and routes readings to channels.
  */
 export class CcDeviceSession {
-  lastHeartbeatAt: number | undefined;
   // Set when kNotRespondingAfter commands in a row have gone unanswered, or another host owns the
   // session. Cleared by the next reply to an open or ping, other than `othersession`.
   notResponding = false;
@@ -55,15 +54,9 @@ export class CcDeviceSession {
     this.write = write;
     this.randomSessionId = options.randomSessionId ?? defaultRandomSessionId;
     makeObservable<CcDeviceSession>(this, {
-      lastHeartbeatAt: observable,
       notResponding: observable,
-      setLastHeartbeatAt: action,
       setNotResponding: action
     });
-  }
-
-  setLastHeartbeatAt(time: number) {
-    this.lastHeartbeatAt = time;
   }
 
   setNotResponding(value: boolean) {
@@ -155,13 +148,10 @@ export class CcDeviceSession {
     if (seq === undefined || !kind) return;
     this.pending.delete(seq);
     this.heardReply();
-    if (kind === "open") {
-      if (this.opened) return;
+    if (kind === "open" && !this.opened) {
       this.opened = true;
       this.clearTimers();
       this.pingTimer = setInterval(() => this.ping(), kPingIntervalMs);
-    } else {
-      this.setLastHeartbeatAt(Date.now());
     }
   }
 

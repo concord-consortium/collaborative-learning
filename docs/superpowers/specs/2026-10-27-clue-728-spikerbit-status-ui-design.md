@@ -147,7 +147,8 @@ zero when the tab becomes visible. Once the backlog drains after the student com
 ping is answered. A board that has really stopped is reported when the fourth ping goes out,
 about 4 s after the tab is visible again. *(My call.)*
 
-The existing `lastHeartbeatAt` now has no reader. It stays.
+The `lastHeartbeatAt` timestamp that #3055 added for this purpose is removed, since the count
+replaces it.
 
 `identify`'s reply doesn't count toward this: the state is about the session. *(My call.)*
 
@@ -352,6 +353,5 @@ derives `lossMessage` and `lossAt` from it. Every tile's pane shows it. An unplu
 - The pulse is the `connect-loss-pulse` class described above.
 - The loss reason goes through `onDisconnect(loss)`, and `DeviceConnection.disconnect` clears
   `onDisconnect` before closing, with no flag.
-- `lastHeartbeatAt` stays, with no reader.
 - The not-responding tooltip is "The Spiker:bit is not responding. Click for details."
 - No Cypress spec.

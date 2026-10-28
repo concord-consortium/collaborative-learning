@@ -215,8 +215,8 @@ Keep `kSpikerbitFirmwareVersion` equal to the `firmware:` number in the `HELLO` 
 
 1. It sends `open session:<id> #n` with a random id, and re-sends it every 2 s until an
    `ok` arrives.
-2. It then sends `ping session:<id> #n` every second. Each `ok` to a ping stamps
-   `lastHeartbeatAt`, which stops advancing when the board stops answering.
+2. It then sends `ping session:<id> #n` every second, which keeps the session open on the board.
+   The replies feed the not-responding count (below).
 3. When a pending ping gets `err nosession`, it opens a new session with a new id. Chrome slows
    timers in hidden tabs, so this is how a session that lapsed while its tab was hidden
    recovers. When one gets `err othersession`, it stops, since another host owns the session, and

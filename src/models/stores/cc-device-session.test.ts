@@ -74,31 +74,6 @@ describe("CcDeviceSession", () => {
     s.stop();
   });
 
-  it("records lastHeartbeatAt for an ok to a ping", () => {
-    const s = make();
-    s.start();
-    s.receive(deviceLine("ok #1"), []);
-    expect(s.lastHeartbeatAt).toBeUndefined();
-    jest.advanceTimersByTime(1000);
-    expect(lastBody()).toBe("ping session:4242 #2");
-    s.receive(deviceLine("ok #2"), []);
-    expect(s.lastHeartbeatAt).toBe(Date.now());
-    s.stop();
-  });
-
-  it("lastHeartbeatAt is observable", () => {
-    const s = make();
-    const seen: Array<number | undefined> = [];
-    const dispose = autorun(() => { seen.push(s.lastHeartbeatAt); });
-    s.start();
-    s.receive(deviceLine("ok #1"), []);
-    jest.advanceTimersByTime(1000);
-    s.receive(deviceLine("ok #2"), []);
-    dispose();
-    s.stop();
-    expect(seen).toEqual([undefined, Date.now()]);
-  });
-
   it("re-opens with a new id on err nosession, once", () => {
     const ids = [1, 2];
     const s = make(() => ids.shift() as number);
