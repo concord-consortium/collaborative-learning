@@ -445,7 +445,7 @@ wires to `recordUnplug` for `"unplugged"` and to `clearActiveDevice(loss)` for `
 
 | Transport | `"unplugged"` | `"lost"` |
 |---|---|---|
-| Web Serial | `navigator.serial`'s `disconnect` event for the device's port, from `initWebSerialConnectionEvents`. Only authentic Arduinos have been seen to raise it. | the read loop giving up on a port that stopped being readable, a few seconds later |
+| Web Serial | `navigator.serial`'s `disconnect` event for the device's port, from `initWebSerialConnectionEvents`. Authentic Arduinos raise it, and so did the two clone Arduinos tried; the radio hub hasn't been tried. | the read loop giving up on a port that stopped being readable, a few seconds later |
 | WebUSB (Spiker:bit) | `navigator.usb`'s `disconnect` event for the library connection's device, which `MicrobitUsbTransport` listens for itself. It then closes the library connection, whose status would otherwise stay Connected. | the library's `Disconnected` status, which follows any failed WebUSB call (see below) |
 
 An unplug can be reported by both paths, in either order. The second finds the device already

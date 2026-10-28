@@ -186,8 +186,8 @@ A device can be lost by these paths, and each has to record it:
 
 - **Web Serial (Arduino, radio hub), the browser event:** `initWebSerialConnectionEvents` in
   [web-serial-transport.ts](../../../src/models/stores/web-serial-transport.ts) handles
-  `navigator.serial`'s `disconnect` event, which authentic Arduinos raise the moment they're
-  unplugged. It acts only when the event's target is the `WebSerialTransport`'s `lastPort`, so
+  `navigator.serial`'s `disconnect` event, which Arduinos raise the moment they're unplugged:
+  authentic ones, and the two clones tried. It acts only when the event's target is the `WebSerialTransport`'s `lastPort`, so
   another port's unplug changes nothing, and records the unplug with `recordUnplug`. Before
   this change it cleared the device directly for any port.
 - **Web Serial, the read loop:** for boards that don't raise the browser event, the read loop
@@ -216,9 +216,10 @@ A device can be lost by these paths, and each has to record it:
 **Which message.** An unplug confirmed by the browser's `navigator.usb` or `navigator.serial`
 `disconnect` event for the active device says "The Spiker:bit was unplugged." (or "The Arduino
 was unplugged."). Any other loss the user didn't ask for (a failed WebUSB call, or the Web Serial
-read loop giving up) says "The connection to the Spiker:bit was lost." (or the Arduino). Boards
-that don't raise `navigator.serial`'s event, such as clone Arduinos and the radio hub, therefore
-always show "lost".
+read loop giving up) says "The connection to the Spiker:bit was lost." (or the Arduino). A board
+that doesn't raise `navigator.serial`'s event would therefore always show "lost". Clone Arduinos
+do raise it (two different clones said "The Arduino was unplugged." in the hand checks); the radio
+hub hasn't been tried.
 
 **The race between the two Spiker:bit paths.** An unplug sets off both: the `navigator.usb` event,
 and a failed `ping` write within the next second. Whichever clears the device first wins, and
@@ -282,7 +283,9 @@ derives `lossMessage` and `lossAt` from it. Every tile's pane shows it. An unplu
 - **No Cypress spec.** The Jest tests cover the logic, and a Cypress spec can't plug in a board.
 - **By hand, with a board, in the browser.** Run at `cbd2f2a86` from the branch preview, in a Mac
   browser.
-  - **Unplug a Spiker:bit, and an Arduino while connected:** passed.
+  - **Unplug a Spiker:bit, and an Arduino while connected:** passed. Retested after the review
+    fixes with two different clone Arduinos: each said "The Arduino was unplugged.", and the
+    button's tooltip led with it.
   - **Another tab opens the Spiker:bit's serial port** from a Web Serial terminal
     (serialterminal.com): passed. The CLUE tab stays connected but stops receiving bytes, so the
     button turns yellow and the pane says "The Spiker:bit is not responding." "Is it alive?" shows

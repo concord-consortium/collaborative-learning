@@ -33,8 +33,8 @@ export class WebSerialTransport implements IDeviceTransport {
   private reading = false;
   private readonly READ_TIMEOUT_MS = 2000;
 
-  // Whether this board raises the browser `connect`/`disconnect` events (see
-  // initWebSerialConnectionEvents). Only authentic Arduinos were observed to raise them.
+  // Whether this board raises the browser `connect` event (see initWebSerialConnectionEvents). Only
+  // authentic Arduinos were observed to raise it. Clone Arduinos raise `disconnect` too.
   get raisesWebSerialConnect(){
     return this.deviceInfo?.usbProductId === kArduinoUsbProductId;
   }

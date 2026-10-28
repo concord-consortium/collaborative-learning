@@ -33,8 +33,8 @@ export class SerialDevice {
   // channels of every registered source.
   private channelSources = new Set<() => NodeChannelInfo[]>();
   /**
-   * True when we think the connected Web Serial board will raise the browser
-   * connect/disconnect events. It drives connect-button physical-connection UI. Only ever set
+   * True when we think the connected Web Serial board will raise the browser `connect` event.
+   * It drives connect-button physical-connection UI. Only ever set
    * by the Web Serial path — stays false for a WebUSB (Spiker:bit) connection.
    */
   raisesWebSerialConnect = false;
