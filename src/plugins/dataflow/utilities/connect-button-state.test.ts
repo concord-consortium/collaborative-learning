@@ -36,6 +36,16 @@ describe("connectButtonTooltip", () => {
     expect(connectButtonTooltip({ ...base, needsDevice: true, unseenError: true }))
       .toBe("Couldn't connect. Click for details.");
   });
+
+  it("leads with a loss, keeping whether the program needs a device", () => {
+    const lossMessage = "The Spiker:bit was unplugged.";
+    expect(connectButtonTooltip({ ...base, lossMessage }))
+      .toBe("The Spiker:bit was unplugged. Click to connect.");
+    expect(connectButtonTooltip({ ...base, needsDevice: true, lossMessage }))
+      .toBe("The Spiker:bit was unplugged. This program needs a device. Click to connect.");
+    expect(connectButtonTooltip({ ...base, unseenError: true, lossMessage }))
+      .toBe("Couldn't connect. Click for details.");
+  });
 });
 
 describe("toolbarShowsConnect", () => {

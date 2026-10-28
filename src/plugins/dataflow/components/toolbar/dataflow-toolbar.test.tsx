@@ -512,6 +512,14 @@ describe("Dataflow connect button and pane", () => {
     act(() => r.stores.serialDevice.clearActiveDevice());
   });
 
+  it("the button's name says the device was unplugged", () => {
+    const r = renderConnect();
+    fakeConnected(r);
+    act(() => r.stores.serialDevice.activeTransport!.onDisconnect!("unplugged"));
+    expect(getTrigger(r.container).getAttribute("aria-label"))
+      .toBe("The Spiker:bit was unplugged. Click to connect.");
+  });
+
   describe("the second line", () => {
     const pane = () => screen.getByRole("group", { name: "Device connection" });
 

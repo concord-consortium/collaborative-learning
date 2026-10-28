@@ -27,14 +27,22 @@ export function notRespondingMessage(label: string | undefined): string {
   return `The ${label} is not responding.`;
 }
 
-export function connectButtonTooltip(o: IConnectButtonInput & { connectedLabel?: string }): string {
+interface IConnectButtonTooltipInput extends IConnectButtonInput {
+  connectedLabel?: string;
+  // Why the last device went away, while that loss is kept. Leads the not-connected text, so the
+  // button still says so once its pulses end.
+  lossMessage?: string;
+}
+
+export function connectButtonTooltip(o: IConnectButtonTooltipInput): string {
+  const loss = o.lossMessage ? `${o.lossMessage} ` : "";
   switch (connectButtonState(o)) {
     case "connected": return `Connected: ${o.connectedLabel}`;
     case "attention":
       if (o.connected) return `${notRespondingMessage(o.connectedLabel)} Click for details.`;
       return o.unseenError
         ? "Couldn't connect. Click for details."
-        : "This program needs a device. Click to connect.";
-    default: return "Connect a device";
+        : `${loss}This program needs a device. Click to connect.`;
+    default: return o.lossMessage ? `${loss}Click to connect.` : "Connect a device";
   }
 }

@@ -282,7 +282,9 @@ export const ConnectDeviceButton = observer(function ConnectDeviceButton({ name 
     notResponding: connection.notResponding
   };
   const state = connectButtonState(stateInput);
-  const title = connectButtonTooltip({ ...stateInput, connectedLabel: connection.connectedLabel });
+  const title = connectButtonTooltip({
+    ...stateInput, connectedLabel: connection.connectedLabel, lossMessage: connection.lossMessage
+  });
 
   const pane = isOpen && content && model
     ? <ConnectPane connection={connection} content={content} tileId={model.id} paneRef={paneRef}

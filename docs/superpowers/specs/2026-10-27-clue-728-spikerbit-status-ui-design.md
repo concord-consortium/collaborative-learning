@@ -55,11 +55,11 @@ The button keeps its three looks: gray (`idle`), green (`connected`) and yellow 
 `attention` pulses three times when it's newly applied and then stays yellow
 ([dataflow-connect-pane.scss](../../../src/plugins/dataflow/components/toolbar/dataflow-connect-pane.scss)).
 
-| Case | Button | Tooltip (suggested) |
+| Case | Button | Tooltip (also the button's name) |
 |---|---|---|
 | Connected and answering | green, as today | `Connected: Spiker:bit`, as today |
 | Connected, **not responding** (including `othersession`) | three pulses, then **stays yellow** until the board answers again, whether or not the program needs a device | `The Spiker:bit is not responding. Click for details.` |
-| **Unplugged**, or the connection **lost** | three pulses, then the normal not-connected look: **solid yellow if the program needs a device, gray if not** | the normal not-connected tooltip |
+| **Unplugged**, or the connection **lost** | three pulses, then the normal not-connected look: **solid yellow if the program needs a device, gray if not** | the pane's loss line, then the normal not-connected text, until the next connect attempt: `The Spiker:bit was unplugged. Click to connect.`, or `… This program needs a device. Click to connect.` |
 
 The unplugged case is new behavior: today the pulses only come with a button that stays yellow.
 It needs a pulse that settles back to gray. It's a separate `connect-loss-pulse` class, whose
