@@ -17,7 +17,8 @@ patch with the developer, and record the steps.
 Deploy what the deploy-timing decisions call for, with the same commands as staging (cutting.md)
 and `--project collaborative-learning-ec215`. Compare production's deployed params first,
 for each codebase with the tag's `<codebase>/.env.collaborative-learning-ec215`. Production and
-staging can differ.
+staging can differ. Check `gcloud auth print-access-token` first: the login may have expired since
+preparation, and the rules read needs it.
 
 Follow the recorded order:
 - **`before`:** compare production's deployed copy with the tag ("Firebase deployables" in
@@ -61,8 +62,9 @@ Check the release list shows it as Latest, with no Pre-release badge.
   so use the REST API from a small script in `scripts/local/` that reads the dev-templates `.env`:
   `GET /rest/api/3/project/CLUE/versions` to find the id, then
   `PUT /rest/api/3/version/<id>` with `{"released": true, "releaseDate": "YYYY-MM-DD"}`.
-  `/version/<id>/unresolvedIssueCount` shows what's still open. Unlike the Jira UI, the API doesn't
-  make you move unresolved issues. Leave a story whose code shipped on this version.
+  `/version/<id>/unresolvedIssueCount` shows what's still open; read it after closing the release
+  story, which otherwise counts as open. Unlike the Jira UI, the API doesn't make you move
+  unresolved issues. Leave a story whose code shipped on this version.
 - **Earlier versions:** check that the previous version is marked released too.
 
 ## Announcements [approve]
@@ -70,7 +72,8 @@ Check the release list shows it as Latest, with no Pre-release badge.
 - **#clue:** reply in the pre-announcement's thread: "CLUE <X.Y.Z> is now live:
   https://collaborative-learning.concord.org/", plus the GitHub release link.
 - **#releases:** a top-level post, "CLUE <X.Y.Z> is released: <GitHub release link>", followed by
-  the `slack` release notes converted to standard markdown (as in preparing.md's pre-announcement).
+  the `slack` release notes, converted to standard markdown and with the same sections flattened as
+  in the pre-announcement (preparing.md).
   Every CLUE release is announced here, separately from #clue.
 - **Open stories:** nudge the owners of stories still open on the version, in the latest
   release-status post's thread. A scheduled message works for someone in another timezone; it is

@@ -1,4 +1,6 @@
 name: Manual Regression
+# Names each run after its inputs, so a run on one branch or spec can be told from another's.
+run-name: Manual Regression on ${{ inputs.branch }} (${{ inputs.test }})
 
 on:
   workflow_dispatch:
@@ -83,8 +85,8 @@ jobs:
       # `parallel: true` it then claims every spec instead of its usual share and runs
       # them serially, taking hours or hitting the job timeout.
       matrix:
-        # run 7 copies of the current job in parallel
-        containers: [1, 2, 3, 4, 5, 6, 7]
+        # run 15 copies of the current job in parallel, as ci-regression.yml does
+        containers: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v2

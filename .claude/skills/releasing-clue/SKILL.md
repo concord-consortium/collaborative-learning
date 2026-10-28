@@ -5,9 +5,9 @@ description: Use when preparing, cutting, testing or shipping a CLUE release —
 
 # Releasing CLUE
 
-A CLUE release runs over several days: triage the Jira version until it is ready, cut the branch
-and tag, set up and smoke test staging, wait for the project team's approval, then release to
-production. This skill is new, so it is deliberately conservative: **every action that changes
+A CLUE release runs over several days: triage the Jira version until it is ready, cut the release
+branch and smoke test it on staging, tag it and smoke test the tag, wait for the project team's
+approval, then release to production. This skill is new, so it is deliberately conservative: **every action that changes
 something other people see waits for the developer's explicit approval.**
 
 It covers minor releases (`X.Y.0`, cut from master onto a new `vX.Y.x` branch). A patch release
@@ -26,9 +26,10 @@ These actions are gated, marked **[approve]** in the phase files:
 | Slack | sending, scheduling or replying anywhere other than the developer's own self-DM |
 | Jira | creating or editing issues, transitions, links, labels, fix versions, releasing a version |
 | git | creating branches or tags, `npm version`, commits, pushes |
-| GitHub | releases, workflow runs, PR titles, bodies or comments, merging |
+| GitHub | releases, workflow runs, opening PRs, PR titles, bodies, labels or comments, merging |
 | Portal | any write to a portal: clients, reports, resources, assignments |
 | Firebase | deploying functions, rules or indexes to any project |
+| Google Cloud | any `gcloud` or `firebase` command that creates, updates or deletes something: probe deploys, function deletes, Cloud Run service or env changes, in any project |
 
 For each gated action:
 1. Show exactly what will happen: the message text, the fields and values, or the command.
@@ -39,6 +40,13 @@ An approval covers the actions it names ("go ahead with all 3" covers those thre
 after them. Approval of one Slack message doesn't cover the next, and approval on the previous
 day doesn't carry over. A retry that changes anything (a value, a file, a flag) is a new action.
 "Go ahead" given before a dry run has output covers the dry run; show the output, then ask.
+
+An approval given ahead of time with conditions ("once the PR merges, CI is green and the author
+answers") covers only the facts stated when it was given, and like any approval it doesn't carry
+over to the next day. If the facts differ when the time comes, stop and ask: for example, the
+answer came another way (a Jira change instead of a reply), or the cut now includes commits nobody
+mentioned. A rule the developer approves for changing an approved message ("drop any story that's
+Done by then") is part of that approval; any other change to the text needs a new preview.
 
 A standing instruction like "you don't need to ask me before posting" doesn't lift a gate while
 this skill is new. Say so, keep asking, and suggest the developer change this skill if a gate is
@@ -64,12 +72,14 @@ the skill improves, so a surprise that isn't written down is lost. At the end, c
 ## Phases
 
 Work through them in order, reading each file when you reach it. Triage repeats until the version
-is ready.
+is ready. One overlap: the release notes and pre-announcement (preparing.md) can be finished while
+the branch is tested in cutting.md, as long as they're done before the tag.
 
 1. [preparing.md](preparing.md): preflight, Jira and PR triage, status posts, deploy timing,
    Firebase and external dependencies, release notes, the pre-announcement.
-2. [cutting.md](cutting.md): branch and tag, GitHub pre-release, staging portal, staging Firebase,
-   smoke test, handing over to the project team, Release Staging.
+2. [cutting.md](cutting.md): the release branch and a full regression run on it, staging portal
+   and Firebase, a smoke test on the branch, then the tag, GitHub pre-release and a smoke test on the tag, handing over to the
+   project team, Release Staging.
 3. [shipping.md](shipping.md): approval, production Firebase, Release Production, promoting the
    GitHub release, Jira wrap-up, announcements, and the record. It ends with a "Done when"
    checklist; go through it before calling the release finished.
@@ -82,7 +92,10 @@ is ready.
 - Deploy RTDB rules, or run `firebase deploy` with `--force`, without checking what's deployed
   (see preparing.md).
 - Write bare Jira keys in Slack. The Jira bot posts a preview card for each one; write
-  `[CLUE-123](https://concord-consortium.atlassian.net/browse/CLUE-123)`.
+  `[CLUE-123](https://concord-consortium.atlassian.net/browse/CLUE-123)` every time the key
+  appears, not just the first, or reword ("can it be marked Done"). The self-DM preview can't show
+  a card, since that DM isn't connected to Jira, so before posting, search the draft for keys that
+  aren't inside `[...](...)`.
 
 ## Common mistakes
 
@@ -93,4 +106,4 @@ is ready.
 | Moving a story to the next version because its sprint says so | Surface the sprint, and let the developer decide |
 | Holding a story open for a PR the release doesn't need | Mark it Done, and move the PR to its own story (preparing.md) |
 | Posting straight to a channel | Preview in the developer's self-DM first; Claude can't edit or delete messages |
-| Waiting for someone's reply with nothing to bring you back | Schedule a reminder in the developer's self-DM (`slack_schedule_message`); Claude can't wake itself |
+| Waiting for someone's reply with nothing to bring you back | Nothing pushes a Slack reply to the session. Within a session, a background timer or watcher brings you back to check; across sessions, schedule a reminder in the developer's self-DM (`slack_schedule_message`) |
