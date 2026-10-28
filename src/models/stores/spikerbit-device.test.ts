@@ -2,7 +2,7 @@ import { SerialDevice } from "./serial";
 import { withChecksum } from "./cc-device-protocol";
 import { kMaxSeq } from "./cc-device-session";
 import {
-  SpikerbitDevice, IMicrobitUsbConnection, kSpikerbitFirmwareVersion, MicrobitUsbTransport
+  IMicrobitUsbConnection, IUsbDisconnectSource, kSpikerbitFirmwareVersion, MicrobitUsbTransport, SpikerbitDevice
 } from "./spikerbit-device";
 
 const helloLine = (firmware: number, version = 1) =>
@@ -49,6 +49,8 @@ class FakeConnection implements IMicrobitUsbConnection {
   held: string[][] = [];
   // Whether the board acknowledges a session's open.
   acksOpen = true;
+  // The USBDevice the library holds; the transport compares unplug events against it.
+  device: unknown = { name: "this board" };
 
   addEventListener(type: string, listener: any) {
     if (type === "serialdata") this.serialListeners.push(listener);
@@ -78,6 +80,8 @@ class FakeConnection implements IMicrobitUsbConnection {
     }
   }
   async disconnect() { /* no-op */ }
+  getDevice() { return this.device; }
+  emitStatus(status: string) { this.statusListeners.forEach(l => l({ status })); }
 
   resetWrites() { return this.written.filter(w => w.startsWith("!!")); }
 }
@@ -279,6 +283,110 @@ describe("SpikerbitDevice", () => {
     conn.statusListeners.forEach(l => l({ status: "Disconnected" }));
 
     expect(serialDevice.isConnected()).toBe(false);
+  });
+
+  describe("noticing a lost board", () => {
+    // A stand-in for navigator.usb that lets a test raise its disconnect event.
+    function makeUsbSource() {
+      const listeners = new Set<(e: { device: unknown }) => void>();
+      const source: IUsbDisconnectSource & { unplug: (device: unknown) => void, count: () => number } = {
+        addEventListener: (_type, l) => { listeners.add(l); },
+        removeEventListener: (_type, l) => { listeners.delete(l); },
+        unplug: device => listeners.forEach(l => l({ device })),
+        count: () => listeners.size
+      };
+      return source;
+    }
+
+    it("an unplug of its own device fires onDisconnect('unplugged')", () => {
+      const conn = new FakeConnection();
+      const usb = makeUsbSource();
+      const transport = new MicrobitUsbTransport(conn, usb);
+      const losses: string[] = [];
+      transport.onDisconnect = loss => losses.push(loss);
+      usb.unplug(conn.device);
+      expect(losses).toEqual(["unplugged"]);
+    });
+
+    it("an unplug of its own device also closes the library connection", () => {
+      const conn = new FakeConnection();
+      const disconnect = jest.spyOn(conn, "disconnect");
+      const usb = makeUsbSource();
+      new MicrobitUsbTransport(conn, usb);
+      usb.unplug(conn.device);
+      expect(disconnect).toHaveBeenCalledTimes(1);
+    });
+
+    it("the Disconnected status from closing after an unplug leaves it unplugged", () => {
+      const serialDevice = makeSerialDevice();
+      const conn = new FakeConnection();
+      jest.spyOn(conn, "disconnect").mockImplementation(async () => conn.emitStatus("Disconnected"));
+      const usb = makeUsbSource();
+      serialDevice.setActiveDevice("spikerbit", new MicrobitUsbTransport(conn, usb));
+      usb.unplug(conn.device);
+      expect(serialDevice.isConnected()).toBe(false);
+      expect(serialDevice.lastLoss?.reason).toBe("unplugged");
+    });
+
+    it("an unplug of another device is ignored", () => {
+      const conn = new FakeConnection();
+      const usb = makeUsbSource();
+      const transport = new MicrobitUsbTransport(conn, usb);
+      const losses: string[] = [];
+      transport.onDisconnect = loss => losses.push(loss);
+      usb.unplug({ name: "another board" });
+      conn.device = undefined;
+      usb.unplug(undefined);
+      expect(losses).toEqual([]);
+    });
+
+    it("the library's Disconnected status fires onDisconnect('lost')", () => {
+      const conn = new FakeConnection();
+      const transport = new MicrobitUsbTransport(conn, makeUsbSource());
+      const losses: string[] = [];
+      transport.onDisconnect = loss => losses.push(loss);
+      conn.emitStatus("Disconnected");
+      expect(losses).toEqual(["lost"]);
+    });
+
+    it("dispose removes the unplug listener", () => {
+      const usb = makeUsbSource();
+      const transport = new MicrobitUsbTransport(new FakeConnection(), usb);
+      expect(usb.count()).toBe(1);
+      transport.dispose();
+      expect(usb.count()).toBe(0);
+    });
+
+    it("disposing the device removes its transport's unplug listener", () => {
+      const usb = makeUsbSource();
+      const device = new SpikerbitDevice(makeSerialDevice(), new FakeConnection(), { usb });
+      expect(usb.count()).toBe(1);
+      device.dispose();
+      expect(usb.count()).toBe(0);
+    });
+
+    it("a failed write and then the unplug end as unplugged", () => {
+      const serialDevice = makeSerialDevice();
+      const conn = new FakeConnection();
+      const usb = makeUsbSource();
+      const transport = new MicrobitUsbTransport(conn, usb);
+      serialDevice.setActiveDevice("spikerbit", transport);
+      conn.emitStatus("Disconnected");
+      expect(serialDevice.lastLoss?.reason).toBe("lost");
+      usb.unplug(conn.device);
+      expect(serialDevice.lastLoss?.reason).toBe("unplugged");
+    });
+
+    it("the unplug and then a failed write end as unplugged", () => {
+      const serialDevice = makeSerialDevice();
+      const conn = new FakeConnection();
+      const usb = makeUsbSource();
+      const transport = new MicrobitUsbTransport(conn, usb);
+      serialDevice.setActiveDevice("spikerbit", transport);
+      usb.unplug(conn.device);
+      conn.emitStatus("Disconnected");
+      expect(serialDevice.lastLoss?.reason).toBe("unplugged");
+    });
   });
 
   describe("connect-time reset and query", () => {

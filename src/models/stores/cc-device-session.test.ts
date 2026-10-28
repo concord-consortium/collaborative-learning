@@ -74,31 +74,6 @@ describe("CcDeviceSession", () => {
     s.stop();
   });
 
-  it("records lastHeartbeatAt for an ok to a ping", () => {
-    const s = make();
-    s.start();
-    s.receive(deviceLine("ok #1"), []);
-    expect(s.lastHeartbeatAt).toBeUndefined();
-    jest.advanceTimersByTime(1000);
-    expect(lastBody()).toBe("ping session:4242 #2");
-    s.receive(deviceLine("ok #2"), []);
-    expect(s.lastHeartbeatAt).toBe(Date.now());
-    s.stop();
-  });
-
-  it("lastHeartbeatAt is observable", () => {
-    const s = make();
-    const seen: Array<number | undefined> = [];
-    const dispose = autorun(() => { seen.push(s.lastHeartbeatAt); });
-    s.start();
-    s.receive(deviceLine("ok #1"), []);
-    jest.advanceTimersByTime(1000);
-    s.receive(deviceLine("ok #2"), []);
-    dispose();
-    s.stop();
-    expect(seen).toEqual([undefined, Date.now()]);
-  });
-
   it("re-opens with a new id on err nosession, once", () => {
     const ids = [1, 2];
     const s = make(() => ids.shift() as number);
@@ -315,5 +290,218 @@ describe("CcDeviceSession", () => {
     expect(pings[997]).toBe("ping session:4242 #999");
     expect(pings[998]).toBe("ping session:4242 #1");
     s.stop();
+  });
+
+  describe("identify", () => {
+    it("sends identify #n and resolves answered on its ok", async () => {
+      const s = make();
+      s.start();
+      s.receive(deviceLine("ok #1"), []);
+      const result = s.identify();
+      expect(write).toHaveBeenLastCalledWith(withChecksum("identify #2"));
+      s.receive(deviceLine("ok #2"), []);
+      await expect(result).resolves.toBe("answered");
+      s.stop();
+    });
+
+    it("resolves noAnswer when no reply comes within 2 s", async () => {
+      const s = make();
+      s.start();
+      s.receive(deviceLine("ok #1"), []);
+      let settled: string | undefined;
+      void s.identify().then(r => { settled = r; });
+      await jest.advanceTimersByTimeAsync(1999);
+      expect(settled).toBeUndefined();
+      await jest.advanceTimersByTimeAsync(1);
+      expect(settled).toBe("noAnswer");
+      s.stop();
+    });
+
+    it("counts an err reply as answered", async () => {
+      const warn = jest.spyOn(console, "warn").mockImplementation(() => undefined);
+      const s = make();
+      s.start();
+      s.receive(deviceLine("ok #1"), []);
+      const result = s.identify();
+      s.receive(deviceLine("err #2 unknown"), []);
+      await expect(result).resolves.toBe("answered");
+      warn.mockRestore();
+      s.stop();
+    });
+
+    it("still works after othersession has stopped the session", async () => {
+      const warn = jest.spyOn(console, "warn").mockImplementation(() => undefined);
+      const s = make();
+      s.start();
+      s.receive(deviceLine("ok #1"), []);
+      jest.advanceTimersByTime(1000);
+      s.receive(deviceLine("err #2 othersession"), []);
+      const result = s.identify();
+      expect(write).toHaveBeenLastCalledWith(withChecksum("identify #3"));
+      s.receive(deviceLine("ok #3"), []);
+      await expect(result).resolves.toBe("answered");
+      warn.mockRestore();
+      s.stop();
+    });
+  });
+
+  describe("not responding", () => {
+    const setHidden = (hidden: boolean) => {
+      Object.defineProperty(document, "visibilityState", {
+        configurable: true, get: () => hidden ? "hidden" : "visible"
+      });
+      document.dispatchEvent(new Event("visibilitychange"));
+    };
+    afterEach(() => setHidden(false));
+
+    // The #n of the latest command written.
+    const latestSeq = () => Number(/#(\d+)$/.exec(lastBody())![1]);
+
+    it("is not responding once a ping goes out with three unanswered", () => {
+      const s = make();
+      s.start();
+      s.receive(deviceLine("ok #1"), []);
+      jest.advanceTimersByTime(3000);
+      expect(s.notResponding).toBe(false);
+      jest.advanceTimersByTime(1000);
+      expect(s.notResponding).toBe(true);
+      s.stop();
+    });
+
+    it("a reply to a pending ping ends not responding", () => {
+      const s = make();
+      s.start();
+      s.receive(deviceLine("ok #1"), []);
+      jest.advanceTimersByTime(4000);
+      expect(s.notResponding).toBe(true);
+      s.receive(deviceLine(`ok #${latestSeq()}`), []);
+      expect(s.notResponding).toBe(false);
+      s.stop();
+    });
+
+    it("err nosession is an answer", () => {
+      const s = make();
+      s.start();
+      s.receive(deviceLine("ok #1"), []);
+      jest.advanceTimersByTime(2000);
+      s.receive(deviceLine("err #3 nosession"), []);
+      expect(lastBody()).toMatch(/^open /);
+      jest.advanceTimersByTime(2000);
+      expect(s.notResponding).toBe(false);
+      s.stop();
+    });
+
+    it("an err with another reason, answering a pending ping, is an answer", () => {
+      const warn = jest.spyOn(console, "warn").mockImplementation(() => undefined);
+      const s = make();
+      s.start();
+      s.receive(deviceLine("ok #1"), []);
+      jest.advanceTimersByTime(3000);
+      s.receive(deviceLine("err #4 value"), []);
+      jest.advanceTimersByTime(1000);
+      expect(s.notResponding).toBe(false);
+      expect(warn).toHaveBeenCalled();
+      warn.mockRestore();
+      s.stop();
+    });
+
+    it("an err with another reason, answering a pending open, is an answer", () => {
+      const warn = jest.spyOn(console, "warn").mockImplementation(() => undefined);
+      const s = make();
+      s.start();
+      jest.advanceTimersByTime(4000);
+      s.receive(deviceLine("err #3 value"), []);
+      jest.advanceTimersByTime(2000);
+      expect(s.notResponding).toBe(false);
+      warn.mockRestore();
+      s.stop();
+    });
+
+    it("counts unanswered opens too", () => {
+      const s = make();
+      s.start();
+      jest.advanceTimersByTime(4000);
+      expect(s.notResponding).toBe(false);
+      jest.advanceTimersByTime(2000);
+      expect(s.notResponding).toBe(true);
+      s.stop();
+    });
+
+    it("doesn't count while the tab is hidden, and starts over when it's visible", () => {
+      const s = make();
+      s.start();
+      s.receive(deviceLine("ok #1"), []);
+      setHidden(true);
+      jest.advanceTimersByTime(10000);
+      expect(s.notResponding).toBe(false);
+      setHidden(false);
+      jest.advanceTimersByTime(3000);
+      expect(s.notResponding).toBe(false);
+      jest.advanceTimersByTime(1000);
+      expect(s.notResponding).toBe(true);
+      s.stop();
+    });
+
+    it("commands unanswered before the tab was hidden don't count once it's visible again", () => {
+      const s = make();
+      s.start();
+      s.receive(deviceLine("ok #1"), []);
+      jest.advanceTimersByTime(2000);
+      setHidden(true);
+      setHidden(false);
+      jest.advanceTimersByTime(2000);
+      expect(s.notResponding).toBe(false);
+      s.stop();
+    });
+
+    it("stop removes the visibility listener", () => {
+      const remove = jest.spyOn(document, "removeEventListener");
+      const s = make();
+      s.start();
+      remove.mockClear();
+      s.stop();
+      expect(remove).toHaveBeenCalledWith("visibilitychange", expect.any(Function));
+      remove.mockRestore();
+    });
+
+    it("err othersession makes it not responding at once, and it stays so", () => {
+      const warn = jest.spyOn(console, "warn").mockImplementation(() => undefined);
+      const s = make();
+      s.start();
+      s.receive(deviceLine("ok #1"), []);
+      jest.advanceTimersByTime(1000);
+      s.receive(deviceLine("err #2 othersession"), []);
+      expect(s.notResponding).toBe(true);
+      const count = write.mock.calls.length;
+      jest.advanceTimersByTime(5000);
+      expect(s.notResponding).toBe(true);
+      expect(write.mock.calls.length).toBe(count);
+      warn.mockRestore();
+      s.stop();
+    });
+
+    it("identify's ok doesn't end not responding", async () => {
+      const s = make();
+      s.start();
+      s.receive(deviceLine("ok #1"), []);
+      jest.advanceTimersByTime(4000);
+      const result = s.identify();
+      s.receive(deviceLine(`ok #${latestSeq()}`), []);
+      await expect(result).resolves.toBe("answered");
+      expect(s.notResponding).toBe(true);
+      s.stop();
+    });
+
+    it("notResponding is observable", () => {
+      const s = make();
+      const seen: boolean[] = [];
+      const dispose = autorun(() => { seen.push(s.notResponding); });
+      s.start();
+      s.receive(deviceLine("ok #1"), []);
+      jest.advanceTimersByTime(4000);
+      dispose();
+      expect(seen).toEqual([false, true]);
+      s.stop();
+    });
   });
 });

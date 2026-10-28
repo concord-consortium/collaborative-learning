@@ -1,4 +1,5 @@
-import { WebSerialTransport } from "./web-serial-transport";
+import { SerialDevice } from "./serial";
+import { initWebSerialConnectionEvents, WebSerialTransport } from "./web-serial-transport";
 
 // Minimal fake SerialPort. `chunks` are delivered by the reader in order, then done.
 function fakePort(info: Partial<SerialPortInfo>, chunks: Uint8Array[] = []) {
@@ -176,8 +177,8 @@ describe("WebSerialTransport", () => {
       await t.open();
       const received: string[] = [];
       t.onData = (c) => received.push(c);
-      const disconnected: boolean[] = [];
-      t.onDisconnect = () => disconnected.push(true);
+      const disconnected: string[] = [];
+      t.onDisconnect = (loss) => disconnected.push(loss);
 
       const readingDone = t.startReading();
       await Promise.resolve();
@@ -185,7 +186,7 @@ describe("WebSerialTransport", () => {
       await readingDone;
 
       expect(received).toContain("emg:7\r\n");
-      expect(disconnected).toEqual([true]);
+      expect(disconnected).toEqual(["lost"]);
     } finally {
       jest.useRealTimers();
     }
@@ -219,5 +220,78 @@ describe("WebSerialTransport", () => {
     await t.startReading();
 
     expect(order).toEqual(["close", "onDisconnect"]);
+  });
+});
+
+describe("initWebSerialConnectionEvents", () => {
+  let listeners: Record<string, (e: Event) => void>;
+
+  beforeEach(() => {
+    listeners = {};
+    (navigator as any).serial = {
+      addEventListener: jest.fn((type: string, l: (e: Event) => void) => { listeners[type] = l; })
+    };
+  });
+  afterEach(() => { delete (navigator as any).serial; });
+
+  // The browser fires disconnect at the removed SerialPort, and it bubbles to navigator.serial.
+  const unplug = (port: unknown) =>
+    listeners.disconnect({ timeStamp: 1, type: "disconnect", target: port } as unknown as Event);
+  const transportOn = (port: unknown) => {
+    const transport = new WebSerialTransport();
+    transport.lastPort = port as SerialPort;
+    return transport;
+  };
+
+  it("the browser's disconnect event records an unplug of the active Web Serial device", () => {
+    const serialDevice = new SerialDevice();
+    initWebSerialConnectionEvents(serialDevice);
+    const port = {};
+    const transport = transportOn(port);
+    serialDevice.setActiveDevice("arduino", transport);
+    unplug(port);
+    expect(serialDevice.isConnected()).toBe(false);
+    expect(serialDevice.lastLoss?.reason).toBe("unplugged");
+    expect(serialDevice.lastLoss?.transport).toBe(transport);
+  });
+
+  it("upgrades a loss the read loop recorded first", () => {
+    const serialDevice = new SerialDevice();
+    initWebSerialConnectionEvents(serialDevice);
+    const port = {};
+    const transport = transportOn(port);
+    serialDevice.setActiveDevice("arduino", transport);
+    transport.onDisconnect?.("lost");
+    unplug(port);
+    expect(serialDevice.lastLoss?.reason).toBe("unplugged");
+  });
+
+  it("an unplug of another port leaves the active device connected", () => {
+    const serialDevice = new SerialDevice();
+    initWebSerialConnectionEvents(serialDevice);
+    serialDevice.setActiveDevice("arduino", transportOn({}));
+    unplug({});
+    expect(serialDevice.isConnected()).toBe(true);
+    expect(serialDevice.lastLoss).toBeUndefined();
+  });
+
+  it("an unplug of another port doesn't upgrade a loss", () => {
+    const serialDevice = new SerialDevice();
+    initWebSerialConnectionEvents(serialDevice);
+    const transport = transportOn({});
+    serialDevice.setActiveDevice("arduino", transport);
+    transport.onDisconnect?.("lost");
+    unplug({});
+    expect(serialDevice.lastLoss?.reason).toBe("lost");
+  });
+
+  it("ignores the event when no Web Serial device is or was connected", () => {
+    const serialDevice = new SerialDevice();
+    initWebSerialConnectionEvents(serialDevice);
+    const transport = { write: jest.fn(), close: jest.fn() };
+    serialDevice.setActiveDevice("spikerbit", transport);
+    unplug({});
+    expect(serialDevice.isConnected()).toBe(true);
+    serialDevice.clearActiveDevice();
   });
 });

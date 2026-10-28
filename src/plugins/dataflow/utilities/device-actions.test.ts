@@ -179,6 +179,31 @@ describe("device actions", () => {
     expect(content.unseenConnectError).toBe(true);
   });
 
+  it.each([[false, true], [true, false]])(
+    "a connect refused because another app has the board says so (pane open: %s)",
+    async (paneOpen, unseen) => {
+      const content = makeContent();
+      content.setConnectPaneOpen(paneOpen);
+
+      expect(await connectDeviceForTile({ connection: makeConnection("inUse"), content, tileId, choice: "spikerbit" }))
+        .toBe("inUse");
+
+      expect(content.connectError).toBe("Another app is using the Spiker:bit.");
+      expect(content.unseenConnectError).toBe(unseen);
+      expect(logTileChangeEvent).not.toHaveBeenCalled();
+    }
+  );
+
+  it("a reconnect refused because another app has the board says so", async () => {
+    const content = makeContent();
+
+    await reconnectDeviceForTile({
+      connection: makeConnection("inUse", { lastChoice: "spikerbit" }), content, tileId
+    });
+
+    expect(content.connectError).toBe("Another app is using the Spiker:bit.");
+  });
+
   it("a canceled connect records no error", async () => {
     const content = makeContent();
 

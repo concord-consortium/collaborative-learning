@@ -26,6 +26,15 @@
       }
     }
 
+    // Pulses three times when a device goes away, then shows whatever the button's state calls for.
+    &.connect-loss-pulse {
+      animation: connect-slowpulse 1.5s linear 3;
+
+      @media (prefers-reduced-motion: reduce) {
+        animation: none;
+      }
+    }
+
     &.connect-connected,
     &.connect-connected:hover:not(:disabled):not([aria-disabled="true"]):not(.selected) {
       background-color: #82f982;
@@ -49,6 +58,10 @@
 
       .connect-error {
         color: #b00020;
+        margin-top: 4px;
+      }
+
+      .connect-note {
         margin-top: 4px;
       }
     }

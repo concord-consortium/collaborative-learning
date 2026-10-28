@@ -4,7 +4,10 @@ import {
 } from "../../../models/stores/spikerbit-device";
 import { WebSerialOpenResult, WebSerialTransport } from "../../../models/stores/web-serial-transport";
 import { withChecksum } from "../../../models/stores/cc-device-protocol";
-import { DeviceConnection, getDeviceConnection, IDeviceConnectionDeps } from "./device-connection";
+import {
+  DeviceConnection, getDeviceConnection, IDeviceConnectionDeps, kIdentifyResultMs
+} from "./device-connection";
+import { IdentifyResult } from "../../../models/stores/cc-device-session";
 
 function makePort(usbVendorId: number, usbProductId: number) {
   return { getInfo: () => ({ usbVendorId, usbProductId }) } as unknown as SerialPort;
@@ -45,17 +48,22 @@ function makeSpikerbit(serialDevice: SerialDevice) {
   const transport = { write: jest.fn(), close: jest.fn().mockResolvedValue(undefined) };
   const device = {
     connectAndStream: jest.fn(async () => { serialDevice.setActiveDevice("spikerbit", transport); }),
-    disconnect: jest.fn().mockResolvedValue(undefined)
+    disconnect: jest.fn().mockResolvedValue(undefined),
+    dispose: jest.fn()
   };
   return { device, transport };
 }
 
 // A fake @microbit/microbit-connection USB connection for driving a real SpikerbitDevice.
-function makeUsbConnection(options: { failWrite?: boolean } = {}) {
+// With reportsDisconnect, its disconnect raises the library's Disconnected status, as the real one does.
+function makeUsbConnection(options: { failWrite?: boolean, reportsDisconnect?: boolean } = {}) {
+  const usbDevice = {};
   const serialListeners: Array<(d: { data: string }) => void> = [];
+  const statusListeners: Array<(d: { status: string }) => void> = [];
   const connection = {
-    addEventListener: jest.fn((type: string, listener: (d: { data: string }) => void) => {
+    addEventListener: jest.fn((type: string, listener: (d: any) => void) => {
       if (type === "serialdata") serialListeners.push(listener);
+      if (type === "status") statusListeners.push(listener);
     }),
     connect: jest.fn().mockResolvedValue(undefined),
     flash: jest.fn().mockResolvedValue(undefined),
@@ -74,7 +82,10 @@ function makeUsbConnection(options: { failWrite?: boolean } = {}) {
         }
       });
     }),
-    disconnect: jest.fn().mockResolvedValue(undefined)
+    disconnect: jest.fn(async () => {
+      if (options.reportsDisconnect) statusListeners.forEach(l => l({ status: "Disconnected" }));
+    }),
+    getDevice: () => usbDevice
   };
   return connection;
 }
@@ -146,7 +157,8 @@ describe("DeviceConnection", () => {
     const serialDevice = new SerialDevice();
     const device = {
       connectAndStream: jest.fn().mockRejectedValue({ code: "no-device-selected" }),
-      disconnect: jest.fn().mockResolvedValue(undefined)
+      disconnect: jest.fn().mockResolvedValue(undefined),
+      dispose: jest.fn()
     };
     const connection = new DeviceConnection(serialDevice, {
       createSpikerbitDevice: () => device as unknown as SpikerbitDevice
@@ -159,7 +171,8 @@ describe("DeviceConnection", () => {
     const serialDevice = new SerialDevice();
     const device = {
       connectAndStream: jest.fn().mockRejectedValue(new Error("boom")),
-      disconnect: jest.fn().mockResolvedValue(undefined)
+      disconnect: jest.fn().mockResolvedValue(undefined),
+      dispose: jest.fn()
     };
     const connection = new DeviceConnection(serialDevice, {
       createSpikerbitDevice: () => device as unknown as SpikerbitDevice
@@ -418,6 +431,187 @@ describe("DeviceConnection", () => {
     connection.dismissConnectTutorial({ by: "ok", tileId: "tile1" });
     serialDevice.setActiveDevice("arduino", { write: jest.fn(), close: jest.fn() });
     expect(connection.connectTutorialDismissal).toEqual({ by: "ok", tileId: "tile1" });
+  });
+
+  describe("status", () => {
+    const unplugActive = (serialDevice: SerialDevice) => serialDevice.activeTransport!.onDisconnect!("unplugged");
+    const loseActive = (serialDevice: SerialDevice) => serialDevice.activeTransport!.onDisconnect!("lost");
+
+    it("a requested disconnect records no loss, even when the library reports Disconnected", async () => {
+      const serialDevice = new SerialDevice();
+      const usbConnection = makeUsbConnection({ reportsDisconnect: true });
+      const connection = new DeviceConnection(serialDevice, realSpikerbitDeps(usbConnection));
+      await connection.connect("spikerbit");
+      await connection.disconnect();
+      expect(serialDevice.isConnected()).toBe(false);
+      expect(serialDevice.lastLoss).toBeUndefined();
+      expect(connection.lossMessage).toBeUndefined();
+    });
+
+    it("after Disconnect and Reconnect of the same Spiker:bit, a loss is recorded again", async () => {
+      const serialDevice = new SerialDevice();
+      const usbConnection = makeUsbConnection({ reportsDisconnect: true });
+      const connection = new DeviceConnection(serialDevice, realSpikerbitDeps(usbConnection));
+      await connection.connect("spikerbit");
+      await connection.disconnect();
+      await connection.reconnect();
+      // The library disconnecting itself, as it does after a failed WebUSB call.
+      await usbConnection.disconnect();
+      expect(serialDevice.isConnected()).toBe(false);
+      expect(serialDevice.lastLoss?.reason).toBe("lost");
+    });
+
+    it("an unplug gives the unplugged message with the device's label", async () => {
+      const { serialDevice, connection } = setup([makeTransport()]);
+      await connection.connect("arduino");
+      unplugActive(serialDevice);
+      expect(connection.lossMessage).toBe("The Arduino was unplugged.");
+      expect(connection.lossAt).toBe(serialDevice.lastLoss?.at);
+    });
+
+    it("a lost connection gives the lost message", async () => {
+      const { serialDevice, connection } = setup([makeTransport(["opened"], { deviceFamily: "microbit" })]);
+      await connection.connect("microbitHub");
+      loseActive(serialDevice);
+      expect(connection.lossMessage).toBe("The connection to the micro:bit (radio hub) was lost.");
+    });
+
+    it("a connect attempt clears the loss", async () => {
+      const { serialDevice, connection } = setup([makeTransport(), makeTransport(["canceled"])]);
+      await connection.connect("arduino");
+      unplugActive(serialDevice);
+      await connection.connect("arduino");
+      expect(serialDevice.lastLoss).toBeUndefined();
+      expect(connection.lossMessage).toBeUndefined();
+      expect(connection.lossAt).toBeUndefined();
+    });
+
+    it("connect('spikerbit') returns inUse when another app has the board, and lets the device go", async () => {
+      const serialDevice = new SerialDevice();
+      const device = {
+        connectAndStream: jest.fn().mockRejectedValue({ code: "device-in-use" }),
+        disconnect: jest.fn().mockResolvedValue(undefined),
+        dispose: jest.fn()
+      };
+      const connection = new DeviceConnection(serialDevice, {
+        createSpikerbitDevice: () => device as unknown as SpikerbitDevice
+      });
+      expect(await connection.connect("spikerbit")).toBe("inUse");
+      expect(device.disconnect).toHaveBeenCalled();
+      expect(device.dispose).toHaveBeenCalled();
+    });
+
+    it("reconnect returns inUse without falling back to the chooser", async () => {
+      const serialDevice = new SerialDevice();
+      const { device } = makeSpikerbit(serialDevice);
+      const createSpikerbitDevice = jest.fn(() => device as unknown as SpikerbitDevice);
+      const connection = new DeviceConnection(serialDevice, {
+        createSpikerbitDevice, getSpikerbitFlashDataSource: () => "flash-source"
+      });
+      await connection.connect("spikerbit");
+      device.connectAndStream.mockRejectedValue({ code: "device-in-use" });
+      expect(await connection.reconnect()).toBe("inUse");
+      expect(createSpikerbitDevice).toHaveBeenCalledTimes(1);
+    });
+
+    it("notResponding and canIdentify follow the session", async () => {
+      const serialDevice = new SerialDevice();
+      const connection = new DeviceConnection(serialDevice, realSpikerbitDeps(makeUsbConnection()));
+      await connection.connect("spikerbit");
+      expect(connection.canIdentify).toBe(true);
+      expect(connection.notResponding).toBe(false);
+      serialDevice.ccDeviceSession!.setNotResponding(true);
+      expect(connection.notResponding).toBe(true);
+      serialDevice.clearActiveDevice();
+      expect(connection.canIdentify).toBe(false);
+      expect(connection.notResponding).toBe(false);
+    });
+
+    it("an Arduino can't identify", async () => {
+      const { connection } = setup([makeTransport()]);
+      await connection.connect("arduino");
+      expect(connection.canIdentify).toBe(false);
+      await expect(connection.identify()).resolves.toBe("noAnswer");
+    });
+
+    describe("the Is it alive? check", () => {
+      beforeEach(() => jest.useFakeTimers());
+      afterEach(() => jest.useRealTimers());
+
+      // A connected Spiker:bit whose session's identify waits for the test to answer.
+      async function setupCheck() {
+        const serialDevice = new SerialDevice();
+        const connection = new DeviceConnection(serialDevice, realSpikerbitDeps(makeUsbConnection()));
+        await connection.connect("spikerbit");
+        const answers: Array<(result: IdentifyResult) => void> = [];
+        jest.spyOn(serialDevice.ccDeviceSession!, "identify")
+          .mockImplementation(() => new Promise(resolve => { answers.push(resolve); }));
+        const answer = async (result: IdentifyResult) => {
+          answers.shift()!(result);
+          await jest.advanceTimersByTimeAsync(0);
+        };
+        return { serialDevice, connection, answer };
+      }
+
+      it("is checking, then the answer, then nothing after 3 s", async () => {
+        const { serialDevice, connection, answer } = await setupCheck();
+        expect(connection.check).toBeUndefined();
+        const result = connection.identify();
+        expect(connection.check).toBe("checking");
+        await answer("answered");
+        await expect(result).resolves.toBe("answered");
+        expect(connection.check).toBe("answered");
+        await jest.advanceTimersByTimeAsync(kIdentifyResultMs - 1);
+        expect(connection.check).toBe("answered");
+        await jest.advanceTimersByTimeAsync(1);
+        expect(connection.check).toBeUndefined();
+        serialDevice.clearActiveDevice();
+      });
+
+      it("isn't shown for another session, even when its answer comes later", async () => {
+        const { serialDevice, connection, answer } = await setupCheck();
+        void connection.identify();
+        serialDevice.setActiveDevice("spikerbit", { write: jest.fn(), close: jest.fn() });
+        expect(connection.check).toBeUndefined();
+        await answer("answered");
+        expect(connection.check).toBeUndefined();
+        serialDevice.clearActiveDevice();
+      });
+
+      it("an earlier session's late answer doesn't replace a newer check", async () => {
+        const { serialDevice, connection, answer } = await setupCheck();
+        void connection.identify();
+        serialDevice.setActiveDevice("spikerbit", { write: jest.fn(), close: jest.fn() });
+        jest.spyOn(serialDevice.ccDeviceSession!, "identify").mockImplementation(() => new Promise(() => undefined));
+        void connection.identify();
+        await answer("noAnswer");
+        expect(connection.check).toBe("checking");
+        serialDevice.clearActiveDevice();
+      });
+
+      it("a new check isn't cleared by the timer of the one before it", async () => {
+        const { serialDevice, connection, answer } = await setupCheck();
+        void connection.identify();
+        await answer("answered");
+        await jest.advanceTimersByTimeAsync(kIdentifyResultMs - 1000);
+        void connection.identify();
+        await jest.advanceTimersByTimeAsync(1000);
+        expect(connection.check).toBe("checking");
+        await answer("noAnswer");
+        expect(connection.check).toBe("noAnswer");
+        serialDevice.clearActiveDevice();
+      });
+    });
+
+    it("identify asks the session", async () => {
+      const serialDevice = new SerialDevice();
+      const connection = new DeviceConnection(serialDevice, realSpikerbitDeps(makeUsbConnection()));
+      await connection.connect("spikerbit");
+      const identify = jest.spyOn(serialDevice.ccDeviceSession!, "identify").mockResolvedValue("answered");
+      await expect(connection.identify()).resolves.toBe("answered");
+      expect(identify).toHaveBeenCalled();
+      serialDevice.clearActiveDevice();
+    });
   });
 
   it("getDeviceConnection returns one instance per SerialDevice", () => {

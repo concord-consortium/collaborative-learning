@@ -15,7 +15,9 @@ import { DataflowContentModelType } from "../../model/dataflow-content";
 import {
   DeviceChoice, DeviceConnection, getDeviceConnection, kDeviceChoiceLabels, kDeviceChoiceOrder
 } from "../../model/device-connection";
-import { connectButtonState, connectButtonTooltip } from "../../utilities/connect-button-state";
+import {
+  connectButtonState, connectButtonTooltip, notRespondingMessage
+} from "../../utilities/connect-button-state";
 import {
   connectDeviceForTile, disconnectDeviceForTile, reconnectDeviceForTile
 } from "../../utilities/device-actions";
@@ -76,7 +78,7 @@ interface IConnectPaneProps {
 const ConnectPane = observer(function ConnectPane(
     { connection, content, tileId, paneRef, onClose }: IConnectPaneProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
-  const { busyChoice, isConnected, connectedLabel } = connection;
+  const { busyChoice, isConnected, connectedLabel, check } = connection;
   const busy = !!busyChoice;
   const headingId = useId();
 
@@ -199,6 +201,16 @@ const ConnectPane = observer(function ConnectPane(
     ? `Connecting to ${kDeviceChoiceLabels[busyChoice]}…`
     : isConnected ? `Connected: ${connectedLabel}` : "Not connected";
 
+  // One line under the status: the "Is it alive?" check's progress, or else what's wrong.
+  const checkNote = !check ? undefined
+    : check === "checking" ? `Checking the ${connectedLabel}… look for the heart.`
+    : check === "answered" ? `The ${connectedLabel} answered.`
+    : `The ${connectedLabel} didn't answer.`;
+  const problem = checkNote ? undefined
+    : isConnected
+      ? connection.notResponding ? notRespondingMessage(connectedLabel) : undefined
+      : content.connectError ?? connection.lossMessage;
+
   return (
     <div ref={setContainer} className="toolbar-palette dataflow-connect-pane" style={floatingStyles}
         role="group" aria-labelledby={headingId} onKeyDownCapture={handleKeyDownCapture}
@@ -206,13 +218,16 @@ const ConnectPane = observer(function ConnectPane(
       <div className="connect-heading" id={headingId}>Device connection</div>
       <div className="connect-status" role="status">
         <div className="connect-status-line">{status}</div>
-        {!isConnected && content.connectError &&
-          <div className="connect-error">{content.connectError}</div>}
+        {checkNote && <div className="connect-note">{checkNote}</div>}
+        {problem && <div className="connect-error">{problem}</div>}
       </div>
       {isConnected
         ? <div className="connect-actions">
             <PaneControl text="Reconnect" busy={busy} onActivate={reconnect} />
             <PaneControl text="Disconnect" busy={busy} onActivate={disconnect} />
+            {connection.canIdentify &&
+              <PaneControl text="Is it alive?" busy={busy || check === "checking"}
+                  onActivate={() => { void connection.identify(); }} />}
           </div>
         : <div className="connect-devices">
             {kDeviceChoiceOrder.map(choice => (
@@ -236,6 +251,11 @@ export const ConnectDeviceButton = observer(function ConnectDeviceButton({ name 
   const isOpen = !!content?.connectPaneOpen;
   const paneRef = useRef<HTMLDivElement | null>(null);
 
+  // Pulses when a device goes away while this toolbar is showing, not for a loss from before it
+  // mounted. The class stays until the next connect attempt clears the loss.
+  const lossAtMount = useRef(connection.lossAt).current;
+  const lossPulse = connection.lossAt !== undefined && connection.lossAt !== lossAtMount;
+
   // Deselecting the tile unmounts the toolbar; the model volatile would otherwise stay open. Deleting
   // the tile destroys the content before this runs.
   useEffect(() => () => {
@@ -258,10 +278,13 @@ export const ConnectDeviceButton = observer(function ConnectDeviceButton({ name 
   const stateInput = {
     connected: connection.isConnected,
     needsDevice: !!content?.needsDevice,
-    unseenError: !!content?.unseenConnectError
+    unseenError: !!content?.unseenConnectError,
+    notResponding: connection.notResponding
   };
   const state = connectButtonState(stateInput);
-  const title = connectButtonTooltip({ ...stateInput, connectedLabel: connection.connectedLabel });
+  const title = connectButtonTooltip({
+    ...stateInput, connectedLabel: connection.connectedLabel, lossMessage: connection.lossMessage
+  });
 
   const pane = isOpen && content && model
     ? <ConnectPane connection={connection} content={content} tileId={model.id} paneRef={paneRef}
@@ -269,7 +292,8 @@ export const ConnectDeviceButton = observer(function ConnectDeviceButton({ name 
     : undefined;
 
   return (
-    <TileToolbarButton name={name} title={title} colorClass={`connect-${state}`} expanded={isOpen}
+    <TileToolbarButton name={name} title={title} expanded={isOpen}
+        colorClass={classNames(`connect-${state}`, { "connect-loss-pulse": lossPulse })}
         dataTestId="connect-device-button" disabled={readOnly || !content}
         disabledMessage="Connecting a device isn't available in a read-only view"
         onClick={() => content?.setConnectPaneOpen(!isOpen)} extraContent={pane}>

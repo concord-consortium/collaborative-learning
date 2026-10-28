@@ -4,7 +4,10 @@
   display: flex;
   flex-direction: column;
   text-align: center;
-  z-index: 1;
+  // The toolbar is portaled into the canvas's stacking context, so this ranks it, and the palettes
+  // inside it, against the rows: it has to beat a row's resize handle (tile-row.scss), or a palette
+  // over a row boundary loses its clicks to the handle.
+  z-index: $toolbar-z-index;
 
   &.disabled {
     display: none;
