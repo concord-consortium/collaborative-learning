@@ -1,6 +1,6 @@
 import { act, renderHook } from "@testing-library/react";
 import { ChatStatus, ChatTransport, ChatTurn } from "./transport";
-import { kReplyDeadlineMs, useChat } from "./use-chat";
+import { ChatLogContext, kReplyDeadlineMs, useChat } from "./use-chat";
 import { Logger } from "../../lib/logger";
 import { LogEventName } from "../../lib/logger-types";
 
@@ -35,12 +35,18 @@ const userTurn = (id: string): ChatTurn => ({ id, sender: "user", text: "help" }
 const assistantTurn = (id: string): ChatTurn => ({ id, sender: "assistant", text: "here you go" });
 const advance = (ms: number) => act(() => { jest.advanceTimersByTime(ms); });
 
-const renderChat = (transport: ChatTransport) =>
-  renderHook(() => useChat({ transport, header: "Doc · 1.1" }));
+const renderChat = (transport: ChatTransport, logContext?: ChatLogContext) =>
+  renderHook(() => useChat({ transport, header: "Doc · 1.1", logContext }));
+
+// Cleared for every test, not just the logging block below: the deadline tests log too, and a
+// stale call from one of them would quietly satisfy an assertion added here later.
+beforeEach(() => {
+  jest.useFakeTimers();
+  mockLog.mockClear();
+});
+afterEach(() => jest.useRealTimers());
 
 describe("useChat reply deadline", () => {
-  beforeEach(() => jest.useFakeTimers());
-  afterEach(() => jest.useRealTimers());
 
   it("never times out while idle", () => {
     const t = stubTransport();
@@ -132,17 +138,10 @@ describe("useChat reply deadline", () => {
 describe("useChat logging", () => {
   const logContext = { conversationId: "conv-1", documentKey: "doc-1" };
 
-  const renderWithContext = (transport: ChatTransport) =>
-    renderHook(() => useChat({ transport, header: "Doc · 1.1", logContext }));
+  const renderWithContext = (transport: ChatTransport) => renderChat(transport, logContext);
 
   const eventsNamed = (event: LogEventName) =>
     mockLog.mock.calls.filter(([e]) => e === event);
-
-  beforeEach(() => {
-    jest.useFakeTimers();
-    mockLog.mockClear();
-  });
-  afterEach(() => jest.useRealTimers());
 
   it("logs the timeout exactly once, however many renders follow", () => {
     const t = stubTransport();

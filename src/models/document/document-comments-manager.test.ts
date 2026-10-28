@@ -715,6 +715,9 @@ describe("DocumentCommentsManager", () => {
   // 120s budget and cannot be lowered — so the only way to signal a stuck request earlier is to
   // say the wait has become unusual while still waiting it out.
   describe("slow requests", () => {
+    beforeEach(() => {
+      jest.useFakeTimers();
+    });
     afterEach(() => {
       jest.useRealTimers();
     });
@@ -723,7 +726,6 @@ describe("DocumentCommentsManager", () => {
       manager.queueRemoteComment({ triggeredAt: Date.now(), source: "ai", checkCompleted });
 
     it("is not slow before the threshold, and is slow after it", async () => {
-      jest.useFakeTimers();
       queueAi();
 
       await jest.advanceTimersByTimeAsync(kSlowRemoteCommentMs - 1);
@@ -734,7 +736,6 @@ describe("DocumentCommentsManager", () => {
     });
 
     it("never becomes slow when its comment arrives first", async () => {
-      jest.useFakeTimers();
       let arrived = false;
       queueAi(() => arrived);
 
@@ -748,7 +749,6 @@ describe("DocumentCommentsManager", () => {
     });
 
     it("stops being slow once it resolves", async () => {
-      jest.useFakeTimers();
       let arrived = false;
       queueAi(() => arrived);
 
@@ -762,7 +762,6 @@ describe("DocumentCommentsManager", () => {
 
     // The new timer must not disturb the give-up it precedes.
     it("still expires and reports failure at 120s", async () => {
-      jest.useFakeTimers();
       manager.setLatestIdeasRequestId("req-a");
       manager.queueRemoteComment({
         triggeredAt: Date.now(), source: "ai", checkCompleted: () => false, requestId: "req-a"
@@ -778,7 +777,6 @@ describe("DocumentCommentsManager", () => {
     });
 
     it("leaves nothing behind when disposed while slow", async () => {
-      jest.useFakeTimers();
       queueAi();
       await jest.advanceTimersByTimeAsync(kSlowRemoteCommentMs);
       expect(manager.hasSlowRemoteComment).toBe(true);

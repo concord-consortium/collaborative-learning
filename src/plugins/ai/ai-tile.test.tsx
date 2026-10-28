@@ -167,7 +167,6 @@ describe("AIComponent", () => {
   // classHash is required to reach the request path; the mocks above otherwise return none, so
   // getAiContent stays null.
   describe("the request effect, with classHash present", () => {
-    let rejectOlderRun: (error: Error) => void = () => {};
     // Real DocumentContentModel instances: documentHasStudentWork's getSnapshot() call needs a
     // live MST node, so these tests fail if that call is ever removed.
 
@@ -580,6 +579,7 @@ describe("AIComponent", () => {
       ]);
 
       // A superseded run is not a failure: its rejection must log nothing.
+      let rejectOlderRun: (error: Error) => void;
       const promiseOlder = new Promise((_resolve, reject) => { rejectOlderRun = reject; });
       mockGetAiContent.mockImplementationOnce(() => promiseOlder);
       mockGetAiContent.mockResolvedValueOnce({ data: { text: "newer response" } });
@@ -588,7 +588,7 @@ describe("AIComponent", () => {
 
       (logTileChangeEvent as jest.Mock).mockClear();
       await act(async () => {
-        rejectOlderRun(new Error("stale network error"));
+        rejectOlderRun!(new Error("stale network error"));
         await Promise.resolve();
         await Promise.resolve();
       });
