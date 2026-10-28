@@ -8,6 +8,9 @@ No AI surface in CLUE may leave a student staring at a progress indicator foreve
 that shows "Ada is working" gets a client-side deadline after which the indicator stops and the
 student is told what happened, so a request that died server-side is visible rather than silent.
 
+And it is visible to more than the student: every AI failure emits a log event, so the team can
+answer "how often does Ada fail?" from data rather than from complaints.
+
 ## Why
 
 A student cannot distinguish "the tutor is thinking" from "the tutor is never going to answer."
@@ -54,6 +57,8 @@ governed what this student sees now.
 - A 45-second "taking longer than usual" interim line for the Ideas / document-evaluation waiting
   message, with the existing 120s hard expiry unchanged.
 - A visible failure message in the AI tile when its request fails.
+- A log event for every AI failure: chat timeout, chat unavailable, Ideas failure, AI tile
+  failure — plus a chat "message sent" event, so a failure count has a denominator.
 
 **Out**
 
@@ -69,6 +74,11 @@ governed what this student sees now.
   wrong for some unit.
 - **The teacher-facing AI class summary** (`src/components/navigation/ai-summary.tsx`). It has its
   own `checking`/`generating` status machine and no reported wedge. Separate story if it needs one.
+- **Cross-posting a failure from one surface into another.** The AI tile's failure does not raise
+  a comments-panel message, and neither the tile nor Ideas writes into the chat. See "Each surface
+  reports its own failure."
+- **Full chat event coverage** — replies received, panel open/close, highlight use. Only what a
+  failure rate needs goes in here; instrumenting the chat properly is its own story.
 
 ## Design
 
@@ -166,6 +176,53 @@ unlike the Ideas status message, which is deliberately client-only. This follows
 student can see is worth more than one that vanishes on reload. A later refresh overwrites it
 normally.
 
+### 5. Each surface reports its own failure
+
+The tile reports in the tile, the chat reports in the chat, Ideas reports in the comments panel.
+No failure is copied into another surface.
+
+Two reasons, one per candidate. The **chat transcript is persisted in Firestore and fed back to
+the model as conversation history**, so an injected "something went wrong" turn would become part
+of what the model reads on the next turn — a client-only row avoids that but is still a message in
+a conversation the student may never have opened. The **comments panel cannot say which tile
+failed**; a document may hold several AI tiles with different prompts, and the panel's status line
+has no tile to name.
+
+The general point: cross-posting puts an error in front of people who were not there. A student
+who clicked Update on a tile is looking at that tile. The audience that needs the cross-surface
+view is the team, and logging serves them better than a duplicated message does.
+
+### 6. Logging
+
+**Why this is load-bearing, not an afterthought.** The chat emits **no log events at all** today —
+not sends, not replies, not errors. "How often does Ada fail to answer?" is currently unanswerable.
+Ideas logs `REQUEST_IDEA` on the click and nothing about the outcome, so attempts are countable
+and failures are not. And a caught error that reaches only `console.error` goes nowhere: Rollbar
+captures uncaught errors, while CLUE log events reach both the research log database and Rollbar
+as info (`Logger.registerLogListener` in `src/lib/misc.ts`). The console.error in the AI tile's
+catch today is, in practice, writing to nowhere.
+
+**The denominator.** A failure event on its own yields a number nobody can interpret — forty chat
+timeouts is a crisis out of two hundred and a rounding error out of forty thousand. Since the chat
+logs nothing, a successful-send event goes in alongside the timeout so a rate can be computed.
+This is the only non-failure event in scope.
+
+**Reaching the logger.** `Logger.log` is static and queues messages until the logger initializes,
+so the chat can call it without holding stores. It serializes the event by **name**
+(`LogEventName[event]` in `formatAndSend`), not by its numeric enum value, so inserting new entries
+mid-enum does not renumber anything downstream.
+
+**What is logged, and what is not.** Identifiers and a reason: document key, problem path,
+conversation id, tile id, and which failure it was. **Never the student's message text, their
+authored prompt, or any document content.** These logs go to a research database and to Rollbar;
+student-written text does not belong in either, and a failure rate does not need it. The raw
+server error string is also left out — it can be long and can echo request content.
+
+**Event names.** The chat gets three new ones, since it has none to reuse. Ideas gets one. The AI
+tile reuses its existing `AI_TOOL_CHANGE` with `operation: "requestFailed"`, matching the
+convention already in `ai-content.ts` (`requestRefresh` is logged the same way) rather than
+introducing a fourth name for researchers to learn.
+
 ## Constants
 
 | Constant | Value | Home |
@@ -181,6 +238,19 @@ rather than moving to `ai-evaluation-messages.ts`: that module is about AI *eval
 document (Ideas and the AI tile), and the chat is a different feature with a different message
 already living in the hook.
 
+## Log events
+
+| Event | Fires when | Payload |
+|---|---|---|
+| `AI_CHAT_MESSAGE_SENT` | a user message reaches Firestore | conversation id, document key, problem path |
+| `AI_CHAT_TIMEOUT` | the 45s reply deadline fires | conversation id, document key, problem path |
+| `AI_CHAT_UNAVAILABLE` | the transport reports `status: "error"` | conversation id, document key, problem path |
+| `IDEAS_REQUEST_FAILED` | the 15s foreground deadline, the 120s expiry, or a `"failed"` server outcome | document key, problem path, request id, which of the three |
+| `AI_TOOL_CHANGE` *(existing)* | the AI tile's request fails | tile id, `operation: "requestFailed"` |
+
+`AI_CHAT_MESSAGE_SENT` is the denominator for the two chat failure events. No event carries
+message text, prompt text, document content or the raw server error string.
+
 ## Testing
 
 | Test | Covers |
@@ -191,6 +261,10 @@ already living in the hook.
 | `document-comments-manager.test.ts` | Slow set populated at 45s, cleared on resolve, on expiry, and on `dispose`. |
 | `waiting-message.test.tsx` | Interim message replaces the thinking message when the entry is slow. |
 | `ai-tile.test.tsx` | Failure writes the message; a superseded run restores instead. |
+| `use-chat.test.ts` | Timeout and unavailable each log once per episode, not once per render. A successful send logs; a failed send does not. |
+| `document-comments-manager.test.ts` | Each of the three Ideas failure paths logs, and an expiry superseded by a newer click does not. |
+| `ai-tile.test.tsx` | A failed request logs `requestFailed`; a superseded run logs nothing. |
+| all of the above | No logged payload contains message text, prompt text or document content. |
 
 No Cypress work: all four behaviors are timer-driven and are exercised honestly with Jest fake
 timers. A Cypress spec would have to wait 45 real seconds to prove anything.

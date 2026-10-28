@@ -2,9 +2,9 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** No AI surface in CLUE leaves a student watching a progress indicator forever. The chat gets a 45s client-side reply deadline, Ideas gets a 45s "taking longer than usual" line ahead of its existing 120s give-up, and the AI tile reports a failed request instead of silently restoring its old text.
+**Goal:** No AI surface in CLUE leaves a student watching a progress indicator forever, and no AI failure is invisible to the team. The chat gets a 45s client-side reply deadline, Ideas gets a 45s "taking longer than usual" line ahead of its existing 120s give-up, the AI tile reports a failed request instead of silently restoring its old text, and every one of those failures emits a log event.
 
-**Architecture:** The chat deadline lives in `useChat`, the single place `pending` is derived, so it covers both transports without touching `FirestoreTransport.emitStatus`'s status precedence. The Ideas interim line is a second timer inside `queueRemoteComment`, clearing through the existing `wrappedDispose` so `removePendingComments` stays the only path an entry leaves the queue by. Separately, `FirestoreTransport` stops recording the last-sent workspace hash in completion order.
+**Architecture:** The chat deadline lives in `useChat`, the single place `pending` is derived, so it covers both transports without touching `FirestoreTransport.emitStatus`'s status precedence. The Ideas interim line is a second timer inside `queueRemoteComment`, clearing through the existing `wrappedDispose` so `removePendingComments` stays the only path an entry leaves the queue by. Logging reaches the static `Logger.log`, which queues until the logger initializes, so the chat needs no store access; the comments manager stays free of document/store coupling by taking an `onFailure` callback rather than logging itself. Separately, `FirestoreTransport` stops recording the last-sent workspace hash in completion order.
 
 **Tech Stack:** TypeScript, React 18, MobX / MobX State Tree, Jest + @testing-library/react with fake timers.
 
@@ -29,8 +29,11 @@
 | `src/models/document/base-document-content.ts` *(modify)* | `isRemoteCommentSlow` view |
 | `src/components/chat/waiting-message.tsx` *(modify)* | Pick the interim message when the entry is slow |
 | `src/components/chat/waiting-message.test.tsx` *(modify)* | Interim message rendering |
-| `src/plugins/ai/ai-tile.tsx` *(modify)* | Write the failure message on a real failure |
-| `src/plugins/ai/ai-tile.test.tsx` *(modify)* | Failure writes the message; a superseded run restores |
+| `src/plugins/ai/ai-tile.tsx` *(modify)* | Write the failure message on a real failure; log it |
+| `src/plugins/ai/ai-tile.test.tsx` *(modify)* | Failure writes the message and logs; a superseded run restores and logs nothing |
+| `src/lib/logger-types.ts` *(modify)* | `AI_CHAT_MESSAGE_SENT`, `AI_CHAT_TIMEOUT`, `AI_CHAT_UNAVAILABLE`, `IDEAS_REQUEST_FAILED` |
+| `src/components/chat-tutor/chat-sidebar.tsx` *(modify)* | Hoist the conversation id out of the transport memo; pass log context to `useChat` |
+| `src/components/document/document.tsx` *(modify)* | Log the two client-side Ideas failure paths; supply `onFailure` to the manager |
 
 No Cypress spec, so no `.github/workflows/manual-regression.yml` change. No functions, rules or index changes, so **no Deploy timing callout** on the PR. No authorable config, so no `docs/unit-configuration.md` update.
 
@@ -513,7 +516,102 @@ npm test -- src/plugins/ai
 
 ---
 
-## Task 7: Full verification
+## Task 7: Logging
+
+Do this **after** Tasks 1–6, so every failure path it hooks into already exists and is tested.
+
+**Files:**
+- Modify: `src/lib/logger-types.ts`
+- Modify: `src/components/chat-tutor/use-chat.ts`, `src/components/chat-tutor/chat-sidebar.tsx`
+- Modify: `src/models/document/document-comments-manager.ts`, `src/components/document/document.tsx`
+- Modify: `src/plugins/ai/ai-tile.tsx`
+- Tests: `use-chat.test.ts`, `document-comments-manager.test.ts`, `ai-tile.test.tsx`
+
+**What never goes in a payload:** the student's message text, their authored prompt, any document
+content, or the raw server error string. Identifiers and a reason only. These logs reach a research
+database and Rollbar.
+
+- [ ] **Step 1: Add the event names**
+
+In `src/lib/logger-types.ts`, add `AI_CHAT_MESSAGE_SENT`, `AI_CHAT_TIMEOUT` and
+`AI_CHAT_UNAVAILABLE` near `CHAT_PANEL_HIDE`/`CHAT_PANEL_SHOW`, and `IDEAS_REQUEST_FAILED` beside
+`REQUEST_IDEA`.
+
+Insertion mid-enum is safe: `formatAndSend` serializes with `LogEventName[event]`, so the **name**
+travels, not the numeric value. Confirm no test pins the enum's length before relying on that.
+
+- [ ] **Step 2: Chat — hoist the conversation id**
+
+`chat-sidebar.tsx` currently computes `conversationDocId(...)` inline inside the transport
+`useMemo`. Lift it into its own `useMemo` and pass the result into both the transport and the log
+context. `conversationDocId` is pure, so this changes no behavior.
+
+This id is what joins a log row to the Firestore conversation — the ticket links to one specific
+wedged document, and that is exactly the lookup it enables. `problemPath` is already on every log
+message (`createLogMessage`), so the context needs only `{ conversationId, documentKey }`.
+
+- [ ] **Step 3: Chat — write the failing tests**
+
+In `use-chat.test.ts`, mock the logger (`jest.mock("../../lib/logger", ...)`) and assert:
+
+1. The deadline firing logs `AI_CHAT_TIMEOUT` **exactly once**, including after further renders —
+   a log inside a render body rather than the timer callback would fire repeatedly.
+2. `status: "error"` logs `AI_CHAT_UNAVAILABLE` once per transition, not once per snapshot. Emit
+   `"error"` twice in a row and assert a single call.
+3. A successful send logs `AI_CHAT_MESSAGE_SENT`; a send whose transport rejects logs nothing.
+4. No payload contains the message text. Send a recognizable string and assert it appears in no
+   logged argument.
+
+- [ ] **Step 4: Chat — implement**
+
+Add the optional log context to `UseChatOptions`, log the send in `sendMessage` after the
+transport call resolves, log the timeout inside the `setTimeout` callback, and log the unavailable
+case in the existing `status === "error"` effect (which already fires once per transition).
+
+Make the context optional so `DebugTransport` callers and the existing tests need not supply it.
+Debug dry-run sends being loggable is not a concern in practice: `chatDebug` is a developer URL
+param and the logger is inert outside authed mode.
+
+- [ ] **Step 5: Ideas — implement and test**
+
+The manager has no document reference and should keep none. Add an optional
+`onFailure?: () => void` to `IQueueRemoteCommentParams`, store it on the pending entry, and call it
+from a small private `reportFailure()` alongside the two existing
+`showStatusMessage(IDEAS_REQUEST_FAILED_MESSAGE)` calls — the 120s expiry and the `"failed"`
+outcome in `applyEvaluationStatus`. `"skipped-empty"` is not a failure and logs nothing.
+
+In `document.tsx`, supply `onFailure` (the document is already in scope there) and log
+`IDEAS_REQUEST_FAILED` at the two client-side paths as well: the 15s foreground deadline and
+`guardedAttempt`'s catch. Carry a `reason` field distinguishing the four so the data can tell a
+dead server from a dead connection.
+
+Test in `document-comments-manager.test.ts` that each in-manager path calls `onFailure` once, and
+that an expiry superseded by a newer click calls it **not at all** — matching the existing
+"shows nothing when an older request's entry expires after a newer click" case, which is the
+precedent for that rule.
+
+- [ ] **Step 6: AI tile — implement and test**
+
+`ai-tile.test.tsx` already mocks `logTileChangeEvent` and asserts against it, so reuse that.
+
+In the tile's catch, beside the failure message from Task 6:
+
+```ts
+logAiEvent(content, "requestFailed", {});
+```
+
+Inside the same `isCurrent()` guard — a superseded run is not a failure and must log nothing. No
+error string in the payload.
+
+- [ ] **Step 7: Verify**
+
+```bash
+npm test -- src/components/chat-tutor src/models/document src/plugins/ai src/components/document
+```
+
+---
+
+## Task 8: Full verification
 
 - [ ] **Step 1: Types and lint**
 
@@ -528,10 +626,20 @@ pass before committing.
 - [ ] **Step 2: Jest across everything touched**
 
 ```bash
-npm test -- src/components/chat-tutor src/components/chat src/models/document src/plugins/ai
+npm test -- src/components/chat-tutor src/components/chat src/models/document src/plugins/ai src/components/document
 ```
 
 Report the actual pass/fail counts. Do not claim completion from a partial run.
+
+- [ ] **Step 2b: Confirm no student text reaches a log payload**
+
+```bash
+grep -n "Logger.log\|logAiEvent\|logDocumentEvent" -r src/components/chat-tutor src/components/document/document.tsx src/plugins/ai/ai-tile.tsx
+```
+
+Read each payload and confirm it carries identifiers and a reason only — no message text, prompt
+text, document content or raw server error string. The tests assert this, but it is worth one
+pair of eyes, since a log that leaks student writing is not something a later test catches.
 
 - [ ] **Step 3: Hand-check in the browser**
 
@@ -563,3 +671,6 @@ Commit locally. Do not push until the user has checked it on localhost or said t
 | The slow-entry set desyncs from `pendingComments` | Both the 45s and 120s timers clear through `wrappedDispose`, and `removePendingComments` stays the single exit path. Task 5 Step 1 case 5 tests `dispose()` while slow. |
 | The AI tile failure message persists in document content | Stated and accepted in the spec; follows `AI_TILE_EMPTY_MESSAGE`'s existing precedent. Revisit only if a student reports a stuck error in a saved document. |
 | The hash rollback fires on a send that attached nothing | `claimedRight` distinguishes the two; Task 3 Step 1 case 4 is exactly this. |
+| A failure event logs on every render instead of once | Every log sits in a timer callback, a transition-keyed effect, or a resolved promise — never a render body. Task 7 Step 3 cases 1 and 2 assert the counts rather than just the calls. |
+| Student-written text reaches the research logs | Payloads are identifiers and a reason only. Task 7 Step 3 case 4 asserts it, Task 8 Step 2b re-reads every call site by hand. |
+| Chat failure counts have no denominator | `AI_CHAT_MESSAGE_SENT` ships in the same change, so a rate is computable from day one rather than after a follow-up. |
