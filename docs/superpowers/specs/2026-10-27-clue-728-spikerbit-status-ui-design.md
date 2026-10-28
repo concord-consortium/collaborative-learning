@@ -284,27 +284,51 @@ derives `lossMessage` and `lossAt` from it. Every tile's pane shows it. An unplu
 - **Jest, end to end** (`spikerbit-end-to-end.test.ts`, on `MakeCodeSim`): a board that stops
   answering turns not responding, and `identify` gets its answer.
 - **No Cypress spec.** The Jest tests cover the logic, and a Cypress spec can't plug in a board.
-- **By hand, with a board, in the browser:** unplug a Spiker:bit and an Arduino while connected;
-  hold a Spiker:bit's reset button (or otherwise stall it) to see not responding and recovery;
-  connect from a second CLUE tab for `device-in-use`; click "Is it alive?" and see the heart, hear
-  the sound on a V2, and read "answered"; leave the tab hidden for several minutes and come back
-  without the button turning yellow. After a Spiker:bit's connection is lost (unplug and replug
+- **By hand, with a board, in the browser:**
+  - ✅ unplug a Spiker:bit
+  - ✅ unplug an Arduino while connected;
+  - ✅ open the Spiker:bit's serial port from a Web Serial terminal (such as serialterminal.com) in
+    another tab, to see not responding, then close the terminal's port to see recovery. The CLUE
+    tab stays connected and can still send, so "Is it alive?" shows the heart and plays the sound,
+    but the terminal reads the board's replies first, so the pane says "The Spiker:bit didn't
+    answer."
+    - ✅ I tested this using serialterminal.com to connect to the serial port in a another tab, this doesn't disconnect the WebUSB CLUE tab, but it seems to keep that tab from receiving any bytes. The "Is it alive?" plays the sound but gives the message saying it failed. The button turned yellow, and went back to green after disconnecting the terminal's Web Serial port.
+  - ✅ hold a Spiker:bit's reset button (or otherwise stall it) to see not responding and recovery
+    - ✅ holding the microbit reset button causes the button to go yellow and show the message "The Spiker:bit is not responding". The reconnect button makes it work again, it doesn't recover on its own. The device chooser didn't come up when I pushed the reconnect button.
+      - Held the reset button until the connect button turned yellow, then released it. Clicking "Is it alive?" then showed no heart and played no sound. The pane said "Checking the Spiker:bit… look for the heart.", then after about 2 s "The Spiker:bit didn't answer.", then went back to "The Spiker:bit is not responding." So after the reset, CLUE's commands don't reach the board and no replies come back: the USB link is stuck in both directions until Reconnect. Expected recovery: the restarted firmware answers the next ping with `err nosession` and CLUE opens a new session, with no Reconnect needed.
+  - ✅ connect from a second CLUE tab for `device-in-use`;
+  - ✅ click "Is it alive?" and see the heart, hear
+  the sound on a V2, and read "answered";
+  - ✅ leave the tab hidden for several minutes and come back
+  without the button turning yellow.
+    - after leaving the tab hidden for around 68 seconds, the spiker:bit switched to idle mode (based on the display), then after around 45 seconds the spiker:bit restarted a session. And this time it went back to idle much faster about 12 seconds. It then continued to repeated the cycle. When I switched back to the table it restarted the session immediately. I did not see a yellow connect button.
+  - ✅ After a Spiker:bit's connection is lost (unplug and replug
   it), connect it again in the same tab: the pane shouldn't say "Another app is using the
   Spiker:bit." The library's disconnect after a failed write might leave this tab's claim on the
   interface, which Chrome would then refuse as in use.
 - **Retests of #3055's code, on a board.** The review of #3055 asked for these at its head, and
   they were moved here because this branch contains that code. Report the results in this PR's
   description, naming the boards and the commit tested.
-  - Spiker:bit V2 and V1, in a Mac browser:
-    - Connect a freshly plugged-in board already running v4: it connects with no flash.
-    - Auto-flash from other firmware, starting from both the v3 banner firmware and a MakeCode
+  - Spiker:bit V2, in a Mac browser:
+    - ✅ Connect a freshly plugged-in board already running v4: it connects with no flash.
+    - Auto-flash from other firmware, starting from both the ✅ v3 banner firmware and a ✅ MakeCode
       program. The MakeCode program doesn't answer, so this takes the 1.5 s timeout path.
-    - After Dataflow flashes a board in the browser, Disconnect, then Connect: no second flash.
+    - ✅ After Dataflow flashes a board in the browser, Disconnect, then Connect: no second flash.
       This case came up in the original Spiker:bit support (#2929). After the first flash since
       plug-in, the library pushes 2048 dummy bytes into the interface chip's buffers
       (`cdc-saturation.js`), which the Node runs of #3055 never exercised.
-    - EMG in a Sensor node, the servo from a Live Output, and Disconnect/Reconnect.
-  - Arduino: connect, readings, the servo and gripper outputs, and Disconnect/Reconnect. #3055
+    - ✅ EMG in a Sensor node, ✅ the servo from a Live Output, and ✅ Disconnect/Reconnect.
+  - Spiker:bit V1, in a Mac browser:
+    - FAILED: Connect a freshly plugged-in board already running v4: it connects with no flash.
+      - it does re-flash the board at least in some cases, I haven't identified the cases yet.
+    - Auto-flash from other firmware, starting from both the ✅ v3 banner firmware and a ✅ MakeCode
+      program. The MakeCode program doesn't answer, so this takes the 1.5 s timeout path.
+    - ✅ After Dataflow flashes a board in the browser, Disconnect, then Connect: no second flash.
+      This case came up in the original Spiker:bit support (#2929). After the first flash since
+      plug-in, the library pushes 2048 dummy bytes into the interface chip's buffers
+      (`cdc-saturation.js`), which the Node runs of #3055 never exercised.
+    - ✅ EMG in a Sensor node, ✅ the servo from a Live Output, and ✅  Disconnect/Reconnect.
+  - Arduino: ✅ connect, ✅ readings, the servo and gripper outputs, and ✅ Disconnect/Reconnect. #3055
     changed `device-capabilities.ts`, `live-output-node.ts` and `DeviceConnection.disconnect` for
     every device.
   - Not the radio hub.
