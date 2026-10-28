@@ -472,8 +472,9 @@ async function main() {
       "(a dry run cannot tell — the read-only search covers only recent materials)");
   } else {
     const state = activity.created ? "created" : "reused";
-    // A real run has just set the flag. A dry run has written nothing, so it reports the
-    // existing activity's setting as read from its edit page, or what a real run would do.
+    // A real run has just set the flag. A dry run has written nothing, so it reads the existing
+    // activity's edit page: if the flag is already on it says so, and if not it says what a real
+    // run would do.
     const flag = activity.authTokenSet ? "append_auth_token=true" : "would set append_auth_token";
     console.log(`Activity ${activity.id}: ${state}, ${flag}`);
   }
