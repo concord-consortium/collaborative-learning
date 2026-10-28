@@ -15,7 +15,9 @@ import { DataflowContentModelType } from "../../model/dataflow-content";
 import {
   DeviceChoice, DeviceConnection, getDeviceConnection, kDeviceChoiceLabels, kDeviceChoiceOrder
 } from "../../model/device-connection";
-import { connectButtonState, connectButtonTooltip } from "../../utilities/connect-button-state";
+import {
+  connectButtonState, connectButtonTooltip, notRespondingMessage
+} from "../../utilities/connect-button-state";
 import {
   connectDeviceForTile, disconnectDeviceForTile, reconnectDeviceForTile
 } from "../../utilities/device-actions";
@@ -206,7 +208,7 @@ const ConnectPane = observer(function ConnectPane(
     : `The ${connectedLabel} didn't answer.`;
   const problem = checkNote ? undefined
     : isConnected
-      ? connection.notResponding ? `The ${connectedLabel} is not responding.` : undefined
+      ? connection.notResponding ? notRespondingMessage(connectedLabel) : undefined
       : content.connectError ?? connection.lossMessage;
 
   return (

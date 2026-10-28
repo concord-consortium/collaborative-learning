@@ -23,11 +23,15 @@ export function connectButtonState(o: IConnectButtonInput): ConnectButtonState {
   return o.needsDevice || o.unseenError ? "attention" : "idle";
 }
 
+export function notRespondingMessage(label: string | undefined): string {
+  return `The ${label} is not responding.`;
+}
+
 export function connectButtonTooltip(o: IConnectButtonInput & { connectedLabel?: string }): string {
   switch (connectButtonState(o)) {
     case "connected": return `Connected: ${o.connectedLabel}`;
     case "attention":
-      if (o.connected) return `The ${o.connectedLabel} is not responding. Click for details.`;
+      if (o.connected) return `${notRespondingMessage(o.connectedLabel)} Click for details.`;
       return o.unseenError
         ? "Couldn't connect. Click for details."
         : "This program needs a device. Click to connect.";
