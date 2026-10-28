@@ -2,7 +2,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** No AI surface in CLUE leaves a student watching a progress indicator forever, and no AI failure is invisible to the team. The chat gets a 45s client-side reply deadline, Ideas gets a 45s "taking longer than usual" line ahead of its existing 120s give-up, the AI tile reports a failed request instead of silently restoring its old text, and every one of those failures emits a log event.
+**Goal:** No AI surface in CLUE leaves a student watching a progress indicator forever, and no AI failure is invisible to the team. The chat gets a 30s client-side reply deadline, Ideas gets a 45s "taking longer than usual" line ahead of its existing 120s give-up, the AI tile reports a failed request instead of silently restoring its old text, and every one of those failures emits a log event.
 
 **Architecture:** The chat deadline lives in `useChat`, the single place `pending` is derived, so it covers both transports without touching `FirestoreTransport.emitStatus`'s status precedence. The Ideas interim line is a second timer inside `queueRemoteComment`, clearing through the existing `wrappedDispose` so `removePendingComments` stays the only path an entry leaves the queue by. Logging reaches the static `Logger.log`, which queues until the logger initializes, so the chat needs no store access; the comments manager stays free of document/store coupling by taking an `onFailure` callback rather than logging itself. Separately, `FirestoreTransport` stops recording the last-sent workspace hash in completion order.
 
@@ -16,7 +16,7 @@
 
 | File | Responsibility |
 |---|---|
-| `src/components/chat-tutor/use-chat.ts` *(modify)* | The 45s reply deadline, `timedOut` in the result, the timeout message constant |
+| `src/components/chat-tutor/use-chat.ts` *(modify)* | The reply deadline, `timedOut` in the result, the timeout message constant |
 | `src/components/chat-tutor/use-chat.test.ts` *(create)* | Deadline fires, restarts per message, clears on a late reply and on transport swap |
 | `src/components/chat-tutor/chat.tsx` *(modify)* | Render the timeout row; keep the live region from re-announcing the previous reply |
 | `src/components/chat-tutor/chat-timeout.test.tsx` *(create)* | `Chat` renders the timeout row and no typing dots |
@@ -85,9 +85,11 @@ Cases to assert:
 2. **Fires at the deadline** — emit a user turn and `status: "generating"`, advance
    `kReplyDeadlineMs`; `pending` is false and `timedOut` is true. Also assert `pending` was still
    true one millisecond earlier, so the test pins the boundary rather than just "eventually."
-3. **Restarts on a new message** — go pending, advance 40s, emit a second user turn, advance 40s;
-   `timedOut` is still false (total elapsed 80s, but only 40s since the newest message). This is
-   the case a `waiting`-only dependency list gets wrong.
+3. **Restarts on a new message** — go pending, advance to just short of the deadline, emit a
+   second user turn, advance that far again; `timedOut` is still false (well past one deadline in
+   total, but not since the newest message). Express the advances as offsets from
+   `kReplyDeadlineMs` rather than literals, so the constant can move without breaking the test.
+   This is the case a `waiting`-only dependency list gets wrong.
 4. **A late reply clears it** — let it time out, then emit an assistant turn and `status: "idle"`;
    `timedOut` returns to false and the turn is in `turns`.
 5. **Transport swap resets** — rerender the hook with a second transport while timed out;
@@ -104,8 +106,12 @@ In `use-chat.ts`, add the constants near the existing message string:
 // How long the client waits for a reply before it stops claiming Ada is working. Nothing on the
 // client can tell a dead turn from a slow one — the drain writes its assistant document and its
 // cursor in one batch, so a drain that died writes neither — which is why this is a deadline and
-// not a smarter reading of status. A reply carrying document context routinely takes 10-25s.
-export const kReplyDeadlineMs = 45_000;
+// not a smarter reading of status.
+//
+// 30s is a compromise between a student's patience and a slow but healthy reply. Erring short is
+// the cheaper mistake: a late reply still renders and clears the message. AI_CHAT_TIMEOUT over
+// AI_CHAT_MESSAGE_SENT gives the rate this should be retuned against.
+export const kReplyDeadlineMs = 30_000;
 
 // Deliberately distinct from the status:"error" message below: the backend reporting an error and
 // the backend reporting nothing are different failures, and support cannot tell them apart if
@@ -648,7 +654,7 @@ compile — a long-lived dev server that has seen branch switches serves a stale
 current (see CLAUDE.md).
 
 Open the chat and send a message with the network offline (DevTools → Network → Offline) or with
-the chat trigger disabled, then watch: the dots stop at 45s and the message appears, the composer
+the chat trigger disabled, then watch: the dots stop at 30s and the message appears, the composer
 still accepts a message, and sending again restarts the dots.
 
 - [ ] **Step 4: Run `/code-self-review` over the full diff**
@@ -666,7 +672,7 @@ Commit locally. Do not push until the user has checked it on localhost or said t
 
 | Risk | Handling |
 |---|---|
-| 45s cuts off a legitimately slow reply | The reply still renders when it arrives; the message row clears with it. Nothing is discarded. If real traffic shows 45s is too tight, the constant is one line — but do not make it authorable without evidence. |
+| 30s cuts off a legitimately slow reply | The reply still renders when it arrives; the message row clears with it. Nothing is discarded. `AI_CHAT_TIMEOUT` over `AI_CHAT_MESSAGE_SENT` is the rate to retune against — the constant is one line, but do not make it authorable without that evidence. |
 | The live region announces a stale reply on timeout | Explicitly covered: Task 2 Step 3 guards it, Task 2 Step 2 case 4 tests it. |
 | The slow-entry set desyncs from `pendingComments` | Both the 45s and 120s timers clear through `wrappedDispose`, and `removePendingComments` stays the single exit path. Task 5 Step 1 case 5 tests `dispose()` while slow. |
 | The AI tile failure message persists in document content | Stated and accepted in the spec; follows `AI_TILE_EMPTY_MESSAGE`'s existing precedent. Revisit only if a student reports a stuck error in a saved document. |

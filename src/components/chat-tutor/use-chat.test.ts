@@ -74,12 +74,14 @@ describe("useChat reply deadline", () => {
     const t = stubTransport();
     const { result } = renderChat(t.transport);
 
+    const nearlyDue = kReplyDeadlineMs - 5_000;
+
     t.turns([userTurn("m1")]);
     t.status("generating");
-    advance(40_000);
+    advance(nearlyDue);
 
     t.turns([userTurn("m1"), userTurn("m2")]);
-    advance(40_000); // 80s since the first message, 40s since the second
+    advance(nearlyDue); // well past one deadline in total, but not since the second message
 
     expect(result.current.timedOut).toBe(false);
 

@@ -6,8 +6,13 @@ import { LogEventName } from "../../lib/logger-types";
 // How long the client waits for a reply before it stops claiming Ada is working. Nothing on the
 // client can tell a dead turn from a slow one -- the drain writes its assistant document and its
 // cursor in one batch, so a drain that died writes neither -- which is why this is a deadline and
-// not a smarter reading of status. A reply carrying document context routinely takes 10-25s.
-export const kReplyDeadlineMs = 45_000;
+// not a smarter reading of status.
+//
+// 30s is a compromise between a student's patience and a slow but healthy reply. Erring short is
+// the cheaper mistake: a late reply still renders and clears the message, so a tight deadline
+// costs a confusing moment rather than an answer. AI_CHAT_TIMEOUT over AI_CHAT_MESSAGE_SENT gives
+// the timeout rate this should be retuned against, rather than guessing again.
+export const kReplyDeadlineMs = 30_000;
 
 // Distinct from the status:"error" message below: the backend reporting an error and the backend
 // reporting nothing are different failures, and support can't tell them apart if they read alike.

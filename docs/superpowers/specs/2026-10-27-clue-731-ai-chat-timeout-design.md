@@ -49,13 +49,15 @@ governed what this student sees now.
 
 **In**
 
-- A 45-second client-side reply deadline for the Ada chat sidebar, with a visible message.
+- A 30-second client-side reply deadline for the Ada chat sidebar, with a visible message.
 - Send-order (not completion-order) bookkeeping of the last-sent workspace hash in
   `FirestoreTransport`.
 - A regression test pinning the existing guarantee that a document edit cannot reach an in-flight
   chat turn.
 - A 45-second "taking longer than usual" interim line for the Ideas / document-evaluation waiting
-  message, with the existing 120s hard expiry unchanged.
+  message, with the existing 120s hard expiry unchanged. Deliberately not the chat's 30s: an Ideas
+  request is normally slower (Shutterbug alone is allowed 45s), so calling it unusual at 30s would
+  be false.
 - A visible failure message in the AI tile when its request fails.
 - A log event for every AI failure: chat timeout, chat unavailable, Ideas failure, AI tile
   failure — plus a chat "message sent" event, so a failure count has a denominator.
@@ -70,7 +72,7 @@ governed what this student sees now.
 - **A Retry button in the chat.** The composer is already enabled during a pending reply, so
   retrying costs a retype, not a dead end. A real retry button has to decide what happens when the
   first turn lands late, which is a bigger question than this story.
-- **Making the chat timeout authorable per unit.** One constant until there is evidence 45s is
+- **Making the chat timeout authorable per unit.** One constant until the timeout rate shows it is
   wrong for some unit.
 - **The teacher-facing AI class summary** (`src/components/navigation/ai-summary.tsx`). It has its
   own `checking`/`generating` status machine and no reported wedge. Separate story if it needs one.
@@ -93,15 +95,20 @@ should be made to wait" is a UI judgment, and `emitStatus`'s three-way precedenc
 that threading a fourth state through it would cost more than it buys.
 
 **Restart condition.** The timer restarts when the hook starts waiting **and whenever the newest
-turn changes** — not on `waiting` alone. A student who sends a second message at 40s would
-otherwise inherit the first message's clock and be told "Ada didn't answer" five seconds later,
+turn changes** — not on `waiting` alone. A student who sends a second message late in the wait
+would otherwise inherit the first message's clock and be told "Ada didn't answer" seconds later,
 about a message sent moments ago. Keying on the newest turn's id works because the id comes from
 `messagesRef().add()`, which mints it client-side; the optimistic snapshot and the confirmed one
 carry the same id, so the id changes exactly once per message.
 
-**Value.** 45 seconds. A real reply carrying document context routinely takes 10–25s, so the
-ticket's literal 20s would cut off healthy turns. 45s is unambiguously abnormal without being a
-wait.
+**Value.** 30 seconds, between the ticket's 20s and the 45s first proposed here. 45s was argued
+from an estimate of reply latency, not a measurement, and 45s is a long time to a student.
+
+Erring short is the cheaper mistake: a late reply still renders and clears the message, so a
+too-tight deadline costs a confusing moment rather than an answer. And this is the one number in
+the story that the logging makes empirically revisable — `AI_CHAT_TIMEOUT` over
+`AI_CHAT_MESSAGE_SENT` is the timeout rate, so a week of classroom use settles whether 30s cuts
+off healthy replies.
 
 **On expiry.** `pending` goes false — the dots stop and the "Ada is typing" live region clears.
 A message row appears reading *"Ada didn't answer. Please try again."* The composer needs no
@@ -227,7 +234,7 @@ introducing a fourth name for researchers to learn.
 
 | Constant | Value | Home |
 |---|---|---|
-| `kReplyDeadlineMs` | `45_000` | `src/components/chat-tutor/use-chat.ts` |
+| `kReplyDeadlineMs` | `30_000` | `src/components/chat-tutor/use-chat.ts` |
 | `kTimeoutMessage` | "Ada didn't answer. Please try again." | `src/components/chat-tutor/use-chat.ts` |
 | `kSlowRemoteCommentMs` | `45_000` | `src/models/document/document-comments-manager.ts` |
 | `IDEAS_SLOW_MESSAGE` | "Ada is taking longer than usual..." | `src/models/document/ai-evaluation-messages.ts` |
@@ -243,7 +250,7 @@ already living in the hook.
 | Event | Fires when | Payload |
 |---|---|---|
 | `AI_CHAT_MESSAGE_SENT` | a user message reaches Firestore | conversation id, document key, problem path |
-| `AI_CHAT_TIMEOUT` | the 45s reply deadline fires | conversation id, document key, problem path |
+| `AI_CHAT_TIMEOUT` | the reply deadline fires | conversation id, document key, problem path |
 | `AI_CHAT_UNAVAILABLE` | the transport reports `status: "error"` | conversation id, document key, problem path |
 | `IDEAS_REQUEST_FAILED` | the 15s foreground deadline, the 120s expiry, or a `"failed"` server outcome | document key, problem path, request id, which of the three |
 | `AI_TOOL_CHANGE` *(existing)* | the AI tile's request fails | tile id, `operation: "requestFailed"` |
@@ -255,7 +262,7 @@ message text, prompt text, document content or the raw server error string.
 
 | Test | Covers |
 |---|---|
-| `use-chat.test.ts` *(new)* | Deadline fires at 45s; `pending` goes false; `timedOut` set. Timer restarts on a new turn. Late reply clears the timeout and renders. Transport swap resets. No timeout while idle. |
+| `use-chat.test.ts` *(new)* | Deadline fires at `kReplyDeadlineMs`; `pending` goes false; `timedOut` set. Timer restarts on a new turn. Late reply clears the timeout and renders. Transport swap resets. No timeout while idle. |
 | `firestore-transport.test.ts` | Overlapping sends record the hash in send order; a failed write restores the prior hash; a failed write superseded by a newer send does not. |
 | `firestore-transport.test.ts` | Regression: a document mutated between send and write resolution does not change what that message carried. |
 | `document-comments-manager.test.ts` | Slow set populated at 45s, cleared on resolve, on expiry, and on `dispose`. |
@@ -267,7 +274,7 @@ message text, prompt text, document content or the raw server error string.
 | all of the above | No logged payload contains message text, prompt text or document content. |
 
 No Cypress work: all four behaviors are timer-driven and are exercised honestly with Jest fake
-timers. A Cypress spec would have to wait 45 real seconds to prove anything.
+timers. A Cypress spec would have to wait the real deadline out to prove anything.
 
 ## Delivery
 
