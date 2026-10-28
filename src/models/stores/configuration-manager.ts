@@ -64,6 +64,10 @@ export class ConfigurationManager implements UnitConfiguration {
     return this.getProp<UC["aiPrompt"]>("aiPrompt");
   }
 
+  get aiEvaluateOnSessionEnd(){
+    return this.getProp<UC["aiEvaluateOnSessionEnd"]>("aiEvaluateOnSessionEnd");
+  }
+
   get chatTutorPrompts(){
     return this.getProp<UC["chatTutorPrompts"]>("chatTutorPrompts");
   }

@@ -104,6 +104,18 @@ These properties are configurable at the application (built into the code) or th
 }
 ```
 
+**What each prompt produces.** The AI is asked for up to three things, and each one is requested only if the prompt fields behind it are present:
+
+| Asked for | Requires | Where it ends up |
+|---|---|---|
+| `discussion` | `discussionPrompt` | the first half of the comment |
+| `keyIndicators` | `keyIndicatorsPrompt` | the rest of the comment, after "Evidence:", joined by commas |
+| `category` | `categorizationDescription` **and** a non-empty `categories` | the document's tag, which the Sort Work view groups by |
+
+So the comment is built from `discussion` and `keyIndicators` only. **A unit with neither `keyIndicatorsPrompt` nor `discussionPrompt` produces an empty comment** — the evaluation still succeeds and still tags the document, and the student gets a tag with no text. Nothing on the server stops this: the only check rejects an `aiPrompt` that asks for nothing at all, and asking for `category` alone satisfies it.
+
+The authoring interface is what prevents it, and it only lets you blank `discussionPrompt`. Doing that is how a unit gets a comment that is just the evidence for its tag, with no general advice attached — the CMP math units do this, and blanking the field removes the key from the unit's JSON. `categorizationDescription` and `keyIndicatorsPrompt` stay required there. Editing the JSON by hand bypasses that guard, so a unit written by hand needs at least one of `keyIndicatorsPrompt` and `discussionPrompt` to say anything to the student.
+
 **What the AI is sent.** Every evaluation sends a text summary of the document and a screenshot of it in one request. Which of the two arrive depends on the document, not on any setting.
 
 - The **summary** is sent when it would carry the student's work. That means the student typed something, or the document holds something the summary describes in detail — a drawing with at least one object, for instance, is summarized as a table of those objects. A tile that is empty, or one the summary can only name rather than describe, does not count.
@@ -114,6 +126,12 @@ So a document of only text gets no screenshot; a drawing with objects in it gets
 A document with no content at all is an exception: it is evaluated anyway, and only its summary is sent. That summary describes an empty document, so the feedback will not say anything useful. This may be temporary. Not evaluating such a document is the better answer, but the student is shown a "thinking about it" message that only an arriving comment removes, so refusing to evaluate would leave that message up for good. Changing this needs a matching change in the interface, to say plainly that the document is empty.
 
 An `aiPrompt` may still carry a `summarizer` property, written by older versions of the authoring interface to choose between sending text and sending a picture. It is ignored.
+
+`aiEvaluateOnSessionEnd`: (boolean | undefined) When true, `aiEvaluation` also runs without anyone asking: when a document the student edited is closed, and whenever their connection drops. Defaults to false, so a unit with `aiEvaluation` set evaluates only what students request with the ideas button, since unrequested evaluations cost real money. Setting this has no effect without `aiEvaluation`.
+
+Two details are worth knowing before turning it on. Only documents the student actually edited are evaluated — the request is attached to machinery that is set up at the first save, so a document opened and left alone is never evaluated. And a dropped connection is not the same as the end of a session: a brief outage triggers an evaluation and the session then carries on, so one document can be evaluated several times.
+
+Note the interaction with `showIdeasButton`: a unit that sets `aiEvaluation` and `showIdeasButton: false` has no way for a student to request an evaluation, so it is evaluated only if this setting is on.
 
 `showIdeasButton`: (boolean | undefined) If set the ideas button visibility is determined by the value. If undefined the existing logic is used
 which checks if the the aiEvaluation is set or if there are invisible exemplar documents.
@@ -309,8 +327,9 @@ Defaults:
 Additional Live Output / sampling keys (all optional; each defaults to today's behavior):
 
 - `servoInputMode`: `"degrees"` (default) or `"proportion"`. In `"proportion"` mode the Servo Live
-  Output accepts an input from 0–1 instead of 0–180 degrees (mapping 0→0°, 1→180°) and its field reads
-  `"<n>% rotation"`. The stored/hardware value stays in degrees, so the serial path is unchanged.
+  Output and the Servo Demo Output accept an input from 0–1 instead of 0–180 degrees (mapping 0→0°,
+  1→180°) and their fields read `"<n>% rotation"`. The stored/hardware value stays in degrees, so the
+  serial path is unchanged.
 - `liveOutputTypes`: an array of Live Output type names to offer in the block's dropdown, e.g.
   `["Servo", "Gripper 2.0"]`. Absent, empty, unknown-only, or listing *every* type all mean the full
   list (no restriction, standard order). For a genuine subset the author's order is preserved and the

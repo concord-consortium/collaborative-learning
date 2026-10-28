@@ -6,6 +6,7 @@ import { GroupVirtualDocument } from "../document/group-virtual-document";
 import { UserModelType } from "./user";
 import { DocumentsModelType } from "./documents";
 import { ProblemPublication } from "../document/document-types";
+import { kNewGroupUserGraceMs } from "./group-user-constants";
 
 export interface IGroupsEnvironment {
   user?: UserModelType,  // This is the current user of the application
@@ -53,7 +54,7 @@ export const GroupUserModel = types
       // Also in the future we might support setting up the groups before the class is
       // initialized. For the time being we list users as New in that case.
       const clazz = self.environment?.class;
-      if (!clazz || (self.connectedTimestamp + 1000) > clazz.timestamp) {
+      if (!clazz || (self.connectedTimestamp + kNewGroupUserGraceMs) > clazz.timestamp) {
         return GroupUserState.New;
       }
 

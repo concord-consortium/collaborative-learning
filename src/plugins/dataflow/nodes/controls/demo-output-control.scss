@@ -123,3 +123,40 @@
     }
   }
 }
+
+.servo-control {
+  // The arm reaches 41px either side of the hub at this size, and the body hangs below it, so
+  // this is the sweep's own height plus a little.
+  height: 86px;
+  width: 120px;
+
+  .servo-assembly {
+    position: relative;
+    height: 86px;
+    left: 8px;
+
+    // Decorative: without this the arm's image box, which is mostly transparent, swallows the
+    // clicks meant for the dropdown behind it.
+    .servo-part {
+      position: absolute;
+      pointer-events: none;
+    }
+
+    // The servo lies on its side, hub to the right, drawn at 80%. These offsets line the hub up
+    // under the arm's pivot by eye in the tile: the hub and the body's face are nearly the same
+    // colour, so measuring its centre off the asset does not give a usable answer.
+    .servo-part.body {
+      height: 35px;
+      left: -4px;
+      top: 25px;
+    }
+
+    // Pivoting on that hub. The arm image is far larger than its ink and its pivot is the image
+    // centre, which is what lets rotate turn it about the hub.
+    .servo-part.arm {
+      height: 121px;
+      left: -4px;
+      top: -18px;
+    }
+  }
+}

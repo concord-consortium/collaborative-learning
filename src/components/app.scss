@@ -24,7 +24,14 @@ body.tile-picked-up {
   align-items: center;
   justify-content: center;
   color: #242424;
-  &:has(.log-monitor), &:has(.a11y-debug-sidebar) {
+
+  // Absolutely positioned layers in the app, such as the workspace's drag handler, size to .app.
+  // Without this they span all of #app, covering the log monitor sidebar.
+  > .app {
+    position: relative;
+  }
+
+  &:has(.log-monitor) {
     overflow: hidden;
 
     > .app {
