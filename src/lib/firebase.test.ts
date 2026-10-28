@@ -264,7 +264,7 @@ describe("Firebase class", () => {
     it("should handle custom evaluation with aiPrompt", async () => {
       const storesWithCustomEvaluation = {
         ...mockStores,
-        appConfig: { aiEvaluation: "custom", aiPrompt: "test prompt" }
+        appConfig: { aiEvaluation: "custom", aiPrompt: "test prompt", aiEvaluateOnSessionEnd: true }
       };
       const firebaseWithCustom = new Firebase({ stores: storesWithCustomEvaluation } as unknown as DB);
       const mockRef = { set: jest.fn().mockResolvedValue(undefined) };
@@ -284,7 +284,7 @@ describe("Firebase class", () => {
     it("merges teacher-added custom tag ids into aiPrompt.categories", async () => {
       const storesWithCustomTags = {
         ...mockStores,
-        appConfig: { aiEvaluation: "custom", aiPrompt: { categories: ["a"] } },
+        appConfig: { aiEvaluation: "custom", aiPrompt: { categories: ["a"] }, aiEvaluateOnSessionEnd: true },
         commentTags: { customTagRecord: { "custom-1": "Custom One" } }
       };
       const firebaseWithCustom = new Firebase({ stores: storesWithCustomTags } as unknown as DB);
@@ -304,7 +304,7 @@ describe("Firebase class", () => {
     it("should handle custom evaluation without aiPrompt", async () => {
       const storesWithCustomEvaluation = {
         ...mockStores,
-        appConfig: { aiEvaluation: "custom", aiPrompt: undefined }
+        appConfig: { aiEvaluation: "custom", aiPrompt: undefined, aiEvaluateOnSessionEnd: true }
       };
       const firebaseWithCustom = new Firebase({ stores: storesWithCustomEvaluation } as unknown as DB);
       const mockRef = { set: jest.fn().mockResolvedValue(undefined) };
@@ -317,7 +317,7 @@ describe("Firebase class", () => {
     it("should handle non-custom evaluation", () => {
       const storesWithNonCustomEvaluation = {
         ...mockStores,
-        appConfig: { aiEvaluation: "standard", aiPrompt: undefined }
+        appConfig: { aiEvaluation: "standard", aiPrompt: undefined, aiEvaluateOnSessionEnd: true }
       };
       const firebaseWithNonCustom = new Firebase({ stores: storesWithNonCustomEvaluation } as unknown as DB);
       const mockRef = { set: jest.fn().mockResolvedValue(undefined) };
@@ -339,7 +339,7 @@ describe("Firebase class", () => {
     it("sends no context while the unit is the placeholder", () => {
       const storesBeforeTheUnitLoads = {
         ...mockStores,
-        appConfig: { aiEvaluation: "standard", aiPrompt: undefined },
+        appConfig: { aiEvaluation: "standard", aiPrompt: undefined, aiEvaluateOnSessionEnd: true },
         unit: { code: "NULL" }
       };
       const firebaseBeforeLoad = new Firebase({ stores: storesBeforeTheUnitLoads } as unknown as DB);
@@ -356,7 +356,7 @@ describe("Firebase class", () => {
       // A real unit with an unresolved problem: a stale offering, or a mistyped problem parameter.
       const storesWithNoProblem = {
         ...mockStores,
-        appConfig: { aiEvaluation: "standard", aiPrompt: undefined },
+        appConfig: { aiEvaluation: "standard", aiPrompt: undefined, aiEvaluateOnSessionEnd: true },
         problem: { ordinal: 0 }
       };
       const firebaseWithNoProblem = new Firebase({ stores: storesWithNoProblem } as unknown as DB);
@@ -373,7 +373,7 @@ describe("Firebase class", () => {
     it("sends the context for an investigation numbered zero", () => {
       const storesInInvestigationZero = {
         ...mockStores,
-        appConfig: { aiEvaluation: "standard", aiPrompt: undefined },
+        appConfig: { aiEvaluation: "standard", aiPrompt: undefined, aiEvaluateOnSessionEnd: true },
         investigation: { ordinal: 0 },
         problem: { ordinal: 1 }
       };
@@ -390,12 +390,13 @@ describe("Firebase class", () => {
         });
     });
 
-    // The disconnect handler registers its value when the document opens, so what it carries is
-    // decided here rather than when the connection drops.
+    // The disconnect handler registers its value at the document's first save, so what it carries
+    // — and whether the unit's flag puts it there at all — is decided then, not when the
+    // connection drops.
     it("registers a disconnect write that carries the context", () => {
       const storesWithEvaluation = {
         ...mockStores,
-        appConfig: { aiEvaluation: "standard", aiPrompt: undefined }
+        appConfig: { aiEvaluation: "standard", aiPrompt: undefined, aiEvaluateOnSessionEnd: true }
       };
       const firebaseWithEvaluation = new Firebase({ stores: storesWithEvaluation } as unknown as DB);
       const onDisconnectSet = jest.fn().mockResolvedValue(undefined);
@@ -417,7 +418,7 @@ describe("Firebase class", () => {
       // Firebase rejects undefined, and the function keeps a context whose offeringId is "".
       const storesOutsideAnOffering = {
         ...mockStores,
-        appConfig: { aiEvaluation: "standard", aiPrompt: undefined },
+        appConfig: { aiEvaluation: "standard", aiPrompt: undefined, aiEvaluateOnSessionEnd: true },
         user: { ...mockStores.user, offeringId: "" }
       };
       const firebaseOutside = new Firebase({ stores: storesOutsideAnOffering } as unknown as DB);
@@ -436,7 +437,7 @@ describe("Firebase class", () => {
     it("should handle no evaluation configured", () => {
       const storesWithNoEvaluation = {
         ...mockStores,
-        appConfig: { aiEvaluation: undefined, aiPrompt: undefined }
+        appConfig: { aiEvaluation: undefined, aiPrompt: undefined, aiEvaluateOnSessionEnd: true }
       };
       const firebaseWithNoEvaluation = new Firebase({ stores: storesWithNoEvaluation } as unknown as DB);
       const mockRef = { set: jest.fn().mockResolvedValue(undefined) };
@@ -448,6 +449,8 @@ describe("Firebase class", () => {
         });
     });
 
+    // No aiEvaluateOnSessionEnd here: an evaluation the student asked for runs whatever the unit
+    // does at session end.
     it("includes requestId in the standard evaluation write when passed", () => {
       const storesWithNonCustomEvaluation = {
         ...mockStores,
@@ -496,7 +499,7 @@ describe("Firebase class", () => {
     it("omits the requestId key entirely when not passed (custom evaluation)", async () => {
       const storesWithCustomEvaluation = {
         ...mockStores,
-        appConfig: { aiEvaluation: "custom", aiPrompt: "test prompt" }
+        appConfig: { aiEvaluation: "custom", aiPrompt: "test prompt", aiEvaluateOnSessionEnd: true }
       };
       const firebaseWithCustom = new Firebase({ stores: storesWithCustomEvaluation } as unknown as DB);
       const mockRef = { set: jest.fn().mockResolvedValue(undefined) };
@@ -510,7 +513,7 @@ describe("Firebase class", () => {
     it("omits the requestId key entirely when not passed (standard evaluation)", async () => {
       const storesWithNonCustomEvaluation = {
         ...mockStores,
-        appConfig: { aiEvaluation: "standard", aiPrompt: undefined }
+        appConfig: { aiEvaluation: "standard", aiPrompt: undefined, aiEvaluateOnSessionEnd: true }
       };
       const firebaseWithNonCustom = new Firebase({ stores: storesWithNonCustomEvaluation } as unknown as DB);
       const mockRef = { set: jest.fn().mockResolvedValue(undefined) };
@@ -519,6 +522,65 @@ describe("Firebase class", () => {
       await firebaseWithNonCustom.setLastEditedNow(mockUser as any, mockDocumentKey, mockUserId);
 
       expect(evaluationWriteArgs(mockRef)).not.toHaveProperty("requestId");
+    });
+
+    // Whether an unrequested evaluation is written at all. What one carries once written is covered
+    // by the tests above.
+    describe("session-end gate", () => {
+      const evaluationPath = expect.stringContaining("/evaluation/standard");
+
+      const setUp = (aiEvaluateOnSessionEnd?: boolean) => {
+        const stores = {
+          ...mockStores,
+          appConfig: { aiEvaluation: "standard", aiPrompt: undefined, aiEvaluateOnSessionEnd }
+        };
+        const fb = new Firebase({ stores } as unknown as DB);
+        const onDisconnectSet = jest.fn().mockResolvedValue(undefined);
+        const mockRef = {
+          set: jest.fn().mockResolvedValue(undefined),
+          onDisconnect: () => ({ set: onDisconnectSet, cancel: jest.fn() })
+        };
+        const refSpy = jest.spyOn(fb, 'ref').mockReturnValue(mockRef as any);
+        return { fb, mockRef, refSpy, onDisconnectSet };
+      };
+
+      it("writes no evaluation at session end for a unit that did not opt in", async () => {
+        const { fb, mockRef, refSpy } = setUp();
+
+        await fb.setLastEditedNow(mockUser as any, mockDocumentKey, mockUserId);
+
+        expect(refSpy).not.toHaveBeenCalledWith(evaluationPath);
+        expect(mockRef.set).toHaveBeenCalledTimes(1);
+        expect(mockRef.set).toHaveBeenCalledWith("server-timestamp");
+      });
+
+      it("writes an evaluation at session end for a unit that opted in", async () => {
+        const { fb, mockRef, refSpy } = setUp(true);
+
+        await fb.setLastEditedNow(mockUser as any, mockDocumentKey, mockUserId);
+
+        expect(refSpy).toHaveBeenCalledWith(evaluationPath);
+        expect(mockRef.set).toHaveBeenCalledTimes(2);
+      });
+
+      it("registers no disconnect evaluation for a unit that did not opt in", () => {
+        const { fb, refSpy, onDisconnectSet } = setUp();
+
+        const onDisconnects = fb.setLastEditedOnDisconnect(mockUser as any, mockDocumentKey, mockUserId);
+
+        expect(refSpy).not.toHaveBeenCalledWith(evaluationPath);
+        expect(onDisconnects).toHaveLength(1);
+        expect(onDisconnectSet).toHaveBeenCalledWith("server-timestamp");
+      });
+
+      it("registers a disconnect evaluation for a unit that opted in", () => {
+        const { fb, refSpy } = setUp(true);
+
+        const onDisconnects = fb.setLastEditedOnDisconnect(mockUser as any, mockDocumentKey, mockUserId);
+
+        expect(refSpy).toHaveBeenCalledWith(evaluationPath);
+        expect(onDisconnects).toHaveLength(2);
+      });
     });
   });
 

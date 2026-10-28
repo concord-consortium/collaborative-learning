@@ -1030,4 +1030,70 @@ describe("FirestoreHistoryManagerConcurrent", () => {
       expect(historyManager.resumeCountdownSeconds).toBe(4);
     });
   });
+  describe("onLocalEntryUploaded", () => {
+    const queueEntry = (manager: Instance<typeof TreeManager>, historyManager: FirestoreHistoryManagerConcurrent,
+                        id: string) => {
+      const entry = HistoryEntry.create(makeEntrySnapshot(
+        id,
+        "main",
+        [{ op: "replace", path: "/items/1/color", value: "red" }],
+        [{ op: "replace", path: "/items/1/color", value: "white" }],
+      ));
+      manager.addHistoryEntryAfterApplying(entry);
+      historyManager.completedHistoryEntryQueue.push(entry);
+      return entry;
+    };
+
+    it("reports each entry of a committed transaction, in order", async () => {
+      getLastHistoryEntry.mockResolvedValue({ id: "r0", index: 0 });
+      const { manager, historyManager, firestoreCapture } = await setupManager({
+        txMetadataLastHistoryEntry: { id: "r0", index: 0 },
+      });
+      const onLocalEntryUploaded = jest.fn();
+      historyManager.onLocalEntryUploaded = onLocalEntryUploaded;
+      queueEntry(manager, historyManager, "L1");
+      queueEntry(manager, historyManager, "L2");
+      historyManager.environmentAndMetadataDocReadyPromise = Promise.resolve();
+
+      await historyManager.uploadQueuedHistoryEntries();
+
+      expect(firestoreCapture.transactionSetCalls).toHaveLength(2);
+      expect(onLocalEntryUploaded.mock.calls.map(([entry]) => entry.id)).toEqual(["L1", "L2"]);
+    });
+
+    it("reports nothing when the transaction is aborted by a moved head", async () => {
+      getLastHistoryEntry.mockResolvedValue({ id: "r0", index: 0 });
+      const { manager, historyManager } = await setupManager({
+        txMetadataLastHistoryEntry: { id: "R1", index: 1 },
+      });
+      const onLocalEntryUploaded = jest.fn();
+      historyManager.onLocalEntryUploaded = onLocalEntryUploaded;
+      queueEntry(manager, historyManager, "L1");
+      historyManager.environmentAndMetadataDocReadyPromise = Promise.resolve();
+
+      await historyManager.uploadQueuedHistoryEntries();
+
+      expect(historyManager.completedHistoryEntryQueue.map(e => e.id)).toEqual(["L1"]);
+      expect(onLocalEntryUploaded).not.toHaveBeenCalled();
+    });
+
+    it("reports nothing for an entry rolled back before upload", async () => {
+      getLastHistoryEntry.mockResolvedValue(undefined);
+      const { manager, tree, historyManager, firestoreCapture } = await setupManager();
+      const onLocalEntryUploaded = jest.fn();
+      historyManager.onLocalEntryUploaded = onLocalEntryUploaded;
+      tree.setItems([Item.create({ id: "a" }), Item.create({ id: "b" })]);
+      applyPatch(tree, { op: "replace", path: "/items/1/color", value: "red" });
+      queueEntry(manager, historyManager, "L1");
+
+      await historyManager.rollbackLocalEntries(1, []);
+      historyManager.environmentAndMetadataDocReadyPromise = Promise.resolve();
+      await historyManager.uploadQueuedHistoryEntries();
+
+      expect(tree.items[1].color).toBe("white");
+      expect(historyManager.completedHistoryEntryQueue).toHaveLength(0);
+      expect(firestoreCapture.transactionSetCalls).toEqual([]);
+      expect(onLocalEntryUploaded).not.toHaveBeenCalled();
+    });
+  });
 });

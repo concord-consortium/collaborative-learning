@@ -18,6 +18,7 @@ interface AISettingsFormInputs {
   },
   aiTileAvailable: boolean;
   showIdeasButton: boolean;
+  aiEvaluateOnSessionEnd: boolean;
 }
 
 const isAIAuthorTool = (tool: IAuthorTool | WritableDraft<IAuthorTool>) => {
@@ -52,7 +53,8 @@ const AISettings: React.FC = () => {
         discussionPrompt: aiPrompt?.discussionPrompt ?? "",
       },
       aiTileAvailable,
-      showIdeasButton
+      showIdeasButton,
+      aiEvaluateOnSessionEnd: !!unitConfig?.config?.aiEvaluateOnSessionEnd
     };
   }, [unitConfig]);
 
@@ -66,6 +68,11 @@ const AISettings: React.FC = () => {
   // disable AI-related fields if aiEvaluation is not set in initial settings
   const [disableAiFields, setDisableAiFields] = useState(settings.aiEvaluation !== "custom");
 
+  // Session-end evaluation does nothing without an evaluation method, but unlike the prompt fields
+  // it applies to every method, not just "custom". Disabled rather than cleared, so a unit whose
+  // method is switched off and back on keeps the author's choice.
+  const disableSessionEnd = !currentAiEvaluation;
+
   // when aiEvaluation changes, revalidate the form to ensure required fields are filled in
   useEffect(() => {
     setDisableAiFields(currentAiEvaluation !== "custom");
@@ -74,7 +81,6 @@ const AISettings: React.FC = () => {
     // we need to wait until after the state has been updated
     // before triggering the validations
     setTimeout(() => {
-      trigger("aiPrompt.discussionPrompt");
       trigger("aiPrompt.keyIndicatorsPrompt");
       trigger("aiPrompt.categorizationDescription");
       trigger("aiPrompt.mainPrompt");
@@ -99,7 +105,11 @@ const AISettings: React.FC = () => {
         const categories = config.commentTags ? Object.keys(config.commentTags) : [];
 
         if (!config.aiPrompt) {
-          config.aiPrompt = { ...data.aiPrompt, categories };
+          const { discussionPrompt, ...rest } = data.aiPrompt;
+          config.aiPrompt = {
+            ...rest, categories,
+            ...(discussionPrompt?.trim() ? { discussionPrompt } : {})
+          };
         } else {
           const aiPrompt = config.aiPrompt;
           const {
@@ -111,7 +121,13 @@ const AISettings: React.FC = () => {
           aiPrompt.categorizationDescription = categorizationDescription;
           aiPrompt.categories = categories;
           aiPrompt.keyIndicatorsPrompt = keyIndicatorsPrompt;
-          aiPrompt.discussionPrompt = discussionPrompt;
+          // An empty discussion prompt is the absence of one: it removes the `discussion` field
+          // from the response schema either way, so the key is dropped rather than stored as "".
+          if (discussionPrompt?.trim()) {
+            aiPrompt.discussionPrompt = discussionPrompt;
+          } else {
+            delete aiPrompt.discussionPrompt;
+          }
           // The analysis pipeline ignores summarizer, so drop it from configs that still carry it.
           delete aiPrompt.summarizer;
         }
@@ -136,6 +152,8 @@ const AISettings: React.FC = () => {
         if (data.showIdeasButton !== undefined) {
           config.showIdeasButton = data.showIdeasButton;
         }
+
+        config.aiEvaluateOnSessionEnd = data.aiEvaluateOnSessionEnd;
       }
     });
   };
@@ -170,6 +188,16 @@ const AISettings: React.FC = () => {
           <option value="categorize-design">Categorize Design</option>
         </select>
         {errors.aiEvaluation && <span className="form-error">{errors.aiEvaluation.message}</span>}
+      </div>
+      <div>
+        <label htmlFor="aiEvaluateOnSessionEnd">Evaluate At Session End</label>
+        <input
+          id="aiEvaluateOnSessionEnd"
+          type="checkbox"
+          {...register("aiEvaluateOnSessionEnd")}
+          disabled={disableSessionEnd}
+        /> Also evaluate edited documents when they close or the connection drops, not only when a
+        student asks for ideas
       </div>
       <div>
         <label htmlFor="systemPrompt">System Prompt</label>
@@ -224,7 +252,7 @@ const AISettings: React.FC = () => {
           <tr>
             <td className="left">
               <div className="stacked">
-                <label htmlFor="keyIndicatorsPrompt">Your Work Shows Prompt</label>
+                <label htmlFor="keyIndicatorsPrompt">Evidence Prompt</label>
                 <textarea
                   id="keyIndicatorsPrompt"
                   defaultValue={settings.aiPrompt.keyIndicatorsPrompt}
@@ -244,14 +272,9 @@ const AISettings: React.FC = () => {
                 <textarea
                   id="discussionPrompt"
                   defaultValue={settings.aiPrompt.discussionPrompt}
-                  {...register("aiPrompt.discussionPrompt", {
-                    validate: validateAiFields
-                  })}
+                  {...register("aiPrompt.discussionPrompt")}
                   disabled={disableAiFields}
                 />
-                {errors.aiPrompt?.discussionPrompt &&
-                  <span className="form-error">{errors.aiPrompt?.discussionPrompt?.message}</span>
-                }
               </div>
             </td>
           </tr>

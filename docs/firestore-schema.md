@@ -45,9 +45,39 @@ What reaches the AI prompt depends on who wrote the rated comment. Ratings of Ad
 sent as a count per value. Ratings of comments people wrote are sent as the comment itself — its
 text, its tag, and a count per value — fenced, escaped and length-capped.
 
+## Researcher dashboard activity
+
+The top-level `researcher_dashboard` collection holds the portal researcher dashboard's per-learner
+activity documents, at `researcher_dashboard/{portal}/activity/{class_hash}/users/{uid}`: `{portal}` is
+the portal host with `.` as `_`, `{uid}` the student's portal user id. They have the shape
+report-service writes for Activity Player answers, so the dashboard reads both the same way:
+
+- `lastActivityAt`: the server time of the write that recorded the student's most recent change, not
+  the time of the change itself, which is earlier.
+- `writeCount`: incremented by each write; a change signal, compared only for inequality.
+- `changed`: a map from portal offering id to the server time of the write that recorded the student's
+  last change in that offering's problem, planning or group documents. Personal, learning log and class
+  documents update only the first two fields.
+
+The CLUE app writes the document itself (`src/models/stores/activity-recorder.ts`), only for a student
+launched from the portal or standalone (`appMode` `authed`). A change counts once its history entry is
+uploaded and a content save covering it has succeeded, or 30 seconds after the upload if no such save
+is confirmed; a change still waiting when the page closes is written then. A change whose history
+upload fails, or that is rolled back after a conflicting edit in a group or class document, is never
+recorded. The steps a running Simulator or DataFlow tile records on its own (`SimulatorTool`
+`.../step`, `DataflowProgram` `.../tickAndProcess`) do not count. Each tab writes at most every 5
+seconds; a student with several tabs open can write more often. The Firestore rule limits a student to
+their own document, their own class and portal, their launch offering's key and the server's clock.
+Only a researcher token for the class can read them. Nothing deletes them.
+
+Activity is recorded only for students on a CLUE release that includes the recorder, launched from an
+offering that uses the current version: an offering pinned to a `/version/` URL records nothing until it
+is repointed. A launch without `firebaseEnv=staging` writes to production Firebase, even from the staging
+portal.
+
 ## Top level collections
 
-Besides `analysis` and `summaries`, the rest of the top-level collections are similar to Firebase:
+Besides `analysis`, `summaries` and `researcher_dashboard`, the rest of the top-level collections are similar to Firebase:
 
 `authed, demo, dev, qa, tests, users`
 

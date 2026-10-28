@@ -50,6 +50,7 @@ export interface IUnitConfig extends IItemTemplateConfig {
   enableCommentRoles: CommentRole[];
   aiEvaluation?: AIEvaluation;
   aiPrompt: IAiPrompt;
+  aiEvaluateOnSessionEnd?: boolean;
   chatTutorPrompts?: IChatTutorPrompts;
   chatTutorEnabled?: boolean;
   chatTutorIntro?: string;
@@ -152,7 +153,9 @@ export interface IAiPrompt {
   categorizationDescription: string;
   categories: string[];
   keyIndicatorsPrompt: string;
-  discussionPrompt: string;
+  // Optional, matching `AIPromptModel` and the shared `IAiPrompt`. `systemPrompt`, `mainPrompt`,
+  // `categorizationDescription` and `keyIndicatorsPrompt` are not: the authoring form requires them.
+  discussionPrompt?: string;
   // Accepted in existing unit JSON and ignored: every evaluation sends both representations.
   summarizer?: string;
 }

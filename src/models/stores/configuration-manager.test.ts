@@ -155,6 +155,16 @@ describe("ConfigurationManager", () => {
     expect(config.aiPrompt).toBeUndefined();
   });
 
+  it("should return aiEvaluateOnSessionEnd from configuration when defined", () => {
+    const config = new ConfigurationManager(defaults, [{ ...overrides, aiEvaluateOnSessionEnd: true }]);
+    expect(config.aiEvaluateOnSessionEnd).toBe(true);
+  });
+
+  it("should return undefined aiEvaluateOnSessionEnd when not configured", () => {
+    const config = new ConfigurationManager(defaults, []);
+    expect(config.aiEvaluateOnSessionEnd).toBeUndefined();
+  });
+
   it("should return commentTags when showCommentTag is true", () => {
     const defaultsWithCommentTags = {
       ...defaults,
