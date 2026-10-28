@@ -102,10 +102,10 @@ export class CcDeviceSession {
   }
 
   // Asks the device to draw attention to itself. Any reply to it, ok or err, means it answered.
-  identify(timeoutMs = kIdentifyTimeoutMs): Promise<IdentifyResult> {
+  identify(): Promise<IdentifyResult> {
     const seq = this.nextSeq();
     return new Promise(resolve => {
-      const timer = setTimeout(() => finish("noAnswer"), timeoutMs);
+      const timer = setTimeout(() => finish("noAnswer"), kIdentifyTimeoutMs);
       const finish = (result: IdentifyResult) => {
         clearTimeout(timer);
         this.identifies.delete(seq);
