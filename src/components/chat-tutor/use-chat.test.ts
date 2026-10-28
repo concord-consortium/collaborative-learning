@@ -143,10 +143,11 @@ describe("useChat logging", () => {
   const eventsNamed = (event: LogEventName) =>
     mockLog.mock.calls.filter(([e]) => e === event);
 
-  it("logs the timeout exactly once, however many renders follow", () => {
+  it("logs the timeout exactly once, however many renders follow", async () => {
     const t = stubTransport();
-    const { rerender } = renderWithContext(t.transport);
+    const { result, rerender } = renderWithContext(t.transport);
 
+    await act(async () => { await result.current.sendMessage("how do I start?"); });
     t.turns([userTurn("m1")]);
     t.status("generating");
     advance(kReplyDeadlineMs);
@@ -193,6 +194,35 @@ describe("useChat logging", () => {
     });
 
     expect(eventsNamed(LogEventName.AI_CHAT_MESSAGE_SENT)).toHaveLength(0);
+  });
+
+  // A wedged conversation re-arms the deadline every time the sidebar is reopened, because
+  // isAwaitingReply is computed over rehydrated history. The message must still appear — the
+  // conversation really is unanswered — but counting it again would inflate the timeout rate
+  // against a denominator that counted the send once.
+  it("shows the timeout for a conversation already waiting on open, but does not log it", () => {
+    const t = stubTransport();
+    const { result } = renderChat(t.transport, logContext);
+
+    // No send in this session: this is rehydrated history for a turn sent earlier.
+    t.turns([userTurn("m1")]);
+    t.status("generating");
+    advance(kReplyDeadlineMs);
+
+    expect(result.current.timedOut).toBe(true);
+    expect(eventsNamed(LogEventName.AI_CHAT_TIMEOUT)).toHaveLength(0);
+  });
+
+  it("logs the timeout for a message sent in this session", async () => {
+    const t = stubTransport();
+    const { result } = renderChat(t.transport, logContext);
+
+    await act(async () => { await result.current.sendMessage("how do I start?"); });
+    t.turns([userTurn("m1")]);
+    t.status("generating");
+    advance(kReplyDeadlineMs);
+
+    expect(eventsNamed(LogEventName.AI_CHAT_TIMEOUT)).toHaveLength(1);
   });
 
   // These logs reach a research database and Rollbar. Student writing belongs in neither, and a

@@ -58,6 +58,10 @@ export const AIComponent: React.FC<ITileProps> = observer((props) => {
 
     const generation = ++requestGenerationRef.current;
     const isCurrent = () => requestGenerationRef.current === generation;
+    // refreshCount is stripped by exportJson, so a freshly loaded tile starts at 0 and this is
+    // true only once the student has actually clicked Update. It decides whether a failure is
+    // theirs to see -- see the catch below.
+    const userRequested = content.refreshCount > 0;
     // Undo a superseded run's own blanking before anything else runs, so this run starts from real
     // text — otherwise this run's own capture below would save the blank, not the good text.
     if (previousTextRef.current !== undefined) {
@@ -139,16 +143,27 @@ export const AIComponent: React.FC<ITileProps> = observer((props) => {
             setLastUpdated(new Date(timestamp._seconds*1000));
           }
         } catch (error) {
-          // Say what happened rather than restore the old text, which looks to the student like a
-          // refresh that did nothing. This message is document content, so it persists and syncs —
-          // the same tradeoff AI_TILE_EMPTY_MESSAGE makes above; a later refresh overwrites it.
+          // A student who clicked Update is owed a visible answer: restoring the old text would
+          // look exactly like a refresh that did nothing. The message is document content, so it
+          // persists and syncs — the same tradeoff AI_TILE_EMPTY_MESSAGE makes above.
+          //
+          // The automatic refresh this effect fires on mount is NOT something the student asked
+          // for, and writing a failure there would replace a good prior answer with an error over
+          // a transient hiccup — saved, synced, and in front of the teacher. That case restores,
+          // which is what the tile did before this message existed.
+          //
           // A superseded run is not a failure, and the newer run's own restore handles it; isAlive
           // because writing to a node destroyed mid-request would hide the error being reported.
           if (isCurrent() && isAlive(content)) {
-            content.setText(AI_TILE_REQUEST_FAILED_MESSAGE);
-            previousTextRef.current = undefined;
-            // The console.error below reaches nobody: Rollbar captures uncaught errors, not caught
-            // ones. This log is what makes a tile failure countable.
+            if (userRequested) {
+              content.setText(AI_TILE_REQUEST_FAILED_MESSAGE);
+              previousTextRef.current = undefined;
+            } else if (previousTextRef.current !== undefined) {
+              content.setText(previousTextRef.current);
+              previousTextRef.current = undefined;
+            }
+            // Logged either way: the console.error below reaches nobody, since Rollbar captures
+            // uncaught errors and not caught ones, and an automatic failure is still a failure.
             logAiEvent(content, "requestFailed", {});
           }
           console.error("Failed to query AI", error);

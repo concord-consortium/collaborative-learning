@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { ChatStatus, ChatTransport, ChatTurn } from "./transport";
 import { Logger } from "../../lib/logger";
 import { LogEventName } from "../../lib/logger-types";
@@ -49,6 +49,12 @@ export function useChat({ transport, header, logContext }: UseChatOptions): UseC
   const [status, setStatus] = useState<ChatStatus>("idle");
   const [error, setError] = useState<string | null>(null);
   const [timedOut, setTimedOut] = useState(false);
+  // Whether the student sent anything during this mount. isAwaitingReply is computed over
+  // rehydrated history and the sidebar unmounts when closed, so an already-wedged conversation
+  // re-arms the deadline every time it is reopened. The message should still appear each time —
+  // the conversation really is unanswered — but counting those would inflate AI_CHAT_TIMEOUT with
+  // repeat views of one failure, against a denominator that counts the send once.
+  const sentThisSessionRef = useRef(false);
 
   // Re-subscribe whenever the transport instance changes — this is the hard
   // conversation swap when the student switches documents or problems.
@@ -58,6 +64,7 @@ export function useChat({ transport, header, logContext }: UseChatOptions): UseC
     setError(null);
     setStatus("idle");
     setTurns([]);
+    sentThisSessionRef.current = false;
     return transport.subscribe(setTurns, setStatus);
   }, [transport]);
 
@@ -83,7 +90,7 @@ export function useChat({ transport, header, logContext }: UseChatOptions): UseC
     if (!waiting) return;
     const timer = setTimeout(() => {
       setTimedOut(true);
-      Logger.log(LogEventName.AI_CHAT_TIMEOUT, { ...logContext });
+      if (sentThisSessionRef.current) Logger.log(LogEventName.AI_CHAT_TIMEOUT, { ...logContext });
     }, kReplyDeadlineMs);
     return () => clearTimeout(timer);
   }, [waiting, newestTurnId, logContext]);
@@ -98,6 +105,7 @@ export function useChat({ transport, header, logContext }: UseChatOptions): UseC
       await transport.sendUserMessage(trimmed);
       // Only once the write landed, so the denominator counts messages the backend could
       // actually have answered.
+      sentThisSessionRef.current = true;
       Logger.log(LogEventName.AI_CHAT_MESSAGE_SENT, { ...logContext });
     } catch (e) {
       setError((e as Error)?.message || "Failed to send your message. Please try again.");

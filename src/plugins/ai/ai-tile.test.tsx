@@ -485,20 +485,46 @@ describe("AIComponent", () => {
 
     // previousText here is the model's non-empty authored default, so this distinguishes
     // "restored" from "left blank" — the next test covers a real prior response.
-    it("on a populated document, when getAiContent rejects: the failure message is shown, Loading " +
-       "is gone, and nothing escapes as an unhandled rejection", async () => {
+    // The student did not ask for the mount-time refresh, so a transient failure there must not
+    // replace a good prior answer with an error -- which is document content, saved, synced and
+    // visible to the teacher.
+    it("on a populated document, when the automatic mount refresh rejects: the previous text is " +
+       "restored, Loading is gone, and nothing escapes as an unhandled rejection", async () => {
       mockStores.documents.getDocument.mockReturnValue(documentWith(populatedDocContent()));
       mockGetAiContent.mockRejectedValueOnce(new Error("network error"));
       const aiContent = defaultAIContent();
       aiContent.setPrompt("What do you think?");
+      const previousText = aiContent.text;
       const aiModel = TileModel.create({ content: aiContent });
 
       const { queryByText } = await act(async () => render(
         <AIComponent {...defaultProps} model={aiModel} documentId="test-doc-1" />
       ));
 
-      expect(aiContent.text).toBe(AI_TILE_REQUEST_FAILED_MESSAGE);
+      expect(aiContent.text).toBe(previousText);
       expect(queryByText("Loading...")).not.toBeInTheDocument();
+    });
+
+    // The student clicked Update, so restoring the old text would look exactly like a refresh
+    // that did nothing. This is the case the durable message exists for.
+    it("on a populated document, when a student-requested refresh rejects: the failure message " +
+       "is shown", async () => {
+      mockStores.documents.getDocument.mockReturnValue(documentWith(populatedDocContent()));
+      const aiContent = defaultAIContent();
+      aiContent.setPrompt("What do you think?");
+      const aiModel = TileModel.create({ content: aiContent });
+
+      await act(async () => render(<AIComponent {...defaultProps} model={aiModel} documentId="test-doc-1" />));
+      expect(aiContent.text).toBe("Mocked customized content");
+
+      mockGetAiContent.mockRejectedValueOnce(new Error("network error"));
+      await act(async () => {
+        aiContent.requestRefresh();
+        await Promise.resolve();
+        await Promise.resolve();
+      });
+
+      expect(aiContent.text).toBe(AI_TILE_REQUEST_FAILED_MESSAGE);
     });
 
     // The tile can be deleted while a request is in flight. Pins that the catch block's isAlive

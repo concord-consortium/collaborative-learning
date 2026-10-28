@@ -236,7 +236,6 @@ export class FirestoreTransport implements ChatTransport {
     // the ForeverLearning path. The composer stays open during a pending reply so a student can
     // escape a wedged turn, so overlapping sends are expected, not exotic.
     const claimedRight = decision.attachRight ? right : undefined;
-    const previousRightHash = this.lastSentRightHash;
     if (claimedRight) {
       this.lastSentRightHash = claimedRight.hash;
     }
@@ -244,11 +243,16 @@ export class FirestoreTransport implements ChatTransport {
     try {
       await this.messagesRef().add(message);
     } catch (e) {
-      // The workspace never left the client, so the record has to go back — but only if this send
-      // is still the one holding it. `claimedRight` is what separates this from an unchanged send,
+      // The workspace never left the client, so the claim has to go — but only if this send is
+      // still the one holding it. `claimedRight` is what separates this from an unchanged send,
       // whose hash matches precisely because it attached nothing.
+      //
+      // Cleared rather than restored to the previous hash: with two sends in flight that previous
+      // one may itself have failed, and restoring it would claim a delivery that never happened,
+      // leaving the next send to omit the workspace entirely. Clearing costs at most one redundant
+      // re-attach, which is the cheaper way to be wrong.
       if (claimedRight && this.lastSentRightHash === claimedRight.hash) {
-        this.lastSentRightHash = previousRightHash;
+        this.lastSentRightHash = undefined;
       }
       throw e;
     }

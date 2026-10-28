@@ -393,6 +393,32 @@ describe("FirestoreTransport workspace bookkeeping under overlapping sends", () 
     expect(added[2]).not.toHaveProperty("rightContext");
   });
 
+  // Both sends failing means the student was offline; neither message landed. Restoring the
+  // earlier send's hash would claim a workspace the server never received, so the next send that
+  // DID land would carry no workspace and the tutor would answer blind to the student's work.
+  it("claims nothing when two overlapping sends both fail", async () => {
+    const { added, settle, transport, edit } = transportWithMutableWorkspace();
+
+    const first = transport.sendUserMessage("one");          // claims W1
+    edit("W2", "H2");
+    const second = transport.sendUserMessage("two");         // claims W2, remembers W1
+
+    settle[0].reject(new Error("offline"));
+    await expect(first).rejects.toThrow("offline");
+    settle[1].reject(new Error("offline"));
+    await expect(second).rejects.toThrow("offline");
+
+    // The student undoes the edit, so the document is back at the workspace the FIRST (also
+    // failed) send claimed. Restoring that claim on the second send's rollback would make this
+    // send attach nothing, and the server has never seen any workspace at all.
+    edit("W1", "H1");
+    const third = transport.sendUserMessage("three");
+    settle[2].resolve();
+    await third;
+
+    expect(added[2].rightContext).toBe("W1");
+  });
+
   // Nothing retroactively tells an in-flight turn about an edit: the payload is computed before
   // the write. Pinned here because the guarantee is load-bearing and invisible from the call site.
   it("does not change what a message carried when the document is edited mid-send", async () => {
