@@ -14,7 +14,7 @@ import { useStores } from "../../hooks/use-stores";
 import { useUserContext } from "../../hooks/use-user-context";
 import { DocumentContentModel } from "../../models/document/document-content";
 import { getDocumentIdentifier } from "../../models/document/document-utils";
-import { AI_TILE_EMPTY_MESSAGE } from "../../models/document/ai-evaluation-messages";
+import { AI_TILE_EMPTY_MESSAGE, AI_TILE_REQUEST_FAILED_MESSAGE } from "../../models/document/ai-evaluation-messages";
 import { liveProblemsFromUnit } from "../../models/curriculum/unit-utils";
 import { AIContentModelType, logAiEvent } from "./ai-content";
 import { changeSlashesToUnderscores } from "./ai-utils";
@@ -139,12 +139,17 @@ export const AIComponent: React.FC<ITileProps> = observer((props) => {
             setLastUpdated(new Date(timestamp._seconds*1000));
           }
         } catch (error) {
-          // Restore rather than leave the blank text set above; no-op if nothing was cleared, a
-          // newer refresh has taken over, or the tile was deleted mid-request — writing to a
-          // destroyed node would throw and hide the error this is trying to report.
-          if (isCurrent() && previousTextRef.current !== undefined && isAlive(content)) {
-            content.setText(previousTextRef.current);
+          // Say what happened rather than restore the old text, which looks to the student like a
+          // refresh that did nothing. This message is document content, so it persists and syncs —
+          // the same tradeoff AI_TILE_EMPTY_MESSAGE makes above; a later refresh overwrites it.
+          // A superseded run is not a failure, and the newer run's own restore handles it; isAlive
+          // because writing to a node destroyed mid-request would hide the error being reported.
+          if (isCurrent() && isAlive(content)) {
+            content.setText(AI_TILE_REQUEST_FAILED_MESSAGE);
             previousTextRef.current = undefined;
+            // The console.error below reaches nobody: Rollbar captures uncaught errors, not caught
+            // ones. This log is what makes a tile failure countable.
+            logAiEvent(content, "requestFailed", {});
           }
           console.error("Failed to query AI", error);
         } finally {

@@ -1,6 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import React from "react";
 import WaitingMessage, { StatusMessage } from "./waiting-message";
+import { IDEAS_SLOW_MESSAGE } from "../../models/document/ai-evaluation-messages";
 
 jest.mock("../../hooks/use-stores", () => ({
   useStores: () => ({
@@ -22,6 +23,11 @@ describe("WaitingMessage", () => {
   it("renders Ada's status message when awaiting a remote comment", () => {
     render(<WaitingMessage content={{ isAwaitingRemoteComment: true } as any} />);
     expect(screen.getByTestId("comment")).toHaveTextContent("Ada is thinking about it...");
+  });
+
+  it("says the wait has become unusual once the request is slow", () => {
+    render(<WaitingMessage content={{ isAwaitingRemoteComment: true, isRemoteCommentSlow: true } as any} />);
+    expect(screen.getByTestId("comment")).toHaveTextContent(IDEAS_SLOW_MESSAGE);
   });
 
   it("announces itself as a polite live region", () => {

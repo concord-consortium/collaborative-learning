@@ -1,7 +1,7 @@
 import React, { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import classNames from "classnames";
 import { v4 as uuidv4 } from "uuid";
-import { UseChatResult } from "./use-chat";
+import { kTimeoutMessage, UseChatResult } from "./use-chat";
 import { ChatTurn } from "./transport";
 
 import "./chat.scss";
@@ -119,7 +119,7 @@ const DebugTurn: React.FC<{ turn: ChatTurn }> = ({ turn }) => {
 
 export const Chat: React.FC<IProps> = ({ chat, onClose, closeLabel, transcriptTitle, introText,
     onHighlightHover, onHighlightToggle, activeHighlightKey, enableHighlights = false }) => {
-  const { turns, error, pending, sendMessage, header } = chat;
+  const { turns, error, pending, timedOut, sendMessage, header } = chat;
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -338,7 +338,7 @@ export const Chat: React.FC<IProps> = ({ chat, onClose, closeLabel, transcriptTi
 
       {/* single polite live region announcing the completed assistant reply */}
       <div className="visually-hidden" aria-live="polite" data-testid="chat-live">
-        {!pending && lastAssistantText ? `Ada said: ${lastAssistantText}` : ""}
+        {!pending && !timedOut && lastAssistantText ? `Ada said: ${lastAssistantText}` : ""}
       </div>
 
       {/* Pinning a highlight moves a ring onto an object elsewhere in the document, where nothing
@@ -360,7 +360,8 @@ export const Chat: React.FC<IProps> = ({ chat, onClose, closeLabel, transcriptTi
           {activeHighlightLabel ? `Highlighting ${activeHighlightLabel}` : ""}
         </div>}
 
-      {error && <div className="chat-error" role="alert" data-testid="chat-error">{error}</div>}
+      {(error || timedOut) &&
+        <div className="chat-error" role="alert" data-testid="chat-error">{error ?? kTimeoutMessage}</div>}
 
       <form className="chat-composer" onSubmit={onSubmit} data-testid="chat-composer">
         <label htmlFor={inputId} className="visually-hidden">Message Ada</label>

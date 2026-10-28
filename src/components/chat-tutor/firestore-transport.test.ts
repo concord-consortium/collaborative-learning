@@ -285,3 +285,125 @@ describe("FirestoreTransport measures the workspace in bytes", () => {
     expect(added[0]).not.toHaveProperty("rightContent");
   });
 });
+
+
+// The composer stays open while a reply is pending — that is the student's only escape from a
+// wedged turn — so two sends can be in flight at once. `lastSentRightHash` therefore has to track
+// what was SENT, not what happened to resolve last.
+describe("FirestoreTransport workspace bookkeeping under overlapping sends", () => {
+  // Unlike fakeFirestore above, each add() hands back a promise the test settles by hand, which is
+  // the only way to express one send resolving while another is still open.
+  function deferredFirestore() {
+    const added: Record<string, unknown>[] = [];
+    const settle: Array<{ resolve: () => void; reject: (e: unknown) => void }> = [];
+    const messages = {
+      add: (doc: Record<string, unknown>) => {
+        added.push(doc);
+        return new Promise<void>((resolve, reject) => settle.push({ resolve, reject }));
+      }
+    };
+    const firestore = { collection: () => ({ doc: () => ({ collection: () => messages }) }) };
+    return { added, settle, firestore: firestore as any };
+  }
+
+  function transportWithMutableWorkspace() {
+    const { added, settle, firestore } = deferredFirestore();
+    let summary = { markdown: "W1", hash: "H1" };
+    const transport = new FirestoreTransport({
+      firestore, conversationId: "conv1", uid: "123", contextId: "class1",
+      problemPath: "sas/1/2", getLeftContext: () => "{}",
+      getRightSummary: () => summary,
+    });
+    const edit = (markdown: string, hash: string) => { summary = { markdown, hash }; };
+    return { added, settle, transport, edit };
+  }
+
+  it("records the hash in send order, not completion order", async () => {
+    const { added, settle, transport, edit } = transportWithMutableWorkspace();
+
+    const first = transport.sendUserMessage("one");
+    edit("W2", "H2");
+    const second = transport.sendUserMessage("two");
+
+    // B's write lands before A's, which is what put the client's record behind the server's.
+    settle[1].resolve();
+    settle[0].resolve();
+    await Promise.all([first, second]);
+
+    const third = transport.sendUserMessage("three");
+    settle[2].resolve();
+    await third;
+
+    expect(added[1].rightContext).toBe("W2");
+    expect(added[2]).not.toHaveProperty("rightContext");
+  });
+
+  it("re-attaches a workspace whose write failed", async () => {
+    const { added, settle, transport } = transportWithMutableWorkspace();
+
+    const first = transport.sendUserMessage("one");
+    settle[0].reject(new Error("offline"));
+    await expect(first).rejects.toThrow("offline");
+
+    const second = transport.sendUserMessage("two");
+    settle[1].resolve();
+    await second;
+
+    expect(added[1].rightContext).toBe("W1");
+  });
+
+  // A's rollback must not undo B's successful delivery of the same workspace.
+  it("does not roll back over a newer send that succeeded", async () => {
+    const { added, settle, transport, edit } = transportWithMutableWorkspace();
+
+    const first = transport.sendUserMessage("one");
+    edit("W2", "H2");
+    const second = transport.sendUserMessage("two");
+
+    settle[1].resolve();
+    await second;
+    settle[0].reject(new Error("offline"));
+    await expect(first).rejects.toThrow("offline");
+
+    const third = transport.sendUserMessage("three");
+    settle[2].resolve();
+    await third;
+
+    expect(added[2]).not.toHaveProperty("rightContext");
+  });
+
+  // The hashes match precisely BECAUSE this send attached nothing, so a hash match alone is not
+  // evidence that this send is the one holding the record.
+  it("does not clear the record when an unchanged send fails", async () => {
+    const { added, settle, transport } = transportWithMutableWorkspace();
+
+    const first = transport.sendUserMessage("one");
+    settle[0].resolve();
+    await first;
+
+    const second = transport.sendUserMessage("two"); // attaches nothing: workspace unchanged
+    settle[1].reject(new Error("offline"));
+    await expect(second).rejects.toThrow("offline");
+
+    const third = transport.sendUserMessage("three");
+    settle[2].resolve();
+    await third;
+
+    expect(added[0].rightContext).toBe("W1");
+    expect(added[2]).not.toHaveProperty("rightContext");
+  });
+
+  // Nothing retroactively tells an in-flight turn about an edit: the payload is computed before
+  // the write. Pinned here because the guarantee is load-bearing and invisible from the call site.
+  it("does not change what a message carried when the document is edited mid-send", async () => {
+    const { added, settle, transport, edit } = transportWithMutableWorkspace();
+
+    const first = transport.sendUserMessage("one");
+    edit("W2", "H2");
+    settle[0].resolve();
+    await first;
+
+    expect(added).toHaveLength(1);
+    expect(added[0].rightContext).toBe("W1");
+  });
+});
