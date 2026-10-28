@@ -161,14 +161,26 @@ describe("useChat logging", () => {
 
   // The transport re-emits its status on every snapshot, so a log keyed on anything but the
   // transition would fire repeatedly for one failure.
-  it("logs an unavailable backend once per transition, not once per snapshot", () => {
+  it("logs an unavailable backend once per transition, not once per snapshot", async () => {
     const t = stubTransport();
-    renderWithContext(t.transport);
+    const { result } = renderWithContext(t.transport);
 
+    await act(async () => { await result.current.sendMessage("how do I start?"); });
     t.status("error");
     t.status("error");
 
     expect(eventsNamed(LogEventName.AI_CHAT_UNAVAILABLE)).toHaveLength(1);
+  });
+
+  // The parent doc's "error" persists in Firestore, so reopening a failed conversation transitions
+  // idle -> error again. Counting those would inflate the failure rate with repeat views.
+  it("does not log an unavailable backend for a conversation that was already failed on open", () => {
+    const t = stubTransport();
+    renderChat(t.transport, logContext);
+
+    t.status("error");
+
+    expect(eventsNamed(LogEventName.AI_CHAT_UNAVAILABLE)).toHaveLength(0);
   });
 
   it("logs a send that landed", async () => {

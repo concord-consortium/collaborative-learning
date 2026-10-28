@@ -72,7 +72,9 @@ export function useChat({ transport, header, logContext }: UseChatOptions): UseC
   useEffect(() => {
     if (status === "error") {
       setError("Ada is currently unavailable. Please try again.");
-      Logger.log(LogEventName.AI_CHAT_UNAVAILABLE, { ...logContext });
+      // Gated like the timeout below: the parent doc's "error" persists in Firestore, so every
+      // reopen of a failed conversation would otherwise log again with no matching send.
+      if (sentThisSessionRef.current) Logger.log(LogEventName.AI_CHAT_UNAVAILABLE, { ...logContext });
     }
   }, [status, logContext]);
 

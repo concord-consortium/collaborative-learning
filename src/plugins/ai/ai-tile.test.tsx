@@ -37,6 +37,7 @@ import { ITileApi } from "../../components/tiles/tile-api";
 import { TileModel } from "../../models/tiles/tile-model";
 import { logTileChangeEvent } from "../../models/tiles/log/log-tile-change-event";
 import { LogEventName } from "../../lib/logger-types";
+import { Logger } from "../../lib/logger";
 import { defaultAIContent } from "./ai-content";
 import { AIComponent } from "./ai-tile";
 import {
@@ -96,6 +97,10 @@ jest.mock("../../models/document/document-utils", () => ({
 // Logger.stores is uninitialized in this component test; mock the change logger so setPrompt/setText
 // don't crash when the AI content logs changes.
 jest.mock("../../models/tiles/log/log-tile-change-event", () => ({ logTileChangeEvent: jest.fn() }));
+
+// The failure event goes through Logger directly, deliberately bypassing the tile-change helper
+// (which would also emit QUESTION_ANSWERS_CHANGE for a tile inside a Question tile).
+jest.mock("../../lib/logger", () => ({ Logger: { log: jest.fn() } }));
 
 describe("AIComponent", () => {
   const content = defaultAIContent();
@@ -505,6 +510,42 @@ describe("AIComponent", () => {
       expect(queryByText("Loading...")).not.toBeInTheDocument();
     });
 
+    // refreshCount stays positive after an Update, so classifying on "> 0" would make a later
+    // automatic request — here a remount of the same model, as happens when a document view is
+    // closed and reopened — look student-requested, and let its failure overwrite a good saved
+    // answer with an error nobody asked for.
+    it("after a successful Update, a failure on a remount of the same model still restores",
+       async () => {
+      mockStores.documents.getDocument.mockReturnValue(documentWith(populatedDocContent()));
+      const aiContent = defaultAIContent();
+      aiContent.setPrompt("What do you think?");
+      const aiModel = TileModel.create({ content: aiContent });
+
+      const { unmount } = await act(async () =>
+        render(<AIComponent {...defaultProps} model={aiModel} documentId="test-doc-1" />));
+
+      // A real Update that succeeds, leaving refreshCount positive.
+      mockGetAiContent.mockResolvedValueOnce({ data: { text: "a good answer" } });
+      await act(async () => {
+        aiContent.requestRefresh();
+        await Promise.resolve();
+        await Promise.resolve();
+      });
+      expect(aiContent.text).toBe("a good answer");
+
+      unmount();
+
+      const callsBefore = mockGetAiContent.mock.calls.length;
+      mockGetAiContent.mockRejectedValueOnce(new Error("network error"));
+      await act(async () => render(
+        <AIComponent {...defaultProps} model={aiModel} documentId="test-doc-1" />
+      ));
+
+      // Without this the test could pass by the remount never making a request at all.
+      expect(mockGetAiContent.mock.calls.length).toBe(callsBefore + 1);
+      expect(aiContent.text).toBe("a good answer");
+    });
+
     // The student clicked Update, so restoring the old text would look exactly like a refresh
     // that did nothing. This is the case the durable message exists for.
     it("on a populated document, when a student-requested refresh rejects: the failure message " +
@@ -590,7 +631,7 @@ describe("AIComponent", () => {
 
       await act(async () => render(<AIComponent {...defaultProps} model={aiModel} documentId="test-doc-1" />));
 
-      (logTileChangeEvent as jest.Mock).mockClear();
+      (Logger.log as jest.Mock).mockClear();
       mockGetAiContent.mockRejectedValueOnce(new Error("network error"));
       await act(async () => {
         aiContent.requestRefresh();
@@ -598,11 +639,13 @@ describe("AIComponent", () => {
         await Promise.resolve();
       });
 
-      const failures = (logTileChangeEvent as jest.Mock).mock.calls.filter(
-        ([, params]) => params.operation === "requestFailed");
-      expect(failures).toEqual([
-        [LogEventName.AI_TOOL_CHANGE, { tileId: aiModel.id, operation: "requestFailed", change: {} }]
-      ]);
+      const failures = (Logger.log as jest.Mock).mock.calls.filter(
+        ([event]) => event === LogEventName.AI_TILE_REQUEST_FAILED);
+      expect(failures).toHaveLength(1);
+      expect(failures[0][1]).toMatchObject({ tileId: aiModel.id, userRequested: true });
+      // Its own event, so it can never cascade into QUESTION_ANSWERS_CHANGE.
+      expect(logTileChangeEvent).not.toHaveBeenCalledWith(
+        LogEventName.AI_TOOL_CHANGE, expect.objectContaining({ operation: "requestFailed" }));
 
       // A superseded run is not a failure: its rejection must log nothing.
       let rejectOlderRun: (error: Error) => void;
@@ -612,15 +655,15 @@ describe("AIComponent", () => {
       await act(async () => { aiContent.requestRefresh(); await Promise.resolve(); });
       await act(async () => { aiContent.requestRefresh(); await Promise.resolve(); await Promise.resolve(); });
 
-      (logTileChangeEvent as jest.Mock).mockClear();
+      (Logger.log as jest.Mock).mockClear();
       await act(async () => {
         rejectOlderRun!(new Error("stale network error"));
         await Promise.resolve();
         await Promise.resolve();
       });
 
-      expect((logTileChangeEvent as jest.Mock).mock.calls.filter(
-        ([, params]) => params.operation === "requestFailed")).toHaveLength(0);
+      expect((Logger.log as jest.Mock).mock.calls.filter(
+        ([event]) => event === LogEventName.AI_TILE_REQUEST_FAILED)).toHaveLength(0);
     });
 
     it("on a populated document, when a later refresh's getAiContent rejects: the failure message " +

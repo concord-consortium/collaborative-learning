@@ -1,8 +1,8 @@
 import React from "react";
-import { render, screen } from "@testing-library/react";
+import { act, fireEvent, render, screen } from "@testing-library/react";
 import { Chat } from "./chat";
 import { ChatTurn } from "./transport";
-import { kTimeoutMessage, UseChatResult } from "./use-chat";
+import { kReplyDeadlineMs, kTimeoutMessage, UseChatResult } from "./use-chat";
 
 const chatResult = (over: Partial<UseChatResult> = {}): UseChatResult => ({
   turns: [], status: "idle", error: null, pending: false, timedOut: false,
@@ -44,5 +44,30 @@ describe("Chat reply timeout", () => {
   it("shows no message row when there is neither an error nor a timeout", () => {
     render(<Chat chat={chatResult()} />);
     expect(screen.queryByTestId("chat-error")).not.toBeInTheDocument();
+  });
+});
+
+// Firestore resolves add() only once the backend acknowledges it, so an offline write stays
+// pending indefinitely. Before this, `sending` never cleared: the composer stayed disabled and the
+// typing dots kept running past the deadline whose whole job is to end them — the exact scenario
+// the feature is meant to cover.
+describe("Chat with a send that never resolves", () => {
+  beforeEach(() => jest.useFakeTimers());
+  afterEach(() => jest.useRealTimers());
+
+  it("releases the composer and stops the dots on the deadline", () => {
+    const chat = chatResult({ sendMessage: jest.fn(() => new Promise<void>(() => undefined)) });
+    render(<Chat chat={chat} />);
+
+    fireEvent.change(screen.getByTestId("chat-input"), { target: { value: "how do I start?" } });
+    fireEvent.submit(screen.getByTestId("chat-composer"));
+
+    expect(screen.getByTestId("chat-typing")).toBeInTheDocument();
+    expect(screen.getByTestId("chat-input")).toBeDisabled();
+
+    act(() => { jest.advanceTimersByTime(kReplyDeadlineMs); });
+
+    expect(screen.queryByTestId("chat-typing")).not.toBeInTheDocument();
+    expect(screen.getByTestId("chat-input")).not.toBeDisabled();
   });
 });

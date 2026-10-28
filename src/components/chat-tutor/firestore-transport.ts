@@ -64,7 +64,14 @@ export class FirestoreTransport implements ChatTransport {
   // mirrors the parent doc's problemInstalled flag; a not-yet-created parent reads
   // as false, so the first send attaches LEFT
   private problemInstalled = false;
+  // `lastSentRightHash` means "the server has this one". It is therefore recorded only once a
+  // write is acknowledged: a claim staked before delivery would let a concurrent send skip a
+  // workspace whose only carrier then failed, and the tutor would answer that turn blind to the
+  // student's work. The sequence numbers keep a late-resolving older send from overwriting a newer
+  // one's record, which is what would otherwise re-attach a workspace the server already has.
   private lastSentRightHash: string | undefined;
+  private rightSendSeq = 0;
+  private lastSentRightSeq = 0;
   private onStatus?: (status: ChatStatus) => void;
 
   constructor(private readonly opts: FirestoreTransportOptions) {}
@@ -230,31 +237,16 @@ export class FirestoreTransport implements ChatTransport {
       message[right.field] = right.value;
     }
 
-    // Recorded before the write, not after. Two overlapping sends would otherwise record in
-    // completion order, leaving the client believing an older workspace was the last one sent and
-    // re-attaching one the server already has — up to kMaxAttachedWorkspace of document JSON on
-    // the ForeverLearning path. The composer stays open during a pending reply so a student can
-    // escape a wedged turn, so overlapping sends are expected, not exotic.
-    const claimedRight = decision.attachRight ? right : undefined;
-    if (claimedRight) {
-      this.lastSentRightHash = claimedRight.hash;
-    }
+    // The composer stays open during a pending reply so a student can escape a wedged turn, so
+    // overlapping sends are expected, not exotic. See lastSentRightHash for why this is recorded
+    // on acknowledgement rather than optimistically, and why the order matters.
+    const sendSeq = ++this.rightSendSeq;
 
-    try {
-      await this.messagesRef().add(message);
-    } catch (e) {
-      // The workspace never left the client, so the claim has to go — but only if this send is
-      // still the one holding it. `claimedRight` is what separates this from an unchanged send,
-      // whose hash matches precisely because it attached nothing.
-      //
-      // Cleared rather than restored to the previous hash: with two sends in flight that previous
-      // one may itself have failed, and restoring it would claim a delivery that never happened,
-      // leaving the next send to omit the workspace entirely. Clearing costs at most one redundant
-      // re-attach, which is the cheaper way to be wrong.
-      if (claimedRight && this.lastSentRightHash === claimedRight.hash) {
-        this.lastSentRightHash = undefined;
-      }
-      throw e;
+    await this.messagesRef().add(message);
+
+    if (decision.attachRight && right && sendSeq > this.lastSentRightSeq) {
+      this.lastSentRightSeq = sendSeq;
+      this.lastSentRightHash = right.hash;
     }
   }
 

@@ -1,7 +1,7 @@
 import React, { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import classNames from "classnames";
 import { v4 as uuidv4 } from "uuid";
-import { kTimeoutMessage, UseChatResult } from "./use-chat";
+import { kReplyDeadlineMs, kTimeoutMessage, UseChatResult } from "./use-chat";
 import { ChatTurn } from "./transport";
 
 import "./chat.scss";
@@ -224,11 +224,18 @@ export const Chat: React.FC<IProps> = ({ chat, onClose, closeLabel, transcriptTi
     if (!text || sending) return;
     setSending(true);
     setInput("");
+    // Firestore resolves add() only once the backend acknowledges it, so an offline write stays
+    // pending indefinitely (it is queued locally). Awaiting it for the UI would leave the composer
+    // disabled and the typing dots running forever — past the reply deadline whose whole job is to
+    // end exactly that. Release the composer on the same deadline. The write is left running and
+    // still reconciles if it lands later; this bounds the UI, not the delivery.
+    const release = setTimeout(() => setSending(false), kReplyDeadlineMs);
     try {
       await sendMessage(text);
     } catch {
       setInput(text); // restore so the student can retry (error surfaced by the hook)
     } finally {
+      clearTimeout(release);
       setSending(false);
     }
   };

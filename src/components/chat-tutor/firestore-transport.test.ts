@@ -419,6 +419,23 @@ describe("FirestoreTransport workspace bookkeeping under overlapping sends", () 
     expect(added[2].rightContext).toBe("W1");
   });
 
+  // The send that carries the workspace can fail while a later one that skipped it succeeds. If
+  // the hash were claimed before delivery, that later turn would reach the backend with no
+  // workspace at all and the tutor would answer it blind to the student's work.
+  it("still carries the workspace when the send that first attached it fails", async () => {
+    const { added, settle, transport } = transportWithMutableWorkspace();
+
+    const first = transport.sendUserMessage("one");   // attaches W1
+    const second = transport.sendUserMessage("two");  // document unchanged
+
+    settle[0].reject(new Error("offline"));
+    await expect(first).rejects.toThrow("offline");
+    settle[1].resolve();
+    await second;
+
+    expect(added[1].rightContext).toBe("W1");
+  });
+
   // Nothing retroactively tells an in-flight turn about an edit: the payload is computed before
   // the write. Pinned here because the guarantee is load-bearing and invisible from the call site.
   it("does not change what a message carried when the document is edited mid-send", async () => {

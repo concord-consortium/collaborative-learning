@@ -10,6 +10,8 @@ import { BasicEditableTileTitle } from "../../components/tiles/basic-editable-ti
 import { TileToolbar } from "../../components/toolbar/tile-toolbar";
 import { ITileProps } from "../../components/tiles/tile-component";
 import { useFirebaseFunction } from "../../hooks/use-firebase-function";
+import { Logger } from "../../lib/logger";
+import { LogEventName } from "../../lib/logger-types";
 import { useStores } from "../../hooks/use-stores";
 import { useUserContext } from "../../hooks/use-user-context";
 import { DocumentContentModel } from "../../models/document/document-content";
@@ -39,6 +41,10 @@ export const AIComponent: React.FC<ITileProps> = observer((props) => {
   // Text to restore when a request is invalidated with no successor to finish the job (e.g. the
   // class context disappears mid-request). Shared across runs, and cleared once no longer needed.
   const previousTextRef = useRef<string | undefined>(undefined);
+  // The refreshCount this effect last ran against. The effect also reruns when userContext, the
+  // document or unit config changes, so "has ever been refreshed" would misread those as the
+  // student asking — see userRequested below.
+  const lastRefreshCountRef = useRef(content.refreshCount);
 
   useEffect(() => {
     onRegisterTileApi({
@@ -58,10 +64,11 @@ export const AIComponent: React.FC<ITileProps> = observer((props) => {
 
     const generation = ++requestGenerationRef.current;
     const isCurrent = () => requestGenerationRef.current === generation;
-    // refreshCount is stripped by exportJson, so a freshly loaded tile starts at 0 and this is
-    // true only once the student has actually clicked Update. It decides whether a failure is
-    // theirs to see -- see the catch below.
-    const userRequested = content.refreshCount > 0;
+    // True only when refreshCount moved since the last run of this effect, i.e. the student
+    // clicked Update to cause THIS run. A rerun from any other dependency is automatic, however
+    // many times they clicked before. Decides whether a failure is theirs to see — see the catch.
+    const userRequested = content.refreshCount > lastRefreshCountRef.current;
+    lastRefreshCountRef.current = content.refreshCount;
     // Undo a superseded run's own blanking before anything else runs, so this run starts from real
     // text — otherwise this run's own capture below would save the blank, not the good text.
     if (previousTextRef.current !== undefined) {
@@ -164,7 +171,14 @@ export const AIComponent: React.FC<ITileProps> = observer((props) => {
             }
             // Logged either way: the console.error below reaches nobody, since Rollbar captures
             // uncaught errors and not caught ones, and an automatic failure is still a failure.
-            logAiEvent(content, "requestFailed", {});
+            //
+            // Its own event rather than logAiEvent: that routes through logTileBaseEvent, which
+            // for a tile inside a Question tile also emits QUESTION_ANSWERS_CHANGE carrying the
+            // question prompt and the sibling answers. A failed request is not an answer change,
+            // and these rows reach a research database and Rollbar.
+            Logger.log(LogEventName.AI_TILE_REQUEST_FAILED, {
+              tileId: model.id, documentId: identifier, userRequested
+            });
           }
           console.error("Failed to query AI", error);
         } finally {

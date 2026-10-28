@@ -584,10 +584,15 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
       return;
     }
 
-    // Every path that gives up on this click reports through here, so the four are countable
-    // against REQUEST_IDEA above. Identifiers and a reason only — no document content.
+    // Every path that gives up on this click reports through here. Logger.log with an explicit
+    // field list rather than logDocumentEvent: that helper expands the document into
+    // documentTitle and documentProperties, both student-authored, and these rows reach a research
+    // database and Rollbar. documentKey still joins a failure to its REQUEST_IDEA.
     const logFailure = (reason: IdeasFailureReason) =>
-      logDocumentEvent(LogEventName.IDEAS_REQUEST_FAILED, { document }, undefined, { reason, requestId });
+      Logger.log(LogEventName.IDEAS_REQUEST_FAILED, {
+        documentKey: document.key, documentType: document.type, documentUid: document.uid,
+        requestId, reason
+      });
 
     commentsManager.setIdeasClickInProgress(true);
 
