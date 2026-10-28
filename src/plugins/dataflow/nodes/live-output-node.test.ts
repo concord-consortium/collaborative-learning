@@ -1,9 +1,10 @@
 import { LiveOutputNode } from "./live-output-node";
 import { NodeLiveOutputTypes, resolveAllowedOutputTypes } from "../model/utilities/node";
 
-// Minimal fake SerialDevice that records which output writer the node invoked. The keyValue
-// branch of sendDataToSerialDevice reads only this.model and the device's deviceFamily, so an
-// Object.create stub of the node (as the rete-manager tests do) exercises the gate directly.
+// Minimal fake SerialDevice that records which output writer the node invoked. The combined
+// keyValue and ccDevice branch of sendDataToSerialDevice reads only this.model and the device's
+// deviceFamily, so an Object.create stub of the node (as the rete-manager tests do) exercises the
+// gate directly.
 function fakeSerialDevice(deviceFamily: string) {
   return {
     deviceFamily,
@@ -11,7 +12,7 @@ function fakeSerialDevice(deviceFamily: string) {
     servoWrites: [] as number[],
     writeToOutForBBGripper(val: number) { this.gripperWrites.push(val); },
     writeToOutForServo(val: number) { this.servoWrites.push(val); },
-    writeToOutForMicroBitRelayHub() { /* unused on the keyValue path */ },
+    writeToOutForMicroBitRelayHub() { /* unused on the keyValue and ccDevice paths */ },
   };
 }
 
@@ -34,8 +35,8 @@ describe("LiveOutputNode.sendDataToSerialDevice output gating (CLUE-567 #1)", ()
   });
 
   it("does not write a gripper command to a Spiker:bit, whose only output is a servo", () => {
-    // Regression for the protocol-only gate: arduino and spikerbit share the keyValue
-    // protocol, so gating on protocol alone let gripper integers reach the Spiker:bit's servo.
+    // Gating on protocol alone would let gripper commands reach a device whose only output is a
+    // servo.
     const device = fakeSerialDevice("spikerbit");
     send(makeNode(130, "Gripper 2.0"), device);
     expect(device.gripperWrites).toEqual([]);

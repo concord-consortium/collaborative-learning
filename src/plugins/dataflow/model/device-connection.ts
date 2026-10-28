@@ -1,7 +1,8 @@
 // This lives in the DataFlow plugin, not src/models/stores, because it imports the Spiker:bit
 // firmware hex, which has to stay in the DataFlow chunk.
-import { makeAutoObservable, reaction, runInAction } from "mobx";
+import { makeAutoObservable, observable, reaction, runInAction } from "mobx";
 import { SerialDevice } from "../../../models/stores/serial";
+import { CcDeviceSession, IdentifyResult } from "../../../models/stores/cc-device-session";
 import { SpikerbitDevice } from "../../../models/stores/spikerbit-device";
 import {
   createSpikerbitConnection, makeSpikerbitFlashDataSource
@@ -21,7 +22,23 @@ export const kDeviceChoiceLabels: Record<DeviceChoice, string> = {
   spikerbit: "Spiker:bit"
 };
 
-export type ConnectResult = "connected" | "canceled" | "failed";
+// How long disconnect waits for the board to take the `close` write before closing the transport
+// anyway. A write to a stalled port may never settle.
+export const kEndSessionTimeoutMs = 500;
+
+// How long the answer to "Is it alive?" stays before the check is cleared.
+export const kIdentifyResultMs = 3000;
+
+// An "Is it alive?" check: waiting for the board, or its answer.
+export type IdentifyCheckState = "checking" | IdentifyResult;
+
+interface IIdentifyCheck {
+  session: CcDeviceSession;
+  state: IdentifyCheckState;
+}
+
+// "inUse": another tab or app has claimed the board.
+export type ConnectResult = "connected" | "canceled" | "failed" | "inUse";
 
 // What dismissed the connect tutorial: OK in one tile, or any connection.
 export type ConnectTutorialDismissal = { by: "ok", tileId: string } | { by: "connection" };
@@ -34,8 +51,10 @@ export interface IDeviceConnectionDeps {
 
 const kNoDeviceSelected = "no-device-selected";
 
-function isNoDeviceSelected(error: unknown) {
-  return (error as { code?: string } | null)?.code === kNoDeviceSelected;
+const kDeviceInUse = "device-in-use";
+
+function errorCode(error: unknown) {
+  return (error as { code?: string } | null)?.code;
 }
 
 /**
@@ -59,6 +78,9 @@ export class DeviceConnection {
   // connection remembers the board, so Reconnect reopens it without the chooser. Connect
   // replaces it with a fresh one, which shows the chooser.
   private spikerbitDevice: SpikerbitDevice | undefined;
+  // The latest "Is it alive?" check, with the CcDeviceSession it asked. It counts only while that
+  // object is the active one, so a reconnect or a new device never shows an earlier board's answer.
+  private identifyCheck: IIdentifyCheck | undefined = undefined;
 
   constructor(serialDevice: SerialDevice, deps?: Partial<IDeviceConnectionDeps>) {
     this.serialDevice = serialDevice;
@@ -68,16 +90,19 @@ export class DeviceConnection {
       getSpikerbitFlashDataSource: () => makeSpikerbitFlashDataSource(spikerbitHex),
       ...deps
     };
-    makeAutoObservable<DeviceConnection, "serialDevice" | "deps" | "lastWebSerialTransport" | "spikerbitDevice">(
+    makeAutoObservable<DeviceConnection,
+        "serialDevice" | "deps" | "lastWebSerialTransport" | "spikerbitDevice" | "identifyCheck">(
       this,
       {
         serialDevice: false,
         deps: false,
         lastWebSerialTransport: false,
         spikerbitDevice: false,
+        identifyCheck: observable.ref,
         connect: false,
         reconnect: false,
-        disconnect: false
+        disconnect: false,
+        identify: false
       }
     );
     // A connection made any way, from any tile, ends the connect tutorial, so a later disconnect
@@ -93,6 +118,60 @@ export class DeviceConnection {
 
   get connectedLabel(): string | undefined {
     return this.isConnected && this.lastChoice ? kDeviceChoiceLabels[this.lastChoice] : undefined;
+  }
+
+  // The label of the device last connected, whether or not it still is.
+  get label(): string | undefined {
+    return this.lastChoice ? kDeviceChoiceLabels[this.lastChoice] : undefined;
+  }
+
+  get notResponding() {
+    return this.isConnected && !!this.serialDevice.ccDeviceSession?.notResponding;
+  }
+
+  // Only a device speaking the CC Device Protocol can be asked to identify itself.
+  get canIdentify() {
+    return this.isConnected && !!this.serialDevice.ccDeviceSession;
+  }
+
+  // The "Is it alive?" check for the connected device, as every tile's pane shows it.
+  get check(): IdentifyCheckState | undefined {
+    const check = this.identifyCheck;
+    return this.isConnected && check?.session === this.serialDevice.ccDeviceSession ? check?.state : undefined;
+  }
+
+  // Asks the device to identify itself, and keeps `check` up to date: checking, then the answer for
+  // kIdentifyResultMs.
+  async identify(): Promise<IdentifyResult> {
+    const session = this.serialDevice.ccDeviceSession;
+    if (!session) return "noAnswer";
+    const checking: IIdentifyCheck = { session, state: "checking" };
+    runInAction(() => { this.identifyCheck = checking; });
+    const result = await session.identify();
+    // A newer check replaces this one, and its answer stands.
+    if (this.identifyCheck !== checking) return result;
+    const answered: IIdentifyCheck = { session, state: result };
+    runInAction(() => { this.identifyCheck = answered; });
+    // A newer check by then keeps its own state.
+    setTimeout(() => {
+      runInAction(() => { if (this.identifyCheck === answered) this.identifyCheck = undefined; });
+    }, kIdentifyResultMs);
+    return result;
+  }
+
+  // Why the last device went away without the user asking, until the next connect attempt.
+  get lossMessage(): string | undefined {
+    const loss = this.serialDevice.lastLoss;
+    if (this.isConnected || !loss) return undefined;
+    const label = this.label ?? "device";
+    return loss.reason === "unplugged"
+      ? `The ${label} was unplugged.`
+      : `The connection to the ${label} was lost.`;
+  }
+
+  // When that loss happened. A new value means a new loss; an unplug confirming a loss keeps it.
+  get lossAt(): number | undefined {
+    return this.serialDevice.lastLoss?.at;
   }
 
   get connectTutorialDismissed() {
@@ -122,6 +201,21 @@ export class DeviceConnection {
 
   async disconnect(): Promise<void> {
     const transport = this.serialDevice.activeTransport;
+    // The close asked for here can be reported back as a loss; it isn't one.
+    if (transport) transport.onDisconnect = undefined;
+    // Tell the board the session is over before its transport closes.
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    try {
+      const timedOut = new Promise<"timeout">(resolve => {
+        timer = setTimeout(() => resolve("timeout"), kEndSessionTimeoutMs);
+      });
+      const result = await Promise.race([this.serialDevice.endSession(), timedOut]);
+      if (result === "timeout") console.error("Device session end timed out; closing the transport anyway");
+    } catch (e) {
+      console.error("Device session end failed", e);
+    } finally {
+      clearTimeout(timer);
+    }
     try {
       await transport?.close();
     } catch (e) {
@@ -133,6 +227,7 @@ export class DeviceConnection {
 
   private async attempt(choice: DeviceChoice, run: () => Promise<ConnectResult>): Promise<ConnectResult> {
     if (this.busyChoice) return "canceled";
+    this.serialDevice.clearLastLoss();
     runInAction(() => { this.busyChoice = choice; });
     try {
       const result = await run();
@@ -211,10 +306,10 @@ export class DeviceConnection {
       await device.connectAndStream(this.deps.getSpikerbitFlashDataSource());
       return "connected";
     } catch (e) {
-      if (isNoDeviceSelected(e)) return "canceled";
+      if (errorCode(e) === kNoDeviceSelected) return "canceled";
       console.error("Spiker:bit connection failed", e);
       await this.disposeSpikerbit();
-      return "failed";
+      return errorCode(e) === kDeviceInUse ? "inUse" : "failed";
     }
   }
 
@@ -226,6 +321,7 @@ export class DeviceConnection {
     } catch (e) {
       console.error("Spiker:bit disconnect failed", e);
     }
+    device?.dispose();
   }
 }
 

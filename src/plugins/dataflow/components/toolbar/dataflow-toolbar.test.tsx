@@ -7,7 +7,8 @@ import { ModalProvider } from "react-modal-hook";
 
 import { ReadOnlyContext } from "../../../../components/document/read-only-context";
 import { SerialDevice } from "../../../../models/stores/serial";
-import { ConnectResult, getDeviceConnection } from "../../model/device-connection";
+import { ConnectResult, getDeviceConnection, kIdentifyResultMs } from "../../model/device-connection";
+import { IdentifyResult } from "../../../../models/stores/cc-device-session";
 import { TileModelContext } from "../../../../components/tiles/tile-api";
 import { ITileModel, TileModel } from "../../../../models/tiles/tile-model";
 import { specStores } from "../../../../models/stores/spec-stores";
@@ -326,15 +327,17 @@ describe("Dataflow pan split button (CLUE-573)", () => {
 });
 
 describe("Dataflow connect button and pane", () => {
-  function renderConnect(opts: RenderOptions = {}) {
+  // Pass `stores` to render a second toolbar sharing the first one's device connection, and
+  // `strict` to render it in React.StrictMode, which mounts, unmounts and remounts it.
+  function renderConnect(opts: RenderOptions & { stores?: ReturnType<typeof specStores>, strict?: boolean } = {}) {
     const info = getToolbarButtonInfo("dataflow", "connect");
     if (!info) throw new Error("connect is not registered");
     const Component = info.component;
-    const stores = specStores();
+    const stores = opts.stores ?? specStores();
     const content = opts.content ?? DataflowContentModel.create();
     const model = TileModel.create({ content });
     const connection = getDeviceConnection(stores.serialDevice);
-    const result = render(
+    const tree = (
       <ModalProvider>
         <Provider stores={stores}>
           <ReadOnlyContext.Provider value={!!opts.readOnly}>
@@ -347,6 +350,7 @@ describe("Dataflow connect button and pane", () => {
         </Provider>
       </ModalProvider>
     );
+    const result = render(opts.strict ? <React.StrictMode>{tree}</React.StrictMode> : tree);
     return { ...result, content, stores, connection, model, tileId: model.id };
   }
 
@@ -356,7 +360,7 @@ describe("Dataflow connect button and pane", () => {
     return trigger;
   }
 
-  function openPane(opts: RenderOptions = {}) {
+  function openPane(opts: Parameters<typeof renderConnect>[0] = {}) {
     const r = renderConnect(opts);
     fireEvent.click(getTrigger(r.container));
     return r;
@@ -493,6 +497,229 @@ describe("Dataflow connect button and pane", () => {
     fireEvent.click(within(group).getByRole("button", { name: "Connect Arduino" }));
     fireEvent.keyDown(within(group).getByRole("button", { name: "Connect Arduino" }), { key: "Enter" });
     expect(connect).not.toHaveBeenCalled();
+  });
+
+  it("the button turns yellow when the board stops responding, and green when it answers again", () => {
+    const r = renderConnect();
+    fakeConnected(r);
+    const trigger = getTrigger(r.container);
+    const session = r.stores.serialDevice.ccDeviceSession!;
+    act(() => session.setNotResponding(true));
+    expect(trigger.classList.contains("connect-attention")).toBe(true);
+    expect(trigger.getAttribute("aria-label")).toBe("The Spiker:bit is not responding. Click for details.");
+    act(() => session.setNotResponding(false));
+    expect(trigger.classList.contains("connect-connected")).toBe(true);
+    act(() => r.stores.serialDevice.clearActiveDevice());
+  });
+
+  it("the button's name says the device was unplugged", () => {
+    const r = renderConnect();
+    fakeConnected(r);
+    act(() => r.stores.serialDevice.activeTransport!.onDisconnect!("unplugged"));
+    expect(getTrigger(r.container).getAttribute("aria-label"))
+      .toBe("The Spiker:bit was unplugged. Click to connect.");
+  });
+
+  describe("the second line", () => {
+    const pane = () => screen.getByRole("group", { name: "Device connection" });
+
+    it("says the Spiker:bit is not responding, under Connected", () => {
+      const r = openPane();
+      fakeConnected(r);
+      act(() => r.stores.serialDevice.ccDeviceSession!.setNotResponding(true));
+      expect(within(pane()).getByRole("status")).toHaveTextContent("Connected: Spiker:bit");
+      expect(within(pane()).getByText("The Spiker:bit is not responding.")).toBeInTheDocument();
+      act(() => r.stores.serialDevice.clearActiveDevice());
+    });
+
+    it("says the device was unplugged, or that the connection was lost, under Not connected", () => {
+      const r = openPane();
+      fakeConnected(r);
+      act(() => r.stores.serialDevice.activeTransport!.onDisconnect!("unplugged"));
+      expect(within(pane()).getByRole("status")).toHaveTextContent("Not connected");
+      expect(within(pane()).getByText("The Spiker:bit was unplugged.")).toBeInTheDocument();
+      fakeConnected(r);
+      act(() => r.stores.serialDevice.activeTransport!.onDisconnect!("lost"));
+      expect(within(pane()).getByText("The connection to the Spiker:bit was lost.")).toBeInTheDocument();
+    });
+
+    it("a connect error wins over a loss message", () => {
+      const r = openPane();
+      fakeConnected(r);
+      act(() => r.stores.serialDevice.activeTransport!.onDisconnect!("unplugged"));
+      act(() => r.content.setConnectError("Couldn't connect to Spiker:bit."));
+      expect(within(pane()).getByText("Couldn't connect to Spiker:bit.")).toBeInTheDocument();
+      expect(within(pane()).queryByText("The Spiker:bit was unplugged.")).toBeNull();
+    });
+  });
+
+  describe("Is it alive?", () => {
+    beforeEach(() => jest.useFakeTimers());
+    afterEach(() => jest.useRealTimers());
+
+    const pane = () => screen.getByRole("group", { name: "Device connection" });
+    const aliveButton = () => within(pane()).getByRole("button", { name: "Is it alive?" });
+
+    // Opens the pane on a connected Spiker:bit whose session's identify waits for the test to answer.
+    function setupCheck(opts: { strict?: boolean } = {}) {
+      const r = openPane(opts);
+      fakeConnected(r);
+      const answers: Array<(result: IdentifyResult) => void> = [];
+      const identify = jest.spyOn(r.stores.serialDevice.ccDeviceSession!, "identify")
+        .mockImplementation(() => new Promise(resolve => { answers.push(resolve); }));
+      const answer = async (result: IdentifyResult) => {
+        await act(async () => { answers.shift()!(result); });
+      };
+      return { ...r, identify, answer };
+    }
+
+    afterEach(() => {
+      act(() => { jest.runOnlyPendingTimers(); });
+    });
+
+    it("shows only for a connected Spiker:bit", () => {
+      const r = openPane();
+      expect(within(pane()).queryByRole("button", { name: "Is it alive?" })).toBeNull();
+      act(() => {
+        r.stores.serialDevice.setActiveDevice("arduino", fakeTransport());
+        runInAction(() => { r.connection.lastChoice = "arduino"; });
+      });
+      expect(within(pane()).queryByRole("button", { name: "Is it alive?" })).toBeNull();
+      fakeConnected(r);
+      expect(aliveButton()).toBeInTheDocument();
+      act(() => r.stores.serialDevice.clearActiveDevice());
+    });
+
+    it("checks, reports the answer, then goes back to what the line showed", async () => {
+      const r = setupCheck();
+      act(() => r.stores.serialDevice.ccDeviceSession!.setNotResponding(true));
+      aliveButton().focus();
+      fireEvent.click(aliveButton());
+      expect(r.identify).toHaveBeenCalledTimes(1);
+      expect(within(pane()).getByText("Checking the Spiker:bit… look for the heart.")).toBeInTheDocument();
+      expect(within(pane()).queryByText("The Spiker:bit is not responding.")).toBeNull();
+      expect(isDisabled(aliveButton())).toBe(true);
+      await r.answer("answered");
+      expect(within(pane()).getByText("The Spiker:bit answered.")).toBeInTheDocument();
+      expect(isDisabled(aliveButton())).toBe(false);
+      expect(document.activeElement).toBe(aliveButton());
+      expect(r.content.connectPaneOpen).toBe(true);
+      act(() => { jest.advanceTimersByTime(kIdentifyResultMs); });
+      expect(within(pane()).queryByText("The Spiker:bit answered.")).toBeNull();
+      expect(within(pane()).getByText("The Spiker:bit is not responding.")).toBeInTheDocument();
+      act(() => r.stores.serialDevice.clearActiveDevice());
+    });
+
+    it("reports when the board didn't answer", async () => {
+      const r = setupCheck();
+      fireEvent.click(aliveButton());
+      await r.answer("noAnswer");
+      expect(within(pane()).getByText("The Spiker:bit didn't answer.")).toBeInTheDocument();
+      act(() => r.stores.serialDevice.clearActiveDevice());
+    });
+
+    it("ignores clicks while checking, and a click after the answer starts a new check", async () => {
+      const r = setupCheck();
+      fireEvent.click(aliveButton());
+      fireEvent.click(aliveButton());
+      expect(r.identify).toHaveBeenCalledTimes(1);
+      await r.answer("answered");
+      fireEvent.click(aliveButton());
+      expect(r.identify).toHaveBeenCalledTimes(2);
+      expect(within(pane()).getByText("Checking the Spiker:bit… look for the heart.")).toBeInTheDocument();
+      act(() => { jest.advanceTimersByTime(kIdentifyResultMs); });
+      expect(within(pane()).getByText("Checking the Spiker:bit… look for the heart.")).toBeInTheDocument();
+      await r.answer("answered");
+      act(() => r.stores.serialDevice.clearActiveDevice());
+    });
+
+    it("the answer is still there when the pane is closed during the check and opened again", async () => {
+      const consoleError = jest.spyOn(console, "error");
+      const r = setupCheck();
+      fireEvent.click(aliveButton());
+      fireEvent.keyDown(aliveButton(), { key: "Escape" });
+      expect(r.content.connectPaneOpen).toBe(false);
+      await r.answer("answered");
+      fireEvent.click(getTrigger(r.container));
+      expect(within(pane()).getByText("The Spiker:bit answered.")).toBeInTheDocument();
+      expect(consoleError).not.toHaveBeenCalled();
+      consoleError.mockRestore();
+      act(() => r.stores.serialDevice.clearActiveDevice());
+    });
+
+    it("works in React.StrictMode", async () => {
+      const r = setupCheck({ strict: true });
+      fireEvent.click(aliveButton());
+      await r.answer("answered");
+      expect(within(pane()).getByText("The Spiker:bit answered.")).toBeInTheDocument();
+      expect(isDisabled(aliveButton())).toBe(false);
+      act(() => r.stores.serialDevice.clearActiveDevice());
+    });
+  });
+
+  describe("after a loss", () => {
+    const pulsing = (r: ReturnType<typeof renderConnect>) =>
+      getTrigger(r.container).classList.contains("connect-loss-pulse");
+    const lose = (r: ReturnType<typeof renderConnect>, loss: "lost" | "unplugged") => {
+      const transport = r.stores.serialDevice.activeTransport ?? r.stores.serialDevice.lastLoss!.transport;
+      act(() => transport.onDisconnect!(loss));
+    };
+
+    // The pulse is the class's CSS animation, which runs once when the class is added and then
+    // shows the state's own look.
+    it("the button gets the pulse class over its normal look, kept until the next connect attempt", () => {
+      jest.useFakeTimers();
+      const r = renderConnect();
+      fakeConnected(r);
+      lose(r, "lost");
+      expect(pulsing(r)).toBe(true);
+      expect(getTrigger(r.container).classList.contains("connect-idle")).toBe(true);
+      act(() => { jest.advanceTimersByTime(60000); });
+      expect(pulsing(r)).toBe(true);
+      act(() => r.stores.serialDevice.clearLastLoss());
+      expect(pulsing(r)).toBe(false);
+      jest.useRealTimers();
+    });
+
+    it("a toolbar shown after the loss doesn't pulse", () => {
+      const first = renderConnect();
+      fakeConnected(first);
+      lose(first, "unplugged");
+      const second = renderConnect({ stores: first.stores });
+      expect(pulsing(second)).toBe(false);
+      act(() => first.stores.serialDevice.clearLastLoss());
+      expect(pulsing(second)).toBe(false);
+    });
+
+    it("an unplug confirming the loss doesn't pulse again", () => {
+      const r = renderConnect();
+      fakeConnected(r);
+      lose(r, "lost");
+      const trigger = getTrigger(r.container);
+      const observer = new MutationObserver(() => undefined);
+      observer.observe(trigger, { attributes: true, attributeFilter: ["class"], attributeOldValue: true });
+      lose(r, "unplugged");
+      const changes = observer.takeRecords();
+      observer.disconnect();
+      expect(r.stores.serialDevice.lastLoss?.reason).toBe("unplugged");
+      expect(pulsing(r)).toBe(true);
+      // Taking the class off and putting it back would replay the animation.
+      expect(changes.every(c => c.oldValue?.includes("connect-loss-pulse"))).toBe(true);
+    });
+
+    it("a later loss pulses again", () => {
+      jest.useFakeTimers();
+      const r = renderConnect();
+      fakeConnected(r);
+      lose(r, "lost");
+      jest.advanceTimersByTime(1);
+      fakeConnected(r);
+      expect(pulsing(r)).toBe(false);
+      lose(r, "lost");
+      expect(pulsing(r)).toBe(true);
+      act(() => r.stores.serialDevice.clearActiveDevice());
+      jest.useRealTimers();
+    });
   });
 
   it("the button shows the attention state when the program needs a device", () => {

@@ -38,8 +38,11 @@ export function resetProgramForTile({ content, tileId, trigger }: ITileOptions &
 }
 
 /** A user looking at the pane sees the error there, so only a closed pane leaves it unseen. */
-function recordConnectFailure(content: DataflowContentModelType, label: string | undefined) {
-  content.setConnectError(`Couldn't connect to ${label ?? "the device"}.`);
+function recordConnectFailure(content: DataflowContentModelType, result: ConnectResult, label: string | undefined) {
+  if (result !== "failed" && result !== "inUse") return;
+  content.setConnectError(result === "inUse"
+    ? `Another app is using the ${label ?? "device"}.`
+    : `Couldn't connect to ${label ?? "the device"}.`);
   content.setUnseenConnectError(!content.connectPaneOpen);
 }
 
@@ -49,7 +52,7 @@ export async function connectDeviceForTile(o: IConnectionOptions & { choice: Dev
   const result = await connection.connect(choice);
   // The tile may have been deleted while the connection was being made.
   if (!isAlive(content)) return result;
-  if (result === "failed") recordConnectFailure(content, labelFor(choice));
+  recordConnectFailure(content, result, labelFor(choice));
   if (result === "connected") {
     logDeviceEvent(tileId, "connectDevice", choice);
     resetProgramForTile({ content, tileId, trigger: "connect" });
@@ -63,7 +66,7 @@ export async function reconnectDeviceForTile(o: IConnectionOptions): Promise<Con
   content.clearConnectError();
   const result = await connection.reconnect();
   if (!isAlive(content)) return result;
-  if (result === "failed") recordConnectFailure(content, labelFor(choice));
+  recordConnectFailure(content, result, labelFor(choice));
   if (result === "connected") {
     logDeviceEvent(tileId, "reconnectDevice", choice);
     resetProgramForTile({ content, tileId, trigger: "reconnect" });

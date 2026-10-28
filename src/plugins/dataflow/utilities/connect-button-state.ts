@@ -10,22 +10,39 @@ export function toolbarShowsConnect(tools: unknown): boolean {
   return Array.isArray(tools) && tools.includes("connect");
 }
 
-export function connectButtonState(o: {
-  connected: boolean; needsDevice: boolean; unseenError: boolean;
-}): ConnectButtonState {
-  if (o.connected) return "connected";
+interface IConnectButtonInput {
+  connected: boolean;
+  needsDevice: boolean;
+  unseenError: boolean;
+  // Connected, but the board isn't answering, or another host owns its session.
+  notResponding: boolean;
+}
+
+export function connectButtonState(o: IConnectButtonInput): ConnectButtonState {
+  if (o.connected) return o.notResponding ? "attention" : "connected";
   return o.needsDevice || o.unseenError ? "attention" : "idle";
 }
 
-export function connectButtonTooltip(o: {
-  connected: boolean; connectedLabel?: string; needsDevice: boolean; unseenError: boolean;
-}): string {
+export function notRespondingMessage(label: string | undefined): string {
+  return `The ${label} is not responding.`;
+}
+
+interface IConnectButtonTooltipInput extends IConnectButtonInput {
+  connectedLabel?: string;
+  // Why the last device went away, while that loss is kept. Leads the not-connected text, so the
+  // button still says so once its pulses end.
+  lossMessage?: string;
+}
+
+export function connectButtonTooltip(o: IConnectButtonTooltipInput): string {
+  const loss = o.lossMessage ? `${o.lossMessage} ` : "";
   switch (connectButtonState(o)) {
     case "connected": return `Connected: ${o.connectedLabel}`;
     case "attention":
+      if (o.connected) return `${notRespondingMessage(o.connectedLabel)} Click for details.`;
       return o.unseenError
         ? "Couldn't connect. Click for details."
-        : "This program needs a device. Click to connect.";
-    default: return "Connect a device";
+        : `${loss}This program needs a device. Click to connect.`;
+    default: return o.lossMessage ? `${loss}Click to connect.` : "Connect a device";
   }
 }

@@ -1,4 +1,4 @@
-import { IDeviceTransport } from "./device-transport";
+import { DeviceLoss, IDeviceTransport } from "./device-transport";
 import { SerialDevice } from "./serial";
 
 const textEncoder = new TextEncoder();
@@ -18,7 +18,7 @@ export type WebSerialOpenResult = "opened" | "canceled" | "failed";
 
 export class WebSerialTransport implements IDeviceTransport {
   onData?: (chunk: string) => void;
-  onDisconnect?: () => void;
+  onDisconnect?: (loss: DeviceLoss) => void;
 
   deviceFamily: string | undefined;
   private deviceInfo: SerialPortInfo | null = null;
@@ -33,8 +33,8 @@ export class WebSerialTransport implements IDeviceTransport {
   private reading = false;
   private readonly READ_TIMEOUT_MS = 2000;
 
-  // Whether this board raises the browser `connect`/`disconnect` events (see
-  // initWebSerialConnectionEvents). Only authentic Arduinos were observed to raise them.
+  // Whether this board raises the browser `connect` event (see initWebSerialConnectionEvents). Only
+  // authentic Arduinos were observed to raise it. Clone Arduinos raise `disconnect` too.
   get raisesWebSerialConnect(){
     return this.deviceInfo?.usbProductId === kArduinoUsbProductId;
   }
@@ -136,7 +136,7 @@ export class WebSerialTransport implements IDeviceTransport {
       // Release the port so a later connect to it doesn't find it still open.
       await this.closePort();
       this.port = null;
-      this.onDisconnect?.();
+      this.onDisconnect?.("lost");
     }
   }
 
@@ -191,17 +191,26 @@ export class WebSerialTransport implements IDeviceTransport {
  * startup to catch this event and improve the connect-button UI. Not every board does this —
  * see raisesWebSerialConnect in WebSerialTransport.
  *
- * The disconnect handler tears down the active connection on unplug. It is guarded so it only
- * fires while a WebSerialTransport is active and can't kill a live WebUSB (Spiker:bit) session.
+ * The disconnect handler records an unplug of the Web Serial port it belongs to; see the comment
+ * on it.
  */
 export function initWebSerialConnectionEvents(serialDevice: SerialDevice){
   navigator.serial?.addEventListener("connect", (e) => {
     serialDevice.updateConnectionInfo(e.timeStamp, e.type);
   });
+  // The browser fires disconnect at the removed SerialPort, and it bubbles here, so `e.target` says
+  // which port was unplugged; any other port's unplug leaves the device alone.
   navigator.serial?.addEventListener("disconnect", (e) => {
-    if (serialDevice.activeTransport instanceof WebSerialTransport) {
+    const isUnplugged = (transport: unknown): transport is WebSerialTransport =>
+      transport instanceof WebSerialTransport && transport.lastPort === e.target;
+    const active = serialDevice.activeTransport;
+    if (isUnplugged(active)) {
       serialDevice.updateConnectionInfo(e.timeStamp, e.type);
-      serialDevice.clearActiveDevice();
+      serialDevice.recordUnplug(active);
+    } else {
+      // The read loop may have given up on the port first and recorded it as lost.
+      const lost = serialDevice.lastLoss?.transport;
+      if (isUnplugged(lost)) serialDevice.recordUnplug(lost);
     }
   });
 }
