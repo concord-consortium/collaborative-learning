@@ -56,21 +56,24 @@ export function connectPaneStatus(input: IPaneStatusInput): IPaneStatus {
   const connected = `Connected: ${label}`;
   const notConnected = "Not connected";
 
+  // A running attempt names its own device. The connection's label is still the one used before.
   if (attempt && !attempt.ended) {
-    const connecting = `Connecting to ${label ?? kDeviceChoiceLabels[attempt.choice]}…`;
+    const attemptLabel = kDeviceChoiceLabels[attempt.choice];
+    const connecting = `Connecting to ${attemptLabel}…`;
+    const attemptConnected = `Connected: ${attemptLabel}`;
     switch (attempt.step) {
       case "choose":
         return status(connecting, { text: "Choose it in the browser's list.", tone: "hint" });
       case "open":
         return status(connecting, { text: "Opening the connection…", tone: "plain" });
       case "checkFirmware":
-        return status(connected, { text: "Checking its firmware…", tone: "plain" });
+        return status(attemptConnected, { text: "Checking its firmware…", tone: "plain" });
       case "update": {
         const percent = attempt.updatePercent ?? 0;
         return status("Updating. Keep it plugged in.", { text: `${percent}%`, tone: "plain", progress: percent });
       }
       case "waitForData":
-        return status(connected, { text: "Waiting for data…", tone: "plain" });
+        return status(attemptConnected, { text: "Waiting for data…", tone: "plain" });
     }
   }
 

@@ -38,6 +38,13 @@ describe("connectPaneStatus", () => {
       .toBe("Connecting to Spiker:bit…");
   });
 
+  it.each(["choose", "open", "checkFirmware", "waitForData"] as const)(
+    "names the device being connected, not the one used before, while %s runs", step => {
+      const { line1 } = connectPaneStatus({ ...base, label: "Arduino", attempt: running(step) });
+      expect(line1).toContain("Spiker:bit");
+      expect(line1).not.toContain("Arduino");
+    });
+
   it("opening", () => {
     expect(connectPaneStatus({ ...base, attempt: running("open") })).toEqual({
       line1: "Connecting to Spiker:bit…",
