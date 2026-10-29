@@ -286,3 +286,29 @@ describe("linkedTableTileId", () => {
     expect(content.linkedTableTileId).toBeUndefined();
   });
 });
+
+/** A Dataflow tile whose program holds two named nodes, as a capture's columns come from them. */
+function setupContentWithTwoNamedNodes(...names: string[]) {
+  const content = setupContentWithSharedModel();
+  names.forEach((name, i) => {
+    content.program.addNodeSnapshot({
+      id: `node-${i}`, name: "Number", x: 0, y: 0,
+      data: { type: "Number", orderedDisplayName: name, nodeValue: 400 + i }
+    } as any);
+  });
+  return content;
+}
+
+describe("prepareCapture", () => {
+  it("builds a point column followed by one column per named node", () => {
+    const content = setupContentWithTwoNamedNodes("Sensor", "Servo");
+    content.prepareCapture();
+    expect(content.dataSet.attributes.map(a => a.name)).toEqual(["Point", "Sensor", "Servo"]);
+  });
+
+  it("names the dataset with the capture's start time", () => {
+    const content = setupContentWithTwoNamedNodes("Sensor", "Servo");
+    content.prepareCapture(new Date(2026, 9, 29, 14, 32, 7));
+    expect(content.dataSet.name).toBe("Program data 14:32:07");
+  });
+});

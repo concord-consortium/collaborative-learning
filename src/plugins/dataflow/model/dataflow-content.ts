@@ -55,6 +55,15 @@ export const kDefaultLabel = "Dataflow Node";
 // A case has one value for time and one value for each node
 const kMaxRecordedValues = 10000;
 
+export const kPointAttributeName = "Point";
+
+/** `Program data 14:32:07`. Becomes the dataset's name, which TableContentModel.contentTitle
+ * surfaces as the table's header -- so the capture's time is recorded once, for the capture,
+ * rather than in a column on every row. */
+export function captureName(startedAt: Date) {
+  return `Program data ${startedAt.toLocaleTimeString([], { hour12: false })}`;
+}
+
 export function defaultDataSet(title: string|undefined) {
   const dataSet = DataSet.create({
     name: title,
@@ -457,15 +466,20 @@ export const DataflowContentModel = TileContentModel
     },
   }))
   .actions(self => ({
-    prepareRecording() {
+    /**
+     * Sets the table up for a fresh capture:
+     *   Point | Node 1 | Node 2 | Node 3 ...
+     *     1   |  val   |  val   |  val
+     * The point number stays numeric so the Graph tile infers a numeric x-axis; the capture's
+     * start time goes in the dataset's name instead of a column (see captureName).
+     */
+    prepareCapture(startedAt: Date = new Date()) {
       self.clearAttributes();
-      // dataSet looks like
-      // Time   |  Node 1 | Node 2 | Node 3 etc
-      //    0   |   val    | val    |  val
-      addAttributeToDataSet(self.dataSet, { name: "Time (sec)" }); //time quantized to nearest sampling rate
+      addAttributeToDataSet(self.dataSet, { name: kPointAttributeName });
       self.program.nodes.forEach((n) => { //add attributes based on nodes in tile
         n.data.orderedDisplayName && self.addNewAttrFromNode(n.id, n.data.orderedDisplayName);
       });
+      self.dataSet.setName(captureName(startedAt));
     },
     resetRecording() {
       //clear the dataSet;

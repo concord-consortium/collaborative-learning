@@ -523,7 +523,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
 
     switch (programMode){
       case ProgramMode.Ready:
-        tileContent.prepareRecording();
+        tileContent.prepareCapture();
         this.setState({isPlaying: false, playBackIndex: 0}); //reset isPlaying
         this.setState({isRecording: true});
         break;
