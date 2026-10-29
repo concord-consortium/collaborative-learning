@@ -151,12 +151,15 @@ async function runAttempt(
 
 export function connectDeviceForTile(o: IConnectionOptions & { choice: DeviceChoice }): Promise<ConnectResult> {
   const { connection, choice } = o;
+  // A refused click starts nothing, so it logs nothing and leaves the tile's failure showing.
+  if (connection.busyChoice) return Promise.resolve("canceled");
   return runAttempt({ ...o, trigger: "connect", device: choice },
     options => connection.connect(choice, options));
 }
 
 export function reconnectDeviceForTile(o: IConnectionOptions): Promise<ConnectResult> {
   const { connection } = o;
+  if (connection.busyChoice || !connection.lastChoice) return Promise.resolve("canceled");
   return runAttempt({ ...o, trigger: "reconnect", device: connection.lastChoice },
     options => connection.reconnect(options));
 }

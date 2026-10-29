@@ -45,7 +45,7 @@ function endAttempt(
 // creates the attempt synchronously inside connect or reconnect.
 function makeConnection(
   outcomeOrDrive: AttemptOutcome | Drive,
-  opts: { lastChoice?: DeviceChoice, isConnected?: boolean, paneView?: "devices" | "actions" } = {}
+  opts: { lastChoice?: DeviceChoice, isConnected?: boolean, paneView?: "devices" | "actions", busyChoice?: DeviceChoice } = {}
 ) {
   const drive: Drive = typeof outcomeOrDrive === "function"
     ? outcomeOrDrive
@@ -58,6 +58,7 @@ function makeConnection(
   const connection = {
     lastChoice: opts.lastChoice,
     isConnected: opts.isConnected ?? false,
+    busyChoice: opts.busyChoice,
     paneView: opts.paneView ?? (opts.isConnected ? "actions" : "devices"),
     attempt: undefined as ConnectionAttempt | undefined,
     lastFailure: undefined as IConnectFailure | undefined,
@@ -288,6 +289,36 @@ describe("device actions", () => {
     expectLog("resetProgram", { targetType: "program", trigger: "reconnect" });
     expectLogMatching("connectResult", { trigger: "reconnect", outcome: "connected" });
   });
+
+  it("a connect refused because one is running logs nothing and keeps the tile's failure", async () => {
+    const content = makeContent();
+    await connectDeviceForTile({ connection: makeConnection("openFailed"), content, tileId, choice: "arduino" });
+    (logTileChangeEvent as jest.Mock).mockClear();
+    const connection = makeConnection("connected", { busyChoice: "spikerbit" });
+
+    expect(await connectDeviceForTile({ connection, content, tileId, choice: "arduino" })).toBe("canceled");
+
+    expect(connection.connect).not.toHaveBeenCalled();
+    expect(logTileChangeEvent).not.toHaveBeenCalled();
+    expect(content.connectFailure?.kind).toBe("openFailed");
+  });
+
+  it.each([
+    ["one is running", { lastChoice: "arduino", busyChoice: "arduino" }],
+    ["there is nothing to reconnect", {}]
+  ] as [string, { lastChoice?: DeviceChoice, busyChoice?: DeviceChoice }][])(
+    "a reconnect refused because %s logs nothing and keeps the tile's failure", async (_name, opts) => {
+      const content = makeContent();
+      await connectDeviceForTile({ connection: makeConnection("openFailed"), content, tileId, choice: "arduino" });
+      (logTileChangeEvent as jest.Mock).mockClear();
+      const connection = makeConnection("connected", opts);
+
+      expect(await reconnectDeviceForTile({ connection, content, tileId })).toBe("canceled");
+
+      expect(connection.reconnect).not.toHaveBeenCalled();
+      expect(logTileChangeEvent).not.toHaveBeenCalled();
+      expect(content.connectFailure?.kind).toBe("openFailed");
+    });
 
   it("a failed reconnect does not reset, and logs only the start and the result", async () => {
     const content = makeContent();
