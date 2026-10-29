@@ -482,7 +482,7 @@ that does to the program's ticks. For the connection:
 - **CLUE doesn't pause the connection.** `@microbit/microbit-connection`'s `initialize()` would
   pause a Spiker:bit's connection while the page is hidden and reconnect when it's shown again,
   but CLUE doesn't call `initialize()`. A program keeps reading and writing the device in a
-  hidden page, only less often.
+  hidden page.
 - **Web Serial reads keep up.** `WebSerialTransport`'s read loop waits on the port, not on a
   timer, so readings still reach the channels. Only the ticks that sample them slow down.
 - **Spiker:bit reads fall behind.** `@microbit/microbit-connection` reads DAPLink's buffer on a

@@ -55,7 +55,7 @@ In a readOnly program, there is no tick. The `data` function will only be called
 
 ## Ticks in a hidden page
 
-The tick is a `setInterval` at the program's sampling rate (`setDataRate` in `dataflow-program.tsx`). Browsers slow timers in a page the user can't see, so there a program ticks less often than its sampling rate says.
+The tick is a `setInterval` at the program's sampling rate (`setDataRate` in `dataflow-program.tsx`). Browsers slow timers in a page the user can't see, so a program in such a page ticks less often than its sampling rate says.
 
 ### What counts as hidden
 
