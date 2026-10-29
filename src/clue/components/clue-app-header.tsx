@@ -4,6 +4,7 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import { EPanelId, IPanelGroupSpec } from "../../components/app-header";
 import { IBaseProps } from "../../components/base";
 import { ChatTutorSidebar } from "../../components/chat-tutor/chat-sidebar";
+import { RightDrawer } from "../../components/right-drawer/right-drawer";
 import { ClassMenuContainer } from "../../components/class-menu-container";
 import { GroupManagementModal } from "../../components/group/group-management-modal";
 import { NetworkStatus } from "../../components/network-status";
@@ -261,7 +262,7 @@ export const ClueAppHeaderComponent: React.FC<IProps> = observer(function ClueAp
         type="button"
         ref={chatTutorLauncherRef}
         className="chat-tutor-launcher"
-        hidden={isChatTutorOpen}
+        hidden={ui.isRightDrawerOpen}
         aria-label="Open the AIdeas chat with Ada"
         aria-expanded={isChatTutorOpen}
         aria-controls="chat-tutor-sidebar"
@@ -280,12 +281,13 @@ export const ClueAppHeaderComponent: React.FC<IProps> = observer(function ClueAp
     );
   };
 
-  const renderChatTutorSidebar = () => {
+  const renderChatTutorSidebar = (active: boolean) => {
     if (!isChatTutorOpen || !showChatTutorLauncher || !chatTutorDocumentKey || !chatTutorDocument?.content) {
       return null;
     }
     return (
       <ChatTutorSidebar
+        active={active}
         documentKey={chatTutorDocumentKey}
         documentTitle={getDocumentDisplayTitle(unit, chatTutorDocument, appConfig) || problem.title}
         problemPath={problemPath}
@@ -296,8 +298,13 @@ export const ClueAppHeaderComponent: React.FC<IProps> = observer(function ClueAp
     );
   };
 
+  const renderRightDrawer = () => (
+    <RightDrawer chatTutorAvailable={showChatTutorLauncher} renderChatTutor={renderChatTutorSidebar} />
+  );
+
   const renderNonStudentHeader = ({showProblemMenu}: {showProblemMenu: boolean}) => {
     return (
+      <>
       <header ref={headerRef} className="app-header" aria-label="CLUE Header">
         <div className="left">
           <div className="unit" data-test="investigation-title">
@@ -339,6 +346,8 @@ export const ClueAppHeaderComponent: React.FC<IProps> = observer(function ClueAp
           />
         </div>
       </header>
+      {renderRightDrawer()}
+      </>
     );
   };
 
@@ -425,7 +434,7 @@ export const ClueAppHeaderComponent: React.FC<IProps> = observer(function ClueAp
           />
         </div>
       </header>
-      {renderChatTutorSidebar()}
+      {renderRightDrawer()}
     </>
   );
 });

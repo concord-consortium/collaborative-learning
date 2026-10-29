@@ -41,8 +41,9 @@ jest.mock("./firestore-transport", () => ({
 // The drawer's focus-trap is orthogonal to highlight ownership and pulls in
 // @concord-consortium/accessibility-tools, which does real DOM focus work that jsdom doesn't need to
 // exercise here — a no-op keeps these tests about highlight state, not focus trapping.
+const mockUseTutorDrawerTrap = jest.fn();
 jest.mock("./use-tutor-drawer-trap", () => ({
-  useTutorDrawerTrap: () => undefined
+  useTutorDrawerTrap: (options: unknown) => mockUseTutorDrawerTrap(options)
 }));
 
 // A unit with one investigation/problem, optionally carrying an aiUnitSummary. buildUnitContext
@@ -112,6 +113,7 @@ describe("ChatTutorSidebar as a highlight source", () => {
       problem={problem}
       content={content}
       onClose={jest.fn()}
+      active={true}
     />
   );
 
@@ -120,6 +122,15 @@ describe("ChatTutorSidebar as a highlight source", () => {
   // The flag is read per render, so a test that changes it must put it back.
   beforeEach(() => {
     mockStores.appConfig.chatTutorHighlights = true;
+  });
+
+  it("passes the drawer's active state to the focus trap, so the trap is off on another tab", () => {
+    const content = makeContent();
+    const { rerender } = render(sidebar(content));
+    expect(mockUseTutorDrawerTrap).toHaveBeenLastCalledWith(expect.objectContaining({ active: true }));
+    rerender(<ChatTutorSidebar documentKey="doc-1" documentTitle="Test Document" problemPath="unit/1/1"
+                               problem={problem} content={content} onClose={jest.fn()} active={false} />);
+    expect(mockUseTutorDrawerTrap).toHaveBeenLastCalledWith(expect.objectContaining({ active: false }));
   });
 
   it("renders one button per highlight, labelled from the model's own text", () => {
@@ -333,6 +344,7 @@ describe("ChatTutorSidebar as a highlight source", () => {
         problem={unit.investigations[0].problems[0]}
         content={content}
         onClose={jest.fn()}
+        active={true}
       />
     );
 
@@ -396,6 +408,7 @@ describe("ChatTutorSidebar names the assistant consistently", () => {
         problem={problem}
         content={DocumentContentModel.create({})}
         onClose={jest.fn()}
+        active={true}
       />
     );
   });

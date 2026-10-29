@@ -59,7 +59,7 @@ export class ClueAppContentComponent extends BaseComponent<IProps> {
     const ariaLabels = getAriaLabels();
 
     return (
-      <div className={classNames("clue-app-content", { "chat-tutor-open": ui.showChatTutor })}>
+      <div className={classNames("clue-app-content", { "right-drawer-open": ui.isRightDrawerOpen })}>
         <nav className="skip-links">
           {showResourcesSkipLink &&
             <a href="#resources-panel" className="skip-link" onClick={this.handleResourcesSkipLink}>

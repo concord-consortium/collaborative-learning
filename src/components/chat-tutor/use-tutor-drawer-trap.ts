@@ -7,13 +7,15 @@ interface TutorDrawerTrapOptions {
   bodyRef: RefObject<HTMLElement | null>;
   // close the drawer + restore focus to the launcher (owned by the caller)
   onEscape: () => void;
+  // False while the drawer is mounted but another tab is showing; the trap is then off.
+  active: boolean;
 }
 
 // Tab/Shift+Tab containment and Escape for the tutor drawer, via useFocusTrap.
-// The drawer is mounted only while open, so the config is always defined here and
-// every open is a fresh mount; enterTrap() must still be called explicitly after the
-// hook's mount effect (which sets descendants non-tabbable), or all controls would be
-// left at tabindex=-1 with no initial focus.
+// The drawer is mounted only while open, and the config is undefined (trap off) while another
+// tab is showing. enterTrap() must be called explicitly each time the trap becomes active, after
+// the hook's own effect (which sets descendants non-tabbable), or all controls would be left at
+// tabindex=-1 with no initial focus.
 //
 // Strategy shape: one "content" slot (the body wrapper), listed in tabWithinSlots so
 // Tab walks the body's focusable children instead of cycling back immediately. One
@@ -21,11 +23,11 @@ interface TutorDrawerTrapOptions {
 // always fires; returning "handled" skips the trap's exit + container.focus(), letting
 // the caller's launcher-restore stand (plain onExit cannot do this — the trap's
 // container.focus() would clobber it).
-export function useTutorDrawerTrap({ containerRef, bodyRef, onEscape }: TutorDrawerTrapOptions) {
+export function useTutorDrawerTrap({ containerRef, bodyRef, onEscape, active }: TutorDrawerTrapOptions) {
   const onEscapeRef = useRef(onEscape);
   onEscapeRef.current = onEscape;
 
-  const config: FocusTrapConfig = useMemo(() => ({
+  const config: FocusTrapConfig | undefined = useMemo(() => active ? ({
     containerRef,
     strategy: {
       getElements: () => ({ content: bodyRef.current ?? undefined }),
@@ -46,13 +48,13 @@ export function useTutorDrawerTrap({ containerRef, bodyRef, onEscape }: TutorDra
         }
       }
     }
-  }), [containerRef, bodyRef]);
+  }) : undefined, [containerRef, bodyRef, active]);
 
   const trap = useFocusTrap(config);
   const trapRef = useRef(trap);
   trapRef.current = trap;
 
   useEffect(() => {
-    trapRef.current?.enterTrap();
-  }, []);
+    if (active) trapRef.current?.enterTrap();
+  }, [active]);
 }

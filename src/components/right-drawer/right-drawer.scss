@@ -1,0 +1,46 @@
+@import "../vars";
+
+// Right-edge drawer, offset below the app header so it aligns with the workspace/resources
+// columns. It sits at the right edge with a fixed width; the workspace reserves the same width
+// while the drawer is open (see clue-app-content.scss) so content is bumped over, not overlaid.
+.right-drawer {
+  position: fixed;
+  top: $header-height;
+  right: 0;
+  bottom: 0;
+  z-index: 1000;
+  width: $chat-tutor-width;
+  margin: 4px;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  background: white;
+
+  .right-drawer-tabs {
+    display: flex;
+    flex: none;
+    gap: 2px;
+
+    .right-drawer-tab {
+      flex: 1;
+      padding: 6px 8px;
+      border: 1px solid $charcoal-light-1;
+      border-bottom: none;
+      border-radius: 4px 4px 0 0;
+      background: $charcoal-light-4;
+      cursor: pointer;
+
+      &.selected {
+        background: white;
+        font-weight: bold;
+      }
+    }
+  }
+
+  .right-drawer-body {
+    flex: 1;
+    min-height: 0;
+
+    &[hidden] { display: none; }
+  }
+}

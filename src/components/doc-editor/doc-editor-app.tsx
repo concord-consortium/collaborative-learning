@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useState } from "react";
 import stringify from "json-stringify-pretty-compact";
 import { applySnapshot, getSnapshot, onSnapshot } from "mobx-state-tree";
 import { observer } from "mobx-react";
+import classNames from "classnames";
 import { Menu, MenuButton, MenuDivider, MenuItem, MenuList, Portal } from "@chakra-ui/react";
 
 import { defaultDocumentModel, defaultDocumentModelParts } from "./doc-editor-app-defaults";
@@ -11,7 +12,8 @@ import { DocumentContentSnapshotType } from "../../models/document/document-cont
 import { useCustomModal } from "../../hooks/use-custom-modal";
 import { urlParams } from "../../utilities/url-params";
 import { getAssetUrl } from "../../utilities/asset-utils";
-import { useAppConfig } from "../../hooks/use-stores";
+import { useAppConfig, useUIStore } from "../../hooks/use-stores";
+import { RightDrawer } from "../right-drawer/right-drawer";
 import { DocumentAnnotationToolbar } from "../document/document-annotation-toolbar";
 import { CanvasComponent } from "../document/canvas";
 import { DocEditorSettings } from "./doc-editor-settings";
@@ -35,6 +37,7 @@ const initialDoc = savedDocString ? JSON.parse(savedDocString) : defaultDocument
 export const DocEditorApp = observer(function DocEditorApp() {
 
   const appConfig = useAppConfig();
+  const ui = useUIStore();
   const [document, setDocument] = useState(() => {
     return createDocumentModelWithEnv(appConfig, initialDoc);
   });
@@ -263,7 +266,7 @@ export const DocEditorApp = observer(function DocEditorApp() {
   // This is wrapped in a div.primary-workspace so it can be used with cypress
   // tests that are looking for stuff in a div like this
   return (
-    <div id="doc-editor-app">
+    <div id="doc-editor-app" className={classNames({ "right-drawer-open": ui.isRightDrawerOpen })}>
       <div id="left-panel">
         <div className="primary-workspace single-workspace">
           <div className="document">
@@ -315,6 +318,7 @@ export const DocEditorApp = observer(function DocEditorApp() {
         </div>
       }
       { aiSummary && <AiSummary summary={aiSummary} toggleAiSummary={handleToggleAiSummary} /> }
+      <RightDrawer chatTutorAvailable={false} />
     </div>
   );
 });
