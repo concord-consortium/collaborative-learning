@@ -58,42 +58,63 @@ Table It use it too is about one line.
 |---|---|
 | What "unlink" means | The table tile detaches from the program's shared dataset and keeps the recorded data as its own. The student's numbers survive; the stale link does not. |
 | What triggers it | Structural change only: a node added, removed, or rewired. A rename or a parameter tweak does not unlink. |
-| Timestamp | Wall-clock, for both single samples and continuous recording. |
+| Timestamp | Not per row. The first column is an ordinal point number; the capture's start time goes in the dataset name, which is the table's header. |
 | Samples + recording | A recording run appends to whatever single samples are already in the table. |
 
-The last two were chosen over the alternatives proposed here, with the costs below understood.
+The timestamp decision replaced two earlier attempts — a numeric wall-clock that read as
+`1792169527000`, and a numeric/readable column pair — both of which worked around the numeric-first-
+column constraint rather than removing it.
 
-## The time column
+## Time: in the header, not in every row
 
-Two columns, because no single one can do the job:
+The first column is an **ordinal point number** — 1, 2, 3 — and the capture's start time goes into
+the **dataset's name**, which is the table tile's header.
 
-| | `Time (sec)` | `Time of day` |
-|---|---|---|
-| value | number | string |
-| a recorded run | elapsed seconds, as today | `14:32:07` |
-| a single sample | seconds since the table's first row | `14:32:07` |
+```
+Program data 14:32:07
+ Point | Sensor | Servo
+   1   |  412   |  90
+   2   |  418   |  90
+   3   |  455   |  45
+```
 
-**Why not one readable column.** `formatValue` (`cell-formatter.tsx`) passes every value through
-`Number(value)` and applies a numeric formatter when it is finite; there is no date or time hook,
-and attributes carry only a numeric `precision`. A clock time therefore has to be stored as a
-string — and `attribute.type` is inferred as `"numeric"` only when every non-empty value parses as
-a number, otherwise `"categorical"`. A string time column would hand the Graph tile a categorical
-x-axis, which is reasonable for a handful of samples and unusable for a recording of hundreds of
-rows. It would also make `getTimeAtRecordedIndex` return `0`, zeroing the playback scrubber.
+This is better than the two alternatives considered before it, and it is worth saying why, because
+both looked necessary at the time.
 
-**Why not one numeric column.** Epoch milliseconds keeps the graph and the scrubber working but
-displays as `1792169527000` in the table and on the axis.
+**It removes the constraint instead of working around it.** The first attribute has to be numeric:
+`attribute.type` infers `"numeric"` only when every value parses as a number, so a string there
+gives the Graph tile a categorical x-axis, and `getTimeAtRecordedIndex` returns `0` for a
+non-number, zeroing the playback scrubber. An ordinal is a number, so nothing breaks — and unlike
+epoch milliseconds (`1792169527000`), it is already the number a student wants to read.
 
-**So both.** The first column stays numeric and keeps every existing consumer working; the second
-is the one a student reads. Both kinds of row fill both, so appending stays coherent.
+**It is the right x-axis for what this story is for.** The ticket exists so a student can "compare
+different inputs/outputs". Samples captured minutes apart are not a time series; plotting them
+against real elapsed time spreads three points across a mostly empty axis. Against point number
+they sit evenly, which is what makes them comparable.
 
-`durationOfRecording` still changes from *the last row's absolute value* to *last − first*, so a
-table holding single samples taken minutes apart reports a sane duration rather than counting from
-the first row's zero.
+**The timestamp belongs to the capture, not the row.** It is one fact about a session, so it is
+recorded once. `TableContentModel.contentTitle` returns `self.dataSet.name`, so setting the name
+puts it in the table's header with no new UI.
 
-**Note on sequencing.** CLUE-771 removes playback, which removes the scrubber's claim on the first
-column — but the Graph tile's use of `attributes[0]` survives it, and that is the binding
-constraint. Neither story unblocks the other here.
+### What this changes in the code
+
+`recordCase` currently writes `recordIndex * programDataRate / 1000` into column 0, and
+`getTimeAtRecordedIndex` reads that column back as seconds for the playback scrubber. With an
+ordinal in the column, the scrubber derives its time instead:
+`index * programDataRate / 1000` — the same arithmetic, moved from storage to a view.
+
+That is **backward compatible for existing documents**: in a saved recording, column 0 already
+holds exactly `index * rate / 1000`, so the derived value matches the stored one. The one case
+where they differ is a document whose data rate was changed after recording, where the scrubber
+would read slightly off — and CLUE-771 removes the scrubber.
+
+### Open details
+
+- **Column name.** "Point" follows the ticket's own wording. "Sample" would also do.
+- **1-based.** `recordIndex` starts at 0 today; the column shows 1, 2, 3, since it is for reading.
+- **Name format.** Something like `Program data 14:32:07`. Note `getUniqueSharedModelName` may
+  append a suffix when a document is copied, and a student renaming the table overwrites the name —
+  both acceptable, since their title should win.
 
 ## Design
 
@@ -104,14 +125,15 @@ A Dataflow-specific toolbar button that:
 - links to the existing table tile when the program's shared dataset already has one, rather than
   adding a second;
 - creates a table and links it when none exists;
-- calls `prepareRecording()`'s column setup when the table is empty, so the columns are the two
-  time columns above followed by the program's node names, per bullet 2.
+- calls `prepareRecording()`'s column setup when the table is empty, so the columns are the point
+  number followed by the program's node names, per bullet 2;
+- sets the dataset's name to the capture's start time, which is the table's header.
 
 The shared `DataSetViewButton` is left alone.
 
 ### 2. Record Single Sample
 
-A toolbar button that appends exactly one row: both time columns, then each node's current
+A toolbar button that appends exactly one row: the next point number, then each node's current
 `nodeValue`, through the existing `recordCase` path. If no table exists it does what Table It
 does first, then writes the sample.
 
@@ -147,14 +169,14 @@ button joins it there in CLUE-771.
 - Any change to how a continuous recording samples, or to the data rate selector.
 - Everything in CLUE-771: lifting recording state, moving the record button, removing playback,
   reworking Clear.
-- A date/time formatter for table columns generally. Two columns avoids needing one; building it
-  would be its own change, with every tile as its blast radius.
+- A date/time formatter for table columns. Putting the timestamp in the header avoids needing one;
+  building it would be its own change, with every tile as its blast radius.
 
 ## Testing
 
 | Test | Covers |
 |---|---|
-| `dataflow-content.test.ts` | Both time columns are created and filled; the first stays numeric so `attribute.type` infers `"numeric"`. `durationOfRecording` is last − first, and is correct for a table mixing single samples and a recorded run. |
+| `dataflow-content.test.ts` | The point column is numeric, so `attribute.type` infers `"numeric"` and the Graph tile gets a numeric x-axis. The dataset name carries the capture's start time. `getTimeAtRecordedIndex` derives from index and data rate, and matches what a pre-existing recording stored in its own column. |
 | toolbar registration tests | Table It links an existing table rather than adding a second; creates one when none exists. |
 | single-sample tests | One row appended with the current wall-clock and each node's value; creates the table first when none exists; disabled while recording. |
 | unlink tests | A node added, removed or rewired detaches linked tables with their data intact; a rename or parameter change does not. |
