@@ -1,6 +1,8 @@
 # CLUE-740: Table It and Record Single Sample in Dataflow — Design
 
 **Jira:** CLUE-740 (epic CLUE-714, "Microbits for Inquiry"), fixVersion 7.8.0
+**Split out:** CLUE-771 carries the recording controls — lifting `isRecording` out of React state,
+moving the record button to the toolbar, removing playback, reworking Clear.
 
 ## Goal
 
@@ -23,26 +25,32 @@ Worth stating, because three of the ticket's seven bullets are closer to done th
 
 ## What is actually in the way
 
-Two obstacles the ticket does not mention, which together are most of the work.
+Two things the ticket does not mention. The first is no longer this story's problem; the second
+turned out not to be a problem at all.
 
-### Recording state lives in React, not the model
+### Recording state lives in React — and is now CLUE-771's problem
 
-`ProgramMode` (Ready → Recording → Done) is derived in `DataflowProgram` from `this.state.isRecording`
-plus `isDataSetEmptyCases`. The record button sits in the program topbar, inside that component.
+`ProgramMode` (Ready → Recording → Done) is derived in `DataflowProgram` from
+`this.state.isRecording` plus `isDataSetEmptyCases`, and the record button sits in the program
+topbar inside that component. A tile-toolbar button renders from a different tree and cannot reach
+that state, so the record button cannot move until `isRecording` is lifted into the model.
 
-A tile-toolbar button is rendered from a different tree and cannot reach that state. So moving the
-record button into the toolbar (bullet 6) requires **lifting `isRecording` into the MST content
-model** first, with `ProgramMode` derived there. Everything else in this story is small by
-comparison; this is the part that makes the 3-point estimate wrong.
+That work, and the rest of the control rework around it, moved to CLUE-771. **Nothing in this
+story depends on it:** the single-sample button writes a row directly and does not need
+`ProgramMode`, beyond being disabled while a continuous recording is running — which it can read
+from the same `isDataSetEmptyCases`/topbar state the existing UI already uses.
 
-### `DataSetViewButton` is shared
+### Table It's behavior is per-tile, not shared
 
-The "Table It!" button is `src/components/toolbar/data-set-view-button.tsx`, used by Dataflow,
-Table, Graph and Data Card alike. It always calls `addTileAfter`, so it always creates a new tile.
+Worth recording, because the opposite assumption shaped an earlier draft of this design.
+`toolbarButtonInfos` is a `Map<tileType, Map<buttonName, info>>`, so every tile type registers its
+own button list. Dataflow already registers `data-set-view`; it simply points at the component in
+`src/components/toolbar/data-set-view-button.tsx`, which Table, Graph and Data Card also use.
 
-Bullet 1 wants it to reuse an already-linked table. Changing the shared component changes every
-tile that uses it. **This design gives Dataflow its own button** rather than altering behavior for
-tiles this story has not considered.
+Pointing Dataflow's registration at a different component therefore affects **only Dataflow**.
+There is no shared-behavior risk to weigh here, and no reason to keep "always create a new table"
+for safety's sake. The find-linked-table helper is needed for bullet 5 regardless, so having
+Table It use it too is about one line.
 
 ## Decisions taken
 
@@ -85,17 +93,7 @@ chosen; say so and it changes.
 
 ## Design
 
-### 1. Lift recording state into the model
-
-`isRecording` moves from `DataflowProgram`'s React state to `DataflowContentModel`, with
-`programMode` as a view derived from it and `isDataSetEmptyCases` exactly as
-`determineProgramMode` does today. `DataflowProgram` reads the model instead of its own state; the
-topbar keeps working unchanged because it already receives `programMode` as a prop.
-
-Doing this first means the toolbar buttons are a thin layer over an existing state machine rather
-than a second copy of it.
-
-### 2. Dataflow's own Table It
+### 1. Dataflow's own Table It
 
 A Dataflow-specific toolbar button that:
 
@@ -107,7 +105,7 @@ A Dataflow-specific toolbar button that:
 
 The shared `DataSetViewButton` is left alone.
 
-### 3. Record Single Sample
+### 2. Record Single Sample
 
 A toolbar button that appends exactly one row: the current wall-clock, then each node's current
 `nodeValue`, through the existing `recordCase` path. If no table exists it does what Table It
@@ -121,7 +119,7 @@ the table's columns, the sample would land in the wrong columns; `recordCase` al
 missing attributes but writes misaligned data. The unlink rule below is what prevents that, and a
 sample taken against a structurally changed program must rebuild the columns rather than append.
 
-### 4. Unlink on structural change
+### 3. Unlink on structural change
 
 A reaction on the program's node and connection structure — not on node values or names. When it
 fires and the dataset holds recorded cases, each linked table tile is given its own copy of the
@@ -132,24 +130,26 @@ This is the one piece with no existing analog in the tile, and it is where a bug
 unlinking too eagerly loses the live link a student expects, and too late lets a sample land in
 columns that describe a different program.
 
-### 5. Toolbar order
+### 4. Toolbar order
 
-Record and Record Single Sample are registered as Dataflow toolbar buttons and placed after Table
-It and Graph It in the default toolbar configuration.
+Record Single Sample is registered as a Dataflow toolbar button and placed after Table It and
+Graph It in `app-config.json`, whose dataflow `tools` list currently begins
+`["data-set-view", "Table"], ["data-set-view", "Graph"], "delete", …`. The continuous record
+button joins it there in CLUE-771.
 
 ## Out of scope
 
 - Changing the shared `DataSetViewButton` for other tiles.
 - Any change to how a continuous recording samples, or to the data rate selector.
-- Removing the topbar record button. It keeps working off the same model state; retiring it is a
-  separate change once the toolbar button has been seen in use.
+- Everything in CLUE-771: lifting recording state, moving the record button, removing playback,
+  reworking Clear.
 - A readable time formatter for table columns. See "The time column".
 
 ## Testing
 
 | Test | Covers |
 |---|---|
-| `dataflow-content.test.ts` | `programMode` derives from model state exactly as `determineProgramMode` did; `durationOfRecording` is last − first and survives a table mixing samples and a run. |
+| `dataflow-content.test.ts` | `durationOfRecording` is last − first, and is correct for a table mixing single samples and a recorded run. |
 | toolbar registration tests | Table It links an existing table rather than adding a second; creates one when none exists. |
 | single-sample tests | One row appended with the current wall-clock and each node's value; creates the table first when none exists; disabled while recording. |
 | unlink tests | A node added, removed or rewired detaches linked tables with their data intact; a rename or parameter change does not. |
@@ -164,6 +164,5 @@ it fail — rather than by passing once.
   rules or the indexes; on this design it touches none of them.
 - A new Cypress spec would need adding to `.github/workflows/manual-regression.yml`; extending the
   existing `dataflow_tool_spec.js` avoids that.
-- **The estimate is wrong at 3 points.** Lifting recording state into the model, a Dataflow-specific
-  Table It, a new sample path, a structural-change reaction and a toolbar reorder is 5–8. Worth
-  re-pointing before the work starts.
+- **Held at 3 points** after the split, with the state lift moved to CLUE-771. The unlink reaction
+  is the part with no prior art in this tile and the most likely place to overrun.
