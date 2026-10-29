@@ -239,7 +239,7 @@ export class DeviceConnection {
 
   private async openWebSerial(transport: WebSerialTransport, port?: SerialPort): Promise<ConnectResult> {
     const opened = await transport.open(port);
-    if (opened !== "opened") return opened;
+    if (opened !== "opened") return opened === "canceled" ? "canceled" : "failed";
     this.lastWebSerialTransport = transport;
     return this.activateWebSerial(transport);
   }
@@ -266,7 +266,8 @@ export class DeviceConnection {
 
     const chooserTransport = this.deps.createWebSerialTransport();
     const result = await chooserTransport.open();
-    return result === "opened" ? this.finishWebSerial(chooserTransport) : result;
+    if (result === "opened") return this.finishWebSerial(chooserTransport);
+    return result === "canceled" ? "canceled" : "failed";
   }
 
   private finishWebSerial(transport: WebSerialTransport) {
