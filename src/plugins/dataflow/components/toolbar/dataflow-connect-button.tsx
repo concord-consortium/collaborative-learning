@@ -18,10 +18,11 @@ import {
   DeviceChoice, DeviceConnection, getDeviceConnection, kDeviceChoiceLabels, kDeviceChoiceOrder
 } from "../../model/device-connection";
 import { connectButtonState, connectButtonTooltip } from "../../utilities/connect-button-state";
-import { connectPaneStatus } from "../../utilities/connect-pane-status";
+import { connectionStatusInput, connectPaneStatus } from "../../utilities/connect-pane-status";
 import {
   connectDeviceForTile, disconnectDeviceForTile, reconnectDeviceForTile
 } from "../../utilities/device-actions";
+import { openConnectionHelp } from "./connection-help-panel";
 
 import ConnectIcon from "../../assets/icons/connect-icon.svg";
 
@@ -86,7 +87,6 @@ const ConnectPane = observer(function ConnectPane(
     { connection, content, tileId, paneRef, onOpenHelp, onClose }: IConnectPaneProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const { busyChoice, paneView, actionsEnabled, check } = connection;
-  const { serialDevice } = useStores();
   const busy = !!busyChoice;
   const headingId = useId();
 
@@ -205,16 +205,7 @@ const ConnectPane = observer(function ConnectPane(
     void disconnectDeviceForTile({ connection, content, tileId }).then(closeAfterSuccess);
   };
 
-  const { line1, line2, announce } = connectPaneStatus({
-    attempt: connection.attempt,
-    isConnected: connection.isConnected,
-    dataReceived: connection.dataReceived,
-    label: connection.label,
-    failure: content.connectFailure,
-    loss: connection.isConnected ? undefined : serialDevice.lastLoss?.reason,
-    notResponding: connection.notResponding,
-    check
-  });
+  const { line1, line2, announce } = connectPaneStatus(connectionStatusInput(connection, content.connectFailure));
   const helpKind = line2?.helpKind;
   const actionsBusy = busy || !actionsEnabled;
 
@@ -270,7 +261,7 @@ const ConnectPane = observer(function ConnectPane(
 export const ConnectDeviceButton = observer(function ConnectDeviceButton({ name }: IToolbarButtonComponentProps) {
   const model = useContext(TileModelContext);
   const content = model?.content as DataflowContentModelType | undefined;
-  const { serialDevice } = useStores();
+  const { serialDevice, ui } = useStores();
   const readOnly = useReadOnlyContext();
   const connection = getDeviceConnection(serialDevice);
   const isOpen = !!content?.connectPaneOpen;
@@ -332,9 +323,15 @@ export const ConnectDeviceButton = observer(function ConnectDeviceButton({ name 
     connecting: attempt && !attempt.ended ? kDeviceChoiceLabels[attempt.choice] : undefined
   });
 
+  // The help shows the tile's failure when it is the kind asked about.
+  const openHelp = (kind: HelpKind) => {
+    const topic = model && connection.helpTopic(kind, model.id, content?.connectFailure);
+    if (topic) openConnectionHelp({ connection, ui, topic });
+  };
+
   const pane = isOpen && content && model
     ? <ConnectPane connection={connection} content={content} tileId={model.id} paneRef={paneRef}
-        onClose={() => content.setConnectPaneOpen(false)} />
+        onOpenHelp={openHelp} onClose={() => content.setConnectPaneOpen(false)} />
     : undefined;
 
   // The live region sits beside the pane, not in it, so it exists while the pane is closed.

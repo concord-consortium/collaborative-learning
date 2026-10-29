@@ -2,7 +2,7 @@ import { ConnectionAttempt } from "../model/connection-attempt";
 import {
   HelpKind, IConnectFailure, kDeviceChoiceLabels, kStallKinds, paneProblemText
 } from "../model/connect-failures";
-import { IdentifyCheckState } from "../model/device-connection";
+import { DeviceConnection, IdentifyCheckState } from "../model/device-connection";
 import { DeviceLoss } from "../../../models/stores/device-transport";
 
 export type PaneLineTone = "plain" | "hint" | "problem";
@@ -25,6 +25,23 @@ export interface IPaneStatusInput {
   loss: DeviceLoss | undefined;
   notResponding: boolean;
   check: IdentifyCheckState | undefined;
+}
+
+// The status of the shared connection, showing `failure`: the tile's in its pane, or the
+// connection's own in the Connection help.
+export function connectionStatusInput(
+  connection: DeviceConnection, failure: IConnectFailure | undefined
+): IPaneStatusInput {
+  return {
+    attempt: connection.attempt,
+    isConnected: connection.isConnected,
+    dataReceived: connection.dataReceived,
+    label: connection.label,
+    failure,
+    loss: connection.lossReason,
+    notResponding: connection.notResponding,
+    check: connection.check
+  };
 }
 
 type Line2 = NonNullable<IPaneStatus["line2"]>;

@@ -147,3 +147,23 @@ export function failureDetails({ kind, step, elapsedMs, error }: IConnectFailure
   }
   return parts.join(" ");
 }
+
+// The details for help on a kind: the failure's, when it is that kind. A problem found after the
+// connection was made has no failure, so its details say what was noticed.
+export function helpDetails(kind: HelpKind, failure: IConnectFailure | undefined) {
+  if (failure?.kind === kind) return failureDetails(failure);
+  switch (kind) {
+    case "lost": return "After connecting. The connection closed without an unplug.";
+    case "noAnswer": return "After connecting. No answer to the identify check.";
+    case "notResponding": return "After connecting. No replies to its pings.";
+    default: return `After connecting. ${paneProblemText(kind)}`;
+  }
+}
+
+// Whether two kinds give a device the same headline and tries, so a change from one to the other
+// leaves the help as true as it was.
+export function sameHelp(a: HelpKind, b: HelpKind, choice: DeviceChoice) {
+  const text = (kind: HelpKind) =>
+    [helpHeadline(kind, choice), ...helpTries(kind, choice).map(t => t.text)].join("\n");
+  return text(a) === text(b);
+}

@@ -1,5 +1,6 @@
 import {
-  errorInfo, failureDetails, helpHeadline, helpTries, HelpKind, paneProblemText, kDeviceChoiceLabels
+  errorInfo, failureDetails, helpDetails, helpHeadline, helpTries, HelpKind, paneProblemText, kDeviceChoiceLabels,
+  sameHelp
 } from "./connect-failures";
 
 const allHelpKinds: HelpKind[] = [
@@ -51,5 +52,19 @@ describe("connect failures", () => {
     expect(failureDetails({ kind: "inUse", choice: "spikerbit", step: "open", elapsedMs: 300,
       error: { code: "device-in-use", message: "Unable to claim interface." } }))
       .toBe("Step: open. device-in-use: Unable to claim interface.");
+  });
+
+  it("helpDetails uses the failure of that kind, or says what was noticed after connecting", () => {
+    const failure = { kind: "openTimeout", choice: "spikerbit", step: "open", elapsedMs: 20000 } as const;
+    expect(helpDetails("openTimeout", failure)).toBe("Step: open. Didn't finish within 20 s.");
+    expect(helpDetails("noAnswer", failure)).toBe("After connecting. No answer to the identify check.");
+    expect(helpDetails("notResponding", undefined)).toBe("After connecting. No replies to its pings.");
+  });
+
+  it("sameHelp is true only for kinds with the same headline and tries", () => {
+    expect(sameHelp("noAnswer", "notResponding", "spikerbit")).toBe(true);
+    expect(sameHelp("openFailed", "openTimeout", "arduino")).toBe(true);
+    expect(sameHelp("noData", "notResponding", "arduino")).toBe(false);
+    expect(sameHelp("updateFailed", "updateStalled", "spikerbit")).toBe(false);
   });
 });

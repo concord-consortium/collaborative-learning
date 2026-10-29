@@ -12,7 +12,8 @@ import {
 import { WebSerialOpenResult, WebSerialTransport } from "../../../models/stores/web-serial-transport";
 import spikerbitHex from "../firmware/spikerbit-clue.hex";
 import {
-  AttemptOutcome, AttemptStep, DeviceChoice, errorInfo, FailureKind, IConnectFailure, kDeviceChoiceLabels
+  AttemptOutcome, AttemptStep, DeviceChoice, errorInfo, FailureKind, HelpKind, helpDetails, IConnectFailure,
+  kDeviceChoiceLabels, sameHelp
 } from "./connect-failures";
 import { AttemptTrigger, AttemptView, ConnectionAttempt } from "./connection-attempt";
 
@@ -80,6 +81,32 @@ interface IOpenFailure {
   error?: unknown;
 }
 
+// What the Connection help is about. `tileId` is the tile it was opened from, which its log events
+// name; the help itself follows the connection, so it outlives that tile.
+export interface IHelpTopic {
+  kind: HelpKind;
+  choice: DeviceChoice;
+  details: string;
+  tileId: string;
+}
+
+// What has changed since the help's topic was shown: the device works now, or has a problem with
+// other help.
+export type HelpNotice = { type: "working" } | { type: "differentProblem"; topic: IHelpTopic };
+
+// The Connection help's state, kept here rather than in its component, which unmounts while Ada's
+// tab is selected.
+export interface IConnectionHelp {
+  shown: IHelpTopic;
+  notice: HelpNotice | undefined;
+  detailsExpanded: boolean;
+}
+
+export interface IHelpListener {
+  // A notice appeared.
+  onNotice?(notice: HelpNotice): void;
+}
+
 // What dismissed the connect tutorial: OK in one tile, or any connection.
 export type ConnectTutorialDismissal = { by: "ok", tileId: string } | { by: "connection" };
 
@@ -142,6 +169,8 @@ export class DeviceConnection {
   // What first dismissed the connect tutorial, which then stays dismissed on every tile. In memory
   // only, so it can show again after a page reload.
   connectTutorialDismissal: ConnectTutorialDismissal | undefined = undefined;
+  // The Connection help, while it is open.
+  help: IConnectionHelp | undefined = undefined;
 
   private serialDevice: SerialDevice;
   private deps: IDeviceConnectionDeps;
@@ -157,6 +186,10 @@ export class DeviceConnection {
   // the attempt keeps it until then, or until a Disconnect, Connect or Reconnect disposes it.
   private stalledSpikerbit: SpikerbitDevice | undefined = undefined;
   private followed: IFollowedAttempt | undefined = undefined;
+  private helpListener: IHelpListener | undefined = undefined;
+  // Set when the help opens, until its panel moves focus to its heading. Showing the panel again
+  // after Ada's tab leaves focus where it is.
+  private helpFocusRequested = false;
 
   constructor(serialDevice: SerialDevice, deps?: Partial<IDeviceConnectionDeps>) {
     this.serialDevice = serialDevice;
@@ -169,7 +202,7 @@ export class DeviceConnection {
     };
     makeAutoObservable<DeviceConnection,
         "serialDevice" | "deps" | "lastWebSerialTransport" | "spikerbitDevice" | "identifyCheck"
-        | "stalledSpikerbit" | "followed">(
+        | "stalledSpikerbit" | "followed" | "helpListener" | "helpFocusRequested">(
       this,
       {
         serialDevice: false,
@@ -181,6 +214,10 @@ export class DeviceConnection {
         lastFailure: observable.ref,
         stalledSpikerbit: observable.ref,
         followed: false,
+        help: observable.ref,
+        helpListener: false,
+        helpFocusRequested: false,
+        takeHelpFocusRequest: false,
         connect: false,
         reconnect: false,
         disconnect: false,
@@ -192,6 +229,8 @@ export class DeviceConnection {
     reaction(() => this.isConnected, connected => {
       if (connected) this.dismissConnectTutorial({ by: "connection" });
     }, { fireImmediately: true });
+    // The help's steps stay as they were opened; a change in the problem shows as a notice.
+    reaction(() => this.currentProblem, problem => this.problemChanged(problem));
   }
 
   get isConnected() {
@@ -273,6 +312,75 @@ export class DeviceConnection {
   // When that loss happened. A new value means a new loss; an unplug confirming a loss keeps it.
   get lossAt(): number | undefined {
     return this.serialDevice.lastLoss?.at;
+  }
+
+  // Why the last device went away without the user asking, while nothing is connected.
+  get lossReason(): DeviceLoss | undefined {
+    return this.isConnected ? undefined : this.serialDevice.lastLoss?.reason;
+  }
+
+  // The problem the connection has now, or "working" once data is arriving. Undefined while an
+  // attempt runs, and after an unplug, which has no help.
+  get currentProblem(): HelpKind | "working" | undefined {
+    const attempt = this.attempt;
+    if (attempt && !attempt.ended) return undefined;
+    if (this.check === "noAnswer") return "noAnswer";
+    const loss = this.lossReason;
+    if (loss) return loss === "lost" ? "lost" : undefined;
+    if (this.lastFailure) return this.lastFailure.kind;
+    if (this.notResponding) return "notResponding";
+    return this.dataReceived ? "working" : undefined;
+  }
+
+  // The help topic for a kind, with the failure's details when `failure` is that kind.
+  helpTopic(kind: HelpKind, tileId: string, failure = this.lastFailure): IHelpTopic | undefined {
+    const matching = failure?.kind === kind ? failure : undefined;
+    const choice = matching?.choice ?? this.lastChoice ?? this.attempt?.choice;
+    return choice && { kind, choice, details: helpDetails(kind, matching), tileId };
+  }
+
+  openHelp(topic: IHelpTopic, listener?: IHelpListener) {
+    this.help = { shown: topic, notice: undefined, detailsExpanded: false };
+    this.helpListener = listener;
+    this.helpFocusRequested = true;
+  }
+
+  // Whether the help's panel should move focus to its heading. Answers true once per opening.
+  takeHelpFocusRequest() {
+    const requested = this.helpFocusRequested;
+    this.helpFocusRequested = false;
+    return requested;
+  }
+
+  showNoticeTopic() {
+    const notice = this.help?.notice;
+    if (notice?.type !== "differentProblem") return;
+    this.help = { shown: notice.topic, notice: undefined, detailsExpanded: false };
+  }
+
+  toggleHelpDetails() {
+    if (this.help) this.help = { ...this.help, detailsExpanded: !this.help.detailsExpanded };
+  }
+
+  closeHelp() {
+    this.help = undefined;
+    this.helpListener = undefined;
+    this.helpFocusRequested = false;
+  }
+
+  private problemChanged(problem: HelpKind | "working" | undefined) {
+    const help = this.help;
+    if (!help || problem === undefined) return;
+    const { shown } = help;
+    let notice: HelpNotice | undefined;
+    if (problem === "working") {
+      notice = { type: "working" };
+    } else if (!sameHelp(problem, shown.kind, shown.choice)) {
+      const topic = this.helpTopic(problem, shown.tileId);
+      if (topic) notice = { type: "differentProblem", topic };
+    }
+    this.help = { ...help, notice };
+    if (notice) this.helpListener?.onNotice?.(notice);
   }
 
   get connectTutorialDismissed() {
