@@ -14,6 +14,8 @@ import { SharedModelDocumentManager } from "../../../models/document/shared-mode
 import { ITileEnvironment } from "../../../models/tiles/tile-content";
 import { registerTileTypes } from "../../../register-tile-types";
 import { DataflowContentModelType } from "./dataflow-content";
+import { recordCase } from "./utilities/recording-utilities";
+import { uniqueId } from "../../../utilities/js-utils";
 
 registerTileTypes(["Dataflow", "Table", "Graph"]);
 
@@ -293,8 +295,14 @@ function setupContentWithTwoNamedNodes(...names: string[]) {
   names.forEach((name, i) => {
     content.program.addNodeSnapshot({
       id: `node-${i}`, name: "Number", x: 0, y: 0,
-      data: { type: "Number", orderedDisplayName: name, nodeValue: 400 + i }
+      data: { type: "Number", orderedDisplayName: name }
     } as any);
+  });
+  // nodeValue reads from the node's entry for the program's current tick, so a value only exists
+  // once a tick is open and the node has written into it.
+  content.program.addNewTick(uniqueId());
+  names.forEach((_name, i) => {
+    content.program.nodes.get(`node-${i}`)?.data.setNodeValue(400 + i);
   });
   return content;
 }
@@ -310,5 +318,48 @@ describe("prepareCapture", () => {
     const content = setupContentWithTwoNamedNodes("Sensor", "Servo");
     content.prepareCapture(new Date(2026, 9, 29, 14, 32, 7));
     expect(content.dataSet.name).toBe("Program data 14:32:07");
+  });
+});
+
+describe("recordCase", () => {
+  it("writes a 1-based point number in the first column", () => {
+    const content = setupContentWithTwoNamedNodes("Sensor", "Servo");
+    content.prepareCapture();
+    recordCase(content);
+    recordCase(content);
+    const pointId = content.dataSet.attributes[0].id;
+    expect(content.dataSet.getValueAtIndex(0, pointId)).toBe(1);
+    expect(content.dataSet.getValueAtIndex(1, pointId)).toBe(2);
+  });
+
+  // The point column must stay numeric, or the Graph tile infers a categorical x-axis and
+  // getTimeAtRecordedIndex returns 0.
+  it("leaves the point column numeric", () => {
+    const content = setupContentWithTwoNamedNodes("Sensor", "Servo");
+    content.prepareCapture();
+    recordCase(content);
+    recordCase(content);
+    expect(content.dataSet.attributes[0].type).toBe("numeric");
+  });
+
+  // The number comes from the row's position, so a run that starts after single samples continues
+  // from them rather than writing a second point 1.
+  it("numbers from the rows already present", () => {
+    const content = setupContentWithTwoNamedNodes("Sensor", "Servo");
+    content.prepareCapture();
+    recordCase(content);
+    recordCase(content);
+    recordCase(content);
+    const pointId = content.dataSet.attributes[0].id;
+    expect(content.dataSet.getValueAtIndex(2, pointId)).toBe(3);
+  });
+
+  it("writes each node's current value into its own column", () => {
+    const content = setupContentWithTwoNamedNodes("Sensor", "Servo");
+    content.prepareCapture();
+    recordCase(content);
+    const [, sensor, servo] = content.dataSet.attributes;
+    expect(content.dataSet.getValueAtIndex(0, sensor.id)).toBe(400);
+    expect(content.dataSet.getValueAtIndex(0, servo.id)).toBe(401);
   });
 });

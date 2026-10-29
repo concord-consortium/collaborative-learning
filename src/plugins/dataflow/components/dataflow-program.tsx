@@ -499,7 +499,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       case ProgramMode.Recording:
         reteManager.tickAndProcessNodes();
         if (!readOnly) {
-          recordCase(this.props.tileContent, recordIndex);
+          recordCase(this.props.tileContent);
         }
         this.incrementRecordIndex();
         break;
