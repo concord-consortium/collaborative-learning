@@ -56,14 +56,13 @@ function attemptDetails(attempt: ConnectionAttempt) {
  * Logs `connectProgress` 5, 10, 20, 40... s after the click while the attempt runs. Returns a
  * function that stops the checkpoints.
  */
-function startCheckpoints(o: ITileOptions, attempt: ConnectionAttempt) {
-  const { content, tileId } = o;
+function startCheckpoints(tileId: string, attempt: ConnectionAttempt) {
   let timer: ReturnType<typeof setTimeout> | undefined;
   const scheduleAt = (checkpointMs: number) => {
     // Measured against the clock, so a late timer doesn't push the later checkpoints off.
     timer = setTimeout(() => {
       timer = undefined;
-      if (!isAlive(content) || attempt.ended) return;
+      if (attempt.ended) return;
       logDeviceEvent(tileId, "connectProgress", attempt.choice, {
         ...attemptDetails(attempt), elapsedMs: attempt.elapsedMs, step: attempt.step,
         updatePercent: attempt.step === "update" ? attempt.updatePercent : undefined
@@ -84,7 +83,8 @@ function recordFailure(content: DataflowContentModelType, failure: IConnectFailu
 
 /**
  * Runs one attempt for the tile: logs it from the click to its result, resets the program when the
- * device becomes active and records the failure the tile's pane shows.
+ * device becomes active and records the failure the tile's pane shows. A tile deleted meanwhile is
+ * left alone, but the attempt is still logged under its id.
  */
 async function runAttempt(
   o: IConnectionOptions & { trigger: "connect" | "reconnect"; device: DeviceChoice | undefined },
@@ -101,29 +101,27 @@ async function runAttempt(
       stopCheckpoints?.();
       // A stalled device can still become active, so its reset stays armed.
       if (!attempt.outcome || !(kStallKinds as readonly string[]).includes(attempt.outcome)) stopResetWatch?.();
-      if (!alive()) return;
       const { outcome, failure, firmware } = attempt;
       logDeviceEvent(tileId, "connectResult", attempt.choice, {
         ...attemptDetails(attempt), outcome, elapsedMs: attempt.elapsedMs,
         failedStep: failure?.step, error: failure?.error, firmware
       });
-      if (failure) recordFailure(content, failure);
+      if (failure && alive()) recordFailure(content, failure);
     },
     onRecovered: attempt => {
       stopResetWatch?.();
-      if (!alive()) return;
       logDeviceEvent(tileId, "connectRecovered", attempt.choice, {
         attemptId: attempt.id, elapsedMs: attempt.elapsedMs, steps: attempt.steps
       });
-      content.clearConnectFailure();
+      if (alive()) content.clearConnectFailure();
     },
     onAbandonedOpen: (attempt, info) => {
-      if (alive()) logDeviceEvent(tileId, "abandonedOpen", attempt.choice, { attemptId: attempt.id, ...info });
+      logDeviceEvent(tileId, "abandonedOpen", attempt.choice, { attemptId: attempt.id, ...info });
     },
     onLost: (attempt, reason) => {
       stopResetWatch?.();
-      if (!alive()) return;
       logDeviceEvent(tileId, "deviceLost", attempt.choice, { attemptId: attempt.id, reason });
+      if (!alive()) return;
       // A stalled update that fails later leaves the connection with that failure to show.
       const { lastFailure } = connection;
       if (lastFailure) recordFailure(content, lastFailure);
@@ -138,7 +136,7 @@ async function runAttempt(
   // The attempt exists as soon as connect or reconnect is called, unless nothing was started.
   const started = connection.attempt;
   if (started?.id === attemptId) {
-    stopCheckpoints = startCheckpoints(o, started);
+    stopCheckpoints = startCheckpoints(tileId, started);
     stopResetWatch = when(() => started.steps.active !== undefined, () => {
       if (alive()) resetProgramForTile({ content, tileId, trigger });
     });

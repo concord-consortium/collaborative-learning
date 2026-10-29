@@ -332,7 +332,7 @@ describe("device actions", () => {
   });
 
   it.each(["connect", "reconnect"])(
-    "a %s that finishes after the tile was deleted does not touch the content or log", async operation => {
+    "a %s that finishes after the tile was deleted logs its result without touching the content", async operation => {
       const content = makeContent();
       let finish: () => void = () => undefined;
       const connection = makeConnection((attempt, listener) => new Promise<AttemptOutcome>(resolve => {
@@ -351,13 +351,14 @@ describe("device actions", () => {
       finish();
 
       expect(await acting).toBe("connected");
-      expect(logTileChangeEvent).not.toHaveBeenCalled();
+      expect(ops()).toEqual(["connectResult"]);
+      expectLogMatching("connectResult", { outcome: "connected" });
       expect(warn).not.toHaveBeenCalled();
       warn.mockRestore();
     });
 
   it.each(["connect", "reconnect"])(
-    "a %s that fails after the tile was deleted does not throw or log", async operation => {
+    "a %s that fails after the tile was deleted logs its result and does not throw", async operation => {
       const content = makeContent();
       let finish: () => void = () => undefined;
       const connection = makeConnection((attempt, listener) => new Promise<AttemptOutcome>(resolve => {
@@ -374,26 +375,59 @@ describe("device actions", () => {
 
       await expect(acting).resolves.toBe("openFailed");
       expect(warn).not.toHaveBeenCalled();
-      expect(logTileChangeEvent).not.toHaveBeenCalled();
+      expect(ops()).toEqual(["connectResult"]);
+      expectLogMatching("connectResult", { outcome: "openFailed", failedStep: "open" });
       warn.mockRestore();
     });
 
-  it("a deleted tile stops the checkpoints and nothing throws", async () => {
+  it("a deleted tile's attempt keeps logging its checkpoints until it ends, and nothing throws", async () => {
     jest.useFakeTimers();
     try {
       const content = makeContent();
-      const connection = makeConnection(() => new Promise<AttemptOutcome>(() => undefined));
-      void connectDeviceForTile({ connection, content, tileId, choice: "arduino" });
+      let finish: () => void = () => undefined;
+      const connection = makeConnection((attempt, listener) => new Promise<AttemptOutcome>(resolve => {
+        finish = () => resolve(endAttempt(attempt, listener, "openTimeout"));
+      }));
+      const acting = connectDeviceForTile({ connection, content, tileId, choice: "arduino" });
       await jest.advanceTimersByTimeAsync(5000);
       expect(loggedChanges("connectProgress").length).toBe(1);
 
       destroy(content);
-      await expect(jest.advanceTimersByTimeAsync(60000)).resolves.not.toThrow();
+      await expect(jest.advanceTimersByTimeAsync(20000)).resolves.not.toThrow();
+      expect(loggedChanges("connectProgress").map(c => c.elapsedMs)).toEqual([5000, 10000, 20000]);
 
-      expect(loggedChanges("connectProgress").length).toBe(1);
+      finish();
+      await acting;
+      await jest.advanceTimersByTimeAsync(60000);
+      expect(loggedChanges("connectProgress").length).toBe(3);
+      expectLogMatching("connectResult", { outcome: "openTimeout" });
     } finally {
       jest.useRealTimers();
     }
+  });
+
+  it("an attempt whose tile was deleted still logs a recovery, an abandoned open and a loss", async () => {
+    const content = makeContent();
+    let attempt: ConnectionAttempt | undefined;
+    let listener: IAttemptListener = {};
+    const connection = makeConnection((a, l) => {
+      attempt = a;
+      listener = l;
+      return Promise.resolve(endAttempt(a, l, "noData", { step: "waitForData" }));
+    });
+    await connectDeviceForTile({ connection, content, tileId, choice: "arduino" });
+    destroy(content);
+    (logTileChangeEvent as jest.Mock).mockClear();
+    const warn = jest.spyOn(console, "warn").mockImplementation(() => undefined);
+
+    attempt!.dataArrived();
+    listener.onRecovered?.(attempt!);
+    listener.onAbandonedOpen?.(attempt!, { late: "opened" });
+    listener.onLost?.(attempt!, "unplugged");
+
+    expect(ops()).toEqual(["connectRecovered", "abandonedOpen", "deviceLost"]);
+    expect(warn).not.toHaveBeenCalled();
+    warn.mockRestore();
   });
 
   it("disconnect logs disconnectDevice and does not reset", async () => {
