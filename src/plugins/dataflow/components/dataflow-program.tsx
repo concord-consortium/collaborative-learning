@@ -523,7 +523,16 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
 
     switch (programMode){
       case ProgramMode.Ready:
-        tileContent.prepareCapture();
+        // Only when there is nothing to keep, so a run started after single samples appends to
+        // them rather than discarding what the student captured.
+        //
+        // Not yet reachable with samples present: determineProgramMode returns Ready only for an
+        // empty dataset, so a tile holding single samples reports Done and the button offers Clear
+        // rather than Record. Reworking that state machine is CLUE-771; this guard is here so the
+        // append is correct the moment Ready can be reached with rows in the table.
+        if (tileContent.dataSet.cases.length === 0) {
+          tileContent.prepareCapture();
+        }
         this.setState({isPlaying: false, playBackIndex: 0}); //reset isPlaying
         this.setState({isRecording: true});
         break;
