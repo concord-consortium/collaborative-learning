@@ -320,7 +320,7 @@ export class DeviceConnection {
   }
 
   // The problem the connection has now, or "working" once data is arriving. Undefined while an
-  // attempt runs, and after an unplug, which has no help.
+  // attempt runs, after an unplug, which has no help, and with neither a problem nor data.
   get currentProblem(): HelpKind | "working" | undefined {
     const attempt = this.attempt;
     if (attempt && !attempt.ended) return undefined;
@@ -368,16 +368,28 @@ export class DeviceConnection {
     this.helpFocusRequested = false;
   }
 
+  // A running attempt leaves the notice as it is until its outcome. Otherwise, with no problem, the
+  // device isn't working any more, so a working notice goes; a different problem's steps still apply.
   private problemChanged(problem: HelpKind | "working" | undefined) {
     const help = this.help;
-    if (!help || problem === undefined) return;
+    if (!help) return;
+    if (problem === undefined) {
+      const attempt = this.attempt;
+      if (help.notice?.type === "working" && !(attempt && !attempt.ended)) {
+        this.help = { ...help, notice: undefined };
+      }
+      return;
+    }
     const { shown } = help;
     let notice: HelpNotice | undefined;
     if (problem === "working") {
       notice = { type: "working" };
-    } else if (!sameHelp(problem, shown.kind, shown.choice)) {
+    } else {
+      // Help on another device names that device, so it is different help even for the same kind.
       const topic = this.helpTopic(problem, shown.tileId);
-      if (topic) notice = { type: "differentProblem", topic };
+      if (topic && (topic.choice !== shown.choice || !sameHelp(problem, shown.kind, shown.choice))) {
+        notice = { type: "differentProblem", topic };
+      }
     }
     this.help = { ...help, notice };
     if (notice) this.helpListener?.onNotice?.(notice);
