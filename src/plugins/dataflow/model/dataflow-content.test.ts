@@ -1,6 +1,7 @@
 import { applyPatch, getSnapshot, unprotect } from "mobx-state-tree";
 import {
-  defaultDataflowContent, DEFAULT_PROGRAM_ZOOM, DataflowContentModel, DataflowContentModelSnapshotIn
+  defaultDataflowContent, DEFAULT_PROGRAM_ZOOM, DataflowContentModel, DataflowContentModelSnapshotIn,
+  DataflowContentModelType
 } from "./dataflow-content";
 import { newDataRate, newZoom } from "./dataflow-content-test-constants";
 import dataflowThreeNode from "../test-docs/dataflow-1-three-node.json";
@@ -13,7 +14,6 @@ import { IDocumentImportSnapshot } from "../../../models/document/document-conte
 import { SharedModelDocumentManager } from "../../../models/document/shared-model-document-manager";
 import { ITileEnvironment } from "../../../models/tiles/tile-content";
 import { registerTileTypes } from "../../../register-tile-types";
-import { DataflowContentModelType } from "./dataflow-content";
 import { recordCase } from "./utilities/recording-utilities";
 import { uniqueId } from "../../../utilities/js-utils";
 

@@ -311,6 +311,32 @@ export const DataflowContentModel = TileContentModel
     }
   }))
   .actions(self => ({
+    detachLinkedTables() {
+      // Never reattached by undo, deliberately. A recorded capture describes the program as it
+      // was, so re-linking it to a program that has moved on would reintroduce exactly the
+      // results/program mismatch this exists to prevent. Keeping it off the undo stack is also
+      // what avoids Tree.handleSharedModelChanges resolving `<sharedModelPath>/sharedModel` for
+      // an entry an undo patch has removed, which throws "Not a child".
+      //
+      // This works only because the call comes from a reaction, not from inside the structural
+      // action: withoutUndo is ignored (with a warning) when called from a child action.
+      withoutUndo();
+      const sharedModelManager = self.tileEnv?.sharedModelManager;
+      const sharedModel = self.sharedModel;
+      if (!sharedModelManager?.isReady || !sharedModel) return;
+      // Nothing captured yet means nothing to preserve, and detaching would only break a link the
+      // student is still setting up.
+      if (self.dataSet.cases.length === 0) return;
+      // No tables are following it, so there is nothing to hand it to.
+      if (sharedModelManager.getSharedModelTileIds(sharedModel).every(id => id === self.metadata.id)) return;
+
+      // The program walks away from the capture rather than copying it out: the tables keep the
+      // dataset they already hold, with the student's numbers intact, and afterAttach's
+      // sharedModelSetup reaction gives this program a fresh one.
+      sharedModelManager.removeTileSharedModel(self, sharedModel);
+    },
+  }))
+  .actions(self => ({
     afterAttach() { //
       addDisposer(self, reaction(() => {
         const sharedModelManager = self.tileEnv?.sharedModelManager;
@@ -363,6 +389,22 @@ export const DataflowContentModel = TileContentModel
         updateSharedDataSetColors(dataSets);
       },
       {name: "sharedModelSetup", fireImmediately: true}));
+
+      // Structure only -- node and connection ids. A rename or a value change leaves the capture's
+      // columns describing the program, so neither detaches.
+      //
+      // A reaction rather than a call inside each structural action: that keeps the detach out of
+      // the action's undo entry, which is what lets withoutUndo apply and makes the detach
+      // one-way. Re-firing while undo replays patches is harmless, since detachLinkedTables
+      // returns early once nothing is linked.
+      addDisposer(self, reaction(
+        () => {
+          const nodeIds = Array.from(self.program.nodes.keys()).sort().join(",");
+          const connectionIds = Array.from(self.program.connections.keys()).sort().join(",");
+          return `${nodeIds}|${connectionIds}`;
+        },
+        () => self.detachLinkedTables(),
+        {name: "detachOnStructuralChange"}));
     },
     setProgram(program: any) {
       if (program) {
@@ -459,6 +501,16 @@ export const DataflowContentModel = TileContentModel
         self.dataSet.removeAttribute(attr.id);
       });
     },
+    /**
+     * Hands every tile sharing this program's dataset its own copy of it, and stops it following
+     * the program. Called when the program's structure changes under a capture: the recorded
+     * numbers describe the program as it was, so they stay with the table while the program is
+     * free to start a new capture.
+     *
+     * Called from the structural actions rather than a reaction, so it lands in the same undo
+     * entry as the change that justified it -- one undo restores the structure AND the link.
+     * Patch application does not call actions, so this cannot re-fire while history replays.
+     */
     clearCases() {
       const ids = self.dataSet.cases.map(({__id__}) => ( __id__));
       self.dataSet.removeCases(ids);
