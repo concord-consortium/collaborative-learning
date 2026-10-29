@@ -23,6 +23,7 @@ import { SharedProgramData, SharedProgramDataType } from "../../shared-program-d
 
 import { uniqueId } from "../../../utilities/js-utils";
 import { getTileContentById, getTileModelById } from "../../../utilities/mst-utils";
+import { kTableTileType } from "../../../models/tiles/table/table-content";
 import { withoutUndo } from "../../../models/history/without-undo";
 import { IDataflowOutputConfig } from "../../../../shared/ai-summarizer/ai-summarizer-types";
 import { getTileModel } from "../../../models/tiles/tile-model";
@@ -223,6 +224,16 @@ export const DataflowContentModel = TileContentModel
         return sharedModelManager?.getSharedModelTileIds(link).includes(tileId);
       });
       return isTileIdFound;
+    },
+    /** The Table tile currently sharing this program's dataset, if any. Both Table It and Record
+     * Single Sample key off this: one to avoid making a second table, the other to know whether
+     * it has to make the first one. */
+    get linkedTableTileId(): string | undefined {
+      const sharedModelManager = self.tileEnv?.sharedModelManager;
+      const sharedModel = self.sharedModel;
+      if (!sharedModelManager?.isReady || !sharedModel) return undefined;
+      return sharedModelManager.getSharedModelTileIds(sharedModel)
+        .find(id => getTileModelById(self, id)?.content.type === kTableTileType);
     },
     getTimeAtRecordedIndex(index: number) {
       const { dataSet } = self;

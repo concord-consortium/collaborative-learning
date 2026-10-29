@@ -8,6 +8,14 @@ import { DEFAULT_DATA_RATE } from "./utilities/node";
 import { IGeneratorNodeModel } from "../nodes/generator-node";
 import { INumberNodeModel } from "../nodes/number-node";
 import { IDemoOutputNodeModel } from "../nodes/demo-output-node";
+import { DocumentContentModel, DocumentContentSnapshotType } from "../../../models/document/document-content";
+import { IDocumentImportSnapshot } from "../../../models/document/document-content-import-types";
+import { SharedModelDocumentManager } from "../../../models/document/shared-model-document-manager";
+import { ITileEnvironment } from "../../../models/tiles/tile-content";
+import { registerTileTypes } from "../../../register-tile-types";
+import { DataflowContentModelType } from "./dataflow-content";
+
+registerTileTypes(["Dataflow", "Table", "Graph"]);
 
 describe("DataflowContentModel", () => {
   it("should have correct defaults", () => {
@@ -221,4 +229,60 @@ describe("DataflowContentModel", () => {
     });
   });
 
+});
+
+// A real document with a SharedModelDocumentManager, because linkedTableTileId walks the manager's
+// tile list — stubbing it would test the stub. Follows dataflow-node-highlight.test.ts.
+function createDocument(snapshot: IDocumentImportSnapshot) {
+  const sharedModelManager = new SharedModelDocumentManager();
+  const environment: ITileEnvironment = { sharedModelManager };
+  const content = DocumentContentModel.create(snapshot as DocumentContentSnapshotType, environment);
+  sharedModelManager.setDocument(content);
+  return { content, sharedModelManager };
+}
+
+function dataflowContentFrom(doc: any, tileId = "df1") {
+  return doc.getTile(tileId)!.content as DataflowContentModelType;
+}
+
+/** A Dataflow tile alone. Its afterAttach creates the SharedDataSet, so one already exists. */
+function setupContentWithSharedModel() {
+  const { content: doc } = createDocument({ tiles: [{ id: "df1", content: { type: "Dataflow" } as any }] });
+  return dataflowContentFrom(doc);
+}
+
+/** A Dataflow tile plus another tile sharing its dataset. */
+function setupContentWithLinkedTile(otherType: string, otherTileId: string) {
+  const { content: doc, sharedModelManager } = createDocument({
+    tiles: [
+      { id: "df1", content: { type: "Dataflow" } as any },
+      { id: otherTileId, content: { type: otherType } as any }
+    ]
+  });
+  const content = dataflowContentFrom(doc);
+  const otherContent = doc.getTile(otherTileId)!.content;
+  sharedModelManager.addTileSharedModel(otherContent, content.sharedModel!);
+  return { doc, content, otherContent, sharedModelManager };
+}
+
+const setupContentWithLinkedTable = () => {
+  const r = setupContentWithLinkedTile("Table", "table1");
+  return { ...r, tableTileId: "table1", tableContent: r.otherContent };
+};
+const setupContentWithLinkedGraph = () => setupContentWithLinkedTile("Graph", "graph1");
+
+describe("linkedTableTileId", () => {
+  it("is undefined when no tile shares the program's dataset", () => {
+    expect(setupContentWithSharedModel().linkedTableTileId).toBeUndefined();
+  });
+
+  it("returns the id of a Table tile sharing the program's dataset", () => {
+    const { content, tableTileId } = setupContentWithLinkedTable();
+    expect(content.linkedTableTileId).toBe(tableTileId);
+  });
+
+  it("ignores a non-Table tile sharing the dataset", () => {
+    const { content } = setupContentWithLinkedGraph();
+    expect(content.linkedTableTileId).toBeUndefined();
+  });
 });
