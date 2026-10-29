@@ -422,6 +422,38 @@ describe("Dataflow connect button and pane", () => {
     expect(getTrigger(container)).toHaveAttribute("aria-expanded", "false");
   });
 
+  describe("announcing a failure the student can't see", () => {
+    const headline = "The browser couldn't open the Spiker:bit.";
+    const failure = { kind: "openTimeout", choice: "spikerbit", step: "open", elapsedMs: 0 } as const;
+
+    it("announces the help headline politely when a failure is recorded with the pane closed", () => {
+      const r = renderConnect();
+      expect(screen.queryByText(headline)).toBeNull();
+      act(() => {
+        r.content.setConnectFailure(failure);
+        r.content.setUnseenConnectError(true);
+      });
+      expect(screen.getByText(headline)).toHaveAttribute("aria-live", "polite");
+    });
+
+    it("does not announce a failure recorded while the pane is open", () => {
+      const r = openPane();
+      act(() => {
+        r.content.setConnectFailure(failure);
+        r.content.setUnseenConnectError(false);
+      });
+      expect(screen.queryByText(headline)).toBeNull();
+    });
+
+    it("does not announce a stale unseen failure on mount", () => {
+      const content = DataflowContentModel.create();
+      content.setConnectFailure(failure);
+      content.setUnseenConnectError(true);
+      renderConnect({ content });
+      expect(screen.queryByText(headline)).toBeNull();
+    });
+  });
+
   it("opening the pane moves focus to the first control", () => {
     openPane();
     const group = screen.getByRole("group", { name: "Device connection" });
@@ -612,7 +644,7 @@ describe("Dataflow connect button and pane", () => {
 
     it("More… joins the arrow-key navigation", () => {
       const r = renderConnect();
-      r.content.setConnectFailure({ kind: "inUse", choice: "spikerbit", step: "open", elapsedMs: 0 });
+      act(() => r.content.setConnectFailure({ kind: "inUse", choice: "spikerbit", step: "open", elapsedMs: 0 }));
       fireEvent.click(getTrigger(r.container));
       const more = within(pane()).getByRole("button", { name: "More…" });
       const controls = within(pane()).getAllByRole("button");

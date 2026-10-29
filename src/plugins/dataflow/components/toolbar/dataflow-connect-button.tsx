@@ -11,7 +11,8 @@ import { IToolbarButtonComponentProps } from "../../../../components/toolbar/too
 import { TileModelContext } from "../../../../components/tiles/tile-api";
 import { useReadOnlyContext } from "../../../../components/document/read-only-context";
 import { useStores } from "../../../../hooks/use-stores";
-import { HelpKind, kStallKinds } from "../../model/connect-failures";
+import { useAnnounce } from "../../../../utilities/use-announce";
+import { HelpKind, helpHeadline, kStallKinds } from "../../model/connect-failures";
 import { DataflowContentModelType } from "../../model/dataflow-content";
 import {
   DeviceChoice, DeviceConnection, getDeviceConnection, kDeviceChoiceLabels, kDeviceChoiceOrder
@@ -25,6 +26,9 @@ import {
 import ConnectIcon from "../../assets/icons/connect-icon.svg";
 
 import "./dataflow-connect-pane.scss";
+
+// How long a failure announcement stays in its live region before it is cleared.
+const kFailureAnnounceMs = 5000;
 
 // How each navigation key moves focus: by a signed number of controls, or to the first or last one.
 const kFocusSteps: Record<string, number | "first" | "last"> = {
@@ -277,6 +281,19 @@ export const ConnectDeviceButton = observer(function ConnectDeviceButton({ name 
   const lossAtMount = useRef(connection.lossAt).current;
   const lossPulse = connection.lossAt !== undefined && connection.lossAt !== lossAtMount;
 
+  // A failure recorded while the pane is closed is announced politely, since nothing on screen is
+  // being watched. A failure already unseen at mount was announced, or missed, before this mounted.
+  const { announcement, announce } = useAnnounce(kFailureAnnounceMs);
+  const failure = content?.connectFailure;
+  const unseenError = !!content?.unseenConnectError;
+  const announcedFailure = useRef(failure);
+  useEffect(() => {
+    if (unseenError && failure && failure !== announcedFailure.current) {
+      announce(helpHeadline(failure.kind, failure.choice));
+    }
+    announcedFailure.current = failure;
+  }, [unseenError, failure, announce]);
+
   // Deselecting the tile unmounts the toolbar; the model volatile would otherwise stay open. Deleting
   // the tile destroys the content before this runs.
   useEffect(() => () => {
@@ -320,12 +337,20 @@ export const ConnectDeviceButton = observer(function ConnectDeviceButton({ name 
         onClose={() => content.setConnectPaneOpen(false)} />
     : undefined;
 
+  // The live region sits beside the pane, not in it, so it exists while the pane is closed.
+  const extraContent = (
+    <>
+      {pane}
+      {announcement && <span role="status" aria-live="polite" className="visually-hidden">{announcement}</span>}
+    </>
+  );
+
   return (
     <TileToolbarButton name={name} title={title} expanded={isOpen}
         colorClass={classNames(`connect-${state}`, { "connect-loss-pulse": lossPulse })}
         dataTestId="connect-device-button" disabled={readOnly || !content}
         disabledMessage="Connecting a device isn't available in a read-only view"
-        onClick={() => content?.setConnectPaneOpen(!isOpen)} extraContent={pane}>
+        onClick={() => content?.setConnectPaneOpen(!isOpen)} extraContent={extraContent}>
       <ConnectIcon />
     </TileToolbarButton>
   );
