@@ -58,6 +58,12 @@ class DataflowToolTile {
   getFlowtool() {
     return cy.get('.primary-workspace .flow-tool');
   }
+  getTableItButton() {
+    return cy.get(`.primary-workspace .dataflow-toolbar .toolbar-button.data-set-view`).first();
+  }
+  getRecordSampleButton() {
+    return cy.get(`.primary-workspace .dataflow-toolbar .toolbar-button.record-sample`);
+  }
   getZoomInButton() {
     return cy.get(`.primary-workspace .dataflow-toolbar .toolbar-button.zoom-in`);
   }
