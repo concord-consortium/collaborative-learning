@@ -39,7 +39,7 @@ export function resetProgramForTile({ content, tileId, trigger }: ITileOptions &
 
 /** A user looking at the pane sees the error there, so only a closed pane leaves it unseen. */
 function recordConnectFailure(content: DataflowContentModelType, result: ConnectResult, label: string | undefined) {
-  if (result !== "failed" && result !== "inUse") return;
+  if (result === "connected" || result === "canceled" || result === "lost" || result === "unplugged") return;
   content.setConnectError(result === "inUse"
     ? `Another app is using the ${label ?? "device"}.`
     : `Couldn't connect to ${label ?? "the device"}.`);

@@ -59,7 +59,7 @@ describe("device actions", () => {
     expectLog("resetProgram", { targetType: "program", trigger: "connect" });
   });
 
-  it.each(["canceled", "failed"] as ConnectResult[])("a %s connect neither resets nor logs", async result => {
+  it.each(["canceled", "openFailed"] as ConnectResult[])("a %s connect neither resets nor logs", async result => {
     const content = makeContent();
     const ticks = content.program.recentTicks.length;
     const connection = makeConnection(result);
@@ -84,7 +84,7 @@ describe("device actions", () => {
   it("a failed reconnect neither resets nor logs", async () => {
     const content = makeContent();
     const ticks = content.program.recentTicks.length;
-    const connection = makeConnection("failed", { lastChoice: "arduino" });
+    const connection = makeConnection("openFailed", { lastChoice: "arduino" });
 
     await reconnectDeviceForTile({ connection, content, tileId });
 
@@ -116,7 +116,7 @@ describe("device actions", () => {
       const content = makeContent();
       let finish: (r: ConnectResult) => void = () => undefined;
       const pending = new Promise<ConnectResult>(resolve => { finish = resolve; });
-      const connection = makeConnection("failed", { lastChoice: "arduino" });
+      const connection = makeConnection("openFailed", { lastChoice: "arduino" });
       (connection.connect as jest.Mock).mockReturnValue(pending);
       (connection.reconnect as jest.Mock).mockReturnValue(pending);
 
@@ -125,9 +125,9 @@ describe("device actions", () => {
         : reconnectDeviceForTile({ connection, content, tileId });
       destroy(content);
       const warn = jest.spyOn(console, "warn").mockImplementation(() => undefined);
-      finish("failed");
+      finish("openFailed");
 
-      await expect(acting).resolves.toBe("failed");
+      await expect(acting).resolves.toBe("openFailed");
       expect(warn).not.toHaveBeenCalled();
       expect(logTileChangeEvent).not.toHaveBeenCalled();
       warn.mockRestore();
@@ -161,7 +161,7 @@ describe("device actions", () => {
       const content = makeContent();
       content.setConnectPaneOpen(paneOpen);
 
-      await connectDeviceForTile({ connection: makeConnection("failed"), content, tileId, choice: "spikerbit" });
+      await connectDeviceForTile({ connection: makeConnection("openFailed"), content, tileId, choice: "spikerbit" });
 
       expect(content.connectError).toBe("Couldn't connect to Spiker:bit.");
       expect(content.unseenConnectError).toBe(unseen);
@@ -172,7 +172,7 @@ describe("device actions", () => {
     const content = makeContent();
 
     await reconnectDeviceForTile({
-      connection: makeConnection("failed", { lastChoice: "arduino" }), content, tileId
+      connection: makeConnection("openFailed", { lastChoice: "arduino" }), content, tileId
     });
 
     expect(content.connectError).toBe("Couldn't connect to Arduino.");
@@ -216,7 +216,7 @@ describe("device actions", () => {
   it("a later connect, reconnect or disconnect clears the error", async () => {
     const content = makeContent();
     const fail = () =>
-      connectDeviceForTile({ connection: makeConnection("failed"), content, tileId, choice: "arduino" });
+      connectDeviceForTile({ connection: makeConnection("openFailed"), content, tileId, choice: "arduino" });
 
     await fail();
     await connectDeviceForTile({ connection: makeConnection("connected"), content, tileId, choice: "arduino" });
@@ -240,7 +240,7 @@ describe("device actions", () => {
 
   it("opening the pane marks the error seen", async () => {
     const content = makeContent();
-    await connectDeviceForTile({ connection: makeConnection("failed"), content, tileId, choice: "arduino" });
+    await connectDeviceForTile({ connection: makeConnection("openFailed"), content, tileId, choice: "arduino" });
     expect(content.unseenConnectError).toBe(true);
 
     content.setConnectPaneOpen(true);

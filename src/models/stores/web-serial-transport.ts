@@ -96,8 +96,8 @@ export class WebSerialTransport implements IDeviceTransport {
     return "opened";
   }
 
-  // Races port.open against the time limit. When the limit wins, the port is closed and forgotten
-  // before this resolves, and the still-pending open is watched so a late success closes the port.
+  // Races port.open against the time limit. When the limit wins, the port is given up on (see
+  // abandonOpen) and this resolves at once.
   private async openWithLimit(port: SerialPort, options: IWebSerialOpenOptions): Promise<OpenOutcome> {
     const opening = port.open({ baudRate: 9600 });
     const settled: Promise<OpenOutcome> = opening.then(
@@ -111,7 +111,22 @@ export class WebSerialTransport implements IDeviceTransport {
       timeoutId = setTimeout(() => resolve({ status: "timeout" }), options.timeoutMs);
     });
     const outcome = await Promise.race([settled, timedOut]).finally(() => clearTimeout(timeoutId));
-    if (outcome.status === "timeout") {
+    if (outcome.status === "timeout") this.abandonOpen(port, settled, options);
+    return outcome;
+  }
+
+  // Tries to close and forget a port whose open was given up on, and closes it if that open
+  // succeeds later. Nothing here is awaited: a port stuck opening may not close either, and the
+  // time limit mustn't wait for it. Each part reports through options.onAbandoned as it finishes.
+  private abandonOpen(port: SerialPort, settled: Promise<OpenOutcome>, options: IWebSerialOpenOptions) {
+    const report = (info: IAbandonedOpenInfo) => {
+      try {
+        options.onAbandoned?.(info);
+      } catch (e) {
+        console.error("Abandoned open report failed", e);
+      }
+    };
+    const closeAndForget = async () => {
       const info: IAbandonedOpenInfo = {};
       try { await port.close(); info.close = "ok"; } catch { info.close = "failed"; }
       const forgettable = port as unknown as { forget?: () => Promise<void> };
@@ -120,15 +135,15 @@ export class WebSerialTransport implements IDeviceTransport {
       } else {
         info.forget = "unsupported";
       }
-      options.onAbandoned?.(info);
-      settled.then(async (late) => {
-        if (late.status === "opened") {
-          try { await port.close(); } catch { /* the port is abandoned either way */ }
-        }
-        options.onAbandoned?.({ late: late.status === "opened" ? "opened" : "failed" });
-      });
-    }
-    return outcome;
+      report(info);
+    };
+    void closeAndForget();
+    void settled.then(async (late) => {
+      if (late.status === "opened") {
+        try { await port.close(); } catch { /* the port is abandoned either way */ }
+      }
+      report({ late: late.status === "opened" ? "opened" : "failed" });
+    });
   }
 
   public write(line: string){

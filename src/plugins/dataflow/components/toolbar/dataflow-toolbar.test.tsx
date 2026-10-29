@@ -869,7 +869,7 @@ describe("Dataflow connect button and pane", () => {
 
   it("a failed Connect keeps the pane open and shows the error", async () => {
     const r = openPane();
-    jest.spyOn(r.connection, "connect").mockResolvedValue("failed");
+    jest.spyOn(r.connection, "connect").mockResolvedValue("openFailed");
     act(() => screen.getByRole("button", { name: "Connect Spiker:bit" }).focus());
     await act(async () => { fireEvent.click(screen.getByRole("button", { name: "Connect Spiker:bit" })); });
     expect(r.content.connectPaneOpen).toBe(true);
@@ -882,7 +882,7 @@ describe("Dataflow connect button and pane", () => {
     const stores = specStores();
     const tiles = [TileModel.create({ content: DataflowContentModel.create() }),
       TileModel.create({ content: DataflowContentModel.create() })];
-    jest.spyOn(getDeviceConnection(stores.serialDevice), "connect").mockResolvedValue("failed");
+    jest.spyOn(getDeviceConnection(stores.serialDevice), "connect").mockResolvedValue("openFailed");
     render(
       <ModalProvider>
         <Provider stores={stores}>
@@ -915,7 +915,7 @@ describe("Dataflow connect button and pane", () => {
   });
 
   // Reconnect disconnects first, so after a failed or canceled attempt nothing is connected.
-  it.each<ConnectResult>(["failed", "canceled"])("a %s Reconnect keeps the pane open", async (result) => {
+  it.each<ConnectResult>(["openFailed", "canceled"])("a %s Reconnect keeps the pane open", async (result) => {
     const r = openPane();
     fakeConnected(r);
     jest.spyOn(r.connection, "reconnect").mockImplementation(async () => {
@@ -926,7 +926,7 @@ describe("Dataflow connect button and pane", () => {
     await act(async () => { fireEvent.click(screen.getByRole("button", { name: "Reconnect" })); });
     expect(r.content.connectPaneOpen).toBe(true);
     const error = within(paneGroup()).queryByText("Couldn't connect to Spiker:bit.");
-    if (result === "failed") {
+    if (result === "openFailed") {
       expect(error).toBeInTheDocument();
     } else {
       expect(error).toBeNull();

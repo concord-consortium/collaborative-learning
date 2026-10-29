@@ -36,6 +36,9 @@ const kQueryPollMs = 10;
 // command.
 const kFirstResetSeq = kMaxSeq + 1;
 
+// The `code` of the error connectAndStream throws when the USB open takes too long.
+const kOpenTimeoutCode = "open-timeout";
+
 // Minimal subset of @microbit/microbit-connection's MicrobitUSBConnection that
 // this module depends on. Kept as an interface so tests can supply a fake and so
 // the device logic stays decoupled from the library (only spikerbit-connection.ts
@@ -142,6 +145,9 @@ export class SpikerbitDevice {
   private firmwareQueryTimeoutMs: number;
   private openTimeoutMs: number | undefined;
   private resetSeq = kFirstResetSeq;
+  // Counts connectAndStream calls and disconnects, so a connect can tell that it was disconnected
+  // while it was running.
+  private connectRun = 0;
   // When the latest connect-time chunk arrived, and when the backlog was first seen to have
   // drained (a read shorter than kDaplinkReadBytes) since the latest "!!" and "?".
   private lastDataAt = 0;
@@ -156,25 +162,34 @@ export class SpikerbitDevice {
   }
 
   // Rejects with an error whose `code` is "open-timeout" when the USB open takes longer than
-  // openTimeoutMs.
+  // openTimeoutMs, and "closed" when disconnect is called before the board becomes active.
   public async connectAndStream(flashDataSource: unknown, observer?: ISpikerbitConnectObserver) {
+    const run = ++this.connectRun;
     this.transport.onData = this.handleFirmwareData;
 
     try {
       await this.connectAndCheckFirmware(flashDataSource, observer);
     } catch (e) {
       // Close the link so a failed attempt doesn't leave the board open and still feeding
-      // the firmware handler.
-      await this.disconnect().catch((err) => console.warn("Spiker:bit disconnect failed", err));
+      // the firmware handler. An abandoned open is already being closed in the background.
+      if ((e as { code?: string } | null)?.code !== kOpenTimeoutCode) {
+        await this.disconnect().catch((err) => console.warn("Spiker:bit disconnect failed", err));
+      }
       throw e;
     }
 
+    // A board disconnected during its update, perhaps to start another connect, mustn't then
+    // replace whatever is active.
+    if (run !== this.connectRun) {
+      throw Object.assign(new Error("The connection was closed while it was starting"), { code: "closed" });
+    }
     this.serialDevice.setActiveDevice(kSpikerbitDeviceName, this.transport);
   }
 
   // Closes the WebUSB link. The library connection's status event then clears the store's
   // active device if this transport holds it.
   public disconnect() {
+    this.connectRun++;
     this.transport.onData = undefined;
     this.buffer = "";
     return this.connection.disconnect();
@@ -185,9 +200,8 @@ export class SpikerbitDevice {
     this.transport.dispose();
   }
 
-  // Races connection.connect() against openTimeoutMs. When the limit wins, the link is closed and
-  // the device forgotten before this rejects, and the still-pending open is watched so that a late
-  // success is closed too.
+  // Races connection.connect() against openTimeoutMs. When the limit wins, the open is given up on
+  // (see abandonOpen) and this rejects at once.
   private async openWithLimit(observer?: ISpikerbitConnectObserver) {
     const settled = this.connection.connect().then(
       () => ({ status: "opened" as const }),
@@ -207,22 +221,42 @@ export class SpikerbitDevice {
     if (outcome.status === "failed") throw outcome.error;
     if (outcome.status === "opened") return;
 
-    const info: IAbandonedOpenInfo = {};
-    try { await this.connection.disconnect(); info.close = "ok"; } catch { info.close = "failed"; }
-    const forgettable = this.connection.getDevice() as { forget?: () => Promise<void> } | undefined;
-    if (typeof forgettable?.forget === "function") {
-      try { await forgettable.forget(); info.forget = "ok"; } catch { info.forget = "failed"; }
-    } else {
-      info.forget = "unsupported";
-    }
-    observer?.onAbandoned?.(info);
-    settled.then(async (late) => {
+    this.abandonOpen(settled, observer);
+    throw Object.assign(new Error("Opening the USB connection timed out"), { code: kOpenTimeoutCode });
+  }
+
+  // Tries to close the link and forget the device whose open was given up on, and closes the link
+  // if that open succeeds later. Nothing here is awaited: a link stuck opening may not close
+  // either, and the time limit mustn't wait for it. Each part reports through
+  // observer.onAbandoned as it finishes.
+  private abandonOpen(
+    settled: Promise<{ status: "opened" } | { status: "failed" }>, observer?: ISpikerbitConnectObserver
+  ) {
+    const report = (info: IAbandonedOpenInfo) => {
+      try {
+        observer?.onAbandoned?.(info);
+      } catch (e) {
+        console.error("Abandoned open report failed", e);
+      }
+    };
+    const closeAndForget = async () => {
+      const info: IAbandonedOpenInfo = {};
+      try { await this.connection.disconnect(); info.close = "ok"; } catch { info.close = "failed"; }
+      const forgettable = this.connection.getDevice() as { forget?: () => Promise<void> } | undefined;
+      if (typeof forgettable?.forget === "function") {
+        try { await forgettable.forget(); info.forget = "ok"; } catch { info.forget = "failed"; }
+      } else {
+        info.forget = "unsupported";
+      }
+      report(info);
+    };
+    void closeAndForget();
+    void settled.then(async (late) => {
       if (late.status === "opened") {
         await this.connection.disconnect().catch(() => { /* the open is abandoned either way */ });
       }
-      observer?.onAbandoned?.({ late: late.status });
+      report({ late: late.status });
     });
-    throw Object.assign(new Error("Opening the USB connection timed out"), { code: "open-timeout" });
   }
 
   private async connectAndCheckFirmware(flashDataSource: unknown, observer?: ISpikerbitConnectObserver) {

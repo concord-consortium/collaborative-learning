@@ -1,5 +1,5 @@
 import { SerialDevice } from "./serial";
-import { initWebSerialConnectionEvents, WebSerialTransport } from "./web-serial-transport";
+import { initWebSerialConnectionEvents, WebSerialOpenResult, WebSerialTransport } from "./web-serial-transport";
 
 // Minimal fake SerialPort. `chunks` are delivered by the reader in order, then done.
 function fakePort(info: Partial<SerialPortInfo>, chunks: Uint8Array[] = []) {
@@ -262,6 +262,37 @@ describe("WebSerialTransport open steps", () => {
     await jest.advanceTimersByTimeAsync(20000);
     expect(await result).toBe("timeout");
     expect(onAbandoned).toHaveBeenCalledWith({ close: "failed", forget: "ok" });
+  });
+
+  it("open resolves timeout at the limit even when closing the stuck port hangs too", async () => {
+    jest.useFakeTimers();
+    const port = fakePort({ usbProductId: 67 });
+    port.open = jest.fn(() => new Promise(() => { /* never settles */ }));
+    port.close = jest.fn(() => new Promise<void>(() => { /* never settles */ }));
+    const onAbandoned = jest.fn();
+    const t = new WebSerialTransport();
+    let result: WebSerialOpenResult | undefined;
+    void t.open(port, { timeoutMs: 20000, onAbandoned }).then(r => { result = r; });
+    await jest.advanceTimersByTimeAsync(20000);
+    expect(result).toBe("timeout");
+    expect(port.close).toHaveBeenCalled();
+    expect(onAbandoned).not.toHaveBeenCalled();
+  });
+
+  it("an onAbandoned that throws doesn't become an unhandled rejection", async () => {
+    jest.useFakeTimers();
+    const port = fakePort({ usbProductId: 67 });
+    let resolveOpen: () => void = () => undefined;
+    port.open = jest.fn(() => new Promise<void>(resolve => { resolveOpen = resolve; }));
+    const onAbandoned = jest.fn(() => { throw new Error("listener failed"); });
+    const t = new WebSerialTransport();
+    const result = t.open(port, { timeoutMs: 20000, onAbandoned });
+    await jest.advanceTimersByTimeAsync(20000);
+    expect(await result).toBe("timeout");
+    resolveOpen();
+    await jest.advanceTimersByTimeAsync(0);
+    expect(onAbandoned).toHaveBeenCalledTimes(2);
+    expect(console.error).toHaveBeenCalledWith("Abandoned open report failed", expect.any(Error));
   });
 
   it("an open that finishes after the timeout is closed at once and reported", async () => {
