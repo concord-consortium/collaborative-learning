@@ -363,3 +363,23 @@ describe("recordCase", () => {
     expect(content.dataSet.getValueAtIndex(0, servo.id)).toBe(401);
   });
 });
+
+describe("getTimeAtRecordedIndex", () => {
+  it("derives elapsed seconds from the index and the data rate", () => {
+    const content = setupContentWithTwoNamedNodes("Sensor", "Servo");
+    content.setProgramDataRate(100);
+    content.prepareCapture();
+    recordCase(content);
+    recordCase(content);
+    recordCase(content);
+    expect(content.getTimeAtRecordedIndex(0)).toBe(0);
+    expect(content.getTimeAtRecordedIndex(2)).toBeCloseTo(0.2);
+    expect(content.durationOfRecording).toBeCloseTo(0.2);
+  });
+
+  it("returns 0 for an out-of-range index", () => {
+    const content = setupContentWithTwoNamedNodes("Sensor", "Servo");
+    content.prepareCapture();
+    expect(content.getTimeAtRecordedIndex(5)).toBe(0);
+  });
+});

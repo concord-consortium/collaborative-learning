@@ -244,17 +244,16 @@ export const DataflowContentModel = TileContentModel
       return sharedModelManager.getSharedModelTileIds(sharedModel)
         .find(id => getTileModelById(self, id)?.content.type === kTableTileType);
     },
+    /** Elapsed seconds at a recorded row, derived from its position and the data rate rather than
+     * read from the table -- the first column holds a point ordinal now. For a recording saved
+     * before that change this returns what that column already held, since it was written as
+     * index * rate / 1000. */
     getTimeAtRecordedIndex(index: number) {
       const { dataSet } = self;
       if (!dataSet || index < 0 || index >= dataSet.cases.length) {
         return 0;
       }
-      const timeQuantizedId = dataSet.attributes[0].id;
-      const time = dataSet.getValueAtIndex(index, timeQuantizedId);
-      if (typeof time !== "number") {
-        return 0;
-      }
-      return time;
+      return (index * self.programDataRate) / 1000;
     },
   }))
   .views(self => ({
