@@ -473,6 +473,97 @@ A Spiker:bit connect that fails because another tab or app has claimed the board
 `device-in-use` error) returns `"inUse"`, which the pane reports as "Another app is using the
 Spiker:bit."
 
+## Hidden pages
+
+What counts as hidden, and how much Chrome slows timers there, is in
+[Ticks in a hidden page](../../../../docs/dataflow.md#ticks-in-a-hidden-page), along with what
+that does to the program's ticks. For the connection:
+
+- **CLUE doesn't pause the connection.** `@microbit/microbit-connection`'s `initialize()` would
+  pause a Spiker:bit's connection while the page is hidden and reconnect when it's shown again,
+  but CLUE doesn't call `initialize()`. A program keeps reading and writing the device in a
+  hidden page, only less often.
+- **Web Serial reads keep up.** `WebSerialTransport`'s read loop waits on the port, not on a
+  timer, so readings still reach the channels. Only the ticks that sample them slow down.
+- **Spiker:bit reads fall behind.** `@microbit/microbit-connection` reads DAPLink's buffer on a
+  `setTimeout` chain, at most 62 bytes per read (`startPolling` in its `daplink.js`). At one read
+  a second, or one a minute once the page has been hidden for 5 minutes, that is slower than the
+  EMG readings arrive, so DAPLink's buffer fills and drops new output (see
+  [the backlog](cc-device-protocol.md#connecting)). The readings that do arrive are old, and
+  replies to the session's commands queue behind them or are lost. Using WebUSB directly
+  wouldn't allow a read that waits for data, like the Web Serial loop's: DAPLink sends serial
+  data only in reply to a read command, so the host has to poll.
+- **The session may lapse.** The Spiker:bit ends a session after 5 s without a `ping`, and once
+  the page has been hidden for 5 minutes the session's 1 s ping timer fires only about once a
+  minute. The next `ping` gets `err nosession`, and the session opens again. In a hand test, the
+  session lapsed about 68 s after the tab was hidden, was opened again about 45 s later, lapsed
+  again after about 12 s, and kept cycling; showing the tab opened it again at once.
+- **Not responding isn't counted while the page is hidden.** See "Not responding" in
+  [The CC Device Protocol session](#the-cc-device-protocol-session): the count pauses and starts
+  again from zero when the page is shown, so a student coming back doesn't see a false "not
+  responding".
+- **If DataFlow is ever embedded in a cross-origin iframe,** the count won't pause while the
+  iframe is scrolled out of view. Chrome slows the iframe's timers like a hidden tab's, but its
+  `visibilityState` stays `visible`, so the connect button could turn yellow. Such an iframe would
+  also need `allow="usb; serial"` for the device APIs to work at all.
+
+## Possible improvements
+
+- **Empty DAPLink's buffer at each wake-up in a hidden page.** This would let Dataflow keep up
+  with the readings while a hidden page's timers are slowed to once a second. It adds
+  complexity, so it isn't recommended until there is a demonstrated need.
+  `@microbit/microbit-connection`'s read loop sleeps after every read, so a hidden page gets 62
+  bytes per timer wake-up. A loop that reads again straight away while reads return data, and
+  sleeps only when the buffer is empty, would empty the whole backlog at each wake-up; USB
+  transfers are promises, not timers, so they aren't slowed. At today's one reading per 100 ms,
+  that would keep up while the page's timers fire once a second, for its first 5 minutes hidden.
+  It couldn't keep up once they slow to about once a minute. And with more sensors, ASCII
+  readings would fill DAPLink's roughly 500-byte buffer within a second, so keeping up with them
+  would also take a binary mode for readings. Finally, it means modifying
+  `@microbit/microbit-connection`.
+- **Not recommended: read the Spiker:bit over Web Serial.** The micro:bit also exposes a serial
+  port, which the radio-hub micro:bit uses. Reading it would wait for data like the Arduino's
+  read loop and never overflow DAPLink's buffer. But flashing still needs WebUSB, so a student
+  would have to pick the board in two device choosers. Users and product owners already dislike
+  having one device chooser, so a second isn't worth it.
+
+## Testing
+
+The automated tests stop just above the browser's device APIs:
+
+- `web-serial-transport.test.ts` replaces `navigator.serial` and its ports with fakes.
+- `spikerbit-device.test.ts` and `device-connection.test.ts` give `SpikerbitDevice` a fake
+  `IMicrobitUsbConnection` in place of the library's WebUSB connection.
+- `spikerbit-end-to-end.test.ts` wires that connection to `MakeCodeSim`, which runs the firmware
+  source, through a model of DAPLink's buffer (see
+  [Testing the firmware in Jest](../firmware/README.md#testing-the-firmware-in-jest)).
+
+Everything below that, the browser's device chooser, its WebUSB and Web Serial code and the USB
+link, is checked by hand on real boards.
+
+### Why not test against the browser's real device stack
+
+It would take two things, a device the browser accepts as real and a way to pick it in the
+device chooser, and neither is practical. This was checked with Chrome 156 in October 2026.
+
+- **Tests can't pick a device in the chooser.** `requestPort()` and `requestDevice()` open a
+  chooser that is part of Chrome's own window, not the page, so Cypress and Playwright selectors
+  can't reach it. The DevTools protocol has a `DeviceAccess` domain for this
+  (`deviceRequestPrompted`, then `selectPrompt`), which Puppeteer's `waitForDevicePrompt` uses,
+  but Chrome raises it only for Web Bluetooth: with `DeviceAccess` enabled, neither the Web
+  Serial nor the WebUSB chooser raised `deviceRequestPrompted`. The Chrome policies
+  `SerialAllowUsbDevicesForUrls` and `WebUsbAllowDevicesForUrls` grant a device ahead of time, so
+  `getPorts()` and `getDevices()` return it, but `requestPort()` and `requestDevice()` still show
+  the chooser. Clicking it through the operating system (`xdotool`, macOS accessibility
+  scripting) needs a visible browser window and is fragile.
+- **Only Linux can fake a USB device in software.** The `dummy_hcd` kernel module provides a
+  virtual USB controller pair, so a gadget driver (`g_serial`, Raw Gadget or FunctionFS) can
+  appear to the browser as a plugged-in device; USB/IP with `vhci_hcd` does the same from a
+  user-space server. A serial gadget would be enough for the Web Serial path. Passing for a
+  micro:bit over WebUSB is much more: the fake would have to answer DAPLink's CMSIS-DAP commands,
+  its serial commands and flashing, as `@microbit/microbit-connection` uses them. macOS has no
+  equivalent of `dummy_hcd`. Whether GitHub's Ubuntu runners ship the module wasn't checked.
+
 ## Summary
 
 Both directions run through `SerialDevice` and are transport-agnostic: outbound via

@@ -53,6 +53,38 @@ Additionally each `watchedValue` of the node is recorded on each tick. These rec
 
 In a readOnly program, there is no tick. The `data` function will only be called when the program is changed underneath it. This is why the "only readOnly views" case described above should be tested.
 
+## Ticks in a hidden page
+
+The tick is a `setInterval` at the program's sampling rate (`setDataRate` in `dataflow-program.tsx`). Browsers slow timers in a page the user can't see, so there a program ticks less often than its sampling rate says.
+
+### What counts as hidden
+
+A page is hidden when `document.visibilityState` is `hidden`: its tab isn't the selected one, its window is minimized, or the screen is locked. Chrome on macOS and Windows can also count a window covered entirely by other windows as hidden. Scrolling doesn't hide a page.
+
+Chrome also throttles some iframes that aren't hidden. CLUE doesn't put DataFlow in an iframe today, but if it ever does, that matters. These were measured with Chrome 156 in October 2026:
+
+| Where the program runs | `visibilityState` | Timers |
+|---|---|---|
+| The selected tab | `visible` | at their set rate |
+| A background tab | `hidden` | about once a second, and about once a minute after 5 minutes hidden |
+| A same-origin iframe scrolled out of view | `visible` | at their set rate |
+| A cross-origin iframe scrolled out of view | `visible` | about once a second, still after more than 5 minutes, and animation frames stop |
+
+So if DataFlow is ever embedded in a cross-origin iframe, it will run as slowly as in a background tab whenever the iframe is scrolled out of view, while still reporting `visible`. Code that checks `visibilityState` won't notice.
+
+### What it does to a program
+
+At any sampling rate faster than 1 s, a program in a hidden page ticks about once a second. Once the page has been hidden for 5 minutes, it ticks about once a minute at any sampling rate.
+
+- A **Sensor node** reads the channel's latest value on each tick, so readings that arrive between ticks are never seen.
+- **Generator** and **Timer** nodes, and virtual sensors, compute their value from `Date.now()`. Each value is right for the moment of its tick; there are just fewer of them.
+- A **Live Output** node sends only on a tick, so a servo moves at most once per tick.
+- The plots under the nodes get one point per tick.
+- **A recording gets the wrong times.** `recordCase` writes the time column as the tick count times the sampling rate, not the time that has passed. A recording at 100 ms that runs for a minute in a hidden page gets about 60 rows, timed from 0 to 6 s.
+- Playback also moves one row per tick, so it slows down too.
+
+For what a hidden page does to a device connection, see [Hidden pages](../src/plugins/dataflow/docs/serial.md#hidden-pages) in the serial connections doc.
+
 # Location of Node State
 
 Nodes can store stuff in several places:
