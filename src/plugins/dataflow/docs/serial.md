@@ -33,7 +33,7 @@ and **outbound** (a Live Output node → bytes leaving the computer).
 | `MicrobitUsbTransport` | `src/models/stores/spikerbit-device.ts` | `IDeviceTransport` over a micro:bit WebUSB connection: `write()` out, `serialdata` → `onData` in, `status` → `onDisconnect("lost")`, and `navigator.usb`'s `disconnect` for its device → `onDisconnect("unplugged")`. |
 | `SpikerbitDevice` | `src/models/stores/spikerbit-device.ts` | Spiker:bit connect, reset, firmware check and flash; taps `onData` for connect-time firmware detection, then hands the transport to the store. |
 | `SerialDevice` | `src/models/stores/serial.ts` | Transport-agnostic connection store: holds the active transport and the registered channel sources, routes writes (`writeLine`) and inbound parsing (`receive`). `isConnected()` is observable. Keeps `lastLoss`. |
-| `DeviceConnection` | `src/plugins/dataflow/model/device-connection.ts` | App-wide connect, reconnect and disconnect; one instance per `SerialDevice`, from `getDeviceConnection`. Tracks `lastChoice`, `busyChoice` and `connectTutorialDismissal`. Follows the latest `ConnectionAttempt` and exposes `attempt`, `lastFailure`, `paneView`, `actionsEnabled` and `dataReceived`. Keeps the "Is it alive?" check, and exposes `lossMessage` and `notResponding`. |
+| `DeviceConnection` | `src/plugins/dataflow/model/device-connection.ts` | App-wide connect, reconnect and disconnect; one instance per `SerialDevice`, from `getDeviceConnection`. Tracks `lastChoice`, `busyChoice` and `connectTutorialDismissal`. Follows the latest `ConnectionAttempt` and exposes `attempt`, `lastFailure`, `paneView`, `actionsEnabled` and `dataReceived`; `currentFailure` drops a stall's failure once its device is no longer open (`holdsDevice`). Keeps the "Is it alive?" check, and exposes `lossReason`, `lossMessage` and `notResponding`. Holds the Connection help drawer's state (`help`, set by `openHelp` and cleared by `closeHelp`), whose notices follow `currentProblem`. |
 | `ConnectionAttempt` | `src/plugins/dataflow/model/connection-attempt.ts` | One Connect or Reconnect: its step, step times, view, outcome and failure. See [The connection attempt](#the-connection-attempt). |
 | tile device actions | `src/plugins/dataflow/utilities/device-actions.ts` | Wrap `DeviceConnection` for one tile: they reset the clicking tile's program, log the change, and record a failed attempt's message on the tile. |
 | `parseKeyValueData` | `src/models/stores/serial-protocol.ts` | `keyValue` parser (Arduino): `emg:<n>\r\n` lines → channel values. |
@@ -68,11 +68,11 @@ actions below. The log events name the device by the choice the user connected w
 `disconnect()`. Connect and reconnect resolve the attempt's outcome: `"connected"`,
 `"canceled"`, a failure kind (`connect-failures.ts`), or `"unplugged"` / `"lost"` (see
 [The connection attempt](#the-connection-attempt)). `options` carries an `attemptId` and a
-listener. When a device is already connected, both disconnect it first. A Web Serial board and the Spiker:bit take different
-flows, and both end by calling `SerialDevice.setActiveDevice(deviceFamily, transport)`, which
-records the active transport, wires its inbound callbacks, and marks the store connected.
-Inbound data is matched against the registered channel sources (see
-[Channel sources](#channel-sources)).
+listener. When a device is already connected, both disconnect it first. A Web Serial board and
+the Spiker:bit take different flows, and both end by calling
+`SerialDevice.setActiveDevice(deviceFamily, transport)`, which records the active transport,
+wires its inbound callbacks, and marks the store connected. Inbound data is matched against the
+registered channel sources (see [Channel sources](#channel-sources)).
 
 **Web Serial (Arduino and radio-hub micro:bit):**
 
@@ -133,11 +133,10 @@ failing (see "Why a device went away").
 
 **Disconnect** first ends an attempt still running as `canceled`, and disposes a Spiker:bit
 that isn't active yet: one whose update stalled, or one the running attempt opened (see below).
-It ends any CC
-Device Protocol session (`SerialDevice.endSession`, waiting at most
-500 ms, `kEndSessionTimeoutMs`), then closes the transport and clears the active device. For a
-Spiker:bit, closing
-the transport disconnects the library connection; the device is kept for Reconnect.
+It clears `lastFailure`, since a stall's failure goes with its device. It ends any CC Device
+Protocol session (`SerialDevice.endSession`, waiting at most 500 ms, `kEndSessionTimeoutMs`),
+then closes the transport and clears the active device. For a Spiker:bit, closing the transport
+disconnects the library connection; the device is kept for Reconnect.
 
 **Tile device actions.** The pane, the top-bar menu and the `reset` button call the tile device
 actions in `device-actions.ts`, which wrap `DeviceConnection` and log `DATAFLOW_TOOL_CHANGE`
@@ -161,7 +160,7 @@ carry `targetType: "device"` and `device`: the choice id (`arduino`, `microbitHu
 | `connectResult` | `attemptId`, `trigger`, `outcome`, `elapsedMs`, `steps`; for a failure `failedStep` and `error` (`name`, `code`, `message`); for a Spiker:bit `firmware` (`found`, `updated`) | The attempt ends, including `canceled` |
 | `connectRecovered` | `attemptId`, `elapsedMs`, `steps` | An attempt that ended in a stall gets its first data after all |
 | `abandonedOpen` | `attemptId`, and what the `close()`, `forget()` and late settle of the abandoned open did | An open the attempt gave up on settles, or its best-effort close finishes |
-| `deviceLost` | `attemptId`, `reason`: `unplugged` or `lost` | A device the attempt left open is lost, or a stalled update fails later |
+| `deviceLost` | `attemptId`, `reason`: `unplugged`, `lost`, or `updateFailed` for a stalled update whose flash fails later | A device the attempt left open is lost, or a stalled update's flash fails later |
 | `disconnectDevice` | `targetType: "device"`, `device`: the choice that was connected | The user disconnects |
 | `resetProgram` | `targetType: "program"`, `trigger`: `connect`, `reconnect` or `button` | The program is reset |
 | `showConnectTutorial` | `targetType: "connectTutorial"` | The connect tutorial appears over the tile |
@@ -176,6 +175,8 @@ carry `targetType: "device"` and `device`: the choice id (`arduino`, `microbitHu
 - Only a Disconnect the user chooses logs `disconnectDevice`. An unplug logs `deviceLost` when the
   attempt had ended with the device open; one before that ends the attempt, which `connectResult`
   records as `unplugged` or `lost`.
+- A tile deleted during an attempt is left alone, but the attempt's events are still logged under
+  its id.
 - One OK or one connection dismisses the tutorial on every tile, so each tile it covered logs a
   dismissal; the tile whose OK was clicked has `trigger` `ok`. A tile that closes while the
   tutorial shows, such as a deleted tile, logs no dismissal.
@@ -228,17 +229,25 @@ failure, with its step and how long that step had run.
 
 **Stalls and recovery.** `updateStalled`, `noData` and `notResponding` end the attempt, but the
 device stays open and the stalled step keeps running. The actions are enabled, and a stalled
-update keeps the actions view though its board isn't active yet. An update that then finishes
-makes the board active and waits for its data, without a second outcome. First data after a
-stall sets `attempt.recovered`, clears `lastFailure` and calls the listener's `onRecovered`.
-Disconnect or Connect during a stalled update first disposes that `SpikerbitDevice`, which
-closes its library connection and so stops the flash. Reconnect closes the library connection too,
-but keeps the device and reopens it without the chooser. After the attempt has ended with its
-device open, a loss calls the listener's `onLost`. That includes a stalled update's board, which
-isn't active yet: its loss is also recorded on `SerialDevice.lastLoss` (`recordLoss`), so the pane
-shows it, and `lastFailure` is cleared. If a stalled update's flash fails after all, the board is
-disposed, `lastFailure` becomes `updateFailed`, and the listener hears it as `onLost` with
-`lost`.
+update keeps the actions view though its board isn't active yet. A stall's failure counts only
+while its device is open (`holdsDevice`): the button and the pane ignore one that outlasted it.
+
+- **An update that finishes after all** makes the board active without a second outcome. It no
+  longer stalls, so `lastFailure` is cleared, and the board gets the same 5 s wait for its first
+  data. If none comes, `lastFailure` becomes `notResponding`. The listener hears both changes
+  through `onStallChanged`, and the tile device actions show them on the tile.
+- **First data after a stall** sets `attempt.recovered`, clears `lastFailure` and calls the
+  listener's `onRecovered`.
+- **Disconnect or Connect during a stalled update** first disposes that `SpikerbitDevice`, which
+  closes its library connection and so stops the flash. Reconnect closes the library connection
+  too, but keeps the device and reopens it without the chooser.
+- **A loss after the attempt has ended** with its device open calls the listener's `onLost` and
+  clears `lastFailure`, so the pane shows the loss rather than the stall. That includes a stalled
+  update's board, which isn't active yet: its loss is also recorded on `SerialDevice.lastLoss`
+  (`recordLoss`), so the pane shows it.
+- **A stalled update whose flash fails after all** disposes the board, and `lastFailure` becomes
+  `updateFailed`. The listener hears it as `onLost` with the reason `updateFailed`, and the tile
+  shows that failure.
 
 **Giving up on an open.** Neither Web Serial nor WebUSB is known to let a page close a device
 while its open is pending, so at the limit the attempt stops waiting: it ends as `openTimeout`
@@ -550,9 +559,10 @@ cleared, so the guard in `onDisconnect` ignores a second `"lost"`, and `recordUn
 `DeviceConnection.disconnect` unhooks the transport's `onDisconnect` before closing it, because a
 requested close also raises the library's `Disconnected`. A connect attempt clears the record.
 
-`DeviceConnection` turns this into what the connect pane shows: `lossMessage` ("The Spiker:bit was
-unplugged." or "The connection to the Spiker:bit was lost.") and `lossAt` (a new value pulses the
-connect button three times).
+`DeviceConnection` turns this into `lossReason`, which the connect pane shows ("It was unplugged."
+or "Connection lost."), `lossMessage` for the connect button's tooltip ("The Spiker:bit was
+unplugged." or "The connection to the Spiker:bit was lost."), and `lossAt` (a new value pulses
+the connect button three times).
 
 `MicrobitUsbTransport` listens for `navigator.usb`'s `disconnect` itself, since CLUE doesn't call
 the library's `initialize()`, where the library would. Without that event, an unplug would be
@@ -566,8 +576,7 @@ the answer for 3 s. The check remembers the `CcDeviceSession` it asked and count
 object is active, so it survives the pane closing and never shows an earlier board's answer.
 
 A Spiker:bit connect that fails because another tab or app has claimed the board (the library's
-`device-in-use` error) returns `"inUse"`, which the pane reports as "Another app is using the
-Spiker:bit."
+`device-in-use` error) returns `"inUse"`, which the pane reports as "In use by another tab."
 
 ## Summary
 
