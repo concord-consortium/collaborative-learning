@@ -35,9 +35,12 @@ interface IProps {
   // of the document it actually needs.
   content: IHighlightContentModel | undefined;
   onClose: () => void;
+  // False while another tab in the right drawer is showing. The sidebar stays mounted, so the
+  // conversation is kept, but its focus trap is off.
+  active: boolean;
 }
 
-// Right-edge overlay drawer for the AI chat tutor. Mounted only while open (the
+// Content of the right drawer's AI chat tutor tab. Mounted only while Ada is open (the
 // app-header launcher owns the open/close state); mounting resets the transport, so
 // switching documents or problems while open swaps the conversation.
 //
@@ -45,12 +48,12 @@ interface IProps {
 // which can be taken over by another highlight source (a variable chip, say) while this
 // sidebar stays open.
 export const ChatTutorSidebar: React.FC<IProps> = observer((props) => {
-  const { documentKey, documentTitle, problemPath, problem, content, onClose } = props;
+  const { documentKey, documentTitle, problemPath, problem, content, onClose, active } = props;
   const { appConfig, db, user, unit } = useStores();
   const containerRef = useRef<HTMLDivElement>(null);
   const bodyRef = useRef<HTMLDivElement>(null);
 
-  useTutorDrawerTrap({ containerRef, bodyRef, onEscape: onClose });
+  useTutorDrawerTrap({ containerRef, bodyRef, onEscape: onClose, active });
 
   const getRightSummary = useRightDirty(documentKey, content);
 

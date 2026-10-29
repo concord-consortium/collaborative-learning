@@ -1,9 +1,17 @@
+@import "../vars";
 @import "../document/unwrapped-document";
 
 #doc-editor-app {
   display: flex;
   height: 100vh;
   width: 100vw;
+
+  // Reserve the right drawer's width so it doesn't cover the document. The extra 8px accounts for
+  // the drawer's own 4px margin plus a 4px gap.
+  &.right-drawer-open {
+    padding-right: calc(#{$chat-tutor-width} + 8px);
+    box-sizing: border-box;
+  }
 
   .titlebar {
     .actions {
