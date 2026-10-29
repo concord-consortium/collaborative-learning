@@ -13,7 +13,7 @@ import { WebSerialOpenResult, WebSerialTransport } from "../../../models/stores/
 import spikerbitHex from "../firmware/spikerbit-clue.hex";
 import {
   AttemptOutcome, AttemptStep, DeviceChoice, errorInfo, FailureKind, HelpKind, helpDetails, IConnectFailure,
-  kDeviceChoiceLabels, sameHelp
+  kDeviceChoiceLabels, kStallKinds, sameHelp
 } from "./connect-failures";
 import { AttemptTrigger, AttemptView, ConnectionAttempt } from "./connection-attempt";
 
@@ -47,16 +47,23 @@ export const kUpdateStallMs = 10000;
 
 export type ConnectResult = AttemptOutcome;
 
+// Why a device the attempt left open went away: a loss, or the failed flash of a stalled update.
+export type AttemptLoss = DeviceLoss | "updateFailed";
+
 // What a caller of connect or reconnect hears about its attempt besides the outcome.
 export interface IAttemptListener {
   // Called as the promise from connect or reconnect resolves.
   onEnded?(attempt: ConnectionAttempt): void;
   // The first data arrived after a stall ended the attempt.
   onRecovered?(attempt: ConnectionAttempt): void;
+  // After a stall ended the attempt, the stall changed: a stalled update finished, so it no longer
+  // stalls (undefined), or the board it then made active sent no data in time (that failure).
+  onStallChanged?(attempt: ConnectionAttempt, failure: IConnectFailure | undefined): void;
   // An open the attempt gave up on was closed and forgotten, or settled late.
   onAbandonedOpen?(attempt: ConnectionAttempt, info: IAbandonedOpenInfo): void;
-  // The device went away without being asked to, after the attempt had ended with it open.
-  onLost?(attempt: ConnectionAttempt, reason: DeviceLoss): void;
+  // The device went away without being asked to, after the attempt had ended with it open. For
+  // "updateFailed", `lastFailure` is that failure.
+  onLost?(attempt: ConnectionAttempt, reason: AttemptLoss): void;
 }
 
 export interface IAttemptOptions {
@@ -164,7 +171,8 @@ export class DeviceConnection {
   busyChoice: DeviceChoice | undefined = undefined;
   // The latest connect or reconnect attempt.
   attempt: ConnectionAttempt | undefined = undefined;
-  // The latest attempt's failure. The next attempt clears it, and so does first data after a stall.
+  // The latest attempt's failure. The next attempt clears it, and so do a Disconnect, first data
+  // after a stall, and the loss of the device a stall left open.
   lastFailure: IConnectFailure | undefined = undefined;
   // What first dismissed the connect tutorial, which then stays dismissed on every tile. In memory
   // only, so it can show again after a page reload.
@@ -254,6 +262,17 @@ export class DeviceConnection {
 
   get dataReceived() {
     return this.isConnected && this.serialDevice.dataReceived;
+  }
+
+  // Whether a device is open: the active one, or a Spiker:bit a stalled update holds open.
+  get holdsDevice() {
+    return this.isConnected || this.paneView === "actions";
+  }
+
+  // `failure`, unless it is a stall whose device is no longer open, which another tile's
+  // Disconnect can leave on a tile.
+  currentFailure(failure: IConnectFailure | undefined) {
+    return failure && (!kStallKinds.includes(failure.kind) || this.holdsDevice) ? failure : undefined;
   }
 
   get connectedLabel(): string | undefined {
@@ -428,6 +447,8 @@ export class DeviceConnection {
     const starting = attempt && !attempt.ended && this.isFollowing(attempt) ? attempt : undefined;
     if (starting) this.endAttempt(starting, "canceled");
     this.stopFollowing();
+    // A stall's failure goes with its device.
+    this.lastFailure = undefined;
     if (starting?.choice === "spikerbit" && starting.steps.active === undefined) await this.disposeSpikerbit();
     await this.closeDevices();
   }
@@ -570,8 +591,26 @@ export class DeviceConnection {
         () => this.deviceLost(attempt, this.serialDevice.lastLoss!.reason))
     );
     const noData = attempt.choice === "spikerbit" ? "notResponding" : "noData";
-    this.setLimit(attempt, kFirstDataTimeoutMs,
-      () => this.endAttempt(attempt, noData, { elapsedMs: kFirstDataTimeoutMs }));
+    if (!attempt.ended) {
+      this.setLimit(attempt, kFirstDataTimeoutMs,
+        () => this.endAttempt(attempt, noData, { elapsedMs: kFirstDataTimeoutMs }));
+    } else if (attempt.outcome === "updateStalled") {
+      // The stalled update finished after all. The attempt keeps its outcome, but the update no
+      // longer stalls, and the board gets the same wait for its first data, which can stall too.
+      this.stallChanged(attempt, undefined);
+      clearTimeout(followed.timer);
+      followed.timer = setTimeout(() => this.stallChanged(attempt, {
+        kind: noData, choice: attempt.choice, step: "waitForData", elapsedMs: kFirstDataTimeoutMs
+      }), kFirstDataTimeoutMs);
+    }
+  }
+
+  // After a stall ended the attempt, its failure changed.
+  private stallChanged(attempt: ConnectionAttempt, failure: IConnectFailure | undefined) {
+    const followed = this.followed;
+    if (followed?.attempt !== attempt) return;
+    this.lastFailure = failure;
+    followed.listener?.onStallChanged?.(attempt, failure);
   }
 
   private dataArrived(attempt: ConnectionAttempt) {
@@ -581,18 +620,22 @@ export class DeviceConnection {
     if (!attempt.ended) {
       this.endAttempt(attempt, "connected");
     } else if (attempt.recovered) {
+      this.clearLimit(attempt);
       this.lastFailure = undefined;
       followed.listener?.onRecovered?.(attempt);
     }
   }
 
-  // A loss before the attempt has ended ends it. After that, the device it left open was lost.
+  // A loss before the attempt has ended ends it. After that, the device it left open was lost, and
+  // a stall's failure goes with it.
   private deviceLost(attempt: ConnectionAttempt, reason: DeviceLoss) {
     const followed = this.followed;
     if (followed?.attempt !== attempt) return;
     if (!attempt.ended) {
       this.endAttempt(attempt, reason);
     } else {
+      this.clearLimit(attempt);
+      this.lastFailure = undefined;
       followed.listener?.onLost?.(attempt, reason);
     }
   }
@@ -771,7 +814,7 @@ export class DeviceConnection {
       kind: "updateFailed", choice: attempt.choice, step: "update", elapsedMs: attempt.stepElapsedMs,
       error: errorInfo(error)
     };
-    this.followed?.listener?.onLost?.(attempt, "lost");
+    this.followed?.listener?.onLost?.(attempt, "updateFailed");
   }
 
   // The board went away after its open and before it became active, perhaps during a stalled

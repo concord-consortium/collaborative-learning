@@ -68,6 +68,19 @@ describe("connectButtonTooltip", () => {
       .toBe("Spiker:bit: the update stalled. Click for details.");
   });
 
+  it("a stall comes before an unseen error, which comes before a loss", () => {
+    const all = {
+      ...base, stalled: true, unseenError: true, connectedLabel: "Arduino",
+      lossMessage: "The Arduino was unplugged."
+    };
+    expect(connectButtonState(all)).toBe("attention");
+    expect(connectButtonTooltip(all)).toBe("Arduino: no data yet. Click for details.");
+    expect(connectButtonTooltip({ ...all, stalled: false })).toBe("Couldn't connect. Click for details.");
+    expect(connectButtonState({ ...all, stalled: false, unseenError: false })).toBe("idle");
+    expect(connectButtonTooltip({ ...all, stalled: false, unseenError: false }))
+      .toBe("The Arduino was unplugged. Click to connect.");
+  });
+
   it("the unseen-error text wins when a device is also needed", () => {
     expect(connectButtonTooltip({ ...base, needsDevice: true, unseenError: true }))
       .toBe("Couldn't connect. Click for details.");

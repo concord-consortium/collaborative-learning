@@ -115,6 +115,11 @@ async function runAttempt(
       });
       if (alive()) content.clearConnectFailure();
     },
+    onStallChanged: (_attempt, failure) => {
+      if (!alive()) return;
+      if (failure) recordFailure(content, failure);
+      else content.clearConnectFailure();
+    },
     onAbandonedOpen: (attempt, info) => {
       logDeviceEvent(tileId, "abandonedOpen", attempt.choice, { attemptId: attempt.id, ...info });
     },
@@ -122,9 +127,10 @@ async function runAttempt(
       stopResetWatch?.();
       logDeviceEvent(tileId, "deviceLost", attempt.choice, { attemptId: attempt.id, reason });
       if (!alive()) return;
-      // A stalled update that fails later leaves the connection with that failure to show.
+      // A stalled update whose flash fails later leaves the connection with that failure to show.
+      // Any other loss shows as the loss, so a stall's failure goes.
       const { lastFailure } = connection;
-      if (lastFailure) recordFailure(content, lastFailure);
+      if (reason === "updateFailed" && lastFailure) recordFailure(content, lastFailure);
       else content.clearConnectFailure();
     }
   };

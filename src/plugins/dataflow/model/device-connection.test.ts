@@ -811,6 +811,47 @@ describe("DeviceConnection", () => {
       expect(listener.onRecovered).toHaveBeenCalledWith(connection.attempt);
     });
 
+    it("disconnect after a stall clears lastFailure, so nothing still says the device stalled", async () => {
+      const { connection } = setup([makeTransport(["opened"], { sendsData: false })]);
+      const p = connection.connect("arduino");
+      await jest.advanceTimersByTimeAsync(kFirstDataTimeoutMs);
+      expect(await p).toBe("noData");
+      expect(connection.lastFailure?.kind).toBe("noData");
+      await connection.disconnect();
+      expect(connection.lastFailure).toBeUndefined();
+      expect(connection.currentProblem).toBeUndefined();
+    });
+
+    it("a loss after a noData stall calls onLost and clears lastFailure, so the loss shows", async () => {
+      const transport = makeTransport(["opened"], { sendsData: false });
+      const { connection } = setup([transport]);
+      const listener = { onLost: jest.fn() };
+      const p = connection.connect("arduino", { listener });
+      await jest.advanceTimersByTimeAsync(kFirstDataTimeoutMs);
+      expect(await p).toBe("noData");
+      transport.onDisconnect!("unplugged");
+      expect(listener.onLost).toHaveBeenCalledWith(connection.attempt, "unplugged");
+      expect(connection.lastFailure).toBeUndefined();
+      expect(connection.lossReason).toBe("unplugged");
+      expect(connection.attempt!.outcome).toBe("noData");
+    });
+
+    it("a stall's failure counts only while its device is held", async () => {
+      const { connection, serialDevice } = setup([makeTransport(["opened"], { sendsData: false })]);
+      const p = connection.connect("arduino");
+      await jest.advanceTimersByTimeAsync(kFirstDataTimeoutMs);
+      expect(await p).toBe("noData");
+      const stall = connection.lastFailure;
+      const openFailed = { kind: "openFailed", choice: "arduino", step: "open", elapsedMs: 0 } as const;
+      expect(connection.holdsDevice).toBe(true);
+      expect(connection.currentFailure(stall)).toBe(stall);
+      serialDevice.clearActiveDevice();
+      expect(connection.holdsDevice).toBe(false);
+      expect(connection.currentFailure(stall)).toBeUndefined();
+      expect(connection.currentFailure(openFailed)).toBe(openFailed);
+      expect(connection.currentFailure(undefined)).toBeUndefined();
+    });
+
     it("an update with no progress for 10 s ends as updateStalled and keeps the actions view", async () => {
       const { connection, stepped } = setupSpikerbit();
       const p = connection.connect("spikerbit");
@@ -857,8 +898,45 @@ describe("DeviceConnection", () => {
       expect(connection.attempt!.recovered).toBe(true);
       expect(connection.lastFailure).toBeUndefined();
       expect(listener.onRecovered).toHaveBeenCalledWith(connection.attempt);
+      // The first data stopped the wait for it.
+      await jest.advanceTimersByTimeAsync(kFirstDataTimeoutMs);
+      expect(connection.lastFailure).toBeUndefined();
       serialDevice.clearActiveDevice();
     });
+
+    it("a stalled update that finishes clears its updateStalled failure when the board becomes active",
+      async () => {
+        const { connection, stepped, serialDevice } = setupSpikerbit();
+        const listener = { onStallChanged: jest.fn(), onRecovered: jest.fn() };
+        const p = connection.connect("spikerbit", { listener });
+        await flush();
+        stepped.observer().onOpened!();
+        stepped.observer().onFirmwareChecked!(null, true);
+        await jest.advanceTimersByTimeAsync(kUpdateStallMs);
+        expect(await p).toBe("updateStalled");
+        stepped.observer().onUpdateFinished!();
+        await stepped.activate();
+        expect(connection.lastFailure).toBeUndefined();
+        expect(connection.currentProblem).toBeUndefined();
+        expect(listener.onStallChanged).toHaveBeenCalledWith(connection.attempt, undefined);
+        expect(connection.attempt!.outcome).toBe("updateStalled");
+
+        // The board still gets the usual wait for its first data, and data after it recovers.
+        await jest.advanceTimersByTimeAsync(kFirstDataTimeoutMs - 1);
+        expect(connection.lastFailure).toBeUndefined();
+        await jest.advanceTimersByTimeAsync(1);
+        const stall = {
+          kind: "notResponding", choice: "spikerbit", step: "waitForData", elapsedMs: kFirstDataTimeoutMs
+        };
+        expect(connection.lastFailure).toEqual(stall);
+        expect(listener.onStallChanged).toHaveBeenLastCalledWith(connection.attempt, stall);
+        expect(connection.paneView).toBe("actions");
+        expect(connection.actionsEnabled).toBe(true);
+        stepped.transport.onData!("data\r\n");
+        expect(connection.lastFailure).toBeUndefined();
+        expect(listener.onRecovered).toHaveBeenCalledWith(connection.attempt);
+        serialDevice.clearActiveDevice();
+      });
 
     it("disconnect during a stalled update disposes the Spiker:bit device", async () => {
       const { connection, stepped } = setupSpikerbit();
@@ -970,7 +1048,7 @@ describe("DeviceConnection", () => {
       expect(connection.lossMessage).toBe("The Spiker:bit was unplugged.");
     });
 
-    it("a stalled update whose flash then fails calls onLost and shows updateFailed on the device list", async () => {
+    it("a stalled update whose flash then fails reports updateFailed to onLost and shows it", async () => {
       const { connection, stepped } = setupSpikerbit();
       const listener = { onLost: jest.fn() };
       const p = connection.connect("spikerbit", { listener });
@@ -980,7 +1058,7 @@ describe("DeviceConnection", () => {
       await jest.advanceTimersByTimeAsync(kUpdateStallMs);
       expect(await p).toBe("updateStalled");
       await stepped.fail(new Error("flash failed"));
-      expect(listener.onLost).toHaveBeenCalledWith(connection.attempt, "lost");
+      expect(listener.onLost).toHaveBeenCalledWith(connection.attempt, "updateFailed");
       expect(connection.lastFailure).toMatchObject({
         kind: "updateFailed", step: "update", error: { message: "flash failed" }
       });

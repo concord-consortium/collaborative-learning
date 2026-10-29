@@ -28,7 +28,7 @@ export interface IPaneStatusInput {
 }
 
 // The status of the shared connection, showing `failure`: the tile's in its pane, or the
-// connection's own in the Connection help.
+// connection's own in the Connection help. A stall's failure shows only while its device is open.
 export function connectionStatusInput(
   connection: DeviceConnection, failure: IConnectFailure | undefined
 ): IPaneStatusInput {
@@ -37,7 +37,7 @@ export function connectionStatusInput(
     isConnected: connection.isConnected,
     dataReceived: connection.dataReceived,
     label: connection.label,
-    failure,
+    failure: connection.currentFailure(failure),
     loss: connection.lossReason,
     notResponding: connection.notResponding,
     check: connection.check

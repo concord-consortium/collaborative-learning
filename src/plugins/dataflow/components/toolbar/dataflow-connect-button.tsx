@@ -304,12 +304,16 @@ export const ConnectDeviceButton = observer(function ConnectDeviceButton({ name 
     return () => document.removeEventListener("pointerdown", handlePointerDown, true);
   }, [isOpen, content]);
 
+  // A stall counts only while its device is still open. The tile's own can outlast it, after
+  // another tile's Disconnect.
+  const lastFailure = connection.currentFailure(connection.lastFailure);
+  const staleTileStall = !!failure && !connection.currentFailure(failure);
   const stateInput = {
     connected: connection.isConnected,
     needsDevice: !!content?.needsDevice,
-    unseenError: !!content?.unseenConnectError,
+    unseenError: unseenError && !staleTileStall,
     notResponding: connection.notResponding,
-    stalled: !!connection.lastFailure && kStallKinds.includes(connection.lastFailure.kind),
+    stalled: !!lastFailure && kStallKinds.includes(lastFailure.kind),
     dataReceived: connection.dataReceived
   };
   const attempt = connection.attempt;
@@ -317,8 +321,8 @@ export const ConnectDeviceButton = observer(function ConnectDeviceButton({ name 
   const title = connectButtonTooltip({
     ...stateInput,
     connectedLabel: connection.connectedLabel
-      ?? (connection.lastFailure ? kDeviceChoiceLabels[connection.lastFailure.choice] : undefined),
-    stallKind: connection.lastFailure?.kind,
+      ?? (lastFailure ? kDeviceChoiceLabels[lastFailure.choice] : undefined),
+    stallKind: lastFailure?.kind,
     lossMessage: connection.lossMessage,
     connecting: attempt && !attempt.ended ? kDeviceChoiceLabels[attempt.choice] : undefined
   });

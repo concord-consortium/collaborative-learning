@@ -6,7 +6,13 @@ import { DataflowContentModel } from "../model/dataflow-content";
 import { DataflowNodeModel } from "../model/dataflow-program-model";
 import { AttemptOutcome, FailureKind, IConnectFailure, kStallKinds } from "../model/connect-failures";
 import { ConnectionAttempt } from "../model/connection-attempt";
-import { DeviceChoice, DeviceConnection, IAttemptListener, IAttemptOptions } from "../model/device-connection";
+import {
+  DeviceChoice, DeviceConnection, IAttemptListener, IAttemptOptions, kFirstDataTimeoutMs
+} from "../model/device-connection";
+import { SerialDevice } from "../../../models/stores/serial";
+import { DeviceLoss } from "../../../models/stores/device-transport";
+import { WebSerialTransport } from "../../../models/stores/web-serial-transport";
+import { connectionStatusInput, connectPaneStatus } from "./connect-pane-status";
 import {
   connectDeviceForTile, disconnectDeviceForTile, kCheckpointStartMs, newAttemptId, reconnectDeviceForTile,
   resetProgramForTile
@@ -45,7 +51,9 @@ function endAttempt(
 // creates the attempt synchronously inside connect or reconnect.
 function makeConnection(
   outcomeOrDrive: AttemptOutcome | Drive,
-  opts: { lastChoice?: DeviceChoice, isConnected?: boolean, paneView?: "devices" | "actions", busyChoice?: DeviceChoice } = {}
+  opts: {
+    lastChoice?: DeviceChoice, isConnected?: boolean, paneView?: "devices" | "actions", busyChoice?: DeviceChoice
+  } = {}
 ) {
   const drive: Drive = typeof outcomeOrDrive === "function"
     ? outcomeOrDrive
@@ -610,10 +618,86 @@ describe("device actions", () => {
     expect(content.connectFailure?.kind).toBe("updateStalled");
 
     connection.lastFailure = { kind: "updateFailed", choice: "spikerbit", step: "update", elapsedMs: 12000 };
-    listener.onLost?.(attempt!, "lost");
+    listener.onLost?.(attempt!, "updateFailed");
 
     expect(content.connectFailure?.kind).toBe("updateFailed");
-    expectLogMatching("deviceLost", { reason: "lost" });
+    expectLogMatching("deviceLost", { reason: "updateFailed" });
+  });
+
+  it.each(["unplugged", "lost"] as const)(
+    "a loss (%s) after a stall clears the tile's stall failure and marks nothing unseen", async reason => {
+      const content = makeContent();
+      content.setConnectPaneOpen(true);
+      let attempt: ConnectionAttempt | undefined;
+      let listener: IAttemptListener = {};
+      const connection = makeConnection((a, l) => {
+        attempt = a;
+        listener = l;
+        return Promise.resolve(endAttempt(a, l, "noData", { step: "waitForData" }));
+      });
+      await connectDeviceForTile({ connection, content, tileId, choice: "arduino" });
+      content.setConnectPaneOpen(false);
+
+      // Only a stalled update's failed flash is a failure to show; the reason says which it is.
+      connection.lastFailure = attempt!.failure;
+      listener.onLost?.(attempt!, reason);
+
+      expect(content.connectFailure).toBeUndefined();
+      expect(content.unseenConnectError).toBe(false);
+      expectLogMatching("deviceLost", { reason });
+    });
+
+  it("an unplug after a real connection's noData stall shows the loss, not the stall", async () => {
+    jest.useFakeTimers();
+    try {
+      const transport = {
+        open: jest.fn().mockResolvedValue("opened"), close: jest.fn().mockResolvedValue(undefined),
+        startReading: jest.fn(), write: jest.fn(), deviceFamily: "arduino", raisesWebSerialConnect: true,
+        onData: undefined, onDisconnect: undefined as ((loss: DeviceLoss) => void) | undefined
+      };
+      const connection = new DeviceConnection(new SerialDevice(), {
+        createWebSerialTransport: () => transport as unknown as WebSerialTransport
+      });
+      const content = makeContent();
+      content.setConnectPaneOpen(true);
+      const acting = connectDeviceForTile({ connection, content, tileId, choice: "arduino" });
+      await jest.advanceTimersByTimeAsync(kFirstDataTimeoutMs);
+      expect(await acting).toBe("noData");
+      expect(content.connectFailure?.kind).toBe("noData");
+      content.setConnectPaneOpen(false);
+
+      transport.onDisconnect!("unplugged");
+
+      expect(content.connectFailure).toBeUndefined();
+      expect(content.unseenConnectError).toBe(false);
+      expect(connectPaneStatus(connectionStatusInput(connection, content.connectFailure)).line2?.text)
+        .toBe("It was unplugged.");
+      expectLogMatching("deviceLost", { reason: "unplugged" });
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
+  it("a stall that changes after the attempt ended updates the tile's failure", async () => {
+    const content = makeContent();
+    let attempt: ConnectionAttempt | undefined;
+    let listener: IAttemptListener = {};
+    const connection = makeConnection((a, l) => {
+      attempt = a;
+      listener = l;
+      return Promise.resolve(endAttempt(a, l, "updateStalled", { step: "update" }));
+    });
+    await connectDeviceForTile({ connection, content, tileId, choice: "spikerbit" });
+    expect(content.connectFailure?.kind).toBe("updateStalled");
+
+    listener.onStallChanged?.(attempt!, undefined);
+    expect(content.connectFailure).toBeUndefined();
+    expect(content.unseenConnectError).toBe(false);
+
+    const stall: IConnectFailure = { kind: "notResponding", choice: "spikerbit", step: "waitForData", elapsedMs: 5000 };
+    listener.onStallChanged?.(attempt!, stall);
+    expect(content.connectFailure).toEqual(stall);
+    expect(content.unseenConnectError).toBe(true);
   });
 
   it("a canceled connect records no failure", async () => {

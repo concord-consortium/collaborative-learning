@@ -588,6 +588,58 @@ describe("Dataflow connect button and pane", () => {
       .toBe("The Spiker:bit was unplugged. Click to connect.");
   });
 
+  describe("after a stall", () => {
+    const noData = { kind: "noData", choice: "arduino", step: "waitForData", elapsedMs: 5000 } as const;
+    const pane = () => screen.getByRole("group", { name: "Device connection" });
+
+    function stalledArduino(r: ReturnType<typeof renderConnect>) {
+      act(() => {
+        r.stores.serialDevice.setActiveDevice("arduino", fakeTransport());
+        runInAction(() => {
+          r.connection.lastChoice = "arduino";
+          r.connection.lastFailure = noData;
+        });
+        r.content.setConnectFailure(noData);
+      });
+    }
+
+    it("Disconnect leaves the button idle and the pane clean", async () => {
+      const r = openPane();
+      stalledArduino(r);
+      const trigger = getTrigger(r.container);
+      expect(trigger).toHaveClass("connect-attention");
+      expect(within(pane()).getByText("No data yet.")).toBeInTheDocument();
+
+      await act(async () => { fireEvent.click(within(pane()).getByRole("button", { name: "Disconnect" })); });
+
+      expect(trigger).toHaveClass("connect-idle");
+      expect(trigger.getAttribute("aria-label")).toBe("Connect a device");
+      fireEvent.click(trigger);
+      expect(within(pane()).getByRole("status")).toHaveTextContent("Not connected");
+      expect(within(pane()).getByText("Plug in a device, then click Connect.")).toBeInTheDocument();
+    });
+
+    it("a tile's stall no longer shows once its device is gone", () => {
+      const r = renderConnect();
+      stalledArduino(r);
+      act(() => r.content.setUnseenConnectError(true));
+      expect(getTrigger(r.container)).toHaveClass("connect-attention");
+
+      // Another tile's Disconnect clears the connection's failure, but not this tile's.
+      act(() => {
+        runInAction(() => { r.connection.lastFailure = undefined; });
+        r.stores.serialDevice.clearActiveDevice();
+      });
+
+      const trigger = getTrigger(r.container);
+      expect(trigger).toHaveClass("connect-idle");
+      expect(trigger.getAttribute("aria-label")).toBe("Connect a device");
+      fireEvent.click(trigger);
+      expect(within(pane()).getByRole("status")).toHaveTextContent("Not connected");
+      expect(within(pane()).queryByText("No data yet.")).toBeNull();
+    });
+  });
+
   describe("the status area", () => {
     const pane = () => screen.getByRole("group", { name: "Device connection" });
     const lines = () => pane().querySelectorAll(".connect-status-line, .connect-detail");
