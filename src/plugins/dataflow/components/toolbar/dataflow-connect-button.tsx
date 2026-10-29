@@ -11,14 +11,13 @@ import { IToolbarButtonComponentProps } from "../../../../components/toolbar/too
 import { TileModelContext } from "../../../../components/tiles/tile-api";
 import { useReadOnlyContext } from "../../../../components/document/read-only-context";
 import { useStores } from "../../../../hooks/use-stores";
-import { kStallKinds, paneProblemText } from "../../model/connect-failures";
+import { HelpKind, kStallKinds } from "../../model/connect-failures";
 import { DataflowContentModelType } from "../../model/dataflow-content";
 import {
   DeviceChoice, DeviceConnection, getDeviceConnection, kDeviceChoiceLabels, kDeviceChoiceOrder
 } from "../../model/device-connection";
-import {
-  connectButtonState, connectButtonTooltip, notRespondingMessage
-} from "../../utilities/connect-button-state";
+import { connectButtonState, connectButtonTooltip } from "../../utilities/connect-button-state";
+import { connectPaneStatus } from "../../utilities/connect-pane-status";
 import {
   connectDeviceForTile, disconnectDeviceForTile, reconnectDeviceForTile
 } from "../../utilities/device-actions";
@@ -41,6 +40,7 @@ function findTrigger(pane: Element | null | undefined) {
 interface IPaneControlProps {
   // The accessible name, when the visible text alone doesn't say enough
   label?: string;
+  className?: string;
   text: string;
   busy: boolean;
   onActivate: () => void;
@@ -48,7 +48,7 @@ interface IPaneControlProps {
 
 // `div role="button"`, not a real button, for the reason given at PanPalette's arrows
 // (dataflow-zoom-pan-buttons.tsx).
-function PaneControl({ label, text, busy, onActivate }: IPaneControlProps) {
+function PaneControl({ label, className, text, busy, onActivate }: IPaneControlProps) {
   function activate(e: React.SyntheticEvent) {
     e.stopPropagation();
     if ("key" in e) (e as React.KeyboardEvent).preventDefault();
@@ -56,7 +56,7 @@ function PaneControl({ label, text, busy, onActivate }: IPaneControlProps) {
   }
   return (
     <div role="button" tabIndex={0} aria-label={label} aria-disabled={busy || undefined}
-        className={classNames("connect-control", { disabled: busy })}
+        className={classNames("connect-control", className, { disabled: busy })}
         onClick={activate}
         onKeyDown={(e) => {
           if (e.key === "Enter" || e.key === " ") activate(e);
@@ -73,13 +73,16 @@ interface IConnectPaneProps {
   // The pane that is showing now. A slow attempt can outlive the pane that started it, when the
   // user closes and reopens the pane, so its result reads the live pane from here.
   paneRef: React.MutableRefObject<HTMLDivElement | null>;
+  // Opens the help drawer for a failure's kind.
+  onOpenHelp?: (kind: HelpKind) => void;
   onClose: () => void;
 }
 
 const ConnectPane = observer(function ConnectPane(
-    { connection, content, tileId, paneRef, onClose }: IConnectPaneProps) {
+    { connection, content, tileId, paneRef, onOpenHelp, onClose }: IConnectPaneProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
-  const { busyChoice, isConnected, connectedLabel, check } = connection;
+  const { busyChoice, paneView, actionsEnabled, check } = connection;
+  const { serialDevice } = useStores();
   const busy = !!busyChoice;
   const headingId = useId();
 
@@ -138,7 +141,7 @@ const ConnectPane = observer(function ConnectPane(
     if (holdsFocus.current && (!active || active === document.body)) {
       containerRef.current?.querySelector<HTMLElement>("[role='button']")?.focus({ preventScroll: true });
     }
-  }, [isConnected]);
+  }, [paneView]);
 
   function handleFocus() {
     holdsFocus.current = true;
@@ -198,36 +201,53 @@ const ConnectPane = observer(function ConnectPane(
     void disconnectDeviceForTile({ connection, content, tileId }).then(closeAfterSuccess);
   };
 
-  const status = busyChoice
-    ? `Connecting to ${kDeviceChoiceLabels[busyChoice]}…`
-    : isConnected ? `Connected: ${connectedLabel}` : "Not connected";
+  const { line1, line2, announce } = connectPaneStatus({
+    attempt: connection.attempt,
+    isConnected: connection.isConnected,
+    dataReceived: connection.dataReceived,
+    label: connection.label,
+    failure: content.connectFailure,
+    loss: connection.isConnected ? undefined : serialDevice.lastLoss?.reason,
+    notResponding: connection.notResponding,
+    check
+  });
+  const helpKind = line2?.helpKind;
+  const actionsBusy = busy || !actionsEnabled;
 
-  // One line under the status: the "Is it alive?" check's progress, or else what's wrong.
-  const checkNote = !check ? undefined
-    : check === "checking" ? `Checking the ${connectedLabel}… look for the heart.`
-    : check === "answered" ? `The ${connectedLabel} answered.`
-    : `The ${connectedLabel} didn't answer.`;
-  const problem = checkNote ? undefined
-    : isConnected
-      ? connection.notResponding ? notRespondingMessage(connectedLabel) : undefined
-      : content.connectFailure ? paneProblemText(content.connectFailure.kind) : connection.lossMessage;
+  // Line 2 always renders, empty when there is nothing to say, so the area never changes height.
+  // Only a problem goes in the live region; steps and the progress bar are not announced.
+  const detail = (
+    <div className={classNames("connect-detail", line2?.tone)}>
+      {line2?.progress !== undefined &&
+        <div className="connect-progress" role="progressbar" aria-label="Firmware update"
+            aria-valuemin={0} aria-valuemax={100} aria-valuenow={line2.progress}>
+          <div className="connect-progress-fill" style={{ width: `${line2.progress}%` }} />
+        </div>}
+      <span className="connect-detail-text">{line2?.text}</span>
+      {helpKind &&
+        <PaneControl className="connect-more" text="More…" busy={false}
+            onActivate={() => onOpenHelp?.(helpKind)} />}
+    </div>
+  );
 
   return (
     <div ref={setContainer} className="toolbar-palette dataflow-connect-pane" style={floatingStyles}
         role="group" aria-labelledby={headingId} onKeyDownCapture={handleKeyDownCapture}
         onFocus={handleFocus} onBlur={handleBlur}>
       <div className="connect-heading" id={headingId}>Device connection</div>
-      <div className="connect-status" role="status">
-        <div className="connect-status-line">{status}</div>
-        {checkNote && <div className="connect-note">{checkNote}</div>}
-        {problem && <div className="connect-error">{problem}</div>}
+      <div className="connect-status">
+        <div role="status">
+          <div className="connect-status-line">{line1}</div>
+          {announce && detail}
+        </div>
+        {!announce && detail}
       </div>
-      {isConnected
+      {paneView === "actions"
         ? <div className="connect-actions">
-            <PaneControl text="Reconnect" busy={busy} onActivate={reconnect} />
-            <PaneControl text="Disconnect" busy={busy} onActivate={disconnect} />
+            <PaneControl text="Reconnect" busy={actionsBusy} onActivate={reconnect} />
+            <PaneControl text="Disconnect" busy={actionsBusy} onActivate={disconnect} />
             {connection.canIdentify &&
-              <PaneControl text="Is it alive?" busy={busy || check === "checking"}
+              <PaneControl text="Is it alive?" busy={actionsBusy || check === "checking"}
                   onActivate={() => { void connection.identify(); }} />}
           </div>
         : <div className="connect-devices">
