@@ -120,14 +120,13 @@ export const RecordSingleSampleButton = observer(function RecordSingleSampleButt
       onClick={handleClick}
       disabled={!content || readOnly}
     >
-      {/* No dedicated icon yet; the Table icon reads as "a row into the table". */}
-      {getTileComponentInfo("Table")?.Icon ? <RecordSampleGlyph /> : "+1"}
+      <RecordSampleGlyph />
     </TileToolbarButton>
   );
 });
 
-/** A single filled point, for "capture one". Inline rather than an asset so this ships without a
- * new svg; replace with a designed icon when there is one. */
+/** A single filled point, for "capture one". Inline rather than an imported asset, unlike every
+ * other button here, because there is no designed icon yet -- replace it with one. */
 function RecordSampleGlyph() {
   return (
     <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">

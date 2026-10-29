@@ -55,12 +55,12 @@ export const kDefaultLabel = "Dataflow Node";
 // A case has one value for time and one value for each node
 const kMaxRecordedValues = 10000;
 
-export const kPointAttributeName = "Point";
+const kPointAttributeName = "Point";
 
 /** `Program data 14:32:07`. Becomes the dataset's name, which TableContentModel.contentTitle
  * surfaces as the table's header -- so the capture's time is recorded once, for the capture,
  * rather than in a column on every row. */
-export function captureName(startedAt: Date) {
+function captureName(startedAt: Date) {
   return `Program data ${startedAt.toLocaleTimeString([], { hour12: false })}`;
 }
 
@@ -391,12 +391,8 @@ export const DataflowContentModel = TileContentModel
       {name: "sharedModelSetup", fireImmediately: true}));
 
       // Structure only -- node and connection ids. A rename or a value change leaves the capture's
-      // columns describing the program, so neither detaches.
-      //
-      // A reaction rather than a call inside each structural action: that keeps the detach out of
-      // the action's undo entry, which is what lets withoutUndo apply and makes the detach
-      // one-way. Re-firing while undo replays patches is harmless, since detachLinkedTables
-      // returns early once nothing is linked.
+      // columns describing the program, so neither detaches. A reaction rather than a call inside
+      // each structural action, so that withoutUndo applies; see detachLinkedTables.
       addDisposer(self, reaction(
         () => {
           const nodeIds = Array.from(self.program.nodes.keys()).sort().join(",");
