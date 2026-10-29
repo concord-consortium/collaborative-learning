@@ -290,8 +290,8 @@ export const ConnectDeviceButton = observer(function ConnectDeviceButton({ name 
   useEffect(() => {
     if (unseenError && failure && failure !== announcedFailure.current) {
       announce(helpHeadline(failure.kind, failure.choice));
+      announcedFailure.current = failure;
     }
-    announcedFailure.current = failure;
   }, [unseenError, failure, announce]);
 
   // Deselecting the tile unmounts the toolbar; the model volatile would otherwise stay open. Deleting

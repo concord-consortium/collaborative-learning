@@ -436,6 +436,14 @@ describe("Dataflow connect button and pane", () => {
       expect(screen.getByText(headline)).toHaveAttribute("aria-live", "polite");
     });
 
+    it("announces when the failure and the unseen flag are recorded in separate renders", () => {
+      const r = renderConnect();
+      act(() => r.content.setConnectFailure(failure));
+      expect(screen.queryByText(headline)).toBeNull();
+      act(() => r.content.setUnseenConnectError(true));
+      expect(screen.getByText(headline)).toHaveAttribute("aria-live", "polite");
+    });
+
     it("does not announce a failure recorded while the pane is open", () => {
       const r = openPane();
       act(() => {
