@@ -3,6 +3,11 @@
 Brainstormed 2026-10-29. Story: CLUE-727, in epic CLUE-714. Builds on the connect pane from CLUE-716
 and the Spiker:bit status work from CLUE-728.
 
+Implemented in two stacked PRs. #3066 adds this spec and the right-edge drawer host, with the
+changes to Ada that "The connection help drawer" describes. #3065 builds on it with everything
+else: the connection attempt, the connect pane, the failure kinds, the help panel, the toolbar
+button, accessibility and logging.
+
 ## Why
 
 A student connecting a Spiker:bit or Arduino to Dataflow today sees almost nothing when it goes
@@ -361,7 +366,7 @@ recorded only for steps that happened:
 | `connectResult` | The attempt ends, including `canceled` | `trigger`, `outcome`, `elapsedMs`, `steps`, and for a failure `failedStep` and `error` (`name`, `code`, `message`); for a Spiker:bit, the firmware found and whether it was updated |
 | `connectRecovered` | An attempt that ended in a stall (`updateStalled`, `noData`, `notResponding`) gets its first data after all | `elapsedMs`, `steps` |
 | `abandonedOpen` | An open given up on settles later, or the best-effort `close()` / `forget()` finish | what each one did |
-| `deviceLost` | An unplug or lost connection is detected (not a Disconnect the user chose) | `reason`: `unplugged` or `lost` |
+| `deviceLost` | An unplug or lost connection is detected (not a Disconnect the user chose), or the firmware update of a stalled Spiker:bit fails | `reason`: `unplugged`, `lost` or `updateFailed` |
 | `showConnectHelp` / `hideConnectHelp` | The help drawer opens or closes | failure `kind`; for hide, `trigger`: `close` (✕) or `closeHelp` (the notice's button) |
 | `connectHelpNotice` | A notice appears in the help drawer, or the student uses its button | `notice`: `working` or `differentProblem`, the new `kind` for the latter, and `action`: `shown` or `clicked` |
 | `disconnectDevice`, `resetProgram` | Unchanged | — |
