@@ -765,4 +765,53 @@ context('Dataflow Tool Tile', function () {
       });
     });
   });
+
+  it("shows why a connection failed in the pane and the help drawer", () => {
+    const fakePort = {
+      getInfo: () => ({}),
+      open: () => Promise.reject(new DOMException("Failed to open serial port.", "NetworkError")),
+      addEventListener: () => undefined,
+      removeEventListener: () => undefined
+    };
+    const url = "/editor/?appMode=qa&unit=./curriculum/example-curriculum/example-curriculum.json&mouseSensor&noStorage";
+    cy.visit(url, {
+      onBeforeLoad(win) {
+        const serial = win.navigator.serial;
+        if (serial) {
+          cy.stub(serial, "requestPort").resolves(fakePort);
+        } else {
+          Object.defineProperty(win.navigator, "serial", {
+            configurable: true,
+            value: {
+              requestPort: () => Promise.resolve(fakePort),
+              addEventListener: () => undefined,
+              removeEventListener: () => undefined,
+              getPorts: () => Promise.resolve([])
+            }
+          });
+        }
+      }
+    });
+    clueCanvas.addTile("dataflow");
+    dataflowToolTile.getDataflowTile().click();
+
+    cy.get("[data-testid='connect-device-button']").first().click();
+    cy.get(".connect-status-line").should("be.visible");
+    cy.get("[aria-label='Connect Arduino']").first().click();
+
+    cy.get(".connect-detail.problem").should("contain", "Couldn't open it.");
+
+    cy.log("the pane's More… link opens the help drawer with the failure's steps");
+    cy.get(".connect-more").first().click();
+    cy.get(".right-drawer").should("contain", "The browser couldn't open the Arduino.");
+
+    cy.log("Details shows the error name");
+    cy.get(".right-drawer .connection-help-details-toggle").click()
+      .should("have.attr", "aria-expanded", "true");
+    cy.get(".right-drawer .connection-help-details-text").should("contain", "NetworkError");
+
+    cy.log("the close button closes the drawer");
+    cy.get(".right-drawer [aria-label='Close connection help']").click();
+    cy.get(".right-drawer").should("not.exist");
+  });
 });
