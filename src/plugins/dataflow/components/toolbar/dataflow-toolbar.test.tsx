@@ -436,6 +436,19 @@ describe("Dataflow connect button and pane", () => {
       expect(screen.getByText(headline)).toHaveAttribute("aria-live", "polite");
     });
 
+    // A live region inserted already holding its text is often not read, so it stays mounted.
+    it("keeps the live region mounted, empty until there is something to announce", () => {
+      const r = renderConnect();
+      const region = r.container.querySelector("[role='status'][aria-live='polite']");
+      expect(region).toBeInTheDocument();
+      expect(region).toBeEmptyDOMElement();
+      act(() => {
+        r.content.setConnectFailure(failure);
+        r.content.setUnseenConnectError(true);
+      });
+      expect(screen.getByText(headline)).toBe(region);
+    });
+
     it("announces when the failure and the unseen flag are recorded in separate renders", () => {
       const r = renderConnect();
       act(() => r.content.setConnectFailure(failure));

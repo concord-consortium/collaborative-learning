@@ -52,9 +52,9 @@ describe("ChatTutorLauncher", () => {
   it("focuses the panel's tab when Ada closes while a panel stays open", () => {
     render(<Harness />);
     act(() => { mockUi.setShowChatTutor(true); mockUi.openDrawerPanel(panel); });
-    fireEvent.click(screen.getByRole("tab", { name: "Ada" }));
+    fireEvent.click(screen.getByRole("button", { name: "Ada" }));
     fireEvent.click(screen.getByText("Close Ada"));
-    expect(screen.getByRole("tab", { name: "Connection help" })).toHaveFocus();
+    expect(screen.getByRole("button", { name: "Connection help" })).toHaveFocus();
   });
 
   it("focuses the launcher when Ada closes and the drawer closes entirely", () => {

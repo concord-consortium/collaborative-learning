@@ -37,14 +37,15 @@ export const RightDrawer: React.FC<IProps> = observer(function RightDrawer(props
 
   return (
     <div className="right-drawer" data-testid="right-drawer">
+      {/* Two toggle buttons rather than ARIA tabs: the pressed one is showing. */}
       {showTabs && drawerPanel &&
-        <div className="right-drawer-tabs" role="tablist">
-          <button type="button" role="tab" aria-selected={adaActive}
+        <div className="right-drawer-tabs">
+          <button type="button" aria-pressed={adaActive}
                   className={classNames("right-drawer-tab", { selected: adaActive })}
                   onClick={selectAda}>
             Ada
           </button>
-          <button type="button" role="tab" id={kRightDrawerPanelTabId} aria-selected={panelShowing}
+          <button type="button" id={kRightDrawerPanelTabId} aria-pressed={panelShowing}
                   className={classNames("right-drawer-tab", { selected: panelShowing })}
                   onClick={() => ui.setDrawerTab("panel")}>
             {drawerPanel.tabLabel}

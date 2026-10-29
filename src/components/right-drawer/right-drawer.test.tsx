@@ -38,24 +38,31 @@ describe("RightDrawer", () => {
     render(<RightDrawer chatTutorAvailable={false} />);
     act(() => mockUi.openDrawerPanel(panel));
     expect(screen.getByTestId("panel-content")).toBeInTheDocument();
-    expect(screen.queryByRole("tab")).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Ada" })).not.toBeInTheDocument();
   });
 
   it("shows Ada and panel tabs when Ada is available, and keeps Ada mounted on the panel tab", () => {
     render(<RightDrawer chatTutorAvailable={true} renderChatTutor={renderChatTutor} />);
     act(() => mockUi.setShowChatTutor(true));
     // Ada alone: no tabs
-    expect(screen.queryByRole("tab")).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Ada" })).not.toBeInTheDocument();
     expect(screen.getByTestId("ada-content")).toBeVisible();
 
     act(() => mockUi.openDrawerPanel(panel));
-    expect(screen.getAllByRole("tab").map(t => t.textContent)).toEqual(["Ada", "Connection help"]);
-    expect(screen.getByRole("tab", { name: "Connection help" })).toHaveAttribute("aria-selected", "true");
+    // Two toggle buttons, not a tab list: the selected one is pressed.
+    expect(screen.queryByRole("tablist")).not.toBeInTheDocument();
+    expect(screen.queryByRole("tab")).not.toBeInTheDocument();
+    const ada = screen.getByRole("button", { name: "Ada" });
+    const help = screen.getByRole("button", { name: "Connection help" });
+    expect(help).toHaveAttribute("aria-pressed", "true");
+    expect(ada).toHaveAttribute("aria-pressed", "false");
     expect(screen.getByTestId("panel-content")).toBeVisible();
     // still mounted (so the conversation is kept) but hidden
     expect(screen.getByTestId("ada-content")).not.toBeVisible();
 
-    fireEvent.click(screen.getByRole("tab", { name: "Ada" }));
+    fireEvent.click(ada);
+    expect(ada).toHaveAttribute("aria-pressed", "true");
+    expect(help).toHaveAttribute("aria-pressed", "false");
     expect(mockUi.drawerTab).toBe("chatTutor");
     expect(screen.getByTestId("ada-content")).toBeVisible();
     expect(screen.queryByTestId("panel-content")).not.toBeInTheDocument();
@@ -66,7 +73,7 @@ describe("RightDrawer", () => {
     render(<RightDrawer chatTutorAvailable={true} renderChatTutor={renderChatTutor} />);
     act(() => mockUi.openDrawerPanel(panel));
     expect(screen.queryByTestId("ada-content")).not.toBeInTheDocument();
-    fireEvent.click(screen.getByRole("tab", { name: "Ada" }));
+    fireEvent.click(screen.getByRole("button", { name: "Ada" }));
     expect(mockUi.showChatTutor).toBe(true);
     expect(mockUi.drawerTab).toBe("chatTutor");
     expect(screen.getByTestId("ada-content")).toBeVisible();

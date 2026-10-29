@@ -338,11 +338,12 @@ export const ConnectDeviceButton = observer(function ConnectDeviceButton({ name 
         onOpenHelp={openHelp} onClose={() => content.setConnectPaneOpen(false)} />
     : undefined;
 
-  // The live region sits beside the pane, not in it, so it exists while the pane is closed.
+  // The live region sits beside the pane, not in it, so it exists while the pane is closed. It stays
+  // mounted and only its text changes, since a region inserted already holding text is often missed.
   const extraContent = (
     <>
       {pane}
-      {announcement && <span role="status" aria-live="polite" className="visually-hidden">{announcement}</span>}
+      <span role="status" aria-live="polite" className="visually-hidden">{announcement}</span>
     </>
   );
 
