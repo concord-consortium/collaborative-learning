@@ -27,6 +27,13 @@ describe("connectButtonState", () => {
     expect(connectButtonState({ ...base, dataReceived: true })).toBe("connected");
     expect(connectButtonState({ ...base, stalled: true })).toBe("attention");
   });
+
+  it("a stall is attention even when the device isn't the active one", () => {
+    expect(connectButtonState({
+      connected: false, needsDevice: false, unseenError: false, notResponding: false, stalled: true,
+      dataReceived: false
+    })).toBe("attention");
+  });
 });
 
 describe("connectButtonTooltip", () => {
@@ -54,6 +61,11 @@ describe("connectButtonTooltip", () => {
   it("a stall says there is no data yet", () => {
     expect(connectButtonTooltip({ ...base, connected: true, stalled: true, connectedLabel: "Arduino" }))
       .toBe("Arduino: no data yet. Click for details.");
+  });
+
+  it("an update stall says the update stalled, even when not connected", () => {
+    expect(connectButtonTooltip({ ...base, stalled: true, stallKind: "updateStalled", connectedLabel: "Spiker:bit" }))
+      .toBe("Spiker:bit: the update stalled. Click for details.");
   });
 
   it("the unseen-error text wins when a device is also needed", () => {

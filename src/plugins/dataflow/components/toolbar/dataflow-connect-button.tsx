@@ -287,7 +287,11 @@ export const ConnectDeviceButton = observer(function ConnectDeviceButton({ name 
   const attempt = connection.attempt;
   const state = connectButtonState(stateInput);
   const title = connectButtonTooltip({
-    ...stateInput, connectedLabel: connection.connectedLabel, lossMessage: connection.lossMessage,
+    ...stateInput,
+    connectedLabel: connection.connectedLabel
+      ?? (connection.lastFailure ? kDeviceChoiceLabels[connection.lastFailure.choice] : undefined),
+    stallKind: connection.lastFailure?.kind,
+    lossMessage: connection.lossMessage,
     connecting: attempt && !attempt.ended ? kDeviceChoiceLabels[attempt.choice] : undefined
   });
 
