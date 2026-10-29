@@ -2,7 +2,7 @@ import { kMaxSeq } from "./cc-device-session";
 import { withChecksum } from "./cc-device-protocol";
 import { SerialDevice } from "./serial";
 import { detectFirmwareReply, FirmwareReply, shouldFlash } from "./serial-protocol";
-import { DeviceLoss, IDeviceTransport } from "./device-transport";
+import { DeviceLoss, IAbandonedOpenInfo, IDeviceTransport } from "./device-transport";
 
 // The version of the firmware bundled at src/plugins/dataflow/firmware/spikerbit-clue.hex.
 // Keep equal to the `firmware:` number in the HELLO line of spikerbit-clue.ts.
@@ -52,6 +52,19 @@ export interface IMicrobitUsbConnection {
   disconnect(): Promise<void>;
   // The library's USBDevice. Typed unknown: it's only compared with the device in an unplug event.
   getDevice(): unknown;
+}
+
+// What connectAndStream reports as the connection proceeds, so a caller can show its steps.
+export interface ISpikerbitConnectObserver {
+  onOpened?(): void;
+  // `reply` is what the board answered with, or null when it didn't answer; `willUpdate` is
+  // whether the firmware is about to be flashed.
+  onFirmwareChecked?(reply: FirmwareReply | null, willUpdate: boolean): void;
+  // 0-100. Every call counts as progress.
+  onUpdateProgress?(percent: number): void;
+  onUpdateFinished?(): void;
+  // Called after an abandoned USB open is closed and forgotten, and again if it settles late.
+  onAbandoned?(info: IAbandonedOpenInfo): void;
 }
 
 // The part of navigator.usb that reports a device being unplugged.
@@ -113,6 +126,9 @@ export class MicrobitUsbTransport implements IDeviceTransport {
 
 export interface SpikerbitDeviceOptions {
   firmwareQueryTimeoutMs?: number;
+  // How long the USB open may take before connectAndStream gives up with an "open-timeout" error.
+  // No limit when unset.
+  openTimeoutMs?: number;
   // Where unplugs are reported. Defaults to navigator.usb.
   usb?: IUsbDisconnectSource;
 }
@@ -124,6 +140,7 @@ export class SpikerbitDevice {
   private buffer = "";
   private detectedReply: FirmwareReply | null = null;
   private firmwareQueryTimeoutMs: number;
+  private openTimeoutMs: number | undefined;
   private resetSeq = kFirstResetSeq;
   // When the latest connect-time chunk arrived, and when the backlog was first seen to have
   // drained (a read shorter than kDaplinkReadBytes) since the latest "!!" and "?".
@@ -135,16 +152,16 @@ export class SpikerbitDevice {
     this.connection = connection;
     this.transport = new MicrobitUsbTransport(connection, options?.usb);
     this.firmwareQueryTimeoutMs = options?.firmwareQueryTimeoutMs ?? kFirmwareQueryTimeoutMs;
+    this.openTimeoutMs = options?.openTimeoutMs;
   }
 
-  public async connectAndStream(
-    flashDataSource: unknown,
-    progress?: (stage: string, pct?: number) => void
-  ){
+  // Rejects with an error whose `code` is "open-timeout" when the USB open takes longer than
+  // openTimeoutMs.
+  public async connectAndStream(flashDataSource: unknown, observer?: ISpikerbitConnectObserver) {
     this.transport.onData = this.handleFirmwareData;
 
     try {
-      await this.connectAndCheckFirmware(flashDataSource, progress);
+      await this.connectAndCheckFirmware(flashDataSource, observer);
     } catch (e) {
       // Close the link so a failed attempt doesn't leave the board open and still feeding
       // the firmware handler.
@@ -168,18 +185,63 @@ export class SpikerbitDevice {
     this.transport.dispose();
   }
 
-  private async connectAndCheckFirmware(
-    flashDataSource: unknown,
-    progress?: (stage: string, pct?: number) => void
-  ) {
-    await this.connection.connect();
+  // Races connection.connect() against openTimeoutMs. When the limit wins, the link is closed and
+  // the device forgotten before this rejects, and the still-pending open is watched so that a late
+  // success is closed too.
+  private async openWithLimit(observer?: ISpikerbitConnectObserver) {
+    const settled = this.connection.connect().then(
+      () => ({ status: "opened" as const }),
+      (error: unknown) => ({ status: "failed" as const, error })
+    );
+    if (this.openTimeoutMs == null) {
+      const result = await settled;
+      if (result.status === "failed") throw result.error;
+      return;
+    }
+
+    let timeoutId: ReturnType<typeof setTimeout> | undefined;
+    const timedOut = new Promise<{ status: "timeout" }>((resolve) => {
+      timeoutId = setTimeout(() => resolve({ status: "timeout" }), this.openTimeoutMs);
+    });
+    const outcome = await Promise.race([settled, timedOut]).finally(() => clearTimeout(timeoutId));
+    if (outcome.status === "failed") throw outcome.error;
+    if (outcome.status === "opened") return;
+
+    const info: IAbandonedOpenInfo = {};
+    try { await this.connection.disconnect(); info.close = "ok"; } catch { info.close = "failed"; }
+    const forgettable = this.connection.getDevice() as { forget?: () => Promise<void> } | undefined;
+    if (typeof forgettable?.forget === "function") {
+      try { await forgettable.forget(); info.forget = "ok"; } catch { info.forget = "failed"; }
+    } else {
+      info.forget = "unsupported";
+    }
+    observer?.onAbandoned?.(info);
+    settled.then(async (late) => {
+      if (late.status === "opened") {
+        await this.connection.disconnect().catch(() => { /* the open is abandoned either way */ });
+      }
+      observer?.onAbandoned?.({ late: late.status });
+    });
+    throw Object.assign(new Error("Opening the USB connection timed out"), { code: "open-timeout" });
+  }
+
+  private async connectAndCheckFirmware(flashDataSource: unknown, observer?: ISpikerbitConnectObserver) {
+    await this.openWithLimit(observer);
+    observer?.onOpened?.();
 
     this.resetSeq = kFirstResetSeq;
     const running = await this.queryFirmware();
-    if (shouldFlash(running, kSpikerbitDeviceName, kSpikerbitFirmwareVersion)) {
+    const willUpdate = shouldFlash(running, kSpikerbitDeviceName, kSpikerbitFirmwareVersion);
+    observer?.onFirmwareChecked?.(running, willUpdate);
+    if (willUpdate) {
       // USB connection stays Connected through a flash (DAPLink interface chip is untouched) and
       // serial auto-reinitializes, so no explicit reconnect here.
+      // A progress call without a percent marks the end of the flashing, which isn't progress.
+      const progress = (_stage: string, pct?: number) => {
+        if (pct !== undefined) observer?.onUpdateProgress?.(Math.round(pct * 100));
+      };
       await this.connection.flash(flashDataSource, { partial: true, progress });
+      observer?.onUpdateFinished?.();
       // Re-query to confirm the flash took, but proceed regardless: the board was just written
       // with the known-good bundled hex, so a null/stale reply here is far more likely a serial
       // re-init timing artifact than bad firmware, and aborting would discard a good flash while
