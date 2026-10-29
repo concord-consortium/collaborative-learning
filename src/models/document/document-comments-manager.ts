@@ -219,10 +219,7 @@ export class DocumentCommentsManager {
 
     runInAction(() => {
       this.pendingComments = this.pendingComments.filter(p => !ids.has(p.id));
-      if (removed.some(p => this.slowRemoteCommentIds.has(p.id))) {
-        this.slowRemoteCommentIds = new Set(
-          [...this.slowRemoteCommentIds].filter(slowId => !ids.has(slowId)));
-      }
+      ids.forEach(id => this.slowRemoteCommentIds.delete(id));
     });
 
     removed.forEach(p => {
@@ -246,10 +243,8 @@ export class DocumentCommentsManager {
       this.checkPendingComments();
     }, kRemoteCommentExpiryMs);
 
-    // Replaced rather than mutated: makeAutoObservable does not make a plain Set's contents
-    // observable, so an in-place add would not re-render the waiting message.
     const slowTimer = setTimeout(() => {
-      runInAction(() => { this.slowRemoteCommentIds = new Set(this.slowRemoteCommentIds).add(id); });
+      runInAction(() => { this.slowRemoteCommentIds.add(id); });
     }, kSlowRemoteCommentMs);
 
     const wrappedDispose = () => {
@@ -357,6 +352,6 @@ export class DocumentCommentsManager {
     });
     this.comments = [];
     this.pendingComments = [];
-    this.slowRemoteCommentIds = new Set();
+    this.slowRemoteCommentIds.clear();
   }
 }

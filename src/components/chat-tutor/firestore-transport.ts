@@ -64,11 +64,10 @@ export class FirestoreTransport implements ChatTransport {
   // mirrors the parent doc's problemInstalled flag; a not-yet-created parent reads
   // as false, so the first send attaches LEFT
   private problemInstalled = false;
-  // `lastSentRightHash` means "the server has this one". It is therefore recorded only once a
-  // write is acknowledged: a claim staked before delivery would let a concurrent send skip a
-  // workspace whose only carrier then failed, and the tutor would answer that turn blind to the
-  // student's work. The sequence numbers keep a late-resolving older send from overwriting a newer
-  // one's record, which is what would otherwise re-attach a workspace the server already has.
+  // "The server has this one", so it is recorded only on acknowledgement: claiming before delivery
+  // would let a concurrent send skip a workspace whose only carrier then failed, leaving the tutor
+  // blind to the student's work. The sequence keeps a late older send from overwriting a newer
+  // record, which would re-attach a workspace the server already has.
   private lastSentRightHash: string | undefined;
   private rightSendSeq = 0;
   private lastSentRightSeq = 0;
@@ -237,9 +236,6 @@ export class FirestoreTransport implements ChatTransport {
       message[right.field] = right.value;
     }
 
-    // The composer stays open during a pending reply so a student can escape a wedged turn, so
-    // overlapping sends are expected, not exotic. See lastSentRightHash for why this is recorded
-    // on acknowledgement rather than optimistically, and why the order matters.
     const sendSeq = ++this.rightSendSeq;
 
     await this.messagesRef().add(message);

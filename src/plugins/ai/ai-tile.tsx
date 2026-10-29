@@ -150,17 +150,10 @@ export const AIComponent: React.FC<ITileProps> = observer((props) => {
             setLastUpdated(new Date(timestamp._seconds*1000));
           }
         } catch (error) {
-          // A student who clicked Update is owed a visible answer: restoring the old text would
-          // look exactly like a refresh that did nothing. The message is document content, so it
-          // persists and syncs — the same tradeoff AI_TILE_EMPTY_MESSAGE makes above.
-          //
-          // The automatic refresh this effect fires on mount is NOT something the student asked
-          // for, and writing a failure there would replace a good prior answer with an error over
-          // a transient hiccup — saved, synced, and in front of the teacher. That case restores,
-          // which is what the tile did before this message existed.
-          //
-          // A superseded run is not a failure, and the newer run's own restore handles it; isAlive
-          // because writing to a node destroyed mid-request would hide the error being reported.
+          // A requested refresh reports: restoring would look like a refresh that did nothing, and
+          // this message is document content, the same tradeoff AI_TILE_EMPTY_MESSAGE makes above.
+          // An automatic one restores instead, so a transient failure cannot replace a good saved
+          // answer. A superseded run is neither, and isAlive guards a tile deleted mid-request.
           if (isCurrent() && isAlive(content)) {
             if (userRequested) {
               content.setText(AI_TILE_REQUEST_FAILED_MESSAGE);
@@ -169,13 +162,9 @@ export const AIComponent: React.FC<ITileProps> = observer((props) => {
               content.setText(previousTextRef.current);
               previousTextRef.current = undefined;
             }
-            // Logged either way: the console.error below reaches nobody, since Rollbar captures
-            // uncaught errors and not caught ones, and an automatic failure is still a failure.
-            //
-            // Its own event rather than logAiEvent: that routes through logTileBaseEvent, which
-            // for a tile inside a Question tile also emits QUESTION_ANSWERS_CHANGE carrying the
-            // question prompt and the sibling answers. A failed request is not an answer change,
-            // and these rows reach a research database and Rollbar.
+            // Logged either way; console.error reaches nobody, as Rollbar captures only uncaught
+            // errors. Its own event, not logAiEvent: that cascades into QUESTION_ANSWERS_CHANGE
+            // for a tile inside a Question tile, carrying the prompt and sibling answers.
             Logger.log(LogEventName.AI_TILE_REQUEST_FAILED, {
               tileId: model.id, documentId: identifier, userRequested
             });

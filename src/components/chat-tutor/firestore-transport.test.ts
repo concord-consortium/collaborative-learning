@@ -287,9 +287,8 @@ describe("FirestoreTransport measures the workspace in bytes", () => {
 });
 
 
-// The composer stays open while a reply is pending — that is the student's only escape from a
-// wedged turn — so two sends can be in flight at once. `lastSentRightHash` therefore has to track
-// what was SENT, not what happened to resolve last.
+// The composer stays open while a reply is pending, so two sends can be in flight at once.
+// `lastSentRightHash` means "acknowledged by the server", recorded in send order.
 describe("FirestoreTransport workspace bookkeeping under overlapping sends", () => {
   // Unlike fakeFirestore above, each add() hands back a promise the test settles by hand, which is
   // the only way to express one send resolving while another is still open.
@@ -338,7 +337,7 @@ describe("FirestoreTransport workspace bookkeeping under overlapping sends", () 
     expect(added[2]).not.toHaveProperty("rightContext");
   });
 
-  it("re-attaches a workspace whose write failed", async () => {
+  it("attaches again when the write that carried the workspace failed", async () => {
     const { added, settle, transport } = transportWithMutableWorkspace();
 
     const first = transport.sendUserMessage("one");
@@ -352,8 +351,8 @@ describe("FirestoreTransport workspace bookkeeping under overlapping sends", () 
     expect(added[1].rightContext).toBe("W1");
   });
 
-  // A's rollback must not undo B's successful delivery of the same workspace.
-  it("does not roll back over a newer send that succeeded", async () => {
+  // An older send failing must not unsettle what a newer, successful one delivered.
+  it("keeps a newer send's acknowledged workspace when an older send fails", async () => {
     const { added, settle, transport, edit } = transportWithMutableWorkspace();
 
     const first = transport.sendUserMessage("one");
@@ -372,9 +371,8 @@ describe("FirestoreTransport workspace bookkeeping under overlapping sends", () 
     expect(added[2]).not.toHaveProperty("rightContext");
   });
 
-  // The hashes match precisely BECAUSE this send attached nothing, so a hash match alone is not
-  // evidence that this send is the one holding the record.
-  it("does not clear the record when an unchanged send fails", async () => {
+  // This send attached nothing, so its failure says nothing about what the server already has.
+  it("leaves the acknowledged hash in place when an unchanged send fails", async () => {
     const { added, settle, transport } = transportWithMutableWorkspace();
 
     const first = transport.sendUserMessage("one");
@@ -396,21 +394,20 @@ describe("FirestoreTransport workspace bookkeeping under overlapping sends", () 
   // Both sends failing means the student was offline; neither message landed. Restoring the
   // earlier send's hash would claim a workspace the server never received, so the next send that
   // DID land would carry no workspace and the tutor would answer blind to the student's work.
-  it("claims nothing when two overlapping sends both fail", async () => {
+  it("records nothing when two overlapping sends both fail", async () => {
     const { added, settle, transport, edit } = transportWithMutableWorkspace();
 
-    const first = transport.sendUserMessage("one");          // claims W1
+    const first = transport.sendUserMessage("one");          // carries W1
     edit("W2", "H2");
-    const second = transport.sendUserMessage("two");         // claims W2, remembers W1
+    const second = transport.sendUserMessage("two");         // carries W2
 
     settle[0].reject(new Error("offline"));
     await expect(first).rejects.toThrow("offline");
     settle[1].reject(new Error("offline"));
     await expect(second).rejects.toThrow("offline");
 
-    // The student undoes the edit, so the document is back at the workspace the FIRST (also
-    // failed) send claimed. Restoring that claim on the second send's rollback would make this
-    // send attach nothing, and the server has never seen any workspace at all.
+    // The student undoes the edit, so the document is back at the workspace the first (also
+    // failed) send carried. Nothing was acknowledged, so this send must carry it again.
     edit("W1", "H1");
     const third = transport.sendUserMessage("three");
     settle[2].resolve();

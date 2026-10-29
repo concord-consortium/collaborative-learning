@@ -111,8 +111,15 @@ the story that the logging makes empirically revisable — `AI_CHAT_TIMEOUT` ove
 off healthy replies.
 
 **On expiry.** `pending` goes false — the dots stop and the "Ada is typing" live region clears.
-A message row appears reading *"Ada didn't answer. Please try again."* The composer needs no
-change; it is already enabled during a pending reply.
+A message row appears reading *"Ada didn't answer. Please try again."*
+
+The deadline also has to release the composer's own `sending` state. Firestore resolves `add()`
+only on backend acknowledgement, so an offline write stays pending indefinitely and `Chat` renders
+dots for `pending || sending` while disabling the input — which would leave the student past the
+deadline with running dots and a dead composer, the exact state this exists to end. The write is
+left running and still reconciles if it lands. Because the student can then send again while an
+earlier send is unresolved, a send-generation ref stops a superseded send from re-disabling the
+composer or restoring its message over what they have since typed.
 
 **Wording.** Deliberately distinct from the existing `status:"error"` line ("Ada is currently
 unavailable. Please try again."). Those are different failures — one is the backend reporting an
@@ -136,25 +143,20 @@ causes makes both the component and its tests guess. `chat.tsx` renders one mess
 frozen at send time, and the drain reads only what is on the message documents. This is pinned
 with a regression test rather than changed.
 
-**The real defect beside it.** `lastSentRightHash` is assigned *after* the `await`:
+**The real defect beside it.** `lastSentRightHash` was assigned *after* the `await`, so two
+overlapping sends recorded in completion order. Send A (hash `H1`) and send B (`H2`) can resolve
+B-then-A, leaving the client believing `H1` was last sent when the server has `H2`; the next
+message then re-attaches a workspace the server already has — on the ForeverLearning path up to
+900 KB of document JSON. Overlapping sends are not hypothetical: the composer is open during a
+pending reply precisely so a student can escape a wedged turn.
 
-```ts
-await this.messagesRef().add(message);
-if (decision.attachRight && right) {
-  this.lastSentRightHash = right.hash;
-}
-```
-
-Two overlapping sends therefore record in completion order, not send order. Send A (hash `H1`)
-and send B (`H2`) can resolve B-then-A, leaving the client believing `H1` was last sent when the
-server has `H2`. The next message re-attaches a workspace the server already has — on the
-ForeverLearning path that is up to 900 KB of document JSON per message. Overlapping sends are not
-hypothetical: the composer is open during a pending reply precisely so a student can escape a
-wedged turn.
-
-**Fix.** Assign in send order, before the await. On a failed write, restore the previous value
-unless a newer send has already superseded it — otherwise a failed send would mark a workspace as
-delivered that never left the client, and the student's retry would omit it.
+**Fix.** `lastSentRightHash` means *the server has acknowledged this one*, so it is recorded after
+the write succeeds, and a monotonic send sequence stops a late-resolving older send from
+overwriting a newer one's record. Claiming the hash *before* the write — the first attempt here —
+is worse than the bug it replaced: a concurrent send would see the claim, skip an unchanged
+workspace, and if the only carrier then failed, that turn would reach the backend with no
+workspace at all and the tutor would answer it blind. A failed write now records nothing, so the
+next send carries the workspace again. Over-attaching costs bytes; omitting costs context.
 
 ### 3. Ideas interim line
 
@@ -225,10 +227,11 @@ authored prompt, or any document content.** These logs go to a research database
 student-written text does not belong in either, and a failure rate does not need it. The raw
 server error string is also left out — it can be long and can echo request content.
 
-**Event names.** The chat gets three new ones, since it has none to reuse. Ideas gets one. The AI
-tile reuses its existing `AI_TOOL_CHANGE` with `operation: "requestFailed"`, matching the
-convention already in `ai-content.ts` (`requestRefresh` is logged the same way) rather than
-introducing a fourth name for researchers to learn.
+**Event names.** The chat gets three new ones, since it has none to reuse; Ideas and the AI tile
+get one each. The tile's failure deliberately does *not* reuse `AI_TOOL_CHANGE` through
+`logAiEvent`: that helper means "this tile's content changed" and cascades into
+`QUESTION_ANSWERS_CHANGE` for a tile inside a Question tile. A failed request is not an answer
+change, and that cascade would carry the question prompt and the sibling answers into telemetry.
 
 ## Constants
 
@@ -252,26 +255,40 @@ already living in the hook.
 | `AI_CHAT_MESSAGE_SENT` | a user message reaches Firestore | conversation id, document key, problem path |
 | `AI_CHAT_TIMEOUT` | the reply deadline fires | conversation id, document key, problem path |
 | `AI_CHAT_UNAVAILABLE` | the transport reports `status: "error"` | conversation id, document key, problem path |
-| `IDEAS_REQUEST_FAILED` | the 15s foreground deadline, the 120s expiry, or a `"failed"` server outcome | document key, problem path, request id, which of the three |
-| `AI_TOOL_CHANGE` *(existing)* | the AI tile's request fails | tile id, `operation: "requestFailed"` |
+| `IDEAS_REQUEST_FAILED` | the 15s foreground deadline, a client error, the 120s expiry, or a `"failed"` server outcome | document key, type and uid, request id, and which of the four |
+| `AI_TILE_REQUEST_FAILED` | the AI tile's request fails | tile id, document id, whether the student requested it |
 
-`AI_CHAT_MESSAGE_SENT` is the denominator for the two chat failure events. No event carries
-message text, prompt text, document content or the raw server error string.
+`AI_CHAT_MESSAGE_SENT` is the denominator for the two chat failure events; a send with no log
+context (the debug transport, which is ungated in every appMode) is not counted.
+
+The Ideas failure rate is `IDEAS_REQUEST_FAILED` over `REQUEST_IDEA`, joined on `requestId`, which
+both now carry. It is a floor rather than an exact rate: `REQUEST_IDEA` is logged only after the
+click's foreground Firebase work succeeds, so a `client-deadline` or `client-error` failure can
+have no attempt row to match.
+
+No event carries message text, prompt text, document content, document title or the raw server
+error string. `logDocumentEvent` and `logAiEvent` are both deliberately bypassed for these: the
+first expands a document into `documentTitle` and `documentProperties`, and the second cascades
+into `QUESTION_ANSWERS_CHANGE` for a tile inside a Question tile, carrying the question prompt and
+the sibling answers.
 
 ## Testing
 
 | Test | Covers |
 |---|---|
-| `use-chat.test.ts` *(new)* | Deadline fires at `kReplyDeadlineMs`; `pending` goes false; `timedOut` set. Timer restarts on a new turn. Late reply clears the timeout and renders. Transport swap resets. No timeout while idle. |
-| `firestore-transport.test.ts` | Overlapping sends record the hash in send order; a failed write restores the prior hash; a failed write superseded by a newer send does not. |
+| `use-chat.test.ts` | Deadline fires at `kReplyDeadlineMs`; `pending` goes false; `timedOut` set. Timer restarts on a new turn. Late reply clears the timeout and renders. Transport swap resets. No timeout while idle. |
+| `use-chat.test.ts` | Timeout and unavailable each log once per episode, not once per render. A landed send logs; a failed send and a send with no log context do not. No payload carries the student's message. |
+| `use-chat.test.ts` | A conversation already waiting, or already failed, on open shows its message but logs nothing — only a send made in this session counts. |
+| `chat-timeout.test.tsx` | The timeout row renders, an error outranks it, and the live region does not re-announce the previous reply. A never-resolving send releases the composer on the deadline, and a superseded send neither re-disables it nor overwrites the new draft. |
+| `firestore-transport.test.ts` | The hash records in send order, not completion order; a failed write records nothing, so the workspace is carried again; an older send failing leaves a newer acknowledged hash alone; an unchanged send failing changes nothing. |
 | `firestore-transport.test.ts` | Regression: a document mutated between send and write resolution does not change what that message carried. |
-| `document-comments-manager.test.ts` | Slow set populated at 45s, cleared on resolve, on expiry, and on `dispose`. |
+| `document-comments-manager.test.ts` | Slow set populated at 45s, cleared on resolve, on expiry, and on `dispose`. Each in-manager Ideas failure path reports once; an expiry superseded by a newer click reports nothing. |
+| `document.test.tsx` | `IDEAS_REQUEST_FAILED` carries exactly the allowed fields and the right reason on both client paths, and nothing is logged where the unit has no `aiEvaluation`. |
 | `waiting-message.test.tsx` | Interim message replaces the thinking message when the entry is slow. |
-| `ai-tile.test.tsx` | Failure writes the message; a superseded run restores instead. |
-| `use-chat.test.ts` | Timeout and unavailable each log once per episode, not once per render. A successful send logs; a failed send does not. |
-| `document-comments-manager.test.ts` | Each of the three Ideas failure paths logs, and an expiry superseded by a newer click does not. |
-| `ai-tile.test.tsx` | A failed request logs `requestFailed`; a superseded run logs nothing. |
-| all of the above | No logged payload contains message text, prompt text or document content. |
+| `ai-tile.test.tsx` | A requested failure writes the message and logs; an automatic one restores; a superseded run does neither. The failure never reaches the tile-change helper. |
+
+Each of these was checked by mutation — reverting the behavior it describes makes it fail — rather
+than by passing once.
 
 No Cypress work: all four behaviors are timer-driven and are exercised honestly with Jest fake
 timers. A Cypress spec would have to wait the real deadline out to prove anything.

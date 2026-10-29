@@ -1,5 +1,12 @@
 # CLUE-731: AI Chats Should Time Out — Implementation Plan
 
+> **Status: built and superseded.** This is the plan as written before implementation, kept for
+> the record. Review found three defects in what it specified, so the shipped code differs from it
+> in three places: the reply deadline also releases the composer's `sending` state (Task 2); the
+> workspace hash is recorded on acknowledgement rather than claimed before the write (Task 3); and
+> the AI tile reports only a student-requested failure, under its own `AI_TILE_REQUEST_FAILED`
+> event rather than `AI_TOOL_CHANGE` (Tasks 6-7). The design doc is the current description.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** No AI surface in CLUE leaves a student watching a progress indicator forever, and no AI failure is invisible to the team. The chat gets a 30s client-side reply deadline, Ideas gets a 45s "taking longer than usual" line ahead of its existing 120s give-up, the AI tile reports a failed request instead of silently restoring its old text, and every one of those failures emits a log event.

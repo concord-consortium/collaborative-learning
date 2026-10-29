@@ -620,8 +620,8 @@ describe("AIComponent", () => {
       }
     });
 
-    // console.error reaches nobody — Rollbar captures uncaught errors, not caught ones — so the
-    // log event is the only thing that makes a tile failure countable.
+    // console.error reaches nobody, since Rollbar captures uncaught errors and not caught ones, so
+    // the log event is the only record a tile failure leaves.
     it("on a populated document, logs a failed request, and logs nothing for a superseded one",
        async () => {
       mockStores.documents.getDocument.mockReturnValue(documentWith(populatedDocContent()));
@@ -632,6 +632,7 @@ describe("AIComponent", () => {
       await act(async () => render(<AIComponent {...defaultProps} model={aiModel} documentId="test-doc-1" />));
 
       (Logger.log as jest.Mock).mockClear();
+      (logTileChangeEvent as jest.Mock).mockClear();
       mockGetAiContent.mockRejectedValueOnce(new Error("network error"));
       await act(async () => {
         aiContent.requestRefresh();
@@ -643,9 +644,11 @@ describe("AIComponent", () => {
         ([event]) => event === LogEventName.AI_TILE_REQUEST_FAILED);
       expect(failures).toHaveLength(1);
       expect(failures[0][1]).toMatchObject({ tileId: aiModel.id, userRequested: true });
-      // Its own event, so it can never cascade into QUESTION_ANSWERS_CHANGE.
-      expect(logTileChangeEvent).not.toHaveBeenCalledWith(
-        LogEventName.AI_TOOL_CHANGE, expect.objectContaining({ operation: "requestFailed" }));
+      // The refresh click is a real tile change and belongs on that helper; the failure is not,
+      // and must stay off it -- that helper is what cascades into QUESTION_ANSWERS_CHANGE,
+      // carrying the question prompt and sibling answers, for a tile inside a Question tile.
+      expect((logTileChangeEvent as jest.Mock).mock.calls.map(([, params]) => params.operation))
+        .toEqual(["requestRefresh"]);
 
       // A superseded run is not a failure: its rejection must log nothing.
       let rejectOlderRun: (error: Error) => void;
@@ -876,9 +879,9 @@ describe("AIComponent", () => {
       expect(aiContent.text).toBe("Newer response");
     });
 
-    // A failure now reports rather than restores, so the restore point is only ever read by the
-    // top-of-effect undo. This pins that B captured the real text and not A's blank, by letting
-    // the class context disappear — the remaining path that restores from the captured point.
+    // The restore point is read only by the top-of-effect undo, since a requested failure reports
+    // instead. This pins that B captured the real text and not A's blank, by letting the class
+    // context disappear — the remaining path that restores from the captured point.
     it("a run started while an earlier one is still in flight captures the real text, not that " +
        "run's own blank, as its restore point", async () => {
       mockStores.documents.getDocument.mockReturnValue(documentWith(populatedDocContent()));

@@ -122,6 +122,10 @@ export const Chat: React.FC<IProps> = ({ chat, onClose, closeLabel, transcriptTi
   const { turns, error, pending, timedOut, sendMessage, header } = chat;
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
+  // Identifies the newest submit. Once the release timer below frees the composer, an earlier send
+  // can still settle: without this its finally would re-enable the composer mid-send, and its
+  // catch would overwrite whatever the student has since typed with the old message.
+  const sendGenRef = useRef(0);
   const [copied, setCopied] = useState(false);
   const listRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -224,19 +228,21 @@ export const Chat: React.FC<IProps> = ({ chat, onClose, closeLabel, transcriptTi
     if (!text || sending) return;
     setSending(true);
     setInput("");
-    // Firestore resolves add() only once the backend acknowledges it, so an offline write stays
-    // pending indefinitely (it is queued locally). Awaiting it for the UI would leave the composer
-    // disabled and the typing dots running forever — past the reply deadline whose whole job is to
-    // end exactly that. Release the composer on the same deadline. The write is left running and
-    // still reconciles if it lands later; this bounds the UI, not the delivery.
-    const release = setTimeout(() => setSending(false), kReplyDeadlineMs);
+    // An offline add() stays pending indefinitely, so awaiting it for the UI would hold the
+    // composer disabled past the deadline meant to end exactly that. This bounds the UI only: the
+    // write keeps running and still reconciles if it lands.
+    const gen = ++sendGenRef.current;
+    const isNewest = () => gen === sendGenRef.current;
+    const release = setTimeout(() => { if (isNewest()) setSending(false); }, kReplyDeadlineMs);
     try {
       await sendMessage(text);
     } catch {
-      setInput(text); // restore so the student can retry (error surfaced by the hook)
+      // Restore so the student can retry (the error itself is surfaced by the hook). Never over
+      // text they have typed since: a superseded send's message is not what they are writing now.
+      if (isNewest()) setInput(prev => prev || text);
     } finally {
       clearTimeout(release);
-      setSending(false);
+      if (isNewest()) setSending(false);
     }
   };
 

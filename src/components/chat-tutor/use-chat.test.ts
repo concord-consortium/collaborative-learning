@@ -133,8 +133,8 @@ describe("useChat reply deadline", () => {
 });
 
 
-// The chat emitted no log events at all before this, so a failure count had nothing to be a rate
-// of. MESSAGE_SENT is that denominator; the rest are the failures.
+// MESSAGE_SENT is the denominator the failure events are a rate of, so what does and does not
+// count as a send decides whether that rate means anything.
 describe("useChat logging", () => {
   const logContext = { conversationId: "conv-1", documentKey: "doc-1" };
 

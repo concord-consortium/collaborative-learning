@@ -17,11 +17,6 @@ describe("Chat reply timeout", () => {
     expect(screen.getByTestId("chat-error")).toHaveTextContent(kTimeoutMessage);
   });
 
-  it("stops the typing indicator", () => {
-    render(<Chat chat={chatResult({ timedOut: true })} />);
-    expect(screen.queryByTestId("chat-typing")).not.toBeInTheDocument();
-  });
-
   // A real send failure must not be masked by the deadline that follows it.
   it("prefers a send error over the timeout message", () => {
     render(<Chat chat={chatResult({ timedOut: true, error: "Failed to send your message." })} />);
@@ -48,9 +43,8 @@ describe("Chat reply timeout", () => {
 });
 
 // Firestore resolves add() only once the backend acknowledges it, so an offline write stays
-// pending indefinitely. Before this, `sending` never cleared: the composer stayed disabled and the
-// typing dots kept running past the deadline whose whole job is to end them — the exact scenario
-// the feature is meant to cover.
+// pending indefinitely. The deadline therefore has to bound the composer's own sending state, not
+// just the wait for a reply, or the dots run on past it with the input disabled.
 describe("Chat with a send that never resolves", () => {
   beforeEach(() => jest.useFakeTimers());
   afterEach(() => jest.useRealTimers());
@@ -69,5 +63,28 @@ describe("Chat with a send that never resolves", () => {
 
     expect(screen.queryByTestId("chat-typing")).not.toBeInTheDocument();
     expect(screen.getByTestId("chat-input")).not.toBeDisabled();
+  });
+
+  // Once the composer is released the student can send again, and the first send may still settle.
+  it("does not let a superseded send re-disable the composer or overwrite the new draft", () => {
+    let failFirst: (e: Error) => void = () => undefined;
+    const sendMessage = jest.fn()
+      .mockImplementationOnce(() => new Promise<void>((_r, rej) => { failFirst = rej; }))
+      .mockImplementationOnce(() => new Promise<void>(() => undefined));
+    render(<Chat chat={chatResult({ sendMessage })} />);
+    const input = () => screen.getByTestId("chat-input") as HTMLInputElement;
+
+    fireEvent.change(input(), { target: { value: "first message" } });
+    fireEvent.submit(screen.getByTestId("chat-composer"));
+    act(() => { jest.advanceTimersByTime(kReplyDeadlineMs); });
+
+    fireEvent.change(input(), { target: { value: "second message" } });
+    fireEvent.submit(screen.getByTestId("chat-composer"));
+    expect(input()).toBeDisabled();
+
+    act(() => { failFirst(new Error("offline")); });
+
+    expect(input()).toBeDisabled();          // the second send is still in flight
+    expect(input().value).toBe("");          // and the student's composer is not stuffed with the first
   });
 });

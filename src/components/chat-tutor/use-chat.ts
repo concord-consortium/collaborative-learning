@@ -3,15 +3,10 @@ import { ChatStatus, ChatTransport, ChatTurn } from "./transport";
 import { Logger } from "../../lib/logger";
 import { LogEventName } from "../../lib/logger-types";
 
-// How long the client waits for a reply before it stops claiming Ada is working. Nothing on the
-// client can tell a dead turn from a slow one -- the drain writes its assistant document and its
-// cursor in one batch, so a drain that died writes neither -- which is why this is a deadline and
-// not a smarter reading of status.
-//
-// 30s is a compromise between a student's patience and a slow but healthy reply. Erring short is
-// the cheaper mistake: a late reply still renders and clears the message, so a tight deadline
-// costs a confusing moment rather than an answer. AI_CHAT_TIMEOUT over AI_CHAT_MESSAGE_SENT gives
-// the timeout rate this should be retuned against, rather than guessing again.
+// A deadline rather than a smarter reading of status: no client state distinguishes a dead turn
+// from a slow one, since the drain commits its reply and its cursor together. Erring short is the
+// cheaper mistake, because a late reply still renders and clears the message. Retune against
+// AI_CHAT_TIMEOUT over AI_CHAT_MESSAGE_SENT.
 export const kReplyDeadlineMs = 30_000;
 
 // Distinct from the status:"error" message below: the backend reporting an error and the backend
@@ -28,7 +23,7 @@ export interface UseChatResult {
   header: string;
 }
 
-export interface ChatLogContext {
+export interface ChatLogContext extends Record<string, unknown> {
   // Joins a log row to the Firestore conversation it came from, which is the lookup a report of
   // one stuck chat needs. problemPath is already on every log message, so it isn't repeated here.
   conversationId: string;
@@ -49,11 +44,8 @@ export function useChat({ transport, header, logContext }: UseChatOptions): UseC
   const [status, setStatus] = useState<ChatStatus>("idle");
   const [error, setError] = useState<string | null>(null);
   const [timedOut, setTimedOut] = useState(false);
-  // Whether the student sent anything during this mount. isAwaitingReply is computed over
-  // rehydrated history and the sidebar unmounts when closed, so an already-wedged conversation
-  // re-arms the deadline every time it is reopened. The message should still appear each time —
-  // the conversation really is unanswered — but counting those would inflate AI_CHAT_TIMEOUT with
-  // repeat views of one failure, against a denominator that counts the send once.
+  // Reopening a wedged conversation re-arms the deadline from rehydrated history. The message
+  // should appear every time, but only a send made here counts, or repeat views inflate the rate.
   const sentThisSessionRef = useRef(false);
 
   // Re-subscribe whenever the transport instance changes — this is the hard
@@ -74,7 +66,7 @@ export function useChat({ transport, header, logContext }: UseChatOptions): UseC
       setError("Ada is currently unavailable. Please try again.");
       // Gated like the timeout below: the parent doc's "error" persists in Firestore, so every
       // reopen of a failed conversation would otherwise log again with no matching send.
-      if (sentThisSessionRef.current) Logger.log(LogEventName.AI_CHAT_UNAVAILABLE, { ...logContext });
+      if (logContext && sentThisSessionRef.current) Logger.log(LogEventName.AI_CHAT_UNAVAILABLE, logContext);
     }
   }, [status, logContext]);
 
@@ -92,7 +84,7 @@ export function useChat({ transport, header, logContext }: UseChatOptions): UseC
     if (!waiting) return;
     const timer = setTimeout(() => {
       setTimedOut(true);
-      if (sentThisSessionRef.current) Logger.log(LogEventName.AI_CHAT_TIMEOUT, { ...logContext });
+      if (logContext && sentThisSessionRef.current) Logger.log(LogEventName.AI_CHAT_TIMEOUT, logContext);
     }, kReplyDeadlineMs);
     return () => clearTimeout(timer);
   }, [waiting, newestTurnId, logContext]);
@@ -108,7 +100,9 @@ export function useChat({ transport, header, logContext }: UseChatOptions): UseC
       // Only once the write landed, so the denominator counts messages the backend could
       // actually have answered.
       sentThisSessionRef.current = true;
-      Logger.log(LogEventName.AI_CHAT_MESSAGE_SENT, { ...logContext });
+      // No context means the debug transport, which is ungated in every appMode: its dry runs
+      // would inflate the denominator with rows carrying no conversation.
+      if (logContext) Logger.log(LogEventName.AI_CHAT_MESSAGE_SENT, logContext);
     } catch (e) {
       setError((e as Error)?.message || "Failed to send your message. Please try again.");
       throw e;
