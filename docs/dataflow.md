@@ -61,20 +61,25 @@ The tick is a `setInterval` at the program's sampling rate (`setDataRate` in `da
 
 A page is hidden when `document.visibilityState` is `hidden`: its tab isn't the selected one, its window is minimized, or the screen is locked. Chrome on macOS and Windows can also count a window covered entirely by other windows as hidden. Scrolling doesn't hide a page.
 
-Chrome also throttles some iframes that aren't hidden. CLUE doesn't put DataFlow in an iframe today, but if it ever does, that matters. These were measured with Chrome 156 in October 2026:
+How much Chrome slows a `setInterval` depends on how long the page has been hidden and where it is served from. These were measured with Chrome 156 in October 2026:
 
 | Where the program runs | `visibilityState` | Timers |
 |---|---|---|
 | The selected tab | `visible` | at their set rate |
-| A background tab | `hidden` | about once a second, and about once a minute after 5 minutes hidden |
+| A background tab, page from a site (a branch preview, production) | `hidden` | about once a second, then about once a minute from about 1 minute hidden |
+| A background tab, page from `localhost` | `hidden` | about once a second for more than 3 minutes, and about once a minute 3 to 6 minutes after hiding |
 | A same-origin iframe scrolled out of view | `visible` | at their set rate |
 | A cross-origin iframe scrolled out of view | `visible` | about once a second, still after more than 5 minutes, and animation frames stop |
 
-So if DataFlow is ever embedded in a cross-origin iframe, it will run as slowly as in a background tab whenever the iframe is scrolled out of view, while still reporting `visible`. Code that checks `visibilityState` won't notice.
+A `setInterval` created after the page is hidden slows down too: one created in a page from a site that had been hidden for 100 s fired 6 times about a second apart, and then once a minute.
+
+So a hidden page served by the dev server on `localhost` keeps running much longer than the same page on a branch preview or in production. Check hidden-page behavior on a branch preview.
+
+Chrome also throttles some iframes that aren't hidden. CLUE doesn't put DataFlow in an iframe today, but if it ever does, that matters. If DataFlow is ever embedded in a cross-origin iframe, it will run at about once a second whenever the iframe is scrolled out of view, while still reporting `visible`. Code that checks `visibilityState` won't notice. The iframe rows were measured with pages from `localhost`; from a site, the iframe may slow further, as a background tab does.
 
 ### What it does to a program
 
-At any sampling rate faster than 1 s, a program in a hidden page ticks about once a second. Once the page has been hidden for 5 minutes, it ticks about once a minute at any sampling rate.
+At any sampling rate faster than 1 s, a program in a hidden page ticks about once a second. After about a minute hidden (more than 3 minutes on `localhost`), it ticks about once a minute at any sampling rate.
 
 - A **Sensor node** reads the channel's latest value on each tick, so readings that arrive between ticks are never seen.
 - **Generator** and **Timer** nodes, and virtual sensors, compute their value from `Date.now()`. Each value is right for the moment of its tick; there are just fewer of them.

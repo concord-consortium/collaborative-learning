@@ -241,8 +241,8 @@ last reply (about 6 s while still opening), it sets the observable `notRespondin
 one of them (`ok`, or any `err` but `othersession`) clears it and restarts the count.
 `err othersession` sets it until the next connect or reconnect. The count is in commands, not
 seconds. It pauses while the page is hidden and restarts when it's visible: in a hidden tab the
-browser slows the transport's reads below the rate the readings arrive, so replies fall behind
-and would look missing.
+browser slows timers, and a transport whose reads run on a timer can fall behind the readings, so
+replies would look missing.
 
 **Identify.** `identify()` sends `identify #n` and resolves `"answered"` on any reply carrying
 that `#n`, `ok` or `err`, or `"noAnswer"` after 2 s. It works whatever state the session is in,
@@ -485,41 +485,52 @@ that does to the program's ticks. For the connection:
   hidden page.
 - **Web Serial reads keep up.** `WebSerialTransport`'s read loop waits on the port, not on a
   timer, so readings still reach the channels. Only the ticks that sample them slow down.
-- **Spiker:bit reads fall behind.** `@microbit/microbit-connection` reads DAPLink's buffer on a
-  `setTimeout` chain, at most 62 bytes per read (`startPolling` in its `daplink.js`). At one read
-  a second, or one a minute once the page has been hidden for 5 minutes, that is slower than the
-  EMG readings arrive, so DAPLink's buffer fills and drops new output (see
-  [the backlog](cc-device-protocol.md#connecting)). The readings that do arrive are old, and
-  replies to the session's commands queue behind them or are lost. Using WebUSB directly
-  wouldn't allow a read that waits for data, like the Web Serial loop's: DAPLink sends serial
-  data only in reply to a read command, so the host has to poll.
-- **The session may lapse.** The Spiker:bit ends a session after 5 s without a `ping`, and once
-  the page has been hidden for 5 minutes the session's 1 s ping timer fires only about once a
-  minute. The next `ping` gets `err nosession`, and the session opens again. In a hand test, the
-  session lapsed about 68 s after the tab was hidden, was opened again about 45 s later, lapsed
-  again after about 12 s, and kept cycling; showing the tab opened it again at once.
+- **Spiker:bit reads may keep up.** `@microbit/microbit-connection` reads DAPLink's buffer in a
+  loop that waits for each USB read and then for a 1 ms `setTimeout`, and a read returns at most
+  62 bytes (`startPolling` in its `daplink.js`). In a hidden page Chrome holds that timer back,
+  but not to the once a minute of the tick and ping timers: a stand-in for the loop, with a
+  `MessageChannel` round trip in place of the USB read, ran about 3 times a second after more
+  than 3 minutes hidden. If the real loop does the same, it reads about 180 bytes a second, more
+  than the EMG readings' roughly 100 (one `emg:` line of about 10 bytes every 100 ms), and keeps
+  up. This hasn't been checked on a board. A loop that reads slower than the readings arrive lets
+  DAPLink's buffer fill and drop new output (see [the backlog](cc-device-protocol.md#connecting)):
+  the readings that do arrive are old, and replies to the session's commands queue behind them
+  or are lost. Using WebUSB directly wouldn't allow a read that waits for data, like the Web
+  Serial loop's: DAPLink sends serial data only in reply to a read command, so the host has to
+  poll.
+- **The session lapses, again and again, in a page from a site.** The Spiker:bit ends a session
+  after 5 s without a `ping`. About a minute after the page is hidden, the session's 1 s ping
+  timer drops to about once a minute, and the session lapses 5 s after the last ping. The next
+  ping, about a minute after the last, gets `err nosession`, and CLUE opens a new session. That
+  session's ping timer is a new `setInterval`, which fires about once a second for about 9 s and
+  then about once a minute, so the new session lapses about 15 s after it opens. The cycle
+  repeats about once a minute until the page is shown, which opens the session again at once. A
+  hand test on a branch preview fits this: the session lapsed about 68 s after the tab was
+  hidden, was opened again about 45 s later, lapsed again after about 12 s, and kept cycling. On
+  `localhost` the ping timer keeps firing about once a second for more than 3 minutes, so the
+  session lasts at least that long.
 - **Not responding isn't counted while the page is hidden.** See "Not responding" in
   [The CC Device Protocol session](#the-cc-device-protocol-session): the count pauses and starts
   again from zero when the page is shown, so a student coming back doesn't see a false "not
   responding".
 - **If DataFlow is ever embedded in a cross-origin iframe,** the count won't pause while the
-  iframe is scrolled out of view. Chrome slows the iframe's timers like a hidden tab's, but its
+  iframe is scrolled out of view. Chrome slows the iframe's timers to about once a second, but its
   `visibilityState` stays `visible`, so the connect button could turn yellow. Such an iframe would
   also need `allow="usb; serial"` for the device APIs to work at all.
 
 ## Possible improvements
 
 - **Empty DAPLink's buffer at each wake-up in a hidden page.** This would let Dataflow keep up
-  with the readings while a hidden page's timers are slowed to once a second. It adds
-  complexity, so it isn't recommended until there is a demonstrated need.
-  `@microbit/microbit-connection`'s read loop sleeps after every read, so a hidden page gets 62
-  bytes per timer wake-up. A loop that reads again straight away while reads return data, and
-  sleeps only when the buffer is empty, would empty the whole backlog at each wake-up; USB
-  transfers are promises, not timers, so they aren't slowed. At today's one reading per 100 ms,
-  that would keep up while the page's timers fire once a second, for its first 5 minutes hidden.
-  It couldn't keep up once they slow to about once a minute. And with more sensors, ASCII
-  readings would fill DAPLink's roughly 500-byte buffer within a second, so keeping up with them
-  would also take a binary mode for readings. Finally, it means modifying
+  with more readings in a hidden page. It adds complexity, so it isn't recommended until there
+  is a demonstrated need. `@microbit/microbit-connection`'s read loop sleeps after every read, so
+  a hidden page gets 62 bytes per timer wake-up. A loop that reads again straight away while
+  reads return data, and sleeps only when the buffer is empty, would empty the whole backlog at
+  each wake-up; USB transfers are promises, not timers, so they aren't slowed. Today's readings
+  may not need it: if the real loop wakes about 3 times a second in a hidden page, as its
+  stand-in did (see [Hidden pages](#hidden-pages)), it already keeps up. With more sensors, ASCII
+  readings could arrive faster than 62-byte reads take them. Whether a binary mode for readings
+  would also be needed, to cut the bytes per reading, depends on how often the real loop wakes,
+  which hasn't been checked on a board. Finally, it means modifying
   `@microbit/microbit-connection`.
 - **Not recommended: read the Spiker:bit over Web Serial.** The micro:bit also exposes a serial
   port, which the radio-hub micro:bit uses. Reading it would wait for data like the Arduino's
