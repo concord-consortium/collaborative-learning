@@ -370,7 +370,20 @@ git commit -m "CLUE-740: derive playback time from the row index"
 
 This is the piece with no prior art in the tile and the likeliest place to overrun. Detaching
 too eagerly loses a live link the student expects; too late lets a sample land in columns that
-describe a different program.
+describe a different program. And it has to be undoable *with* the change that caused it.
+
+- [ ] **Step 0: Verify shared-model changes join the tile action's history entry**
+
+The detach manipulates shared models, which live in the document tree rather than the tile's.
+CLUE's history is multi-tree, so whether a shared-model change made inside a tile action is
+attributed to that action's entry decides whether one undo restores the link atomically. Read
+`Tree.handleSharedModelChanges` and the exchange handling in `src/models/history/`.
+
+Then prove it, rather than reasoning about it: write a test that performs a structural change on a
+document with a linked table, undoes once, and asserts the table is linked again **and** the node
+is back. If it takes two undos, the detach is landing in its own entry and must move up to a
+document-level action — stop and raise that before continuing, because it changes this task's
+shape.
 
 - [ ] **Step 1: Write the failing test**
 
@@ -420,6 +433,30 @@ describe("structural change", () => {
     expect(content.linkedTableTileId).toBe(tableTileId);
   });
 });
+
+describe("undo", () => {
+  // The whole point of detaching from an action rather than a reaction: one entry, one undo.
+  it("restores the node and the link in a single undo", () => {
+    const { content, undoStore, tableTileId } = setupDocumentWithLinkedTableAndRows();
+    const nodeCountBefore = content.program.nodes.size;
+
+    content.program.addNode(makeNode("Sensor2"));
+    expect(content.linkedTableTileId).toBeUndefined();
+
+    undoStore.undo();
+
+    expect(content.program.nodes.size).toBe(nodeCountBefore);
+    expect(content.linkedTableTileId).toBe(tableTileId);
+  });
+
+  // A reaction would re-fire on the patches undo applies and detach the table again.
+  it("does not detach again while undoing", () => {
+    const { content, undoStore, tableTileId } = setupDocumentWithLinkedTableAndRows();
+    content.program.addNode(makeNode("Sensor2"));
+    undoStore.undo();
+    expect(content.linkedTableTileId).toBe(tableTileId);
+  });
+});
 ```
 
 Write the four `setup*`/helper functions at the top of the describe block using the same model
@@ -462,29 +499,38 @@ In the final `.actions` block:
 
 `getSnapshot` comes from `mobx-state-tree` and `getTileContentById` is already imported.
 
-- [ ] **Step 4: Implement the reaction**
+- [ ] **Step 4: Call it from the structural actions — NOT from a reaction**
 
-In `afterAttach`, alongside the existing `sharedModelSetup` disposer. **Structure only** — the
-tracked value is node ids and connection ids, so a rename or a value change does not fire it.
+A reaction is wrong here and the reason matters. Changes group into one undo entry only via a
+parent action or a `flow` (`docs/undo-and-time-travel.md`), and a reaction runs after the
+triggering action commits — so its detach would be a separate entry. Worse, undo applies patches
+and patch application re-runs reactions, so undoing the node that caused a detach would detach
+again. Actions are **not** re-entered during patch application, which is exactly the property
+needed.
+
+In `dataflow-program-model.ts`, have each structural action call the content model's
+`detachLinkedTables()`. Reach the content model from the program model with MST's `getParent`, or
+add a small `detachLinkedTables` passthrough if the program model already has a parent accessor —
+check what that file does today rather than inventing a second route.
 
 ```ts
-      addDisposer(self, reaction(
-        () => {
-          const nodeIds = Array.from(self.program.nodes.keys()).sort().join(",");
-          const connectionIds = Array.from(self.program.connections?.keys() ?? []).sort().join(",");
-          return `${nodeIds}|${connectionIds}`;
-        },
-        () => self.detachLinkedTables(),
-        { name: "detachOnStructuralChange" }
-      ));
+    addNode(node: IDataflowNodeModel) {
+      // The captured data describes the program as it was, so it stops following this one. Called
+      // here rather than from a reaction so it lands in the same undo entry as this change: one
+      // undo then restores the node AND the link. Patch application does not call actions, so
+      // this cannot re-fire while history is replaying.
+      detachLinkedTablesFor(self);
+      ...
+    },
 ```
 
-Do **not** pass `fireImmediately` here: the first evaluation at attach time would detach a table
-the document just restored.
+Apply the same call in `addNodeSnapshot`, `addConnection`, `removeConnection`, `removeNode` and
+`removeNodeAndConnections`. It runs more than once for a compound change like
+`removeNodeAndConnections`; that is harmless, since after the first call there are no linked
+tables left, and it matches that file's stated convention of funnelling removal through one path
+"so that every removal path is consistent by construction".
 
-Check `self.program.connections` against the actual Rete program model before relying on it; if
-connections are held per node rather than in a map, build the id string from the nodes' inputs
-instead. The test for "detaches when a connection changes" is what proves whichever you pick.
+Do **not** call it from any action that only renames a node or sets a value.
 
 - [ ] **Step 5: Run and watch it pass**
 
@@ -496,9 +542,13 @@ Expected: PASS.
 
 - [ ] **Step 6: Mutation-check the two negative tests**
 
-The rename and parameter tests pass trivially if the reaction never fires. Prove they bite:
-temporarily widen the reaction's tracked value to include node names, re-run, and confirm
-*"does NOT detach when a node is renamed"* fails. Restore the narrow version.
+The rename and parameter tests pass trivially if the detach is never wired up at all. Prove they
+bite: temporarily add the `detachLinkedTablesFor(self)` call to the rename action too, re-run, and
+confirm *"does NOT detach when a node is renamed"* fails. Remove it again.
+
+Do the same for the undo tests: temporarily move the detach into a reaction and confirm
+*"restores the node and the link in a single undo"* fails. That is the assumption this whole task
+rests on, so it should be seen failing once.
 
 ```bash
 npx jest src/plugins/dataflow/model/dataflow-content.test.ts -t "structural change"
@@ -949,8 +999,8 @@ Commit locally. Do not push until the user has checked it on localhost or said t
 
 | Risk | Handling |
 |---|---|
-| The detach reaction fires on document load and unlinks a restored table | No `fireImmediately`. Task 5 Step 4 says so explicitly; a test that loads a document with a linked table and asserts it stays linked would make it certain. |
-| `program.connections` is not a map, so the reaction never sees a rewire | Task 5 Step 4 says to check the real model, and the "detaches when a connection changes" test is what proves whichever shape is used. |
+| Undo leaves the table detached, or detaches it again | The reason the detach is a child action of each structural change rather than a reaction. Task 5 Step 0 verifies the history-entry assumption before anything is built on it; Step 1's `undo` tests pin both directions. |
+| A structural action is missed, so some edits do not detach | Every one of `addNode`, `addNodeSnapshot`, `addConnection`, `removeConnection`, `removeNode`, `removeNodeAndConnections` gets the call. The rename and parameter tests pin the other side. |
 | The `data-set-view` entry for Graph silently becomes a second Table button | Task 7 Step 3 calls this out and requires `args` handling plus a test that Graph still adds a Graph tile. |
 | Single samples cannot be disabled during a recording yet | `isRecording` is not on the model until CLUE-771. Task 6 Step 3 narrows the disable to read-only and says to note the gap in the PR rather than fake the check. |
 | Old documents' playback drifts | Only when the data rate was changed after recording; CLUE-771 removes playback. Spec records this. |

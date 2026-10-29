@@ -58,6 +58,7 @@ Table It use it too is about one line.
 |---|---|
 | What "unlink" means | The table tile detaches from the program's shared dataset and keeps the recorded data as its own. The student's numbers survive; the stale link does not. |
 | What triggers it | Structural change only: a node added, removed, or rewired. A rename or a parameter tweak does not unlink. |
+| Undo | A detach is part of the same history entry as the change that caused it, so one undo restores the structure and the link together. |
 | Timestamp | Not per row. The first column is an ordinal point number; the capture's start time goes in the dataset name, which is the table's header. |
 | Samples + recording | A recording run appends to whatever single samples are already in the table. |
 
@@ -145,16 +146,42 @@ the table's columns, the sample would land in the wrong columns; `recordCase` al
 missing attributes but writes misaligned data. The unlink rule below is what prevents that, and a
 sample taken against a structurally changed program must rebuild the columns rather than append.
 
-### 3. Unlink on structural change
+### 3. Unlink on structural change — and relink on undo
 
-A reaction on the program's node and connection structure — not on node values or names. When it
-fires and the dataset holds recorded cases, each linked table tile is given its own copy of the
-dataset and removed from the program's shared model, leaving the program free to start a fresh
-table on the next Table It or sample.
+Detaching has to be **undoable with the change that caused it**: a student who undoes back to the
+program the data was captured against should get the live link back, not an orphaned table.
 
-This is the one piece with no existing analog in the tile, and it is where a bug would be quietest:
-unlinking too eagerly loses the live link a student expects, and too late lets a sample land in
-columns that describe a different program.
+**This rules out a reaction.** `docs/undo-and-time-travel.md` says changes group into one history
+entry only via a parent action or a `flow`. A MobX reaction runs *after* the triggering action has
+committed, so a reaction-based detach would land in its own entry — and worse, undo applies
+patches, which re-run reactions. Undoing the node that caused the detach would re-trigger the
+reaction and detach again, which is precisely the behavior being asked for and its opposite.
+
+**So the detach is a child action of the structural change.** The actions that alter structure all
+live on `DataflowProgramModel`: `addNode`, `addNodeSnapshot`, `addConnection`, `removeConnection`,
+`removeNode` and `removeNodeAndConnections`. Each calls the content model's `detachLinkedTables()`,
+which makes the detach part of the same history entry as the change that justified it, by the
+parent-action rule.
+
+Two things follow, and both are why this is the right shape rather than a workaround:
+
+- **Undo restores both at once.** One entry holds the structural change and the detach, so one
+  undo puts the node back *and* re-links the table.
+- **Undo cannot re-detach.** Patch application does not call actions, so `detachLinkedTables` is
+  not re-entered while history is being replayed. The reaction had the opposite property.
+
+Calling it from every structural action means it runs more than once for a compound change such as
+`removeNodeAndConnections`. That is harmless — after the first call there are no linked tables
+left — and it matches the convention already stated in `dataflow-program-model.ts`, where removal
+is funnelled through one path "so that every removal path is consistent by construction".
+
+**The one thing to verify before building this.** The detach manipulates shared models, which live
+in the document tree rather than the tile's. CLUE's history is multi-tree, and whether a
+shared-model change made inside a tile action is attributed to that action's history entry decides
+whether undo restores the link atomically. `Tree.handleSharedModelChanges` is the path to read.
+If it turns out shared-model changes land in a separate entry, the detach needs to move up to a
+document-level action instead, and that is a larger change — so this is Task 5's first step, not a
+detail to discover during it.
 
 ### 4. Toolbar order
 
@@ -178,6 +205,7 @@ button joins it there in CLUE-771.
 |---|---|
 | `dataflow-content.test.ts` | The point column is numeric, so `attribute.type` infers `"numeric"` and the Graph tile gets a numeric x-axis. The dataset name carries the capture's start time. `getTimeAtRecordedIndex` derives from index and data rate, and matches what a pre-existing recording stored in its own column. |
 | toolbar registration tests | Table It links an existing table rather than adding a second; creates one when none exists. |
+| undo tests | Undoing a node addition restores the node and re-links the table in one step; undoing does not leave the table detached, and does not detach it a second time. |
 | single-sample tests | One row appended with the current wall-clock and each node's value; creates the table first when none exists; disabled while recording. |
 | unlink tests | A node added, removed or rewired detaches linked tables with their data intact; a rename or parameter change does not. |
 | Cypress `dataflow_tool_spec.js` | The two buttons appear in order after Table It and Graph It, and a single sample reaches the table. |
