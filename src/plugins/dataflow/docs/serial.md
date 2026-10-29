@@ -141,28 +141,41 @@ the transport disconnects the library connection; the device is kept for Reconne
 
 **Tile device actions.** The pane, the top-bar menu and the `reset` button call the tile device
 actions in `device-actions.ts`, which wrap `DeviceConnection` and log `DATAFLOW_TOOL_CHANGE`
-events with the operations `connectDevice`, `reconnectDevice`, `disconnectDevice` and
-`resetProgram`. A successful connect or reconnect resets only the clicking tile's program,
-through `resetProgramForTile`, which says what Reset leaves alone. Disconnect never resets.
+events with the operations `connectDevice`, `reconnectDevice`, `connectProgress`, `connectResult`,
+`connectRecovered`, `abandonedOpen`, `deviceLost`, `disconnectDevice` and `resetProgram`. A
+connect or reconnect resets only the clicking tile's program, through `resetProgramForTile`,
+which says what Reset leaves alone, as soon as the device becomes the active one. Disconnect never
+resets, and it also works while a stalled Spiker:bit update holds a board open that isn't active.
 
 **Log events.** Each is a `DATAFLOW_TOOL_CHANGE` event for one tile (`tileId`): the clicking
 tile, or for the connect tutorial's events, the tile it covers. The fields below sit at the top
-level of the event.
+level of the event. Every event of one attempt carries the same `attemptId`, and the device events
+carry `targetType: "device"` and `device`: the choice id (`arduino`, `microbitHub` or
+`spikerbit`). Step times are `attempt.steps`: ms from the click, for the steps that happened.
 
 | `operation` | Other fields | Logged when |
 |---|---|---|
-| `connectDevice` | `targetType: "device"`, `device`: the choice id (`arduino`, `microbitHub` or `spikerbit`) | A Connect succeeds |
-| `reconnectDevice` | `targetType: "device"`, `device` | A Reconnect succeeds |
+| `connectDevice` | `attemptId` | Connect is clicked |
+| `reconnectDevice` | `attemptId` | Reconnect is clicked |
+| `connectProgress` | `attemptId`, `trigger`, `elapsedMs`, `step`, `steps`, `updatePercent` during an update | The attempt is still running 5, 10, 20, 40... s after the click |
+| `connectResult` | `attemptId`, `trigger`, `outcome`, `elapsedMs`, `steps`; for a failure `failedStep` and `error` (`name`, `code`, `message`); for a Spiker:bit `firmware` (`found`, `updated`) | The attempt ends, including `canceled` |
+| `connectRecovered` | `attemptId`, `elapsedMs`, `steps` | An attempt that ended in a stall gets its first data after all |
+| `abandonedOpen` | `attemptId`, and what the `close()`, `forget()` and late settle of the abandoned open did | An open the attempt gave up on settles, or its best-effort close finishes |
+| `deviceLost` | `attemptId`, `reason`: `unplugged` or `lost` | A device the attempt left open is lost, or a stalled update fails later |
 | `disconnectDevice` | `targetType: "device"`, `device`: the choice that was connected | The user disconnects |
 | `resetProgram` | `targetType: "program"`, `trigger`: `connect`, `reconnect` or `button` | The program is reset |
 | `showConnectTutorial` | `targetType: "connectTutorial"` | The connect tutorial appears over the tile |
 | `dismissConnectTutorial` | `targetType: "connectTutorial"`, `trigger`: `ok` (OK in this tile), `okInAnotherTile` or `connection` | The tutorial over the tile is dismissed |
 
-- A successful Connect or Reconnect logs two events: the device event, then `resetProgram` with
-  `trigger` `connect` or `reconnect`.
-- A failed, refused (`inUse`) or canceled attempt logs nothing.
-- Only a Disconnect the user chooses is logged. An unplug logs nothing, so a `connectDevice` can
-  have no matching `disconnectDevice`.
+- `connectDevice` and `reconnectDevice` mark the click, not a success. A quick attempt logs
+  `connectDevice`, `resetProgram` (when the device becomes active) and `connectResult`; anything
+  the student did in between sits between them in time order. A slow attempt adds `connectProgress`
+  events. A reload or a closed tab leaves a start, maybe some progress events and no result.
+- A failed, stalled or `canceled` attempt logs its `connectResult` too, with no `resetProgram`
+  unless the device became active first.
+- Only a Disconnect the user chooses logs `disconnectDevice`. An unplug logs `deviceLost` when the
+  attempt had ended with the device open; one before that ends the attempt, which `connectResult`
+  records as `unplugged` or `lost`.
 - One OK or one connection dismisses the tutorial on every tile, so each tile it covered logs a
   dismissal; the tile whose OK was clicked has `trigger` `ok`. A tile that closes while the
   tutorial shows, such as a deleted tile, logs no dismissal.

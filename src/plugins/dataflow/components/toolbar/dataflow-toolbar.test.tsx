@@ -7,7 +7,11 @@ import { ModalProvider } from "react-modal-hook";
 
 import { ReadOnlyContext } from "../../../../components/document/read-only-context";
 import { SerialDevice } from "../../../../models/stores/serial";
-import { ConnectResult, getDeviceConnection, kIdentifyResultMs } from "../../model/device-connection";
+import {
+  ConnectResult, DeviceChoice, getDeviceConnection, IAttemptOptions, kIdentifyResultMs
+} from "../../model/device-connection";
+import { FailureKind } from "../../model/connect-failures";
+import { ConnectionAttempt } from "../../model/connection-attempt";
 import { IdentifyResult } from "../../../../models/stores/cc-device-session";
 import { TileModelContext } from "../../../../components/tiles/tile-api";
 import { ITileModel, TileModel } from "../../../../models/tiles/tile-model";
@@ -326,6 +330,17 @@ describe("Dataflow pan split button (CLUE-573)", () => {
 
 });
 
+// A connect or reconnect that ends in a failure, as DeviceConnection reports it to the tile.
+function failingAttempt(kind: FailureKind, choice: DeviceChoice = "spikerbit") {
+  return async (...args: unknown[]) => {
+    const options = args[args.length - 1] as IAttemptOptions;
+    const attempt = new ConnectionAttempt(choice, "connect", options.attemptId);
+    attempt.end(kind, { kind, choice, step: "open", elapsedMs: 0 });
+    options.listener?.onEnded?.(attempt);
+    return kind;
+  };
+}
+
 describe("Dataflow connect button and pane", () => {
   // Pass `stores` to render a second toolbar sharing the first one's device connection, and
   // `strict` to render it in React.StrictMode, which mounts, unmounts and remounts it.
@@ -478,10 +493,10 @@ describe("Dataflow connect button and pane", () => {
 
   it("after a failure: shows the message and the device list again", () => {
     const r = openPane();
-    act(() => r.content.setConnectError("Couldn't connect to Spiker:bit."));
+    act(() => r.content.setConnectFailure({ kind: "openFailed", choice: "spikerbit", step: "open", elapsedMs: 0 }));
     const group = screen.getByRole("group", { name: "Device connection" });
     expect(within(group).getByRole("status")).toHaveTextContent("Not connected");
-    expect(within(group).getByText("Couldn't connect to Spiker:bit.")).toBeInTheDocument();
+    expect(within(group).getByText("Couldn't open it.")).toBeInTheDocument();
     expect(within(group).getByRole("button", { name: "Connect Spiker:bit" })).toBeInTheDocument();
   });
 
@@ -547,8 +562,8 @@ describe("Dataflow connect button and pane", () => {
       const r = openPane();
       fakeConnected(r);
       act(() => r.stores.serialDevice.activeTransport!.onDisconnect!("unplugged"));
-      act(() => r.content.setConnectError("Couldn't connect to Spiker:bit."));
-      expect(within(pane()).getByText("Couldn't connect to Spiker:bit.")).toBeInTheDocument();
+      act(() => r.content.setConnectFailure({ kind: "openFailed", choice: "spikerbit", step: "open", elapsedMs: 0 }));
+      expect(within(pane()).getByText("Couldn't open it.")).toBeInTheDocument();
       expect(within(pane()).queryByText("The Spiker:bit was unplugged.")).toBeNull();
     });
   });
@@ -753,14 +768,14 @@ describe("Dataflow connect button and pane", () => {
     const r = openPane();
     const connect = jest.spyOn(r.connection, "connect").mockResolvedValue("canceled");
     fireEvent.keyDown(screen.getByRole("button", { name: "Connect Spiker:bit" }), { key });
-    expect(connect).toHaveBeenCalledWith("spikerbit");
+    expect(connect).toHaveBeenCalledWith("spikerbit", expect.objectContaining({ listener: expect.any(Object) }));
   });
 
   it("clicking Connect for Spiker:bit calls the connection with \"spikerbit\"", () => {
     const r = openPane();
     const connect = jest.spyOn(r.connection, "connect").mockResolvedValue("canceled");
     fireEvent.click(screen.getByRole("button", { name: "Connect Spiker:bit" }));
-    expect(connect).toHaveBeenCalledWith("spikerbit");
+    expect(connect).toHaveBeenCalledWith("spikerbit", expect.objectContaining({ listener: expect.any(Object) }));
   });
 
   it("focus stays in the pane when its controls change", () => {
@@ -869,11 +884,11 @@ describe("Dataflow connect button and pane", () => {
 
   it("a failed Connect keeps the pane open and shows the error", async () => {
     const r = openPane();
-    jest.spyOn(r.connection, "connect").mockResolvedValue("openFailed");
+    jest.spyOn(r.connection, "connect").mockImplementation(failingAttempt("openFailed"));
     act(() => screen.getByRole("button", { name: "Connect Spiker:bit" }).focus());
     await act(async () => { fireEvent.click(screen.getByRole("button", { name: "Connect Spiker:bit" })); });
     expect(r.content.connectPaneOpen).toBe(true);
-    expect(within(paneGroup()).getByText("Couldn't connect to Spiker:bit.")).toBeInTheDocument();
+    expect(within(paneGroup()).getByText("Couldn't open it.")).toBeInTheDocument();
     expect(within(paneGroup()).getByRole("button", { name: "Connect Arduino" })).toBeInTheDocument();
   });
 
@@ -882,7 +897,7 @@ describe("Dataflow connect button and pane", () => {
     const stores = specStores();
     const tiles = [TileModel.create({ content: DataflowContentModel.create() }),
       TileModel.create({ content: DataflowContentModel.create() })];
-    jest.spyOn(getDeviceConnection(stores.serialDevice), "connect").mockResolvedValue("openFailed");
+    jest.spyOn(getDeviceConnection(stores.serialDevice), "connect").mockImplementation(failingAttempt("openFailed"));
     render(
       <ModalProvider>
         <Provider stores={stores}>
@@ -899,7 +914,7 @@ describe("Dataflow connect button and pane", () => {
     const [a, b] = tiles.map(model => within(screen.getByTestId(model.id)));
     fireEvent.click(a.getByTestId("connect-device-button"));
     await act(async () => { fireEvent.click(a.getByRole("button", { name: "Connect Spiker:bit" })); });
-    expect(a.getByText("Couldn't connect to Spiker:bit.")).toBeInTheDocument();
+    expect(a.getByText("Couldn't open it.")).toBeInTheDocument();
     fireEvent.click(b.getByTestId("connect-device-button"));
     expect(b.getByRole("group", { name: "Device connection" })).toBeInTheDocument();
     expect(b.queryByText(/Couldn't connect/)).toBeNull();
@@ -918,14 +933,14 @@ describe("Dataflow connect button and pane", () => {
   it.each<ConnectResult>(["openFailed", "canceled"])("a %s Reconnect keeps the pane open", async (result) => {
     const r = openPane();
     fakeConnected(r);
-    jest.spyOn(r.connection, "reconnect").mockImplementation(async () => {
+    jest.spyOn(r.connection, "reconnect").mockImplementation(async options => {
       r.stores.serialDevice.clearActiveDevice();
-      return result;
+      return result === "openFailed" ? failingAttempt("openFailed")(options) : result;
     });
     act(() => screen.getByRole("button", { name: "Reconnect" }).focus());
     await act(async () => { fireEvent.click(screen.getByRole("button", { name: "Reconnect" })); });
     expect(r.content.connectPaneOpen).toBe(true);
-    const error = within(paneGroup()).queryByText("Couldn't connect to Spiker:bit.");
+    const error = within(paneGroup()).queryByText("Couldn't open it.");
     if (result === "openFailed") {
       expect(error).toBeInTheDocument();
     } else {

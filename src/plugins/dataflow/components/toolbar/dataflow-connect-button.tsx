@@ -11,6 +11,7 @@ import { IToolbarButtonComponentProps } from "../../../../components/toolbar/too
 import { TileModelContext } from "../../../../components/tiles/tile-api";
 import { useReadOnlyContext } from "../../../../components/document/read-only-context";
 import { useStores } from "../../../../hooks/use-stores";
+import { paneProblemText } from "../../model/connect-failures";
 import { DataflowContentModelType } from "../../model/dataflow-content";
 import {
   DeviceChoice, DeviceConnection, getDeviceConnection, kDeviceChoiceLabels, kDeviceChoiceOrder
@@ -209,7 +210,7 @@ const ConnectPane = observer(function ConnectPane(
   const problem = checkNote ? undefined
     : isConnected
       ? connection.notResponding ? notRespondingMessage(connectedLabel) : undefined
-      : content.connectError ?? connection.lossMessage;
+      : content.connectFailure ? paneProblemText(content.connectFailure.kind) : connection.lossMessage;
 
   return (
     <div ref={setContainer} className="toolbar-palette dataflow-connect-pane" style={floatingStyles}
