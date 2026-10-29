@@ -5,6 +5,8 @@ import { useStores } from "../../hooks/use-stores";
 
 import "./right-drawer.scss";
 
+export const kRightDrawerPanelTabId = "right-drawer-panel-tab";
+
 interface IProps {
   // True when the student has Ada, so the drawer can offer her next to a panel.
   chatTutorAvailable: boolean;
@@ -42,7 +44,7 @@ export const RightDrawer: React.FC<IProps> = observer(function RightDrawer(props
                   onClick={selectAda}>
             Ada
           </button>
-          <button type="button" role="tab" aria-selected={panelShowing}
+          <button type="button" role="tab" id={kRightDrawerPanelTabId} aria-selected={panelShowing}
                   className={classNames("right-drawer-tab", { selected: panelShowing })}
                   onClick={() => ui.setDrawerTab("panel")}>
             {drawerPanel.tabLabel}
