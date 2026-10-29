@@ -385,6 +385,10 @@ is back. If it takes two undos, the detach is landing in its own entry and must 
 document-level action — stop and raise that before continuing, because it changes this task's
 shape.
 
+**Keep this a model test, and do not run the program.** Each tick records actions of its own, so a
+test that lets the program run would interleave tick entries between the change and the undo and
+tell you nothing about grouping. Nothing ticks under Jest unless you start it — just do not.
+
 - [ ] **Step 1: Write the failing test**
 
 ```ts
@@ -987,6 +991,11 @@ table appear headed `Program data HH:MM:SS` with a Point column; click Record Si
 and watch points 1 and 2 appear; click Table It again and confirm no second table; add a node and
 confirm the table detaches with its rows intact; click Graph It and confirm the x-axis is numeric.
 
+**Do not hand-check undo here.** Each tick records its own actions, so undo currently walks back
+through tick entries rather than landing on the node change — a known Dataflow issue being
+addressed separately. The grouping this story relies on is covered by the model tests in Task 5,
+where nothing is ticking. Report it as unverifiable in the browser rather than as broken.
+
 - [ ] **Step 5: Run `/code-self-review` over the full diff**
 
 - [ ] **Step 6: Hold for the user before pushing**
@@ -999,6 +1008,7 @@ Commit locally. Do not push until the user has checked it on localhost or said t
 
 | Risk | Handling |
 |---|---|
+| Dataflow's tick actions make undo look broken in the browser | Known and separate — ticks record their own history entries. The Task 5 model tests are where the grouping is proven; Task 10 Step 4 says not to hand-check undo. The design inherits the fix for free once ticks leave history. |
 | Undo leaves the table detached, or detaches it again | The reason the detach is a child action of each structural change rather than a reaction. Task 5 Step 0 verifies the history-entry assumption before anything is built on it; Step 1's `undo` tests pin both directions. |
 | A structural action is missed, so some edits do not detach | Every one of `addNode`, `addNodeSnapshot`, `addConnection`, `removeConnection`, `removeNode`, `removeNodeAndConnections` gets the call. The rename and parameter tests pin the other side. |
 | The `data-set-view` entry for Graph silently becomes a second Table button | Task 7 Step 3 calls this out and requires `args` handling plus a test that Graph still adds a Graph tile. |

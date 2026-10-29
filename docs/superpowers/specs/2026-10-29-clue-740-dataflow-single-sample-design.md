@@ -175,6 +175,24 @@ Calling it from every structural action means it runs more than once for a compo
 left — and it matches the convention already stated in `dataflow-program-model.ts`, where removal
 is funnelled through one path "so that every removal path is consistent by construction".
 
+**Dataflow's undo stack is not clean today, and that does not change this design.** Each tick
+records actions of its own — `updateSharedProgramData` runs every tick, and the program model
+keeps a tick history — so undoing a node change in the running app currently walks back through
+tick entries rather than landing on the change. Scott is dissociating ticks from history
+separately.
+
+Two consequences, and neither is a reason to wait:
+
+- **The unit tests still mean something.** Nothing ticks under Jest, so a model-level test of "one
+  undo restores the node and the link" measures exactly the grouping this design is about.
+- **The browser hand-check cannot show it yet.** Undo there will step through tick entries. That
+  is the known issue, not a fault in this work, and whoever implements should not chase it.
+
+Putting the detach inside the structural action is also what makes this forward-compatible: it
+inherits whatever undo treatment that action ends up with, so when ticks leave the history the
+behavior becomes correct with no change here. `withoutUndo()` is already used in this tile
+(`resetRunningState`, `setOutputConfig`) if a narrower fix is ever wanted sooner.
+
 **The one thing to verify before building this.** The detach manipulates shared models, which live
 in the document tree rather than the tile's. CLUE's history is multi-tree, and whether a
 shared-model change made inside a tile action is attributed to that action's history entry decides
