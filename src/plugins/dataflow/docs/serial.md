@@ -109,8 +109,11 @@ and if needed flashes the firmware (see
 calls `setActiveDevice("spikerbit", transport)`. If any step fails after the link opens,
 `connectAndStream` disconnects the library connection before it rethrows, so a failed attempt
 doesn't leave the board open. If `disconnect()` is called while `connectAndStream` is still
-running, for example during a stalled update, it throws `closed` instead of making the board
-active, so an abandoned connect can't replace a newer one.
+running, for example during a stalled update, it stops at its next step with a `closed` error
+instead of writing to the board or making it active, and it doesn't close the link, so an
+abandoned connect can't disturb a newer one on the same board. Between the open and becoming
+active, a loss of the board is reported to the connect's observer (`onLost`); a disconnect asked
+for isn't one.
 
 **Reconnect.** `reconnect()` repeats the last device choice, so the user doesn't pick a
 device type again. For a Web Serial board it tries the last port
@@ -128,7 +131,9 @@ Any other failure ends the attempt. A Spiker:bit
 unplug is noticed by `navigator.usb`'s `disconnect` event, or else by the next write to the board
 failing (see "Why a device went away").
 
-**Disconnect** first disposes a Spiker:bit whose update stalled (see below). It ends any CC
+**Disconnect** first ends an attempt still running as `canceled`, and disposes a Spiker:bit
+that isn't active yet: one whose update stalled, or one the running attempt opened (see below).
+It ends any CC
 Device Protocol session (`SerialDevice.endSession`, waiting at most
 500 ms, `kEndSessionTimeoutMs`), then closes the transport and clears the active device. For a
 Spiker:bit, closing
@@ -177,19 +182,25 @@ until then.
 | `update` | Spiker:bit with old or missing firmware | The flash finishes and the re-query is done | `kUpdateStallMs` (10 s) with no progress, then `updateStalled` |
 | `waitForData` | All | The first data arrives | `kFirstDataTimeoutMs` (5 s) from when the device became active, then `notResponding` (Spiker:bit) or `noData` |
 
-`attempt.steps` records when each step happened, in ms from the click: `chooserClosed`
-(Web Serial only: the library hides when the Spiker:bit's chooser closes), `opened`,
+`attempt.steps` records when each step happened, in ms from the click: `chooserClosed`, `opened`,
 `firmwareChecked`, `updateStarted`, `updateFinished`, `active` (when `setActiveDevice` ran) and
 `firstData`. For a Spiker:bit, `attempt.firmware` records the firmware it answered with and
 whether it was updated. The open limit lives in the transports (`WebSerialTransport.open`'s
 `timeoutMs`, `SpikerbitDevice`'s `openTimeoutMs`); the other two are timers in
-`DeviceConnection`, cleared when the attempt ends or a new one starts.
+`DeviceConnection`, cleared when the attempt ends or a new one starts, and as soon as a flash
+fails, so a slow close after it can't be taken for a stall. The library's `connect()` shows the
+Spiker:bit's chooser itself. It reports a `"FindingDevice"` progress stage before the chooser and
+`"Connecting"` once a device is chosen, or at once for a board it knows. `SpikerbitDevice` starts
+its limit at `"Connecting"` and reports it as `onOpening`, which records `chooserClosed` when the
+chooser was shown, so the time in the chooser never counts.
 
 Other failures: Web Serial's `"failed"` is `openFailed`. A Spiker:bit's `device-in-use` is
-`inUse`, any other error before the open is `openFailed`, and an error after the open but before
-the board is active is `updateFailed`, which disposes the device. A loss of the active device
-before the first data ends the attempt as `unplugged` or `lost` at once. `lastFailure` holds the
-latest attempt's failure, with its step and how long that step had run.
+`inUse`, the library's own 10 s limit on the USB open (code `timeout`) is `openTimeout`, any
+other error before the open is `openFailed`, and an error after the open but before the board is
+active is `updateFailed`, which disposes the device. A loss of the device before the first data,
+active or not, ends the attempt as `unplugged` or `lost` at once. A Disconnect while the attempt
+runs ends it as `canceled`, so no failure is recorded. `lastFailure` holds the latest attempt's
+failure, with its step and how long that step had run.
 
 **The two views.** The connect pane shows either the device list or the connected actions, and
 `paneView` says which. While an attempt runs it is the attempt's own view, not `isConnected`:
@@ -207,9 +218,14 @@ device stays open and the stalled step keeps running. The actions are enabled, a
 update keeps the actions view though its board isn't active yet. An update that then finishes
 makes the board active and waits for its data, without a second outcome. First data after a
 stall sets `attempt.recovered`, clears `lastFailure` and calls the listener's `onRecovered`.
-Disconnect, Connect or Reconnect during a stalled update first disposes that `SpikerbitDevice`,
-which closes its library connection and so stops the flash. Reconnect then shows the chooser.
-After the attempt has ended with its device open, a loss calls the listener's `onLost`.
+Disconnect or Connect during a stalled update first disposes that `SpikerbitDevice`, which
+closes its library connection and so stops the flash. Reconnect closes the library connection too,
+but keeps the device and reopens it without the chooser. After the attempt has ended with its
+device open, a loss calls the listener's `onLost`. That includes a stalled update's board, which
+isn't active yet: its loss is also recorded on `SerialDevice.lastLoss` (`recordLoss`), so the pane
+shows it, and `lastFailure` is cleared. If a stalled update's flash fails after all, the board is
+disposed, `lastFailure` becomes `updateFailed`, and the listener hears it as `onLost` with
+`lost`.
 
 **Giving up on an open.** Neither Web Serial nor WebUSB is known to let a page close a device
 while its open is pending, so at the limit the attempt stops waiting: it ends as `openTimeout`

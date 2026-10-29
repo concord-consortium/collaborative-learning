@@ -53,6 +53,7 @@ export class SerialDevice {
       setActiveDevice: action,
       clearActiveDevice: action,
       recordUnplug: action,
+      recordLoss: action,
       clearLastLoss: action,
       markDataReceived: action
     });
@@ -145,6 +146,12 @@ export class SerialDevice {
     } else if (this.lastLoss?.transport === transport && this.lastLoss.reason === "lost") {
       this.lastLoss = { ...this.lastLoss, reason: "unplugged" };
     }
+  }
+
+  // Records the loss of a device that was open but never became active, such as a Spiker:bit
+  // unplugged during its firmware update.
+  public recordLoss(transport: IDeviceTransport, reason: DeviceLoss){
+    this.lastLoss = { reason, transport, at: Date.now() };
   }
 
   public clearLastLoss(){

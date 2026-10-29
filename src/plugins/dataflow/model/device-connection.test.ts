@@ -73,7 +73,7 @@ function makeSpikerbit(serialDevice: SerialDevice) {
 
 // A fake @microbit/microbit-connection USB connection for driving a real SpikerbitDevice.
 // With reportsDisconnect, its disconnect raises the library's Disconnected status, as the real one does.
-function makeUsbConnection(options: { failWrite?: boolean, reportsDisconnect?: boolean } = {}) {
+function makeUsbConnection(options: { failWrite?: boolean, reportsDisconnect?: boolean, firmware?: number } = {}) {
   const usbDevice = {};
   const serialListeners: Array<(d: { data: string }) => void> = [];
   const statusListeners: Array<(d: { status: string }) => void> = [];
@@ -95,7 +95,8 @@ function makeUsbConnection(options: { failWrite?: boolean, reportsDisconnect?: b
         if (seq) send(withChecksum(`ok #${seq}`));
         if (line === "?") {
           send(withChecksum(
-            `hello protocol:CCDeviceProtocol version:1 device:spikerbit firmware:${kSpikerbitFirmwareVersion}`));
+            `hello protocol:CCDeviceProtocol version:1 device:spikerbit firmware:${
+              options.firmware ?? kSpikerbitFirmwareVersion}`));
         }
       });
     }),
@@ -669,6 +670,7 @@ describe("DeviceConnection", () => {
       let observer: ISpikerbitConnectObserver = {};
       let settle = { resolve: () => undefined as void, reject: (_e: unknown) => undefined as void };
       const device = {
+        transport,
         connectAndStream: jest.fn((_source: unknown, connectObserver: ISpikerbitConnectObserver) => {
           observer = connectObserver;
           return new Promise<void>((resolve, reject) => { settle = { resolve, reject }; });
@@ -883,6 +885,156 @@ describe("DeviceConnection", () => {
       expect(stepped.device.disconnect.mock.invocationCallOrder[0])
         .toBeLessThan(transport.open.mock.invocationCallOrder[0]);
       expect(stepped.device.dispose).toHaveBeenCalled();
+    });
+
+    it("a fresh Spiker:bit's open starts when its chooser closes, and its failures are at the open", async () => {
+      const { connection, stepped } = setupSpikerbit();
+      const p = connection.connect("spikerbit");
+      await flush();
+      expect(connection.attempt!.step).toBe("choose");
+      await jest.advanceTimersByTimeAsync(30000);
+      stepped.observer().onOpening!(true);
+      expect(connection.attempt!.step).toBe("open");
+      expect(connection.attempt!.steps.chooserClosed).toBe(30000);
+      await jest.advanceTimersByTimeAsync(3000);
+      await stepped.fail({ code: "device-in-use", message: "Unable to claim interface." });
+      expect(await p).toBe("inUse");
+      expect(connection.lastFailure).toMatchObject({ kind: "inUse", step: "open", elapsedMs: 3000 });
+    });
+
+    it("the library's own open time limit is openTimeout", async () => {
+      const { connection, stepped } = setupSpikerbit();
+      const p = connection.connect("spikerbit");
+      await flush();
+      stepped.observer().onOpening!(false);
+      expect(connection.attempt!.steps.chooserClosed).toBeUndefined();
+      await stepped.fail({ code: "timeout", message: "Timeout" });
+      expect(await p).toBe("openTimeout");
+      expect(connection.lastFailure).toMatchObject({ kind: "openTimeout", step: "open" });
+    });
+
+    it("a flash that fails just before the stall limit, with a slow close, ends as updateFailed", async () => {
+      const { connection, stepped } = setupSpikerbit();
+      stepped.device.disconnect.mockImplementation(() => new Promise(resolve => setTimeout(resolve, 200)));
+      const { result: p } = await startSpikerbit(connection, stepped, true);
+      await jest.advanceTimersByTimeAsync(9900);
+      void stepped.fail(new Error("flash failed"));
+      await jest.advanceTimersByTimeAsync(300);
+      expect(await p).toBe("updateFailed");
+      expect(connection.paneView).toBe("devices");
+      expect(connection.lastFailure?.kind).toBe("updateFailed");
+    });
+
+    it("a real Spiker:bit whose flash fails just before the stall limit, with a slow close, ends as updateFailed",
+      async () => {
+        const serialDevice = new SerialDevice();
+        const usbConnection = makeUsbConnection({ firmware: kSpikerbitFirmwareVersion - 1 });
+        usbConnection.flash.mockImplementation(() =>
+          new Promise((_, reject) => setTimeout(() => reject(new Error("flash failed")), 9900)));
+        usbConnection.disconnect.mockImplementation(() => new Promise(resolve => setTimeout(resolve, 200)));
+        const connection = new DeviceConnection(serialDevice, realSpikerbitDeps(usbConnection));
+        const p = connection.connect("spikerbit");
+        await jest.advanceTimersByTimeAsync(9900 + 1000);
+        expect(await p).toBe("updateFailed");
+        expect(connection.paneView).toBe("devices");
+      });
+
+    it("an unplug of a stalled Spiker:bit calls onLost and shows the device list with the unplug", async () => {
+      const { connection, stepped } = setupSpikerbit();
+      const listener = { onLost: jest.fn() };
+      const p = connection.connect("spikerbit", { listener });
+      await flush();
+      stepped.observer().onOpened!();
+      stepped.observer().onFirmwareChecked!(null, true);
+      await jest.advanceTimersByTimeAsync(kUpdateStallMs);
+      expect(await p).toBe("updateStalled");
+      stepped.observer().onLost!("unplugged");
+      expect(listener.onLost).toHaveBeenCalledWith(connection.attempt, "unplugged");
+      expect(connection.lastFailure).toBeUndefined();
+      expect(connection.paneView).toBe("devices");
+      expect(connection.lossMessage).toBe("The Spiker:bit was unplugged.");
+      await flush();
+      expect(stepped.device.dispose).toHaveBeenCalled();
+      // The flash failing afterward adds nothing.
+      await stepped.fail(new Error("device gone"));
+      expect(listener.onLost).toHaveBeenCalledTimes(1);
+      expect(connection.lastFailure).toBeUndefined();
+    });
+
+    it("an unplug during a running update ends the attempt as unplugged", async () => {
+      const { connection, stepped } = setupSpikerbit();
+      const { result: p } = await startSpikerbit(connection, stepped, true);
+      stepped.observer().onLost!("unplugged");
+      expect(await p).toBe("unplugged");
+      expect(connection.lastFailure).toBeUndefined();
+      expect(connection.lossMessage).toBe("The Spiker:bit was unplugged.");
+    });
+
+    it("a stalled update whose flash then fails calls onLost and shows updateFailed on the device list", async () => {
+      const { connection, stepped } = setupSpikerbit();
+      const listener = { onLost: jest.fn() };
+      const p = connection.connect("spikerbit", { listener });
+      await flush();
+      stepped.observer().onOpened!();
+      stepped.observer().onFirmwareChecked!(null, true);
+      await jest.advanceTimersByTimeAsync(kUpdateStallMs);
+      expect(await p).toBe("updateStalled");
+      await stepped.fail(new Error("flash failed"));
+      expect(listener.onLost).toHaveBeenCalledWith(connection.attempt, "lost");
+      expect(connection.lastFailure).toMatchObject({
+        kind: "updateFailed", step: "update", error: { message: "flash failed" }
+      });
+      expect(connection.attempt!.outcome).toBe("updateStalled");
+      expect(connection.paneView).toBe("devices");
+      expect(stepped.device.dispose).toHaveBeenCalled();
+    });
+
+    it("disconnect while a Web Serial board waits for its first data ends the attempt as canceled", async () => {
+      const { connection } = setup([makeTransport(["opened"], { sendsData: false })]);
+      const listener = { onEnded: jest.fn() };
+      const p = connection.connect("arduino", { listener });
+      await flush();
+      expect(connection.attempt!.step).toBe("waitForData");
+      await connection.disconnect();
+      expect(await p).toBe("canceled");
+      expect(connection.busyChoice).toBeUndefined();
+      await jest.advanceTimersByTimeAsync(kFirstDataTimeoutMs);
+      expect(connection.attempt!.outcome).toBe("canceled");
+      expect(connection.lastFailure).toBeUndefined();
+      expect(connection.paneView).toBe("devices");
+      expect(listener.onEnded).toHaveBeenCalledTimes(1);
+    });
+
+    it("reconnect during a stalled update reopens the same Spiker:bit without the chooser", async () => {
+      const serialDevice = new SerialDevice();
+      const stepped = makeSteppedSpikerbit(serialDevice);
+      const createSpikerbitDevice = jest.fn(() => stepped.device as unknown as SpikerbitDevice);
+      const connection = new DeviceConnection(serialDevice, {
+        createSpikerbitDevice, getSpikerbitFlashDataSource: () => "flash-source"
+      });
+      const { result: p } = await startSpikerbit(connection, stepped, true);
+      await jest.advanceTimersByTimeAsync(kUpdateStallMs);
+      expect(await p).toBe("updateStalled");
+      const staleObserver = stepped.observer();
+
+      const reconnecting = connection.reconnect();
+      await flush();
+      expect(stepped.device.disconnect).toHaveBeenCalledTimes(1);
+      expect(stepped.device.dispose).not.toHaveBeenCalled();
+      expect(createSpikerbitDevice).toHaveBeenCalledTimes(1);
+      expect(stepped.device.connectAndStream).toHaveBeenCalledTimes(2);
+      expect(connection.attempt!.trigger).toBe("reconnect");
+      expect(connection.paneView).toBe("actions");
+      // The abandoned run's reports change nothing.
+      staleObserver.onUpdateProgress!(90);
+      expect(connection.attempt!.updatePercent).toBeUndefined();
+
+      stepped.observer().onOpened!();
+      stepped.observer().onFirmwareChecked!(null, false);
+      await stepped.activate();
+      stepped.transport.onData!("data\r\n");
+      expect(await reconnecting).toBe("connected");
+      serialDevice.clearActiveDevice();
     });
 
     it("a flash that throws ends as updateFailed back on the device list", async () => {

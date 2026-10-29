@@ -95,6 +95,9 @@ const kDeviceInUse = "device-in-use";
 
 const kOpenTimeout = "open-timeout";
 
+// The code of the error @microbit/microbit-connection throws when its own time limit passes.
+const kLibraryTimeout = "timeout";
+
 function errorCode(error: unknown) {
   return (error as { code?: string } | null)?.code;
 }
@@ -292,27 +295,39 @@ export class DeviceConnection {
     const choice = this.lastChoice;
     if (!choice) return "canceled";
     return this.startAttempt(choice, "reconnect", options, async attempt => {
-      await this.closeDevices();
+      // A stalled Spiker:bit is the board Reconnect reopens.
+      await this.closeDevices({ keepStalled: true });
       return choice === "spikerbit" ? this.reconnectSpikerbit(attempt) : this.reconnectWebSerial(attempt);
     });
   }
 
   async disconnect(): Promise<void> {
-    // An attempt still starting its device up is left to finish.
-    if (this.attempt?.ended) this.stopFollowing();
-    await this.disposeStalledSpikerbit();
-    await this.closeActive();
+    const attempt = this.attempt;
+    // An attempt still starting its device up is stopped. The user stopped it, so it isn't a
+    // failure. A Spiker:bit it opened that isn't active yet is let go.
+    const starting = attempt && !attempt.ended && this.isFollowing(attempt) ? attempt : undefined;
+    if (starting) this.endAttempt(starting, "canceled");
+    this.stopFollowing();
+    if (starting?.choice === "spikerbit" && starting.steps.active === undefined) await this.disposeSpikerbit();
+    await this.closeDevices();
   }
 
-  private async closeDevices() {
-    await this.disposeStalledSpikerbit();
+  // Closes the attempt's devices: a stalled Spiker:bit, which is disposed unless kept for
+  // Reconnect, then the active device. Closing the library connection also stops a flash, so two
+  // connects never run against one board.
+  private async closeDevices({ keepStalled = false } = {}) {
+    const stalled = this.stalledSpikerbit;
+    if (stalled && keepStalled) {
+      this.stalledSpikerbit = undefined;
+      try {
+        await stalled.disconnect();
+      } catch (e) {
+        console.error("Spiker:bit disconnect failed", e);
+      }
+    } else if (stalled) {
+      await this.disposeSpikerbit(stalled);
+    }
     if (this.isConnected) await this.closeActive();
-  }
-
-  // Closing the library connection also stops the flash, so two connects never run against one
-  // board.
-  private async disposeStalledSpikerbit() {
-    if (this.stalledSpikerbit) await this.disposeSpikerbit(this.stalledSpikerbit);
   }
 
   private async closeActive() {
@@ -481,7 +496,8 @@ export class DeviceConnection {
 
   private async activateWebSerial(attempt: ConnectionAttempt, transport: WebSerialTransport) {
     const deviceFamily = transport.deviceFamily;
-    if (!deviceFamily) {
+    // A Disconnect stopped the attempt while the port was opening.
+    if (!deviceFamily || !this.isFollowing(attempt)) {
       await transport.close();
       this.endAttempt(attempt, "openFailed");
       return;
@@ -545,33 +561,54 @@ export class DeviceConnection {
     attempt: ConnectionAttempt, device: SpikerbitDevice
   ): Promise<IOpenFailure | undefined> {
     const listener = this.followed?.listener;
+    // Reports from a run that a Disconnect or a newer attempt replaced are ignored.
+    const following = () => this.isFollowing(attempt);
     let opened = false;
-    const limitUpdate = () => this.setLimit(attempt, kUpdateStallMs, () => this.updateStalled(attempt, device));
+    let failed = false;
+    const limitUpdate = () => this.setLimit(attempt, kUpdateStallMs, () => {
+      if (!failed) this.updateStalled(attempt, device);
+    });
     const observer: ISpikerbitConnectObserver = {
+      onOpening: afterChooser => {
+        if (!following()) return;
+        if (afterChooser) attempt.chooserClosed();
+        else attempt.setStep("open");
+      },
       onOpened: () => {
         opened = true;
         this.markOpened(attempt, "checkFirmware");
       },
       onFirmwareChecked: (reply, willUpdate) => {
+        if (!following()) return;
         attempt.firmwareChecked(describeFirmware(reply), willUpdate);
         if (willUpdate) limitUpdate();
       },
       onUpdateProgress: percent => {
+        if (!following()) return;
         attempt.updateProgress(percent);
         limitUpdate();
       },
       onUpdateFinished: () => {
+        if (!following()) return;
         attempt.updateFinished();
         this.clearLimit(attempt);
       },
+      // The board may take a while to close, and a stall mustn't be reported meanwhile.
+      onFailed: () => {
+        failed = true;
+        this.clearLimit(attempt);
+      },
+      onLost: loss => this.openSpikerbitLost(attempt, device, loss),
       onAbandoned: info => listener?.onAbandonedOpen?.(attempt, info)
     };
 
     try {
       await device.connectAndStream(this.deps.getSpikerbitFlashDataSource(), observer);
     } catch (e) {
-      // A Disconnect or a newer attempt has already disposed of the board.
-      if (!this.isFollowing(attempt)) return undefined;
+      failed = true;
+      this.clearLimit(attempt);
+      // A Disconnect, a newer attempt or a loss has already let the board go.
+      if (!following() || this.spikerbitDevice !== device) return undefined;
       const code = errorCode(e);
       if (code === kNoDeviceSelected) return { outcome: "canceled" };
       console.error("Spiker:bit connection failed", e);
@@ -580,11 +617,20 @@ export class DeviceConnection {
         await this.disposeSpikerbit(device, { close: false });
         return { outcome: "openTimeout", error: e };
       }
+      // A stall ended the attempt, so this board is the stalled one.
+      const stalled = attempt.ended;
       await this.disposeSpikerbit(device);
       if (code === kDeviceInUse) return { outcome: "inUse", error: e };
+      // The library gives up on the USB open itself after 10 s.
+      if (!opened && code === kLibraryTimeout) return { outcome: "openTimeout", error: e };
+      if (stalled) {
+        this.stalledUpdateFailed(attempt, e);
+        return undefined;
+      }
       return { outcome: opened ? "updateFailed" : "openFailed", error: e };
     }
 
+    if (!following()) return undefined;
     const transport = this.serialDevice.activeTransport;
     if (!transport) return { outcome: this.serialDevice.lastLoss?.reason ?? "lost" };
     this.deviceActivated(attempt, transport);
@@ -593,8 +639,36 @@ export class DeviceConnection {
 
   // The flash keeps running, and the board stays open until it finishes or is disposed.
   private updateStalled(attempt: ConnectionAttempt, device: SpikerbitDevice) {
+    if (!this.isFollowing(attempt) || this.spikerbitDevice !== device) return;
     this.stalledSpikerbit = device;
     this.endAttempt(attempt, "updateStalled", { elapsedMs: kUpdateStallMs });
+  }
+
+  // The flash of a stalled update failed after all, so the pane goes back to the device list with
+  // that failure. The attempt has ended, so the listener hears of it as a loss of the board.
+  private stalledUpdateFailed(attempt: ConnectionAttempt, error: unknown) {
+    this.lastFailure = {
+      kind: "updateFailed", choice: attempt.choice, step: "update", elapsedMs: attempt.stepElapsedMs,
+      error: errorInfo(error)
+    };
+    this.followed?.listener?.onLost?.(attempt, "lost");
+  }
+
+  // The board went away after its open and before it became active, perhaps during a stalled
+  // update. While the attempt runs, that ends it; afterward, the listener hears of the loss. It is
+  // recorded as the loss of a device, which the pane shows, and the board is let go.
+  private openSpikerbitLost(attempt: ConnectionAttempt, device: SpikerbitDevice, loss: DeviceLoss) {
+    const followed = this.followed;
+    if (followed?.attempt !== attempt || this.spikerbitDevice !== device) return;
+    this.clearLimit(attempt);
+    if (!attempt.ended) {
+      this.endAttempt(attempt, loss);
+    } else {
+      this.lastFailure = undefined;
+      followed.listener?.onLost?.(attempt, loss);
+    }
+    this.serialDevice.recordLoss(device.transport, loss);
+    void this.disposeSpikerbit(device);
   }
 
   // Lets the board go: closes its library connection unless told not to, then stops listening for

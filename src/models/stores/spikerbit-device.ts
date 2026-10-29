@@ -46,7 +46,9 @@ const kOpenTimeoutCode = "open-timeout";
 export interface IMicrobitUsbConnection {
   addEventListener(type: "serialdata", listener: (data: { data: string }) => void): void;
   addEventListener(type: "status", listener: (data: { status: string }) => void): void;
-  connect(): Promise<void>;
+  // The library reports `progress` stages: "FindingDevice" before it shows its chooser, and
+  // "Connecting" once a device is chosen, or at once for a device it already knows.
+  connect(options?: { progress?: (stage: string) => void }): Promise<void>;
   flash(
     dataSource: unknown,
     options: { partial?: boolean; progress?: (stage: string, pct?: number) => void }
@@ -59,6 +61,8 @@ export interface IMicrobitUsbConnection {
 
 // What connectAndStream reports as the connection proceeds, so a caller can show its steps.
 export interface ISpikerbitConnectObserver {
+  // The USB open started. `afterChooser` is whether the browser's chooser was shown first.
+  onOpening?(afterChooser: boolean): void;
   onOpened?(): void;
   // `reply` is what the board answered with, or null when it didn't answer; `willUpdate` is
   // whether the firmware is about to be flashed.
@@ -66,6 +70,10 @@ export interface ISpikerbitConnectObserver {
   // 0-100. Every call counts as progress.
   onUpdateProgress?(percent: number): void;
   onUpdateFinished?(): void;
+  // The board went away after the open and before it became the active device.
+  onLost?(loss: DeviceLoss): void;
+  // The connect failed. Called before the link is closed, which can take a while.
+  onFailed?(): void;
   // Called after an abandoned USB open is closed and forgotten, and again if it settles late.
   onAbandoned?(info: IAbandonedOpenInfo): void;
 }
@@ -139,7 +147,7 @@ export interface SpikerbitDeviceOptions {
 export class SpikerbitDevice {
   private serialDevice: SerialDevice;
   private connection: IMicrobitUsbConnection;
-  private transport: MicrobitUsbTransport;
+  readonly transport: MicrobitUsbTransport;
   private buffer = "";
   private detectedReply: FirmwareReply | null = null;
   private firmwareQueryTimeoutMs: number;
@@ -168,22 +176,28 @@ export class SpikerbitDevice {
     this.transport.onData = this.handleFirmwareData;
 
     try {
-      await this.connectAndCheckFirmware(flashDataSource, observer);
+      await this.connectAndCheckFirmware(run, flashDataSource, observer);
     } catch (e) {
-      // Close the link so a failed attempt doesn't leave the board open and still feeding
-      // the firmware handler. An abandoned open is already being closed in the background.
-      if ((e as { code?: string } | null)?.code !== kOpenTimeoutCode) {
+      observer?.onFailed?.();
+      // Close the link so a failed attempt doesn't leave the board open and still feeding the
+      // firmware handler. An abandoned open is already being closed in the background, and a run
+      // that was disconnected may share the board with a newer run, which must keep it.
+      if (run === this.connectRun && (e as { code?: string } | null)?.code !== kOpenTimeoutCode) {
         await this.disconnect().catch((err) => console.warn("Spiker:bit disconnect failed", err));
       }
       throw e;
     }
 
-    // A board disconnected during its update, perhaps to start another connect, mustn't then
-    // replace whatever is active.
+    this.throwIfDisconnected(run);
+    this.serialDevice.setActiveDevice(kSpikerbitDeviceName, this.transport);
+  }
+
+  // A board disconnected during its connect, perhaps for another connect, mustn't then be written
+  // to or replace whatever is active.
+  private throwIfDisconnected(run: number) {
     if (run !== this.connectRun) {
       throw Object.assign(new Error("The connection was closed while it was starting"), { code: "closed" });
     }
-    this.serialDevice.setActiveDevice(kSpikerbitDeviceName, this.transport);
   }
 
   // Closes the WebUSB link. The library connection's status event then clears the store's
@@ -200,23 +214,28 @@ export class SpikerbitDevice {
     this.transport.dispose();
   }
 
-  // Races connection.connect() against openTimeoutMs. When the limit wins, the open is given up on
+  // Races connection.connect() against openTimeoutMs, counted from the library's "Connecting"
+  // stage so the time in its chooser doesn't count. When the limit wins, the open is given up on
   // (see abandonOpen) and this rejects at once.
   private async openWithLimit(observer?: ISpikerbitConnectObserver) {
-    const settled = this.connection.connect().then(
+    let choosing = false;
+    let opening = false;
+    let timeoutId: ReturnType<typeof setTimeout> | undefined;
+    let resolveTimedOut: (outcome: { status: "timeout" }) => void = () => undefined;
+    const timedOut = new Promise<{ status: "timeout" }>((resolve) => { resolveTimedOut = resolve; });
+    const progress = (stage: string) => {
+      if (stage === "FindingDevice") choosing = true;
+      if (stage !== "Connecting" || opening) return;
+      opening = true;
+      observer?.onOpening?.(choosing);
+      if (this.openTimeoutMs != null) {
+        timeoutId = setTimeout(() => resolveTimedOut({ status: "timeout" }), this.openTimeoutMs);
+      }
+    };
+    const settled = this.connection.connect({ progress }).then(
       () => ({ status: "opened" as const }),
       (error: unknown) => ({ status: "failed" as const, error })
     );
-    if (this.openTimeoutMs == null) {
-      const result = await settled;
-      if (result.status === "failed") throw result.error;
-      return;
-    }
-
-    let timeoutId: ReturnType<typeof setTimeout> | undefined;
-    const timedOut = new Promise<{ status: "timeout" }>((resolve) => {
-      timeoutId = setTimeout(() => resolve({ status: "timeout" }), this.openTimeoutMs);
-    });
     const outcome = await Promise.race([settled, timedOut]).finally(() => clearTimeout(timeoutId));
     if (outcome.status === "failed") throw outcome.error;
     if (outcome.status === "opened") return;
@@ -259,8 +278,14 @@ export class SpikerbitDevice {
     });
   }
 
-  private async connectAndCheckFirmware(flashDataSource: unknown, observer?: ISpikerbitConnectObserver) {
+  private async connectAndCheckFirmware(run: number, flashDataSource: unknown, observer?: ISpikerbitConnectObserver) {
     await this.openWithLimit(observer);
+    this.throwIfDisconnected(run);
+    // Until the board is active, a loss is reported to the observer. A disconnect asked for here
+    // isn't a loss. setActiveDevice replaces this.
+    this.transport.onDisconnect = loss => {
+      if (run === this.connectRun) observer?.onLost?.(loss);
+    };
     observer?.onOpened?.();
 
     this.resetSeq = kFirstResetSeq;
@@ -275,6 +300,7 @@ export class SpikerbitDevice {
         if (pct !== undefined) observer?.onUpdateProgress?.(Math.round(pct * 100));
       };
       await this.connection.flash(flashDataSource, { partial: true, progress });
+      this.throwIfDisconnected(run);
       observer?.onUpdateFinished?.();
       // Re-query to confirm the flash took, but proceed regardless: the board was just written
       // with the known-good bundled hex, so a null/stale reply here is far more likely a serial
