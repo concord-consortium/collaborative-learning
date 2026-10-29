@@ -65,31 +65,35 @@ The last two were chosen over the alternatives proposed here, with the costs bel
 
 ## The time column
 
-This is the sharpest constraint in the story and the one thing worth confirming before building.
+Two columns, because no single one can do the job:
 
-**Wall-clock for both kinds of row** means one column can hold rows from a single sample and from
-a recorded run and still mean one thing — which is what makes appending coherent. The cost is that
-the column's *value* must stay a **number**, because the first attribute is read numerically:
+| | `Time (sec)` | `Time of day` |
+|---|---|---|
+| value | number | string |
+| a recorded run | elapsed seconds, as today | `14:32:07` |
+| a single sample | seconds since the table's first row | `14:32:07` |
 
-- `getTimeAtRecordedIndex` returns `0` for any non-number, and feeds `durationOfRecording`, which
-  drives the playback scrubber's "0:03 / 0:12" readout
-  (`dataflow-rateselector-playback.tsx`).
-- The Graph tile uses `attributes[0]` as its x-axis.
+**Why not one readable column.** `formatValue` (`cell-formatter.tsx`) passes every value through
+`Number(value)` and applies a numeric formatter when it is finite; there is no date or time hook,
+and attributes carry only a numeric `precision`. A clock time therefore has to be stored as a
+string — and `attribute.type` is inferred as `"numeric"` only when every non-empty value parses as
+a number, otherwise `"categorical"`. A string time column would hand the Graph tile a categorical
+x-axis, which is reasonable for a handful of samples and unusable for a recording of hundreds of
+rows. It would also make `getTimeAtRecordedIndex` return `0`, zeroing the playback scrubber.
 
-A formatted string such as `"14:32:07"` would silently make playback report zero duration and turn
-the graph's x-axis categorical. The data-set's attributes support only numeric precision
-(`.2~f`-style) formatting — there is no time formatter for a column — so a readable clock time
-cannot be had "for free" while keeping the value numeric.
+**Why not one numeric column.** Epoch milliseconds keeps the graph and the scrubber working but
+displays as `1792169527000` in the table and on the axis.
 
-**Therefore:** store the wall-clock as **epoch milliseconds, numeric**, and change
-`durationOfRecording` from *the last row's absolute value* to *last − first*. That is a five-line
-change and it makes playback correct again, including across a table that mixes samples and a run.
+**So both.** The first column stays numeric and keeps every existing consumer working; the second
+is the one a student reads. Both kinds of row fill both, so appending stays coherent.
 
-**The cost, stated plainly:** the column displays as a large raw number (`1792169527000`) rather
-than a time of day, in both the table and the graph axis. If that is unacceptable, the options are
-a second human-readable column alongside the numeric one, or elapsed-seconds instead of
-wall-clock — both previously discussed. This design proceeds with the numeric wall-clock as
-chosen; say so and it changes.
+`durationOfRecording` still changes from *the last row's absolute value* to *last − first*, so a
+table holding single samples taken minutes apart reports a sane duration rather than counting from
+the first row's zero.
+
+**Note on sequencing.** CLUE-771 removes playback, which removes the scrubber's claim on the first
+column — but the Graph tile's use of `attributes[0]` survives it, and that is the binding
+constraint. Neither story unblocks the other here.
 
 ## Design
 
@@ -100,14 +104,14 @@ A Dataflow-specific toolbar button that:
 - links to the existing table tile when the program's shared dataset already has one, rather than
   adding a second;
 - creates a table and links it when none exists;
-- calls `prepareRecording()`'s column setup when the table is empty, so the columns are the
-  program's node names plus the time column, per bullet 2.
+- calls `prepareRecording()`'s column setup when the table is empty, so the columns are the two
+  time columns above followed by the program's node names, per bullet 2.
 
 The shared `DataSetViewButton` is left alone.
 
 ### 2. Record Single Sample
 
-A toolbar button that appends exactly one row: the current wall-clock, then each node's current
+A toolbar button that appends exactly one row: both time columns, then each node's current
 `nodeValue`, through the existing `recordCase` path. If no table exists it does what Table It
 does first, then writes the sample.
 
@@ -143,13 +147,14 @@ button joins it there in CLUE-771.
 - Any change to how a continuous recording samples, or to the data rate selector.
 - Everything in CLUE-771: lifting recording state, moving the record button, removing playback,
   reworking Clear.
-- A readable time formatter for table columns. See "The time column".
+- A date/time formatter for table columns generally. Two columns avoids needing one; building it
+  would be its own change, with every tile as its blast radius.
 
 ## Testing
 
 | Test | Covers |
 |---|---|
-| `dataflow-content.test.ts` | `durationOfRecording` is last − first, and is correct for a table mixing single samples and a recorded run. |
+| `dataflow-content.test.ts` | Both time columns are created and filled; the first stays numeric so `attribute.type` infers `"numeric"`. `durationOfRecording` is last − first, and is correct for a table mixing single samples and a recorded run. |
 | toolbar registration tests | Table It links an existing table rather than adding a second; creates one when none exists. |
 | single-sample tests | One row appended with the current wall-clock and each node's value; creates the table first when none exists; disabled while recording. |
 | unlink tests | A node added, removed or rewired detaches linked tables with their data intact; a rename or parameter change does not. |
