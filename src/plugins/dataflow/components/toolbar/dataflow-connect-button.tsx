@@ -11,7 +11,7 @@ import { IToolbarButtonComponentProps } from "../../../../components/toolbar/too
 import { TileModelContext } from "../../../../components/tiles/tile-api";
 import { useReadOnlyContext } from "../../../../components/document/read-only-context";
 import { useStores } from "../../../../hooks/use-stores";
-import { paneProblemText } from "../../model/connect-failures";
+import { kStallKinds, paneProblemText } from "../../model/connect-failures";
 import { DataflowContentModelType } from "../../model/dataflow-content";
 import {
   DeviceChoice, DeviceConnection, getDeviceConnection, kDeviceChoiceLabels, kDeviceChoiceOrder
@@ -280,11 +280,15 @@ export const ConnectDeviceButton = observer(function ConnectDeviceButton({ name 
     connected: connection.isConnected,
     needsDevice: !!content?.needsDevice,
     unseenError: !!content?.unseenConnectError,
-    notResponding: connection.notResponding
+    notResponding: connection.notResponding,
+    stalled: !!connection.lastFailure && kStallKinds.includes(connection.lastFailure.kind),
+    dataReceived: connection.dataReceived
   };
+  const attempt = connection.attempt;
   const state = connectButtonState(stateInput);
   const title = connectButtonTooltip({
-    ...stateInput, connectedLabel: connection.connectedLabel, lossMessage: connection.lossMessage
+    ...stateInput, connectedLabel: connection.connectedLabel, lossMessage: connection.lossMessage,
+    connecting: attempt && !attempt.ended ? kDeviceChoiceLabels[attempt.choice] : undefined
   });
 
   const pane = isOpen && content && model

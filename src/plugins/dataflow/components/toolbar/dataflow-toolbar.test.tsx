@@ -474,6 +474,7 @@ describe("Dataflow connect button and pane", () => {
   it("connected: shows Connected: Spiker:bit with Reconnect and Disconnect and no device list", () => {
     const r = openPane();
     fakeConnected(r);
+    act(() => runInAction(() => { r.stores.serialDevice.dataReceived = true; }));
     const group = screen.getByRole("group", { name: "Device connection" });
     expect(within(group).getByRole("status")).toHaveTextContent("Connected: Spiker:bit");
     expect(within(group).getByRole("button", { name: "Reconnect" })).toBeInTheDocument();
@@ -517,6 +518,7 @@ describe("Dataflow connect button and pane", () => {
   it("the button turns yellow when the board stops responding, and green when it answers again", () => {
     const r = renderConnect();
     fakeConnected(r);
+    act(() => runInAction(() => { r.stores.serialDevice.dataReceived = true; }));
     const trigger = getTrigger(r.container);
     const session = r.stores.serialDevice.ccDeviceSession!;
     act(() => session.setNotResponding(true));
