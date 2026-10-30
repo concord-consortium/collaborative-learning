@@ -11,7 +11,9 @@ import { DEBUG_HISTORY_VIEW } from "../../lib/debug";
 import { Logger } from "../../lib/logger";
 import { LogEventName } from "../../lib/logger-types";
 import { DocumentModelType } from "../../models/document/document";
-import { CommentWithId, kIdeasRequestDeadlineMs } from "../../models/document/document-comments-manager";
+import {
+  CommentWithId, IdeasFailureReason, kIdeasRequestDeadlineMs
+} from "../../models/document/document-comments-manager";
 import { LearningLogDocument, LearningLogPublication, PersonalDocument } from "../../models/document/document-types";
 import { getDocumentDisplayTitle, getDocumentTitleWithTimestamp } from "../../models/document/document-utils";
 import { IDEAS_EMPTY_MESSAGE, IDEAS_REQUEST_FAILED_MESSAGE } from "../../models/document/ai-evaluation-messages";
@@ -582,6 +584,17 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
       return;
     }
 
+    // Every path that gives up on this click reports through here. Logger.log with an explicit
+    // field list rather than logDocumentEvent: that helper expands the document into
+    // documentTitle and documentProperties, both student-authored, and these rows reach a research
+    // database and Rollbar. requestId is the join to this click's REQUEST_IDEA, which carries the
+    // same id -- though a failure before that call logs none, so not every failure has a match.
+    const logFailure = (reason: IdeasFailureReason) =>
+      Logger.log(LogEventName.IDEAS_REQUEST_FAILED, {
+        documentKey: document.key, documentType: document.type, documentUid: document.uid,
+        requestId, reason
+      });
+
     commentsManager.setIdeasClickInProgress(true);
 
     // setLastEditedNow/getLastEditedTimestamp have no timeout of their own, so a stalled
@@ -619,7 +632,8 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
               return !!(lastAIComment &&
                        lastAIComment.createdAt.getTime() > effectiveLastEdited);
             },
-            dispose: () => statusRef.off("value", onStatus)
+            dispose: () => statusRef.off("value", onStatus),
+            onFailure: logFailure
           });
           statusRef.on("value", onStatus);
 
@@ -629,7 +643,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
         }
       }
 
-      logDocumentEvent(LogEventName.REQUEST_IDEA, { document });
+      logDocumentEvent(LogEventName.REQUEST_IDEA, { document }, undefined, { requestId });
     })();
 
     // Never rejects, so a late failure (after the deadline below has already shown its own
@@ -638,6 +652,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
       console.error("Ideas request failed:", error);
       if (aiEnabled && !timedOut && commentsManager.latestIdeasRequestId === requestId) {
         commentsManager.showStatusMessage(IDEAS_REQUEST_FAILED_MESSAGE);
+        logFailure("client-error");
       }
     });
     let resolveDeadline: (value: "timeout") => void;
@@ -650,7 +665,10 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
     try {
       const result = await Promise.race([guardedAttempt.then(() => "done" as const), deadline]);
       if (result === "timeout") {
-        if (aiEnabled) commentsManager.showStatusMessage(IDEAS_REQUEST_FAILED_MESSAGE);
+        if (aiEnabled) {
+          commentsManager.showStatusMessage(IDEAS_REQUEST_FAILED_MESSAGE);
+          logFailure("client-deadline");
+        }
       } else {
         clearTimeout(deadlineTimer);
       }

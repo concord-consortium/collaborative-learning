@@ -58,7 +58,12 @@ export const ChatTutorSidebar: React.FC<IProps> = observer((props) => {
   // path. Rebuilding on documentKey/problemPath change is the hard conversation swap;
   // the unit's authored prompt overrides and the effective unit-summary slice are both
   // mixed into the conversation id so a change to either starts a fresh conversation.
-  const transport: ChatTransport = useMemo(() => {
+  // The conversation id comes back with the transport because it is derived from values that only
+  // exist in here. It travels into the failure logs, where it joins a log row to the conversation
+  // a report of one stuck chat points at. The debug transport has none.
+  const { transport, conversationId } = useMemo((): {
+    transport: ChatTransport; conversationId?: string;
+  } => {
     const getLeftContext = () => problemSectionsLoaded(problem) ? buildLeftContext(problem) : undefined;
     // Rides the same install-eligible sends as LEFT (see unit-context.ts). Computed fresh per
     // transport, same as getLeftContext -- unit.config is authored data, not expected to change
@@ -66,7 +71,9 @@ export const ChatTutorSidebar: React.FC<IProps> = observer((props) => {
     const getUnitContext = () => buildUnitContext(unit, problem);
     const tutorPrompts = normalizeTutorPrompts(appConfig.chatTutorPrompts);
     if (urlParams.chatDebug) {
-      return new DebugTransport({ getLeftContext, getUnitContext, getRightSummary, tutorPrompts });
+      return {
+        transport: new DebugTransport({ getLeftContext, getUnitContext, getRightSummary, tutorPrompts })
+      };
     }
     const promptsKey = tutorPrompts && tutorPromptsKey(tutorPrompts);
     // Resolved once per transport. Undefined for the default provider, which is what keeps it
@@ -78,11 +85,12 @@ export const ChatTutorSidebar: React.FC<IProps> = observer((props) => {
     // never fork on it either.
     const unitContext = providerInstallsProblem(provider) ? getUnitContext() : undefined;
     const unitKey = unitContext ? hashString(unitContext) : undefined;
-    return new FirestoreTransport({
+    const docId = conversationDocId(
+      user.id, documentKey, user.network, problemPath, promptsKey, provider, unitKey
+    );
+    return { conversationId: docId, transport: new FirestoreTransport({
       firestore: db.firestore,
-      conversationId: conversationDocId(
-        user.id, documentKey, user.network, problemPath, promptsKey, provider, unitKey
-      ),
+      conversationId: docId,
       uid: user.id,
       contextId: user.classHash,
       problemPath,
@@ -95,13 +103,17 @@ export const ChatTutorSidebar: React.FC<IProps> = observer((props) => {
       getRightContent: () => content ? serializeRight(content) : undefined,
       tutorPrompts,
       provider,
-    });
+    }) };
   }, [documentKey, problemPath, problem, getRightSummary, content, appConfig, db, user, unit]);
+
+  const logContext = useMemo(
+    () => conversationId ? { conversationId, documentKey } : undefined,
+    [conversationId, documentKey]);
 
   // The drawer header makes the conversation scope legible: this conversation is bound
   // to one workspace document within one problem, and swaps when either changes.
   const header = `${documentTitle} · ${problemPath}`;
-  const chat = useChat({ transport, header });
+  const chat = useChat({ transport, header, logContext });
 
   // Display-only persona intro (never part of the AI context). An unset value uses the built-in
   // default; an authored empty string suppresses the intro entirely (?? keeps "" distinct from unset).

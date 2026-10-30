@@ -2,6 +2,7 @@ import React, { useEffect, useRef } from "react";
 import { observer } from "mobx-react";
 import { DocumentContentModelType } from "../../models/document/document-content";
 import { kAnalyzerUserParams } from "../../../shared/shared";
+import { IDEAS_SLOW_MESSAGE } from "../../models/document/ai-evaluation-messages";
 import ChatAvatar from "./chat-avatar";
 
 const waitingMessageText = "Ada is thinking about it...";
@@ -46,7 +47,8 @@ const _WaitingMessage: React.FC<IWaitingMessageProps> = ({ content }) => {
 
   return (
     <div className="comment-thread" ref={waitingMessageRef}>
-      {content?.isAwaitingRemoteComment && <AdaStatusMessage message={waitingMessageText} />}
+      {content?.isAwaitingRemoteComment &&
+        <AdaStatusMessage message={content.isRemoteCommentSlow ? IDEAS_SLOW_MESSAGE : waitingMessageText} />}
     </div>
   );
 };

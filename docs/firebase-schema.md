@@ -8,6 +8,16 @@ The core design elements of the schema are:
 4. Any object that can be loaded as a list should contain the minimum amount of metadata to display the information on the UI with id references to larger objects.
 5. All read-only write-once data (such as "publications") will be stored using DB storage.
 
+## Read outside CLUE: `clueExport`
+
+The `clueExport` function in `functions-v2` hands student documents to report-server's CLUE document export, which researchers download with cc-data. It reads these paths under `authed/portals/<escapedPortalDomain>/classes/<classHash>/users`:
+
+- the owner keys themselves, to find a class's `group_<offeringId>_` owners;
+- `<uid>/documentMetadata`, the whole node, including `offeringId`, `type`, `title` and `createdAt`;
+- `<uid>/documents/<documentKey>`: `content`, `type`, `version`, `changeCount`, `lastHistoryEntryId` and `self`.
+
+A change to these paths or fields needs `functions-v2/src/clue-export-walk.ts` and its emulator tests updated too, or the export silently loses data. If the rows the export answers change, report-server and cc-data change with them.
+
 ## Hierarchy
 
 ```text
