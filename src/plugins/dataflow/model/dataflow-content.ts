@@ -661,16 +661,6 @@ export const DataflowContentModel = TileContentModel
     setRecordedRun(value: boolean) {
       self.recordedRun = value;
     },
-    startRecording() {
-      // Only when there is nothing to keep, so a run started after single samples appends to them
-      // rather than discarding them. prepareCapture is idempotent, so re-preparing an already
-      // prepared capture keeps the attribute ids a linked table is holding.
-      if (self.dataSet.cases.length === 0) self.prepareCapture();
-      self.isRecording = true;
-    },
-    stopRecording() {
-      self.isRecording = false;
-    },
     resetRecording() {
       self.recordedRun = false;
       // No recording left, so the name should stop claiming one.
@@ -681,6 +671,20 @@ export const DataflowContentModel = TileContentModel
       // create a default dataSet x | y table
       addAttributeToDataSet(self.dataSet, { name: "x" });
       addAttributeToDataSet(self.dataSet, { name: "y" });
+    },
+  }))
+  // Its own block so `self` can see prepareCapture: within one .actions() block, `self` does not
+  // include the actions that block is defining.
+  .actions(self => ({
+    startRecording() {
+      // Only when there is nothing to keep, so a run started after single samples appends to them
+      // rather than discarding them. prepareCapture is idempotent about columns, so what this
+      // guard really protects is the capture's name -- preparing again would restamp its time.
+      if (self.dataSet.cases.length === 0) self.prepareCapture();
+      self.isRecording = true;
+    },
+    stopRecording() {
+      self.isRecording = false;
     },
   }));
 

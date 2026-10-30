@@ -37,10 +37,9 @@ function ensureLinkedTable(
     if (!sharedModel) return;
     addTilesContext.addTileAfter("Table", tile, [sharedModel]);
   }
-  // `recordedRun` guards the window between a recording starting and its first tick: the columns
-  // are already prepared but no rows exist yet, and re-preparing would clear the flag and leave
-  // the program in Ready when the recording stops.
-  if (content.dataSet.cases.length === 0 && !content.recordedRun) {
+  // `isRecording` guards the window between a run starting and its first tick: the columns are
+  // already prepared but no rows exist yet, and re-preparing would restamp the capture's name.
+  if (content.dataSet.cases.length === 0 && !content.isRecording) {
     content.prepareCapture();
   }
 }

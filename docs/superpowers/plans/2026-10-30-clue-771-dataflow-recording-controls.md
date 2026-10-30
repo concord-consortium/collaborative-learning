@@ -89,7 +89,8 @@ describe("startRecording", () => {
     expect(content.dataSet.attributes.map(a => a.name)).toEqual(["Point", "Sensor", "Servo"]);
   });
 
-  // A run started after single samples continues them rather than discarding what was captured.
+  // Point numbering continues rather than restarting. (prepareCapture's own idempotency is what
+  // protects the columns here; the guard in startRecording is pinned by the name test below.)
   it("leaves existing points alone and appends to them", () => {
     const content = setupContentWithTwoNamedNodes("Sensor", "Servo");
     content.prepareCapture();
@@ -101,6 +102,19 @@ describe("startRecording", () => {
 
     expect(content.dataSet.cases).toHaveLength(2);
     expect(content.dataSet.getValueAtIndex(1, pointId)).toBe(2);
+  });
+
+  // Appending must not restamp the name: the capture's time is when collection began, and
+  // prepareCapture would overwrite it with the time Record was pressed again.
+  it("keeps the original capture time when it appends", () => {
+    const content = setupContentWithTwoNamedNodes("Sensor", "Servo");
+    content.setContentTitle("Program 1");
+    content.prepareCapture(new Date(2026, 9, 30, 14, 32, 7));
+    recordCase(content);
+
+    content.startRecording();
+
+    expect(content.dataSet.name).toBe("Program 1 14:32:07");
   });
 
   it("stops recording", () => {
@@ -137,10 +151,16 @@ In `src/plugins/dataflow/model/dataflow-content.ts`, in the `.volatile(self => (
 
 - [ ] **Step 4: Add the actions**
 
-In the final `.actions(self => ({...}))` block — the one holding `setRecordedRun` and
-`resetRecording` — add:
+These go in **a new `.actions(self => ({...}))` block appended after the one holding
+`resetRecording`**, not inside it. Within a single actions block, MST's `self` does not include the
+actions that block is defining, so `self.prepareCapture()` would not type-check from the block that
+defines `prepareCapture` — it works at runtime, which makes this a types-only failure that Jest
+will not catch. Run `npx tsc --noEmit -p tsconfig.json`.
 
 ```ts
+  // Its own block so `self` can see prepareCapture: within one .actions() block, `self` does not
+  // include the actions that block is defining.
+  .actions(self => ({
     startRecording() {
       // Only when there is nothing to keep, so a run started after single samples appends to them
       // rather than discarding them. prepareCapture is idempotent, so re-preparing an already
@@ -151,6 +171,7 @@ In the final `.actions(self => ({...}))` block — the one holding `setRecordedR
     stopRecording() {
       self.isRecording = false;
     },
+  }));
 ```
 
 - [ ] **Step 5: Run the tests to verify they pass**
@@ -159,14 +180,18 @@ In the final `.actions(self => ({...}))` block — the one holding `setRecordedR
 npx jest src/plugins/dataflow/model/dataflow-content.test.ts -t "startRecording"
 ```
 
-Expected: PASS, 3 tests.
+Expected: PASS, 4 tests.
 
 - [ ] **Step 6: Mutation-test**
 
 Change `if (self.dataSet.cases.length === 0) self.prepareCapture();` to
-`self.prepareCapture();` (unconditional) and run the tests again. Expected: the "leaves existing
-points alone" test FAILS, because an unconditional prepare restamps and the point numbering
-restarts. Restore the guard and confirm the tests pass again.
+`self.prepareCapture();` (unconditional) and run the tests again. Expected: **"keeps the original
+capture time when it appends" FAILS** — the name picks up the current wall-clock time instead of
+14:32:07.
+
+The other two tests will still pass under that mutation, and that is expected: `prepareCapture` is
+idempotent about columns and never touches cases, so the dataset's name is the only thing the
+outer guard changes. Restore the guard and confirm all four pass.
 
 - [ ] **Step 7: Commit**
 
@@ -177,54 +202,19 @@ git commit -m "CLUE-771: lift recording state into the content model"
 
 ---
 
-## Task 2: Retire `recordedRun`
+## Task 2: Point the Table It guard at `isRecording`
 
-`recordedRun` existed to tell Done from Ready and to guard `ensureLinkedTable`'s prepare window.
-`isRecording` answers the second directly and the first is going away.
+`recordedRun` has two readers: this guard, and `hasRecordedRun` -> `determineProgramMode`. Only the
+first can move now — deleting the property while `determineProgramMode` still reads it would leave
+the branch broken between here and Task 8, so the property itself is retired there, in the same
+commit that deletes the state machine it serves.
 
 **Files:**
-- Modify: `src/plugins/dataflow/model/dataflow-content.ts`
-- Modify: `src/plugins/dataflow/components/toolbar/dataflow-table-buttons.tsx:43`
+- Modify: `src/plugins/dataflow/components/toolbar/dataflow-table-buttons.tsx:40-45`
 
-- [ ] **Step 1: Decide whether the property can be deleted**
+- [ ] **Step 1: Repoint the guard**
 
-```bash
-cd /Users/lbondaryk/Desktop/collaborative-learning
-git log origin/master --oneline | grep -i "CLUE-740" | head
-```
-
-- **No results** — CLUE-740 has not merged, so no document has ever persisted `recordedRun`.
-  Delete the property (Step 2a).
-- **Results found** — it has shipped. Deleting it would break history replay for any document that
-  recorded under that build, the same way the `programZoom` comment in this file describes. Keep
-  the property (Step 2b).
-
-- [ ] **Step 2a: Delete the property (only if it never shipped)**
-
-In `src/plugins/dataflow/model/dataflow-content.ts` remove:
-- the property `recordedRun: types.maybe(types.boolean),` from the `.props({...})` block
-- the `hasRecordedRun` view and its `/** Falls back to the row count ... */` comment
-- `setRecordedRun`
-- the line `self.recordedRun = false;` from `prepareCapture`
-- the line `self.recordedRun = false;` from `resetRecording`
-
-- [ ] **Step 2b: Keep it as a no-op (only if it shipped)**
-
-Leave the property in place and replace its declaration comment with:
-
-```ts
-    // Deprecated (CLUE-771): nothing reads this any more. The property stays because CLUE's
-    // history replay resolves patches by path, so a saved entry naming /recordedRun would stop
-    // resolving and halt playback -- see the programZoom comment above.
-    recordedRun: types.maybe(types.boolean),
-```
-
-Then remove `hasRecordedRun`, `setRecordedRun`, and both `self.recordedRun = false;` assignments as
-in Step 2a.
-
-- [ ] **Step 3: Repoint the Table It guard**
-
-In `src/plugins/dataflow/components/toolbar/dataflow-table-buttons.tsx`, replace lines 40-45:
+Replace lines 40-45:
 
 ```tsx
   // `recordedRun` guards the window between a recording starting and its first tick: the columns
@@ -245,20 +235,20 @@ with:
   }
 ```
 
-- [ ] **Step 4: Run the dataflow suite**
+- [ ] **Step 2: Run the toolbar tests**
 
 ```bash
-npx jest src/plugins/dataflow/
+npx jest src/plugins/dataflow/components/toolbar/
+npx tsc --noEmit -p tsconfig.json
 ```
 
-Expected: PASS. Any test referring to `recordedRun`, `setRecordedRun` or `hasRecordedRun` must be
-deleted — those names no longer exist.
+Expected: PASS, no type errors.
 
-- [ ] **Step 5: Commit**
+- [ ] **Step 3: Commit**
 
 ```bash
-git add src/plugins/dataflow/
-git commit -m "CLUE-771: retire recordedRun in favor of isRecording"
+git add src/plugins/dataflow/components/toolbar/dataflow-table-buttons.tsx
+git commit -m "CLUE-771: guard Table It's prepare window with isRecording"
 ```
 
 ---
@@ -934,7 +924,35 @@ block. Change the groups overlay guard from
 
 Delete the `inDisabledRecordingState` getter.
 
-- [ ] **Step 6: Delete the enum and the model method**
+- [ ] **Step 6: Retire `recordedRun`**
+
+Now that `determineProgramMode` is gone, nothing reads it. First confirm it never shipped, because
+removing a persisted property breaks history replay for any document that saved one — the
+`programZoom` comment in `dataflow-content.ts` explains the failure mode:
+
+```bash
+git log origin/master --oneline | grep -ci "CLUE-740"
+gh pr view 3069 --json mergedAt
+```
+
+- **`0` and `"mergedAt": null`** — it never shipped. Delete from
+  `src/plugins/dataflow/model/dataflow-content.ts`: the property
+  `recordedRun: types.maybe(types.boolean),`, the `hasRecordedRun` view with its
+  `/** Falls back to the row count ... */` comment, the `setRecordedRun` action, and the
+  `self.recordedRun = false;` line in each of `prepareCapture` and `resetRecording`.
+- **Anything else** — it shipped. Keep the property, with this comment replacing its current one,
+  and delete only the view, the action and the two assignments:
+
+```ts
+    // Deprecated (CLUE-771): nothing reads this any more. The property stays because CLUE's
+    // history replay resolves patches by path, so a saved entry naming /recordedRun would stop
+    // resolving and halt playback -- see the programZoom comment above.
+    recordedRun: types.maybe(types.boolean),
+```
+
+Delete any test referring to `recordedRun`, `setRecordedRun` or `hasRecordedRun`.
+
+- [ ] **Step 7: Delete the enum and the model method**
 
 In `src/plugins/dataflow/components/types/dataflow-tile-types.ts`, delete the `ProgramMode` enum,
 leaving `UpdateMode`.
@@ -942,7 +960,7 @@ leaving `UpdateMode`.
 In `src/plugins/dataflow/model/dataflow-program-model.ts`, delete the `playbackNodesWithCaseData`
 action at line 265.
 
-- [ ] **Step 7: Verify nothing still references the deletions**
+- [ ] **Step 8: Verify nothing still references the deletions**
 
 ```bash
 grep -rn "ProgramMode\|playbackReteManager\|playBackIndex\|playbackNodesWithCaseData\|isPlaying" \
@@ -952,7 +970,7 @@ grep -rn "ProgramMode\|playbackReteManager\|playBackIndex\|playbackNodesWithCase
 Expected: only hits inside `dataflow-program-topbar.tsx` and `dataflow-rateselector-playback.tsx`,
 which Task 9 rewrites. Anything else must be cleaned up now.
 
-- [ ] **Step 8: Commit**
+- [ ] **Step 9: Commit**
 
 ```bash
 git add src/plugins/dataflow/
