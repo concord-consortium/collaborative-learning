@@ -432,12 +432,7 @@ describe("Dataflow connect button and pane", () => {
   describe("pane placement", () => {
     afterEach(() => { mockFloatingPlacement = undefined; });
 
-    it("the pane carries its placement below the toolbar by default", () => {
-      openPane();
-      expect(screen.getByRole("group", { name: "Device connection" })).toHaveClass("bottom-start");
-    });
-
-    it("the pane's placement class follows a flip above the toolbar", () => {
+    it("the pane's placement class starts below the toolbar and follows a flip above it", () => {
       const { content } = openPane();
       const group = () => screen.getByRole("group", { name: "Device connection" });
       expect(group()).toHaveClass("bottom-start");
