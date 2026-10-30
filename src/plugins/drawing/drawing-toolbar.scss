@@ -4,12 +4,6 @@
   .toolbar-button {
     display: flex;
     position: relative;
-    .corner-triangle {
-      position: absolute;
-      bottom: 2px;
-      right: 2px;
-      fill: $workspace-teal;
-    }
     img {
       height: 24px;
       width: 24px;

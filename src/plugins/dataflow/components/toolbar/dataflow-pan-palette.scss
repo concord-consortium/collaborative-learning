@@ -5,15 +5,6 @@ $pan-button-size: 28px;
 
 .dataflow-toolbar {
   .toolbar-button.pan {
-    position: relative;
-
-    .corner-triangle {
-      position: absolute;
-      bottom: 2px;
-      right: 2px;
-      fill: $workspace-teal;
-    }
-
     .dataflow-pan-face {
       align-items: center;
       display: flex;
