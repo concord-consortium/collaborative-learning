@@ -55,6 +55,8 @@ export const UIDialogModel = types
 type UIDialogModelSnapshot = SnapshotIn<typeof UIDialogModel>;
 type UIDialogModelSnapshotWithoutType = Omit<UIDialogModelSnapshot, "type">;
 
+// A panel shown in the right drawer. The panel owns its focus: moving focus in when it opens,
+// handling Escape, and returning focus to its opener when it closes. The drawer only removes it.
 export interface IDrawerPanel {
   id: string;
   tabLabel: string;
