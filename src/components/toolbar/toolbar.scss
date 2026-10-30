@@ -76,7 +76,8 @@
       background-color: $workspace-teal-light-4;
     }
 
-    // The small triangle in the corner of a button that opens a palette.
+    // The small triangle in the corner of a button that opens a palette. Render it as a direct child
+    // of the button, as TileToolbarButton renders its children.
     &:has(> .corner-triangle) {
       position: relative;
     }
