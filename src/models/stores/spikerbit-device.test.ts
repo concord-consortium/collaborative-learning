@@ -381,17 +381,70 @@ describe("SpikerbitDevice", () => {
       expect(serialDevice.activeTransport).toBeDefined();
     });
 
-    it("a board disconnected during its update never becomes the active device", async () => {
-      const serialDevice = makeSerialDevice();
-      const conn = new FakeConnection();
-      conn.respondHello = helloLine(kSpikerbitFirmwareVersion - 1);
-      conn.respondHelloAfterFlash = helloLine(kSpikerbitFirmwareVersion);
-      const device = new SpikerbitDevice(serialDevice, conn, { firmwareQueryTimeoutMs: 50 });
-      const connecting = device.connectAndStream("HEX", { onFirmwareChecked: () => { void device.disconnect(); } });
+    describe("a disconnect while it starts stops it at its next step", () => {
+      it("is never queried when disconnected while it opens", async () => {
+        const serialDevice = makeSerialDevice();
+        const conn = new FakeConnection();
+        conn.respondHello = helloLine(kSpikerbitFirmwareVersion);
+        let finishOpen: () => void = () => undefined;
+        conn.connect = () => new Promise<void>(resolve => { finishOpen = resolve; });
+        const device = new SpikerbitDevice(serialDevice, conn, { firmwareQueryTimeoutMs: 50 });
+        const connecting = device.connectAndStream("HEX");
 
-      await expect(connecting).rejects.toMatchObject({ code: "closed" });
-      expect(conn.flashed).toBe(true);
-      expect(serialDevice.isConnected()).toBe(false);
+        void device.disconnect();
+        finishOpen();
+        await expect(connecting).rejects.toMatchObject({ code: "closed" });
+        expect(conn.written).toEqual([]);
+        expect(serialDevice.isConnected()).toBe(false);
+      });
+
+      it("is never flashed when disconnected during its firmware query", async () => {
+        const serialDevice = makeSerialDevice();
+        const conn = new FakeConnection();
+        conn.respondHello = helloLine(kSpikerbitFirmwareVersion - 1);
+        conn.holdReplies = 1;
+        const device = new SpikerbitDevice(serialDevice, conn, { firmwareQueryTimeoutMs: 50 });
+        const connecting = device.connectAndStream("HEX");
+        await new Promise(resolve => setTimeout(resolve, 0));
+        expect(conn.resetWrites()).toHaveLength(1);
+
+        void device.disconnect();
+        await expect(connecting).rejects.toMatchObject({ code: "closed" });
+        expect(conn.flashed).toBe(false);
+        expect(serialDevice.isConnected()).toBe(false);
+      });
+
+      it("doesn't finish its update when disconnected while flashing", async () => {
+        const serialDevice = makeSerialDevice();
+        const conn = new FakeConnection();
+        conn.respondHello = helloLine(kSpikerbitFirmwareVersion - 1);
+        let finishFlash: () => void = () => undefined;
+        conn.flash = jest.fn(() => new Promise<void>(resolve => { finishFlash = resolve; }));
+        const observer = { onUpdateFinished: jest.fn() };
+        const device = new SpikerbitDevice(serialDevice, conn, { firmwareQueryTimeoutMs: 50 });
+        const connecting = device.connectAndStream("HEX", observer);
+        await new Promise(resolve => setTimeout(resolve, 0));
+        expect(conn.flash).toHaveBeenCalled();
+
+        void device.disconnect();
+        finishFlash();
+        await expect(connecting).rejects.toMatchObject({ code: "closed" });
+        expect(observer.onUpdateFinished).not.toHaveBeenCalled();
+        expect(serialDevice.isConnected()).toBe(false);
+      });
+
+      it("never becomes the active device when disconnected after its update", async () => {
+        const serialDevice = makeSerialDevice();
+        const conn = new FakeConnection();
+        conn.respondHello = helloLine(kSpikerbitFirmwareVersion - 1);
+        conn.respondHelloAfterFlash = helloLine(kSpikerbitFirmwareVersion);
+        const device = new SpikerbitDevice(serialDevice, conn, { firmwareQueryTimeoutMs: 50 });
+        const connecting = device.connectAndStream("HEX", { onUpdateFinished: () => { void device.disconnect(); } });
+
+        await expect(connecting).rejects.toMatchObject({ code: "closed" });
+        expect(conn.flashed).toBe(true);
+        expect(serialDevice.isConnected()).toBe(false);
+      });
     });
 
     describe("a USB open that doesn't finish", () => {

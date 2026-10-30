@@ -292,6 +292,7 @@ export class SpikerbitDevice {
     const running = await this.queryFirmware();
     const willUpdate = shouldFlash(running, kSpikerbitDeviceName, kSpikerbitFirmwareVersion);
     observer?.onFirmwareChecked?.(running, willUpdate);
+    this.throwIfDisconnected(run);
     if (willUpdate) {
       // USB connection stays Connected through a flash (DAPLink interface chip is untouched) and
       // serial auto-reinitializes, so no explicit reconnect here.
