@@ -1,3 +1,4 @@
+import { getObserverTree, observable, runInAction } from "mobx";
 import { destroy } from "mobx-state-tree";
 import { LogEventName } from "../../../lib/logger-types";
 import { logTileChangeEvent } from "../../../models/tiles/log/log-tile-change-event";
@@ -63,7 +64,8 @@ function makeConnection(
       if (outcomeOrDrive === "connected") attempt.activated();
       return endAttempt(attempt, listener, outcomeOrDrive);
     };
-  const connection = {
+  // Only `attempt` is observable, as on the real connection, so a reaction can see it replaced.
+  const connection = observable({
     lastChoice: opts.lastChoice,
     isConnected: opts.isConnected ?? false,
     busyChoice: opts.busyChoice,
@@ -73,10 +75,13 @@ function makeConnection(
     connect: jest.fn(),
     reconnect: jest.fn(),
     disconnect: jest.fn().mockResolvedValue(undefined)
-  };
+  }, {
+    lastChoice: false, isConnected: false, busyChoice: false, paneView: false, attempt: observable.ref,
+    lastFailure: false, connect: false, reconnect: false, disconnect: false
+  });
   const start = (choice: DeviceChoice, trigger: "connect" | "reconnect", o: IAttemptOptions = {}) => {
     const attempt = new ConnectionAttempt(choice, trigger, o.attemptId);
-    connection.attempt = attempt;
+    runInAction(() => { connection.attempt = attempt; });
     return drive(attempt, o.listener ?? {});
   };
   connection.connect.mockImplementation((choice: DeviceChoice, o?: IAttemptOptions) => start(choice, "connect", o));
@@ -676,6 +681,42 @@ describe("device actions", () => {
     } finally {
       jest.useRealTimers();
     }
+  });
+
+  it("a stalled update that finishes later resets the program", async () => {
+    const content = makeContent();
+    let attempt: ConnectionAttempt | undefined;
+    const connection = makeConnection(async (a, l) => {
+      attempt = a;
+      await Promise.resolve();
+      return endAttempt(a, l, "updateStalled", { step: "update" });
+    });
+    await connectDeviceForTile({ connection, content, tileId, choice: "spikerbit" });
+    expect(ops()).not.toContain("resetProgram");
+
+    attempt!.activated();
+    expect(content.program.recentTicks.length).toBe(1);
+    expectLog("resetProgram", { targetType: "program", trigger: "connect" });
+  });
+
+  it("a stalled update's reset ends when a newer attempt replaces it", async () => {
+    const content = makeContent();
+    let stalled: ConnectionAttempt | undefined;
+    const connection = makeConnection(async (a, l) => {
+      stalled ??= a;
+      await Promise.resolve();
+      return endAttempt(a, l, a === stalled ? "updateStalled" : "openFailed");
+    });
+    const watched = () => !!getObserverTree(stalled!, "steps").observers?.length;
+    await connectDeviceForTile({ connection, content, tileId, choice: "spikerbit" });
+    expect(watched()).toBe(true);
+    await connectDeviceForTile({ connection, content, tileId, choice: "arduino" });
+    expect(watched()).toBe(false);
+
+    // Only the stalled attempt's own board could set this, and it was let go.
+    stalled!.activated();
+    expect(ops()).not.toContain("resetProgram");
+    expect(content.program.recentTicks.length).toBeGreaterThan(1);
   });
 
   it("a stall that changes after the attempt ended updates the tile's failure", async () => {

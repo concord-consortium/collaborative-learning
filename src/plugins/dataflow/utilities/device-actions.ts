@@ -143,8 +143,11 @@ async function runAttempt(
   const started = connection.attempt;
   if (started?.id === attemptId) {
     stopCheckpoints = startCheckpoints(tileId, started);
-    stopResetWatch = when(() => started.steps.active !== undefined, () => {
-      if (alive()) resetProgramForTile({ content, tileId, trigger });
+    // A stalled attempt's watch outlives the attempt, so it also ends once a newer attempt replaces
+    // it, after which this attempt's board can't become active.
+    const replaced = () => connection.attempt !== started;
+    stopResetWatch = when(() => started.steps.active !== undefined || replaced(), () => {
+      if (!replaced() && alive()) resetProgramForTile({ content, tileId, trigger });
     });
   }
 
