@@ -415,7 +415,8 @@ describe("Dataflow connect button and pane", () => {
     const { container, content } = renderConnect();
     const triangle = within(getTrigger(container)).getByTestId("connect-expand-triangle");
     // Jest stubs SVG imports as a custom element, which React gives a `classname` attribute rather
-    // than `class`. Exactly corner-triangle: the shared toolbar style, without expand-collapse.
+    // than `class`. Exactly corner-triangle: not expand-collapse, which marks a triangle with its own
+    // click handler.
     expect(triangle).toHaveAttribute("classname", "corner-triangle");
     expect(triangle).toHaveAttribute("aria-hidden", "true");
     press(triangle);
