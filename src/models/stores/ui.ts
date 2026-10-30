@@ -268,7 +268,6 @@ export const UIModel = types
       },
       closeDrawerPanel() {
         self.drawerPanel = undefined;
-        self.drawerTab = "chatTutor";
       },
       setDrawerTab(tab: DrawerTab) {
         self.drawerTab = tab;
