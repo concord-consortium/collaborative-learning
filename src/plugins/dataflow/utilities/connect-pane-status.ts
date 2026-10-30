@@ -28,8 +28,8 @@ export interface IPaneStatusInput {
   updateResumed: boolean;
 }
 
-// The status of the shared connection, showing the tile's `failure`. A stall's failure shows only
-// while its device is open.
+// The status of the shared connection, showing the tile's `failure` if it still counts (see
+// `currentFailure`).
 export function connectionStatusInput(
   connection: DeviceConnection, failure: IConnectFailure | undefined
 ): IPaneStatusInput {

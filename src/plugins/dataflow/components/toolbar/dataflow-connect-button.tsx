@@ -296,8 +296,7 @@ export const ConnectDeviceButton = observer(function ConnectDeviceButton({ name 
     return () => document.removeEventListener("pointerdown", handlePointerDown, true);
   }, [isOpen, content]);
 
-  // A stall counts only while its device is still open. The tile's own can outlast it, after
-  // another tile's Disconnect.
+  // Failures that no longer count are ignored (see `currentFailure`).
   const lastFailure = connection.currentFailure(connection.lastFailure);
   const staleTileStall = !!failure && !connection.currentFailure(failure);
   const stateInput = {
