@@ -97,9 +97,14 @@ export interface IHelpTopic {
   tileId: string;
 }
 
-// What has changed since the help's topic was shown: the device works now, or has a problem with
-// other help.
-export type HelpNotice = { type: "working" } | { type: "differentProblem"; topic: IHelpTopic };
+// What the help's notices follow: a problem, "working" once data is arriving, or a device that
+// was unplugged or isn't connected, which has no help of its own.
+export type HelpState = HelpKind | "working" | "unplugged" | "notConnected";
+
+// What has changed since the help's topic was shown: the device works now, has a problem with
+// other help, or is no longer connected.
+export type HelpNotice =
+  { type: "working" | "unplugged" | "notConnected" } | { type: "differentProblem"; topic: IHelpTopic };
 
 // The Connection help's state, kept here rather than in its component, which unmounts while Ada's
 // tab is selected.
@@ -338,17 +343,18 @@ export class DeviceConnection {
     return this.isConnected ? undefined : this.serialDevice.lastLoss?.reason;
   }
 
-  // The problem the connection has now, or "working" once data is arriving. Undefined while an
-  // attempt runs, after an unplug, which has no help, and with neither a problem nor data.
-  get currentProblem(): HelpKind | "working" | undefined {
+  // The state the connection's help follows now. Undefined while an attempt runs, and while a
+  // device is open with neither a problem nor data.
+  get currentProblem(): HelpState | undefined {
     const attempt = this.attempt;
     if (attempt && !attempt.ended) return undefined;
     if (this.check === "noAnswer") return "noAnswer";
     const loss = this.lossReason;
-    if (loss) return loss === "lost" ? "lost" : undefined;
+    if (loss) return loss;
     if (this.lastFailure) return this.lastFailure.kind;
     if (this.notResponding) return "notResponding";
-    return this.dataReceived ? "working" : undefined;
+    if (this.dataReceived) return "working";
+    return this.holdsDevice ? undefined : "notConnected";
   }
 
   // The help topic for a kind, with the failure's details when `failure` is that kind.
@@ -389,7 +395,9 @@ export class DeviceConnection {
 
   // A running attempt leaves the notice as it is until its outcome. Otherwise, with no problem, the
   // device isn't working any more, so a working notice goes; a different problem's steps still apply.
-  private problemChanged(problem: HelpKind | "working" | undefined) {
+  // An unplug or a device that isn't connected keeps the steps, which can say to unplug the board
+  // and click Connect, and gets a notice that says what to do next.
+  private problemChanged(problem: HelpState | undefined) {
     const help = this.help;
     if (!help) return;
     if (problem === undefined) {
@@ -401,8 +409,8 @@ export class DeviceConnection {
     }
     const { shown } = help;
     let notice: HelpNotice | undefined;
-    if (problem === "working") {
-      notice = { type: "working" };
+    if (problem === "working" || problem === "unplugged" || problem === "notConnected") {
+      notice = { type: problem };
     } else {
       // Help on another device names that device, so it is different help even for the same kind.
       const topic = this.helpTopic(problem, shown.tileId);

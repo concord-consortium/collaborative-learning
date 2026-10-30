@@ -116,6 +116,18 @@ export const ConnectionHelpPanel = observer(function ConnectionHelpPanel({ onClo
               </span>
               <button type="button" onClick={showNoticeTopic}>Show steps for this</button>
             </div>}
+          {notice?.type === "unplugged" &&
+            <div className="connection-help-notice not-connected">
+              <span>
+                <strong>The {connection.label ?? label} was unplugged.</strong> Plug it back in and click Connect.
+              </span>
+            </div>}
+          {notice?.type === "notConnected" &&
+            <div className="connection-help-notice not-connected">
+              <span>
+                <strong>{`The ${connection.label ?? label} isn't connected.`}</strong> Click Connect to try again.
+              </span>
+            </div>}
         </div>
         <div className={classNames("connection-help-steps", { faded: notice?.type === "working" })}>
           <p className="connection-help-headline">{helpHeadline(shown.kind, shown.choice)}</p>

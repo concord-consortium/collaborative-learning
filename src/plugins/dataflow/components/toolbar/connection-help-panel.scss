@@ -123,6 +123,11 @@ $help-status-line-height: 18px;
       background: $problem-orange-light-8;
       border: solid 1px $problem-orange;
     }
+
+    &.not-connected {
+      background: $workspace-teal-light-9;
+      border: solid 1px $workspace-teal;
+    }
   }
 
   // Stay in place under the working notice, so nothing jumps.

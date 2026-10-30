@@ -147,7 +147,8 @@ which says what Reset leaves alone, as soon as the device becomes the active one
 resets, and it also works while a stalled Spiker:bit update holds a board open that isn't active.
 
 **Log events.** Each is a `DATAFLOW_TOOL_CHANGE` event for one tile (`tileId`): the clicking
-tile, or for the connect tutorial's events, the tile it covers. The fields below sit at the top
+tile; for the connect tutorial's events, the tile it covers; and for the Connection help's, the
+tile it was opened from, even after that tile is deleted. The fields below sit at the top
 level of the event. Every event of one attempt carries the same `attemptId`, and the device events
 carry `targetType: "device"` and `device`: the choice id (`arduino`, `microbitHub` or
 `spikerbit`). Step times are `attempt.steps`: ms from the click, for the steps that happened.
@@ -165,6 +166,9 @@ carry `targetType: "device"` and `device`: the choice id (`arduino`, `microbitHu
 | `resetProgram` | `targetType: "program"`, `trigger`: `connect`, `reconnect` or `button` | The program is reset |
 | `showConnectTutorial` | `targetType: "connectTutorial"` | The connect tutorial appears over the tile |
 | `dismissConnectTutorial` | `targetType: "connectTutorial"`, `trigger`: `ok` (OK in this tile), `okInAnotherTile` or `connection` | The tutorial over the tile is dismissed |
+| `showConnectHelp` | `targetType: "connectHelp"`, `kind` | More… opens the Connection help |
+| `hideConnectHelp` | `targetType: "connectHelp"`, `kind`, `trigger`: `close` (✕ or Escape) or `closeHelp` (the working notice's button) | The Connection help closes |
+| `connectHelpNotice` | `targetType: "connectHelp"`, `notice`: `working`, `differentProblem`, `unplugged` or `notConnected`; `kind` for `differentProblem`; `action`: `shown` or `clicked` | A notice appears in the Connection help, or the student clicks its button |
 
 - `connectDevice` and `reconnectDevice` mark the click, not a success. A quick attempt logs
   `connectDevice`, `resetProgram` (when the device becomes active) and `connectResult`; anything

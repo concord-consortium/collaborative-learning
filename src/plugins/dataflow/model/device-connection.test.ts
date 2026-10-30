@@ -819,7 +819,7 @@ describe("DeviceConnection", () => {
       expect(connection.lastFailure?.kind).toBe("noData");
       await connection.disconnect();
       expect(connection.lastFailure).toBeUndefined();
-      expect(connection.currentProblem).toBeUndefined();
+      expect(connection.currentProblem).toBe("notConnected");
     });
 
     it("a loss after a noData stall calls onLost and clears lastFailure, so the loss shows", async () => {
@@ -1274,7 +1274,7 @@ describe("DeviceConnection", () => {
         expect(connection.help!.notice).toBeUndefined();
       });
 
-      it("an unplug clears the working notice; a running attempt leaves a notice alone", async () => {
+      it("an unplug replaces the working notice; a running attempt leaves a notice alone", async () => {
         const { transport, finishOpen } = makeOpeningTransport();
         const first = makeTransport(["opened"], { sendsData: false });
         const { connection } = setup([first, transport]);
@@ -1294,10 +1294,36 @@ describe("DeviceConnection", () => {
 
         transport.onDisconnect!("unplugged");
         expect(connection.lossReason).toBe("unplugged");
-        expect(connection.help!.notice).toBeUndefined();
+        expect(connection.help!.notice).toEqual({ type: "unplugged" });
       });
 
-      it("an unplug leaves a differentProblem notice, whose steps still apply", async () => {
+      it("an unplug while the steps are followed keeps them, and the same problem after it clears the notice",
+          async () => {
+        const first = makeTransport(["opened"], { sendsData: false });
+        const { transport: second, finishOpen } = makeOpeningTransport();
+        const { connection } = setup([first, second]);
+        const p = connection.connect("arduino");
+        await jest.advanceTimersByTimeAsync(kFirstDataTimeoutMs);
+        expect(await p).toBe("noData");
+        const shown = connection.helpTopic("noData", "tile-1")!;
+        const listener = { onNotice: jest.fn() };
+        connection.openHelp(shown, listener);
+
+        first.onDisconnect!("unplugged");
+        expect(connection.currentProblem).toBe("unplugged");
+        expect(connection.help).toEqual({ shown, notice: { type: "unplugged" }, detailsExpanded: false });
+        expect(listener.onNotice).toHaveBeenCalledWith({ type: "unplugged" });
+
+        const again = connection.connect("arduino");
+        expect(connection.help!.notice).toEqual({ type: "unplugged" });
+        await finishOpen();
+        await jest.advanceTimersByTimeAsync(kFirstDataTimeoutMs);
+        expect(await again).toBe("noData");
+        expect(connection.help!.notice).toBeUndefined();
+        expect(connection.help!.shown).toBe(shown);
+      });
+
+      it("an unplug replaces a differentProblem notice", async () => {
         const transport = makeTransport(["opened"], { sendsData: false });
         const { connection } = setup([makeTransport(["failed"]), transport]);
         await connection.connect("arduino");
@@ -1305,8 +1331,23 @@ describe("DeviceConnection", () => {
         const p = connection.connect("arduino");
         await jest.advanceTimersByTimeAsync(kFirstDataTimeoutMs);
         expect(await p).toBe("noData");
-        transport.onDisconnect!("unplugged");
         expect(connection.help!.notice).toMatchObject({ type: "differentProblem", topic: { kind: "noData" } });
+        transport.onDisconnect!("unplugged");
+        expect(connection.help!.notice).toEqual({ type: "unplugged" });
+      });
+
+      it("a Disconnect or a canceled chooser sets the notConnected notice", async () => {
+        const { connection } = setup([makeTransport(["opened"], { sendsData: false }), makeTransport(["canceled"])]);
+        const p = connection.connect("arduino");
+        await jest.advanceTimersByTimeAsync(kFirstDataTimeoutMs);
+        expect(await p).toBe("noData");
+        connection.openHelp(connection.helpTopic("noData", "tile-1")!);
+        await connection.disconnect();
+        expect(connection.help!.notice).toEqual({ type: "notConnected" });
+
+        connection.openHelp(connection.helpTopic("noData", "tile-1")!);
+        expect(await connection.connect("arduino")).toBe("canceled");
+        expect(connection.help!.notice).toEqual({ type: "notConnected" });
       });
 
       it("the same kind on a different device sets differentProblem with that device's topic", async () => {

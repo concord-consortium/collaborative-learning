@@ -179,6 +179,34 @@ describe("ConnectionHelpPanel", () => {
     ]);
   });
 
+  it("an unplug or a disconnect shows what to do next, and leaves the steps as they were", () => {
+    const r = renderHelp();
+    act(() => r.stores.serialDevice.setActiveDevice("arduino", fakeTransport()));
+    showHelpFor(r, noData);
+    act(() => runInAction(() => {
+      r.connection.lastFailure = undefined;
+      r.stores.serialDevice.clearActiveDevice("unplugged");
+    }));
+    const notice = within(drawer()).getByRole("status");
+    expect(notice).toHaveTextContent("The Arduino was unplugged. Plug it back in and click Connect.");
+    expect(within(notice).getByText("The Arduino was unplugged.").tagName).toBe("STRONG");
+    expect(within(notice).queryByRole("button")).toBeNull();
+    expect(within(drawer()).getByText("It was unplugged.")).toBeInTheDocument();
+    expect(within(drawer()).getByText("The Arduino isn't sending anything.").closest(".connection-help-steps"))
+      .not.toHaveClass("faded");
+
+    act(() => r.stores.serialDevice.clearLastLoss());
+    expect(notice).toHaveTextContent("The Arduino isn't connected. Click Connect to try again.");
+    expect(helpEvents("connectHelpNotice")).toEqual([
+      expect.objectContaining({
+        tileId: "tile-1", change: { targetType: "connectHelp", notice: "unplugged", action: "shown" }
+      }),
+      expect.objectContaining({
+        tileId: "tile-1", change: { targetType: "connectHelp", notice: "notConnected", action: "shown" }
+      })
+    ]);
+  });
+
   it("keeps working when the tile that opened it is deleted", () => {
     const r = renderHelp({ withTile: true });
     act(() => r.stores.serialDevice.setActiveDevice("arduino", fakeTransport()));
