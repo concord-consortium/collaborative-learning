@@ -74,16 +74,16 @@ function startCheckpoints(tileId: string, attempt: ConnectionAttempt) {
   return () => clearTimeout(timer);
 }
 
-// A failure is shown in the pane. A user looking at the pane sees it there, so only a closed pane
-// leaves it unseen.
+// A failure is shown in the palette. A user looking at the palette sees it there, so only a closed
+// palette leaves it unseen.
 function recordFailure(content: DataflowContentModelType, failure: IConnectFailure) {
   content.setConnectFailure(failure);
-  content.setUnseenConnectError(!content.connectPaneOpen);
+  content.setUnseenConnectError(!content.connectPaletteOpen);
 }
 
 /**
  * Runs one attempt for the tile: logs it from the click to its result, resets the program when the
- * device becomes active and records the failure the tile's pane shows. A tile deleted meanwhile is
+ * device becomes active and records the failure the tile's palette shows. A tile deleted meanwhile is
  * left alone, but the attempt is still logged under its id.
  */
 async function runAttempt(
@@ -178,7 +178,7 @@ export function reconnectDeviceForTile(o: IConnectionOptions): Promise<ConnectRe
  */
 export async function disconnectDeviceForTile(o: IConnectionOptions): Promise<void> {
   const { connection, content, tileId } = o;
-  if (!connection.isConnected && connection.paneView !== "actions") return;
+  if (!connection.isConnected && connection.paletteView !== "actions") return;
   content.clearConnectFailure();
   const choice = connection.lastChoice;
   await connection.disconnect();

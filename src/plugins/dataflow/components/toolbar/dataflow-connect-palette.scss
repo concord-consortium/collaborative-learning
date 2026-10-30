@@ -1,7 +1,7 @@
 @import "../../../../components/vars";
 @import "../../../../components/mixins";
 
-// The height of each of the pane's two status lines.
+// The height of each of the palette's two status lines.
 $connect-line-height: 18px;
 
 @keyframes connect-slowpulse {
@@ -44,7 +44,7 @@ $connect-line-height: 18px;
     }
   }
 
-  .toolbar-palette.dataflow-connect-pane {
+  .toolbar-palette.dataflow-connect-palette {
     @include tile-toolbar;
     box-sizing: border-box;
     padding: 8px;

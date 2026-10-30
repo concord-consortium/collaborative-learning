@@ -4,7 +4,7 @@ import { AttemptOutcome, AttemptStep, DeviceChoice, IConnectFailure, kStallKinds
 
 export type AttemptTrigger = "connect" | "reconnect";
 
-// The connect pane's two views: the device list (Connect buttons) or the connected actions.
+// The connect palette's two views: the device list (Connect buttons) or the connected actions.
 export type AttemptView = "devices" | "actions";
 
 export type StepTime = "chooserClosed" | "opened" | "firmwareChecked" | "updateStarted"
@@ -13,7 +13,7 @@ export type StepTime = "chooserClosed" | "opened" | "firmwareChecked" | "updateS
 /**
  * One Connect or Reconnect, from the click to its outcome, and on until its device goes away: a
  * stall ends the attempt, but the device stays open and its first data can still arrive.
- * `DeviceConnection` drives it; the pane and the log read it.
+ * `DeviceConnection` drives it; the palette and the log read it.
  */
 export class ConnectionAttempt {
   readonly id: string;
@@ -73,7 +73,7 @@ export class ConnectionAttempt {
     this.setStep("open");
   }
 
-  // The port or USB device is open, so the pane shows the connected actions, still disabled.
+  // The port or USB device is open, so the palette shows the connected actions, still disabled.
   opened(next: AttemptStep) {
     this.record("opened");
     this.view = "actions";

@@ -215,10 +215,10 @@ export class DeviceConnection {
     return this.serialDevice.isConnected();
   }
 
-  // Which of the connect pane's views shows. While the attempt runs, or holds a stalled update,
+  // Which of the connect palette's views shows. While the attempt runs, or holds a stalled update,
   // it is the attempt's own, which doesn't follow isConnected: a Reconnect keeps the actions while
   // nothing is connected, and a Connect shows them as soon as the device opens.
-  get paneView(): AttemptView {
+  get paletteView(): AttemptView {
     const attempt = this.attempt;
     if (attempt && (!attempt.ended || this.stalledSpikerbit)) return attempt.view;
     return this.isConnected ? "actions" : "devices";
@@ -238,10 +238,10 @@ export class DeviceConnection {
 
   // Whether a device is open: the active one, or a Spiker:bit a stalled update holds open.
   get holdsDevice() {
-    return this.isConnected || this.paneView === "actions";
+    return this.isConnected || this.paletteView === "actions";
   }
 
-  // Whether an update that stalled is making progress again. Its attempt has ended, but the pane
+  // Whether an update that stalled is making progress again. Its attempt has ended, but the palette
   // shows the update as it runs.
   get updateResumed() {
     return !!this.stalledSpikerbit && !this.lastFailure;
@@ -272,7 +272,7 @@ export class DeviceConnection {
     return this.isConnected && !!this.serialDevice.ccDeviceSession;
   }
 
-  // The "Is it alive?" check for the connected device, as every tile's pane shows it.
+  // The "Is it alive?" check for the connected device, as every tile's palette shows it.
   get check(): IdentifyCheckState | undefined {
     const check = this.identifyCheck;
     return this.isConnected && check?.session === this.serialDevice.ccDeviceSession ? check?.state : undefined;
@@ -728,9 +728,9 @@ export class DeviceConnection {
     }, kUpdateStallMs);
   }
 
-  // The flash of a stalled update failed after all, so the pane goes back to the device list with
-  // that failure. The attempt has ended, so the listener hears of it as a loss of the board. The
-  // board's close comes first and can be slow, so a newer attempt may have replaced this one.
+  // The flash of a stalled update failed after all, so the palette goes back to the device list
+  // with that failure. The attempt has ended, so the listener hears of it as a loss of the board.
+  // The board's close comes first and can be slow, so a newer attempt may have replaced this one.
   private stalledUpdateFailed(attempt: ConnectionAttempt, error: unknown) {
     if (!this.isFollowing(attempt)) return;
     this.lastFailure = {
@@ -743,7 +743,7 @@ export class DeviceConnection {
 
   // The board went away after its open and before it became active, perhaps during a stalled
   // update. While the attempt runs, that ends it; afterward, the listener hears of the loss. It is
-  // recorded as the loss of a device, which the pane shows, and the board is let go.
+  // recorded as the loss of a device, which the palette shows, and the board is let go.
   private openSpikerbitLost(attempt: ConnectionAttempt, device: SpikerbitDevice, loss: DeviceLoss) {
     const followed = this.followed;
     if (followed?.attempt !== attempt || this.spikerbitDevice !== device) return;

@@ -1,13 +1,14 @@
 # The connect palette
 
 The connect button in the DataFlow tile toolbar opens the connect palette, where a student connects
-a device and sees how the connection is going. The code calls it the pane: `ConnectPane` in
-`components/toolbar/dataflow-connect-button.tsx`, styled in `dataflow-connect-pane.scss`, with its
-status text from `connectPaneStatus` in `utilities/connect-pane-status.ts`. How a connection
-attempt works, and what it logs, is in [The connection attempt](serial.md#the-connection-attempt).
+a device and sees how the connection is going. It is `ConnectPalette` in
+`components/toolbar/dataflow-connect-button.tsx`, styled in `dataflow-connect-palette.scss`, with
+its status text from `connectPaletteStatus` in `utilities/connect-palette-status.ts`. How a
+connection attempt works, and what it logs, is in
+[The connection attempt](serial.md#the-connection-attempt).
 
 The palette has a "Device connection" heading, a status area, and then one of two views
-(`paneView`): the device list, with a Connect button per device, or the connected actions:
+(`paletteView`): the device list, with a Connect button per device, or the connected actions:
 Reconnect, Disconnect, and Is it alive? for a device that supports it. It is 270px wide.
 
 ## The status area

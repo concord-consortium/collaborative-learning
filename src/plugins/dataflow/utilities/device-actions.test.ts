@@ -13,7 +13,7 @@ import {
 import { SerialDevice } from "../../../models/stores/serial";
 import { DeviceLoss } from "../../../models/stores/device-transport";
 import { WebSerialTransport } from "../../../models/stores/web-serial-transport";
-import { connectionStatusInput, connectPaneStatus } from "./connect-pane-status";
+import { connectionStatusInput, connectPaletteStatus } from "./connect-palette-status";
 import {
   connectDeviceForTile, disconnectDeviceForTile, kCheckpointStartMs, newAttemptId, reconnectDeviceForTile,
   resetProgramForTile
@@ -56,7 +56,7 @@ function endAttempt(
 function makeConnection(
   outcomeOrDrive: AttemptOutcome | Drive,
   opts: {
-    lastChoice?: DeviceChoice, isConnected?: boolean, paneView?: "devices" | "actions", busyChoice?: DeviceChoice
+    lastChoice?: DeviceChoice, isConnected?: boolean, paletteView?: "devices" | "actions", busyChoice?: DeviceChoice
   } = {}
 ) {
   const drive: Drive = typeof outcomeOrDrive === "function"
@@ -72,14 +72,14 @@ function makeConnection(
     lastChoice: opts.lastChoice,
     isConnected: opts.isConnected ?? false,
     busyChoice: opts.busyChoice,
-    paneView: opts.paneView ?? (opts.isConnected ? "actions" : "devices"),
+    paletteView: opts.paletteView ?? (opts.isConnected ? "actions" : "devices"),
     attempt: undefined as ConnectionAttempt | undefined,
     lastFailure: undefined as IConnectFailure | undefined,
     connect: jest.fn(),
     reconnect: jest.fn(),
     disconnect: jest.fn().mockResolvedValue(undefined)
   }, {
-    lastChoice: false, isConnected: false, busyChoice: false, paneView: false, attempt: observable.ref,
+    lastChoice: false, isConnected: false, busyChoice: false, paletteView: false, attempt: observable.ref,
     lastFailure: false, connect: false, reconnect: false, disconnect: false
   });
   const start = (choice: DeviceChoice, trigger: "connect" | "reconnect", o: IAttemptOptions = {}) => {
@@ -461,7 +461,7 @@ describe("device actions", () => {
 
   it("disconnect works on a device that is open but not the active one", async () => {
     const connection = makeConnection("connected", {
-      lastChoice: "spikerbit", isConnected: false, paneView: "actions"
+      lastChoice: "spikerbit", isConnected: false, paletteView: "actions"
     });
 
     await disconnectDeviceForTile({ connection, content: makeContent(), tileId });
@@ -480,10 +480,10 @@ describe("device actions", () => {
   });
 
   it.each([[false, true], [true, false]])(
-    "a failed connect records the failure, and marks it unseen only when the pane is closed (pane open: %s)",
-    async (paneOpen, unseen) => {
+    "a failed connect records the failure, and marks it unseen only when the palette is closed (palette open: %s)",
+    async (paletteOpen, unseen) => {
       const content = makeContent();
-      content.setConnectPaneOpen(paneOpen);
+      content.setConnectPaletteOpen(paletteOpen);
 
       await connectDeviceForTile({ connection: makeConnection("openFailed"), content, tileId, choice: "spikerbit" });
 
@@ -515,7 +515,7 @@ describe("device actions", () => {
 
   it.each(kStallKinds)("a %s stall records the failure and still logs the result", async kind => {
     const content = makeContent();
-    content.setConnectPaneOpen(true);
+    content.setConnectPaletteOpen(true);
 
     await connectDeviceForTile({ connection: makeConnection(kind), content, tileId, choice: "spikerbit" });
 
@@ -614,7 +614,7 @@ describe("device actions", () => {
 
   it("a stalled update that later fails replaces the tile's failure with the connection's", async () => {
     const content = makeContent();
-    content.setConnectPaneOpen(true);
+    content.setConnectPaletteOpen(true);
     let attempt: ConnectionAttempt | undefined;
     let listener: IAttemptListener = {};
     const connection = makeConnection((a, l) => {
@@ -637,7 +637,7 @@ describe("device actions", () => {
   it.each(["unplugged", "lost"] as const)(
     "a loss (%s) after a stall clears the tile's stall failure and marks nothing unseen", async reason => {
       const content = makeContent();
-      content.setConnectPaneOpen(true);
+      content.setConnectPaletteOpen(true);
       let attempt: ConnectionAttempt | undefined;
       let listener: IAttemptListener = {};
       const connection = makeConnection((a, l) => {
@@ -646,7 +646,7 @@ describe("device actions", () => {
         return Promise.resolve(endAttempt(a, l, "noData", { step: "waitForData" }));
       });
       await connectDeviceForTile({ connection, content, tileId, choice: "arduino" });
-      content.setConnectPaneOpen(false);
+      content.setConnectPaletteOpen(false);
 
       // Only a stalled update's failed flash is a failure to show; the reason says which it is.
       connection.lastFailure = attempt!.failure;
@@ -669,18 +669,18 @@ describe("device actions", () => {
         createWebSerialTransport: () => transport as unknown as WebSerialTransport
       });
       const content = makeContent();
-      content.setConnectPaneOpen(true);
+      content.setConnectPaletteOpen(true);
       const acting = connectDeviceForTile({ connection, content, tileId, choice: "arduino" });
       await jest.advanceTimersByTimeAsync(kFirstDataTimeoutMs);
       expect(await acting).toBe("noData");
       expect(content.connectFailure?.kind).toBe("noData");
-      content.setConnectPaneOpen(false);
+      content.setConnectPaletteOpen(false);
 
       transport.onDisconnect!("unplugged");
 
       expect(content.connectFailure).toBeUndefined();
       expect(content.unseenConnectError).toBe(false);
-      expect(connectPaneStatus(connectionStatusInput(connection, content.connectFailure)).line2?.text)
+      expect(connectPaletteStatus(connectionStatusInput(connection, content.connectFailure)).line2?.text)
         .toBe("It was unplugged.");
       expectLogMatching("deviceLost", { reason: "unplugged" });
     } finally {
@@ -782,12 +782,12 @@ describe("device actions", () => {
     expect(content.unseenConnectError).toBe(false);
   });
 
-  it("opening the pane marks the failure seen", async () => {
+  it("opening the palette marks the failure seen", async () => {
     const content = makeContent();
     await connectDeviceForTile({ connection: makeConnection("openFailed"), content, tileId, choice: "arduino" });
     expect(content.unseenConnectError).toBe(true);
 
-    content.setConnectPaneOpen(true);
+    content.setConnectPaletteOpen(true);
 
     expect(content.unseenConnectError).toBe(false);
     expect(content.connectFailure?.kind).toBe("openFailed");

@@ -1,21 +1,21 @@
 import { ConnectionAttempt } from "../model/connection-attempt";
 import {
-  IConnectFailure, kDeviceChoiceLabels, kStallKinds, paneProblemText, ProblemKind
+  IConnectFailure, kDeviceChoiceLabels, kStallKinds, paletteProblemText, ProblemKind
 } from "../model/connect-failures";
 import { DeviceConnection, IdentifyCheckState } from "../model/device-connection";
 import { DeviceLoss } from "../../../models/stores/device-transport";
 
-export type PaneLineTone = "plain" | "hint" | "problem";
+export type PaletteLineTone = "plain" | "hint" | "problem";
 
-export interface IPaneStatus {
+export interface IPaletteStatus {
   line1: string;
   // `progress` (0-100) draws the progress bar.
-  line2?: { text: string; tone: PaneLineTone; progress?: number };
+  line2?: { text: string; tone: PaletteLineTone; progress?: number };
   // Whether line 2 belongs in the live region: problems only.
   announce: boolean;
 }
 
-export interface IPaneStatusInput {
+export interface IPaletteStatusInput {
   attempt: ConnectionAttempt | undefined;
   isConnected: boolean;
   dataReceived: boolean;
@@ -32,7 +32,7 @@ export interface IPaneStatusInput {
 // `currentFailure`).
 export function connectionStatusInput(
   connection: DeviceConnection, failure: IConnectFailure | undefined
-): IPaneStatusInput {
+): IPaletteStatusInput {
   return {
     attempt: connection.attempt,
     isConnected: connection.isConnected,
@@ -46,14 +46,14 @@ export function connectionStatusInput(
   };
 }
 
-type Line2 = NonNullable<IPaneStatus["line2"]>;
+type Line2 = NonNullable<IPaletteStatus["line2"]>;
 
-const status = (line1: string, line2?: Line2): IPaneStatus =>
+const status = (line1: string, line2?: Line2): IPaletteStatus =>
   ({ line1, line2, announce: line2?.tone === "problem" });
 
-const problem = (kind: ProblemKind): Line2 => ({ text: paneProblemText(kind), tone: "problem" });
+const problem = (kind: ProblemKind): Line2 => ({ text: paletteProblemText(kind), tone: "problem" });
 
-export function connectPaneStatus(input: IPaneStatusInput): IPaneStatus {
+export function connectPaletteStatus(input: IPaletteStatusInput): IPaletteStatus {
   const { attempt, isConnected, dataReceived, label, failure, loss, notResponding, check, updateResumed } = input;
   const connected = `Connected: ${label}`;
   const notConnected = "Not connected";

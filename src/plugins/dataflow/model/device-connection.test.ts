@@ -737,10 +737,10 @@ describe("DeviceConnection", () => {
         const { transport, finishOpen } = makeOpeningTransport();
         const { connection } = setup([transport]);
         const p = connection.connect("arduino", { attemptId: "attempt-1" });
-        expect(connection.paneView).toBe("devices");
+        expect(connection.paletteView).toBe("devices");
         expect(connection.attempt!.id).toBe("attempt-1");
         await finishOpen();
-        expect(connection.paneView).toBe("actions");
+        expect(connection.paletteView).toBe("actions");
         expect(connection.actionsEnabled).toBe(false);
         expect(connection.attempt!.step).toBe("waitForData");
         transport.onData!("emg:1\r\n");
@@ -765,7 +765,7 @@ describe("DeviceConnection", () => {
       expect(transport.open).toHaveBeenCalledWith(undefined, expect.objectContaining({ timeoutMs: kOpenTimeoutMs }));
       expect(connection.busyChoice).toBeUndefined();
       expect(connection.lastFailure).toMatchObject({ kind: "openTimeout", step: "open", elapsedMs: kOpenTimeoutMs });
-      expect(connection.paneView).toBe("devices");
+      expect(connection.paletteView).toBe("devices");
     });
 
     it("a retry during a pending open is openTimeout too", async () => {
@@ -790,7 +790,7 @@ describe("DeviceConnection", () => {
         kind: "noData", choice: "arduino", step: "waitForData", elapsedMs: kFirstDataTimeoutMs
       });
       expect(connection.actionsEnabled).toBe(true);
-      expect(connection.paneView).toBe("actions");
+      expect(connection.paletteView).toBe("actions");
       expect(connection.busyChoice).toBeUndefined();
       expect(connection.isConnected).toBe(true);
       expect(connection.dataReceived).toBe(false);
@@ -890,9 +890,9 @@ describe("DeviceConnection", () => {
       const { connection, stepped } = setupSpikerbit();
       const p = connection.connect("spikerbit");
       await flush();
-      expect(connection.paneView).toBe("devices");
+      expect(connection.paletteView).toBe("devices");
       stepped.observer().onOpened!();
-      expect(connection.paneView).toBe("actions");
+      expect(connection.paletteView).toBe("actions");
       expect(connection.attempt!.step).toBe("checkFirmware");
       stepped.observer().onFirmwareChecked!(null, true);
       expect(connection.attempt!.step).toBe("update");
@@ -907,7 +907,7 @@ describe("DeviceConnection", () => {
       expect(await p).toBe("updateStalled");
       expect(connection.lastFailure)
         .toMatchObject({ kind: "updateStalled", step: "update", elapsedMs: kUpdateStallMs });
-      expect(connection.paneView).toBe("actions");
+      expect(connection.paletteView).toBe("actions");
       expect(connection.actionsEnabled).toBe(true);
       expect(connection.busyChoice).toBeUndefined();
       expect(stepped.device.disconnect).not.toHaveBeenCalled();
@@ -928,7 +928,7 @@ describe("DeviceConnection", () => {
       await stepped.activate();
       expect(connection.attempt!.steps.active).toEqual(expect.any(Number));
       expect(connection.isConnected).toBe(true);
-      expect(connection.paneView).toBe("actions");
+      expect(connection.paletteView).toBe("actions");
       stepped.transport.onData!("data\r\n");
       expect(connection.attempt!.recovered).toBe(true);
       expect(connection.lastFailure).toBeUndefined();
@@ -958,7 +958,7 @@ describe("DeviceConnection", () => {
       expect(connection.attempt!.updatePercent).toBe(20);
       // Closing the board would stop the flash.
       expect(connection.actionsEnabled).toBe(false);
-      expect(connection.paneView).toBe("actions");
+      expect(connection.paletteView).toBe("actions");
 
       await jest.advanceTimersByTimeAsync(kUpdateStallMs - 1);
       stepped.observer().onUpdateProgress!(40);
@@ -1012,7 +1012,7 @@ describe("DeviceConnection", () => {
         };
         expect(connection.lastFailure).toEqual(stall);
         expect(listener.onStallChanged).toHaveBeenLastCalledWith(connection.attempt, stall);
-        expect(connection.paneView).toBe("actions");
+        expect(connection.paletteView).toBe("actions");
         expect(connection.actionsEnabled).toBe(true);
         stepped.transport.onData!("data\r\n");
         expect(connection.lastFailure).toBeUndefined();
@@ -1080,7 +1080,7 @@ describe("DeviceConnection", () => {
       await connection.disconnect();
       expect(stepped.device.disconnect).toHaveBeenCalled();
       expect(stepped.device.dispose).toHaveBeenCalledTimes(1);
-      expect(connection.paneView).toBe("devices");
+      expect(connection.paletteView).toBe("devices");
       // The abandoned flash failing later changes nothing.
       await stepped.fail(new Error("disconnected"));
       expect(stepped.device.dispose).toHaveBeenCalledTimes(1);
@@ -1138,7 +1138,7 @@ describe("DeviceConnection", () => {
       void stepped.fail(new Error("flash failed"));
       await jest.advanceTimersByTimeAsync(kSlowCloseMs * 2);
       expect(await p).toBe("updateFailed");
-      expect(connection.paneView).toBe("devices");
+      expect(connection.paletteView).toBe("devices");
       expect(connection.lastFailure?.kind).toBe("updateFailed");
     });
 
@@ -1159,7 +1159,7 @@ describe("DeviceConnection", () => {
         const p = connection.connect("spikerbit");
         await jest.advanceTimersByTimeAsync(kUpdateStartMs + 1000);
         expect(await p).toBe("updateFailed");
-        expect(connection.paneView).toBe("devices");
+        expect(connection.paletteView).toBe("devices");
       });
 
       it("ends as updateFailed after a progress report", async () => {
@@ -1170,7 +1170,7 @@ describe("DeviceConnection", () => {
         const p = connection.connect("spikerbit");
         await jest.advanceTimersByTimeAsync(kUpdateStallMs + 1000);
         expect(await p).toBe("updateFailed");
-        expect(connection.paneView).toBe("devices");
+        expect(connection.paletteView).toBe("devices");
       });
     });
 
@@ -1208,7 +1208,7 @@ describe("DeviceConnection", () => {
       stepped.observer().onLost!("unplugged");
       expect(listener.onLost).toHaveBeenCalledWith(connection.attempt, "unplugged");
       expect(connection.lastFailure).toBeUndefined();
-      expect(connection.paneView).toBe("devices");
+      expect(connection.paletteView).toBe("devices");
       expect(connection.lossMessage).toBe("The Spiker:bit was unplugged.");
       await flush();
       expect(stepped.device.dispose).toHaveBeenCalled();
@@ -1242,7 +1242,7 @@ describe("DeviceConnection", () => {
         kind: "updateFailed", step: "update", error: { message: "flash failed" }
       });
       expect(connection.attempt!.outcome).toBe("updateStalled");
-      expect(connection.paneView).toBe("devices");
+      expect(connection.paletteView).toBe("devices");
       expect(stepped.device.dispose).toHaveBeenCalled();
     });
 
@@ -1272,7 +1272,7 @@ describe("DeviceConnection", () => {
       await jest.advanceTimersByTimeAsync(kFirstDataTimeoutMs);
       expect(connection.attempt!.outcome).toBe("canceled");
       expect(connection.lastFailure).toBeUndefined();
-      expect(connection.paneView).toBe("devices");
+      expect(connection.paletteView).toBe("devices");
       expect(listener.onEnded).toHaveBeenCalledTimes(1);
     });
 
@@ -1295,7 +1295,7 @@ describe("DeviceConnection", () => {
       expect(createSpikerbitDevice).toHaveBeenCalledTimes(1);
       expect(stepped.device.connectAndStream).toHaveBeenCalledTimes(2);
       expect(connection.attempt!.trigger).toBe("reconnect");
-      expect(connection.paneView).toBe("actions");
+      expect(connection.paletteView).toBe("actions");
       // The abandoned run's reports change nothing.
       staleObserver.onUpdateProgress!(90);
       expect(connection.attempt!.updatePercent).toBeUndefined();
@@ -1311,13 +1311,13 @@ describe("DeviceConnection", () => {
     it("a flash that throws ends as updateFailed back on the device list", async () => {
       const { connection, stepped } = setupSpikerbit();
       const { result: p } = await startSpikerbit(connection, stepped, true);
-      expect(connection.paneView).toBe("actions");
+      expect(connection.paletteView).toBe("actions");
       await stepped.fail(new Error("flash failed"));
       expect(await p).toBe("updateFailed");
       expect(connection.lastFailure).toMatchObject({
         kind: "updateFailed", choice: "spikerbit", step: "update", error: { message: "flash failed" }
       });
-      expect(connection.paneView).toBe("devices");
+      expect(connection.paletteView).toBe("devices");
       expect(stepped.device.disconnect).toHaveBeenCalled();
       expect(stepped.device.dispose).toHaveBeenCalled();
     });
@@ -1342,20 +1342,20 @@ describe("DeviceConnection", () => {
 
         const reconnecting = connection.reconnect();
         expect(connection.attempt!.trigger).toBe("reconnect");
-        expect(connection.paneView).toBe("actions");
+        expect(connection.paletteView).toBe("actions");
         expect(connection.actionsEnabled).toBe(false);
         await second.finishOpen();
-        expect(connection.paneView).toBe("actions");
+        expect(connection.paletteView).toBe("actions");
         expect(connection.attempt!.steps.chooserClosed).toBeUndefined();
         second.transport.onData!("emg:1\r\n");
         expect(await reconnecting).toBe("connected");
 
         const failing = connection.reconnect();
         await flush();
-        expect(connection.paneView).toBe("actions");
+        expect(connection.paletteView).toBe("actions");
         await jest.advanceTimersByTimeAsync(kOpenTimeoutMs);
         expect(await failing).toBe("openTimeout");
-        expect(connection.paneView).toBe("devices");
+        expect(connection.paletteView).toBe("devices");
         // A port stuck opening isn't offered the chooser.
         expect(createWebSerialTransport).toHaveBeenCalledTimes(3);
       });
@@ -1370,7 +1370,7 @@ describe("DeviceConnection", () => {
       expect(await p).toBe("unplugged");
       expect(connection.lastFailure).toBeUndefined();
       expect(connection.busyChoice).toBeUndefined();
-      expect(connection.paneView).toBe("devices");
+      expect(connection.paletteView).toBe("devices");
       expect(listener.onLost).not.toHaveBeenCalled();
       await jest.advanceTimersByTimeAsync(kFirstDataTimeoutMs);
       expect(connection.attempt!.outcome).toBe("unplugged");
@@ -1384,7 +1384,7 @@ describe("DeviceConnection", () => {
       transport.onDisconnect!("lost");
       expect(listener.onLost).toHaveBeenCalledWith(connection.attempt, "lost");
       expect(connection.attempt!.outcome).toBe("connected");
-      expect(connection.paneView).toBe("devices");
+      expect(connection.paletteView).toBe("devices");
     });
 
     it("a canceled chooser ends as canceled with no failure", async () => {
@@ -1394,7 +1394,7 @@ describe("DeviceConnection", () => {
       expect(connection.attempt!.outcome).toBe("canceled");
       expect(connection.attempt!.failure).toBeUndefined();
       expect(connection.lastFailure).toBeUndefined();
-      expect(connection.paneView).toBe("devices");
+      expect(connection.paletteView).toBe("devices");
       expect(listener.onEnded).toHaveBeenCalledWith(connection.attempt);
     });
 

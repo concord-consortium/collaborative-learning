@@ -119,7 +119,8 @@ export const DataflowContentModel = TileContentModel
     liveProgramZoom: ProgramZoom.create(DEFAULT_PROGRAM_ZOOM),
     // Whether the toolbar's pan palette is showing (drawing's openPallette pattern).
     panPaletteOpen: false,
-    // The toolbar pan button's face shows and re-performs the last direction chosen from the palette.
+    // The toolbar pan button's face shows and re-performs the last direction chosen from the
+    // palette.
     lastPanDirection: "right" as PanDirection,
     // Whether this tile's program has blocks that only work with a connected device. Kept current
     // by the tile's ReteManager while the tile is editable.
@@ -128,12 +129,12 @@ export const DataflowContentModel = TileContentModel
     // the editable tile's ReteManager, never by later edits or connection changes; the connect
     // tutorial reads it.
     showConnectTutorialOnOpen: false,
-    // Whether the toolbar's connect pane is showing.
-    connectPaneOpen: false,
+    // Whether the toolbar's connect palette is showing.
+    connectPaletteOpen: false,
     // This tile's most recent connection failure, if any. Cleared when the tile starts another
-    // attempt or disconnects, or when any device connects. The connect pane shows it.
+    // attempt or disconnects, or when any device connects. The connect palette shows it.
     connectFailure: undefined as IConnectFailure | undefined,
-    // True when a connection failed while the pane was closed; opening the pane clears it.
+    // True when a connection failed while the palette was closed; opening the palette clears it.
     unseenConnectError: false
   }))
   .views(self => ({
@@ -377,8 +378,8 @@ export const DataflowContentModel = TileContentModel
     setPanPaletteOpen(open: boolean) {
       self.panPaletteOpen = open;
     },
-    setConnectPaneOpen(open: boolean) {
-      self.connectPaneOpen = open;
+    setConnectPaletteOpen(open: boolean) {
+      self.connectPaletteOpen = open;
       if (open) self.unseenConnectError = false;
     },
     setConnectFailure(failure?: IConnectFailure) {

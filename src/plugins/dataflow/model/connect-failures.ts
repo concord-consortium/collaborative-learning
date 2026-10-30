@@ -53,7 +53,7 @@ export function errorInfo(e: unknown): IErrorInfo | undefined {
 
 // Short, and never naming the device, so each fits on the palette's second line (see "The status
 // area" in docs/connect-palette.md).
-const kPaneProblemTexts: Record<ProblemKind, string> = {
+const kPaletteProblemTexts: Record<ProblemKind, string> = {
   openTimeout: "Stuck while opening.",
   openFailed: "Couldn't open it.",
   inUse: "In use by another tab.",
@@ -65,13 +65,13 @@ const kPaneProblemTexts: Record<ProblemKind, string> = {
   noAnswer: "No answer."
 };
 
-// The second line of the connect pane.
-export function paneProblemText(kind: ProblemKind) {
-  return kPaneProblemTexts[kind];
+// The second line of the connect palette.
+export function paletteProblemText(kind: ProblemKind) {
+  return kPaletteProblemTexts[kind];
 }
 
-// The sentence announced when a failure is recorded while the connect pane is closed. Unlike the
-// pane's short text, it names the device.
+// The sentence announced when a failure is recorded while the connect palette is closed. Unlike the
+// palette's short text, it names the device.
 export function problemHeadline(kind: ProblemKind, choice: DeviceChoice) {
   const label = kDeviceChoiceLabels[choice];
   switch (kind) {

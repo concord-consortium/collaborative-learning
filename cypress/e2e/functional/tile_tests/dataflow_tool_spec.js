@@ -766,7 +766,7 @@ context('Dataflow Tool Tile', function () {
     });
   });
 
-  it("shows why a connection failed in the pane", () => {
+  it("shows why a connection failed in the palette", () => {
     const fakePort = {
       getInfo: () => ({}),
       open: () => Promise.reject(new DOMException("Failed to open serial port.", "NetworkError")),

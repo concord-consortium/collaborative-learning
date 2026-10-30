@@ -1,4 +1,4 @@
-import { errorInfo, kDeviceChoiceLabels, paneProblemText, problemHeadline, ProblemKind } from "./connect-failures";
+import { errorInfo, kDeviceChoiceLabels, paletteProblemText, problemHeadline, ProblemKind } from "./connect-failures";
 
 const allProblemKinds: ProblemKind[] = [
   "openTimeout", "openFailed", "inUse", "updateFailed", "updateStalled", "notResponding", "noData",
@@ -6,19 +6,19 @@ const allProblemKinds: ProblemKind[] = [
 ];
 
 describe("connect failures", () => {
-  it("pane problem texts match the spec and never name a device", () => {
-    expect(paneProblemText("openTimeout")).toBe("Stuck while opening.");
-    expect(paneProblemText("openFailed")).toBe("Couldn't open it.");
-    expect(paneProblemText("inUse")).toBe("In use by another tab.");
-    expect(paneProblemText("updateFailed")).toBe("The update failed.");
-    expect(paneProblemText("updateStalled")).toBe("Update stalled.");
-    expect(paneProblemText("notResponding")).toBe("Not responding.");
-    expect(paneProblemText("noData")).toBe("No data yet.");
-    expect(paneProblemText("lost")).toBe("Connection lost.");
-    expect(paneProblemText("noAnswer")).toBe("No answer.");
+  it("palette problem texts match the spec and never name a device", () => {
+    expect(paletteProblemText("openTimeout")).toBe("Stuck while opening.");
+    expect(paletteProblemText("openFailed")).toBe("Couldn't open it.");
+    expect(paletteProblemText("inUse")).toBe("In use by another tab.");
+    expect(paletteProblemText("updateFailed")).toBe("The update failed.");
+    expect(paletteProblemText("updateStalled")).toBe("Update stalled.");
+    expect(paletteProblemText("notResponding")).toBe("Not responding.");
+    expect(paletteProblemText("noData")).toBe("No data yet.");
+    expect(paletteProblemText("lost")).toBe("Connection lost.");
+    expect(paletteProblemText("noAnswer")).toBe("No answer.");
     for (const kind of allProblemKinds) {
       for (const label of Object.values(kDeviceChoiceLabels)) {
-        expect(paneProblemText(kind)).not.toContain(label);
+        expect(paletteProblemText(kind)).not.toContain(label);
       }
     }
   });
