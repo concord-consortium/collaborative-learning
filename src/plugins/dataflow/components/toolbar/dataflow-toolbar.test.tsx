@@ -26,6 +26,20 @@ import "../../dataflow-registration";
 
 jest.mock("../../../../models/tiles/log/log-tile-change-event", () => ({ logTileChangeEvent: jest.fn() }));
 
+// jsdom has no layout, so floating-ui never flips anything. A test sets this to make useFloating
+// report a placement; everything else about floating-ui stays real.
+let mockFloatingPlacement: string | undefined;
+jest.mock("@floating-ui/react", () => {
+  const actual = jest.requireActual("@floating-ui/react");
+  return {
+    ...actual,
+    useFloating: (...args: unknown[]) => {
+      const result = actual.useFloating(...args);
+      return mockFloatingPlacement ? { ...result, placement: mockFloatingPlacement } : result;
+    }
+  };
+});
+
 // A stub covering just the members the buttons read/call — a real ReteManager needs a live DOM
 // area, so tests substitute this via the context rather than constructing one.
 type ManagerStub = Pick<ReteManager, "mstContent" | "readOnly" | "zoomIn" | "zoomOut" | "fitContent" | "pan">;
@@ -378,22 +392,57 @@ describe("Dataflow connect button and pane", () => {
   }
 
   // A real click starts with a pointerdown, which reaches the pane's outside-click handler first.
+  function press(element: Element) {
+    fireEvent.pointerDown(element);
+    fireEvent.click(element);
+  }
+
   it("'connect' is registered and opens and closes its pane on click", () => {
     const { container, content } = renderConnect();
-    const press = () => {
-      fireEvent.pointerDown(getTrigger(container));
-      fireEvent.click(getTrigger(container));
-    };
     expect(screen.queryByRole("group", { name: "Device connection" })).toBeNull();
     expect(getTrigger(container)).toHaveAttribute("aria-expanded", "false");
-    press();
+    press(getTrigger(container));
     expect(content.connectPaneOpen).toBe(true);
     expect(screen.getByRole("group", { name: "Device connection" })).toBeInTheDocument();
     expect(getTrigger(container)).toHaveAttribute("aria-expanded", "true");
-    press();
+    press(getTrigger(container));
     expect(content.connectPaneOpen).toBe(false);
     expect(screen.queryByRole("group", { name: "Device connection" })).toBeNull();
     expect(getTrigger(container)).toHaveAttribute("aria-expanded", "false");
+  });
+
+  it("shows a corner triangle that only marks the button as opening a pane", () => {
+    const { container, content } = renderConnect();
+    const triangle = within(getTrigger(container)).getByTestId("connect-expand-triangle");
+    // Jest stubs SVG imports as a custom element, which React gives a `classname` attribute rather
+    // than `class`. Exactly corner-triangle: not expand-collapse, which marks a triangle with its own
+    // click handler.
+    expect(triangle).toHaveAttribute("classname", "corner-triangle");
+    expect(triangle).toHaveAttribute("aria-hidden", "true");
+    press(triangle);
+    expect(content.connectPaneOpen).toBe(true);
+    press(triangle);
+    expect(content.connectPaneOpen).toBe(false);
+  });
+
+  it("shows the corner triangle on a read-only toolbar", () => {
+    const { container } = renderConnect({ readOnly: true });
+    expect(within(getTrigger(container)).getByTestId("connect-expand-triangle")).toBeInTheDocument();
+  });
+
+  describe("pane placement", () => {
+    afterEach(() => { mockFloatingPlacement = undefined; });
+
+    it("the pane's placement class starts below the toolbar and follows a flip above it", () => {
+      const { content } = openPane();
+      const group = () => screen.getByRole("group", { name: "Device connection" });
+      expect(group()).toHaveClass("bottom-start");
+      mockFloatingPlacement = "top-start";
+      // The pane observes connectError, so this re-renders it the way an autoUpdate repositioning would.
+      act(() => { content.setConnectError("Something went wrong"); });
+      expect(group()).toHaveClass("top-start");
+      expect(group()).not.toHaveClass("bottom-start");
+    });
   });
 
   it("opening the pane moves focus to the first control", () => {

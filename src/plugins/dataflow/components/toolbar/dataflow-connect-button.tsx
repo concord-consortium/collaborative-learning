@@ -23,6 +23,7 @@ import {
 } from "../../utilities/device-actions";
 
 import ConnectIcon from "../../assets/icons/connect-icon.svg";
+import SmallCornerTriangle from "../../../../assets/icons/small-corner-triangle.svg";
 
 import "./dataflow-connect-pane.scss";
 
@@ -96,7 +97,7 @@ const ConnectPane = observer(function ConnectPane(
       : [];
     return scrollers.length ? scrollers : "clippingAncestors";
   }, [tileElement]);
-  const { refs, floatingStyles } = useFloating({
+  const { refs, floatingStyles, placement } = useFloating({
     open: true,
     placement: "bottom-start",
     whileElementsMounted: autoUpdate,
@@ -212,7 +213,8 @@ const ConnectPane = observer(function ConnectPane(
       : content.connectError ?? connection.lossMessage;
 
   return (
-    <div ref={setContainer} className="toolbar-palette dataflow-connect-pane" style={floatingStyles}
+    <div ref={setContainer} className={classNames("toolbar-palette", "dataflow-connect-pane", placement)}
+        style={floatingStyles}
         role="group" aria-labelledby={headingId} onKeyDownCapture={handleKeyDownCapture}
         onFocus={handleFocus} onBlur={handleBlur}>
       <div className="connect-heading" id={headingId}>Device connection</div>
@@ -298,6 +300,9 @@ export const ConnectDeviceButton = observer(function ConnectDeviceButton({ name 
         disabledMessage="Connecting a device isn't available in a read-only view"
         onClick={() => content?.setConnectPaneOpen(!isOpen)} extraContent={pane}>
       <ConnectIcon />
+      {/* Only marks the button as opening a pane: the whole button opens it, and aria-expanded
+          already announces that. */}
+      <SmallCornerTriangle className="corner-triangle" aria-hidden="true" data-testid="connect-expand-triangle" />
     </TileToolbarButton>
   );
 });

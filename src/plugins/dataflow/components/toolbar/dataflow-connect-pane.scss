@@ -39,6 +39,11 @@
     &.connect-connected:hover:not(:disabled):not([aria-disabled="true"]):not(.selected) {
       background-color: #82f982;
     }
+
+    // The toolbar's teal triangle is under 3:1 against the green; this darker teal is 3.4:1.
+    &.connect-connected > .corner-triangle {
+      fill: $workspace-teal-dark-1;
+    }
   }
 
   .toolbar-palette.dataflow-connect-pane {
@@ -47,6 +52,12 @@
     padding: 8px;
     text-align: left;
     width: 230px;
+
+    // The corners that meet the toolbar stay square. The mixin rounds the bottom ones, which is right
+    // below the toolbar; above it, the top ones are rounded instead.
+    &.top-start {
+      border-radius: $toolbar-border-radius $toolbar-border-radius 0 0;
+    }
 
     .connect-heading {
       font-weight: bold;
