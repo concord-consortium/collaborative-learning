@@ -265,6 +265,17 @@ describe("DeviceConnection", () => {
     expect(third.open).toHaveBeenCalledWith(undefined, expect.anything());
   });
 
+  it("reconnect whose last port is still opening ends as openTimeout without the chooser", async () => {
+    const first = makeTransport();
+    const second = makeTransport(["stillOpening"]);
+    const { connection, createWebSerialTransport } = setup([first, second, makeTransport()]);
+    await connection.connect("arduino");
+    await connection.disconnect();
+    expect(await connection.reconnect()).toBe("openTimeout");
+    expect(second.open).toHaveBeenCalledWith(first.lastPort, expect.anything());
+    expect(createWebSerialTransport).toHaveBeenCalledTimes(2);
+  });
+
   it("a late disconnect does not clear a connection made while its close was pending", async () => {
     const first = makeTransport();
     let finishClose: () => void = () => undefined;
@@ -1023,6 +1034,18 @@ describe("DeviceConnection", () => {
       await jest.advanceTimersByTimeAsync(kUpdateStallMs);
       expect(connection.lastFailure).toBeUndefined();
       expect(listener.onStallChanged).not.toHaveBeenCalled();
+    });
+
+    it("disconnect while a Spiker:bit checks its firmware closes and disposes the board", async () => {
+      const { connection, stepped } = setupSpikerbit();
+      const p = connection.connect("spikerbit");
+      await flush();
+      stepped.observer().onOpened!();
+      expect(connection.attempt!.step).toBe("checkFirmware");
+      await connection.disconnect();
+      expect(await p).toBe("canceled");
+      expect(stepped.device.disconnect).toHaveBeenCalled();
+      expect(stepped.device.dispose).toHaveBeenCalled();
     });
 
     it("disconnect during a stalled update disposes the Spiker:bit device", async () => {
