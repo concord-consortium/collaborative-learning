@@ -55,7 +55,8 @@ export interface IMicrobitUsbConnection {
   ): Promise<void>;
   serialWrite(data: string): Promise<void>;
   disconnect(): Promise<void>;
-  // The library's USBDevice. Typed unknown: it's only compared with the device in an unplug event.
+  // The library's USBDevice. Typed unknown: it's compared with the device in an unplug event, and
+  // forgotten after an abandoned open.
   getDevice(): unknown;
 }
 

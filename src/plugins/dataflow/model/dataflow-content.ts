@@ -130,9 +130,8 @@ export const DataflowContentModel = TileContentModel
     showConnectTutorialOnOpen: false,
     // Whether the toolbar's connect pane is showing.
     connectPaneOpen: false,
-    // The message for this tile's most recent connection attempt, if it failed. Cleared when the
-    // tile starts another attempt or disconnects, or when any device connects; the connect pane
-    // shows it while nothing is connected.
+    // This tile's most recent connection failure, if any. Cleared when the tile starts another
+    // attempt or disconnects, or when any device connects. The connect pane shows it.
     connectFailure: undefined as IConnectFailure | undefined,
     // True when a connection failed while the pane was closed; opening the pane clears it.
     unseenConnectError: false

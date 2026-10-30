@@ -153,7 +153,8 @@ export class DeviceConnection {
   // The latest connect or reconnect attempt.
   attempt: ConnectionAttempt | undefined = undefined;
   // The latest attempt's failure. The next attempt clears it, and so do a Disconnect, first data
-  // after a stall, and the loss of the device a stall left open.
+  // after a stall, progress from a stalled update, a stalled update that finishes, and the loss of
+  // the device a stall left open.
   lastFailure: IConnectFailure | undefined = undefined;
   // What first dismissed the connect tutorial, which then stays dismissed on every tile. In memory
   // only, so it can show again after a page reload.
