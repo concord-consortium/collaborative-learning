@@ -49,20 +49,20 @@ describe("RightDrawer", () => {
     expect(screen.getByTestId("ada-content")).toBeVisible();
 
     act(() => mockUi.openDrawerPanel(panel));
-    // Two toggle buttons, not a tab list: the selected one is pressed.
+    // Two buttons, not a tab list: aria-current marks the one showing.
     expect(screen.queryByRole("tablist")).not.toBeInTheDocument();
     expect(screen.queryByRole("tab")).not.toBeInTheDocument();
     const ada = screen.getByRole("button", { name: "Ada" });
     const help = screen.getByRole("button", { name: "Connection help" });
-    expect(help).toHaveAttribute("aria-pressed", "true");
-    expect(ada).toHaveAttribute("aria-pressed", "false");
+    expect(help).toHaveAttribute("aria-current", "true");
+    expect(ada).not.toHaveAttribute("aria-current");
     expect(screen.getByTestId("panel-content")).toBeVisible();
-    // still mounted (so the conversation is kept) but hidden
+    // still mounted (so her unsent message and scroll position are kept) but hidden
     expect(screen.getByTestId("ada-content")).not.toBeVisible();
 
     fireEvent.click(ada);
-    expect(ada).toHaveAttribute("aria-pressed", "true");
-    expect(help).toHaveAttribute("aria-pressed", "false");
+    expect(ada).toHaveAttribute("aria-current", "true");
+    expect(help).not.toHaveAttribute("aria-current");
     expect(mockUi.drawerTab).toBe("chatTutor");
     expect(screen.getByTestId("ada-content")).toBeVisible();
     expect(screen.queryByTestId("panel-content")).not.toBeInTheDocument();
@@ -77,6 +77,46 @@ describe("RightDrawer", () => {
     expect(mockUi.showChatTutor).toBe(true);
     expect(mockUi.drawerTab).toBe("chatTutor");
     expect(screen.getByTestId("ada-content")).toBeVisible();
+  });
+
+  it("closing Ada while her tab is selected shows the panel", () => {
+    render(<RightDrawer chatTutorAvailable={true} renderChatTutor={renderChatTutor} />);
+    act(() => { mockUi.setShowChatTutor(true); mockUi.openDrawerPanel(panel); });
+    fireEvent.click(screen.getByRole("button", { name: "Ada" }));
+    expect(screen.queryByTestId("panel-content")).not.toBeInTheDocument();
+
+    act(() => mockUi.setShowChatTutor(false));
+    expect(screen.queryByTestId("ada-content")).not.toBeInTheDocument();
+    expect(screen.getByTestId("panel-content")).toBeVisible();
+    expect(screen.getByRole("button", { name: "Connection help" })).toHaveAttribute("aria-current", "true");
+  });
+
+  it("tells Ada she is active only while her tab is showing", () => {
+    const activeValues: boolean[] = [];
+    const recordActive = (active: boolean) => {
+      activeValues.push(active);
+      return <AdaProbe />;
+    };
+    render(<RightDrawer chatTutorAvailable={true} renderChatTutor={recordActive} />);
+    act(() => mockUi.setShowChatTutor(true));
+    expect(activeValues[activeValues.length - 1]).toBe(true);
+
+    act(() => mockUi.openDrawerPanel(panel));
+    expect(activeValues[activeValues.length - 1]).toBe(false);
+
+    fireEvent.click(screen.getByRole("button", { name: "Ada" }));
+    expect(activeValues[activeValues.length - 1]).toBe(true);
+  });
+
+  it("gives Ada the tab buttons' row for her focus trap", () => {
+    let tabsRef: React.RefObject<HTMLDivElement> | undefined;
+    const recordTabsRef = (_active: boolean, ref: React.RefObject<HTMLDivElement>) => {
+      tabsRef = ref;
+      return <AdaProbe />;
+    };
+    render(<RightDrawer chatTutorAvailable={true} renderChatTutor={recordTabsRef} />);
+    act(() => { mockUi.setShowChatTutor(true); mockUi.openDrawerPanel(panel); });
+    expect(tabsRef?.current).toContainElement(screen.getByRole("button", { name: "Ada" }));
   });
 
   it("closing the panel leaves Ada showing if Ada was open, and closes the drawer otherwise", () => {

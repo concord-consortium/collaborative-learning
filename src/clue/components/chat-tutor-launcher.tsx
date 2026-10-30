@@ -4,7 +4,7 @@ import { useStores } from "../../hooks/use-stores";
 import { kRightDrawerPanelTabId } from "../../components/right-drawer/right-drawer";
 
 // Floating round "AIdeas" button pinned at the viewport's lower-right. Kept mounted (so the ref
-// stays valid for focus restore on close and aria-controls resolves to the live drawer) but
+// stays valid for focus restore on close and aria-controls resolves to Ada's sidebar) but
 // hidden whenever the right drawer is open, on any tab; it reappears when the drawer closes.
 export const ChatTutorLauncher = observer(forwardRef<HTMLButtonElement>(function ChatTutorLauncher(_props, ref) {
   const { ui } = useStores();

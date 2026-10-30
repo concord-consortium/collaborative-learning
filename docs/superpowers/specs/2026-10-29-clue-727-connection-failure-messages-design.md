@@ -272,9 +272,10 @@ Canceling the device chooser is not a failure: no message, no help.
 
 ## The connection help drawer
 
-**More…** opens a **Connection help** drawer in the same right-edge slot as Ada's drawer.
+**More…** opens a **Connection help** drawer in the same right-edge slot as Ada's sidebar.
 
-- **Placement.** It is fixed to the right edge below the app header, the same width as Ada's drawer.
+- **Placement.** It is fixed to the right edge below the app header (at the top on `/editor/`, which
+  has none), the same width as Ada's sidebar.
   The workspace narrows to make room, using the same rule that makes room for Ada, so nothing is
   covered. The tile may shift left once when the drawer opens; after that nothing moves.
 - **Who gets it.** Everyone who can use the connect pane, not only students with Ada. This means the
@@ -316,11 +317,12 @@ Canceling the device chooser is not a failure: no message, no help.
   - Each notice is announced politely to screen readers.
 - **With Ada available,** the drawer shows tabs, Ada and Connection help. This applies whenever the
   student has Ada, so opening the help still lets them reach Ada.
-  - More… selects the help tab, and Ada's conversation is kept.
+  - More… selects the help tab. Ada stays mounted, so her unsent message and scroll position are kept.
   - Closing the help leaves Ada showing if Ada was open, and otherwise closes the drawer.
   - Ada's "AIdeas" launcher, which floats at the viewport's lower-right, is hidden whenever the
     drawer is open, whichever tab is showing, so it never sits on top of the drawer.
-  - Ada's focus trap applies only while the Ada tab is selected.
+  - Ada's focus trap applies only while the Ada tab is selected, and it includes the tab buttons, so
+    Tab can reach the help's tab without closing Ada.
   - These changes to Ada were agreed during the design.
 - **Not persisted.** It is UI state only, so a reload starts with it closed.
 - **Every route that shows a Dataflow tile toolbar,** including the standalone doc-editor (`/editor/`),
@@ -353,6 +355,7 @@ Canceling the device chooser is not a failure: no message, no help.
     showing, otherwise to the connect button.
   - It does **not** trap focus.
   - Details is a disclosure (`aria-expanded`).
+- **The tabs with Ada** are two plain buttons, not ARIA tabs; `aria-current` marks the one showing.
 
 ## Logging
 
