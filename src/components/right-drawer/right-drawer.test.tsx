@@ -108,6 +108,17 @@ describe("RightDrawer", () => {
     expect(activeValues[activeValues.length - 1]).toBe(true);
   });
 
+  it("gives Ada the toggle buttons' row for her focus trap", () => {
+    let tabsRef: React.RefObject<HTMLDivElement> | undefined;
+    const recordTabsRef = (_active: boolean, ref: React.RefObject<HTMLDivElement>) => {
+      tabsRef = ref;
+      return <AdaProbe />;
+    };
+    render(<RightDrawer chatTutorAvailable={true} renderChatTutor={recordTabsRef} />);
+    act(() => { mockUi.setShowChatTutor(true); mockUi.openDrawerPanel(panel); });
+    expect(tabsRef?.current).toContainElement(screen.getByRole("button", { name: "Ada" }));
+  });
+
   it("closing the panel leaves Ada showing if Ada was open, and closes the drawer otherwise", () => {
     render(<RightDrawer chatTutorAvailable={true} renderChatTutor={renderChatTutor} />);
     act(() => { mockUi.setShowChatTutor(true); mockUi.openDrawerPanel(panel); });

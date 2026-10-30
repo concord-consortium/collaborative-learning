@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { RefObject, useEffect, useMemo, useRef, useState } from "react";
 import { observer } from "mobx-react";
 import { useStores } from "../../hooks/use-stores";
 import { ProblemModelType } from "../../models/curriculum/problem";
@@ -38,6 +38,8 @@ interface IProps {
   // False while another tab in the right drawer is showing. The sidebar stays mounted, so the
   // conversation is kept, but its focus trap is off.
   active: boolean;
+  // The right drawer's toggle buttons, when it shows them. Ada's focus trap includes them.
+  drawerTabsRef?: RefObject<HTMLElement | null>;
 }
 
 // Content of the right drawer's AI chat tutor tab. Mounted only while Ada is open (the
@@ -48,12 +50,12 @@ interface IProps {
 // which can be taken over by another highlight source (a variable chip, say) while this
 // sidebar stays open.
 export const ChatTutorSidebar: React.FC<IProps> = observer((props) => {
-  const { documentKey, documentTitle, problemPath, problem, content, onClose, active } = props;
+  const { documentKey, documentTitle, problemPath, problem, content, onClose, active, drawerTabsRef } = props;
   const { appConfig, db, user, unit } = useStores();
   const containerRef = useRef<HTMLDivElement>(null);
   const bodyRef = useRef<HTMLDivElement>(null);
 
-  useTutorDrawerTrap({ containerRef, bodyRef, onEscape: onClose, active });
+  useTutorDrawerTrap({ containerRef, bodyRef, onEscape: onClose, active, drawerTabsRef });
 
   const getRightSummary = useRightDirty(documentKey, content);
 

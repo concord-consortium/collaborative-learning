@@ -238,13 +238,14 @@ export const ClueAppHeaderComponent: React.FC<IProps> = observer(function ClueAp
     return <ChatTutorLauncher ref={chatTutorLauncherRef} />;
   };
 
-  const renderChatTutorSidebar = (active: boolean) => {
+  const renderChatTutorSidebar = (active: boolean, drawerTabsRef: React.RefObject<HTMLDivElement>) => {
     if (!isChatTutorOpen || !showChatTutorLauncher || !chatTutorDocumentKey || !chatTutorDocument?.content) {
       return null;
     }
     return (
       <ChatTutorSidebar
         active={active}
+        drawerTabsRef={drawerTabsRef}
         documentKey={chatTutorDocumentKey}
         documentTitle={getDocumentDisplayTitle(unit, chatTutorDocument, appConfig) || problem.title}
         problemPath={problemPath}

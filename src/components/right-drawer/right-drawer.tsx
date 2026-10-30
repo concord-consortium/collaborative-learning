@@ -1,4 +1,4 @@
-import React from "react";
+import React, { RefObject, useRef } from "react";
 import { observer } from "mobx-react";
 import classNames from "classnames";
 import { useStores } from "../../hooks/use-stores";
@@ -11,8 +11,9 @@ interface IProps {
   // True when the student has Ada, so the drawer can offer her next to a panel.
   chatTutorAvailable: boolean;
   // Renders Ada's drawer content. `active` is false while the panel tab is selected: Ada stays
-  // mounted then so her conversation is kept.
-  renderChatTutor?: (active: boolean) => React.ReactNode;
+  // mounted then so her conversation is kept. `tabsRef` is the toggle buttons' row, which Ada's
+  // focus trap lets Tab reach.
+  renderChatTutor?: (active: boolean, tabsRef: RefObject<HTMLDivElement>) => React.ReactNode;
 }
 
 // The fixed right-edge slot shared by Ada's chat and plugin-supplied panels (see
@@ -22,6 +23,7 @@ export const RightDrawer: React.FC<IProps> = observer(function RightDrawer(props
   const { chatTutorAvailable, renderChatTutor } = props;
   const { ui } = useStores();
   const { drawerPanel, drawerTab } = ui;
+  const tabsRef = useRef<HTMLDivElement>(null);
 
   const adaShowing = chatTutorAvailable && ui.showChatTutor;
   // The panel shows when it is the selected tab, or when Ada isn't open to compete with it.
@@ -39,7 +41,7 @@ export const RightDrawer: React.FC<IProps> = observer(function RightDrawer(props
     <div className="right-drawer" data-testid="right-drawer">
       {/* Two toggle buttons rather than ARIA tabs: the pressed one is showing. */}
       {showTabs && drawerPanel &&
-        <div className="right-drawer-tabs">
+        <div className="right-drawer-tabs" ref={tabsRef}>
           <button type="button" aria-pressed={adaActive}
                   className={classNames("right-drawer-tab", { selected: adaActive })}
                   onClick={selectAda}>
@@ -54,7 +56,7 @@ export const RightDrawer: React.FC<IProps> = observer(function RightDrawer(props
       }
       {adaShowing &&
         <div className="right-drawer-body" hidden={!adaActive}>
-          {renderChatTutor?.(adaActive)}
+          {renderChatTutor?.(adaActive, tabsRef)}
         </div>
       }
       {drawerPanel && panelShowing &&
