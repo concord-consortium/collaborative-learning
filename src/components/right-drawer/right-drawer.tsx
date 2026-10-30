@@ -10,8 +10,8 @@ export const kRightDrawerPanelTabId = "right-drawer-panel-tab";
 interface IProps {
   // True when the student has Ada, so the drawer can offer her next to a panel.
   chatTutorAvailable: boolean;
-  // Renders Ada's drawer content. `active` is false while the panel tab is selected: Ada stays
-  // mounted then so her conversation is kept. `tabsRef` is the tab buttons' row, which Ada's
+  // Renders Ada's sidebar. `active` is false while the panel tab is selected: Ada stays mounted
+  // then, so her unsent message and scroll position are kept. `tabsRef` is the tab buttons' row, which Ada's
   // focus trap lets Tab reach.
   renderChatTutor?: (active: boolean, tabsRef: RefObject<HTMLDivElement>) => React.ReactNode;
 }
