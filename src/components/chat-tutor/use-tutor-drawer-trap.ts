@@ -3,27 +3,27 @@ import { FocusTrapConfig, useFocusTrap } from "@concord-consortium/accessibility
 
 interface TutorDrawerTrapOptions {
   containerRef: RefObject<HTMLElement | null>;
-  // the drawer body wrapper — the trap's single "content" slot
+  // Ada's sidebar body wrapper — the trap's "content" slot
   bodyRef: RefObject<HTMLElement | null>;
-  // close the drawer + restore focus to the launcher (owned by the caller)
+  // close Ada and restore focus (owned by the caller)
   onEscape: () => void;
-  // False while the drawer is mounted but another tab is showing; the trap is then off.
+  // False while Ada's sidebar is mounted but the drawer's other tab is showing; the trap is then off.
   active: boolean;
   // The right drawer's tab buttons, which sit outside the sidebar. Tab reaches them as the
   // trap's "tabs" slot, so a keyboard user can switch to the other panel without closing Ada.
   drawerTabsRef?: RefObject<HTMLElement | null>;
 }
 
-// Tab/Shift+Tab containment and Escape for the tutor drawer, via useFocusTrap.
-// The drawer is mounted only while open, and the config is undefined (trap off) while another
-// tab is showing. enterTrap() must be called explicitly each time the trap becomes active, after
+// Tab/Shift+Tab containment and Escape for Ada's sidebar, via useFocusTrap.
+// The sidebar is mounted only while Ada is open, and the config is undefined (trap off) while the
+// drawer's other tab is showing. enterTrap() must be called explicitly each time the trap becomes active, after
 // the hook's own effect (which sets descendants non-tabbable), or all controls would be left at
 // tabindex=-1 with no initial focus.
 //
 // Strategy shape: a "content" slot (the body wrapper) and, while the drawer shows its tab
 // buttons, a "tabs" slot. Both are in tabWithinSlots, so Tab walks each slot's focusable children
 // before moving to the other. Both slots get the same escapeHandler; returning "handled" skips
-// the trap's exit + container.focus(), letting the caller's launcher-restore stand (plain onExit
+// the trap's exit + container.focus(), letting the caller's focus restore stand (plain onExit
 // cannot do this — the trap's container.focus() would clobber it).
 export function useTutorDrawerTrap(
   { containerRef, bodyRef, onEscape, active, drawerTabsRef }: TutorDrawerTrapOptions
