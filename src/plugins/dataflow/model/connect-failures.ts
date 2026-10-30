@@ -49,6 +49,8 @@ export function errorInfo(e: unknown): IErrorInfo | undefined {
   return info;
 }
 
+// Short, and never naming the device, so each fits on the palette's second line (see "The status
+// area" in docs/connect-palette.md).
 const kPaneProblemTexts: Record<ProblemKind, string> = {
   openTimeout: "Stuck while opening.",
   openFailed: "Couldn't open it.",

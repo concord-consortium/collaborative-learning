@@ -71,6 +71,7 @@ export function connectPaneStatus(input: IPaneStatusInput): IPaneStatus {
       case "checkFirmware":
         return status(attemptConnected, { text: "Checking its firmware…", tone: "plain" });
       case "update": {
+        // The one first line that isn't the phase: keeping the board plugged in matters more.
         const percent = attempt.updatePercent ?? 0;
         return status("Updating. Keep it plugged in.", { text: `${percent}%`, tone: "plain", progress: percent });
       }

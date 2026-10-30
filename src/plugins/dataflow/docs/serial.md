@@ -59,7 +59,8 @@ The connection is app-wide: there is one `DeviceConnection` per `SerialDevice` (
 `getDeviceConnection`), and it does not live in any tile component. At most one device is
 connected at a time, and a second attempt while one is in progress is ignored (`busyChoice`).
 It is started from the `connect` button in the DataFlow tile toolbar
-(`components/toolbar/dataflow-connect-button.tsx`), or, in a unit whose own `tools` list leaves
+(`components/toolbar/dataflow-connect-button.tsx`, whose palette is described in
+[The connect palette](connect-palette.md)), or, in a unit whose own `tools` list leaves
 out `connect`, from the older connect menu at the top of the tile. Both call the tile device
 actions below. The log events name the device by the choice the user connected with
 (`lastChoice`, such as `microbitHub`), not by the detected `deviceFamily`.
@@ -169,7 +170,8 @@ carry `targetType: "device"` and `device`: the choice id (`arduino`, `microbitHu
 - `connectDevice` and `reconnectDevice` mark the click, not a success. A quick attempt logs
   `connectDevice`, `resetProgram` (when the device becomes active) and `connectResult`; anything
   the student did in between sits between them in time order. A slow attempt adds `connectProgress`
-  events. A reload or a closed tab leaves a start, maybe some progress events and no result.
+  events, whose gaps double so a tab left hanging doesn't log every few seconds. A reload or a
+  closed tab leaves a start, maybe some progress events and no result.
 - A failed, stalled or `canceled` attempt logs its `connectResult` too, with no `resetProgram`
   unless the device became active first.
 - Only a Disconnect the user chooses logs `disconnectDevice`. An unplug logs `deviceLost` when the
@@ -245,7 +247,8 @@ while its device is open (`holdsDevice`): the button and the pane ignore one tha
   listener's `onRecovered`.
 - **Disconnect or Connect during a stalled update** first disposes that `SpikerbitDevice`, which
   closes its library connection and so stops the flash. Reconnect closes the library connection
-  too, but keeps the device and reopens it without the chooser.
+  too, but keeps the device and reopens it without the chooser. Stopping a flash is allowed because
+  the next connect finds the firmware old or broken and updates it again.
 - **A loss after the attempt has ended** with its device open calls the listener's `onLost` and
   clears `lastFailure`, so the pane shows the loss rather than the stall. That includes a stalled
   update's board, which isn't active yet: its loss is also recorded on `SerialDevice.lastLoss`
@@ -260,9 +263,22 @@ right away, and the Connect buttons are enabled again. In the background the tra
 `close()` and `forget()` on the stuck port or device, and closes it if the abandoned open
 succeeds later. Neither is awaited, since a stuck device may not close either. Each reports what
 happened through the listener's `onAbandonedOpen`. A retry while the browser still has the old
-open pending is refused at once with an `InvalidStateError`, which `WebSerialTransport` resolves
-as `"stillOpening"`; that is `openTimeout` too. Unplugging the device is what reliably ends a
-pending open.
+open pending is expected to be refused at once with an `InvalidStateError`, which
+`WebSerialTransport` resolves as `"stillOpening"`; that is `openTimeout` too. Unplugging the device
+is what reliably ends a pending open.
+
+**Not yet verified on hardware.** The design works around these unknowns. When one is checked,
+record the answer here and change the code if it differs.
+
+1. Whether `close()` or `forget()` ends a pending open, for Web Serial and for WebUSB. The
+   `abandonedOpen` log event records what each did, so classroom logs can answer this.
+2. Whether a retry during a pending open fails fast with an `InvalidStateError`.
+3. What Web Serial reports when another tab or app holds the port. Until it is known, that case is
+   `openFailed`, not `inUse`.
+4. Whether the Arduino sketch and the radio hub send data on their own within 5 s of the open. An
+   Arduino resets when its port opens.
+5. Whether closing the library connection during a flash stops it cleanly, and whether the next
+   connect's update then succeeds.
 
 ### Channel sources
 
