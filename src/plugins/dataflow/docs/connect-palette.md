@@ -21,7 +21,7 @@ The status area is always exactly two lines tall, so the rows below it never mov
 - **Line 2 is the detail:** the current step, the progress bar and percentage during an update, a
   gray hint, or a red problem. Red is only for problems.
 
-Every text fits on one line. Line 2's texts are about 30 characters and never name the device,
+Every text fits on one line. Line 2's texts are at most 37 characters and never name the device,
 since "micro:bit (radio hub)" alone would fill most of the line; line 1, the connect button's
 tooltip and the failure announcement name it instead. As a safety net, both lines are `nowrap`
 with an ellipsis.
@@ -33,8 +33,8 @@ with an ellipsis.
   once per attempt.
 - Steps often go by in a fraction of a second, so a step changes only line 2's text. It never makes
   rows or panels appear and disappear.
-- A Reconnect keeps the connected actions the whole way through, disabled, with "Connecting to
-  {device}…" on line 1. It switches to the device list only if it fails before the open. That
+- A Reconnect keeps the connected actions while it runs, disabled, with line 1 following the steps
+  as in a Connect. It switches to the device list for any outcome but a connection or a stall. That
   avoids a connected → device list → connected flash, and keeps the Reconnect button the student
   just used in place.
 
@@ -55,7 +55,9 @@ an attempt runs, its tooltip names the device being connected. See `connect-butt
 - The status area's live region holds line 1, and line 2 only when it is a problem. So phase
   changes and problems are announced, but steps and percentages are not. The progress bar is a
   `progressbar` with its value.
-- A failure recorded while the palette is closed is announced politely from beside the connect
-  button, with a sentence that names the device (`problemHeadline` in `connect-failures.ts`),
-  such as "The browser couldn't open the Arduino."
+- A failure recorded while the palette is closed and the tile is selected is announced politely
+  from beside the connect button, with a sentence that names the device (`problemHeadline` in
+  `connect-failures.ts`), such as "The browser couldn't open the Arduino." The toolbar, and the
+  live region with it, exists only while the tile is selected, so a failure recorded while the
+  tile isn't selected is never announced. The connect button still turns yellow.
 - The controls are `div role="button"`, and the arrow keys, Home and End move between them.
