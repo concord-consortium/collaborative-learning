@@ -1,9 +1,10 @@
-import React, { PropsWithChildren, useCallback } from "react";
+import React, { PropsWithChildren, useCallback, useContext } from "react";
 import { useTouchHold } from "../../hooks/use-touch-hold";
 import classNames from "classnames";
 import { Tooltip } from "react-tippy";
 import { useTooltipOptions } from "../../hooks/use-tooltip-options";
 import { useAnnounce } from "../../utilities/use-announce";
+import { ToolbarBusyContext } from "./tile-toolbar-context";
 
 /**
  * Create the complete tooltip from the given button information.
@@ -54,6 +55,10 @@ export const TileToolbarButton = function ({
   const tipOptions = useTooltipOptions();
   const tooltip = formatTooltip(title, keyHint);
 
+  // A tile mid-operation (dataflow while recording) disables everything but the controls it exempts.
+  const { busy, exempt } = useContext(ToolbarBusyContext);
+  const isDisabled = disabled || (busy && !exempt?.includes(name));
+
   // Announce a message when a disabled button is activated
   const { announcement, announce } = useAnnounce();
   const handleDisabledClick = useCallback((e: React.MouseEvent) => {
@@ -70,17 +75,18 @@ export const TileToolbarButton = function ({
     <Tooltip title={tooltip} {...tipOptions}>
       <button
         type="button"
-        className={classNames("toolbar-button", name, colorClass, { selected: selected || highlighted, disabled })}
+        className={classNames("toolbar-button", name, colorClass,
+          { selected: selected || highlighted, disabled: isDisabled })}
         // Use aria-disabled instead of HTML disabled so buttons remain keyboard-focusable
-        aria-disabled={disabled || undefined}
+        aria-disabled={isDisabled || undefined}
         aria-label={title}
         aria-pressed={selected !== undefined ? selected : undefined}
         aria-expanded={expanded}
-        onClick={disabled ? handleDisabledClick : handleOnClick}
-        onMouseDown={disabled ? undefined : onMouseDown}
-        onMouseUp={disabled ? undefined : onMouseUp}
-        onTouchStart={disabled ? undefined : onTouchStart}
-        onTouchEnd={disabled ? undefined : onTouchEnd}
+        onClick={isDisabled ? handleDisabledClick : handleOnClick}
+        onMouseDown={isDisabled ? undefined : onMouseDown}
+        onMouseUp={isDisabled ? undefined : onMouseUp}
+        onTouchStart={isDisabled ? undefined : onTouchStart}
+        onTouchEnd={isDisabled ? undefined : onTouchEnd}
         data-testid={dataTestId}
       >
         {children}

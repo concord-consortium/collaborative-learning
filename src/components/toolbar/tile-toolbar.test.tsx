@@ -9,6 +9,7 @@ import { defaultTextContent } from "../../models/tiles/text/text-content";
 import { specStores } from "../../models/stores/spec-stores";
 import { specAppConfig } from "../../models/stores/spec-app-config";
 import { TileApiInterface, TileApiInterfaceContext, TileModelContext } from "../tiles/tile-api";
+import { ToolbarBusyContext } from "./tile-toolbar-context";
 
 import CopyIcon from "../../../assets/icons/copy/copy-icon-default.svg";
 
@@ -513,5 +514,28 @@ describe("Tile toolbar ARIA and keyboard", () => {
     fireEvent.keyDown(buttons[0], { key: "Tab", shiftKey: true });
     expect(document.activeElement).toBe(tileElement);
     cleanup();
+  });
+});
+
+describe("ToolbarBusyContext", () => {
+  function renderButton(busy: boolean, exempt?: string[]) {
+    render(
+      <ToolbarBusyContext.Provider value={{ busy, exempt }}>
+        <TileToolbarButton name="zoom-in" title="Zoom In" onClick={jest.fn()}>x</TileToolbarButton>
+      </ToolbarBusyContext.Provider>
+    );
+    return screen.getByRole("button");
+  }
+
+  it("leaves buttons alone when nothing is busy", () => {
+    expect(renderButton(false).getAttribute("aria-disabled")).toBeNull();
+  });
+
+  it("disables a button while the tile is busy", () => {
+    expect(renderButton(true).getAttribute("aria-disabled")).toBe("true");
+  });
+
+  it("leaves an exempt button enabled", () => {
+    expect(renderButton(true, ["zoom-in"]).getAttribute("aria-disabled")).toBeNull();
   });
 });
