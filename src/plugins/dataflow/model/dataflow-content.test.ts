@@ -308,6 +308,31 @@ function setupContentWithTwoNamedNodes(...names: string[]) {
   return content;
 }
 
+// The sync pairs a capture's columns with the program's nodes by position. Between captures the
+// dataset is the default x | y placeholder -- which is what Clear leaves behind, via defaultDataSet
+// -- and those columns describe no node. With a single-node program the counts even match, so the
+// point-column check is the only thing stopping the sync renaming that node to "y".
+describe("syncNodeNamesFromColumns", () => {
+  it("does not rename a node from the default x | y columns", () => {
+    const content = setupContentWithTwoNamedNodes("Sensor");
+    expect(content.dataSet.attributes.map(a => a.name)).toEqual(["x", "y"]);
+
+    content.syncNodeNamesFromColumns();
+
+    expect(content.program.nodes.get("node-0")?.data.orderedDisplayName).toBe("Sensor");
+  });
+
+  it("renames a node when a capture's column is renamed", () => {
+    const content = setupContentWithTwoNamedNodes("Sensor", "Servo");
+    content.prepareCapture();
+    content.dataSet.setAttributeName(content.dataSet.attributes[1].id, "Light");
+
+    content.syncNodeNamesFromColumns();
+
+    expect(content.program.nodes.get("node-0")?.data.orderedDisplayName).toBe("Light");
+  });
+});
+
 describe("prepareCapture", () => {
   it("builds a point column followed by one column per named node", () => {
     const content = setupContentWithTwoNamedNodes("Sensor", "Servo");
