@@ -63,6 +63,9 @@ export function connectButtonTooltip(o: IConnectButtonTooltipInput): string {
       return o.unseenError
         ? "Couldn't connect. Click for details."
         : `${loss}This program needs a device. Click to connect.`;
-    default: return o.lossMessage ? `${loss}Click to connect.` : "Connect a device";
+    default:
+      // Connected, with nothing received yet: a stalled update that finished waits here for its data.
+      if (o.connected) return `Connected: ${o.connectedLabel}`;
+      return o.lossMessage ? `${loss}Click to connect.` : "Connect a device";
   }
 }

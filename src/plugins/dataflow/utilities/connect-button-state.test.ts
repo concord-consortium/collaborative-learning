@@ -54,6 +54,11 @@ describe("connectButtonTooltip", () => {
       .toBe("The Spiker:bit is not responding. Click for details.");
   });
 
+  it("a connected device that hasn't sent anything yet is named, not offered for connecting", () => {
+    expect(connectButtonTooltip({ ...base, connected: true, dataReceived: false, connectedLabel: "Spiker:bit" }))
+      .toBe("Connected: Spiker:bit");
+  });
+
   it("the tooltip while connecting names the device", () => {
     expect(connectButtonTooltip({ ...base, connecting: "Spiker:bit" })).toBe("Connecting to Spiker:bit…");
   });
