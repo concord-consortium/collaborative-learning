@@ -26,6 +26,7 @@ export const RecordButton = observer(function RecordButton({ name }: IToolbarBut
       title="Record data"
       onClick={() => content?.startRecording()}
       disabled={!content || readOnly || content.isRecording}
+      disabledMessage="Stop the current recording to start another"
     >
       <RecordIcon />
     </TileToolbarButton>
