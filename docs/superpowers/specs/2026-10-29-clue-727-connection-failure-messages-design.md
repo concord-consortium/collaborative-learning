@@ -325,8 +325,13 @@ Canceling the device chooser is not a failure: no message, no help.
     Tab can reach the help's tab without closing Ada.
   - These changes to Ada were agreed during the design.
 - **Not persisted.** It is UI state only, so a reload starts with it closed.
-- **Every route that shows a Dataflow tile toolbar,** including the standalone doc-editor (`/editor/`),
-  which has no CLUE app header and is where Cypress tests run, needs a place to show the drawer.
+- **Where it can show.** The CLUE app and the standalone doc-editor (`/editor/`), which has no CLUE app
+  header and is where Cypress tests run, host the drawer. Two pages show a document with no
+  surrounding UI and don't: `/editor/` with `unwrapped`, which is for screenshots, and the iframe
+  page, which the authoring system and screenshots use. There More… is disabled, and hovering it
+  says "Connection help isn't available in this view. Open the document in CLUE to see it."
+  Connecting still works. Someone authoring a document with hardware previews it in CLUE to get
+  the help.
 
 ## Toolbar button
 
@@ -347,7 +352,9 @@ Canceling the device chooser is not a failure: no message, no help.
   CLUE's `useAnnounce` at the moment it is recorded. The announcement is the help headline, e.g. "The
   browser couldn't open the Spiker:bit." This is Doug's review note from CLUE-716.
 - **The progress bar** is a `progressbar` with its value, not announced per change.
-- **More…** joins the pane's arrow-key navigation with the other controls.
+- **More…** joins the pane's arrow-key navigation with the other controls. Where it is disabled
+  because the view has no drawer, it is `aria-disabled`, and the hover text is its description
+  (`aria-describedby`).
 - **The drawer:**
   - It is a labeled complementary region, like Ada's.
   - Opening it moves focus to its heading.
