@@ -16,8 +16,8 @@ interface IProps {
 }
 
 // The fixed right-edge slot shared by Ada's chat and plugin-supplied panels (see
-// ui.openDrawerPanel). The workspace makes room for it (see clue-app-content.scss), so nothing is
-// covered. It renders nothing while neither is open.
+// ui.openDrawerPanel). Pages make room for it (see $right-drawer-reserved-width in vars.scss), so
+// nothing is covered. It renders nothing while neither is open.
 export const RightDrawer: React.FC<IProps> = observer(function RightDrawer(props) {
   const { chatTutorAvailable, renderChatTutor } = props;
   const { ui } = useStores();

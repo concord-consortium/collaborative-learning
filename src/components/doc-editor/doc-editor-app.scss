@@ -6,10 +6,9 @@
   height: 100vh;
   width: 100vw;
 
-  // Reserve the right drawer's width so it doesn't cover the document. The extra 8px accounts for
-  // the drawer's own 4px margin plus a 4px gap.
+  // Make room for the right drawer (see $right-drawer-reserved-width in vars.scss).
   &.right-drawer-open {
-    padding-right: calc(#{$chat-tutor-width} + 8px);
+    padding-right: $right-drawer-reserved-width;
     box-sizing: border-box;
   }
 
