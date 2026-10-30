@@ -632,6 +632,49 @@ describe("Dataflow connect button and pane", () => {
       expect(within(pane()).getByText("Plug in a device, then click Connect.")).toBeInTheDocument();
     });
 
+    // A Spiker:bit update that stalled: its board is open but never became the active device.
+    function stalledUpdate(r: ReturnType<typeof renderConnect>) {
+      const attempt = startAttempt(r);
+      const stall = { kind: "updateStalled", choice: "spikerbit", step: "update", elapsedMs: 45000 } as const;
+      act(() => runInAction(() => {
+        attempt.opened("checkFirmware");
+        attempt.end("updateStalled", stall);
+        r.connection.busyChoice = undefined;
+        r.connection.lastFailure = stall;
+        // Private: only a real stalled update sets it, and that needs a board.
+        (r.connection as unknown as { stalledSpikerbit: object }).stalledSpikerbit = {};
+      }));
+      return stall;
+    }
+
+    it("a stalled update whose board isn't active names the device and says the update stalled", () => {
+      const r = renderConnect();
+      stalledUpdate(r);
+      const trigger = getTrigger(r.container);
+      expect(trigger).toHaveClass("connect-attention");
+      expect(trigger.getAttribute("aria-label")).toBe("Spiker:bit: the update stalled. Click for details.");
+    });
+
+    it("a stalled update making progress again shows as connecting", () => {
+      const r = renderConnect();
+      stalledUpdate(r);
+      act(() => runInAction(() => { r.connection.lastFailure = undefined; }));
+      const trigger = getTrigger(r.container);
+      expect(trigger).toHaveClass("connect-idle");
+      expect(trigger.getAttribute("aria-label")).toBe("Connecting to Spiker:bit…");
+    });
+
+    it("a failure that isn't a stall isn't shown as one", () => {
+      const r = renderConnect();
+      const openFailed = { kind: "openFailed", choice: "arduino", step: "open", elapsedMs: 0 } as const;
+      act(() => {
+        runInAction(() => { r.connection.lastFailure = openFailed; });
+        r.content.setConnectFailure(openFailed);
+        r.content.setUnseenConnectError(true);
+      });
+      expect(getTrigger(r.container).getAttribute("aria-label")).toBe("Couldn't connect. Click for details.");
+    });
+
     it("a tile's stall no longer shows once its device is gone", () => {
       const r = renderConnect();
       stalledArduino(r);
