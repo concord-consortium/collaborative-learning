@@ -13,6 +13,11 @@
     box-sizing: border-box;
   }
 
+  // This page has no app header, so the drawer starts at the top.
+  .right-drawer {
+    top: 0;
+  }
+
   .titlebar {
     .actions {
       column-gap: 5px;
