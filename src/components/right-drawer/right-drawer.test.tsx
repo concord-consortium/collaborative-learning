@@ -57,7 +57,7 @@ describe("RightDrawer", () => {
     expect(help).toHaveAttribute("aria-current", "true");
     expect(ada).not.toHaveAttribute("aria-current");
     expect(screen.getByTestId("panel-content")).toBeVisible();
-    // still mounted (so the conversation is kept) but hidden
+    // still mounted (so her unsent message and scroll position are kept) but hidden
     expect(screen.getByTestId("ada-content")).not.toBeVisible();
 
     fireEvent.click(ada);
