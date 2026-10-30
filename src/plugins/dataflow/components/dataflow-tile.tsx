@@ -23,6 +23,7 @@ import { getDeviceConnection } from "../model/device-connection";
 import { acknowledgeConnectTutorial, DataflowConnectTutorialGate } from "./ui/dataflow-connect-tutorial";
 import { getDataflowFocusSlots } from "./dataflow-focus-slots";
 import { toolbarShowsConnect } from "../utilities/connect-button-state";
+import { kStopButtonName } from "./toolbar/dataflow-recording-buttons";
 
 import "../dataflow-toolbar-registration";
 import "./dataflow-tile.scss";
@@ -158,7 +159,7 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
           />
           {/* During a run Stop is the only live control. Context reaches the toolbar through the
               FloatingPortal it renders into, because a portal preserves the React tree. */}
-          <ToolbarBusyContext.Provider value={{ busy: tileContent.isRecording, exempt: ["stop"] }}>
+          <ToolbarBusyContext.Provider value={{ busy: tileContent.isRecording, exempt: [kStopButtonName] }}>
             <TileToolbar tileType="dataflow" readOnly={!!readOnly} tileElement={this.props.tileElt} />
           </ToolbarBusyContext.Provider>
         </div>

@@ -1,5 +1,5 @@
 import React from "react";
-import { render } from "@testing-library/react";
+import { act, render } from "@testing-library/react";
 import { DndContext } from "@dnd-kit/core";
 import { Provider } from "mobx-react";
 import { ModalProvider } from "react-modal-hook";
@@ -114,6 +114,30 @@ describe("DataflowProgram rete manager routing", () => {
     unmount();
     expect(onActiveReteManagerChanged).toHaveBeenCalledTimes(2);
     expect(lastReportedManager(onActiveReteManagerChanged)).toBeUndefined();
+  });
+});
+
+describe("DataflowProgram recording lifecycle", () => {
+  beforeEach(() => {
+    MockedReteManager.mockClear();
+  });
+
+  it("stops a recording left running when the component unmounts", () => {
+    const content = createContent();
+    const { unmount } = renderProgram(content);
+    act(() => content.startRecording());
+    expect(content.isRecording).toBe(true);
+    unmount();
+    expect(content.isRecording).toBe(false);
+  });
+
+  it("does not stop recording on unmount of a read-only view", () => {
+    const content = createContent();
+    const { unmount } = renderProgram(content, { readOnly: true });
+    act(() => content.startRecording());
+    expect(content.isRecording).toBe(true);
+    unmount();
+    expect(content.isRecording).toBe(true);
   });
 });
 

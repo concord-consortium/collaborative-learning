@@ -351,13 +351,6 @@ describe("prepareCapture", () => {
     expect(content.dataSet.attributes.map(a => a.name)).toEqual(["Point", "Sensor", "Servo", "Extra"]);
   });
 
-  it("drops the capture time again when the recording is cleared", () => {
-    const content = setupContentWithTwoNamedNodes("Sensor", "Servo");
-    content.setContentTitle("Program 1");
-    content.prepareCapture(new Date(2026, 9, 29, 14, 32, 7));
-    content.resetRecording();
-    expect(content.dataSet.name).toBe("Program 1");
-  });
 });
 
 describe("startRecording", () => {
@@ -511,18 +504,6 @@ describe("node and column name sync", () => {
     content.program.nodes.get("node-0")!.data.setOrderedDisplayName("Thermometer");
 
     expect(content.dataSet.attributes[0].name).toBe("Point");
-  });
-
-  // A capture the program no longer holds describes the old program, so renames must not reach it.
-  // Between captures the dataset holds the default x | y placeholder. Those columns describe no
-  // node, so syncing from them renamed the program's first block to "y".
-  it("does not rename a node after the recording is cleared", () => {
-    const content = setupContentWithTwoNamedNodes("Sensor", "Servo");
-    content.prepareCapture();
-    content.resetRecording();
-    content.syncNodeNamesFromColumns();
-    expect([...content.program.nodes.values()].map(n => n.data.orderedDisplayName))
-      .toEqual(["Sensor", "Servo"]);
   });
 
   it("does not touch a dataset the program has detached", () => {

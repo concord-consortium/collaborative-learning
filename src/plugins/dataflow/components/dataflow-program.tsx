@@ -1,4 +1,5 @@
 import React from "react";
+import { isAlive } from "mobx-state-tree";
 import { observable, runInAction } from "mobx";
 import { inject, observer } from "mobx-react";
 import { BaseComponent } from "../../../components/base";
@@ -264,6 +265,11 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     this.disposeChannelSource = undefined;
     document.removeEventListener("keydown", this.handleConnectingKeyDown, true);
     clearInterval(this.intervalHandle);
+    // isRecording is volatile on the content model, which outlives this component: without this a
+    // run left by navigating away strands the tile with its cover up and its toolbar busy. The
+    // read-only guard matters because a read-only view of the same document also mounts this
+    // component, and its unmount must not stop the live run.
+    if (!this.props.readOnly && isAlive(this.props.tileContent)) this.props.tileContent.stopRecording();
     this.reteManager?.dispose();
     this.reteManager = undefined;
     this.props.onActiveReteManagerChanged?.(undefined);

@@ -14,9 +14,8 @@ interface ISamplingRateProps {
 }
 
 /**
- * The header's whole content: the sampling rate, and while a run is in progress the time elapsed
- * so far. The rate stays visible but disabled during a run so a student can still see what they
- * are recording at. (CLUE-771 replaced the slider and playback readout this file used to hold.)
+ * The rate stays visible but disabled during a run, so a student can still see what they are
+ * recording at.
  */
 export const DataflowSamplingRate = observer(function DataflowSamplingRate(props: ISamplingRateProps) {
   const { onRateSelectClick, dataRate, rateOptions, tileContent } = props;

@@ -284,11 +284,6 @@ export const DataflowContentModel = TileContentModel
       const actual = self.dataSet.attributes.map(a => a.name);
       return actual.length === expected.length && actual.every((name, i) => name === expected[i]);
     },
-    get isDataSetEmptyCases(){
-      //Used when DF linked to a table, then we clear. Different than isEmpty
-      //Since there are two attributes X|Y for the default table, we only want to check if there are no cases
-      return self.dataSet.cases.length === 0;
-    },
     get isLinked(){
       return self.linkedDataSets.length > 0;
     },
@@ -411,8 +406,9 @@ export const DataflowContentModel = TileContentModel
       // what avoids Tree.handleSharedModelChanges resolving `<sharedModelPath>/sharedModel` for
       // an entry an undo patch has removed, which throws "Not a child".
       //
-      // This works only because the call comes from a reaction, not from inside the structural
-      // action: withoutUndo is ignored (with a warning) when called from a child action.
+      // This works only because every caller invokes it as a root MST action -- the structural
+      // change reaction and the Clear toolbar button. withoutUndo is ignored (with a warning) from
+      // inside a child action, so it must never be wrapped in another action.
       withoutUndo();
       const sharedModelManager = self.tileEnv?.sharedModelManager;
       const sharedModel = self.sharedModel;
@@ -641,16 +637,6 @@ export const DataflowContentModel = TileContentModel
         });
       }
       self.dataSet.setName(captureName(self.dataSet.name, startedAt));
-    },
-    resetRecording() {
-      // No recording left, so the name should stop claiming one.
-      self.dataSet.setName(stripCaptureTime(self.dataSet.name));
-      //clear the dataSet;
-      self.clearAttributes();
-      self.clearCases();
-      // create a default dataSet x | y table
-      addAttributeToDataSet(self.dataSet, { name: "x" });
-      addAttributeToDataSet(self.dataSet, { name: "y" });
     },
   }))
   // Its own block so `self` can see prepareCapture: within one .actions() block, `self` does not

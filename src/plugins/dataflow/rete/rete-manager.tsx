@@ -582,8 +582,8 @@ export class ReteManager implements INodeServices {
     // The groups overlay is a sibling of the rete container, not a descendant, so a plain
     // container.contains() test deactivated arrow panning as soon as the user touched a group chip
     // or a collapse toggle — the most likely thing to precede a pan. Accept that sibling too,
-    // matched by class rather than by testing the shared parent wholesale, so the hidden editing
-    // canvas doesn't claim pointer presses landing on the playback canvas in Done mode.
+    // matched by class rather than by testing the shared parent wholesale, so pointer handling
+    // stays scoped to this editor's own canvas.
     const editorEl = container.parentElement;
     const inThisCanvas = (target: EventTarget | null) =>
       (target instanceof Node && container.contains(target)) ||

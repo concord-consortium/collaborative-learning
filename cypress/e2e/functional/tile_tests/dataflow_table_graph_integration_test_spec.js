@@ -140,8 +140,12 @@ context('Dataflow Tool Tile', function () {
     dataflowToolTile.recordData("1000", timer1);
     clueCanvas.clickToolbarButtonLabelled("dataflow", "table-it", "Table It!");
 
-    // record data
+    // Clear detaches the table, so the next run needs one of its own.
     dataflowToolTile.clearRecordedData();
+    clueCanvas.deleteTile("table");
+    dataflowToolTile.getDataflowTile().click();
+    clueCanvas.clickToolbarButtonLabelled("dataflow", "table-it", "Table It!");
+
     dataflowToolTile.recordDataWithoutStop("1000", timer2);
 
     // reload while recording

@@ -281,8 +281,8 @@ describe("Dataflow pan split button (CLUE-573)", () => {
     expect(content.panPaletteOpen).toBe(false);
   });
 
-  // During recorded-data playback the active manager's mstContent is a snapshot copy whose volatiles
-  // reset; the remembered direction must live on the real tile content instead.
+  // The active manager's content is not always the tile's own, so the remembered direction must
+  // live on the real tile content instead.
   it("pan state lives on the tile content, not the active manager's content copy", () => {
     const tileContent = DataflowContentModel.create();
     const managerCopy = DataflowContentModel.create();
@@ -984,7 +984,7 @@ describe("Dataflow reset button", () => {
     fireEvent.click(screen.getByRole("button", { name: "Reset program" }));
     first.unmount();
 
-    // A read-only manager is what a read-only view and Done-mode playback both use.
+    // A read-only manager is what a read-only view uses.
     const content = DataflowContentModel.create();
     const readOnlyManager = { ...makeManagerStub(content), readOnly: true };
     renderToolbarButton("reset", { content, manager: readOnlyManager });

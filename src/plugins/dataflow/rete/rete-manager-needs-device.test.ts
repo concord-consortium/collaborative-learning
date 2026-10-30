@@ -100,7 +100,7 @@ describe("ReteManager needs-a-device on open", () => {
     expect(content.showConnectTutorialOnOpen).toBe(false);
   });
 
-  it("does not flag for the playback manager in Done mode", async () => {
+  it("does not flag a manager constructed with playback", async () => {
     const { content, manager } = await openProgram([sensorNode("s1", "emg")], { playback: true });
     managers.push(manager);
     expect(content.showConnectTutorialOnOpen).toBe(false);

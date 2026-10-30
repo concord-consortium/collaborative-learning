@@ -11,6 +11,9 @@ import RecordIcon from "../../assets/topbar-buttons/record-icon.svg";
 import StopIcon from "../../assets/topbar-buttons/stop-icon.svg";
 import ClearIcon from "../../assets/topbar-buttons/clear-icon.svg";
 
+/** The one control that stays live while recording; dataflow-tile exempts it from the busy toolbar. */
+export const kStopButtonName = "stop";
+
 function useRecordingContent() {
   const tile = useContext(TileModelContext);
   const readOnly = useReadOnlyContext();
@@ -57,8 +60,9 @@ export const StopButton = observer(function StopButton({ name }: IToolbarButtonC
  * inside a child action, and putting the detach back on the undo stack reintroduces the "Not a
  * child" crash CLUE-740 documented.
  *
- * Non-destructive, so no confirmation: the linked table keeps the student's points and the program
- * gets a fresh dataset. Where nothing is following, detachLinkedTables empties the dataset instead.
+ * No confirmation, because the usual case hands the student's points to the linked table rather
+ * than destroying them. Where nothing is following, there is no table to hand them to and the rows
+ * are dropped -- they were invisible in that state anyway, since no tile was displaying them.
  */
 export const ClearButton = observer(function ClearButton({ name }: IToolbarButtonComponentProps) {
   const { content, readOnly } = useRecordingContent();
