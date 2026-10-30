@@ -392,19 +392,20 @@ describe("Dataflow connect button and pane", () => {
   }
 
   // A real click starts with a pointerdown, which reaches the pane's outside-click handler first.
+  function press(element: Element) {
+    fireEvent.pointerDown(element);
+    fireEvent.click(element);
+  }
+
   it("'connect' is registered and opens and closes its pane on click", () => {
     const { container, content } = renderConnect();
-    const press = () => {
-      fireEvent.pointerDown(getTrigger(container));
-      fireEvent.click(getTrigger(container));
-    };
     expect(screen.queryByRole("group", { name: "Device connection" })).toBeNull();
     expect(getTrigger(container)).toHaveAttribute("aria-expanded", "false");
-    press();
+    press(getTrigger(container));
     expect(content.connectPaneOpen).toBe(true);
     expect(screen.getByRole("group", { name: "Device connection" })).toBeInTheDocument();
     expect(getTrigger(container)).toHaveAttribute("aria-expanded", "true");
-    press();
+    press(getTrigger(container));
     expect(content.connectPaneOpen).toBe(false);
     expect(screen.queryByRole("group", { name: "Device connection" })).toBeNull();
     expect(getTrigger(container)).toHaveAttribute("aria-expanded", "false");
@@ -417,14 +418,9 @@ describe("Dataflow connect button and pane", () => {
     // than `class`. Exactly corner-triangle: the shared toolbar style, without expand-collapse.
     expect(triangle).toHaveAttribute("classname", "corner-triangle");
     expect(triangle).toHaveAttribute("aria-hidden", "true");
-    // A real press starts with a pointerdown, which reaches the outside-click handler first.
-    const press = () => {
-      fireEvent.pointerDown(triangle);
-      fireEvent.click(triangle);
-    };
-    press();
+    press(triangle);
     expect(content.connectPaneOpen).toBe(true);
-    press();
+    press(triangle);
     expect(content.connectPaneOpen).toBe(false);
   });
 
