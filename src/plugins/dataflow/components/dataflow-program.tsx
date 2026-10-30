@@ -1,9 +1,8 @@
 import React from "react";
 import { observable, runInAction } from "mobx";
-import { getSnapshot } from "mobx-state-tree";
 import { inject, observer } from "mobx-react";
 import { BaseComponent } from "../../../components/base";
-import { DataflowContentModel, DataflowContentModelType } from "../model/dataflow-content";
+import { DataflowContentModelType } from "../model/dataflow-content";
 import { DataflowProgramModelType } from "../model/dataflow-program-model";
 
 import { DataflowProgramToolbar } from "./ui/dataflow-program-toolbar";
@@ -13,8 +12,6 @@ import { DataflowGroupsOverlay } from "./ui/dataflow-groups-overlay";
 import { ProgramDataRates } from "../model/utilities/node";
 import { DocumentContextReact } from "../../../components/document/document-context";
 import { ITileProps } from "../../../components/tiles/tile-component";
-import { ProgramMode } from "./types/dataflow-tile-types";
-import { IDataSet } from "../../../models/data/data-set";
 import { ObjectBoundingBox } from "../../../models/annotations/clue-object";
 
 import { recordCase } from "../model/utilities/recording-utilities";
@@ -59,10 +56,6 @@ interface IProps {
 interface IState {
   editorContainerWidth: number;
   lastIntervalDuration: number;
-  isRecording: boolean;
-  isPlaying: boolean;
-  playBackIndex: number;
-  recordIndex: number; //# of ticks for record
 }
 
 @inject("stores")
@@ -71,11 +64,9 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   public static contextType = DocumentContextReact;
 
   private toolDiv: HTMLElement | null;
-  private playbackToolDiv: HTMLDivElement | null;
   private intervalHandle?: ReturnType<typeof setTimeout>;
   private lastIntervalTime: number;
   private reteManager: ReteManager | undefined;
-  private playbackReteManager: ReteManager | undefined;
   private programContainerEl: HTMLElement | null = null;
   private updateObservable = observable({updateCount: 0});
   private disposeChannelSource: (() => void) | undefined;
@@ -85,10 +76,6 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     this.state = {
       editorContainerWidth: 0,
       lastIntervalDuration: 0,
-      isRecording: false,
-      isPlaying: false,
-      playBackIndex: 0,
-      recordIndex: 0,
     };
     this.lastIntervalTime = Date.now();
   }
@@ -121,14 +108,13 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
 
   public render() {
     const { tileContent, programDataRate } = this.props;
-    const { playBackIndex, isPlaying } = this.state;
-    const programMode = this.determineProgramMode();
+    const isRecording = tileContent.isRecording;
 
     const editorClassForDisplayState = "full";
     const editorClass = `editor ${editorClassForDisplayState}`;
     const isTesting = ["qa", "test"].indexOf(this.stores.appMode) >= 0;
     const showRateUI = ["qa", "test", "dev"].indexOf(this.stores.appMode) >= 0;
-    const showProgramToolbar = programMode !== ProgramMode.Recording && programMode !== ProgramMode.Done;
+    const showProgramToolbar = !isRecording;
 
     // The palette must be a sibling of content (not a descendant) so the focus
     // trap can treat it as its own single-tab-stop slot without nested-slot
@@ -152,12 +138,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
           showRateUI={showRateUI}
           lastIntervalDuration={this.state.lastIntervalDuration}
           serialDevice={this.stores.serialDevice}
-          programMode={programMode}
-          playBackIndex={playBackIndex}
-          isPlaying={isPlaying}
-          handleChangeIsPlaying={this.handleChangeIsPlaying}
           tileContent={tileContent}
-          handleChangeOfProgramMode={this.handleChangeOfProgramMode}
         />
         <div className="dataflow-program-body">
           <div className="dataflow-program-content">
@@ -171,21 +152,11 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
               <div
                 className={editorClass}
               >
-                {
-                  // the main flow-tool div is just hidden so its reteManager doesn't have
-                  // to be disposed and recreated each time the recording finishes
-                }
                 <div
-                  className={`flow-tool ${programMode === ProgramMode.Done ? "hidden" : ""}`}
+                  className="flow-tool"
                   ref={elt => this.toolDiv = elt}
                 />
-                { programMode === ProgramMode.Done &&
-                  <div
-                    className="flow-tool"
-                    ref={elt => this.playbackToolDiv = elt}
-                  />
-                }
-                { this.reteManager && programMode !== ProgramMode.Done &&
+                { this.reteManager &&
                   <DataflowGroupsOverlay reteManager={this.reteManager} /> }
                 { this.shouldShowProgramCover() &&
                   <DataflowProgramCover editorClass={editorClassForDisplayState} /> }
@@ -295,8 +266,6 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     clearInterval(this.intervalHandle);
     this.reteManager?.dispose();
     this.reteManager = undefined;
-    this.playbackReteManager?.dispose();
-    this.playbackReteManager = undefined;
     this.props.onActiveReteManagerChanged?.(undefined);
     this.props.onProgramApiRef?.(null);
   }
@@ -318,9 +287,8 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     // to the recording state are taken into account.
     // Read this, and the canvas transform, before the bail-out below: returning without
     // touching an observable registers no dependency, so nothing can ever re-run this.
-    // A box that is only momentarily unavailable — entering playback, where the incoming
-    // manager's nodeViews are still being populated — would then stay missing for good,
-    // taking its annotation with it.
+    // A box that is only momentarily unavailable — the manager's nodeViews are still being
+    // populated — would then stay missing for good, taking its annotation with it.
     // eslint-disable-next-line unused-imports/no-unused-vars -- need to observe
     const {updateCount} = this.updateObservable;
 
@@ -361,8 +329,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
 
     // We need to update an observable that the getObjectBoundingBox
     // can watch. This is because the location of the blocks changes
-    // when the reteManager changes and when the recording mode changes.
-    // If the playbackReteManager has just been created its elements
+    // when the reteManager changes. A newly created manager's elements
     // won't be setup yet so we need to wait for that to finish before
     // the boundingBoxes are re computed.
     const reteManager = this.activeReteManager;
@@ -371,10 +338,8 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     );
   }
 
-  // The manager owning the canvas the user is looking at: the playback manager in Done mode, the
-  // editor manager otherwise (the editor's canvas is only hidden while playback is up).
   private get activeReteManager() {
-    return this.playbackReteManager ?? this.reteManager;
+    return this.reteManager;
   }
 
   private reportActiveReteManager() {
@@ -384,26 +349,6 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   private initReteManagersIfNeeded() {
     if (!this.reteManager && this.toolDiv) {
       this.initProgram();
-    }
-
-    if (!this.playbackReteManager && this.playbackToolDiv) {
-      const contentSnapshot = getSnapshot(this.props.tileContent);
-      const contentCopy = DataflowContentModel.create(contentSnapshot);
-      this.playbackReteManager = new ReteManager(
-        contentCopy.program, this.tileId, this.playbackToolDiv, contentCopy, this.stores,
-        true, true
-      );
-
-      // When we first show the playbackToolDiv after finishing recording it would show
-      // the last nodeValues and recent values if we don't do anything.
-      // However the playback slider and the time display will be showing the start of the
-      // recording (00:00)
-      // The code below resets the shown nodeValues and recentValues to match the slider
-      // position
-      const dataSet = this.props.tileContent.dataSet;
-      this.playbackNodesWithCaseData(dataSet, 0);
-
-      this.reportActiveReteManager();
     }
   }
 
@@ -457,13 +402,9 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   };
 
   private shouldShowProgramCover() {
-    return this.props.readOnly || this.inDisabledRecordingState;
-  }
-
-  //disable the right side when recordingMode in stop or clear
-  private get inDisabledRecordingState() {
-    const programMode = this.determineProgramMode();
-    return ( programMode === ProgramMode.Recording || programMode === ProgramMode.Done);
+    // Only while a run is in progress. A finished recording leaves the program editable, and
+    // editing it detaches the capture rather than being blocked (CLUE-740).
+    return this.props.readOnly || this.props.tileContent.isRecording;
   }
 
   private addNode = (nodeType: string, position?: [number, number]) => {
@@ -474,140 +415,24 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     this.reteManager?.editor.clear();
   };
 
-  private playbackNodesWithCaseData(dataSet: IDataSet, playBackIndex: number) {
-    if (!this.playbackReteManager) return;
-    this.playbackReteManager.mstContent.program.playbackNodesWithCaseData(dataSet, playBackIndex);
-  }
-
   private tick = () => {
-    const { readOnly, tileContent: tileModel } = this.props;
-    const { playBackIndex, isPlaying, recordIndex } = this.state;
-    const programMode = this.determineProgramMode();
+    const { readOnly, tileContent } = this.props;
     const { reteManager } = this;
 
     if (!reteManager) return;
 
-    const dataSet = tileModel.dataSet;
     const now = Date.now();
     this.setState({lastIntervalDuration: now - this.lastIntervalTime});
     this.lastIntervalTime = now;
 
-    switch (programMode){
-      case ProgramMode.Ready:
-        reteManager.tickAndProcessNodes();
-        break;
-      case ProgramMode.Recording:
-        reteManager.tickAndProcessNodes();
-        if (!readOnly) {
-          recordCase(this.props.tileContent);
-        }
-        this.incrementRecordIndex();
-        break;
-      case ProgramMode.Done:
-        if (isPlaying) {
-          this.playbackNodesWithCaseData(dataSet, playBackIndex);
-          this.incrementPlayBackIndex();
-        }
-        break;
+    reteManager.tickAndProcessNodes();
+    if (tileContent.isRecording && !readOnly) {
+      recordCase(tileContent);
+      // The cap is 10000/(nodes + 1) cases, so a long run ends itself rather than growing forever.
+      if (tileContent.dataSet.cases.length >= tileContent.maxRecordableCases) {
+        tileContent.stopRecording();
+      }
     }
     reteManager.updateSharedProgramData();
   };
-
-  private stopRecording() {
-    this.setState({isRecording: false, recordIndex: 0});
-  }
-
-  private handleChangeOfProgramMode = () => {
-    const { tileContent } = this.props;
-    const programMode = this.determineProgramMode();
-
-    switch (programMode){
-      case ProgramMode.Ready:
-        // Only when there is nothing to keep, so a run started after single samples appends to
-        // them rather than discarding what the student captured.
-        //
-        // Not yet reachable with samples present: determineProgramMode returns Ready only for an
-        // empty dataset, so a tile holding single samples reports Done and the button offers Clear
-        // rather than Record. Reworking that state machine is CLUE-771; this guard is here so the
-        // append is correct the moment Ready can be reached with rows in the table.
-        if (tileContent.dataSet.cases.length === 0) {
-          tileContent.prepareCapture();
-        }
-        tileContent.setRecordedRun(true);
-        this.setState({isPlaying: false, playBackIndex: 0}); //reset isPlaying
-        this.setState({isRecording: true});
-        break;
-      case ProgramMode.Recording:
-        this.stopRecording();
-        break;
-      case ProgramMode.Done:
-        if (this.playbackReteManager) {
-          this.playbackReteManager.dispose();
-          this.playbackReteManager = undefined;
-          this.reportActiveReteManager();
-        }
-        tileContent.resetRecording();
-        break;
-    }
-  };
-
-  private determineProgramMode = () => {
-    const { isRecording } = this.state;
-    const { tileContent } = this.props;
-    // Keyed on hasRecordedRun, not on "the dataset has cases": a single sample puts rows in the
-    // table without being a recording, and treating it as one made the tile read-only and showed
-    // playback.
-    if (!isRecording && !tileContent.hasRecordedRun){
-      return ProgramMode.Ready;
-    }
-    else if (isRecording){
-      return ProgramMode.Recording;
-    }
-    else if (!isRecording && tileContent.hasRecordedRun){
-     return ProgramMode.Done;
-    }
-    return ProgramMode.Ready;
-  };
-
-  private handleChangeIsPlaying = () => {
-    const newIsPlaying = !this.state.isPlaying;
-    if (newIsPlaying) {
-      // If we are starting to play again, figure out if we un-pausing
-      // or restarting after hitting the end of the recording
-      const { tileContent } = this.props;
-      const newPlayBackIndex = this.state.playBackIndex + 1;
-      const recordedCases = tileContent.dataSet.cases.length;
-      if (newPlayBackIndex >= recordedCases) {
-        this.setState({isPlaying: newIsPlaying, playBackIndex: 0});
-      } else {
-        this.setState({isPlaying: newIsPlaying});
-      }
-    } else {
-      this.setState({isPlaying: newIsPlaying});
-    }
-
-  };
-
-  private incrementPlayBackIndex = () => {
-    const { tileContent } = this.props;
-    const newPlayBackIndex = this.state.playBackIndex + 1;
-    const recordedCases = tileContent.dataSet.cases.length;
-    if (newPlayBackIndex >= recordedCases) {
-      // TODO: It'd be nice to record this so the button could show "restart" or "play again"
-      this.setState({isPlaying: false});
-    } else {
-      this.setState({playBackIndex: newPlayBackIndex});
-    }
-  };
-
-  private incrementRecordIndex = () => {
-    const { tileContent } = this.props;
-    const newRecordIndex = this.state.recordIndex + 1;
-    if (newRecordIndex >= tileContent.maxRecordableCases) {
-      this.stopRecording();
-    } else {
-      this.setState({recordIndex: newRecordIndex});
-    }
-  };
-
 }

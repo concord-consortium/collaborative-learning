@@ -146,15 +146,6 @@ export const DataflowContentModel = TileContentModel
     type: types.optional(types.literal(kDataflowTileType), kDataflowTileType),
     program: types.optional(DataflowProgramModel, getSnapshot(DataflowProgramModel.create())),
     programDataRate: DEFAULT_DATA_RATE,
-    /** Whether a continuous recording produced this tile's data.
-     *
-     * The Ready/Recording/Done mode used to be derived from "the dataset has any cases", which
-     * made a single sample flip the tile into Done: playback shown, program read-only, the record
-     * button offering Clear. Samples are not a recording and must not do that.
-     *
-     * types.maybe rather than a defaulted boolean, so a document saved before this existed reads
-     * as undefined and falls back to the old meaning -- a saved recording still opens in Done. */
-    recordedRun: types.maybe(types.boolean),
     /**
      * @deprecated Nothing reads or writes this. The canvas now fits all content on every load
      * instead of restoring a saved pan/zoom, so the live transform lives in the volatile
@@ -277,10 +268,6 @@ export const DataflowContentModel = TileContentModel
       const exported = {...snapshot, program};
       delete (exported as { outputConfig?: unknown }).outputConfig;
       return stringify(exported, {maxLength: 120});
-    },
-    /** Falls back to the row count for a document saved before `recordedRun` existed. */
-    get hasRecordedRun(): boolean {
-      return self.recordedRun ?? self.dataSet.cases.length > 0;
     },
     /** True when the columns already describe the current program: the point column followed by one
      * per named node, in order.
@@ -646,9 +633,6 @@ export const DataflowContentModel = TileContentModel
      * start time goes in the dataset's name instead of a column (see captureName).
      */
     prepareCapture(startedAt: Date = new Date()) {
-      // Explicitly false, so `undefined` keeps meaning "saved before this flag existed". A capture
-      // only counts as a recording once the record button says so (setRecordedRun).
-      self.recordedRun = false;
       if (!self.isCapturePrepared) {
         self.clearAttributes();
         addAttributeToDataSet(self.dataSet, { name: kPointAttributeName });
@@ -658,11 +642,7 @@ export const DataflowContentModel = TileContentModel
       }
       self.dataSet.setName(captureName(self.dataSet.name, startedAt));
     },
-    setRecordedRun(value: boolean) {
-      self.recordedRun = value;
-    },
     resetRecording() {
-      self.recordedRun = false;
       // No recording left, so the name should stop claiming one.
       self.dataSet.setName(stripCaptureTime(self.dataSet.name));
       //clear the dataSet;

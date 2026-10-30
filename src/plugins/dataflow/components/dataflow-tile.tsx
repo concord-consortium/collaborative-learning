@@ -34,10 +34,6 @@ interface IProps extends ITileProps{
 }
 
 interface IDataflowTileState {
-  isRecording: boolean;
-  isPlaying: boolean;
-  playBackIndex: number;
-  recordIndex: number; //# of ticks for record
   isEditingTitle: boolean;
   reteManager: ReteManager | undefined;
 }
@@ -53,10 +49,6 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
   constructor(props: IProps) {
     super(props);
     this.state = {
-      isRecording: false,
-      isPlaying: false,
-      playBackIndex: 0,
-      recordIndex: 0,
       isEditingTitle: false,
       reteManager: undefined
     };

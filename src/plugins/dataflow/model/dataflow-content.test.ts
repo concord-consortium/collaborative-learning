@@ -15,7 +15,7 @@ import { SharedModelDocumentManager } from "../../../models/document/shared-mode
 import { ITileEnvironment } from "../../../models/tiles/tile-content";
 import { registerTileTypes } from "../../../register-tile-types";
 import { recordCase } from "./utilities/recording-utilities";
-import { addAttributeToDataSet, addCanonicalCasesToDataSet } from "../../../models/data/data-set";
+import { addAttributeToDataSet } from "../../../models/data/data-set";
 import { uniqueId } from "../../../utilities/js-utils";
 
 registerTileTypes(["Dataflow", "Table", "Graph"]);
@@ -467,48 +467,6 @@ describe("getTimeAtRecordedIndex", () => {
   });
 });
 
-// A single sample puts rows in the table without being a recording. Deriving the program's mode
-// from "the dataset has cases" made one sample flip the tile into Done -- playback shown, program
-// read-only, the record button offering Clear -- which made single-sample capture unusable.
-describe("hasRecordedRun", () => {
-  it("stays false after single samples, so the program keeps running", () => {
-    const content = setupContentWithTwoNamedNodes("Sensor", "Servo");
-    content.prepareCapture();
-    recordCase(content);
-    recordCase(content);
-    expect(content.dataSet.cases).toHaveLength(2);
-    expect(content.hasRecordedRun).toBe(false);
-  });
-
-  it("is true once a recording has been started", () => {
-    const content = setupContentWithTwoNamedNodes("Sensor", "Servo");
-    content.prepareCapture();
-    content.setRecordedRun(true);
-    expect(content.hasRecordedRun).toBe(true);
-  });
-
-  it("goes back to false when the recording is reset", () => {
-    const content = setupContentWithTwoNamedNodes("Sensor", "Servo");
-    content.setRecordedRun(true);
-    content.resetRecording();
-    expect(content.hasRecordedRun).toBe(false);
-  });
-
-  // A document saved before the flag existed has no value for it, and its recording must still
-  // open in Done rather than looking like a fresh program.
-  it("falls back to the row count for a document saved before the flag existed", () => {
-    const legacy = defaultDataflowContent();
-    expect(legacy.recordedRun).toBeUndefined();
-    expect(legacy.hasRecordedRun).toBe(false);
-
-    // Rows with no flag is what a pre-flag saved recording looks like.
-    addAttributeToDataSet(legacy.dataSet, { name: "Time (sec)" });
-    addCanonicalCasesToDataSet(legacy.dataSet, [{ [legacy.dataSet.attributes[0].id]: 0 }]);
-    expect(legacy.recordedRun).toBeUndefined();
-    expect(legacy.hasRecordedRun).toBe(true);
-  });
-});
-
 // One name shared by a node and its column, in both directions. A rename deliberately does not
 // detach -- the columns still describe the program -- so without this the headers go stale.
 describe("node and column name sync", () => {
@@ -606,20 +564,6 @@ describe("a capture whose last table has been deleted", () => {
     content.program.removeNode("node-0");
 
     expect(content.dataSet.cases).toHaveLength(0);
-  });
-});
-
-describe("a recording that has not ticked yet", () => {
-  // The columns are already prepared but no rows exist, so a toolbar click that re-prepared would
-  // clear recordedRun and leave the program in Ready when the recording stopped.
-  it("keeps recordedRun when the table is touched before the first row", () => {
-    const content = setupContentWithTwoNamedNodes("Sensor", "Servo");
-    content.prepareCapture();
-    content.setRecordedRun(true);
-    expect(content.dataSet.cases).toHaveLength(0);
-
-    content.prepareCapture();          // what a re-prepare would do
-    expect(content.hasRecordedRun).toBe(false);   // ...which is why the button must not call it
   });
 });
 

@@ -3,7 +3,6 @@
 
 $topbar-height: 44px;
 $topbar-color: $gray-light;
-$duration-label-back: $gray-mid;
 $gray-text: #242424;
 
 .program-editor-topbar {
@@ -168,91 +167,7 @@ $gray-text: #242424;
 
   .topbar-center-container{
     display: flex;
-    min-width: 420px;
-
-    //******* SECTION **********
-    .topbar-blank-or-play {
-      width: 100px;
-      background-color: $duration-label-back;
-      margin-left: -10px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-
-      .playback-btn-container{
-        padding-right: 10px;
-        width: 100%;
-        margin-left: 5px;
-
-        .playback-data-btn{
-          width: 90px;
-          height: 25px;
-          display: flex;
-          align-items: center;
-
-          .playback-data-icon{
-            display: flex;
-            width: 20px;
-            margin-right: 5px;
-            margin-left: -3px;
-            height: 100%;
-          }
-          .playback-data-txt{
-            width: 100%;
-            font-family: Ubuntu-Regular, sans-serif;
-            font-size: 14px;
-            font-weight: normal;
-            font-stretch: normal;
-            font-style: normal;
-            line-height: normal;
-            letter-spacing: normal;
-            text-align: center;
-            color: var(--gray-text);
-            margin-left: -2px;
-          }
-        }
-      }
-    }
-
-    /* ==[ Record Button ] == */
-    .record-btn-container{
-      width: 100px;
-      margin-left: 10px;
-      margin-top: 2px;
-
-      .record-data-btn{
-        width: 100px;
-        height: 25px;
-        display: flex;
-        align-items: center;
-        background-color: white;
-        margin-top: -1px;
-        padding: 2px 6px;
-        border-radius: 3px;
-        border: solid 2px $gray-mid;
-
-        .record-data-icon{
-          display: flex;
-          width: 20px;
-          margin-right: 5px;
-          margin-left: -5px;
-          height: 100%;
-        }
-
-        .record-data-txt{
-          width: 100%;
-          font-size: 14px;
-          font-weight: normal;
-          font-stretch: normal;
-          font-style: normal;
-          line-height: normal;
-          letter-spacing: normal;
-          text-align: center;
-          color: var(--gray-text);
-          margin-left: -2px;
-        }
-      }
-    }
+    align-items: center;
   }
 
   .topbar-right {

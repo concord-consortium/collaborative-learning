@@ -1,19 +1,11 @@
 import React from "react";
 import { observer } from "mobx-react";
-import { RateSelectorOrPlayBack } from "./dataflow-rateselector-playback";
+import { DataflowSamplingRate } from "./dataflow-sampling-rate";
 import { ProgramDataRate } from "../../model/utilities/node";
 import { SerialDevice } from "../../../../models/stores/serial";
-import RecordIcon from "../../assets/topbar-buttons/record-icon.svg";
-import StopIcon from "../../assets/topbar-buttons/stop-icon.svg";
-import PlayIcon from "../../assets/topbar-buttons/play-icon.svg";
-import PauseIcon from "../../assets/topbar-buttons/pause-icon.svg";
-import ClearIcon from "../../assets/topbar-buttons/clear-icon.svg";
 import { DeviceChoice, DeviceConnection } from "../../model/device-connection";
 import { DataflowSerialConnectButton } from "./dataflow-serial-connect-button";
 import { DataflowContentModelType } from "../../model/dataflow-content";
-import { ProgramMode } from "../types/dataflow-tile-types";
-import { useCautionAlert } from "../../../../components/utilities/use-caution-alert";
-import { useReadOnlyContext } from "../../../../components/document/read-only-context";
 import { useSettingFromStores } from "../../../../hooks/use-stores";
 import { toolbarShowsConnect } from "../../utilities/connect-button-state";
 
@@ -30,19 +22,12 @@ interface TopbarProps {
   lastIntervalDuration: number;
   serialDevice: SerialDevice;
   connection: DeviceConnection;
-  handleChangeOfProgramMode: () => void;
-  programMode: ProgramMode;
-  playBackIndex: number;
-  isPlaying: boolean;
-  handleChangeIsPlaying: () => void;
   tileContent: DataflowContentModelType;
 }
 
 export const DataflowProgramTopbar = observer(function DataflowProgramTopbar(props: TopbarProps) {
   const { onConnectDevice, onReconnectDevice, onDisconnectDevice, serialDevice, connection,
-          programDataRates, dataRate, onRateSelectClick, handleChangeOfProgramMode,
-          programMode, playBackIndex, isPlaying, handleChangeIsPlaying, tileContent} = props;
-  const readOnly = useReadOnlyContext();
+          programDataRates, dataRate, onRateSelectClick, tileContent } = props;
   // The toolbar's connect button replaces this one. A unit whose own tools list leaves it out keeps
   // this one, so students there can still connect.
   const showConnectButton = !toolbarShowsConnect(useSettingFromStores("tools", "dataflow"));
@@ -58,30 +43,12 @@ export const DataflowProgramTopbar = observer(function DataflowProgramTopbar(pro
           needsDevice={tileContent.needsDevice}
         />}
         <div className="topbar-center-container">
-          <div className="topbar-blank-or-play">
-            {
-              (programMode === ProgramMode.Recording || programMode === ProgramMode.Done) &&
-              <PlaybackButton
-                isPlaying={isPlaying}
-                handleChangeIsPlaying={handleChangeIsPlaying}
-                programMode={programMode}
-              />
-            }
-          </div>
-          <RateSelectorOrPlayBack
+          <DataflowSamplingRate
             rateOptions={programDataRates}
             dataRate={dataRate}
             onRateSelectClick={onRateSelectClick}
-            programMode={programMode}
-            playBackIndex={playBackIndex}
             tileContent={tileContent}
           />
-          <RecordStopOrClearButton
-            disabled={readOnly}
-            programMode={programMode}
-            handleChangeOfProgramMode={handleChangeOfProgramMode}
-          />
-
         </div>
 
         <div className="topbar-right">
@@ -90,100 +57,3 @@ export const DataflowProgramTopbar = observer(function DataflowProgramTopbar(pro
     </div>
   );
 });
-
-/* ==[ Record Data Button ] == */
-enum Mode { //button text
-  "Record",
-  "Stop",
-  "Clear"
-}
-const iconArr = [ //button icon
-  <RecordIcon key={`recordIconKey`}/>,
-  <StopIcon key={`stopIconKey`}/>,
-  <ClearIcon key={`clearIconKey`}/>
-];
-
-interface IRecordStopOrClearProps {
-  disabled: boolean;
-  handleChangeOfProgramMode: () => void;
-  programMode: number;
-}
-
-const RecordStopOrClearButton = (props: IRecordStopOrClearProps) => {
-
-  const { disabled, handleChangeOfProgramMode, programMode } = props;
-
-  /* ==[ Clear Data - Confirmation Modal ] == */
-  const AlertContent = () => {
-    return (
-      <p>
-        Remove the program&#39;s recorded data and any linked displays of this data? This action is not undoable.
-        Make a copy of linked data tables to save the data in this recording.
-      </p>
-    );
-  };
-
-  const [showAlert] = useCautionAlert({
-    title: "Clear Data",
-    content: AlertContent,
-    confirmLabel: "Clear",
-    onConfirm: handleChangeOfProgramMode
-  });
-
-  const onClickHandler = () => {
-    if (!disabled && programMode === ProgramMode.Done){
-      showAlert();
-    }
-    else {
-      handleChangeOfProgramMode();
-    }
-  };
-
-  return (
-    <div className="record-btn-container">
-      <button
-        className="record-data-btn"
-        onClick={onClickHandler}
-        disabled={disabled}
-        aria-label={Mode[programMode]}
-        data-testid="record-data-button"
-      >
-        <div className="record-data-icon">
-          {iconArr[programMode]}
-        </div>
-        <div className="record-data-txt">
-          {Mode[programMode]}
-        </div>
-      </button>
-    </div>
-  );
-};
-
-
-/* ==[ Playback Button ] == */
-interface IPlaybackProps {
-  programMode: number;
-  isPlaying: boolean;
-  handleChangeIsPlaying: () => void;
-}
-
-const PlaybackButton = (props: IPlaybackProps) => {
-  const {programMode, isPlaying, handleChangeIsPlaying} = props;
-  return (
-    <div className="playback-btn-container">
-      <button
-        className="playback-data-btn"
-        disabled={programMode === ProgramMode.Recording}
-        onClick={handleChangeIsPlaying}
-        aria-label={isPlaying ? "Pause" : "Play"} // Added aria-label for screen readers
-      >
-        <div className="playback-data-icon">
-          {isPlaying ? <PauseIcon/> : <PlayIcon/>}
-        </div>
-        <div className="playback-data-txt">
-          { isPlaying ? "Pause" : "Play"}
-        </div>
-      </button>
-    </div>
-  );
-};

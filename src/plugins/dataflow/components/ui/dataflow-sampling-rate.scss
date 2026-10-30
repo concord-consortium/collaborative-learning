@@ -1,0 +1,66 @@
+@import "../../../../components/vars";
+@import "../../../../components/mixins";
+@import "../dataflow-vars";
+
+$duration-label-back: $gray-mid;
+
+/* ==[ Container for the "Sampling Rate" label ] == */
+.topbar-sampleratetext {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 130px;
+  height: 28px;
+  background-color: $duration-label-back;
+
+  /* ==[ Sample Rate Label ] == */
+  .samplerate-label {
+    font-size: 14px;
+    font-weight: 500;
+    font-style: normal;
+    font-stretch: normal;
+    line-height: normal;
+    letter-spacing: normal;
+    color: white;
+  }
+}
+
+/* ==[ Container for the Data Rate selector ] == */
+.topbar-datarate {
+  padding: 2px;
+  width: 96px;
+  height: 28px;
+  border-radius: 14px;
+  border-top-left-radius: 0px;
+  border-bottom-left-radius: 0px;
+  background-color: $duration-label-back;
+
+  select {
+    position: relative;
+    width: 90px;
+    height: 24px;
+    border-radius: 12px;
+    background-color: #ffffff;
+    font-size: 11px;
+    // Suppress the browser's default focus outline (it overlaps the rounded chrome
+    // awkwardly), then layer the canonical focus ring on keyboard focus only.
+    &:focus { outline: none; }
+    @include focus-ring(2px);
+    &:disabled {
+      cursor: default;
+    }
+  }
+
+  option {
+    &:disabled {
+      color: $gray-disabled;
+    }
+  }
+}
+
+.recording-elapsed {
+  display: flex;
+  align-items: center;
+  font-variant-numeric: tabular-nums;   // the readout updates every tick; keep it from jittering
+  margin-left: 8px;
+}
