@@ -1035,31 +1035,76 @@ describe("DeviceConnection", () => {
       expect(connection.lastFailure).toMatchObject({ kind: "openTimeout", step: "open" });
     });
 
+    // The board's close takes kSlowCloseMs, and the flash fails kSlowCloseMs / 2 before the update
+    // would count as stalled, so the limit passes while the close is still going.
+    const kSlowCloseMs = 200;
+    const slowClose = () => new Promise<void>(resolve => setTimeout(resolve, kSlowCloseMs));
+
     it("a flash that fails just before the stall limit, with a slow close, ends as updateFailed", async () => {
       const { connection, stepped } = setupSpikerbit();
-      stepped.device.disconnect.mockImplementation(() => new Promise(resolve => setTimeout(resolve, 200)));
+      stepped.device.disconnect.mockImplementation(slowClose);
       const { result: p } = await startSpikerbit(connection, stepped, true);
-      await jest.advanceTimersByTimeAsync(9900);
+      await jest.advanceTimersByTimeAsync(kUpdateStartMs - kSlowCloseMs / 2);
       void stepped.fail(new Error("flash failed"));
-      await jest.advanceTimersByTimeAsync(300);
+      await jest.advanceTimersByTimeAsync(kSlowCloseMs * 2);
       expect(await p).toBe("updateFailed");
       expect(connection.paneView).toBe("devices");
       expect(connection.lastFailure?.kind).toBe("updateFailed");
     });
 
-    it("a real Spiker:bit whose flash fails just before the stall limit, with a slow close, ends as updateFailed",
-      async () => {
-        const serialDevice = new SerialDevice();
+    describe("a real Spiker:bit whose flash fails just before the stall limit, with a slow close", () => {
+      function failFlashAfter(usbConnection: ReturnType<typeof makeUsbConnection>, ms: number, progress: boolean) {
+        usbConnection.flash.mockImplementation(
+          (_source: unknown, options: { progress?: (stage: string, pct?: number) => void }) => {
+            if (progress) options.progress?.("PartialFlashing", 0.1);
+            return new Promise((_, reject) => setTimeout(() => reject(new Error("flash failed")), ms));
+          });
+      }
+
+      it("ends as updateFailed before the first progress report", async () => {
         const usbConnection = makeUsbConnection({ firmware: kSpikerbitFirmwareVersion - 1 });
-        usbConnection.flash.mockImplementation(() =>
-          new Promise((_, reject) => setTimeout(() => reject(new Error("flash failed")), 9900)));
-        usbConnection.disconnect.mockImplementation(() => new Promise(resolve => setTimeout(resolve, 200)));
-        const connection = new DeviceConnection(serialDevice, realSpikerbitDeps(usbConnection));
+        failFlashAfter(usbConnection, kUpdateStartMs - kSlowCloseMs / 2, false);
+        usbConnection.disconnect.mockImplementation(slowClose);
+        const connection = new DeviceConnection(new SerialDevice(), realSpikerbitDeps(usbConnection));
         const p = connection.connect("spikerbit");
-        await jest.advanceTimersByTimeAsync(9900 + 1000);
+        await jest.advanceTimersByTimeAsync(kUpdateStartMs + 1000);
         expect(await p).toBe("updateFailed");
         expect(connection.paneView).toBe("devices");
       });
+
+      it("ends as updateFailed after a progress report", async () => {
+        const usbConnection = makeUsbConnection({ firmware: kSpikerbitFirmwareVersion - 1 });
+        failFlashAfter(usbConnection, kUpdateStallMs - kSlowCloseMs / 2, true);
+        usbConnection.disconnect.mockImplementation(slowClose);
+        const connection = new DeviceConnection(new SerialDevice(), realSpikerbitDeps(usbConnection));
+        const p = connection.connect("spikerbit");
+        await jest.advanceTimersByTimeAsync(kUpdateStallMs + 1000);
+        expect(await p).toBe("updateFailed");
+        expect(connection.paneView).toBe("devices");
+      });
+    });
+
+    it("a stalled update whose flash fails during a slow close leaves a newer attempt alone", async () => {
+      const { connection, stepped } = setupSpikerbit([makeTransport()]);
+      const stalledListener = { onLost: jest.fn() };
+      const p = connection.connect("spikerbit", { listener: stalledListener });
+      await flush();
+      stepped.observer().onOpened!();
+      stepped.observer().onFirmwareChecked!(null, true);
+      await jest.advanceTimersByTimeAsync(kUpdateStartMs);
+      expect(await p).toBe("updateStalled");
+      stepped.device.disconnect.mockImplementation(slowClose);
+      await stepped.fail(new Error("flash failed"));
+
+      // The student connects another device while the stalled board closes.
+      const listener = { onLost: jest.fn(), onStallChanged: jest.fn() };
+      const next = connection.connect("arduino", { listener });
+      await jest.advanceTimersByTimeAsync(kSlowCloseMs * 2);
+      expect(await next).toBe("connected");
+      expect(connection.lastFailure).toBeUndefined();
+      expect(listener.onLost).not.toHaveBeenCalled();
+      expect(connection.attempt!.choice).toBe("arduino");
+    });
 
     it("an unplug of a stalled Spiker:bit calls onLost and shows the device list with the unplug", async () => {
       const { connection, stepped } = setupSpikerbit();

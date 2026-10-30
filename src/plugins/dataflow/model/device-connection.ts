@@ -725,8 +725,10 @@ export class DeviceConnection {
   }
 
   // The flash of a stalled update failed after all, so the pane goes back to the device list with
-  // that failure. The attempt has ended, so the listener hears of it as a loss of the board.
+  // that failure. The attempt has ended, so the listener hears of it as a loss of the board. The
+  // board's close comes first and can be slow, so a newer attempt may have replaced this one.
   private stalledUpdateFailed(attempt: ConnectionAttempt, error: unknown) {
+    if (!this.isFollowing(attempt)) return;
     this.lastFailure = {
       kind: "updateFailed", choice: attempt.choice, step: "update", elapsedMs: attempt.stepElapsedMs,
       error: errorInfo(error)
