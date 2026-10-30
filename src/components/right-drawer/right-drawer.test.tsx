@@ -91,6 +91,23 @@ describe("RightDrawer", () => {
     expect(screen.getByRole("button", { name: "Connection help" })).toHaveAttribute("aria-pressed", "true");
   });
 
+  it("tells Ada she is active only while her tab is showing", () => {
+    const activeValues: boolean[] = [];
+    const recordActive = (active: boolean) => {
+      activeValues.push(active);
+      return <AdaProbe />;
+    };
+    render(<RightDrawer chatTutorAvailable={true} renderChatTutor={recordActive} />);
+    act(() => mockUi.setShowChatTutor(true));
+    expect(activeValues[activeValues.length - 1]).toBe(true);
+
+    act(() => mockUi.openDrawerPanel(panel));
+    expect(activeValues[activeValues.length - 1]).toBe(false);
+
+    fireEvent.click(screen.getByRole("button", { name: "Ada" }));
+    expect(activeValues[activeValues.length - 1]).toBe(true);
+  });
+
   it("closing the panel leaves Ada showing if Ada was open, and closes the drawer otherwise", () => {
     render(<RightDrawer chatTutorAvailable={true} renderChatTutor={renderChatTutor} />);
     act(() => { mockUi.setShowChatTutor(true); mockUi.openDrawerPanel(panel); });
