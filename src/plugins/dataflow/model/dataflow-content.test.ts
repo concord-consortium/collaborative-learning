@@ -360,6 +360,50 @@ describe("prepareCapture", () => {
   });
 });
 
+describe("startRecording", () => {
+  it("prepares the capture when the dataset is empty", () => {
+    const content = setupContentWithTwoNamedNodes("Sensor", "Servo");
+    content.startRecording();
+    expect(content.isRecording).toBe(true);
+    expect(content.dataSet.attributes.map(a => a.name)).toEqual(["Point", "Sensor", "Servo"]);
+  });
+
+  // Point numbering continues rather than restarting. (prepareCapture's own idempotency is what
+  // protects the columns here; the guard in startRecording is pinned by the name test below.)
+  it("leaves existing points alone and appends to them", () => {
+    const content = setupContentWithTwoNamedNodes("Sensor", "Servo");
+    content.prepareCapture();
+    recordCase(content);
+    const pointId = content.dataSet.attributes[0].id;
+
+    content.startRecording();
+    recordCase(content);
+
+    expect(content.dataSet.cases).toHaveLength(2);
+    expect(content.dataSet.getValueAtIndex(1, pointId)).toBe(2);
+  });
+
+  // Appending must not restamp the name: the capture's time is when collection began, and
+  // prepareCapture would overwrite it with the time Record was pressed again.
+  it("keeps the original capture time when it appends", () => {
+    const content = setupContentWithTwoNamedNodes("Sensor", "Servo");
+    content.setContentTitle("Program 1");
+    content.prepareCapture(new Date(2026, 9, 30, 14, 32, 7));
+    recordCase(content);
+
+    content.startRecording();
+
+    expect(content.dataSet.name).toBe("Program 1 14:32:07");
+  });
+
+  it("stops recording", () => {
+    const content = setupContentWithTwoNamedNodes("Sensor", "Servo");
+    content.startRecording();
+    content.stopRecording();
+    expect(content.isRecording).toBe(false);
+  });
+});
+
 describe("recordCase", () => {
   it("writes a 1-based point number in the first column", () => {
     const content = setupContentWithTwoNamedNodes("Sensor", "Servo");

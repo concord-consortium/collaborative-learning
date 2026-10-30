@@ -199,7 +199,11 @@ export const DataflowContentModel = TileContentModel
     // shows it while nothing is connected.
     connectError: undefined as string | undefined,
     // True when a connection failed while the pane was closed; opening the pane clears it.
-    unseenConnectError: false
+    unseenConnectError: false,
+    // Volatile (not persisted): a reload must not resume a run. Lives on the model rather than in
+    // DataflowProgram's React state so the tile toolbar's buttons can reach it -- a toolbar button
+    // renders from a different component tree and cannot see that state. (CLUE-771)
+    isRecording: false,
   }))
   .views(self => ({
     get sharedModel() {
@@ -656,6 +660,16 @@ export const DataflowContentModel = TileContentModel
     },
     setRecordedRun(value: boolean) {
       self.recordedRun = value;
+    },
+    startRecording() {
+      // Only when there is nothing to keep, so a run started after single samples appends to them
+      // rather than discarding them. prepareCapture is idempotent, so re-preparing an already
+      // prepared capture keeps the attribute ids a linked table is holding.
+      if (self.dataSet.cases.length === 0) self.prepareCapture();
+      self.isRecording = true;
+    },
+    stopRecording() {
+      self.isRecording = false;
     },
     resetRecording() {
       self.recordedRun = false;
