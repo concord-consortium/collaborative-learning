@@ -11,7 +11,7 @@ interface IProps {
   // True when the student has Ada, so the drawer can offer her next to a panel.
   chatTutorAvailable: boolean;
   // Renders Ada's drawer content. `active` is false while the panel tab is selected: Ada stays
-  // mounted then so her conversation is kept. `tabsRef` is the toggle buttons' row, which Ada's
+  // mounted then so her conversation is kept. `tabsRef` is the tab buttons' row, which Ada's
   // focus trap lets Tab reach.
   renderChatTutor?: (active: boolean, tabsRef: RefObject<HTMLDivElement>) => React.ReactNode;
 }
@@ -39,15 +39,15 @@ export const RightDrawer: React.FC<IProps> = observer(function RightDrawer(props
 
   return (
     <div className="right-drawer" data-testid="right-drawer">
-      {/* Two toggle buttons rather than ARIA tabs: the pressed one is showing. */}
+      {/* Two buttons rather than ARIA tabs; aria-current marks the one showing. */}
       {showTabs && drawerPanel &&
         <div className="right-drawer-tabs" ref={tabsRef}>
-          <button type="button" aria-pressed={adaActive}
+          <button type="button" aria-current={adaActive || undefined}
                   className={classNames("right-drawer-tab", { selected: adaActive })}
                   onClick={selectAda}>
             Ada
           </button>
-          <button type="button" id={kRightDrawerPanelTabId} aria-pressed={panelShowing}
+          <button type="button" id={kRightDrawerPanelTabId} aria-current={panelShowing || undefined}
                   className={classNames("right-drawer-tab", { selected: panelShowing })}
                   onClick={() => ui.setDrawerTab("panel")}>
             {drawerPanel.tabLabel}

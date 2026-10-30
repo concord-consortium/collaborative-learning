@@ -30,8 +30,8 @@ function pressTab(shiftKey = false) {
   });
 }
 
-describe("useTutorDrawerTrap with the drawer's toggle buttons", () => {
-  it("lets Tab and Shift+Tab reach the toggle buttons, and Escape there still closes Ada", () => {
+describe("useTutorDrawerTrap with the drawer's tab buttons", () => {
+  it("lets Tab and Shift+Tab reach the tab buttons, and Escape there still closes Ada", () => {
     const onEscape = jest.fn();
     render(<Harness onEscape={onEscape} />);
     const message = screen.getByRole("textbox", { name: "Message" });

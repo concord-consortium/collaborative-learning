@@ -49,20 +49,20 @@ describe("RightDrawer", () => {
     expect(screen.getByTestId("ada-content")).toBeVisible();
 
     act(() => mockUi.openDrawerPanel(panel));
-    // Two toggle buttons, not a tab list: the selected one is pressed.
+    // Two buttons, not a tab list: aria-current marks the one showing.
     expect(screen.queryByRole("tablist")).not.toBeInTheDocument();
     expect(screen.queryByRole("tab")).not.toBeInTheDocument();
     const ada = screen.getByRole("button", { name: "Ada" });
     const help = screen.getByRole("button", { name: "Connection help" });
-    expect(help).toHaveAttribute("aria-pressed", "true");
-    expect(ada).toHaveAttribute("aria-pressed", "false");
+    expect(help).toHaveAttribute("aria-current", "true");
+    expect(ada).not.toHaveAttribute("aria-current");
     expect(screen.getByTestId("panel-content")).toBeVisible();
     // still mounted (so the conversation is kept) but hidden
     expect(screen.getByTestId("ada-content")).not.toBeVisible();
 
     fireEvent.click(ada);
-    expect(ada).toHaveAttribute("aria-pressed", "true");
-    expect(help).toHaveAttribute("aria-pressed", "false");
+    expect(ada).toHaveAttribute("aria-current", "true");
+    expect(help).not.toHaveAttribute("aria-current");
     expect(mockUi.drawerTab).toBe("chatTutor");
     expect(screen.getByTestId("ada-content")).toBeVisible();
     expect(screen.queryByTestId("panel-content")).not.toBeInTheDocument();
@@ -88,7 +88,7 @@ describe("RightDrawer", () => {
     act(() => mockUi.setShowChatTutor(false));
     expect(screen.queryByTestId("ada-content")).not.toBeInTheDocument();
     expect(screen.getByTestId("panel-content")).toBeVisible();
-    expect(screen.getByRole("button", { name: "Connection help" })).toHaveAttribute("aria-pressed", "true");
+    expect(screen.getByRole("button", { name: "Connection help" })).toHaveAttribute("aria-current", "true");
   });
 
   it("tells Ada she is active only while her tab is showing", () => {
@@ -108,7 +108,7 @@ describe("RightDrawer", () => {
     expect(activeValues[activeValues.length - 1]).toBe(true);
   });
 
-  it("gives Ada the toggle buttons' row for her focus trap", () => {
+  it("gives Ada the tab buttons' row for her focus trap", () => {
     let tabsRef: React.RefObject<HTMLDivElement> | undefined;
     const recordTabsRef = (_active: boolean, ref: React.RefObject<HTMLDivElement>) => {
       tabsRef = ref;

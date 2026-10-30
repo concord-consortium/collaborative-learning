@@ -320,7 +320,8 @@ Canceling the device chooser is not a failure: no message, no help.
   - Closing the help leaves Ada showing if Ada was open, and otherwise closes the drawer.
   - Ada's "AIdeas" launcher, which floats at the viewport's lower-right, is hidden whenever the
     drawer is open, whichever tab is showing, so it never sits on top of the drawer.
-  - Ada's focus trap applies only while the Ada tab is selected.
+  - Ada's focus trap applies only while the Ada tab is selected, and it includes the tab buttons, so
+    Tab can reach the help's tab without closing Ada.
   - These changes to Ada were agreed during the design.
 - **Not persisted.** It is UI state only, so a reload starts with it closed.
 - **Every route that shows a Dataflow tile toolbar,** including the standalone doc-editor (`/editor/`),
@@ -353,6 +354,7 @@ Canceling the device chooser is not a failure: no message, no help.
     showing, otherwise to the connect button.
   - It does **not** trap focus.
   - Details is a disclosure (`aria-expanded`).
+- **The tabs with Ada** are two plain buttons, not ARIA tabs; `aria-current` marks the one showing.
 
 ## Logging
 

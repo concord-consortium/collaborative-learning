@@ -9,7 +9,7 @@ interface TutorDrawerTrapOptions {
   onEscape: () => void;
   // False while the drawer is mounted but another tab is showing; the trap is then off.
   active: boolean;
-  // The right drawer's toggle buttons, which sit outside the sidebar. Tab reaches them as the
+  // The right drawer's tab buttons, which sit outside the sidebar. Tab reaches them as the
   // trap's "tabs" slot, so a keyboard user can switch to the other panel without closing Ada.
   drawerTabsRef?: RefObject<HTMLElement | null>;
 }
@@ -20,7 +20,7 @@ interface TutorDrawerTrapOptions {
 // the hook's own effect (which sets descendants non-tabbable), or all controls would be left at
 // tabindex=-1 with no initial focus.
 //
-// Strategy shape: a "content" slot (the body wrapper) and, while the drawer shows its toggle
+// Strategy shape: a "content" slot (the body wrapper) and, while the drawer shows its tab
 // buttons, a "tabs" slot. Both are in tabWithinSlots, so Tab walks each slot's focusable children
 // before moving to the other. Both slots get the same escapeHandler; returning "handled" skips
 // the trap's exit + container.focus(), letting the caller's launcher-restore stand (plain onExit

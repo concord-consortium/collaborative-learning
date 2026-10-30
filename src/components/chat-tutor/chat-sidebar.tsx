@@ -38,7 +38,7 @@ interface IProps {
   // False while another tab in the right drawer is showing. The sidebar stays mounted, so the
   // conversation is kept, but its focus trap is off.
   active: boolean;
-  // The right drawer's toggle buttons, when it shows them. Ada's focus trap includes them.
+  // The right drawer's tab buttons, when it shows them. Ada's focus trap includes them.
   drawerTabsRef?: RefObject<HTMLElement | null>;
 }
 
