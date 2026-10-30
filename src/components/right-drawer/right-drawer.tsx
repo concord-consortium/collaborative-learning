@@ -59,7 +59,7 @@ export const RightDrawer: React.FC<IProps> = observer(function RightDrawer(props
       }
       {drawerPanel && panelShowing &&
         <div className="right-drawer-body">
-          <drawerPanel.Component onClose={() => ui.closeDrawerPanel()} />
+          <drawerPanel.Component key={drawerPanel.id} onClose={() => ui.closeDrawerPanel()} />
         </div>
       }
     </div>
