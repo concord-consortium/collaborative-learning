@@ -168,7 +168,7 @@ carry `targetType: "device"` and `device`: the choice id (`arduino`, `microbitHu
 | `dismissConnectTutorial` | `targetType: "connectTutorial"`, `trigger`: `ok` (OK in this tile), `okInAnotherTile` or `connection` | The tutorial over the tile is dismissed |
 | `showConnectHelp` | `targetType: "connectHelp"`, `kind` | More… opens the Connection help |
 | `hideConnectHelp` | `targetType: "connectHelp"`, `kind`, `trigger`: `close` (✕ or Escape) or `closeHelp` (the working notice's button) | The Connection help closes |
-| `connectHelpNotice` | `targetType: "connectHelp"`, `notice`: `working`, `differentProblem`, `unplugged` or `notConnected`; `kind` for `differentProblem`; `action`: `shown` or `clicked` | A notice appears in the Connection help, or the student clicks its button |
+| `connectHelpNotice` | `targetType: "connectHelp"`, `notice`: `working`, `updating`, `differentProblem`, `unplugged` or `notConnected`; `kind` for `differentProblem`; `action`: `shown` or `clicked` | A notice appears in the Connection help, or the student clicks its button |
 
 - `connectDevice` and `reconnectDevice` mark the click, not a success. A quick attempt logs
   `connectDevice`, `resetProgram` (when the device becomes active) and `connectResult`; anything
@@ -197,7 +197,7 @@ until then.
 | `choose` | Connect, and a Reconnect that falls back to the chooser | The device chooser closes | None. Dismissing it ends the attempt as `canceled`. |
 | `open` | All | The port or USB device is open | `kOpenTimeoutMs` (20 s), then `openTimeout` |
 | `checkFirmware` | Spiker:bit | The firmware answers, or 1.5 s passes | Already bounded |
-| `update` | Spiker:bit with old or missing firmware | The flash finishes and the re-query is done | `kUpdateStallMs` (10 s) with no progress, then `updateStalled` |
+| `update` | Spiker:bit with old or missing firmware | The flash finishes and the re-query is done | `kUpdateStartMs` (45 s) to the first progress, then `kUpdateStallMs` (20 s) between progress reports, then `updateStalled` |
 | `waitForData` | All | The first data arrives | `kFirstDataTimeoutMs` (5 s) from when the device became active, then `notResponding` (Spiker:bit) or `noData` |
 
 `attempt.steps` records when each step happened, in ms from the click: `chooserClosed`, `opened`,
@@ -228,7 +228,7 @@ failure, with its step and how long that step had run.
 - A Reconnect keeps the actions throughout, and goes back to the device list only if it fails
   before the open.
 - `actionsEnabled` is false from the open until the first data arrives or a stall ends the
-  attempt.
+  attempt, and again while a stalled update is making progress (`updateResumed`).
 - Any failure at or before the open, `updateFailed`, a loss or a cancel leaves the device list.
 
 **Stalls and recovery.** `updateStalled`, `noData` and `notResponding` end the attempt, but the
@@ -236,6 +236,11 @@ device stays open and the stalled step keeps running. The actions are enabled, a
 update keeps the actions view though its board isn't active yet. A stall's failure counts only
 while its device is open (`holdsDevice`): the button and the pane ignore one that outlasted it.
 
+- **Progress from a stalled update** clears `lastFailure` and calls `onStallChanged` with no
+  failure. `updateResumed` is then true: the pane shows the ended attempt's update and progress
+  bar as if it still ran, the help's notice is `updating`, and the actions are disabled. Another
+  `kUpdateStallMs` without progress sets `lastFailure` to `updateStalled` again, through
+  `onStallChanged`.
 - **An update that finishes after all** makes the board active without a second outcome. It no
   longer stalls, so `lastFailure` is cleared, and the board gets the same 5 s wait for its first
   data. If none comes, `lastFailure` becomes `notResponding`. The listener hears both changes

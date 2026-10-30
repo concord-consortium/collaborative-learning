@@ -116,6 +116,12 @@ export const ConnectionHelpPanel = observer(function ConnectionHelpPanel({ onClo
               </span>
               <button type="button" onClick={showNoticeTopic}>Show steps for this</button>
             </div>}
+          {notice?.type === "updating" &&
+            <div className="connection-help-notice updating">
+              <span>
+                <strong>The update is going again.</strong> Keep the {connection.label ?? label} plugged in.
+              </span>
+            </div>}
           {notice?.type === "unplugged" &&
             <div className="connection-help-notice not-connected">
               <span>

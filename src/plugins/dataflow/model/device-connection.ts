@@ -42,8 +42,15 @@ export const kOpenTimeoutMs = 20000;
 // before the attempt ends as noData, or notResponding for a Spiker:bit.
 export const kFirstDataTimeoutMs = 5000;
 
-// How long a firmware update may go without progress before the attempt ends as updateStalled.
-export const kUpdateStallMs = 10000;
+// How long a firmware update may take to report its first progress before the attempt ends as
+// updateStalled. Before writing its first page, the library halts the board, fills DAPLink's
+// serial buffers on the first flash after the board is plugged in, resets it and reads its page
+// checksums, all without reporting progress. That took about 25 s on a Chromebook.
+export const kUpdateStartMs = 45000;
+
+// How long a firmware update may go between progress reports before it counts as stalled. A page
+// took about 8 s on a Chromebook.
+export const kUpdateStallMs = 20000;
 
 export type ConnectResult = AttemptOutcome;
 
@@ -97,14 +104,16 @@ export interface IHelpTopic {
   tileId: string;
 }
 
-// What the help's notices follow: a problem, "working" once data is arriving, or a device that
-// was unplugged or isn't connected, which has no help of its own.
-export type HelpState = HelpKind | "working" | "unplugged" | "notConnected";
+// What the help's notices follow: a problem, "working" once data is arriving, a stalled update
+// that is making progress again, or a device that was unplugged or isn't connected, which has no
+// help of its own.
+export type HelpState = HelpKind | "working" | "updating" | "unplugged" | "notConnected";
 
-// What has changed since the help's topic was shown: the device works now, has a problem with
-// other help, or is no longer connected.
+// What has changed since the help's topic was shown: the device works now, its update is going
+// again, it has a problem with other help, or it is no longer connected.
 export type HelpNotice =
-  { type: "working" | "unplugged" | "notConnected" } | { type: "differentProblem"; topic: IHelpTopic };
+  { type: "working" | "updating" | "unplugged" | "notConnected" }
+  | { type: "differentProblem"; topic: IHelpTopic };
 
 // The Connection help's state, kept here rather than in its component, which unmounts while Ada's
 // tab is selected.
@@ -259,9 +268,11 @@ export class DeviceConnection {
     return this.isConnected ? "actions" : "devices";
   }
 
-  // The connected actions are disabled while an attempt is starting its device up.
+  // The connected actions are disabled while an attempt is starting its device up, and while a
+  // stalled update is making progress again, since closing the board would stop the flash.
   get actionsEnabled() {
     const attempt = this.attempt;
+    if (this.updateResumed) return false;
     return !attempt || attempt.ended || attempt.actionsEnabled;
   }
 
@@ -272,6 +283,12 @@ export class DeviceConnection {
   // Whether a device is open: the active one, or a Spiker:bit a stalled update holds open.
   get holdsDevice() {
     return this.isConnected || this.paneView === "actions";
+  }
+
+  // Whether an update that stalled is making progress again. Its attempt has ended, but the pane
+  // shows the update as it runs.
+  get updateResumed() {
+    return !!this.stalledSpikerbit && !this.lastFailure;
   }
 
   // `failure`, unless it is a stall whose device is no longer open, which another tile's
@@ -352,6 +369,7 @@ export class DeviceConnection {
     const loss = this.lossReason;
     if (loss) return loss;
     if (this.lastFailure) return this.lastFailure.kind;
+    if (this.updateResumed) return "updating";
     if (this.notResponding) return "notResponding";
     if (this.dataReceived) return "working";
     return this.holdsDevice ? undefined : "notConnected";
@@ -396,7 +414,8 @@ export class DeviceConnection {
   // A running attempt leaves the notice as it is until its outcome. Otherwise, with no problem, the
   // device isn't working any more, so a working notice goes; a different problem's steps still apply.
   // An unplug or a device that isn't connected keeps the steps, which can say to unplug the board
-  // and click Connect, and gets a notice that says what to do next.
+  // and click Connect, and gets a notice that says what to do next. So does a stalled update that
+  // is making progress again.
   private problemChanged(problem: HelpState | undefined) {
     const help = this.help;
     if (!help) return;
@@ -409,7 +428,7 @@ export class DeviceConnection {
     }
     const { shown } = help;
     let notice: HelpNotice | undefined;
-    if (problem === "working" || problem === "unplugged" || problem === "notConnected") {
+    if (problem === "working" || problem === "updating" || problem === "unplugged" || problem === "notConnected") {
       notice = { type: problem };
     } else {
       // Help on another device names that device, so it is different help even for the same kind.
@@ -736,8 +755,8 @@ export class DeviceConnection {
     const following = () => this.isFollowing(attempt);
     let opened = false;
     let failed = false;
-    const limitUpdate = () => this.setLimit(attempt, kUpdateStallMs, () => {
-      if (!failed) this.updateStalled(attempt, device);
+    const limitUpdate = (ms: number) => this.setLimit(attempt, ms, () => {
+      if (!failed) this.updateStalled(attempt, device, ms);
     });
     const observer: ISpikerbitConnectObserver = {
       onOpening: afterChooser => {
@@ -752,12 +771,13 @@ export class DeviceConnection {
       onFirmwareChecked: (reply, willUpdate) => {
         if (!following()) return;
         attempt.firmwareChecked(describeFirmware(reply), willUpdate);
-        if (willUpdate) limitUpdate();
+        if (willUpdate) limitUpdate(kUpdateStartMs);
       },
       onUpdateProgress: percent => {
         if (!following()) return;
         attempt.updateProgress(percent);
-        limitUpdate();
+        if (!attempt.ended) limitUpdate(kUpdateStallMs);
+        else if (this.stalledSpikerbit === device) this.stalledUpdateProgressed(attempt, () => !failed);
       },
       onUpdateFinished: () => {
         if (!following()) return;
@@ -809,10 +829,25 @@ export class DeviceConnection {
   }
 
   // The flash keeps running, and the board stays open until it finishes or is disposed.
-  private updateStalled(attempt: ConnectionAttempt, device: SpikerbitDevice) {
+  private updateStalled(attempt: ConnectionAttempt, device: SpikerbitDevice, elapsedMs: number) {
     if (!this.isFollowing(attempt) || this.spikerbitDevice !== device) return;
     this.stalledSpikerbit = device;
-    this.endAttempt(attempt, "updateStalled", { elapsedMs: kUpdateStallMs });
+    this.endAttempt(attempt, "updateStalled", { elapsedMs });
+  }
+
+  // A stalled update made progress, so it no longer stalls, until it goes kUpdateStallMs without
+  // progress again. `flashing` is false once the flash has failed.
+  private stalledUpdateProgressed(attempt: ConnectionAttempt, flashing: () => boolean) {
+    const followed = this.followed;
+    if (followed?.attempt !== attempt) return;
+    if (this.lastFailure) this.stallChanged(attempt, undefined);
+    clearTimeout(followed.timer);
+    followed.timer = setTimeout(() => {
+      if (!flashing()) return;
+      this.stallChanged(attempt, {
+        kind: "updateStalled", choice: attempt.choice, step: "update", elapsedMs: kUpdateStallMs
+      });
+    }, kUpdateStallMs);
   }
 
   // The flash of a stalled update failed after all, so the pane goes back to the device list with

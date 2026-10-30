@@ -4,7 +4,7 @@ import { connectPaneStatus, IPaneStatusInput } from "./connect-pane-status";
 
 const base: IPaneStatusInput = {
   attempt: undefined, isConnected: false, dataReceived: false, label: "Spiker:bit", failure: undefined,
-  loss: undefined, notResponding: false, check: undefined
+  loss: undefined, notResponding: false, check: undefined, updateResumed: false
 };
 
 const connectedBase = { ...base, isConnected: true };
@@ -65,6 +65,16 @@ describe("connectPaneStatus", () => {
     expect(connectPaneStatus({ ...connectedBase, attempt })).toEqual({
       line1: "Updating. Keep it plugged in.",
       line2: { text: "45%", tone: "plain", progress: 45 }, announce: false
+    });
+  });
+
+  it("a stalled update that is making progress again shows the bar, not the stall", () => {
+    const attempt = running("update");
+    attempt.end("updateStalled", failure("updateStalled"));
+    attempt.updateProgress(60);
+    expect(connectPaneStatus({ ...base, attempt, updateResumed: true })).toEqual({
+      line1: "Updating. Keep it plugged in.",
+      line2: { text: "60%", tone: "plain", progress: 60 }, announce: false
     });
   });
 

@@ -124,6 +124,7 @@ $help-status-line-height: 18px;
       border: solid 1px $problem-orange;
     }
 
+    &.updating,
     &.not-connected {
       background: $workspace-teal-light-9;
       border: solid 1px $workspace-teal;

@@ -8,7 +8,7 @@ import {
 import { withChecksum } from "../../../models/stores/cc-device-protocol";
 import {
   DeviceConnection, getDeviceConnection, IDeviceConnectionDeps, kFirstDataTimeoutMs, kIdentifyResultMs,
-  kOpenTimeoutMs, kUpdateStallMs
+  kOpenTimeoutMs, kUpdateStartMs, kUpdateStallMs
 } from "./device-connection";
 import { IdentifyResult } from "../../../models/stores/cc-device-session";
 
@@ -852,7 +852,8 @@ describe("DeviceConnection", () => {
       expect(connection.currentFailure(undefined)).toBeUndefined();
     });
 
-    it("an update with no progress for 10 s ends as updateStalled and keeps the actions view", async () => {
+    it("an update with no first progress within its start limit, or no progress after that within the stall " +
+        "limit, ends as updateStalled and keeps the actions view", async () => {
       const { connection, stepped } = setupSpikerbit();
       const p = connection.connect("spikerbit");
       await flush();
@@ -863,7 +864,8 @@ describe("DeviceConnection", () => {
       stepped.observer().onFirmwareChecked!(null, true);
       expect(connection.attempt!.step).toBe("update");
       expect(connection.attempt!.steps.updateStarted).toEqual(expect.any(Number));
-      await jest.advanceTimersByTimeAsync(kUpdateStallMs - 1);
+      await jest.advanceTimersByTimeAsync(kUpdateStartMs - 1);
+      expect(connection.attempt!.ended).toBe(false);
       stepped.observer().onUpdateProgress!(40);
       expect(connection.attempt!.updatePercent).toBe(40);
       await jest.advanceTimersByTimeAsync(kUpdateStallMs - 1);
@@ -885,7 +887,7 @@ describe("DeviceConnection", () => {
       await flush();
       stepped.observer().onOpened!();
       stepped.observer().onFirmwareChecked!(null, true);
-      await jest.advanceTimersByTimeAsync(kUpdateStallMs);
+      await jest.advanceTimersByTimeAsync(kUpdateStartMs);
       expect(await p).toBe("updateStalled");
       stepped.observer().onUpdateFinished!();
       expect(connection.attempt!.firmware).toEqual({ found: null, updated: true });
@@ -904,6 +906,55 @@ describe("DeviceConnection", () => {
       serialDevice.clearActiveDevice();
     });
 
+    it("progress after a stall resumes the update until it goes without progress again", async () => {
+      const { connection, stepped, serialDevice } = setupSpikerbit();
+      const listener = { onStallChanged: jest.fn() };
+      const p = connection.connect("spikerbit", { listener });
+      await flush();
+      stepped.observer().onOpened!();
+      stepped.observer().onFirmwareChecked!(null, true);
+      await jest.advanceTimersByTimeAsync(kUpdateStartMs);
+      expect(await p).toBe("updateStalled");
+      expect(connection.currentProblem).toBe("updateStalled");
+      expect(connection.updateResumed).toBe(false);
+      expect(connection.actionsEnabled).toBe(true);
+      connection.openHelp(connection.helpTopic("updateStalled", "tile-1")!);
+
+      stepped.observer().onUpdateProgress!(20);
+      expect(connection.lastFailure).toBeUndefined();
+      expect(listener.onStallChanged).toHaveBeenLastCalledWith(connection.attempt, undefined);
+      expect(connection.updateResumed).toBe(true);
+      expect(connection.attempt!.updatePercent).toBe(20);
+      expect(connection.currentProblem).toBe("updating");
+      expect(connection.help!.notice).toEqual({ type: "updating" });
+      // Closing the board would stop the flash.
+      expect(connection.actionsEnabled).toBe(false);
+      expect(connection.paneView).toBe("actions");
+
+      await jest.advanceTimersByTimeAsync(kUpdateStallMs - 1);
+      stepped.observer().onUpdateProgress!(40);
+      await jest.advanceTimersByTimeAsync(kUpdateStallMs - 1);
+      expect(connection.updateResumed).toBe(true);
+      await jest.advanceTimersByTimeAsync(1);
+      const stall = { kind: "updateStalled", choice: "spikerbit", step: "update", elapsedMs: kUpdateStallMs };
+      expect(connection.lastFailure).toEqual(stall);
+      expect(listener.onStallChanged).toHaveBeenLastCalledWith(connection.attempt, stall);
+      expect(connection.updateResumed).toBe(false);
+      expect(connection.actionsEnabled).toBe(true);
+      expect(connection.help!.notice).toBeUndefined();
+
+      stepped.observer().onUpdateProgress!(60);
+      expect(connection.updateResumed).toBe(true);
+      stepped.observer().onUpdateFinished!();
+      // The finished update no longer waits for progress.
+      await jest.advanceTimersByTimeAsync(kUpdateStallMs);
+      expect(connection.lastFailure).toBeUndefined();
+      await stepped.activate();
+      expect(connection.updateResumed).toBe(false);
+      expect(connection.actionsEnabled).toBe(true);
+      serialDevice.clearActiveDevice();
+    });
+
     it("a stalled update that finishes clears its updateStalled failure when the board becomes active",
       async () => {
         const { connection, stepped, serialDevice } = setupSpikerbit();
@@ -912,7 +963,7 @@ describe("DeviceConnection", () => {
         await flush();
         stepped.observer().onOpened!();
         stepped.observer().onFirmwareChecked!(null, true);
-        await jest.advanceTimersByTimeAsync(kUpdateStallMs);
+        await jest.advanceTimersByTimeAsync(kUpdateStartMs);
         expect(await p).toBe("updateStalled");
         stepped.observer().onUpdateFinished!();
         await stepped.activate();
@@ -941,7 +992,7 @@ describe("DeviceConnection", () => {
     it("disconnect during a stalled update disposes the Spiker:bit device", async () => {
       const { connection, stepped } = setupSpikerbit();
       const { result: p } = await startSpikerbit(connection, stepped, true);
-      await jest.advanceTimersByTimeAsync(kUpdateStallMs);
+      await jest.advanceTimersByTimeAsync(kUpdateStartMs);
       expect(await p).toBe("updateStalled");
       await connection.disconnect();
       expect(stepped.device.disconnect).toHaveBeenCalled();
@@ -957,7 +1008,7 @@ describe("DeviceConnection", () => {
       const transport = makeTransport();
       const { connection, stepped } = setupSpikerbit([transport]);
       const { result: p } = await startSpikerbit(connection, stepped, true);
-      await jest.advanceTimersByTimeAsync(kUpdateStallMs);
+      await jest.advanceTimersByTimeAsync(kUpdateStartMs);
       expect(await p).toBe("updateStalled");
       expect(await connection.connect("arduino")).toBe("connected");
       expect(stepped.device.disconnect.mock.invocationCallOrder[0])
@@ -1024,7 +1075,7 @@ describe("DeviceConnection", () => {
       await flush();
       stepped.observer().onOpened!();
       stepped.observer().onFirmwareChecked!(null, true);
-      await jest.advanceTimersByTimeAsync(kUpdateStallMs);
+      await jest.advanceTimersByTimeAsync(kUpdateStartMs);
       expect(await p).toBe("updateStalled");
       stepped.observer().onLost!("unplugged");
       expect(listener.onLost).toHaveBeenCalledWith(connection.attempt, "unplugged");
@@ -1055,7 +1106,7 @@ describe("DeviceConnection", () => {
       await flush();
       stepped.observer().onOpened!();
       stepped.observer().onFirmwareChecked!(null, true);
-      await jest.advanceTimersByTimeAsync(kUpdateStallMs);
+      await jest.advanceTimersByTimeAsync(kUpdateStartMs);
       expect(await p).toBe("updateStalled");
       await stepped.fail(new Error("flash failed"));
       expect(listener.onLost).toHaveBeenCalledWith(connection.attempt, "updateFailed");
@@ -1091,7 +1142,7 @@ describe("DeviceConnection", () => {
         createSpikerbitDevice, getSpikerbitFlashDataSource: () => "flash-source"
       });
       const { result: p } = await startSpikerbit(connection, stepped, true);
-      await jest.advanceTimersByTimeAsync(kUpdateStallMs);
+      await jest.advanceTimersByTimeAsync(kUpdateStartMs);
       expect(await p).toBe("updateStalled");
       const staleObserver = stepped.observer();
 

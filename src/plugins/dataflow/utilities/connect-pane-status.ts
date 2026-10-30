@@ -25,6 +25,8 @@ export interface IPaneStatusInput {
   loss: DeviceLoss | undefined;
   notResponding: boolean;
   check: IdentifyCheckState | undefined;
+  // A stalled update is making progress again, so its ended attempt shows as if it still ran.
+  updateResumed: boolean;
 }
 
 // The status of the shared connection, showing `failure`: the tile's in its pane, or the
@@ -40,7 +42,8 @@ export function connectionStatusInput(
     failure: connection.currentFailure(failure),
     loss: connection.lossReason,
     notResponding: connection.notResponding,
-    check: connection.check
+    check: connection.check,
+    updateResumed: connection.updateResumed
   };
 }
 
@@ -52,12 +55,12 @@ const status = (line1: string, line2?: Line2): IPaneStatus =>
 const problem = (kind: HelpKind): Line2 => ({ text: paneProblemText(kind), tone: "problem", helpKind: kind });
 
 export function connectPaneStatus(input: IPaneStatusInput): IPaneStatus {
-  const { attempt, isConnected, dataReceived, label, failure, loss, notResponding, check } = input;
+  const { attempt, isConnected, dataReceived, label, failure, loss, notResponding, check, updateResumed } = input;
   const connected = `Connected: ${label}`;
   const notConnected = "Not connected";
 
   // A running attempt names its own device. The connection's label is still the one used before.
-  if (attempt && !attempt.ended) {
+  if (attempt && (!attempt.ended || updateResumed)) {
     const attemptLabel = kDeviceChoiceLabels[attempt.choice];
     const connecting = `Connecting to ${attemptLabel}…`;
     const attemptConnected = `Connected: ${attemptLabel}`;

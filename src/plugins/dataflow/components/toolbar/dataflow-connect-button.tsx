@@ -324,7 +324,8 @@ export const ConnectDeviceButton = observer(function ConnectDeviceButton({ name 
       ?? (lastFailure ? kDeviceChoiceLabels[lastFailure.choice] : undefined),
     stallKind: lastFailure?.kind,
     lossMessage: connection.lossMessage,
-    connecting: attempt && !attempt.ended ? kDeviceChoiceLabels[attempt.choice] : undefined
+    connecting: attempt && (!attempt.ended || connection.updateResumed)
+      ? kDeviceChoiceLabels[attempt.choice] : undefined
   });
 
   // The help shows the tile's failure when it is the kind asked about.
