@@ -234,7 +234,7 @@ export const Chat: React.FC<IProps> = ({ chat, onClose, closeLabel, transcriptTi
   };
 
   return (
-    // the wrapping drawer exposes the landmark + accessible name
+    // the wrapping sidebar exposes the landmark + accessible name
     <section className="chat-tutor" data-testid="chat-tutor">
       <header className="chat-header" data-testid="chat-header">
         <h2 className="chat-header-title">
