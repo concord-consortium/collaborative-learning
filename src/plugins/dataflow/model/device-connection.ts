@@ -246,10 +246,11 @@ export class DeviceConnection {
     return !!this.stalledSpikerbit && !this.lastFailure;
   }
 
-  // `failure`, unless it is a stall whose device is no longer open, which another tile's
-  // Disconnect can leave on a tile.
+  // `failure`, unless it is a stall whose device is no longer open. Another tile's Disconnect can
+  // leave a stall on a tile, and the device open now may belong to a later attempt.
   currentFailure(failure: IConnectFailure | undefined) {
-    return failure && (!kStallKinds.includes(failure.kind) || this.holdsDevice) ? failure : undefined;
+    if (!failure || !kStallKinds.includes(failure.kind)) return failure;
+    return this.holdsDevice && failure.attemptId === this.attempt?.id ? failure : undefined;
   }
 
   get connectedLabel(): string | undefined {
@@ -444,7 +445,7 @@ export class DeviceConnection {
     followed.timer = undefined;
     const failure: IConnectFailure | undefined = isFailureKind(outcome)
       ? {
-        kind: outcome, choice: attempt.choice, step: attempt.step,
+        attemptId: attempt.id, kind: outcome, choice: attempt.choice, step: attempt.step,
         elapsedMs: elapsedMs ?? attempt.stepElapsedMs, error: errorInfo(error)
       }
       : undefined;
@@ -501,7 +502,8 @@ export class DeviceConnection {
       this.stallChanged(attempt, undefined);
       clearTimeout(followed.timer);
       followed.timer = setTimeout(() => this.stallChanged(attempt, {
-        kind: noData, choice: attempt.choice, step: "waitForData", elapsedMs: kFirstDataTimeoutMs
+        attemptId: attempt.id, kind: noData, choice: attempt.choice, step: "waitForData",
+        elapsedMs: kFirstDataTimeoutMs
       }), kFirstDataTimeoutMs);
     }
   }
@@ -719,7 +721,8 @@ export class DeviceConnection {
     followed.timer = setTimeout(() => {
       if (!flashing()) return;
       this.stallChanged(attempt, {
-        kind: "updateStalled", choice: attempt.choice, step: "update", elapsedMs: kUpdateStallMs
+        attemptId: attempt.id, kind: "updateStalled", choice: attempt.choice, step: "update",
+        elapsedMs: kUpdateStallMs
       });
     }, kUpdateStallMs);
   }
@@ -730,7 +733,8 @@ export class DeviceConnection {
   private stalledUpdateFailed(attempt: ConnectionAttempt, error: unknown) {
     if (!this.isFollowing(attempt)) return;
     this.lastFailure = {
-      kind: "updateFailed", choice: attempt.choice, step: "update", elapsedMs: attempt.stepElapsedMs,
+      attemptId: attempt.id, kind: "updateFailed", choice: attempt.choice, step: "update",
+      elapsedMs: attempt.stepElapsedMs,
       error: errorInfo(error)
     };
     this.followed?.listener?.onLost?.(attempt, "updateFailed");

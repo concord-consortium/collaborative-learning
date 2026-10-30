@@ -16,7 +16,7 @@ function running(step: "choose" | "open" | "checkFirmware" | "update" | "waitFor
 }
 
 const failure = (kind: IConnectFailure["kind"]): IConnectFailure =>
-  ({ kind, choice: "spikerbit", step: "open", elapsedMs: 1000 });
+  ({ attemptId: "attempt-1", kind, choice: "spikerbit", step: "open", elapsedMs: 1000 });
 
 describe("connectPaneStatus", () => {
   it("idle", () => {

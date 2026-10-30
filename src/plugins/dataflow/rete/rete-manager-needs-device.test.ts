@@ -129,7 +129,9 @@ describe("ReteManager connect failure", () => {
   async function openWithError() {
     const opened = await openProgram([sensorNode("s1", "emg")]);
     managers.push(opened.manager);
-    opened.content.setConnectFailure({ kind: "openFailed", choice: "arduino", step: "open", elapsedMs: 0 });
+    opened.content.setConnectFailure({
+      attemptId: "attempt-1", kind: "openFailed", choice: "arduino", step: "open", elapsedMs: 0
+    });
     opened.content.setUnseenConnectError(true);
     return opened;
   }

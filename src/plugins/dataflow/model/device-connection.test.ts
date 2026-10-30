@@ -856,7 +856,9 @@ describe("DeviceConnection", () => {
       await jest.advanceTimersByTimeAsync(kFirstDataTimeoutMs);
       expect(await p).toBe("noData");
       const stall = connection.lastFailure;
-      const openFailed = { kind: "openFailed", choice: "arduino", step: "open", elapsedMs: 0 } as const;
+      const openFailed = {
+        attemptId: "attempt-1", kind: "openFailed", choice: "arduino", step: "open", elapsedMs: 0
+      } as const;
       expect(connection.holdsDevice).toBe(true);
       expect(connection.currentFailure(stall)).toBe(stall);
       serialDevice.clearActiveDevice();
@@ -864,6 +866,23 @@ describe("DeviceConnection", () => {
       expect(connection.currentFailure(stall)).toBeUndefined();
       expect(connection.currentFailure(openFailed)).toBe(openFailed);
       expect(connection.currentFailure(undefined)).toBeUndefined();
+    });
+
+    it("an earlier attempt's stall doesn't count while a newer attempt holds its own device", async () => {
+      const { connection, stepped } = setupSpikerbit([makeTransport(["opened"], { sendsData: false })]);
+      const first = connection.connect("arduino");
+      await jest.advanceTimersByTimeAsync(kFirstDataTimeoutMs);
+      expect(await first).toBe("noData");
+      // Another tile keeps this failure after the Disconnect.
+      const earlierStall = connection.lastFailure;
+      await connection.disconnect();
+
+      const { result: second } = await startSpikerbit(connection, stepped, true);
+      await jest.advanceTimersByTimeAsync(kUpdateStartMs);
+      expect(await second).toBe("updateStalled");
+      expect(connection.holdsDevice).toBe(true);
+      expect(connection.currentFailure(earlierStall)).toBeUndefined();
+      expect(connection.currentFailure(connection.lastFailure)).toBe(connection.lastFailure);
     });
 
     it("an update with no first progress within its start limit, or no progress after that within the stall " +
@@ -946,7 +965,10 @@ describe("DeviceConnection", () => {
       await jest.advanceTimersByTimeAsync(kUpdateStallMs - 1);
       expect(connection.updateResumed).toBe(true);
       await jest.advanceTimersByTimeAsync(1);
-      const stall = { kind: "updateStalled", choice: "spikerbit", step: "update", elapsedMs: kUpdateStallMs };
+      const stall = {
+        attemptId: connection.attempt!.id, kind: "updateStalled", choice: "spikerbit", step: "update",
+        elapsedMs: kUpdateStallMs
+      };
       expect(connection.lastFailure).toEqual(stall);
       expect(listener.onStallChanged).toHaveBeenLastCalledWith(connection.attempt, stall);
       expect(connection.updateResumed).toBe(false);
@@ -985,7 +1007,8 @@ describe("DeviceConnection", () => {
         expect(connection.lastFailure).toBeUndefined();
         await jest.advanceTimersByTimeAsync(1);
         const stall = {
-          kind: "notResponding", choice: "spikerbit", step: "waitForData", elapsedMs: kFirstDataTimeoutMs
+          attemptId: connection.attempt!.id, kind: "notResponding", choice: "spikerbit", step: "waitForData",
+          elapsedMs: kFirstDataTimeoutMs
         };
         expect(connection.lastFailure).toEqual(stall);
         expect(listener.onStallChanged).toHaveBeenLastCalledWith(connection.attempt, stall);

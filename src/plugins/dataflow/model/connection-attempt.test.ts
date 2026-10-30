@@ -46,7 +46,9 @@ describe("ConnectionAttempt", () => {
   it("a stall enables the actions and keeps the view", () => {
     const attempt = new ConnectionAttempt("arduino", "connect");
     attempt.opened("waitForData");
-    attempt.end("noData", { kind: "noData", choice: "arduino", step: "waitForData", elapsedMs: 5000 });
+    attempt.end("noData", {
+      attemptId: attempt.id, kind: "noData", choice: "arduino", step: "waitForData", elapsedMs: 5000
+    });
     expect(attempt).toMatchObject({ ended: true, outcome: "noData", actionsEnabled: true, view: "actions" });
     expect(attempt.failure?.kind).toBe("noData");
     attempt.dataArrived();
@@ -55,7 +57,9 @@ describe("ConnectionAttempt", () => {
 
   it("a failure, a cancel or a loss goes back to the device list", () => {
     const reconnect = new ConnectionAttempt("arduino", "reconnect");
-    reconnect.end("openTimeout", { kind: "openTimeout", choice: "arduino", step: "open", elapsedMs: 20000 });
+    reconnect.end("openTimeout", {
+      attemptId: reconnect.id, kind: "openTimeout", choice: "arduino", step: "open", elapsedMs: 20000
+    });
     expect(reconnect).toMatchObject({ view: "devices", actionsEnabled: false });
     const canceled = new ConnectionAttempt("arduino", "reconnect");
     canceled.end("canceled");

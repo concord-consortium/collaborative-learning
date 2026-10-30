@@ -330,12 +330,16 @@ describe("Dataflow pan split button (CLUE-573)", () => {
 
 });
 
+// An open failure. Only a stall's attemptId is compared, so any id serves when none is given.
+const openFailedOn = (attemptId = "attempt-1") =>
+  ({ attemptId, kind: "openFailed", choice: "spikerbit", step: "open", elapsedMs: 0 }) as const;
+
 // A connect or reconnect that ends in a failure, as DeviceConnection reports it to the tile.
 function failingAttempt(kind: FailureKind, choice: DeviceChoice = "spikerbit") {
   return async (...args: unknown[]) => {
     const options = args[args.length - 1] as IAttemptOptions;
     const attempt = new ConnectionAttempt(choice, "connect", options.attemptId);
-    attempt.end(kind, { kind, choice, step: "open", elapsedMs: 0 });
+    attempt.end(kind, { attemptId: attempt.id, kind, choice, step: "open", elapsedMs: 0 });
     options.listener?.onEnded?.(attempt);
     return kind;
   };
@@ -424,7 +428,9 @@ describe("Dataflow connect button and pane", () => {
 
   describe("announcing a failure the student can't see", () => {
     const headline = "The browser couldn't open the Spiker:bit.";
-    const failure = { kind: "openTimeout", choice: "spikerbit", step: "open", elapsedMs: 0 } as const;
+    const failure = {
+      attemptId: "attempt-1", kind: "openTimeout", choice: "spikerbit", step: "open", elapsedMs: 0
+    } as const;
 
     it("announces the problem headline politely when a failure is recorded with the pane closed", () => {
       const r = renderConnect();
@@ -558,7 +564,7 @@ describe("Dataflow connect button and pane", () => {
 
   it("after a failure: shows the message and the device list again", () => {
     const r = openPane();
-    act(() => r.content.setConnectFailure({ kind: "openFailed", choice: "spikerbit", step: "open", elapsedMs: 0 }));
+    act(() => r.content.setConnectFailure(openFailedOn()));
     const group = screen.getByRole("group", { name: "Device connection" });
     expect(within(group).getByRole("status")).toHaveTextContent("Not connected");
     expect(within(group).getByText("Couldn't open it.")).toBeInTheDocument();
@@ -602,13 +608,20 @@ describe("Dataflow connect button and pane", () => {
   });
 
   describe("after a stall", () => {
-    const noData = { kind: "noData", choice: "arduino", step: "waitForData", elapsedMs: 5000 } as const;
     const pane = () => screen.getByRole("group", { name: "Device connection" });
 
+    // An Arduino whose attempt ended as noData, with its port still open.
     function stalledArduino(r: ReturnType<typeof renderConnect>) {
+      const attempt = new ConnectionAttempt("arduino", "connect");
+      const noData = {
+        attemptId: attempt.id, kind: "noData", choice: "arduino", step: "waitForData", elapsedMs: 5000
+      } as const;
       act(() => {
         r.stores.serialDevice.setActiveDevice("arduino", fakeTransport());
         runInAction(() => {
+          attempt.opened("waitForData");
+          attempt.end("noData", noData);
+          r.connection.attempt = attempt;
           r.connection.lastChoice = "arduino";
           r.connection.lastFailure = noData;
         });
@@ -635,7 +648,9 @@ describe("Dataflow connect button and pane", () => {
     // A Spiker:bit update that stalled: its board is open but never became the active device.
     function stalledUpdate(r: ReturnType<typeof renderConnect>) {
       const attempt = startAttempt(r);
-      const stall = { kind: "updateStalled", choice: "spikerbit", step: "update", elapsedMs: 45000 } as const;
+      const stall = {
+        attemptId: attempt.id, kind: "updateStalled", choice: "spikerbit", step: "update", elapsedMs: 45000
+      } as const;
       act(() => runInAction(() => {
         attempt.opened("checkFirmware");
         attempt.end("updateStalled", stall);
@@ -666,7 +681,9 @@ describe("Dataflow connect button and pane", () => {
 
     it("a failure that isn't a stall isn't shown as one", () => {
       const r = renderConnect();
-      const openFailed = { kind: "openFailed", choice: "arduino", step: "open", elapsedMs: 0 } as const;
+      const openFailed = {
+        attemptId: "attempt-1", kind: "openFailed", choice: "arduino", step: "open", elapsedMs: 0
+      } as const;
       act(() => {
         runInAction(() => { r.connection.lastFailure = openFailed; });
         r.content.setConnectFailure(openFailed);
@@ -711,8 +728,8 @@ describe("Dataflow connect button and pane", () => {
       const attempt = startAttempt(r);
       attempt.chooserClosed();
       check();
-      act(() => attempt.end("openFailed", { kind: "openFailed", choice: "spikerbit", step: "open", elapsedMs: 0 }));
-      act(() => r.content.setConnectFailure({ kind: "openFailed", choice: "spikerbit", step: "open", elapsedMs: 0 }));
+      act(() => attempt.end("openFailed", openFailedOn(attempt.id)));
+      act(() => r.content.setConnectFailure(openFailedOn()));
       check();
     });
 
@@ -749,7 +766,7 @@ describe("Dataflow connect button and pane", () => {
 
     it("a failure shows the problem on line 2 and keeps the device rows", () => {
       const r = openPane();
-      act(() => r.content.setConnectFailure({ kind: "openFailed", choice: "spikerbit", step: "open", elapsedMs: 0 }));
+      act(() => r.content.setConnectFailure(openFailedOn()));
       expect(pane().querySelector(".connect-detail.problem")).toHaveTextContent("Couldn't open it.");
       expect(within(pane()).getAllByRole("button", { name: /^Connect / })).toHaveLength(3);
     });
@@ -762,8 +779,8 @@ describe("Dataflow connect button and pane", () => {
       act(() => attempt.chooserClosed());
       expect(pane().querySelector(".connect-detail")).toHaveTextContent("Opening the connection…");
       act(() => runInAction(() => { b.connection.busyChoice = undefined; }));
-      act(() => attempt.end("openFailed", { kind: "openFailed", choice: "spikerbit", step: "open", elapsedMs: 0 }));
-      a.content.setConnectFailure({ kind: "openFailed", choice: "spikerbit", step: "open", elapsedMs: 0 });
+      act(() => attempt.end("openFailed", openFailedOn(attempt.id)));
+      a.content.setConnectFailure(openFailedOn());
       expect(a.content.connectFailure).toBeDefined();
       expect(b.content.connectFailure).toBeUndefined();
       expect(pane().querySelector(".connect-detail.problem")).toBeNull();
@@ -777,8 +794,8 @@ describe("Dataflow connect button and pane", () => {
       expect(live).toHaveTextContent("Connecting to Spiker:bit…");
       expect(live).not.toHaveTextContent("Opening the connection…");
       act(() => runInAction(() => { r.connection.busyChoice = undefined; }));
-      act(() => attempt.end("openFailed", { kind: "openFailed", choice: "spikerbit", step: "open", elapsedMs: 0 }));
-      act(() => r.content.setConnectFailure({ kind: "openFailed", choice: "spikerbit", step: "open", elapsedMs: 0 }));
+      act(() => attempt.end("openFailed", openFailedOn(attempt.id)));
+      act(() => r.content.setConnectFailure(openFailedOn()));
       expect(within(pane()).getByRole("status")).toHaveTextContent("Couldn't open it.");
     });
   });

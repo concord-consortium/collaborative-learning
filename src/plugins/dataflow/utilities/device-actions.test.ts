@@ -41,7 +41,10 @@ function endAttempt(
 ): AttemptOutcome {
   const isFailure = !["connected", "canceled", "unplugged", "lost"].includes(outcome);
   const failure: IConnectFailure | undefined = isFailure
-    ? { kind: outcome as FailureKind, choice: attempt.choice, step: "open", elapsedMs: 0, ...extra }
+    ? {
+      attemptId: attempt.id, kind: outcome as FailureKind, choice: attempt.choice, step: "open", elapsedMs: 0,
+      ...extra
+    }
     : undefined;
   attempt.end(outcome, failure);
   listener.onEnded?.(attempt);
@@ -539,7 +542,7 @@ describe("device actions", () => {
     await connectDeviceForTile({ connection, content, tileId, choice: "spikerbit" });
 
     expect(content.connectFailure).toEqual({
-      kind: "updateFailed", choice: "spikerbit", step: "update", elapsedMs: 0,
+      attemptId: expect.any(String), kind: "updateFailed", choice: "spikerbit", step: "update", elapsedMs: 0,
       error: { code: "E1", message: "flash failed" }
     });
     expectLogMatching("connectResult", {
@@ -622,7 +625,9 @@ describe("device actions", () => {
     await connectDeviceForTile({ connection, content, tileId, choice: "spikerbit" });
     expect(content.connectFailure?.kind).toBe("updateStalled");
 
-    connection.lastFailure = { kind: "updateFailed", choice: "spikerbit", step: "update", elapsedMs: 12000 };
+    connection.lastFailure = {
+      attemptId: attempt!.id, kind: "updateFailed", choice: "spikerbit", step: "update", elapsedMs: 12000
+    };
     listener.onLost?.(attempt!, "updateFailed");
 
     expect(content.connectFailure?.kind).toBe("updateFailed");
@@ -735,7 +740,9 @@ describe("device actions", () => {
     expect(content.connectFailure).toBeUndefined();
     expect(content.unseenConnectError).toBe(false);
 
-    const stall: IConnectFailure = { kind: "notResponding", choice: "spikerbit", step: "waitForData", elapsedMs: 5000 };
+    const stall: IConnectFailure = {
+      attemptId: attempt!.id, kind: "notResponding", choice: "spikerbit", step: "waitForData", elapsedMs: 5000
+    };
     listener.onStallChanged?.(attempt!, stall);
     expect(content.connectFailure).toEqual(stall);
     expect(content.unseenConnectError).toBe(true);

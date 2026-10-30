@@ -29,6 +29,8 @@ export const kStallKinds: readonly FailureKind[] = ["updateStalled", "notRespond
 export interface IErrorInfo { name?: string; code?: string; message?: string }
 
 export interface IConnectFailure {
+  // The attempt it ended or came from, so a stall counts only while that attempt holds its device.
+  attemptId: string;
   kind: FailureKind;
   choice: DeviceChoice;
   step: AttemptStep;
