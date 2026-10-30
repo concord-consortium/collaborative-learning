@@ -48,6 +48,12 @@
     text-align: left;
     width: 230px;
 
+    // The corners that meet the toolbar stay square. The mixin rounds the bottom ones, which is right
+    // below the toolbar; above it, the top ones are rounded instead.
+    &.top-start {
+      border-radius: $toolbar-border-radius $toolbar-border-radius 0 0;
+    }
+
     .connect-heading {
       font-weight: bold;
       margin-bottom: 6px;

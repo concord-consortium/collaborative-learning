@@ -26,6 +26,20 @@ import "../../dataflow-registration";
 
 jest.mock("../../../../models/tiles/log/log-tile-change-event", () => ({ logTileChangeEvent: jest.fn() }));
 
+// jsdom has no layout, so floating-ui never flips anything. A test sets this to make useFloating
+// report a placement; everything else about floating-ui stays real.
+let mockFloatingPlacement: string | undefined;
+jest.mock("@floating-ui/react", () => {
+  const actual = jest.requireActual("@floating-ui/react");
+  return {
+    ...actual,
+    useFloating: (...args: unknown[]) => {
+      const result = actual.useFloating(...args);
+      return mockFloatingPlacement ? { ...result, placement: mockFloatingPlacement } : result;
+    }
+  };
+});
+
 // A stub covering just the members the buttons read/call — a real ReteManager needs a live DOM
 // area, so tests substitute this via the context rather than constructing one.
 type ManagerStub = Pick<ReteManager, "mstContent" | "readOnly" | "zoomIn" | "zoomOut" | "fitContent" | "pan">;
@@ -417,6 +431,26 @@ describe("Dataflow connect button and pane", () => {
   it("shows the corner triangle on a read-only toolbar", () => {
     const { container } = renderConnect({ readOnly: true });
     expect(within(getTrigger(container)).getByTestId("connect-expand-triangle")).toBeInTheDocument();
+  });
+
+  describe("pane placement", () => {
+    afterEach(() => { mockFloatingPlacement = undefined; });
+
+    it("the pane carries its placement below the toolbar by default", () => {
+      openPane();
+      expect(screen.getByRole("group", { name: "Device connection" })).toHaveClass("bottom-start");
+    });
+
+    it("the pane's placement class follows a flip above the toolbar", () => {
+      const { content } = openPane();
+      const group = () => screen.getByRole("group", { name: "Device connection" });
+      expect(group()).toHaveClass("bottom-start");
+      mockFloatingPlacement = "top-start";
+      // The pane observes connectError, so this re-renders it the way an autoUpdate repositioning would.
+      act(() => { content.setConnectError("Something went wrong"); });
+      expect(group()).toHaveClass("top-start");
+      expect(group()).not.toHaveClass("bottom-start");
+    });
   });
 
   it("opening the pane moves focus to the first control", () => {

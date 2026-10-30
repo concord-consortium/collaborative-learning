@@ -97,7 +97,7 @@ const ConnectPane = observer(function ConnectPane(
       : [];
     return scrollers.length ? scrollers : "clippingAncestors";
   }, [tileElement]);
-  const { refs, floatingStyles } = useFloating({
+  const { refs, floatingStyles, placement } = useFloating({
     open: true,
     placement: "bottom-start",
     whileElementsMounted: autoUpdate,
@@ -213,7 +213,8 @@ const ConnectPane = observer(function ConnectPane(
       : content.connectError ?? connection.lossMessage;
 
   return (
-    <div ref={setContainer} className="toolbar-palette dataflow-connect-pane" style={floatingStyles}
+    <div ref={setContainer} className={classNames("toolbar-palette", "dataflow-connect-pane", placement)}
+        style={floatingStyles}
         role="group" aria-labelledby={headingId} onKeyDownCapture={handleKeyDownCapture}
         onFocus={handleFocus} onBlur={handleBlur}>
       <div className="connect-heading" id={headingId}>Device connection</div>
