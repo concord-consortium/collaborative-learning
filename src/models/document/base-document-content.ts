@@ -580,6 +580,11 @@ export const BaseDocumentContentModel = RowList.named("BaseDocumentContent")
 
       return false;
     },
+    // True once a pending remote comment has waited long enough to look stuck rather than slow.
+    get isRemoteCommentSlow() {
+      const doc = getParentWithTypeName(self, "Document");
+      return !!doc?.commentsManager?.hasSlowRemoteComment;
+    },
     // An inline status message shown in place of a real AI comment (empty-document nudge, or a
     // failure message). Client-only: never written to Firestore, so it doesn't survive a reload.
     get statusMessage() {

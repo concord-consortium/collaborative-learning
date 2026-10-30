@@ -10,6 +10,7 @@ import { specAppConfig } from "../../models/stores/spec-app-config";
 import { createSingleTileContent } from "../../utilities/test-utils";
 import { kAnalyzerUserParams } from "../../../shared/shared";
 import { IDEAS_EMPTY_MESSAGE, IDEAS_REQUEST_FAILED_MESSAGE } from "../../models/document/ai-evaluation-messages";
+import { Logger } from "../../lib/logger";
 import { kIdeasRequestDeadlineMs } from "../../models/document/document-comments-manager";
 import { logDocumentEvent } from "../../models/document/log-document-event";
 import { LogEventName } from "../../lib/logger-types";
@@ -35,6 +36,28 @@ jest.mock("../../models/document/log-document-event", () => ({
   logDocumentEvent: jest.fn(),
   logDocumentViewEvent: jest.fn()
 }));
+
+jest.mock("../../lib/logger", () => ({ Logger: { log: jest.fn() } }));
+
+// These rows reach a research database and Rollbar, so the payload is pinned field by field:
+// routing this back through logDocumentEvent would readmit the student-authored document title,
+// and nothing else in the suite would notice.
+function ideasFailures() {
+  return (Logger.log as jest.Mock).mock.calls
+    .filter(([event]) => event === LogEventName.IDEAS_REQUEST_FAILED);
+}
+
+function expectIdeasFailureLogged(reason: string, doc: DocumentModelType) {
+  const calls = ideasFailures();
+  expect(calls).toHaveLength(1);
+  expect(calls[0][1]).toEqual({
+    documentKey: doc.key,
+    documentType: doc.type,
+    documentUid: doc.uid,
+    requestId: expect.any(String),
+    reason
+  });
+}
 
 function flushMicrotasks() {
   return act(async () => {
@@ -146,7 +169,8 @@ describe("Ideas button", () => {
 
     expect(stores.db.firebase.setLastEditedNow)
       .toHaveBeenCalledWith(stores.user, document.key, document.uid, undefined, requestId);
-    expect(logDocumentEvent).toHaveBeenCalledWith(LogEventName.REQUEST_IDEA, { document });
+    expect(logDocumentEvent).toHaveBeenCalledWith(
+      LogEventName.REQUEST_IDEA, { document }, undefined, { requestId });
     expect(document.commentsManager?.pendingComments).toHaveLength(1);
     expect(document.commentsManager?.pendingComments[0]).toMatchObject({ requestId, postingType: "remote" });
     expect(stores.db.firebase.getEvaluationStatusPath)
@@ -240,7 +264,8 @@ describe("Ideas button", () => {
 
     expect(stores.db.firebase.setLastEditedNow)
       .toHaveBeenCalledWith(stores.user, document.key, document.uid, undefined, undefined);
-    expect(logDocumentEvent).toHaveBeenCalledWith(LogEventName.REQUEST_IDEA, { document });
+    expect(logDocumentEvent).toHaveBeenCalledWith(
+      LogEventName.REQUEST_IDEA, { document }, undefined, { requestId: null });
     expect(document.commentsManager?.pendingComments).toHaveLength(0);
     expect(stores.db.firebase.ref).not.toHaveBeenCalled();
 
@@ -273,7 +298,8 @@ describe("Ideas button", () => {
 
     expect(stores.db.firebase.setLastEditedNow)
       .toHaveBeenCalledWith(stores.user, document.key, document.uid, undefined, undefined);
-    expect(logDocumentEvent).toHaveBeenCalledWith(LogEventName.REQUEST_IDEA, { document });
+    expect(logDocumentEvent).toHaveBeenCalledWith(
+      LogEventName.REQUEST_IDEA, { document }, undefined, { requestId: null });
     expect(document.commentsManager?.statusMessage).toBeNull();
     expect(document.commentsManager?.pendingComments).toHaveLength(0);
     expect(stores.db.firebase.ref).not.toHaveBeenCalled();
@@ -345,6 +371,7 @@ describe("Ideas button", () => {
     expect(document.commentsManager?.canRequestIdeas).toBe(true);
     expect(document.commentsManager?.statusMessage).toMatchObject({ message: IDEAS_REQUEST_FAILED_MESSAGE });
     expect(consoleErrorSpy).toHaveBeenCalledWith("Ideas request failed:", expect.any(Error));
+    expectIdeasFailureLogged("client-error", document);
 
     consoleErrorSpy.mockRestore();
   });
@@ -397,6 +424,7 @@ describe("Ideas button", () => {
     expect(document.commentsManager?.canRequestIdeas).toBe(true);
     expect(document.commentsManager?.statusMessage).toBeNull();
     expect(consoleErrorSpy).toHaveBeenCalledWith("Ideas request failed:", expect.any(Error));
+    expect(ideasFailures()).toHaveLength(0);
 
     consoleErrorSpy.mockRestore();
   });

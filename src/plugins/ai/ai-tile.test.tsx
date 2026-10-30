@@ -37,9 +37,12 @@ import { ITileApi } from "../../components/tiles/tile-api";
 import { TileModel } from "../../models/tiles/tile-model";
 import { logTileChangeEvent } from "../../models/tiles/log/log-tile-change-event";
 import { LogEventName } from "../../lib/logger-types";
+import { Logger } from "../../lib/logger";
 import { defaultAIContent } from "./ai-content";
 import { AIComponent } from "./ai-tile";
-import { AI_TILE_EMPTY_MESSAGE } from "../../models/document/ai-evaluation-messages";
+import {
+  AI_TILE_EMPTY_MESSAGE, AI_TILE_REQUEST_FAILED_MESSAGE
+} from "../../models/document/ai-evaluation-messages";
 import { DocumentContentModel } from "../../models/document/document-content";
 import { ReadOnlyContext } from "../../components/document/read-only-context";
 
@@ -94,6 +97,10 @@ jest.mock("../../models/document/document-utils", () => ({
 // Logger.stores is uninitialized in this component test; mock the change logger so setPrompt/setText
 // don't crash when the AI content logs changes.
 jest.mock("../../models/tiles/log/log-tile-change-event", () => ({ logTileChangeEvent: jest.fn() }));
+
+// The failure event goes through Logger directly, deliberately bypassing the tile-change helper
+// (which would also emit QUESTION_ANSWERS_CHANGE for a tile inside a Question tile).
+jest.mock("../../lib/logger", () => ({ Logger: { log: jest.fn() } }));
 
 describe("AIComponent", () => {
   const content = defaultAIContent();
@@ -483,8 +490,11 @@ describe("AIComponent", () => {
 
     // previousText here is the model's non-empty authored default, so this distinguishes
     // "restored" from "left blank" — the next test covers a real prior response.
-    it("on a populated document, when getAiContent rejects: text is unchanged, Loading is gone, " +
-       "and nothing escapes as an unhandled rejection", async () => {
+    // The student did not ask for the mount-time refresh, so a transient failure there must not
+    // replace a good prior answer with an error -- which is document content, saved, synced and
+    // visible to the teacher.
+    it("on a populated document, when the automatic mount refresh rejects: the previous text is " +
+       "restored, Loading is gone, and nothing escapes as an unhandled rejection", async () => {
       mockStores.documents.getDocument.mockReturnValue(documentWith(populatedDocContent()));
       mockGetAiContent.mockRejectedValueOnce(new Error("network error"));
       const aiContent = defaultAIContent();
@@ -498,6 +508,64 @@ describe("AIComponent", () => {
 
       expect(aiContent.text).toBe(previousText);
       expect(queryByText("Loading...")).not.toBeInTheDocument();
+    });
+
+    // refreshCount stays positive after an Update, so classifying on "> 0" would make a later
+    // automatic request — here a remount of the same model, as happens when a document view is
+    // closed and reopened — look student-requested, and let its failure overwrite a good saved
+    // answer with an error nobody asked for.
+    it("after a successful Update, a failure on a remount of the same model still restores",
+       async () => {
+      mockStores.documents.getDocument.mockReturnValue(documentWith(populatedDocContent()));
+      const aiContent = defaultAIContent();
+      aiContent.setPrompt("What do you think?");
+      const aiModel = TileModel.create({ content: aiContent });
+
+      const { unmount } = await act(async () =>
+        render(<AIComponent {...defaultProps} model={aiModel} documentId="test-doc-1" />));
+
+      // A real Update that succeeds, leaving refreshCount positive.
+      mockGetAiContent.mockResolvedValueOnce({ data: { text: "a good answer" } });
+      await act(async () => {
+        aiContent.requestRefresh();
+        await Promise.resolve();
+        await Promise.resolve();
+      });
+      expect(aiContent.text).toBe("a good answer");
+
+      unmount();
+
+      const callsBefore = mockGetAiContent.mock.calls.length;
+      mockGetAiContent.mockRejectedValueOnce(new Error("network error"));
+      await act(async () => render(
+        <AIComponent {...defaultProps} model={aiModel} documentId="test-doc-1" />
+      ));
+
+      // Without this the test could pass by the remount never making a request at all.
+      expect(mockGetAiContent.mock.calls.length).toBe(callsBefore + 1);
+      expect(aiContent.text).toBe("a good answer");
+    });
+
+    // The student clicked Update, so restoring the old text would look exactly like a refresh
+    // that did nothing. This is the case the durable message exists for.
+    it("on a populated document, when a student-requested refresh rejects: the failure message " +
+       "is shown", async () => {
+      mockStores.documents.getDocument.mockReturnValue(documentWith(populatedDocContent()));
+      const aiContent = defaultAIContent();
+      aiContent.setPrompt("What do you think?");
+      const aiModel = TileModel.create({ content: aiContent });
+
+      await act(async () => render(<AIComponent {...defaultProps} model={aiModel} documentId="test-doc-1" />));
+      expect(aiContent.text).toBe("Mocked customized content");
+
+      mockGetAiContent.mockRejectedValueOnce(new Error("network error"));
+      await act(async () => {
+        aiContent.requestRefresh();
+        await Promise.resolve();
+        await Promise.resolve();
+      });
+
+      expect(aiContent.text).toBe(AI_TILE_REQUEST_FAILED_MESSAGE);
     });
 
     // The tile can be deleted while a request is in flight. Pins that the catch block's isAlive
@@ -552,8 +620,57 @@ describe("AIComponent", () => {
       }
     });
 
-    it("on a populated document, when a later refresh's getAiContent rejects: a real prior " +
-       "response survives, not just the authored placeholder", async () => {
+    // console.error reaches nobody, since Rollbar captures uncaught errors and not caught ones, so
+    // the log event is the only record a tile failure leaves.
+    it("on a populated document, logs a failed request, and logs nothing for a superseded one",
+       async () => {
+      mockStores.documents.getDocument.mockReturnValue(documentWith(populatedDocContent()));
+      const aiContent = defaultAIContent();
+      aiContent.setPrompt("What do you think?");
+      const aiModel = TileModel.create({ content: aiContent });
+
+      await act(async () => render(<AIComponent {...defaultProps} model={aiModel} documentId="test-doc-1" />));
+
+      (Logger.log as jest.Mock).mockClear();
+      (logTileChangeEvent as jest.Mock).mockClear();
+      mockGetAiContent.mockRejectedValueOnce(new Error("network error"));
+      await act(async () => {
+        aiContent.requestRefresh();
+        await Promise.resolve();
+        await Promise.resolve();
+      });
+
+      const failures = (Logger.log as jest.Mock).mock.calls.filter(
+        ([event]) => event === LogEventName.AI_TILE_REQUEST_FAILED);
+      expect(failures).toHaveLength(1);
+      expect(failures[0][1]).toMatchObject({ tileId: aiModel.id, userRequested: true });
+      // The refresh click is a real tile change and belongs on that helper; the failure is not,
+      // and must stay off it -- that helper is what cascades into QUESTION_ANSWERS_CHANGE,
+      // carrying the question prompt and sibling answers, for a tile inside a Question tile.
+      expect((logTileChangeEvent as jest.Mock).mock.calls.map(([, params]) => params.operation))
+        .toEqual(["requestRefresh"]);
+
+      // A superseded run is not a failure: its rejection must log nothing.
+      let rejectOlderRun: (error: Error) => void;
+      const promiseOlder = new Promise((_resolve, reject) => { rejectOlderRun = reject; });
+      mockGetAiContent.mockImplementationOnce(() => promiseOlder);
+      mockGetAiContent.mockResolvedValueOnce({ data: { text: "newer response" } });
+      await act(async () => { aiContent.requestRefresh(); await Promise.resolve(); });
+      await act(async () => { aiContent.requestRefresh(); await Promise.resolve(); await Promise.resolve(); });
+
+      (Logger.log as jest.Mock).mockClear();
+      await act(async () => {
+        rejectOlderRun!(new Error("stale network error"));
+        await Promise.resolve();
+        await Promise.resolve();
+      });
+
+      expect((Logger.log as jest.Mock).mock.calls.filter(
+        ([event]) => event === LogEventName.AI_TILE_REQUEST_FAILED)).toHaveLength(0);
+    });
+
+    it("on a populated document, when a later refresh's getAiContent rejects: the failure message " +
+       "replaces the prior response rather than leaving it to look untouched", async () => {
       mockStores.documents.getDocument.mockReturnValue(documentWith(populatedDocContent()));
       const aiContent = defaultAIContent();
       aiContent.setPrompt("What do you think?");
@@ -570,13 +687,13 @@ describe("AIComponent", () => {
         await Promise.resolve();
       });
 
-      expect(aiContent.text).toBe("Mocked customized content");
+      expect(aiContent.text).toBe(AI_TILE_REQUEST_FAILED_MESSAGE);
     });
 
     // getAiContent resolves (not rejects) on a server-side failure, a distinct path from the
     // rejection tests above.
     it("on a populated document, when a later refresh's response carries a server-side error: " +
-       "a real prior response survives, and the error is logged", async () => {
+       "the failure message is shown, and the error is logged", async () => {
       mockStores.documents.getDocument.mockReturnValue(documentWith(populatedDocContent()));
       const aiContent = defaultAIContent();
       aiContent.setPrompt("What do you think?");
@@ -594,7 +711,7 @@ describe("AIComponent", () => {
         await Promise.resolve();
       });
 
-      expect(aiContent.text).toBe("Mocked customized content");
+      expect(aiContent.text).toBe(AI_TILE_REQUEST_FAILED_MESSAGE);
       expect(consoleErrorSpy).toHaveBeenCalledWith("Failed to query AI", expect.any(Error));
       consoleErrorSpy.mockRestore();
     });
@@ -762,9 +879,11 @@ describe("AIComponent", () => {
       expect(aiContent.text).toBe("Newer response");
     });
 
-    it("a run started while an earlier one is still in flight restores the real text, not that " +
-       "run's own blank, before capturing its own restore point — so a later failure restores " +
-       "the real text too", async () => {
+    // The restore point is read only by the top-of-effect undo, since a requested failure reports
+    // instead. This pins that B captured the real text and not A's blank, by letting the class
+    // context disappear — the remaining path that restores from the captured point.
+    it("a run started while an earlier one is still in flight captures the real text, not that " +
+       "run's own blank, as its restore point", async () => {
       mockStores.documents.getDocument.mockReturnValue(documentWith(populatedDocContent()));
       const aiContent = defaultAIContent();
       aiContent.setPrompt("What do you think?");
@@ -776,8 +895,7 @@ describe("AIComponent", () => {
       expect(aiContent.text).toBe("Mocked customized content");
 
       const promiseA = new Promise<{ data: { text: string } }>((_resolve) => { /* A never settles */ });
-      let rejectB: (error: Error) => void;
-      const promiseB = new Promise((_resolve, reject) => { rejectB = reject; });
+      const promiseB = new Promise<{ data: { text: string } }>((_resolve) => { /* B never settles */ });
       mockGetAiContent.mockImplementationOnce(() => promiseA);
       mockGetAiContent.mockImplementationOnce(() => promiseB);
 
@@ -788,18 +906,19 @@ describe("AIComponent", () => {
       });
       expect(aiContent.text).toBe("");
 
-      // B starts before A settles. It must restore the real text — not A's blank — before its own
-      // request even begins.
+      // B starts before A settles. It must restore the real text — not A's blank — before
+      // capturing its own restore point and blanking again.
       await act(async () => {
         aiContent.requestRefresh();
         await Promise.resolve();
       });
       expect(queryByText("Loading...")).toBeInTheDocument();
 
-      // B fails: it restores what it actually captured, which must be the real text.
+      // The class context disappearing makes the next run take the restore branch, which writes
+      // back whatever B captured. A blank here would mean B had captured A's blank.
+      mockUserContext = mockUserContextWithoutClassHash;
       await act(async () => {
-        rejectB!(new Error("network error"));
-        await Promise.resolve();
+        aiContent.requestRefresh();
         await Promise.resolve();
       });
 
