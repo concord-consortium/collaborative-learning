@@ -1,9 +1,21 @@
+@import "../vars";
 @import "../document/unwrapped-document";
 
 #doc-editor-app {
   display: flex;
   height: 100vh;
   width: 100vw;
+
+  // Make room for the right drawer (see $right-drawer-reserved-width in vars.scss).
+  &.right-drawer-open {
+    padding-right: $right-drawer-reserved-width;
+    box-sizing: border-box;
+  }
+
+  // This page has no app header, so the drawer starts at the top.
+  .right-drawer {
+    top: 0;
+  }
 
   .titlebar {
     .actions {

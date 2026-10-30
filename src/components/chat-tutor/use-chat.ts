@@ -12,7 +12,7 @@ export interface UseChatResult {
 
 export interface UseChatOptions {
   transport: ChatTransport;
-  // Makes the per-document/per-problem scoping legible in the drawer header.
+  // Makes the per-document/per-problem scoping legible in the sidebar header.
   header: string;
 }
 

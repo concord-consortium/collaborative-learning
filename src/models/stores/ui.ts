@@ -55,6 +55,16 @@ export const UIDialogModel = types
 type UIDialogModelSnapshot = SnapshotIn<typeof UIDialogModel>;
 type UIDialogModelSnapshotWithoutType = Omit<UIDialogModelSnapshot, "type">;
 
+// A panel shown in the right drawer. The panel owns its focus: moving focus in when it opens,
+// handling Escape, and returning focus to its opener when it closes. The drawer only removes it.
+// Not every view has a drawer; check ui.hasRightDrawer before offering to open a panel.
+export interface IDrawerPanel {
+  id: string;
+  tabLabel: string;
+  Component: React.FC<{ onClose: () => void }>;
+}
+export type DrawerTab = "chatTutor" | "panel";
+
 export const UIModel = types
   .model("UI", {
     annotationMode: types.maybe(types.string),
@@ -83,6 +93,14 @@ export const UIModel = types
     standalone: false,
     errorContent: undefined as React.FC<any> | undefined,
     showChatTutor: false,
+    // A panel hosted in the right drawer (next to Ada's chat, if the student has it). The component
+    // lives in volatile state, like errorContent, so plugins can supply one without the app
+    // importing them.
+    drawerPanel: undefined as IDrawerPanel | undefined,
+    drawerTab: "chatTutor" as DrawerTab,
+    // How many RightDrawers are mounted. Some views (the authoring and screenshot iframes, unwrapped
+    // /editor/) show a document without one, so a panel opened there would never appear.
+    rightDrawerHosts: 0,
     // The tile named in the last SELECT_TILE. Read-only tiles inside a container all select the
     // container, so the selection alone can't tell us whether the user moved to a different tile.
     lastLoggedTileId: undefined as string | undefined,
@@ -93,6 +111,12 @@ export const UIModel = types
     },
     get isTilePickedUp() {
       return !!self.pickedUpTileId;
+    },
+    get isRightDrawerOpen() {
+      return self.showChatTutor || !!self.drawerPanel;
+    },
+    get hasRightDrawer() {
+      return self.rightDrawerHosts > 0;
     }
   }))
   .actions((self) => {
@@ -246,6 +270,22 @@ export const UIModel = types
       },
       setShowChatTutor(showChatTutor: boolean) {
         self.showChatTutor = showChatTutor;
+      },
+      openDrawerPanel(panel: IDrawerPanel) {
+        self.drawerPanel = panel;
+        self.drawerTab = "panel";
+      },
+      closeDrawerPanel() {
+        self.drawerPanel = undefined;
+      },
+      setDrawerTab(tab: DrawerTab) {
+        self.drawerTab = tab;
+      },
+      addRightDrawerHost() {
+        self.rightDrawerHosts++;
+      },
+      removeRightDrawerHost() {
+        self.rightDrawerHosts--;
       },
       closeDialog,
 

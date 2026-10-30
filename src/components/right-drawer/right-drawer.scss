@@ -1,0 +1,45 @@
+@import "../vars";
+
+// Right-edge drawer, below the app header so it lines up with the workspace and resources
+// columns. Pages make room for it; see $right-drawer-reserved-width in vars.scss.
+.right-drawer {
+  position: fixed;
+  top: $header-height;
+  right: 0;
+  bottom: 0;
+  z-index: 1000;
+  width: $right-drawer-width;
+  margin: $right-drawer-margin;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  background: white;
+
+  .right-drawer-tabs {
+    display: flex;
+    flex: none;
+    gap: 2px;
+
+    .right-drawer-tab {
+      flex: 1;
+      padding: 6px 8px;
+      border: 1px solid $charcoal-light-1;
+      border-bottom: none;
+      border-radius: 4px 4px 0 0;
+      background: $charcoal-light-4;
+      cursor: pointer;
+
+      &.selected {
+        background: white;
+        font-weight: bold;
+      }
+    }
+  }
+
+  .right-drawer-body {
+    flex: 1;
+    min-height: 0;
+
+    &[hidden] { display: none; }
+  }
+}

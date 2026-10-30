@@ -386,9 +386,12 @@ $annotation-blue-very-transparent: rgba(21, 0, 255, 0.125);
 $header-height: 55px;
 $tab-section-border-width: 2px;
 
-// Width of the AI chat tutor drawer. Shared so the workspace can reserve the same
-// amount of space it occupies (see clue-app-content.scss) instead of being overlaid.
-$chat-tutor-width: 310px;
+// The right drawer, which holds Ada's chat and plugin panels (see right-drawer.scss). While it is
+// open, a page reserves $right-drawer-reserved-width on the right (the `.right-drawer-open` rules)
+// so its content moves over instead of being covered: the drawer, its margin, and a 4px gap.
+$right-drawer-width: 310px;
+$right-drawer-margin: 4px;
+$right-drawer-reserved-width: $right-drawer-width + $right-drawer-margin + 4px;
 
 $nav-expanded-peek: 12px;
 $half-nav-expanded-peek: 4px;
