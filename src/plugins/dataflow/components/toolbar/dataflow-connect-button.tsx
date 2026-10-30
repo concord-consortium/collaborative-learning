@@ -23,6 +23,7 @@ import {
 } from "../../utilities/device-actions";
 
 import ConnectIcon from "../../assets/icons/connect-icon.svg";
+import SmallCornerTriangle from "../../../../assets/icons/small-corner-triangle.svg";
 
 import "./dataflow-connect-pane.scss";
 
@@ -298,6 +299,9 @@ export const ConnectDeviceButton = observer(function ConnectDeviceButton({ name 
         disabledMessage="Connecting a device isn't available in a read-only view"
         onClick={() => content?.setConnectPaneOpen(!isOpen)} extraContent={pane}>
       <ConnectIcon />
+      {/* Only marks the button as opening a pane: the whole button opens it, and aria-expanded
+          already announces that. */}
+      <SmallCornerTriangle className="corner-triangle" aria-hidden="true" data-testid="connect-expand-triangle" />
     </TileToolbarButton>
   );
 });

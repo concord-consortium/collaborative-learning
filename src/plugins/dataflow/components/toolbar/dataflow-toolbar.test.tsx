@@ -396,6 +396,29 @@ describe("Dataflow connect button and pane", () => {
     expect(getTrigger(container)).toHaveAttribute("aria-expanded", "false");
   });
 
+  it("shows a corner triangle that only marks the button as opening a pane", () => {
+    const { container, content } = renderConnect();
+    const triangle = within(getTrigger(container)).getByTestId("connect-expand-triangle");
+    // Jest stubs SVG imports as a custom element, which React gives a `classname` attribute rather
+    // than `class`. Exactly corner-triangle: the shared toolbar style, without expand-collapse.
+    expect(triangle).toHaveAttribute("classname", "corner-triangle");
+    expect(triangle).toHaveAttribute("aria-hidden", "true");
+    // A real press starts with a pointerdown, which reaches the outside-click handler first.
+    const press = () => {
+      fireEvent.pointerDown(triangle);
+      fireEvent.click(triangle);
+    };
+    press();
+    expect(content.connectPaneOpen).toBe(true);
+    press();
+    expect(content.connectPaneOpen).toBe(false);
+  });
+
+  it("shows the corner triangle on a read-only toolbar", () => {
+    const { container } = renderConnect({ readOnly: true });
+    expect(within(getTrigger(container)).getByTestId("connect-expand-triangle")).toBeInTheDocument();
+  });
+
   it("opening the pane moves focus to the first control", () => {
     openPane();
     const group = screen.getByRole("group", { name: "Device connection" });
