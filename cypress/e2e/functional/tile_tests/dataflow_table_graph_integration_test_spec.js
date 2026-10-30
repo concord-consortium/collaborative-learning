@@ -12,7 +12,8 @@ let docEditor = new DocEditor;
 
 const programTitle = "Program 1";
 // Preparing a capture appends its start time to the program's name, so the linked table's header
-// reads "Program 1 14:32:07". Clearing the recording strips it again, back to programTitle.
+// reads "Program 1 14:32:07". The table keeps that name when Clear detaches it; the program itself
+// goes back to programTitle, which is what the graph's layer name shows.
 const capturedTitle = /^Program 1 \d{2}:\d{2}:\d{2}$/;
 const graphTitle = "Graph 1";
 
@@ -23,7 +24,6 @@ const programNodes = [
 // program's name instead (see prepareCapture). Table It prepares these columns up front, so an
 // empty linked table already carries them; only clearing the recording puts x | y back.
 const linkedTableAttributes = ["Point", programNodes[0].attribute, programNodes[1].attribute];
-const defaultTableAttributes = ["x", "y"];
 const timer1 = 5;
 const timer2 = 3;
 
@@ -49,8 +49,17 @@ context('Dataflow Tool Tile', function () {
     dataflowToolTile.recordData("1000", timer1);
     dataflowToolTile.checkLinkedTableRecordedData(tableTile, capturedTitle, linkedTableAttributes, timer1);
 
+    // Clear detaches rather than destroys: the table keeps the points it captured and stops
+    // following the program, which is left holding nothing and so disables Clear.
     dataflowToolTile.clearRecordedData();
-    dataflowToolTile.checkEmptyLinkedTable(tableTile, programTitle, defaultTableAttributes);
+    dataflowToolTile.getClearButton().should("have.attr", "aria-disabled", "true");
+    dataflowToolTile.checkLinkedTableRecordedData(tableTile, capturedTitle, linkedTableAttributes, timer1);
+
+    // So a second run needs a table of its own.
+    clueCanvas.deleteTile("table");
+    dataflowToolTile.getDataflowTile().click();
+    clueCanvas.clickToolbarButtonLabelled("dataflow", "table-it", "Table It!");
+    dataflowToolTile.checkEmptyLinkedTable(tableTile, capturedTitle, linkedTableAttributes);
 
     dataflowToolTile.recordData("1000", timer2);
     dataflowToolTile.checkLinkedTableRecordedData(tableTile, capturedTitle, linkedTableAttributes, timer2);
@@ -138,7 +147,9 @@ context('Dataflow Tool Tile', function () {
     // reload while recording
     cy.reload();
 
-    // After a reload the run is over -- isRecording is volatile, so nothing resumes.
+    // After a reload the run is over -- isRecording is volatile, so nothing resumes. The toolbar
+    // renders only for the selected tile, and a reload clears the selection.
+    dataflowToolTile.getDataflowTile().click();
     dataflowToolTile.getRecordButton().should("not.have.attr", "aria-disabled");
     dataflowToolTile.getStopButton().should("have.attr", "aria-disabled", "true");
     dataflowToolTile.getClearButton().should("not.have.attr", "aria-disabled");
@@ -151,10 +162,11 @@ context('Dataflow Tool Tile', function () {
     // reload after clearing
     cy.reload();
 
-    // After a reload the run is over -- isRecording is volatile, so nothing resumes.
+    dataflowToolTile.getDataflowTile().click();
     dataflowToolTile.getRecordButton().should("not.have.attr", "aria-disabled");
     dataflowToolTile.getStopButton().should("have.attr", "aria-disabled", "true");
-    dataflowToolTile.getClearButton().should("not.have.attr", "aria-disabled");
-    dataflowToolTile.checkEmptyLinkedTable(tableTile, programTitle, defaultTableAttributes);
+    // The table kept its points and the program has none, so there is nothing left to clear.
+    dataflowToolTile.getClearButton().should("have.attr", "aria-disabled", "true");
+    dataflowToolTile.checkLinkedTableRecordedData(tableTile, capturedTitle, linkedTableAttributes, timer2);
   });
 });
