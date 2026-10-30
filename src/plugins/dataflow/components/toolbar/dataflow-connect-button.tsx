@@ -11,13 +11,14 @@ import { IToolbarButtonComponentProps } from "../../../../components/toolbar/too
 import { TileModelContext } from "../../../../components/tiles/tile-api";
 import { useReadOnlyContext } from "../../../../components/document/read-only-context";
 import { useStores } from "../../../../hooks/use-stores";
+import { useAnnounce } from "../../../../utilities/use-announce";
+import { kStallKinds, problemHeadline } from "../../model/connect-failures";
 import { DataflowContentModelType } from "../../model/dataflow-content";
 import {
   DeviceChoice, DeviceConnection, getDeviceConnection, kDeviceChoiceLabels, kDeviceChoiceOrder
 } from "../../model/device-connection";
-import {
-  connectButtonState, connectButtonTooltip, notRespondingMessage
-} from "../../utilities/connect-button-state";
+import { connectButtonState, connectButtonTooltip } from "../../utilities/connect-button-state";
+import { connectionStatusInput, connectPaneStatus } from "../../utilities/connect-pane-status";
 import {
   connectDeviceForTile, disconnectDeviceForTile, reconnectDeviceForTile
 } from "../../utilities/device-actions";
@@ -25,6 +26,9 @@ import {
 import ConnectIcon from "../../assets/icons/connect-icon.svg";
 
 import "./dataflow-connect-pane.scss";
+
+// How long a failure announcement stays in its live region before it is cleared.
+const kFailureAnnounceMs = 5000;
 
 // How each navigation key moves focus: by a signed number of controls, or to the first or last one.
 const kFocusSteps: Record<string, number | "first" | "last"> = {
@@ -78,7 +82,7 @@ interface IConnectPaneProps {
 const ConnectPane = observer(function ConnectPane(
     { connection, content, tileId, paneRef, onClose }: IConnectPaneProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
-  const { busyChoice, isConnected, connectedLabel, check } = connection;
+  const { busyChoice, paneView, actionsEnabled, check } = connection;
   const busy = !!busyChoice;
   const headingId = useId();
 
@@ -137,7 +141,7 @@ const ConnectPane = observer(function ConnectPane(
     if (holdsFocus.current && (!active || active === document.body)) {
       containerRef.current?.querySelector<HTMLElement>("[role='button']")?.focus({ preventScroll: true });
     }
-  }, [isConnected]);
+  }, [paneView]);
 
   function handleFocus() {
     holdsFocus.current = true;
@@ -197,36 +201,40 @@ const ConnectPane = observer(function ConnectPane(
     void disconnectDeviceForTile({ connection, content, tileId }).then(closeAfterSuccess);
   };
 
-  const status = busyChoice
-    ? `Connecting to ${kDeviceChoiceLabels[busyChoice]}…`
-    : isConnected ? `Connected: ${connectedLabel}` : "Not connected";
+  const { line1, line2, announce } = connectPaneStatus(connectionStatusInput(connection, content.connectFailure));
+  const actionsBusy = busy || !actionsEnabled;
 
-  // One line under the status: the "Is it alive?" check's progress, or else what's wrong.
-  const checkNote = !check ? undefined
-    : check === "checking" ? `Checking the ${connectedLabel}… look for the heart.`
-    : check === "answered" ? `The ${connectedLabel} answered.`
-    : `The ${connectedLabel} didn't answer.`;
-  const problem = checkNote ? undefined
-    : isConnected
-      ? connection.notResponding ? notRespondingMessage(connectedLabel) : undefined
-      : content.connectError ?? connection.lossMessage;
+  // Line 2 always renders, empty when there is nothing to say, so the area never changes height.
+  // Only a problem goes in the live region; steps and the progress bar are not announced.
+  const detail = (
+    <div className={classNames("connect-detail", line2?.tone)}>
+      {line2?.progress !== undefined &&
+        <div className="connect-progress" role="progressbar" aria-label="Firmware update"
+            aria-valuemin={0} aria-valuemax={100} aria-valuenow={line2.progress}>
+          <div className="connect-progress-fill" style={{ width: `${line2.progress}%` }} />
+        </div>}
+      <span className="connect-detail-text">{line2?.text}</span>
+    </div>
+  );
 
   return (
     <div ref={setContainer} className="toolbar-palette dataflow-connect-pane" style={floatingStyles}
         role="group" aria-labelledby={headingId} onKeyDownCapture={handleKeyDownCapture}
         onFocus={handleFocus} onBlur={handleBlur}>
       <div className="connect-heading" id={headingId}>Device connection</div>
-      <div className="connect-status" role="status">
-        <div className="connect-status-line">{status}</div>
-        {checkNote && <div className="connect-note">{checkNote}</div>}
-        {problem && <div className="connect-error">{problem}</div>}
+      <div className="connect-status">
+        <div role="status">
+          <div className="connect-status-line">{line1}</div>
+          {announce && detail}
+        </div>
+        {!announce && detail}
       </div>
-      {isConnected
+      {paneView === "actions"
         ? <div className="connect-actions">
-            <PaneControl text="Reconnect" busy={busy} onActivate={reconnect} />
-            <PaneControl text="Disconnect" busy={busy} onActivate={disconnect} />
+            <PaneControl text="Reconnect" busy={actionsBusy} onActivate={reconnect} />
+            <PaneControl text="Disconnect" busy={actionsBusy} onActivate={disconnect} />
             {connection.canIdentify &&
-              <PaneControl text="Is it alive?" busy={busy || check === "checking"}
+              <PaneControl text="Is it alive?" busy={actionsBusy || check === "checking"}
                   onActivate={() => { void connection.identify(); }} />}
           </div>
         : <div className="connect-devices">
@@ -256,6 +264,19 @@ export const ConnectDeviceButton = observer(function ConnectDeviceButton({ name 
   const lossAtMount = useRef(connection.lossAt).current;
   const lossPulse = connection.lossAt !== undefined && connection.lossAt !== lossAtMount;
 
+  // A failure recorded while the pane is closed is announced politely, since nothing on screen is
+  // being watched. A failure already unseen at mount was announced, or missed, before this mounted.
+  const { announcement, announce } = useAnnounce(kFailureAnnounceMs);
+  const failure = content?.connectFailure;
+  const unseenError = !!content?.unseenConnectError;
+  const announcedFailure = useRef(failure);
+  useEffect(() => {
+    if (unseenError && failure && failure !== announcedFailure.current) {
+      announce(problemHeadline(failure.kind, failure.choice));
+      announcedFailure.current = failure;
+    }
+  }, [unseenError, failure, announce]);
+
   // Deselecting the tile unmounts the toolbar; the model volatile would otherwise stay open. Deleting
   // the tile destroys the content before this runs.
   useEffect(() => () => {
@@ -275,15 +296,28 @@ export const ConnectDeviceButton = observer(function ConnectDeviceButton({ name 
     return () => document.removeEventListener("pointerdown", handlePointerDown, true);
   }, [isOpen, content]);
 
+  // A stall counts only while its device is still open. The tile's own can outlast it, after
+  // another tile's Disconnect.
+  const lastFailure = connection.currentFailure(connection.lastFailure);
+  const staleTileStall = !!failure && !connection.currentFailure(failure);
   const stateInput = {
     connected: connection.isConnected,
     needsDevice: !!content?.needsDevice,
-    unseenError: !!content?.unseenConnectError,
-    notResponding: connection.notResponding
+    unseenError: unseenError && !staleTileStall,
+    notResponding: connection.notResponding,
+    stalled: !!lastFailure && kStallKinds.includes(lastFailure.kind),
+    dataReceived: connection.dataReceived
   };
+  const attempt = connection.attempt;
   const state = connectButtonState(stateInput);
   const title = connectButtonTooltip({
-    ...stateInput, connectedLabel: connection.connectedLabel, lossMessage: connection.lossMessage
+    ...stateInput,
+    connectedLabel: connection.connectedLabel
+      ?? (lastFailure ? kDeviceChoiceLabels[lastFailure.choice] : undefined),
+    stallKind: lastFailure?.kind,
+    lossMessage: connection.lossMessage,
+    connecting: attempt && (!attempt.ended || connection.updateResumed)
+      ? kDeviceChoiceLabels[attempt.choice] : undefined
   });
 
   const pane = isOpen && content && model
@@ -291,12 +325,21 @@ export const ConnectDeviceButton = observer(function ConnectDeviceButton({ name 
         onClose={() => content.setConnectPaneOpen(false)} />
     : undefined;
 
+  // The live region sits beside the pane, not in it, so it exists while the pane is closed. It stays
+  // mounted and only its text changes, since a region inserted already holding text is often missed.
+  const extraContent = (
+    <>
+      {pane}
+      <span role="status" aria-live="polite" className="visually-hidden">{announcement}</span>
+    </>
+  );
+
   return (
     <TileToolbarButton name={name} title={title} expanded={isOpen}
         colorClass={classNames(`connect-${state}`, { "connect-loss-pulse": lossPulse })}
         dataTestId="connect-device-button" disabled={readOnly || !content}
         disabledMessage="Connecting a device isn't available in a read-only view"
-        onClick={() => content?.setConnectPaneOpen(!isOpen)} extraContent={pane}>
+        onClick={() => content?.setConnectPaneOpen(!isOpen)} extraContent={extraContent}>
       <ConnectIcon />
     </TileToolbarButton>
   );

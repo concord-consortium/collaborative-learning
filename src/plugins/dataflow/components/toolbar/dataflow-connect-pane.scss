@@ -1,6 +1,9 @@
 @import "../../../../components/vars";
 @import "../../../../components/mixins";
 
+// The height of each of the pane's two status lines.
+$connect-line-height: 18px;
+
 @keyframes connect-slowpulse {
   0% { background-color: $star-yellow; }
   50% { background-color: #eee; }
@@ -46,23 +49,63 @@
     box-sizing: border-box;
     padding: 8px;
     text-align: left;
-    width: 230px;
+    width: 270px;
 
     .connect-heading {
       font-weight: bold;
       margin-bottom: 6px;
     }
 
+    // Two lines tall whatever they hold, so the rows below never move.
     .connect-status {
+      height: 2 * $connect-line-height;
       margin-bottom: 8px;
 
-      .connect-error {
-        color: #b00020;
-        margin-top: 4px;
+      .connect-status-line, .connect-detail {
+        box-sizing: border-box;
+        height: $connect-line-height;
+        line-height: $connect-line-height;
+        overflow: hidden;
+        white-space: nowrap;
       }
 
-      .connect-note {
-        margin-top: 4px;
+      .connect-status-line {
+        text-overflow: ellipsis;
+      }
+
+      .connect-detail {
+        align-items: center;
+        display: flex;
+        gap: 6px;
+
+        &.hint {
+          color: #555;
+        }
+
+        &.problem {
+          color: #b00020;
+        }
+
+        .connect-detail-text {
+          min-width: 0;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+
+        .connect-progress {
+          background: #fff;
+          border: solid 1px $workspace-teal;
+          border-radius: 4px;
+          box-sizing: border-box;
+          flex: 1 1 auto;
+          height: 10px;
+          overflow: hidden;
+
+          .connect-progress-fill {
+            background: $workspace-teal;
+            height: 100%;
+          }
+        }
       }
     }
 

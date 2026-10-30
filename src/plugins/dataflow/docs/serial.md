@@ -29,11 +29,12 @@ and **outbound** (a Live Output node → bytes leaving the computer).
 
 | Object | File | Role |
 |---|---|---|
-| `WebSerialTransport` | `src/models/stores/web-serial-transport.ts` | Owns the Web Serial port + read loop; `write()` out, `onData` in. `open(port?)` resolves `"opened"`, `"canceled"` or `"failed"`, and skips the chooser when given a port. `lastPort` survives `close()`. |
+| `WebSerialTransport` | `src/models/stores/web-serial-transport.ts` | Owns the Web Serial port + read loop; `write()` out, `onData` in. `open(port?, options?)` resolves `"opened"`, `"canceled"`, `"failed"`, `"timeout"` or `"stillOpening"`, and skips the chooser when given a port. `lastPort` survives `close()`. |
 | `MicrobitUsbTransport` | `src/models/stores/spikerbit-device.ts` | `IDeviceTransport` over a micro:bit WebUSB connection: `write()` out, `serialdata` → `onData` in, `status` → `onDisconnect("lost")`, and `navigator.usb`'s `disconnect` for its device → `onDisconnect("unplugged")`. |
 | `SpikerbitDevice` | `src/models/stores/spikerbit-device.ts` | Spiker:bit connect, reset, firmware check and flash; taps `onData` for connect-time firmware detection, then hands the transport to the store. |
 | `SerialDevice` | `src/models/stores/serial.ts` | Transport-agnostic connection store: holds the active transport and the registered channel sources, routes writes (`writeLine`) and inbound parsing (`receive`). `isConnected()` is observable. Keeps `lastLoss`. |
-| `DeviceConnection` | `src/plugins/dataflow/model/device-connection.ts` | App-wide connect, reconnect and disconnect; one instance per `SerialDevice`, from `getDeviceConnection`. Tracks `lastChoice`, `busyChoice` and `connectTutorialDismissal`. Keeps the "Is it alive?" check, and exposes `lossMessage` and `notResponding`. |
+| `DeviceConnection` | `src/plugins/dataflow/model/device-connection.ts` | App-wide connect, reconnect and disconnect; one instance per `SerialDevice`, from `getDeviceConnection`. Tracks `lastChoice`, `busyChoice` and `connectTutorialDismissal`. Follows the latest `ConnectionAttempt` and exposes `attempt`, `lastFailure`, `paneView`, `actionsEnabled` and `dataReceived`; `currentFailure` drops a stall's failure once its device is no longer open (`holdsDevice`). Keeps the "Is it alive?" check, and exposes `lossReason`, `lossMessage` and `notResponding`. |
+| `ConnectionAttempt` | `src/plugins/dataflow/model/connection-attempt.ts` | One Connect or Reconnect: its step, step times, view, outcome and failure. See [The connection attempt](#the-connection-attempt). |
 | tile device actions | `src/plugins/dataflow/utilities/device-actions.ts` | Wrap `DeviceConnection` for one tile: they reset the clicking tile's program, log the change, and record a failed attempt's message on the tile. |
 | `parseKeyValueData` | `src/models/stores/serial-protocol.ts` | `keyValue` parser (Arduino): `emg:<n>\r\n` lines → channel values. |
 | `CcDeviceSession` | `src/models/stores/cc-device-session.ts` | One CC Device Protocol session (Spiker:bit): opens it, pings it, parses its lines into channel values, and writes its outputs. Exposes `notResponding` and `identify()`. Created by `setActiveDevice` for a `ccDevice` device. |
@@ -63,14 +64,15 @@ out `connect`, from the older connect menu at the top of the tile. Both call the
 actions below. The log events name the device by the choice the user connected with
 (`lastChoice`, such as `microbitHub`), not by the detected `deviceFamily`.
 
-`DeviceConnection` provides `connect(choice)`, `reconnect()` and `disconnect()`. Connect and
-reconnect resolve `"connected"`, `"canceled"`, `"failed"` or `"inUse"` (see
-[Why a device went away](#why-a-device-went-away)). When a device is already
-connected, both disconnect it first. A Web Serial board and the Spiker:bit take different
-flows, and both end by calling `SerialDevice.setActiveDevice(deviceFamily, transport)`, which
-records the active transport, wires its inbound callbacks, and marks the store connected.
-Inbound data is matched against the registered channel sources (see
-[Channel sources](#channel-sources)).
+`DeviceConnection` provides `connect(choice, options?)`, `reconnect(options?)` and
+`disconnect()`. Connect and reconnect resolve the attempt's outcome: `"connected"`,
+`"canceled"`, a failure kind (`connect-failures.ts`), or `"unplugged"` / `"lost"` (see
+[The connection attempt](#the-connection-attempt)). `options` carries an `attemptId` and a
+listener. When a device is already connected, both disconnect it first. A Web Serial board and
+the Spiker:bit take different flows, and both end by calling
+`SerialDevice.setActiveDevice(deviceFamily, transport)`, which records the active transport,
+wires its inbound callbacks, and marks the store connected. Inbound data is matched against the
+registered channel sources (see [Channel sources](#channel-sources)).
 
 **Web Serial (Arduino and radio-hub micro:bit):**
 
@@ -106,53 +108,161 @@ and if needed flashes the firmware (see
 [Spiker:bit version check and flashing](#spikerbit-version-check-and-flashing) below), then
 calls `setActiveDevice("spikerbit", transport)`. If any step fails after the link opens,
 `connectAndStream` disconnects the library connection before it rethrows, so a failed attempt
-doesn't leave the board open.
+doesn't leave the board open. If `disconnect()` is called while `connectAndStream` is still
+running, for example during a stalled update, it stops at its next step with a `closed` error
+instead of writing to the board or making it active, and it doesn't close the link, so an
+abandoned connect can't disturb a newer one on the same board. Between the open and becoming
+active, a loss of the board is reported to the connect's observer (`onLost`); a disconnect asked
+for isn't one.
 
 **Reconnect.** `reconnect()` repeats the last device choice, so the user doesn't pick a
 device type again. For a Web Serial board it tries the last port
 (`WebSerialTransport.lastPort`, which survives `close()`) first, and if that fails it shows
-the browser's chooser. A Web Serial unplug is noticed quickly, by the browser's `disconnect`
+the browser's chooser. If the last port is still stuck opening (`"timeout"` or
+`"stillOpening"`), the attempt ends as `openTimeout` instead, since choosing that port again would
+get the same answer. A Web Serial unplug is noticed quickly, by the browser's `disconnect`
 event or by the read loop giving up, and either one clears the active device. So Reconnect
 isn't offered for an unplugged board: the pane shows the device choices, and Connect shows
 the chooser. For a Spiker:bit it runs `connectAndStream` again on the known
 `SpikerbitDevice`, whose library connection remembers the board and reopens it without the
-chooser. If that fails, for example because the board was unplugged and plugged back in, it
-disconnects that device and falls back to a new one, which shows the chooser. A Spiker:bit
+chooser. If that board can't be opened (`openFailed`), for example because it was unplugged and
+plugged back in, it disconnects that device and falls back to a new one, which shows the chooser.
+Any other failure ends the attempt. A Spiker:bit
 unplug is noticed by `navigator.usb`'s `disconnect` event, or else by the next write to the board
 failing (see "Why a device went away").
 
-**Disconnect** ends any CC Device Protocol session (`SerialDevice.endSession`, waiting at most
-500 ms, `kEndSessionTimeoutMs`), then closes the transport and clears the active device. For a
-Spiker:bit, closing
-the transport disconnects the library connection; the device is kept for Reconnect.
+**Disconnect** first ends an attempt still running as `canceled`, and disposes a Spiker:bit
+that isn't active yet: one whose update stalled, or one the running attempt opened (see below).
+It clears `lastFailure`, since a stall's failure goes with its device. It ends any CC Device
+Protocol session (`SerialDevice.endSession`, waiting at most 500 ms, `kEndSessionTimeoutMs`),
+then closes the transport and clears the active device. For a Spiker:bit, closing the transport
+disconnects the library connection; the device is kept for Reconnect.
 
 **Tile device actions.** The pane, the top-bar menu and the `reset` button call the tile device
 actions in `device-actions.ts`, which wrap `DeviceConnection` and log `DATAFLOW_TOOL_CHANGE`
-events with the operations `connectDevice`, `reconnectDevice`, `disconnectDevice` and
-`resetProgram`. A successful connect or reconnect resets only the clicking tile's program,
-through `resetProgramForTile`, which says what Reset leaves alone. Disconnect never resets.
+events with the operations `connectDevice`, `reconnectDevice`, `connectProgress`, `connectResult`,
+`connectRecovered`, `abandonedOpen`, `deviceLost`, `disconnectDevice` and `resetProgram`. A
+connect or reconnect resets only the clicking tile's program, through `resetProgramForTile`,
+which says what Reset leaves alone, as soon as the device becomes the active one. Disconnect never
+resets, and it also works while a stalled Spiker:bit update holds a board open that isn't active.
 
 **Log events.** Each is a `DATAFLOW_TOOL_CHANGE` event for one tile (`tileId`): the clicking
 tile, or for the connect tutorial's events, the tile it covers. The fields below sit at the top
-level of the event.
+level of the event. Every event of one attempt carries the same `attemptId`, and the device events
+carry `targetType: "device"` and `device`: the choice id (`arduino`, `microbitHub` or
+`spikerbit`). Step times are `attempt.steps`: ms from the click, for the steps that happened.
 
 | `operation` | Other fields | Logged when |
 |---|---|---|
-| `connectDevice` | `targetType: "device"`, `device`: the choice id (`arduino`, `microbitHub` or `spikerbit`) | A Connect succeeds |
-| `reconnectDevice` | `targetType: "device"`, `device` | A Reconnect succeeds |
+| `connectDevice` | `attemptId` | Connect is clicked |
+| `reconnectDevice` | `attemptId` | Reconnect is clicked |
+| `connectProgress` | `attemptId`, `trigger`, `elapsedMs`, `step`, `steps`, `updatePercent` during an update | The attempt is still running 5, 10, 20, 40... s after the click |
+| `connectResult` | `attemptId`, `trigger`, `outcome`, `elapsedMs`, `steps`; for a failure `failedStep` and `error` (`name`, `code`, `message`); for a Spiker:bit `firmware` (`found`, `updated`) | The attempt ends, including `canceled` |
+| `connectRecovered` | `attemptId`, `elapsedMs`, `steps` | An attempt that ended in a stall gets its first data after all |
+| `abandonedOpen` | `attemptId`, and what the `close()`, `forget()` and late settle of the abandoned open did | An open the attempt gave up on settles, or its best-effort close finishes |
+| `deviceLost` | `attemptId`, `reason`: `unplugged`, `lost`, or `updateFailed` for a stalled update whose flash fails later | A device the attempt left open is lost, or a stalled update's flash fails later |
 | `disconnectDevice` | `targetType: "device"`, `device`: the choice that was connected | The user disconnects |
 | `resetProgram` | `targetType: "program"`, `trigger`: `connect`, `reconnect` or `button` | The program is reset |
 | `showConnectTutorial` | `targetType: "connectTutorial"` | The connect tutorial appears over the tile |
 | `dismissConnectTutorial` | `targetType: "connectTutorial"`, `trigger`: `ok` (OK in this tile), `okInAnotherTile` or `connection` | The tutorial over the tile is dismissed |
 
-- A successful Connect or Reconnect logs two events: the device event, then `resetProgram` with
-  `trigger` `connect` or `reconnect`.
-- A failed, refused (`inUse`) or canceled attempt logs nothing.
-- Only a Disconnect the user chooses is logged. An unplug logs nothing, so a `connectDevice` can
-  have no matching `disconnectDevice`.
+- `connectDevice` and `reconnectDevice` mark the click, not a success. A quick attempt logs
+  `connectDevice`, `resetProgram` (when the device becomes active) and `connectResult`; anything
+  the student did in between sits between them in time order. A slow attempt adds `connectProgress`
+  events. A reload or a closed tab leaves a start, maybe some progress events and no result.
+- A failed, stalled or `canceled` attempt logs its `connectResult` too, with no `resetProgram`
+  unless the device became active first.
+- Only a Disconnect the user chooses logs `disconnectDevice`. An unplug logs `deviceLost` when the
+  attempt had ended with the device open; one before that ends the attempt, which `connectResult`
+  records as `unplugged` or `lost`.
+- A tile deleted during an attempt is left alone, but the attempt's events are still logged under
+  its id.
 - One OK or one connection dismisses the tutorial on every tile, so each tile it covered logs a
   dismissal; the tile whose OK was clicked has `trigger` `ok`. A tile that closes while the
   tutorial shows, such as a deleted tile, logs no dismissal.
+
+### The connection attempt
+
+Each Connect or Reconnect is a `ConnectionAttempt` (`model/connection-attempt.ts`), which
+`DeviceConnection` drives and exposes as `attempt`. It starts at the click and ends with one
+outcome, at the moment the promise from `connect` or `reconnect` resolves. `busyChoice` is set
+until then.
+
+| Step | Applies to | Ends when | Limit |
+|---|---|---|---|
+| `choose` | Connect, and a Reconnect that falls back to the chooser | The device chooser closes | None. Dismissing it ends the attempt as `canceled`. |
+| `open` | All | The port or USB device is open | `kOpenTimeoutMs` (20 s), then `openTimeout` |
+| `checkFirmware` | Spiker:bit | The firmware answers, or 1.5 s passes | Already bounded |
+| `update` | Spiker:bit with old or missing firmware | The flash finishes and the re-query is done | `kUpdateStartMs` (45 s) to the first progress, then `kUpdateStallMs` (20 s) between progress reports, then `updateStalled` |
+| `waitForData` | All | The first data arrives | `kFirstDataTimeoutMs` (5 s) from when the device became active, then `notResponding` (Spiker:bit) or `noData` |
+
+`attempt.steps` records when each step happened, in ms from the click: `chooserClosed`, `opened`,
+`firmwareChecked`, `updateStarted`, `updateFinished`, `active` (when `setActiveDevice` ran) and
+`firstData`. For a Spiker:bit, `attempt.firmware` records the firmware it answered with and
+whether it was updated. The open limit lives in the transports (`WebSerialTransport.open`'s
+`timeoutMs`, `SpikerbitDevice`'s `openTimeoutMs`); the other two are timers in
+`DeviceConnection`, cleared when the attempt ends or a new one starts, and as soon as a flash
+fails, so a slow close after it can't be taken for a stall. The library's `connect()` shows the
+Spiker:bit's chooser itself. It reports a `"FindingDevice"` progress stage before the chooser and
+`"Connecting"` once a device is chosen, or at once for a board it knows. `SpikerbitDevice` starts
+its limit at `"Connecting"` and reports it as `onOpening`, which records `chooserClosed` when the
+chooser was shown, so the time in the chooser never counts.
+
+Other failures: Web Serial's `"failed"` is `openFailed`. A Spiker:bit's `device-in-use` is
+`inUse`, the library's own 10 s limit on the USB open (code `timeout`) is `openTimeout`, any
+other error before the open is `openFailed`, and an error after the open but before the board is
+active is `updateFailed`, which disposes the device. A loss of the device before the first data,
+active or not, ends the attempt as `unplugged` or `lost` at once. A Disconnect while the attempt
+runs ends it as `canceled`, so no failure is recorded. `lastFailure` holds the latest attempt's
+failure, with its step and how long that step had run.
+
+**The two views.** The connect pane shows either the device list or the connected actions, and
+`paneView` says which. While an attempt runs it is the attempt's own view, not `isConnected`:
+
+- A Connect starts on the device list and switches to the actions when the device opens. For a
+  Spiker:bit that is the USB open, before the firmware check.
+- A Reconnect keeps the actions throughout, and goes back to the device list only if it fails
+  before the open.
+- `actionsEnabled` is false from the open until the first data arrives or a stall ends the
+  attempt, and again while a stalled update is making progress (`updateResumed`).
+- Any failure at or before the open, `updateFailed`, a loss or a cancel leaves the device list.
+
+**Stalls and recovery.** `updateStalled`, `noData` and `notResponding` end the attempt, but the
+device stays open and the stalled step keeps running. The actions are enabled, and a stalled
+update keeps the actions view though its board isn't active yet. A stall's failure counts only
+while its device is open (`holdsDevice`): the button and the pane ignore one that outlasted it.
+
+- **Progress from a stalled update** clears `lastFailure` and calls `onStallChanged` with no
+  failure. `updateResumed` is then true: the pane shows the ended attempt's update and progress
+  bar as if it still ran, and the actions are disabled. Another
+  `kUpdateStallMs` without progress sets `lastFailure` to `updateStalled` again, through
+  `onStallChanged`.
+- **An update that finishes after all** makes the board active without a second outcome. It no
+  longer stalls, so `lastFailure` is cleared, and the board gets the same 5 s wait for its first
+  data. If none comes, `lastFailure` becomes `notResponding`. The listener hears both changes
+  through `onStallChanged`, and the tile device actions show them on the tile.
+- **First data after a stall** sets `attempt.recovered`, clears `lastFailure` and calls the
+  listener's `onRecovered`.
+- **Disconnect or Connect during a stalled update** first disposes that `SpikerbitDevice`, which
+  closes its library connection and so stops the flash. Reconnect closes the library connection
+  too, but keeps the device and reopens it without the chooser.
+- **A loss after the attempt has ended** with its device open calls the listener's `onLost` and
+  clears `lastFailure`, so the pane shows the loss rather than the stall. That includes a stalled
+  update's board, which isn't active yet: its loss is also recorded on `SerialDevice.lastLoss`
+  (`recordLoss`), so the pane shows it.
+- **A stalled update whose flash fails after all** disposes the board, and `lastFailure` becomes
+  `updateFailed`. The listener hears it as `onLost` with the reason `updateFailed`, and the tile
+  shows that failure.
+
+**Giving up on an open.** Neither Web Serial nor WebUSB is known to let a page close a device
+while its open is pending, so at the limit the attempt stops waiting: it ends as `openTimeout`
+right away, and the Connect buttons are enabled again. In the background the transport tries
+`close()` and `forget()` on the stuck port or device, and closes it if the abandoned open
+succeeds later. Neither is awaited, since a stuck device may not close either. Each reports what
+happened through the listener's `onAbandonedOpen`. A retry while the browser still has the old
+open pending is refused at once with an `InvalidStateError`, which `WebSerialTransport` resolves
+as `"stillOpening"`; that is `openTimeout` too. Unplugging the device is what reliably ends a
+pending open.
 
 ### Channel sources
 
@@ -241,8 +351,8 @@ last reply (about 6 s while still opening), it sets the observable `notRespondin
 one of them (`ok`, or any `err` but `othersession`) clears it and restarts the count.
 `err othersession` sets it until the next connect or reconnect. The count is in commands, not
 seconds. It pauses while the page is hidden and restarts when it's visible: in a hidden tab the
-browser slows timers, and a transport whose reads run on a timer can fall behind the readings, so
-replies would look missing.
+browser slows the transport's reads below the rate the readings arrive, so replies fall behind
+and would look missing.
 
 **Identify.** `identify()` sends `identify #n` and resolves `"answered"` on any reply carrying
 that `#n`, `ok` or `err`, or `"noAnswer"` after 2 s. It works whatever state the session is in,
@@ -454,9 +564,10 @@ cleared, so the guard in `onDisconnect` ignores a second `"lost"`, and `recordUn
 `DeviceConnection.disconnect` unhooks the transport's `onDisconnect` before closing it, because a
 requested close also raises the library's `Disconnected`. A connect attempt clears the record.
 
-`DeviceConnection` turns this into what the connect pane shows: `lossMessage` ("The Spiker:bit was
-unplugged." or "The connection to the Spiker:bit was lost.") and `lossAt` (a new value pulses the
-connect button three times).
+`DeviceConnection` turns this into `lossReason`, which the connect pane shows ("It was unplugged."
+or "Connection lost."), `lossMessage` for the connect button's tooltip ("The Spiker:bit was
+unplugged." or "The connection to the Spiker:bit was lost."), and `lossAt` (a new value pulses
+the connect button three times).
 
 `MicrobitUsbTransport` listens for `navigator.usb`'s `disconnect` itself, since CLUE doesn't call
 the library's `initialize()`, where the library would. Without that event, an unplug would be
@@ -470,110 +581,7 @@ the answer for 3 s. The check remembers the `CcDeviceSession` it asked and count
 object is active, so it survives the pane closing and never shows an earlier board's answer.
 
 A Spiker:bit connect that fails because another tab or app has claimed the board (the library's
-`device-in-use` error) returns `"inUse"`, which the pane reports as "Another app is using the
-Spiker:bit."
-
-## Hidden pages
-
-What counts as hidden, and how much Chrome slows timers there, is in
-[Ticks in a hidden page](../../../../docs/dataflow.md#ticks-in-a-hidden-page), along with what
-that does to the program's ticks. For the connection:
-
-- **CLUE doesn't pause the connection.** `@microbit/microbit-connection`'s `initialize()` would
-  pause a Spiker:bit's connection while the page is hidden and reconnect when it's shown again,
-  but CLUE doesn't call `initialize()`. A program keeps reading and writing the device in a
-  hidden page.
-- **Web Serial reads keep up.** `WebSerialTransport`'s read loop waits on the port, not on a
-  timer, so readings still reach the channels. Only the ticks that sample them slow down.
-- **Spiker:bit reads may keep up.** `@microbit/microbit-connection` reads DAPLink's buffer in a
-  loop that waits for each USB read and then for a 1 ms `setTimeout`, and a read returns at most
-  62 bytes (`startPolling` in its `daplink.js`). In a hidden page Chrome holds that timer back,
-  but not to the once a minute of the tick and ping timers: a stand-in for the loop, with a
-  `MessageChannel` round trip in place of the USB read, ran about 3 times a second after more
-  than 3 minutes hidden. If the real loop does the same, it reads about 180 bytes a second, more
-  than the EMG readings' roughly 100 (one `emg:` line of about 10 bytes every 100 ms), and keeps
-  up. This hasn't been checked on a board. A loop that reads slower than the readings arrive lets
-  DAPLink's buffer fill and drop new output (see [the backlog](cc-device-protocol.md#connecting)):
-  the readings that do arrive are old, and replies to the session's commands queue behind them
-  or are lost. Using WebUSB directly wouldn't allow a read that waits for data, like the Web
-  Serial loop's: DAPLink sends serial data only in reply to a read command, so the host has to
-  poll.
-- **The session lapses, again and again, in a page from a site.** The Spiker:bit ends a session
-  after 5 s without a `ping`. About a minute after the page is hidden, the session's 1 s ping
-  timer drops to about once a minute, and the session lapses 5 s after the last ping. The next
-  ping, about a minute after the last, gets `err nosession`, and CLUE opens a new session. That
-  session's ping timer is a new `setInterval`, which fires about once a second for about 9 s and
-  then about once a minute, so the new session lapses about 15 s after it opens. The cycle
-  repeats about once a minute until the page is shown, which opens the session again at once. A
-  hand test on a branch preview fits this: the session lapsed about 68 s after the tab was
-  hidden, was opened again about 45 s later, lapsed again after about 12 s, and kept cycling. On
-  `localhost` the ping timer keeps firing about once a second for more than 3 minutes, so the
-  session lasts at least that long.
-- **Not responding isn't counted while the page is hidden.** See "Not responding" in
-  [The CC Device Protocol session](#the-cc-device-protocol-session): the count pauses and starts
-  again from zero when the page is shown, so a student coming back doesn't see a false "not
-  responding".
-- **If DataFlow is ever embedded in a cross-origin iframe,** the count won't pause while the
-  iframe is scrolled out of view. Chrome slows the iframe's timers to about once a second, but its
-  `visibilityState` stays `visible`, so the connect button could turn yellow. Such an iframe would
-  also need `allow="usb; serial"` for the device APIs to work at all.
-
-## Possible improvements
-
-- **Empty DAPLink's buffer at each wake-up in a hidden page.** This would let Dataflow keep up
-  with more readings in a hidden page. It adds complexity, so it isn't recommended until there
-  is a demonstrated need. `@microbit/microbit-connection`'s read loop sleeps after every read, so
-  a hidden page gets 62 bytes per timer wake-up. A loop that reads again straight away while
-  reads return data, and sleeps only when the buffer is empty, would empty the whole backlog at
-  each wake-up; USB transfers are promises, not timers, so they aren't slowed. Today's readings
-  may not need it: if the real loop wakes about 3 times a second in a hidden page, as its
-  stand-in did (see [Hidden pages](#hidden-pages)), it already keeps up. With more sensors, ASCII
-  readings could arrive faster than 62-byte reads take them. Whether a binary mode for readings
-  would also be needed, to cut the bytes per reading, depends on how often the real loop wakes,
-  which hasn't been checked on a board. Finally, it means modifying
-  `@microbit/microbit-connection`.
-- **Not recommended: read the Spiker:bit over Web Serial.** The micro:bit also exposes a serial
-  port, which the radio-hub micro:bit uses. Reading it would wait for data like the Arduino's
-  read loop and never overflow DAPLink's buffer. But flashing still needs WebUSB, so a student
-  would have to pick the board in two device choosers. Users and product owners already dislike
-  having one device chooser, so a second isn't worth it.
-
-## Testing
-
-The automated tests stop just above the browser's device APIs:
-
-- `web-serial-transport.test.ts` replaces `navigator.serial` and its ports with fakes.
-- `spikerbit-device.test.ts` and `device-connection.test.ts` give `SpikerbitDevice` a fake
-  `IMicrobitUsbConnection` in place of the library's WebUSB connection.
-- `spikerbit-end-to-end.test.ts` wires that connection to `MakeCodeSim`, which runs the firmware
-  source, through a model of DAPLink's buffer (see
-  [Testing the firmware in Jest](../firmware/README.md#testing-the-firmware-in-jest)).
-
-Everything below that, the browser's device chooser, its WebUSB and Web Serial code and the USB
-link, is checked by hand on real boards.
-
-### Why not test against the browser's real device stack
-
-It would take two things, a device the browser accepts as real and a way to pick it in the
-device chooser, and neither is practical. This was checked with Chrome 156 in October 2026.
-
-- **Tests can't pick a device in the chooser.** `requestPort()` and `requestDevice()` open a
-  chooser that is part of Chrome's own window, not the page, so Cypress and Playwright selectors
-  can't reach it. The DevTools protocol has a `DeviceAccess` domain for this
-  (`deviceRequestPrompted`, then `selectPrompt`), which Puppeteer's `waitForDevicePrompt` uses,
-  but Chrome raises it only for Web Bluetooth: with `DeviceAccess` enabled, neither the Web
-  Serial nor the WebUSB chooser raised `deviceRequestPrompted`. The Chrome policies
-  `SerialAllowUsbDevicesForUrls` and `WebUsbAllowDevicesForUrls` grant a device ahead of time, so
-  `getPorts()` and `getDevices()` return it, but `requestPort()` and `requestDevice()` still show
-  the chooser. Clicking it through the operating system (`xdotool`, macOS accessibility
-  scripting) needs a visible browser window and is fragile.
-- **Only Linux can fake a USB device in software.** The `dummy_hcd` kernel module provides a
-  virtual USB controller pair, so a gadget driver (`g_serial`, Raw Gadget or FunctionFS) can
-  appear to the browser as a plugged-in device; USB/IP with `vhci_hcd` does the same from a
-  user-space server. A serial gadget would be enough for the Web Serial path. Passing for a
-  micro:bit over WebUSB is much more: the fake would have to answer DAPLink's CMSIS-DAP commands,
-  its serial commands and flashing, as `@microbit/microbit-connection` uses them. macOS has no
-  equivalent of `dummy_hcd`. Whether GitHub's Ubuntu runners ship the module wasn't checked.
+`device-in-use` error) returns `"inUse"`, which the pane reports as "In use by another tab."
 
 ## Summary
 

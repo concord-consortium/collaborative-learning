@@ -13,12 +13,34 @@ describe("connectButtonState", () => {
     [false, true, true, false, "attention"]
   ])("connected=%s needsDevice=%s unseenError=%s notResponding=%s gives %s",
     (connected, needsDevice, unseenError, notResponding, expected) => {
-      expect(connectButtonState({ connected, needsDevice, unseenError, notResponding })).toBe(expected);
+      expect(connectButtonState({
+        connected, needsDevice, unseenError, notResponding, stalled: false, dataReceived: true
+      })).toBe(expected);
     });
+
+  it("connected is green only once data arrives; a stall is attention", () => {
+    const base = {
+      connected: true, needsDevice: false, unseenError: false, notResponding: false, stalled: false,
+      dataReceived: false
+    };
+    expect(connectButtonState(base)).toBe("idle");
+    expect(connectButtonState({ ...base, dataReceived: true })).toBe("connected");
+    expect(connectButtonState({ ...base, stalled: true })).toBe("attention");
+  });
+
+  it("a stall is attention even when the device isn't the active one", () => {
+    expect(connectButtonState({
+      connected: false, needsDevice: false, unseenError: false, notResponding: false, stalled: true,
+      dataReceived: false
+    })).toBe("attention");
+  });
 });
 
 describe("connectButtonTooltip", () => {
-  const base = { connected: false, needsDevice: false, unseenError: false, notResponding: false };
+  const base = {
+    connected: false, needsDevice: false, unseenError: false, notResponding: false, stalled: false,
+    dataReceived: true
+  };
 
   it("names each state", () => {
     expect(connectButtonTooltip(base)).toBe("Connect a device");
@@ -30,6 +52,33 @@ describe("connectButtonTooltip", () => {
       .toBe("This program needs a device. Click to connect.");
     expect(connectButtonTooltip({ ...base, connected: true, connectedLabel: "Spiker:bit", notResponding: true }))
       .toBe("The Spiker:bit is not responding. Click for details.");
+  });
+
+  it("the tooltip while connecting names the device", () => {
+    expect(connectButtonTooltip({ ...base, connecting: "Spiker:bit" })).toBe("Connecting to Spiker:bit…");
+  });
+
+  it("a stall says there is no data yet", () => {
+    expect(connectButtonTooltip({ ...base, connected: true, stalled: true, connectedLabel: "Arduino" }))
+      .toBe("Arduino: no data yet. Click for details.");
+  });
+
+  it("an update stall says the update stalled, even when not connected", () => {
+    expect(connectButtonTooltip({ ...base, stalled: true, stallKind: "updateStalled", connectedLabel: "Spiker:bit" }))
+      .toBe("Spiker:bit: the update stalled. Click for details.");
+  });
+
+  it("a stall comes before an unseen error, which comes before a loss", () => {
+    const all = {
+      ...base, stalled: true, unseenError: true, connectedLabel: "Arduino",
+      lossMessage: "The Arduino was unplugged."
+    };
+    expect(connectButtonState(all)).toBe("attention");
+    expect(connectButtonTooltip(all)).toBe("Arduino: no data yet. Click for details.");
+    expect(connectButtonTooltip({ ...all, stalled: false })).toBe("Couldn't connect. Click for details.");
+    expect(connectButtonState({ ...all, stalled: false, unseenError: false })).toBe("idle");
+    expect(connectButtonTooltip({ ...all, stalled: false, unseenError: false }))
+      .toBe("The Arduino was unplugged. Click to connect.");
   });
 
   it("the unseen-error text wins when a device is also needed", () => {

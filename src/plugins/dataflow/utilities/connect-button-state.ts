@@ -1,3 +1,5 @@
+import { FailureKind } from "../model/connect-failures";
+
 export type ConnectButtonState = "idle" | "connected" | "attention";
 
 /**
@@ -16,10 +18,19 @@ interface IConnectButtonInput {
   unseenError: boolean;
   // Connected, but the board isn't answering, or another host owns its session.
   notResponding: boolean;
+  // A stall failure (no data, not responding, update stalled) while the device is still open.
+  stalled: boolean;
+  // The connected device has sent something.
+  dataReceived: boolean;
 }
 
 export function connectButtonState(o: IConnectButtonInput): ConnectButtonState {
-  if (o.connected) return o.notResponding ? "attention" : "connected";
+  // A stall can leave the device open but not active, so it counts whether or not `connected`.
+  if (o.stalled) return "attention";
+  if (o.connected) {
+    if (o.notResponding) return "attention";
+    return o.dataReceived ? "connected" : "idle";
+  }
   return o.needsDevice || o.unseenError ? "attention" : "idle";
 }
 
@@ -29,16 +40,25 @@ export function notRespondingMessage(label: string | undefined): string {
 
 interface IConnectButtonTooltipInput extends IConnectButtonInput {
   connectedLabel?: string;
+  // The label of the device being connected to, while an attempt is running.
+  connecting?: string;
+  // Which stall `stalled` is, so the tooltip can say what stopped.
+  stallKind?: FailureKind;
   // Why the last device went away, while that loss is kept. Leads the not-connected text, so the
   // button still says so once its pulses end.
   lossMessage?: string;
 }
 
 export function connectButtonTooltip(o: IConnectButtonTooltipInput): string {
+  if (o.connecting) return `Connecting to ${o.connecting}…`;
   const loss = o.lossMessage ? `${o.lossMessage} ` : "";
   switch (connectButtonState(o)) {
     case "connected": return `Connected: ${o.connectedLabel}`;
     case "attention":
+      if (o.stalled && o.stallKind === "updateStalled") {
+        return `${o.connectedLabel}: the update stalled. Click for details.`;
+      }
+      if (o.stalled && !o.notResponding) return `${o.connectedLabel}: no data yet. Click for details.`;
       if (o.connected) return `${notRespondingMessage(o.connectedLabel)} Click for details.`;
       return o.unseenError
         ? "Couldn't connect. Click for details."

@@ -130,11 +130,15 @@ export class ReteManager implements INodeServices {
       // updateNeedsDevice tracks the program's blocks through getNodes(), along with each
       // block's settings and wiring.
       const needsDeviceDisposer = autorun(() => this.updateNeedsDevice());
-      // The connection is app-wide, so a successful one from any tile clears this tile's error from
-      // an earlier failed attempt. A later disconnect can't bring the error back.
+      // The connection is app-wide, so a successful one from any tile clears this tile's failure from
+      // an earlier attempt, as does a device that was connected without data getting its first data.
+      // A later disconnect can't bring the failure back.
       const connectedDisposer = reaction(
-        () => this.stores.serialDevice.isConnected(),
-        connected => { if (connected) this.mstContent.clearConnectError(); },
+        () => {
+          const { serialDevice } = this.stores;
+          return serialDevice.isConnected() ? (serialDevice.dataReceived ? 2 : 1) : 0;
+        },
+        state => { if (state > 0) this.mstContent.clearConnectFailure(); },
         { fireImmediately: true }
       );
       this.deviceStateDisposer = () => {

@@ -14,3 +14,11 @@ export interface IDeviceTransport {
   onData?: (chunk: string) => void;
   onDisconnect?: (loss: DeviceLoss) => void;
 }
+
+// What happened to a port whose open was given up on: whether closing and forgetting it worked,
+// and, once the abandoned open settles later, whether it opened or failed.
+export interface IAbandonedOpenInfo {
+  close?: "ok" | "failed" | "unsupported";
+  forget?: "ok" | "failed" | "unsupported";
+  late?: "opened" | "failed";
+}

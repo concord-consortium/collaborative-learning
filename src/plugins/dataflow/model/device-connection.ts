@@ -1,26 +1,24 @@
 // This lives in the DataFlow plugin, not src/models/stores, because it imports the Spiker:bit
 // firmware hex, which has to stay in the DataFlow chunk.
-import { makeAutoObservable, observable, reaction, runInAction } from "mobx";
+import { makeAutoObservable, observable, reaction, runInAction, when } from "mobx";
 import { SerialDevice } from "../../../models/stores/serial";
 import { CcDeviceSession, IdentifyResult } from "../../../models/stores/cc-device-session";
-import { SpikerbitDevice } from "../../../models/stores/spikerbit-device";
+import { DeviceLoss, IAbandonedOpenInfo, IDeviceTransport } from "../../../models/stores/device-transport";
+import { FirmwareReply } from "../../../models/stores/serial-protocol";
+import { ISpikerbitConnectObserver, SpikerbitDevice } from "../../../models/stores/spikerbit-device";
 import {
   createSpikerbitConnection, makeSpikerbitFlashDataSource
 } from "../../../models/stores/spikerbit-connection";
-import { WebSerialTransport } from "../../../models/stores/web-serial-transport";
+import { WebSerialOpenResult, WebSerialTransport } from "../../../models/stores/web-serial-transport";
 import spikerbitHex from "../firmware/spikerbit-clue.hex";
+import {
+  AttemptOutcome, AttemptStep, DeviceChoice, errorInfo, FailureKind, IConnectFailure, kDeviceChoiceLabels,
+  kStallKinds
+} from "./connect-failures";
+import { AttemptTrigger, AttemptView, ConnectionAttempt } from "./connection-attempt";
 
-// The device choices, in the order the UI lists them. The type is derived from this list, so a
-// new choice can't be left out of it.
-export const kDeviceChoiceOrder = ["arduino", "microbitHub", "spikerbit"] as const;
-
-export type DeviceChoice = typeof kDeviceChoiceOrder[number];
-
-export const kDeviceChoiceLabels: Record<DeviceChoice, string> = {
-  arduino: "Arduino",
-  microbitHub: "micro:bit (radio hub)",
-  spikerbit: "Spiker:bit"
-};
+export { kDeviceChoiceOrder, kDeviceChoiceLabels } from "./connect-failures";
+export type { DeviceChoice } from "./connect-failures";
 
 // How long disconnect waits for the board to take the `close` write before closing the transport
 // anyway. A write to a stalled port may never settle.
@@ -37,8 +35,65 @@ interface IIdentifyCheck {
   state: IdentifyCheckState;
 }
 
-// "inUse": another tab or app has claimed the board.
-export type ConnectResult = "connected" | "canceled" | "failed" | "inUse";
+// How long the open may take before the attempt ends as openTimeout.
+export const kOpenTimeoutMs = 20000;
+
+// How long the device may take to send its first data, from when it becomes the active device,
+// before the attempt ends as noData, or notResponding for a Spiker:bit.
+export const kFirstDataTimeoutMs = 5000;
+
+// How long a firmware update may take to report its first progress before the attempt ends as
+// updateStalled. Before writing its first page, the library halts the board, fills DAPLink's
+// serial buffers on the first flash after the board is plugged in, resets it and reads its page
+// checksums, all without reporting progress. That took about 25 s on a Chromebook.
+export const kUpdateStartMs = 45000;
+
+// How long a firmware update may go between progress reports before it counts as stalled. A page
+// took about 8 s on a Chromebook.
+export const kUpdateStallMs = 20000;
+
+export type ConnectResult = AttemptOutcome;
+
+// Why a device the attempt left open went away: a loss, or the failed flash of a stalled update.
+export type AttemptLoss = DeviceLoss | "updateFailed";
+
+// What a caller of connect or reconnect hears about its attempt besides the outcome.
+export interface IAttemptListener {
+  // Called as the promise from connect or reconnect resolves.
+  onEnded?(attempt: ConnectionAttempt): void;
+  // The first data arrived after a stall ended the attempt.
+  onRecovered?(attempt: ConnectionAttempt): void;
+  // After a stall ended the attempt, the stall changed: a stalled update finished, so it no longer
+  // stalls (undefined), or the board it then made active sent no data in time (that failure).
+  onStallChanged?(attempt: ConnectionAttempt, failure: IConnectFailure | undefined): void;
+  // An open the attempt gave up on was closed and forgotten, or settled late.
+  onAbandonedOpen?(attempt: ConnectionAttempt, info: IAbandonedOpenInfo): void;
+  // The device went away without being asked to, after the attempt had ended with it open. For
+  // "updateFailed", `lastFailure` is that failure.
+  onLost?(attempt: ConnectionAttempt, reason: AttemptLoss): void;
+}
+
+export interface IAttemptOptions {
+  attemptId?: string;
+  listener?: IAttemptListener;
+}
+
+// The attempt DeviceConnection follows: the latest one, until a newer attempt or a Disconnect.
+interface IFollowedAttempt {
+  attempt: ConnectionAttempt;
+  listener?: IAttemptListener;
+  resolve(outcome: ConnectResult): void;
+  // The running step's limit: the update's no-progress limit or the wait for the first data.
+  timer?: ReturnType<typeof setTimeout>;
+  // Stop watching the attempt's active device.
+  disposers: Array<() => void>;
+}
+
+// How one way of opening a device didn't work out.
+interface IOpenFailure {
+  outcome: AttemptOutcome;
+  error?: unknown;
+}
 
 // What dismissed the connect tutorial: OK in one tile, or any connection.
 export type ConnectTutorialDismissal = { by: "ok", tileId: string } | { by: "connection" };
@@ -53,8 +108,36 @@ const kNoDeviceSelected = "no-device-selected";
 
 const kDeviceInUse = "device-in-use";
 
+const kOpenTimeout = "open-timeout";
+
+// The code of the error @microbit/microbit-connection throws when its own time limit passes.
+const kLibraryTimeout = "timeout";
+
 function errorCode(error: unknown) {
   return (error as { code?: string } | null)?.code;
+}
+
+function isFailureKind(outcome: AttemptOutcome): outcome is FailureKind {
+  return outcome !== "connected" && outcome !== "canceled" && outcome !== "lost" && outcome !== "unplugged";
+}
+
+function webSerialOutcome(result: Exclude<WebSerialOpenResult, "opened">): AttemptOutcome {
+  switch (result) {
+    case "canceled": return "canceled";
+    case "failed": return "openFailed";
+    // "stillOpening" is a retry refused because the browser is still opening the port for an
+    // earlier attempt. Unplugging the board is the fix for both.
+    case "timeout":
+    case "stillOpening": return "openTimeout";
+  }
+}
+
+// The firmware a Spiker:bit answered with, as the log records it.
+function describeFirmware(reply: FirmwareReply | null) {
+  if (!reply) return null;
+  return reply.kind === "legacy"
+    ? `legacy v${reply.firmware}`
+    : `device:${reply.hello.device} firmware:${reply.hello.firmware}`;
 }
 
 /**
@@ -65,8 +148,13 @@ export class DeviceConnection {
   // The device choice the user last connected with. Reconnect repeats it, and the log events name
   // the device by it.
   lastChoice: DeviceChoice | undefined = undefined;
-  // Set while a connect or reconnect attempt is in progress.
+  // Set from the click until the attempt ends, which a stall also does.
   busyChoice: DeviceChoice | undefined = undefined;
+  // The latest connect or reconnect attempt.
+  attempt: ConnectionAttempt | undefined = undefined;
+  // The latest attempt's failure. The next attempt clears it, and so do a Disconnect, first data
+  // after a stall, and the loss of the device a stall left open.
+  lastFailure: IConnectFailure | undefined = undefined;
   // What first dismissed the connect tutorial, which then stays dismissed on every tile. In memory
   // only, so it can show again after a page reload.
   connectTutorialDismissal: ConnectTutorialDismissal | undefined = undefined;
@@ -81,17 +169,23 @@ export class DeviceConnection {
   // The latest "Is it alive?" check, with the CcDeviceSession it asked. It counts only while that
   // object is the active one, so a reconnect or a new device never shows an earlier board's answer.
   private identifyCheck: IIdentifyCheck | undefined = undefined;
+  // A Spiker:bit whose update stalled. It is open but not active. The update may still finish, so
+  // the attempt keeps it until then, or until a Disconnect, Connect or Reconnect disposes it.
+  private stalledSpikerbit: SpikerbitDevice | undefined = undefined;
+  private followed: IFollowedAttempt | undefined = undefined;
 
   constructor(serialDevice: SerialDevice, deps?: Partial<IDeviceConnectionDeps>) {
     this.serialDevice = serialDevice;
     this.deps = {
       createWebSerialTransport: () => new WebSerialTransport(),
-      createSpikerbitDevice: (device) => new SpikerbitDevice(device, createSpikerbitConnection()),
+      createSpikerbitDevice: (device) =>
+        new SpikerbitDevice(device, createSpikerbitConnection(), { openTimeoutMs: kOpenTimeoutMs }),
       getSpikerbitFlashDataSource: () => makeSpikerbitFlashDataSource(spikerbitHex),
       ...deps
     };
     makeAutoObservable<DeviceConnection,
-        "serialDevice" | "deps" | "lastWebSerialTransport" | "spikerbitDevice" | "identifyCheck">(
+        "serialDevice" | "deps" | "lastWebSerialTransport" | "spikerbitDevice" | "identifyCheck"
+        | "stalledSpikerbit" | "followed">(
       this,
       {
         serialDevice: false,
@@ -99,6 +193,10 @@ export class DeviceConnection {
         lastWebSerialTransport: false,
         spikerbitDevice: false,
         identifyCheck: observable.ref,
+        attempt: observable.ref,
+        lastFailure: observable.ref,
+        stalledSpikerbit: observable.ref,
+        followed: false,
         connect: false,
         reconnect: false,
         disconnect: false,
@@ -114,6 +212,44 @@ export class DeviceConnection {
 
   get isConnected() {
     return this.serialDevice.isConnected();
+  }
+
+  // Which of the connect pane's views shows. While the attempt runs, or holds a stalled update,
+  // it is the attempt's own, which doesn't follow isConnected: a Reconnect keeps the actions while
+  // nothing is connected, and a Connect shows them as soon as the device opens.
+  get paneView(): AttemptView {
+    const attempt = this.attempt;
+    if (attempt && (!attempt.ended || this.stalledSpikerbit)) return attempt.view;
+    return this.isConnected ? "actions" : "devices";
+  }
+
+  // The connected actions are disabled while an attempt is starting its device up, and while a
+  // stalled update is making progress again, since closing the board would stop the flash.
+  get actionsEnabled() {
+    const attempt = this.attempt;
+    if (this.updateResumed) return false;
+    return !attempt || attempt.ended || attempt.actionsEnabled;
+  }
+
+  get dataReceived() {
+    return this.isConnected && this.serialDevice.dataReceived;
+  }
+
+  // Whether a device is open: the active one, or a Spiker:bit a stalled update holds open.
+  get holdsDevice() {
+    return this.isConnected || this.paneView === "actions";
+  }
+
+  // Whether an update that stalled is making progress again. Its attempt has ended, but the pane
+  // shows the update as it runs.
+  get updateResumed() {
+    return !!this.stalledSpikerbit && !this.lastFailure;
+  }
+
+  // `failure`, unless it is a stall whose device is no longer open, which another tile's
+  // Disconnect can leave on a tile.
+  currentFailure(failure: IConnectFailure | undefined) {
+    return failure && (!kStallKinds.includes(failure.kind) || this.holdsDevice) ? failure : undefined;
   }
 
   get connectedLabel(): string | undefined {
@@ -174,6 +310,11 @@ export class DeviceConnection {
     return this.serialDevice.lastLoss?.at;
   }
 
+  // Why the last device went away without the user asking, while nothing is connected.
+  get lossReason(): DeviceLoss | undefined {
+    return this.isConnected ? undefined : this.serialDevice.lastLoss?.reason;
+  }
+
   get connectTutorialDismissed() {
     return !!this.connectTutorialDismissal;
   }
@@ -183,23 +324,55 @@ export class DeviceConnection {
     this.connectTutorialDismissal ??= dismissal;
   }
 
-  async connect(choice: DeviceChoice): Promise<ConnectResult> {
-    return this.attempt(choice, async () => {
-      if (this.isConnected) await this.disconnect();
-      return choice === "spikerbit" ? this.connectSpikerbit() : this.connectWebSerial();
+  async connect(choice: DeviceChoice, options: IAttemptOptions = {}): Promise<ConnectResult> {
+    return this.startAttempt(choice, "connect", options, async attempt => {
+      await this.closeDevices();
+      return choice === "spikerbit" ? this.connectSpikerbit(attempt) : this.connectWebSerial(attempt);
     });
   }
 
-  async reconnect(): Promise<ConnectResult> {
+  async reconnect(options: IAttemptOptions = {}): Promise<ConnectResult> {
     const choice = this.lastChoice;
     if (!choice) return "canceled";
-    return this.attempt(choice, async () => {
-      if (this.isConnected) await this.disconnect();
-      return choice === "spikerbit" ? this.reconnectSpikerbit() : this.reconnectWebSerial();
+    return this.startAttempt(choice, "reconnect", options, async attempt => {
+      // A stalled Spiker:bit is the board Reconnect reopens.
+      await this.closeDevices({ keepStalled: true });
+      return choice === "spikerbit" ? this.reconnectSpikerbit(attempt) : this.reconnectWebSerial(attempt);
     });
   }
 
   async disconnect(): Promise<void> {
+    const attempt = this.attempt;
+    // An attempt still starting its device up is stopped. The user stopped it, so it isn't a
+    // failure. A Spiker:bit it opened that isn't active yet is let go.
+    const starting = attempt && !attempt.ended && this.isFollowing(attempt) ? attempt : undefined;
+    if (starting) this.endAttempt(starting, "canceled");
+    this.stopFollowing();
+    // A stall's failure goes with its device.
+    this.lastFailure = undefined;
+    if (starting?.choice === "spikerbit" && starting.steps.active === undefined) await this.disposeSpikerbit();
+    await this.closeDevices();
+  }
+
+  // Closes the attempt's devices: a stalled Spiker:bit, which is disposed unless kept for
+  // Reconnect, then the active device. Closing the library connection also stops a flash, so two
+  // connects never run against one board.
+  private async closeDevices({ keepStalled = false } = {}) {
+    const stalled = this.stalledSpikerbit;
+    if (stalled && keepStalled) {
+      this.stalledSpikerbit = undefined;
+      try {
+        await stalled.disconnect();
+      } catch (e) {
+        console.error("Spiker:bit disconnect failed", e);
+      }
+    } else if (stalled) {
+      await this.disposeSpikerbit(stalled);
+    }
+    if (this.isConnected) await this.closeActive();
+  }
+
+  private async closeActive() {
     const transport = this.serialDevice.activeTransport;
     // The close asked for here can be reported back as a loss; it isn't one.
     if (transport) transport.onDisconnect = undefined;
@@ -225,103 +398,373 @@ export class DeviceConnection {
     if (this.serialDevice.activeTransport === transport) this.serialDevice.clearActiveDevice();
   }
 
-  private async attempt(choice: DeviceChoice, run: () => Promise<ConnectResult>): Promise<ConnectResult> {
-    if (this.busyChoice) return "canceled";
+  // Starts following a new attempt and runs it. The promise resolves when the attempt ends, which
+  // can be before `run` finishes: a stalled update keeps going.
+  private startAttempt(
+    choice: DeviceChoice, trigger: AttemptTrigger, options: IAttemptOptions,
+    run: (attempt: ConnectionAttempt) => Promise<void>
+  ): Promise<ConnectResult> {
+    if (this.busyChoice) return Promise.resolve("canceled");
+    this.stopFollowing();
     this.serialDevice.clearLastLoss();
-    runInAction(() => { this.busyChoice = choice; });
-    try {
-      const result = await run();
-      if (result === "connected") runInAction(() => { this.lastChoice = choice; });
-      return result;
-    } catch (e) {
-      console.error("Device connection failed", e);
-      return "failed";
-    } finally {
-      runInAction(() => { this.busyChoice = undefined; });
+    const attempt = new ConnectionAttempt(choice, trigger, options.attemptId);
+    return new Promise<ConnectResult>(resolve => {
+      this.followed = { attempt, listener: options.listener, resolve, disposers: [] };
+      this.attempt = attempt;
+      this.lastFailure = undefined;
+      this.busyChoice = choice;
+      run(attempt).catch(e => {
+        console.error("Device connection failed", e);
+        this.endAttempt(attempt, "openFailed", { error: e });
+      });
+    });
+  }
+
+  private isFollowing(attempt: ConnectionAttempt) {
+    return this.followed?.attempt === attempt;
+  }
+
+  private stopFollowing() {
+    const followed = this.followed;
+    if (!followed) return;
+    this.followed = undefined;
+    clearTimeout(followed.timer);
+    followed.disposers.forEach(dispose => dispose());
+  }
+
+  // Ends the attempt, unless it has already ended or a newer one has replaced it. A failure's
+  // `elapsedMs` is how long its step had run, unless given.
+  private endAttempt(
+    attempt: ConnectionAttempt, outcome: AttemptOutcome,
+    { error, elapsedMs }: { error?: unknown, elapsedMs?: number } = {}
+  ) {
+    const followed = this.followed;
+    if (followed?.attempt !== attempt || attempt.ended) return;
+    clearTimeout(followed.timer);
+    followed.timer = undefined;
+    const failure: IConnectFailure | undefined = isFailureKind(outcome)
+      ? {
+        kind: outcome, choice: attempt.choice, step: attempt.step,
+        elapsedMs: elapsedMs ?? attempt.stepElapsedMs, error: errorInfo(error)
+      }
+      : undefined;
+    attempt.end(outcome, failure);
+    this.lastFailure = failure;
+    this.busyChoice = undefined;
+    followed.resolve(outcome);
+    followed.listener?.onEnded?.(attempt);
+  }
+
+  // Starts or restarts the running step's limit.
+  private setLimit(attempt: ConnectionAttempt, ms: number, onLimit: () => void) {
+    const followed = this.followed;
+    if (followed?.attempt !== attempt || attempt.ended) return;
+    clearTimeout(followed.timer);
+    followed.timer = setTimeout(onLimit, ms);
+  }
+
+  private clearLimit(attempt: ConnectionAttempt) {
+    const followed = this.followed;
+    if (followed?.attempt !== attempt) return;
+    clearTimeout(followed.timer);
+    followed.timer = undefined;
+  }
+
+  // The device is open. The view switches to the connected actions, and Reconnect now repeats this
+  // choice, since a stall still leaves the device open.
+  private markOpened(attempt: ConnectionAttempt, next: AttemptStep) {
+    if (!this.isFollowing(attempt)) return;
+    attempt.opened(next);
+    this.lastChoice = attempt.choice;
+  }
+
+  // The attempt's device became the active device, perhaps after a stall ended the attempt. Waits
+  // for its first data, and watches for it going away.
+  private deviceActivated(attempt: ConnectionAttempt, transport: IDeviceTransport) {
+    const followed = this.followed;
+    if (followed?.attempt !== attempt) return;
+    attempt.activated();
+    this.stalledSpikerbit = undefined;
+    followed.disposers.push(
+      when(() => this.serialDevice.activeTransport === transport && this.serialDevice.dataReceived,
+        () => this.dataArrived(attempt)),
+      when(() => this.serialDevice.lastLoss?.transport === transport,
+        () => this.deviceLost(attempt, this.serialDevice.lastLoss!.reason))
+    );
+    const noData = attempt.choice === "spikerbit" ? "notResponding" : "noData";
+    if (!attempt.ended) {
+      this.setLimit(attempt, kFirstDataTimeoutMs,
+        () => this.endAttempt(attempt, noData, { elapsedMs: kFirstDataTimeoutMs }));
+    } else if (attempt.outcome === "updateStalled") {
+      // The stalled update finished after all. The attempt keeps its outcome, but the update no
+      // longer stalls, and the board gets the same wait for its first data, which can stall too.
+      this.stallChanged(attempt, undefined);
+      clearTimeout(followed.timer);
+      followed.timer = setTimeout(() => this.stallChanged(attempt, {
+        kind: noData, choice: attempt.choice, step: "waitForData", elapsedMs: kFirstDataTimeoutMs
+      }), kFirstDataTimeoutMs);
     }
   }
 
-  private async connectWebSerial(): Promise<ConnectResult> {
-    return this.openWebSerial(this.deps.createWebSerialTransport());
+  // After a stall ended the attempt, its failure changed.
+  private stallChanged(attempt: ConnectionAttempt, failure: IConnectFailure | undefined) {
+    const followed = this.followed;
+    if (followed?.attempt !== attempt) return;
+    this.lastFailure = failure;
+    followed.listener?.onStallChanged?.(attempt, failure);
   }
 
-  private async openWebSerial(transport: WebSerialTransport, port?: SerialPort): Promise<ConnectResult> {
-    const opened = await transport.open(port);
-    if (opened !== "opened") return opened;
-    this.lastWebSerialTransport = transport;
-    return this.activateWebSerial(transport);
+  private dataArrived(attempt: ConnectionAttempt) {
+    const followed = this.followed;
+    if (followed?.attempt !== attempt) return;
+    attempt.dataArrived();
+    if (!attempt.ended) {
+      this.endAttempt(attempt, "connected");
+    } else if (attempt.recovered) {
+      this.clearLimit(attempt);
+      this.lastFailure = undefined;
+      followed.listener?.onRecovered?.(attempt);
+    }
   }
 
-  private async activateWebSerial(transport: WebSerialTransport): Promise<ConnectResult> {
+  // A loss before the attempt has ended ends it. After that, the device it left open was lost, and
+  // a stall's failure goes with it.
+  private deviceLost(attempt: ConnectionAttempt, reason: DeviceLoss) {
+    const followed = this.followed;
+    if (followed?.attempt !== attempt) return;
+    if (!attempt.ended) {
+      this.endAttempt(attempt, reason);
+    } else {
+      this.clearLimit(attempt);
+      this.lastFailure = undefined;
+      followed.listener?.onLost?.(attempt, reason);
+    }
+  }
+
+  private async connectWebSerial(attempt: ConnectionAttempt) {
+    const transport = this.deps.createWebSerialTransport();
+    const result = await this.openWebSerial(attempt, transport);
+    if (result === "opened") return this.activateWebSerial(attempt, transport);
+    this.endAttempt(attempt, webSerialOutcome(result), { error: transport.lastOpenError });
+  }
+
+  // Opens `port`, or the port the user chooses when none is given.
+  private openWebSerial(attempt: ConnectionAttempt, transport: WebSerialTransport, port?: SerialPort) {
+    const listener = this.followed?.listener;
+    return transport.open(port, {
+      timeoutMs: kOpenTimeoutMs,
+      onChosen: port ? undefined : () => attempt.chooserClosed(),
+      onAbandoned: info => listener?.onAbandonedOpen?.(attempt, info)
+    });
+  }
+
+  private async activateWebSerial(attempt: ConnectionAttempt, transport: WebSerialTransport) {
     const deviceFamily = transport.deviceFamily;
-    if (!deviceFamily) {
+    // A Disconnect stopped the attempt while the port was opening.
+    if (!deviceFamily || !this.isFollowing(attempt)) {
       await transport.close();
-      return "failed";
+      this.endAttempt(attempt, "openFailed");
+      return;
     }
+    this.lastWebSerialTransport = transport;
+    this.markOpened(attempt, "waitForData");
     this.serialDevice.setActiveDevice(deviceFamily, transport);
     this.serialDevice.setRaisesWebSerialConnect(transport.raisesWebSerialConnect);
+    this.deviceActivated(attempt, transport);
     transport.startReading();
-    return "connected";
   }
 
-  private async reconnectWebSerial(): Promise<ConnectResult> {
+  // Reopens the last port without the chooser. If that fails, for example because the board was
+  // unplugged, falls back to the chooser. A port still stuck opening ends the attempt instead:
+  // choosing the same port again would get the same answer.
+  private async reconnectWebSerial(attempt: ConnectionAttempt) {
     const lastPort = this.lastWebSerialTransport?.lastPort ?? null;
 
     if (lastPort) {
       const transport = this.deps.createWebSerialTransport();
-      if (await transport.open(lastPort) === "opened") return this.finishWebSerial(transport);
+      const result = await this.openWebSerial(attempt, transport, lastPort);
+      if (result === "opened") return this.activateWebSerial(attempt, transport);
+      if (result !== "failed") {
+        this.endAttempt(attempt, webSerialOutcome(result), { error: transport.lastOpenError });
+        return;
+      }
     }
 
-    const chooserTransport = this.deps.createWebSerialTransport();
-    const result = await chooserTransport.open();
-    return result === "opened" ? this.finishWebSerial(chooserTransport) : result;
-  }
-
-  private finishWebSerial(transport: WebSerialTransport) {
-    this.lastWebSerialTransport = transport;
-    return this.activateWebSerial(transport);
+    attempt.setStep("choose");
+    return this.connectWebSerial(attempt);
   }
 
   // A fresh device has a fresh library connection, which shows the chooser.
-  private async connectSpikerbit(): Promise<ConnectResult> {
+  private async connectSpikerbit(attempt: ConnectionAttempt) {
     await this.disposeSpikerbit();
     const device = this.deps.createSpikerbitDevice(this.serialDevice);
     this.spikerbitDevice = device;
-    return this.streamSpikerbit(device);
+    const failure = await this.streamSpikerbit(attempt, device);
+    if (failure) this.endAttempt(attempt, failure.outcome, { error: failure.error });
   }
 
-  // Reopens the known board without the chooser. If that fails, for example because the
+  // Reopens the known board without the chooser. If it can't be opened, for example because the
   // board was unplugged, falls back to a fresh device and the chooser.
-  private async reconnectSpikerbit(): Promise<ConnectResult> {
+  private async reconnectSpikerbit(attempt: ConnectionAttempt) {
     const known = this.spikerbitDevice;
     if (known) {
-      const result = await this.streamSpikerbit(known);
-      if (result !== "failed") return result;
+      const failure = await this.streamSpikerbit(attempt, known);
+      if (failure?.outcome !== "openFailed") {
+        if (failure) this.endAttempt(attempt, failure.outcome, { error: failure.error });
+        return;
+      }
     }
-    return this.connectSpikerbit();
+    attempt.setStep("choose");
+    return this.connectSpikerbit(attempt);
   }
 
-  private async streamSpikerbit(device: SpikerbitDevice): Promise<ConnectResult> {
+  // Runs the board's connect, following its steps, until the board is active. Resolves with how it
+  // failed, or undefined when there is nothing more to end. A failure after the open closes the
+  // board.
+  private async streamSpikerbit(
+    attempt: ConnectionAttempt, device: SpikerbitDevice
+  ): Promise<IOpenFailure | undefined> {
+    const listener = this.followed?.listener;
+    // Reports from a run that a Disconnect or a newer attempt replaced are ignored.
+    const following = () => this.isFollowing(attempt);
+    let opened = false;
+    let failed = false;
+    const limitUpdate = (ms: number) => this.setLimit(attempt, ms, () => {
+      if (!failed) this.updateStalled(attempt, device, ms);
+    });
+    const observer: ISpikerbitConnectObserver = {
+      onOpening: afterChooser => {
+        if (!following()) return;
+        if (afterChooser) attempt.chooserClosed();
+        else attempt.setStep("open");
+      },
+      onOpened: () => {
+        opened = true;
+        this.markOpened(attempt, "checkFirmware");
+      },
+      onFirmwareChecked: (reply, willUpdate) => {
+        if (!following()) return;
+        attempt.firmwareChecked(describeFirmware(reply), willUpdate);
+        if (willUpdate) limitUpdate(kUpdateStartMs);
+      },
+      onUpdateProgress: percent => {
+        if (!following()) return;
+        attempt.updateProgress(percent);
+        if (!attempt.ended) limitUpdate(kUpdateStallMs);
+        else if (this.stalledSpikerbit === device) this.stalledUpdateProgressed(attempt, () => !failed);
+      },
+      onUpdateFinished: () => {
+        if (!following()) return;
+        attempt.updateFinished();
+        this.clearLimit(attempt);
+      },
+      // The board may take a while to close, and a stall mustn't be reported meanwhile.
+      onFailed: () => {
+        failed = true;
+        this.clearLimit(attempt);
+      },
+      onLost: loss => this.openSpikerbitLost(attempt, device, loss),
+      onAbandoned: info => listener?.onAbandonedOpen?.(attempt, info)
+    };
+
     try {
-      await device.connectAndStream(this.deps.getSpikerbitFlashDataSource());
-      return "connected";
+      await device.connectAndStream(this.deps.getSpikerbitFlashDataSource(), observer);
     } catch (e) {
-      if (errorCode(e) === kNoDeviceSelected) return "canceled";
+      failed = true;
+      this.clearLimit(attempt);
+      // A Disconnect, a newer attempt or a loss has already let the board go.
+      if (!following() || this.spikerbitDevice !== device) return undefined;
+      const code = errorCode(e);
+      if (code === kNoDeviceSelected) return { outcome: "canceled" };
       console.error("Spiker:bit connection failed", e);
-      await this.disposeSpikerbit();
-      return errorCode(e) === kDeviceInUse ? "inUse" : "failed";
+      if (code === kOpenTimeout) {
+        // The device is already closing its abandoned open, and that close may hang.
+        await this.disposeSpikerbit(device, { close: false });
+        return { outcome: "openTimeout", error: e };
+      }
+      // A stall ended the attempt, so this board is the stalled one.
+      const stalled = attempt.ended;
+      await this.disposeSpikerbit(device);
+      if (code === kDeviceInUse) return { outcome: "inUse", error: e };
+      // The library gives up on the USB open itself after 10 s.
+      if (!opened && code === kLibraryTimeout) return { outcome: "openTimeout", error: e };
+      if (stalled) {
+        this.stalledUpdateFailed(attempt, e);
+        return undefined;
+      }
+      return { outcome: opened ? "updateFailed" : "openFailed", error: e };
     }
+
+    if (!following()) return undefined;
+    const transport = this.serialDevice.activeTransport;
+    if (!transport) return { outcome: this.serialDevice.lastLoss?.reason ?? "lost" };
+    this.deviceActivated(attempt, transport);
+    return undefined;
   }
 
-  private async disposeSpikerbit() {
-    const device = this.spikerbitDevice;
-    this.spikerbitDevice = undefined;
-    try {
-      await device?.disconnect();
-    } catch (e) {
-      console.error("Spiker:bit disconnect failed", e);
+  // The flash keeps running, and the board stays open until it finishes or is disposed.
+  private updateStalled(attempt: ConnectionAttempt, device: SpikerbitDevice, elapsedMs: number) {
+    if (!this.isFollowing(attempt) || this.spikerbitDevice !== device) return;
+    this.stalledSpikerbit = device;
+    this.endAttempt(attempt, "updateStalled", { elapsedMs });
+  }
+
+  // A stalled update made progress, so it no longer stalls, until it goes kUpdateStallMs without
+  // progress again. `flashing` is false once the flash has failed.
+  private stalledUpdateProgressed(attempt: ConnectionAttempt, flashing: () => boolean) {
+    const followed = this.followed;
+    if (followed?.attempt !== attempt) return;
+    if (this.lastFailure) this.stallChanged(attempt, undefined);
+    clearTimeout(followed.timer);
+    followed.timer = setTimeout(() => {
+      if (!flashing()) return;
+      this.stallChanged(attempt, {
+        kind: "updateStalled", choice: attempt.choice, step: "update", elapsedMs: kUpdateStallMs
+      });
+    }, kUpdateStallMs);
+  }
+
+  // The flash of a stalled update failed after all, so the pane goes back to the device list with
+  // that failure. The attempt has ended, so the listener hears of it as a loss of the board.
+  private stalledUpdateFailed(attempt: ConnectionAttempt, error: unknown) {
+    this.lastFailure = {
+      kind: "updateFailed", choice: attempt.choice, step: "update", elapsedMs: attempt.stepElapsedMs,
+      error: errorInfo(error)
+    };
+    this.followed?.listener?.onLost?.(attempt, "updateFailed");
+  }
+
+  // The board went away after its open and before it became active, perhaps during a stalled
+  // update. While the attempt runs, that ends it; afterward, the listener hears of the loss. It is
+  // recorded as the loss of a device, which the pane shows, and the board is let go.
+  private openSpikerbitLost(attempt: ConnectionAttempt, device: SpikerbitDevice, loss: DeviceLoss) {
+    const followed = this.followed;
+    if (followed?.attempt !== attempt || this.spikerbitDevice !== device) return;
+    this.clearLimit(attempt);
+    if (!attempt.ended) {
+      this.endAttempt(attempt, loss);
+    } else {
+      this.lastFailure = undefined;
+      followed.listener?.onLost?.(attempt, loss);
     }
-    device?.dispose();
+    this.serialDevice.recordLoss(device.transport, loss);
+    void this.disposeSpikerbit(device);
+  }
+
+  // Lets the board go: closes its library connection unless told not to, then stops listening for
+  // its unplug.
+  private async disposeSpikerbit(device = this.spikerbitDevice, { close = true } = {}) {
+    if (!device) return;
+    if (this.spikerbitDevice === device) this.spikerbitDevice = undefined;
+    if (this.stalledSpikerbit === device) this.stalledSpikerbit = undefined;
+    if (close) {
+      try {
+        await device.disconnect();
+      } catch (e) {
+        console.error("Spiker:bit disconnect failed", e);
+      }
+    }
+    device.dispose();
   }
 }
 

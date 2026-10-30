@@ -2,7 +2,8 @@ import { SerialDevice } from "./serial";
 import { withChecksum } from "./cc-device-protocol";
 import { kMaxSeq } from "./cc-device-session";
 import {
-  IMicrobitUsbConnection, IUsbDisconnectSource, kSpikerbitFirmwareVersion, MicrobitUsbTransport, SpikerbitDevice
+  IMicrobitUsbConnection, ISpikerbitConnectObserver, IUsbDisconnectSource, kSpikerbitFirmwareVersion,
+  MicrobitUsbTransport, SpikerbitDevice
 } from "./spikerbit-device";
 
 const helloLine = (firmware: number, version = 1) =>
@@ -59,9 +60,13 @@ class FakeConnection implements IMicrobitUsbConnection {
   emitSerial(data: string) { this.serialListeners.forEach(l => l({ data })); }
   emitReads(reads: string[]) { reads.forEach(read => this.emitSerial(read)); }
   releaseHeld() { this.held.splice(0).forEach(reads => this.emitReads(reads)); }
-  async connect() { /* no-op */ }
-  async flash() {
+  // A known device: the library goes straight to "Connecting".
+  async connect(options?: { progress?: (stage: string) => void }) { options?.progress?.("Connecting"); }
+  // The pct values the library's flash progress callback gets; undefined ends the flashing.
+  flashProgress: Array<number | undefined> = [];
+  async flash(_source?: unknown, options?: { progress?: (stage: string, pct?: number) => void }) {
     this.flashed = true;
+    this.flashProgress.forEach(pct => options?.progress?.("PartialFlashing", pct));
     if (this.respondHelloAfterFlash !== undefined) this.respondHello = this.respondHelloAfterFlash;
   }
   async serialWrite(data: string) {
@@ -283,6 +288,226 @@ describe("SpikerbitDevice", () => {
     conn.statusListeners.forEach(l => l({ status: "Disconnected" }));
 
     expect(serialDevice.isConnected()).toBe(false);
+  });
+
+  describe("reporting connection steps", () => {
+    it("reports opened, firmware checked and no update for current firmware", async () => {
+      const conn = new FakeConnection();
+      conn.respondHello = helloLine(kSpikerbitFirmwareVersion);
+      const calls: string[] = [];
+      const observer: ISpikerbitConnectObserver = {
+        onOpened: () => calls.push("opened"),
+        onFirmwareChecked: (reply, willUpdate) => calls.push(`firmwareChecked:${willUpdate}:${reply?.kind}`),
+        onUpdateProgress: () => calls.push("progress"),
+        onUpdateFinished: () => calls.push("finished")
+      };
+
+      await new SpikerbitDevice(makeSerialDevice(), conn).connectAndStream("HEX", observer);
+
+      expect(calls).toEqual(["opened", "firmwareChecked:false:ccDevice"]);
+    });
+
+    it("reports update progress as percents and the update finishing", async () => {
+      const conn = new FakeConnection();
+      conn.respondHello = helloLine(kSpikerbitFirmwareVersion - 1);
+      conn.flashProgress = [0.5, undefined];
+      const observer = {
+        onFirmwareChecked: jest.fn(),
+        onUpdateProgress: jest.fn(),
+        onUpdateFinished: jest.fn()
+      };
+      const warn = jest.spyOn(console, "warn").mockImplementation(() => undefined);
+
+      await new SpikerbitDevice(makeSerialDevice(), conn, { firmwareQueryTimeoutMs: 50 })
+        .connectAndStream("HEX", observer);
+
+      expect(observer.onFirmwareChecked).toHaveBeenCalledWith(expect.objectContaining({ kind: "ccDevice" }), true);
+      expect(observer.onUpdateProgress).toHaveBeenCalledTimes(1);
+      expect(observer.onUpdateProgress).toHaveBeenCalledWith(50);
+      expect(observer.onUpdateFinished).toHaveBeenCalledTimes(1);
+      warn.mockRestore();
+    });
+
+    it("reports a known device's open as opening without the chooser", async () => {
+      const conn = new FakeConnection();
+      conn.respondHello = helloLine(kSpikerbitFirmwareVersion);
+      const observer = { onOpening: jest.fn() };
+      await new SpikerbitDevice(makeSerialDevice(), conn).connectAndStream("HEX", observer);
+      expect(observer.onOpening).toHaveBeenCalledWith(false);
+    });
+
+    it("reports the board going away during its update, but not a disconnect it was asked for", async () => {
+      const conn = new FakeConnection();
+      conn.respondHello = helloLine(kSpikerbitFirmwareVersion - 1);
+      let finishFlash: () => void = () => undefined;
+      conn.flash = jest.fn(() => new Promise<void>(resolve => { finishFlash = resolve; }));
+      const observer = { onLost: jest.fn(), onFirmwareChecked: jest.fn() };
+      const device = new SpikerbitDevice(makeSerialDevice(), conn, { firmwareQueryTimeoutMs: 50 });
+      const connecting = device.connectAndStream("HEX", observer);
+      await new Promise(resolve => setTimeout(resolve, 0));
+      expect(observer.onFirmwareChecked).toHaveBeenCalled();
+      conn.emitStatus("Disconnected");
+      expect(observer.onLost).toHaveBeenCalledWith("lost");
+
+      observer.onLost.mockClear();
+      void device.disconnect();
+      conn.emitStatus("Disconnected");
+      expect(observer.onLost).not.toHaveBeenCalled();
+      finishFlash();
+      await expect(connecting).rejects.toMatchObject({ code: "closed" });
+    });
+
+    it("a disconnected connect that fails later leaves a newer connect on the same device alone", async () => {
+      const serialDevice = makeSerialDevice();
+      const conn = new FakeConnection();
+      conn.respondHello = helloLine(kSpikerbitFirmwareVersion - 1);
+      let failFlash: (e: Error) => void = () => undefined;
+      conn.flash = jest.fn(() => new Promise<void>((_, reject) => { failFlash = reject; }));
+      const disconnect = jest.spyOn(conn, "disconnect");
+      const device = new SpikerbitDevice(serialDevice, conn, { firmwareQueryTimeoutMs: 50 });
+      const first = device.connectAndStream("HEX");
+      await new Promise(resolve => setTimeout(resolve, 0));
+      expect(conn.flash).toHaveBeenCalled();
+
+      await device.disconnect();
+      conn.respondHello = helloLine(kSpikerbitFirmwareVersion);
+      await device.connectAndStream("HEX");
+      expect(serialDevice.isConnected()).toBe(true);
+      disconnect.mockClear();
+
+      failFlash(new Error("flash stopped"));
+      await expect(first).rejects.toThrow("flash stopped");
+      expect(disconnect).not.toHaveBeenCalled();
+      expect(serialDevice.activeTransport).toBeDefined();
+    });
+
+    it("a board disconnected during its update never becomes the active device", async () => {
+      const serialDevice = makeSerialDevice();
+      const conn = new FakeConnection();
+      conn.respondHello = helloLine(kSpikerbitFirmwareVersion - 1);
+      conn.respondHelloAfterFlash = helloLine(kSpikerbitFirmwareVersion);
+      const device = new SpikerbitDevice(serialDevice, conn, { firmwareQueryTimeoutMs: 50 });
+      const connecting = device.connectAndStream("HEX", { onFirmwareChecked: () => { void device.disconnect(); } });
+
+      await expect(connecting).rejects.toMatchObject({ code: "closed" });
+      expect(conn.flashed).toBe(true);
+      expect(serialDevice.isConnected()).toBe(false);
+    });
+
+    describe("a USB open that doesn't finish", () => {
+      beforeEach(() => {
+        jest.useFakeTimers();
+      });
+
+      function makeHangingConn() {
+        const conn = new FakeConnection();
+        let settle: (error?: Error) => void = () => undefined;
+        conn.connect = options => new Promise<void>((resolve, reject) => {
+          options?.progress?.("Connecting");
+          settle = error => error ? reject(error) : resolve();
+        });
+        const disconnect = jest.spyOn(conn, "disconnect");
+        return { conn, disconnect, settle: (error?: Error) => settle(error) };
+      }
+
+      it("throws open-timeout, and disconnects a late open", async () => {
+        const { conn, disconnect, settle } = makeHangingConn();
+        const observer = { onAbandoned: jest.fn() };
+        const promise = new SpikerbitDevice(makeSerialDevice(), conn, { openTimeoutMs: 20000 })
+          .connectAndStream("HEX", observer);
+        const assertion = expect(promise).rejects.toMatchObject({ code: "open-timeout" });
+
+        await jest.advanceTimersByTimeAsync(20000);
+        await assertion;
+        expect(disconnect).toHaveBeenCalled();
+        disconnect.mockClear();
+
+        settle();
+        await jest.advanceTimersByTimeAsync(0);
+        expect(disconnect).toHaveBeenCalled();
+        expect(observer.onAbandoned).toHaveBeenLastCalledWith({ late: "opened" });
+      });
+
+      it("counts the limit from the library's Connecting stage, after its chooser", async () => {
+        const conn = new FakeConnection();
+        let progress: (stage: string) => void = () => undefined;
+        conn.connect = options => new Promise<void>(() => {
+          progress = options!.progress!;
+          progress("Initializing");
+          progress("FindingDevice");
+        });
+        const observer = { onOpening: jest.fn() };
+        let error: unknown;
+        void new SpikerbitDevice(makeSerialDevice(), conn, { openTimeoutMs: 20000 })
+          .connectAndStream("HEX", observer)
+          .catch(e => { error = e; });
+        // The student takes a minute in the chooser.
+        await jest.advanceTimersByTimeAsync(60000);
+        expect(error).toBeUndefined();
+        expect(observer.onOpening).not.toHaveBeenCalled();
+        progress("Connecting");
+        expect(observer.onOpening).toHaveBeenCalledWith(true);
+        await jest.advanceTimersByTimeAsync(19999);
+        expect(error).toBeUndefined();
+        await jest.advanceTimersByTimeAsync(1);
+        expect(error).toMatchObject({ code: "open-timeout" });
+      });
+
+      it("throws open-timeout at the limit even when closing the stuck link hangs too", async () => {
+        const { conn, disconnect } = makeHangingConn();
+        disconnect.mockImplementation(() => new Promise<void>(() => { /* never settles */ }));
+        const observer = { onAbandoned: jest.fn() };
+        let error: unknown;
+        void new SpikerbitDevice(makeSerialDevice(), conn, { openTimeoutMs: 20000 })
+          .connectAndStream("HEX", observer)
+          .catch(e => { error = e; });
+        await jest.advanceTimersByTimeAsync(20000);
+        expect(error).toMatchObject({ code: "open-timeout" });
+        expect(disconnect).toHaveBeenCalledTimes(1);
+        expect(observer.onAbandoned).not.toHaveBeenCalled();
+      });
+
+      it("reports a late failure of the open", async () => {
+        const { conn, settle } = makeHangingConn();
+        const observer = { onAbandoned: jest.fn() };
+        const promise = new SpikerbitDevice(makeSerialDevice(), conn, { openTimeoutMs: 1000 })
+          .connectAndStream("HEX", observer);
+        const assertion = expect(promise).rejects.toMatchObject({ code: "open-timeout" });
+        await jest.advanceTimersByTimeAsync(1000);
+        await assertion;
+
+        settle(new Error("late failure"));
+        await jest.advanceTimersByTimeAsync(0);
+        expect(observer.onAbandoned).toHaveBeenLastCalledWith({ late: "failed" });
+      });
+
+      it("tries forget on the USB device when the open is abandoned", async () => {
+        const { conn } = makeHangingConn();
+        const forget = jest.fn().mockResolvedValue(undefined);
+        conn.device = { forget };
+        const observer = { onAbandoned: jest.fn() };
+        const promise = new SpikerbitDevice(makeSerialDevice(), conn, { openTimeoutMs: 1000 })
+          .connectAndStream("HEX", observer);
+        const assertion = expect(promise).rejects.toMatchObject({ code: "open-timeout" });
+        await jest.advanceTimersByTimeAsync(1000);
+        await assertion;
+
+        expect(forget).toHaveBeenCalled();
+        expect(observer.onAbandoned).toHaveBeenCalledWith(expect.objectContaining({ close: "ok", forget: "ok" }));
+      });
+
+      it("reports forget as unsupported when the device has none", async () => {
+        const { conn } = makeHangingConn();
+        const observer = { onAbandoned: jest.fn() };
+        const promise = new SpikerbitDevice(makeSerialDevice(), conn, { openTimeoutMs: 1000 })
+          .connectAndStream("HEX", observer);
+        const assertion = expect(promise).rejects.toMatchObject({ code: "open-timeout" });
+        await jest.advanceTimersByTimeAsync(1000);
+        await assertion;
+
+        expect(observer.onAbandoned).toHaveBeenCalledWith(expect.objectContaining({ forget: "unsupported" }));
+      });
+    });
   });
 
   describe("noticing a lost board", () => {
