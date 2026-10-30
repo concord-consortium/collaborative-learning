@@ -13,6 +13,7 @@ import { DataflowContentModelType } from "../../model/dataflow-content";
 import { recordCase } from "../../model/utilities/recording-utilities";
 
 import ViewBadgeIcon from "../../../../assets/icons/view/view-badge.svg";
+import RecordSampleIcon from "../../assets/icons/record-sample-icon.svg";
 
 /**
  * Points the program at a table, creating one only when it has none, and sets the columns up when
@@ -98,18 +99,7 @@ export const RecordSingleSampleButton = observer(function RecordSingleSampleButt
       onClick={handleClick}
       disabled={!content || readOnly}
     >
-      <RecordSampleGlyph />
+      <RecordSampleIcon />
     </TileToolbarButton>
   );
 });
-
-/** A single filled point, for "capture one". Inline rather than an imported asset, unlike every
- * other button here, because there is no designed icon yet -- replace it with one. */
-function RecordSampleGlyph() {
-  return (
-    <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
-      <circle cx="12" cy="12" r="5" fill="currentColor" />
-      <circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" strokeWidth="1.5" />
-    </svg>
-  );
-}
