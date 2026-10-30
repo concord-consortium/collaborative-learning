@@ -1,5 +1,5 @@
 import React from "react";
-import { render, fireEvent, screen, act, within } from "@testing-library/react";
+import { render, fireEvent, screen, act, waitFor, within } from "@testing-library/react";
 import { runInAction } from "mobx";
 import { destroy } from "mobx-state-tree";
 import { Provider } from "mobx-react";
@@ -7,7 +7,11 @@ import { ModalProvider } from "react-modal-hook";
 
 import { ReadOnlyContext } from "../../../../components/document/read-only-context";
 import { SerialDevice } from "../../../../models/stores/serial";
-import { ConnectResult, getDeviceConnection, kIdentifyResultMs } from "../../model/device-connection";
+import {
+  ConnectResult, DeviceChoice, getDeviceConnection, IAttemptOptions, kIdentifyResultMs
+} from "../../model/device-connection";
+import { FailureKind } from "../../model/connect-failures";
+import { ConnectionAttempt } from "../../model/connection-attempt";
 import { IdentifyResult } from "../../../../models/stores/cc-device-session";
 import { TileModelContext } from "../../../../components/tiles/tile-api";
 import { ITileModel, TileModel } from "../../../../models/tiles/tile-model";
@@ -326,7 +330,22 @@ describe("Dataflow pan split button (CLUE-573)", () => {
 
 });
 
-describe("Dataflow connect button and pane", () => {
+// An open failure. Only a stall's attemptId is compared, so any id serves when none is given.
+const openFailedOn = (attemptId = "attempt-1") =>
+  ({ attemptId, kind: "openFailed", choice: "spikerbit", step: "open", elapsedMs: 0 }) as const;
+
+// A connect or reconnect that ends in a failure, as DeviceConnection reports it to the tile.
+function failingAttempt(kind: FailureKind, choice: DeviceChoice = "spikerbit") {
+  return async (...args: unknown[]) => {
+    const options = args[args.length - 1] as IAttemptOptions;
+    const attempt = new ConnectionAttempt(choice, "connect", options.attemptId);
+    attempt.end(kind, { attemptId: attempt.id, kind, choice, step: "open", elapsedMs: 0 });
+    options.listener?.onEnded?.(attempt);
+    return kind;
+  };
+}
+
+describe("Dataflow connect button and palette", () => {
   // Pass `stores` to render a second toolbar sharing the first one's device connection, and
   // `strict` to render it in React.StrictMode, which mounts, unmounts and remounts it.
   function renderConnect(opts: RenderOptions & { stores?: ReturnType<typeof specStores>, strict?: boolean } = {}) {
@@ -360,7 +379,7 @@ describe("Dataflow connect button and pane", () => {
     return trigger;
   }
 
-  function openPane(opts: Parameters<typeof renderConnect>[0] = {}) {
+  function openConnectPalette(opts: Parameters<typeof renderConnect>[0] = {}) {
     const r = renderConnect(opts);
     fireEvent.click(getTrigger(r.container));
     return r;
@@ -377,8 +396,21 @@ describe("Dataflow connect button and pane", () => {
     });
   }
 
-  // A real click starts with a pointerdown, which reaches the pane's outside-click handler first.
-  it("'connect' is registered and opens and closes its pane on click", () => {
+  // Starts an attempt on the shared connection the way DeviceConnection does, for the palette to
+  // show.
+  function startAttempt(r: ReturnType<typeof renderConnect>, trigger: "connect" | "reconnect" = "connect") {
+    const attempt = new ConnectionAttempt("spikerbit", trigger);
+    act(() => runInAction(() => {
+      r.connection.lastChoice = "spikerbit";
+      r.connection.busyChoice = "spikerbit";
+      r.connection.attempt = attempt;
+    }));
+    return attempt;
+  }
+
+  // A real click starts with a pointerdown, which reaches the palette's outside-click handler
+  // first.
+  it("'connect' is registered and opens and closes its palette on click", () => {
     const { container, content } = renderConnect();
     const press = () => {
       fireEvent.pointerDown(getTrigger(container));
@@ -387,33 +419,106 @@ describe("Dataflow connect button and pane", () => {
     expect(screen.queryByRole("group", { name: "Device connection" })).toBeNull();
     expect(getTrigger(container)).toHaveAttribute("aria-expanded", "false");
     press();
-    expect(content.connectPaneOpen).toBe(true);
+    expect(content.connectPaletteOpen).toBe(true);
     expect(screen.getByRole("group", { name: "Device connection" })).toBeInTheDocument();
     expect(getTrigger(container)).toHaveAttribute("aria-expanded", "true");
     press();
-    expect(content.connectPaneOpen).toBe(false);
+    expect(content.connectPaletteOpen).toBe(false);
     expect(screen.queryByRole("group", { name: "Device connection" })).toBeNull();
     expect(getTrigger(container)).toHaveAttribute("aria-expanded", "false");
   });
 
-  it("opening the pane moves focus to the first control", () => {
-    openPane();
+  describe("announcing a failure the student can't see", () => {
+    const headline = "The browser couldn't open the Spiker:bit.";
+    const failure = {
+      attemptId: "attempt-1", kind: "openTimeout", choice: "spikerbit", step: "open", elapsedMs: 0
+    } as const;
+
+    it("announces the problem headline politely when a failure is recorded with the palette closed", () => {
+      const r = renderConnect();
+      expect(screen.queryByText(headline)).toBeNull();
+      act(() => {
+        r.content.setConnectFailure(failure);
+        r.content.setUnseenConnectError(true);
+      });
+      expect(screen.getByText(headline)).toHaveAttribute("aria-live", "polite");
+    });
+
+    // A live region inserted already holding its text is often not read, so it stays mounted.
+    it("keeps the live region mounted, empty until there is something to announce", () => {
+      const r = renderConnect();
+      const region = r.container.querySelector("[role='status'][aria-live='polite']");
+      expect(region).toBeInTheDocument();
+      expect(region).toBeEmptyDOMElement();
+      act(() => {
+        r.content.setConnectFailure(failure);
+        r.content.setUnseenConnectError(true);
+      });
+      expect(screen.getByText(headline)).toBe(region);
+    });
+
+    it("announces when the failure and the unseen flag are recorded in separate renders", () => {
+      const r = renderConnect();
+      act(() => r.content.setConnectFailure(failure));
+      expect(screen.queryByText(headline)).toBeNull();
+      act(() => r.content.setUnseenConnectError(true));
+      expect(screen.getByText(headline)).toHaveAttribute("aria-live", "polite");
+    });
+
+    it("does not announce a failure recorded while the palette is open", () => {
+      const r = openConnectPalette();
+      act(() => {
+        r.content.setConnectFailure(failure);
+        r.content.setUnseenConnectError(false);
+      });
+      expect(screen.queryByText(headline)).toBeNull();
+    });
+
+    it("does not announce a stale unseen failure on mount", () => {
+      const content = DataflowContentModel.create();
+      content.setConnectFailure(failure);
+      content.setUnseenConnectError(true);
+      renderConnect({ content });
+      expect(screen.queryByText(headline)).toBeNull();
+    });
+  });
+
+  it("opening the palette moves focus to the first control", () => {
+    openConnectPalette();
     const group = screen.getByRole("group", { name: "Device connection" });
     expect(document.activeElement).toBe(within(group).getAllByRole("button")[0]);
   });
 
-  it("Escape closes the pane and returns focus to the trigger", () => {
-    const { container, content } = openPane();
+  // The palette sits inside the tooltip's hover area. A pointer moving onto it from outside enters
+  // that area, as the mouseenter on the palette's parent stands in for here.
+  it("hovering the button shows its tooltip, but not while the palette is open", async () => {
+    const { container } = renderConnect();
+    const trigger = getTrigger(container);
+    const tooltip = () => document.querySelector(".tippy-popper");
+    fireEvent.mouseEnter(trigger.parentElement!);
+    await waitFor(() => expect(tooltip()).not.toBeNull());
+
+    // The click that opens the palette comes with the pointer over the button.
+    fireEvent.click(trigger);
+    await waitFor(() => expect(tooltip()).toBeNull());
+    const palette = screen.getByRole("group", { name: "Device connection" }).closest(".dataflow-connect-palette")!;
+    fireEvent.mouseEnter(palette.parentElement!);
+    await act(() => new Promise(resolve => setTimeout(resolve, 50)));
+    expect(tooltip()).toBeNull();
+  });
+
+  it("Escape closes the palette and returns focus to the trigger", () => {
+    const { container, content } = openConnectPalette();
     const group = screen.getByRole("group", { name: "Device connection" });
     fireEvent.keyDown(within(group).getAllByRole("button")[0], { key: "Escape" });
-    expect(content.connectPaneOpen).toBe(false);
+    expect(content.connectPaletteOpen).toBe(false);
     expect(document.activeElement).toBe(getTrigger(container));
   });
 
-  // See the pan palette's test of the same name for why an ancestor's capture listener stands in for
-  // the toolbar's focus-trap exit.
+  // See the pan palette's test of the same name for why an ancestor's capture listener stands in
+  // for the toolbar's focus-trap exit.
   it("Escape does not reach a capture-phase listener on an ancestor", () => {
-    const { container } = openPane();
+    const { container } = openConnectPalette();
     const ancestor = container.firstElementChild as HTMLElement;
     const ancestorListener = jest.fn();
     ancestor.addEventListener("keydown", ancestorListener, true);
@@ -423,31 +528,31 @@ describe("Dataflow connect button and pane", () => {
     expect(ancestorListener).not.toHaveBeenCalled();
   });
 
-  it("pointerdown outside closes the pane; inside it does not", () => {
-    const { content } = openPane();
+  it("pointerdown outside closes the palette; inside it does not", () => {
+    const { content } = openConnectPalette();
     const group = screen.getByRole("group", { name: "Device connection" });
     fireEvent.pointerDown(within(group).getAllByRole("button")[0]);
-    expect(content.connectPaneOpen).toBe(true);
+    expect(content.connectPaletteOpen).toBe(true);
     fireEvent.pointerDown(document.body);
-    expect(content.connectPaneOpen).toBe(false);
+    expect(content.connectPaletteOpen).toBe(false);
   });
 
   it("closing by outside pointerdown returns focus to the trigger", () => {
-    const { container } = openPane();
+    const { container } = openConnectPalette();
     const group = screen.getByRole("group", { name: "Device connection" });
     expect(group.contains(document.activeElement)).toBe(true);
     fireEvent.pointerDown(document.body);
     expect(document.activeElement).toBe(getTrigger(container));
   });
 
-  it("unmounting the toolbar closes the pane", () => {
-    const { content, unmount } = openPane();
+  it("unmounting the toolbar closes the palette", () => {
+    const { content, unmount } = openConnectPalette();
     unmount();
-    expect(content.connectPaneOpen).toBe(false);
+    expect(content.connectPaletteOpen).toBe(false);
   });
 
   it("not connected: shows Not connected and a Connect control for each device", () => {
-    openPane();
+    openConnectPalette();
     const group = screen.getByRole("group", { name: "Device connection" });
     expect(within(group).getByRole("status")).toHaveTextContent("Not connected");
     for (const label of ["Arduino", "micro:bit (radio hub)", "Spiker:bit"]) {
@@ -457,8 +562,9 @@ describe("Dataflow connect button and pane", () => {
   });
 
   it("connected: shows Connected: Spiker:bit with Reconnect and Disconnect and no device list", () => {
-    const r = openPane();
+    const r = openConnectPalette();
     fakeConnected(r);
+    act(() => runInAction(() => { r.stores.serialDevice.dataReceived = true; }));
     const group = screen.getByRole("group", { name: "Device connection" });
     expect(within(group).getByRole("status")).toHaveTextContent("Connected: Spiker:bit");
     expect(within(group).getByRole("button", { name: "Reconnect" })).toBeInTheDocument();
@@ -467,8 +573,8 @@ describe("Dataflow connect button and pane", () => {
     expect(getTrigger(r.container).classList.contains("connect-connected")).toBe(true);
   });
 
-  it("pane returns to the device list when the device drops", () => {
-    const r = openPane();
+  it("palette returns to the device list when the device drops", () => {
+    const r = openConnectPalette();
     fakeConnected(r);
     act(() => r.stores.serialDevice.clearActiveDevice());
     const group = screen.getByRole("group", { name: "Device connection" });
@@ -477,17 +583,17 @@ describe("Dataflow connect button and pane", () => {
   });
 
   it("after a failure: shows the message and the device list again", () => {
-    const r = openPane();
-    act(() => r.content.setConnectError("Couldn't connect to Spiker:bit."));
+    const r = openConnectPalette();
+    act(() => r.content.setConnectFailure(openFailedOn()));
     const group = screen.getByRole("group", { name: "Device connection" });
     expect(within(group).getByRole("status")).toHaveTextContent("Not connected");
-    expect(within(group).getByText("Couldn't connect to Spiker:bit.")).toBeInTheDocument();
+    expect(within(group).getByText("Couldn't open it.")).toBeInTheDocument();
     expect(within(group).getByRole("button", { name: "Connect Spiker:bit" })).toBeInTheDocument();
   });
 
   it("while connecting: shows Connecting to Spiker:bit… and disables the controls", () => {
-    const r = openPane();
-    act(() => runInAction(() => { r.connection.busyChoice = "spikerbit"; }));
+    const r = openConnectPalette();
+    startAttempt(r, "connect");
     const group = screen.getByRole("group", { name: "Device connection" });
     expect(within(group).getByRole("status")).toHaveTextContent("Connecting to Spiker:bit…");
     const controls = within(group).getAllByRole("button");
@@ -502,6 +608,7 @@ describe("Dataflow connect button and pane", () => {
   it("the button turns yellow when the board stops responding, and green when it answers again", () => {
     const r = renderConnect();
     fakeConnected(r);
+    act(() => runInAction(() => { r.stores.serialDevice.dataReceived = true; }));
     const trigger = getTrigger(r.container);
     const session = r.stores.serialDevice.ccDeviceSession!;
     act(() => session.setNotResponding(true));
@@ -520,36 +627,220 @@ describe("Dataflow connect button and pane", () => {
       .toBe("The Spiker:bit was unplugged. Click to connect.");
   });
 
+  describe("after a stall", () => {
+    const palette = () => screen.getByRole("group", { name: "Device connection" });
+
+    // An Arduino whose attempt ended as noData, with its port still open.
+    function stalledArduino(r: ReturnType<typeof renderConnect>) {
+      const attempt = new ConnectionAttempt("arduino", "connect");
+      const noData = {
+        attemptId: attempt.id, kind: "noData", choice: "arduino", step: "waitForData", elapsedMs: 5000
+      } as const;
+      act(() => {
+        r.stores.serialDevice.setActiveDevice("arduino", fakeTransport());
+        runInAction(() => {
+          attempt.opened("waitForData");
+          attempt.end("noData", noData);
+          r.connection.attempt = attempt;
+          r.connection.lastChoice = "arduino";
+          r.connection.lastFailure = noData;
+        });
+        r.content.setConnectFailure(noData);
+      });
+    }
+
+    it("Disconnect leaves the button idle and the palette clean", async () => {
+      const r = openConnectPalette();
+      stalledArduino(r);
+      const trigger = getTrigger(r.container);
+      expect(trigger).toHaveClass("connect-attention");
+      expect(within(palette()).getByText("No data yet.")).toBeInTheDocument();
+
+      await act(async () => { fireEvent.click(within(palette()).getByRole("button", { name: "Disconnect" })); });
+
+      expect(trigger).toHaveClass("connect-idle");
+      expect(trigger.getAttribute("aria-label")).toBe("Connect a device");
+      fireEvent.click(trigger);
+      expect(within(palette()).getByRole("status")).toHaveTextContent("Not connected");
+      expect(within(palette()).getByText("Plug in a device, then click Connect.")).toBeInTheDocument();
+    });
+
+    // A Spiker:bit update that stalled: its board is open but never became the active device.
+    function stalledUpdate(r: ReturnType<typeof renderConnect>) {
+      const attempt = startAttempt(r);
+      const stall = {
+        attemptId: attempt.id, kind: "updateStalled", choice: "spikerbit", step: "update", elapsedMs: 45000
+      } as const;
+      act(() => runInAction(() => {
+        attempt.opened("checkFirmware");
+        attempt.end("updateStalled", stall);
+        r.connection.busyChoice = undefined;
+        r.connection.lastFailure = stall;
+        // Private: only a real stalled update sets it, and that needs a board.
+        (r.connection as unknown as { stalledSpikerbit: object }).stalledSpikerbit = {};
+      }));
+      return stall;
+    }
+
+    it("a stalled update whose board isn't active names the device and says the update stalled", () => {
+      const r = renderConnect();
+      stalledUpdate(r);
+      const trigger = getTrigger(r.container);
+      expect(trigger).toHaveClass("connect-attention");
+      expect(trigger.getAttribute("aria-label")).toBe("Spiker:bit: the update stalled. Click for details.");
+    });
+
+    it("a stalled update making progress again shows as connecting", () => {
+      const r = renderConnect();
+      stalledUpdate(r);
+      act(() => runInAction(() => { r.connection.lastFailure = undefined; }));
+      const trigger = getTrigger(r.container);
+      expect(trigger).toHaveClass("connect-idle");
+      expect(trigger.getAttribute("aria-label")).toBe("Connecting to Spiker:bit…");
+    });
+
+    it("a failure that isn't a stall isn't shown as one", () => {
+      const r = renderConnect();
+      const openFailed = {
+        attemptId: "attempt-1", kind: "openFailed", choice: "arduino", step: "open", elapsedMs: 0
+      } as const;
+      act(() => {
+        runInAction(() => { r.connection.lastFailure = openFailed; });
+        r.content.setConnectFailure(openFailed);
+        r.content.setUnseenConnectError(true);
+      });
+      expect(getTrigger(r.container).getAttribute("aria-label")).toBe("Couldn't connect. Click for details.");
+    });
+
+    it("a tile's stall no longer shows once its device is gone", () => {
+      const r = renderConnect();
+      stalledArduino(r);
+      act(() => r.content.setUnseenConnectError(true));
+      expect(getTrigger(r.container)).toHaveClass("connect-attention");
+
+      // Another tile's Disconnect clears the connection's failure, but not this tile's.
+      act(() => {
+        runInAction(() => { r.connection.lastFailure = undefined; });
+        r.stores.serialDevice.clearActiveDevice();
+      });
+
+      const trigger = getTrigger(r.container);
+      expect(trigger).toHaveClass("connect-idle");
+      expect(trigger.getAttribute("aria-label")).toBe("Connect a device");
+      fireEvent.click(trigger);
+      expect(within(palette()).getByRole("status")).toHaveTextContent("Not connected");
+      expect(within(palette()).queryByText("No data yet.")).toBeNull();
+    });
+  });
+
+  describe("the status area", () => {
+    const palette = () => screen.getByRole("group", { name: "Device connection" });
+    const lines = () => palette().querySelectorAll(".connect-status-line, .connect-detail");
+
+    it("always has the fixed-height class and exactly two line elements", () => {
+      const r = openConnectPalette();
+      const check = () => {
+        const area = palette().querySelector(".connect-status");
+        expect(area).not.toBeNull();
+        expect(lines()).toHaveLength(2);
+      };
+      check();
+      const attempt = startAttempt(r);
+      attempt.chooserClosed();
+      check();
+      act(() => attempt.end("openFailed", openFailedOn(attempt.id)));
+      act(() => r.content.setConnectFailure(openFailedOn()));
+      check();
+    });
+
+    it("shows the step on line 2 while opening, and the progress bar while updating", () => {
+      const r = openConnectPalette();
+      const attempt = startAttempt(r);
+      expect(palette().querySelector(".connect-detail.hint")).toHaveTextContent("Choose it in the browser's list.");
+      act(() => attempt.chooserClosed());
+      expect(palette().querySelector(".connect-detail.plain")).toHaveTextContent("Opening the connection…");
+      expect(palette().querySelector(".connect-progress")).toBeNull();
+      act(() => { attempt.opened("checkFirmware"); attempt.firmwareChecked("old", true); attempt.updateProgress(45); });
+      const bar = palette().querySelector(".connect-progress");
+      expect(bar).toHaveAttribute("role", "progressbar");
+      expect(bar).toHaveAttribute("aria-valuenow", "45");
+      expect(within(palette()).getByRole("status")).toHaveTextContent("Updating. Keep it plugged in.");
+      expect(palette().querySelector(".connect-detail")).toHaveTextContent("45%");
+    });
+
+    it("switches to the disabled actions at the open and enables them when the attempt connects", () => {
+      const r = openConnectPalette();
+      const attempt = startAttempt(r);
+      expect(within(palette()).getByRole("button", { name: "Connect Arduino" })).toBeInTheDocument();
+      act(() => { attempt.chooserClosed(); attempt.opened("checkFirmware"); });
+      const reconnect = within(palette()).getByRole("button", { name: "Reconnect" });
+      expect(within(palette()).queryByRole("button", { name: /^Connect / })).toBeNull();
+      expect(isDisabled(reconnect)).toBe(true);
+      expect(isDisabled(within(palette()).getByRole("button", { name: "Disconnect" }))).toBe(true);
+      expect(within(palette()).getByRole("status")).toHaveTextContent("Connected: Spiker:bit");
+      fakeConnected(r);
+      act(() => runInAction(() => { r.connection.busyChoice = undefined; attempt.end("connected"); }));
+      expect(isDisabled(within(palette()).getByRole("button", { name: "Reconnect" }))).toBe(false);
+      act(() => r.stores.serialDevice.clearActiveDevice());
+    });
+
+    it("a failure shows the problem on line 2 and keeps the device rows", () => {
+      const r = openConnectPalette();
+      act(() => r.content.setConnectFailure(openFailedOn()));
+      expect(palette().querySelector(".connect-detail.problem")).toHaveTextContent("Couldn't open it.");
+      expect(within(palette()).getAllByRole("button", { name: /^Connect / })).toHaveLength(3);
+    });
+
+    it("an attempt from tile A shows its step in tile B's palette; only A records the failure", () => {
+      const stores = specStores();
+      const a = renderConnect({ stores });
+      const b = openConnectPalette({ stores });
+      const attempt = startAttempt(b);
+      act(() => attempt.chooserClosed());
+      expect(palette().querySelector(".connect-detail")).toHaveTextContent("Opening the connection…");
+      act(() => runInAction(() => { b.connection.busyChoice = undefined; }));
+      act(() => attempt.end("openFailed", openFailedOn(attempt.id)));
+      a.content.setConnectFailure(openFailedOn());
+      expect(a.content.connectFailure).toBeDefined();
+      expect(b.content.connectFailure).toBeUndefined();
+      expect(palette().querySelector(".connect-detail.problem")).toBeNull();
+    });
+
+    it("step text is outside the live region; a problem is inside it", () => {
+      const r = openConnectPalette();
+      const attempt = startAttempt(r);
+      act(() => attempt.chooserClosed());
+      const live = within(palette()).getByRole("status");
+      expect(live).toHaveTextContent("Connecting to Spiker:bit…");
+      expect(live).not.toHaveTextContent("Opening the connection…");
+      act(() => runInAction(() => { r.connection.busyChoice = undefined; }));
+      act(() => attempt.end("openFailed", openFailedOn(attempt.id)));
+      act(() => r.content.setConnectFailure(openFailedOn()));
+      expect(within(palette()).getByRole("status")).toHaveTextContent("Couldn't open it.");
+    });
+  });
+
   describe("the second line", () => {
-    const pane = () => screen.getByRole("group", { name: "Device connection" });
+    const palette = () => screen.getByRole("group", { name: "Device connection" });
 
     it("says the Spiker:bit is not responding, under Connected", () => {
-      const r = openPane();
+      const r = openConnectPalette();
       fakeConnected(r);
       act(() => r.stores.serialDevice.ccDeviceSession!.setNotResponding(true));
-      expect(within(pane()).getByRole("status")).toHaveTextContent("Connected: Spiker:bit");
-      expect(within(pane()).getByText("The Spiker:bit is not responding.")).toBeInTheDocument();
+      expect(within(palette()).getByRole("status")).toHaveTextContent("Connected: Spiker:bit");
+      expect(within(palette()).getByText("Not responding.")).toBeInTheDocument();
       act(() => r.stores.serialDevice.clearActiveDevice());
     });
 
     it("says the device was unplugged, or that the connection was lost, under Not connected", () => {
-      const r = openPane();
+      const r = openConnectPalette();
       fakeConnected(r);
       act(() => r.stores.serialDevice.activeTransport!.onDisconnect!("unplugged"));
-      expect(within(pane()).getByRole("status")).toHaveTextContent("Not connected");
-      expect(within(pane()).getByText("The Spiker:bit was unplugged.")).toBeInTheDocument();
+      expect(within(palette()).getByRole("status")).toHaveTextContent("Not connected");
+      expect(within(palette()).getByText("It was unplugged.")).toBeInTheDocument();
       fakeConnected(r);
       act(() => r.stores.serialDevice.activeTransport!.onDisconnect!("lost"));
-      expect(within(pane()).getByText("The connection to the Spiker:bit was lost.")).toBeInTheDocument();
-    });
-
-    it("a connect error wins over a loss message", () => {
-      const r = openPane();
-      fakeConnected(r);
-      act(() => r.stores.serialDevice.activeTransport!.onDisconnect!("unplugged"));
-      act(() => r.content.setConnectError("Couldn't connect to Spiker:bit."));
-      expect(within(pane()).getByText("Couldn't connect to Spiker:bit.")).toBeInTheDocument();
-      expect(within(pane()).queryByText("The Spiker:bit was unplugged.")).toBeNull();
+      expect(within(palette()).getByText("Connection lost.")).toBeInTheDocument();
     });
   });
 
@@ -557,12 +848,13 @@ describe("Dataflow connect button and pane", () => {
     beforeEach(() => jest.useFakeTimers());
     afterEach(() => jest.useRealTimers());
 
-    const pane = () => screen.getByRole("group", { name: "Device connection" });
-    const aliveButton = () => within(pane()).getByRole("button", { name: "Is it alive?" });
+    const palette = () => screen.getByRole("group", { name: "Device connection" });
+    const aliveButton = () => within(palette()).getByRole("button", { name: "Is it alive?" });
 
-    // Opens the pane on a connected Spiker:bit whose session's identify waits for the test to answer.
+    // Opens the palette on a connected Spiker:bit whose session's identify waits for the test to
+    // answer.
     function setupCheck(opts: { strict?: boolean } = {}) {
-      const r = openPane(opts);
+      const r = openConnectPalette(opts);
       fakeConnected(r);
       const answers: Array<(result: IdentifyResult) => void> = [];
       const identify = jest.spyOn(r.stores.serialDevice.ccDeviceSession!, "identify")
@@ -578,13 +870,13 @@ describe("Dataflow connect button and pane", () => {
     });
 
     it("shows only for a connected Spiker:bit", () => {
-      const r = openPane();
-      expect(within(pane()).queryByRole("button", { name: "Is it alive?" })).toBeNull();
+      const r = openConnectPalette();
+      expect(within(palette()).queryByRole("button", { name: "Is it alive?" })).toBeNull();
       act(() => {
         r.stores.serialDevice.setActiveDevice("arduino", fakeTransport());
         runInAction(() => { r.connection.lastChoice = "arduino"; });
       });
-      expect(within(pane()).queryByRole("button", { name: "Is it alive?" })).toBeNull();
+      expect(within(palette()).queryByRole("button", { name: "Is it alive?" })).toBeNull();
       fakeConnected(r);
       expect(aliveButton()).toBeInTheDocument();
       act(() => r.stores.serialDevice.clearActiveDevice());
@@ -596,17 +888,17 @@ describe("Dataflow connect button and pane", () => {
       aliveButton().focus();
       fireEvent.click(aliveButton());
       expect(r.identify).toHaveBeenCalledTimes(1);
-      expect(within(pane()).getByText("Checking the Spiker:bit… look for the heart.")).toBeInTheDocument();
-      expect(within(pane()).queryByText("The Spiker:bit is not responding.")).toBeNull();
+      expect(within(palette()).getByText("Look for the heart…")).toBeInTheDocument();
+      expect(within(palette()).queryByText("Not responding.")).toBeNull();
       expect(isDisabled(aliveButton())).toBe(true);
       await r.answer("answered");
-      expect(within(pane()).getByText("The Spiker:bit answered.")).toBeInTheDocument();
+      expect(within(palette()).getByText("It answered.")).toBeInTheDocument();
       expect(isDisabled(aliveButton())).toBe(false);
       expect(document.activeElement).toBe(aliveButton());
-      expect(r.content.connectPaneOpen).toBe(true);
+      expect(r.content.connectPaletteOpen).toBe(true);
       act(() => { jest.advanceTimersByTime(kIdentifyResultMs); });
-      expect(within(pane()).queryByText("The Spiker:bit answered.")).toBeNull();
-      expect(within(pane()).getByText("The Spiker:bit is not responding.")).toBeInTheDocument();
+      expect(within(palette()).queryByText("It answered.")).toBeNull();
+      expect(within(palette()).getByText("Not responding.")).toBeInTheDocument();
       act(() => r.stores.serialDevice.clearActiveDevice());
     });
 
@@ -614,7 +906,7 @@ describe("Dataflow connect button and pane", () => {
       const r = setupCheck();
       fireEvent.click(aliveButton());
       await r.answer("noAnswer");
-      expect(within(pane()).getByText("The Spiker:bit didn't answer.")).toBeInTheDocument();
+      expect(within(palette()).getByText("No answer.")).toBeInTheDocument();
       act(() => r.stores.serialDevice.clearActiveDevice());
     });
 
@@ -626,22 +918,22 @@ describe("Dataflow connect button and pane", () => {
       await r.answer("answered");
       fireEvent.click(aliveButton());
       expect(r.identify).toHaveBeenCalledTimes(2);
-      expect(within(pane()).getByText("Checking the Spiker:bit… look for the heart.")).toBeInTheDocument();
+      expect(within(palette()).getByText("Look for the heart…")).toBeInTheDocument();
       act(() => { jest.advanceTimersByTime(kIdentifyResultMs); });
-      expect(within(pane()).getByText("Checking the Spiker:bit… look for the heart.")).toBeInTheDocument();
+      expect(within(palette()).getByText("Look for the heart…")).toBeInTheDocument();
       await r.answer("answered");
       act(() => r.stores.serialDevice.clearActiveDevice());
     });
 
-    it("the answer is still there when the pane is closed during the check and opened again", async () => {
+    it("the answer is still there when the palette is closed during the check and opened again", async () => {
       const consoleError = jest.spyOn(console, "error");
       const r = setupCheck();
       fireEvent.click(aliveButton());
       fireEvent.keyDown(aliveButton(), { key: "Escape" });
-      expect(r.content.connectPaneOpen).toBe(false);
+      expect(r.content.connectPaletteOpen).toBe(false);
       await r.answer("answered");
       fireEvent.click(getTrigger(r.container));
-      expect(within(pane()).getByText("The Spiker:bit answered.")).toBeInTheDocument();
+      expect(within(palette()).getByText("It answered.")).toBeInTheDocument();
       expect(consoleError).not.toHaveBeenCalled();
       consoleError.mockRestore();
       act(() => r.stores.serialDevice.clearActiveDevice());
@@ -651,7 +943,7 @@ describe("Dataflow connect button and pane", () => {
       const r = setupCheck({ strict: true });
       fireEvent.click(aliveButton());
       await r.answer("answered");
-      expect(within(pane()).getByText("The Spiker:bit answered.")).toBeInTheDocument();
+      expect(within(palette()).getByText("It answered.")).toBeInTheDocument();
       expect(isDisabled(aliveButton())).toBe(false);
       act(() => r.stores.serialDevice.clearActiveDevice());
     });
@@ -731,7 +1023,7 @@ describe("Dataflow connect button and pane", () => {
     expect(trigger.getAttribute("aria-label")).toBe("This program needs a device. Click to connect.");
   });
 
-  it("opening the pane clears an unseen error's attention state", () => {
+  it("opening the palette clears an unseen error's attention state", () => {
     const content = DataflowContentModel.create();
     content.setUnseenConnectError(true);
     const { container } = renderConnect({ content });
@@ -749,22 +1041,22 @@ describe("Dataflow connect button and pane", () => {
   });
 
   // The controls are `div role="button"`, so activation keys are handled in the component.
-  it.each(["Enter", " "])("'%s' on a pane control activates it", (key) => {
-    const r = openPane();
+  it.each(["Enter", " "])("'%s' on a palette control activates it", (key) => {
+    const r = openConnectPalette();
     const connect = jest.spyOn(r.connection, "connect").mockResolvedValue("canceled");
     fireEvent.keyDown(screen.getByRole("button", { name: "Connect Spiker:bit" }), { key });
-    expect(connect).toHaveBeenCalledWith("spikerbit");
+    expect(connect).toHaveBeenCalledWith("spikerbit", expect.objectContaining({ listener: expect.any(Object) }));
   });
 
   it("clicking Connect for Spiker:bit calls the connection with \"spikerbit\"", () => {
-    const r = openPane();
+    const r = openConnectPalette();
     const connect = jest.spyOn(r.connection, "connect").mockResolvedValue("canceled");
     fireEvent.click(screen.getByRole("button", { name: "Connect Spiker:bit" }));
-    expect(connect).toHaveBeenCalledWith("spikerbit");
+    expect(connect).toHaveBeenCalledWith("spikerbit", expect.objectContaining({ listener: expect.any(Object) }));
   });
 
-  it("focus stays in the pane when its controls change", () => {
-    const r = openPane();
+  it("focus stays in the palette when its controls change", () => {
+    const r = openConnectPalette();
     act(() => screen.getByRole("button", { name: "Connect Spiker:bit" }).focus());
     fakeConnected(r);
     expect(document.activeElement).toBe(screen.getByRole("button", { name: "Reconnect" }));
@@ -772,41 +1064,41 @@ describe("Dataflow connect button and pane", () => {
     expect(document.activeElement).toBe(screen.getByRole("button", { name: "Connect Arduino" }));
   });
 
-  const paneGroup = () => screen.getByRole("group", { name: "Device connection" });
+  const paletteGroup = () => screen.getByRole("group", { name: "Device connection" });
 
-  it("a successful Connect closes the pane and returns focus to the trigger", async () => {
-    const r = openPane();
+  it("a successful Connect closes the palette and returns focus to the trigger", async () => {
+    const r = openConnectPalette();
     jest.spyOn(r.connection, "connect").mockImplementation(async () => {
       r.stores.serialDevice.setActiveDevice("spikerbit", fakeTransport());
       return "connected";
     });
     act(() => screen.getByRole("button", { name: "Connect Spiker:bit" }).focus());
     await act(async () => { fireEvent.click(screen.getByRole("button", { name: "Connect Spiker:bit" })); });
-    expect(r.content.connectPaneOpen).toBe(false);
+    expect(r.content.connectPaletteOpen).toBe(false);
     expect(screen.queryByRole("group", { name: "Device connection" })).toBeNull();
     expect(document.activeElement).toBe(getTrigger(r.container));
   });
 
-  it("a successful Reconnect closes the pane and returns focus to the trigger", async () => {
-    const r = openPane();
+  it("a successful Reconnect closes the palette and returns focus to the trigger", async () => {
+    const r = openConnectPalette();
     fakeConnected(r);
     jest.spyOn(r.connection, "reconnect").mockResolvedValue("connected");
     act(() => screen.getByRole("button", { name: "Reconnect" }).focus());
     await act(async () => { fireEvent.click(screen.getByRole("button", { name: "Reconnect" })); });
-    expect(r.content.connectPaneOpen).toBe(false);
+    expect(r.content.connectPaletteOpen).toBe(false);
     expect(screen.queryByRole("group", { name: "Device connection" })).toBeNull();
     expect(document.activeElement).toBe(getTrigger(r.container));
   });
 
-  it("Disconnect closes the pane and returns focus to the trigger", async () => {
-    const r = openPane();
+  it("Disconnect closes the palette and returns focus to the trigger", async () => {
+    const r = openConnectPalette();
     fakeConnected(r);
     jest.spyOn(r.connection, "disconnect").mockImplementation(async () => {
       r.stores.serialDevice.clearActiveDevice();
     });
     act(() => screen.getByRole("button", { name: "Disconnect" }).focus());
     await act(async () => { fireEvent.click(screen.getByRole("button", { name: "Disconnect" })); });
-    expect(r.content.connectPaneOpen).toBe(false);
+    expect(r.content.connectPaletteOpen).toBe(false);
     expect(screen.queryByRole("group", { name: "Device connection" })).toBeNull();
     expect(document.activeElement).toBe(getTrigger(r.container));
   });
@@ -828,35 +1120,35 @@ describe("Dataflow connect button and pane", () => {
   }
 
   // A Spiker:bit attempt runs for seconds while it flashes, and the user can close and reopen the
-  // pane meanwhile. The success then closes the reopened pane, which holds focus.
-  it("a success after the pane was closed and reopened returns focus to the trigger", async () => {
-    const r = openPane();
+  // palette meanwhile. The success then closes the reopened palette, which holds focus.
+  it("a success after the palette was closed and reopened returns focus to the trigger", async () => {
+    const r = openConnectPalette();
     const resolve = pendingConnect(r);
     const trigger = getTrigger(r.container);
     act(() => trigger.focus());
     fireEvent.click(trigger);
     fireEvent.click(trigger);
-    expect(paneGroup().contains(document.activeElement)).toBe(true);
+    expect(paletteGroup().contains(document.activeElement)).toBe(true);
     await resolve("connected");
-    expect(r.content.connectPaneOpen).toBe(false);
+    expect(r.content.connectPaletteOpen).toBe(false);
     expect(document.activeElement).toBe(trigger);
   });
 
-  it("a success with focus outside the pane leaves focus where it is", async () => {
-    const r = openPane();
+  it("a success with focus outside the palette leaves focus where it is", async () => {
+    const r = openConnectPalette();
     const resolve = pendingConnect(r);
     const outside = document.createElement("input");
     document.body.appendChild(outside);
     act(() => outside.focus());
     await resolve("connected");
-    expect(r.content.connectPaneOpen).toBe(false);
+    expect(r.content.connectPaletteOpen).toBe(false);
     expect(document.activeElement).toBe(outside);
     outside.remove();
   });
 
   // Deleting a tile destroys its model before the toolbar unmounts.
   it("a success after the tile was deleted does not touch the destroyed content", async () => {
-    const r = openPane();
+    const r = openConnectPalette();
     const resolve = pendingConnect(r);
     const warn = jest.spyOn(console, "warn").mockImplementation(() => undefined);
     destroy(r.model);
@@ -867,22 +1159,22 @@ describe("Dataflow connect button and pane", () => {
     expect(warnings).toEqual([]);
   });
 
-  it("a failed Connect keeps the pane open and shows the error", async () => {
-    const r = openPane();
-    jest.spyOn(r.connection, "connect").mockResolvedValue("failed");
+  it("a failed Connect keeps the palette open and shows the error", async () => {
+    const r = openConnectPalette();
+    jest.spyOn(r.connection, "connect").mockImplementation(failingAttempt("openFailed"));
     act(() => screen.getByRole("button", { name: "Connect Spiker:bit" }).focus());
     await act(async () => { fireEvent.click(screen.getByRole("button", { name: "Connect Spiker:bit" })); });
-    expect(r.content.connectPaneOpen).toBe(true);
-    expect(within(paneGroup()).getByText("Couldn't connect to Spiker:bit.")).toBeInTheDocument();
-    expect(within(paneGroup()).getByRole("button", { name: "Connect Arduino" })).toBeInTheDocument();
+    expect(r.content.connectPaletteOpen).toBe(true);
+    expect(within(paletteGroup()).getByText("Couldn't open it.")).toBeInTheDocument();
+    expect(within(paletteGroup()).getByRole("button", { name: "Connect Arduino" })).toBeInTheDocument();
   });
 
-  it("a failed Connect shows the error only in the pane of the tile where it was clicked", async () => {
+  it("a failed Connect shows the error only in the palette of the tile where it was clicked", async () => {
     const Component = getToolbarButtonInfo("dataflow", "connect")!.component;
     const stores = specStores();
     const tiles = [TileModel.create({ content: DataflowContentModel.create() }),
       TileModel.create({ content: DataflowContentModel.create() })];
-    jest.spyOn(getDeviceConnection(stores.serialDevice), "connect").mockResolvedValue("failed");
+    jest.spyOn(getDeviceConnection(stores.serialDevice), "connect").mockImplementation(failingAttempt("openFailed"));
     render(
       <ModalProvider>
         <Provider stores={stores}>
@@ -899,43 +1191,43 @@ describe("Dataflow connect button and pane", () => {
     const [a, b] = tiles.map(model => within(screen.getByTestId(model.id)));
     fireEvent.click(a.getByTestId("connect-device-button"));
     await act(async () => { fireEvent.click(a.getByRole("button", { name: "Connect Spiker:bit" })); });
-    expect(a.getByText("Couldn't connect to Spiker:bit.")).toBeInTheDocument();
+    expect(a.getByText("Couldn't open it.")).toBeInTheDocument();
     fireEvent.click(b.getByTestId("connect-device-button"));
     expect(b.getByRole("group", { name: "Device connection" })).toBeInTheDocument();
     expect(b.queryByText(/Couldn't connect/)).toBeNull();
   });
 
-  it("a canceled Connect keeps the pane open", async () => {
-    const r = openPane();
+  it("a canceled Connect keeps the palette open", async () => {
+    const r = openConnectPalette();
     jest.spyOn(r.connection, "connect").mockResolvedValue("canceled");
     act(() => screen.getByRole("button", { name: "Connect Spiker:bit" }).focus());
     await act(async () => { fireEvent.click(screen.getByRole("button", { name: "Connect Spiker:bit" })); });
-    expect(r.content.connectPaneOpen).toBe(true);
-    expect(within(paneGroup()).getByRole("button", { name: "Connect Spiker:bit" })).toBeInTheDocument();
+    expect(r.content.connectPaletteOpen).toBe(true);
+    expect(within(paletteGroup()).getByRole("button", { name: "Connect Spiker:bit" })).toBeInTheDocument();
   });
 
   // Reconnect disconnects first, so after a failed or canceled attempt nothing is connected.
-  it.each<ConnectResult>(["failed", "canceled"])("a %s Reconnect keeps the pane open", async (result) => {
-    const r = openPane();
+  it.each<ConnectResult>(["openFailed", "canceled"])("a %s Reconnect keeps the palette open", async (result) => {
+    const r = openConnectPalette();
     fakeConnected(r);
-    jest.spyOn(r.connection, "reconnect").mockImplementation(async () => {
+    jest.spyOn(r.connection, "reconnect").mockImplementation(async options => {
       r.stores.serialDevice.clearActiveDevice();
-      return result;
+      return result === "openFailed" ? failingAttempt("openFailed")(options) : result;
     });
     act(() => screen.getByRole("button", { name: "Reconnect" }).focus());
     await act(async () => { fireEvent.click(screen.getByRole("button", { name: "Reconnect" })); });
-    expect(r.content.connectPaneOpen).toBe(true);
-    const error = within(paneGroup()).queryByText("Couldn't connect to Spiker:bit.");
-    if (result === "failed") {
+    expect(r.content.connectPaletteOpen).toBe(true);
+    const error = within(paletteGroup()).queryByText("Couldn't open it.");
+    if (result === "openFailed") {
       expect(error).toBeInTheDocument();
     } else {
       expect(error).toBeNull();
     }
-    expect(within(paneGroup()).getByRole("button", { name: "Connect Spiker:bit" })).toBeInTheDocument();
+    expect(within(paletteGroup()).getByRole("button", { name: "Connect Spiker:bit" })).toBeInTheDocument();
   });
 
-  it("a device dropping does not pull focus into the pane when focus is elsewhere", () => {
-    const r = openPane();
+  it("a device dropping does not pull focus into the palette when focus is elsewhere", () => {
+    const r = openConnectPalette();
     fakeConnected(r);
     const outside = document.createElement("input");
     document.body.appendChild(outside);
@@ -945,9 +1237,9 @@ describe("Dataflow connect button and pane", () => {
     outside.remove();
   });
 
-  // Focus that left the pane and then fell to <body> is not the pane's to restore.
-  it("a device dropping does not pull focus into the pane after focus left it for <body>", () => {
-    const r = openPane();
+  // Focus that left the palette and then fell to <body> is not the palette's to restore.
+  it("a device dropping does not pull focus into the palette after focus left it for <body>", () => {
+    const r = openConnectPalette();
     fakeConnected(r);
     const outside = document.createElement("input");
     document.body.appendChild(outside);
@@ -959,7 +1251,7 @@ describe("Dataflow connect button and pane", () => {
   });
 
   it("Reconnect and Disconnect call the connection", async () => {
-    const r = openPane();
+    const r = openConnectPalette();
     fakeConnected(r);
     const reconnect = jest.spyOn(r.connection, "reconnect").mockResolvedValue("canceled");
     const disconnect = jest.spyOn(r.connection, "disconnect").mockResolvedValue();
@@ -1007,8 +1299,8 @@ describe("Dataflow reset button", () => {
   });
 });
 
-describe("Dataflow connect pane keyboard navigation in the real toolbar", () => {
-  function PaneTile({ model }: { model: ITileModel }) {
+describe("Dataflow connect palette keyboard navigation in the real toolbar", () => {
+  function PaletteTile({ model }: { model: ITileModel }) {
     const [tileElt, setTileElt] = React.useState<HTMLDivElement | null>(null);
     return (
       <TileModelContext.Provider value={model}>
@@ -1028,7 +1320,7 @@ describe("Dataflow connect pane keyboard navigation in the real toolbar", () => 
       <ModalProvider>
         <Provider stores={stores}>
           <ReadOnlyContext.Provider value={false}>
-            <PaneTile model={model} />
+            <PaletteTile model={model} />
           </ReadOnlyContext.Provider>
         </Provider>
       </ModalProvider>
@@ -1039,14 +1331,14 @@ describe("Dataflow connect pane keyboard navigation in the real toolbar", () => 
   const press = (key: string) => fireEvent.keyDown(document.activeElement as Element, { key });
   const focusedName = () => document.activeElement?.getAttribute("aria-label");
 
-  function openRealPane() {
+  function openRealPalette() {
     const r = renderRealToolbar();
     fireEvent.click(screen.getByTestId("tile-toolbar").querySelector("button.toolbar-button.connect")!);
     return r;
   }
 
-  it("arrow keys, Home and End move focus among the pane's controls instead of the toolbar's buttons", () => {
-    openRealPane();
+  it("arrow keys, Home and End move focus among the palette's controls instead of the toolbar's buttons", () => {
+    openRealPalette();
     expect(focusedName()).toBe("Connect Arduino");
     press("ArrowDown");
     expect(focusedName()).toBe("Connect micro:bit (radio hub)");
@@ -1066,18 +1358,18 @@ describe("Dataflow connect pane keyboard navigation in the real toolbar", () => 
     expect(focusedName()).toBe("Connect Spiker:bit");
   });
 
-  it("arrow keys in the pane keep the pane open and are not left to default handling", () => {
-    const { content } = openRealPane();
+  it("arrow keys in the palette keep the palette open and are not left to default handling", () => {
+    const { content } = openRealPalette();
     const notCanceled = fireEvent.keyDown(document.activeElement as Element, { key: "ArrowDown" });
     expect(notCanceled).toBe(false);
-    expect(content.connectPaneOpen).toBe(true);
+    expect(content.connectPaletteOpen).toBe(true);
   });
 
   // Reset comes first in this toolbar, so a trigger lookup that lands on the row's first button fails.
-  it("Escape closes the pane and returns focus to the connect button", () => {
-    const { content } = openRealPane();
+  it("Escape closes the palette and returns focus to the connect button", () => {
+    const { content } = openRealPalette();
     press("Escape");
-    expect(content.connectPaneOpen).toBe(false);
+    expect(content.connectPaletteOpen).toBe(false);
     expect(document.activeElement).toBe(
       screen.getByTestId("tile-toolbar").querySelector("button.toolbar-button.connect"));
   });

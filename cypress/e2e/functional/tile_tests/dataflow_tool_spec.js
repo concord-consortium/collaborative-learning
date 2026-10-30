@@ -765,4 +765,40 @@ context('Dataflow Tool Tile', function () {
       });
     });
   });
+
+  it("shows why a connection failed in the palette", () => {
+    const fakePort = {
+      getInfo: () => ({}),
+      open: () => Promise.reject(new DOMException("Failed to open serial port.", "NetworkError")),
+      addEventListener: () => undefined,
+      removeEventListener: () => undefined
+    };
+    const url = "/editor/?appMode=qa&unit=./curriculum/example-curriculum/example-curriculum.json&mouseSensor&noStorage";
+    cy.visit(url, {
+      onBeforeLoad(win) {
+        const serial = win.navigator.serial;
+        if (serial) {
+          cy.stub(serial, "requestPort").resolves(fakePort);
+        } else {
+          Object.defineProperty(win.navigator, "serial", {
+            configurable: true,
+            value: {
+              requestPort: () => Promise.resolve(fakePort),
+              addEventListener: () => undefined,
+              removeEventListener: () => undefined,
+              getPorts: () => Promise.resolve([])
+            }
+          });
+        }
+      }
+    });
+    clueCanvas.addTile("dataflow");
+    dataflowToolTile.getDataflowTile().click();
+
+    cy.get("[data-testid='connect-device-button']").first().click();
+    cy.get(".connect-status-line").should("be.visible");
+    cy.get("[aria-label='Connect Arduino']").first().click();
+
+    cy.get(".connect-detail.problem").should("contain", "Couldn't open it.");
+  });
 });

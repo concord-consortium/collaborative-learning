@@ -1,5 +1,5 @@
 import { SerialDevice } from "./serial";
-import { initWebSerialConnectionEvents, WebSerialTransport } from "./web-serial-transport";
+import { initWebSerialConnectionEvents, WebSerialOpenResult, WebSerialTransport } from "./web-serial-transport";
 
 // Minimal fake SerialPort. `chunks` are delivered by the reader in order, then done.
 function fakePort(info: Partial<SerialPortInfo>, chunks: Uint8Array[] = []) {
@@ -220,6 +220,170 @@ describe("WebSerialTransport", () => {
     await t.startReading();
 
     expect(order).toEqual(["close", "onDisconnect"]);
+  });
+});
+
+describe("WebSerialTransport open steps", () => {
+  beforeEach(() => {
+    jest.spyOn(console, "error").mockImplementation(() => undefined);
+  });
+  afterEach(() => {
+    delete (navigator as any).serial;
+    jest.useRealTimers();
+    jest.restoreAllMocks();
+  });
+
+  it("open reports the chooser closing before the port opens", async () => {
+    const port = fakePort({ usbProductId: 67 });
+    const order: string[] = [];
+    port.open = jest.fn(async () => { order.push("open"); });
+    stubSerial(port);
+    const t = new WebSerialTransport();
+    expect(await t.open(undefined, { onChosen: () => order.push("chosen") })).toBe("opened");
+    expect(order).toEqual(["chosen", "open"]);
+  });
+
+  it("open reports a given port as chosen", async () => {
+    const onChosen = jest.fn();
+    const t = new WebSerialTransport();
+    expect(await t.open(fakePort({ usbProductId: 67 }), { onChosen })).toBe("opened");
+    expect(onChosen).toHaveBeenCalledTimes(1);
+  });
+
+  it("open resolves timeout when port.open hasn't settled within timeoutMs, and tries close and forget", async () => {
+    jest.useFakeTimers();
+    const port = fakePort({ usbProductId: 67 });
+    port.open = jest.fn(() => new Promise(() => { /* never settles */ }));
+    port.close = jest.fn(async () => { throw new DOMException("", "InvalidStateError"); });
+    port.forget = jest.fn(async () => undefined);
+    const onAbandoned = jest.fn();
+    const t = new WebSerialTransport();
+    const result = t.open(port, { timeoutMs: 20000, onAbandoned });
+    await jest.advanceTimersByTimeAsync(20000);
+    expect(await result).toBe("timeout");
+    expect(onAbandoned).toHaveBeenCalledWith({ close: "failed" });
+    expect(onAbandoned).toHaveBeenCalledWith({ forget: "ok" });
+  });
+
+  it("open resolves timeout at the limit when closing the stuck port hangs too, and still tries forget", async () => {
+    jest.useFakeTimers();
+    const port = fakePort({ usbProductId: 67 });
+    port.open = jest.fn(() => new Promise(() => { /* never settles */ }));
+    port.close = jest.fn(() => new Promise<void>(() => { /* never settles */ }));
+    port.forget = jest.fn(async () => undefined);
+    const onAbandoned = jest.fn();
+    const t = new WebSerialTransport();
+    let result: WebSerialOpenResult | undefined;
+    void t.open(port, { timeoutMs: 20000, onAbandoned }).then(r => { result = r; });
+    await jest.advanceTimersByTimeAsync(20000);
+    expect(result).toBe("timeout");
+    expect(port.close).toHaveBeenCalled();
+    expect(port.forget).toHaveBeenCalled();
+    expect(onAbandoned.mock.calls).toEqual([[{ forget: "ok" }]]);
+  });
+
+  it("an onAbandoned that throws doesn't become an unhandled rejection", async () => {
+    jest.useFakeTimers();
+    const port = fakePort({ usbProductId: 67 });
+    let resolveOpen: () => void = () => undefined;
+    port.open = jest.fn(() => new Promise<void>(resolve => { resolveOpen = resolve; }));
+    const onAbandoned = jest.fn(() => { throw new Error("listener failed"); });
+    const t = new WebSerialTransport();
+    const result = t.open(port, { timeoutMs: 20000, onAbandoned });
+    await jest.advanceTimersByTimeAsync(20000);
+    expect(await result).toBe("timeout");
+    resolveOpen();
+    await jest.advanceTimersByTimeAsync(0);
+    // close, forget and the late open each report, and each throws.
+    expect(onAbandoned).toHaveBeenCalledTimes(3);
+    expect(console.error).toHaveBeenCalledWith("Abandoned open report failed", expect.any(Error));
+  });
+
+  it("an open that finishes after the timeout is closed at once and reported", async () => {
+    jest.useFakeTimers();
+    const port = fakePort({ usbProductId: 67 });
+    let resolveOpen: () => void = () => undefined;
+    port.open = jest.fn(() => new Promise<void>(resolve => { resolveOpen = resolve; }));
+    port.forget = jest.fn(async () => undefined);
+    const onAbandoned = jest.fn();
+    const t = new WebSerialTransport();
+    const result = t.open(port, { timeoutMs: 20000, onAbandoned });
+    await jest.advanceTimersByTimeAsync(20000);
+    expect(await result).toBe("timeout");
+    port.close.mockClear();
+    resolveOpen();
+    await jest.advanceTimersByTimeAsync(0);
+    expect(port.close).toHaveBeenCalled();
+    expect(onAbandoned).toHaveBeenLastCalledWith({ late: "opened" });
+  });
+
+  it("a late open failure is reported", async () => {
+    jest.useFakeTimers();
+    const port = fakePort({ usbProductId: 67 });
+    let rejectOpen: (e: unknown) => void = () => undefined;
+    port.open = jest.fn(() => new Promise<void>((_, reject) => { rejectOpen = reject; }));
+    const onAbandoned = jest.fn();
+    const t = new WebSerialTransport();
+    const result = t.open(port, { timeoutMs: 20000, onAbandoned });
+    await jest.advanceTimersByTimeAsync(20000);
+    await result;
+    rejectOpen(new DOMException("", "NetworkError"));
+    await jest.advanceTimersByTimeAsync(0);
+    expect(onAbandoned).toHaveBeenLastCalledWith({ late: "failed" });
+  });
+
+  it("open doesn't time out when the port opens in time", async () => {
+    jest.useFakeTimers();
+    const onAbandoned = jest.fn();
+    const t = new WebSerialTransport();
+    expect(await t.open(fakePort({ usbProductId: 67 }), { timeoutMs: 20000, onAbandoned })).toBe("opened");
+    await jest.advanceTimersByTimeAsync(20000);
+    expect(onAbandoned).not.toHaveBeenCalled();
+  });
+
+  it("open resolves stillOpening when the browser says the port is still opening", async () => {
+    const port = fakePort({ usbProductId: 67 });
+    port.open = jest.fn(async () => { throw new DOMException("", "InvalidStateError"); });
+    const t = new WebSerialTransport();
+    expect(await t.open(port)).toBe("stillOpening");
+    expect((t.lastOpenError as Error).name).toBe("InvalidStateError");
+  });
+
+  it("open resolves failed and keeps the error when port.open rejects otherwise", async () => {
+    const port = fakePort({ usbProductId: 67 });
+    port.open = jest.fn(async () => { throw new DOMException("", "NetworkError"); });
+    const t = new WebSerialTransport();
+    expect(await t.open(port)).toBe("failed");
+    expect((t.lastOpenError as Error).name).toBe("NetworkError");
+  });
+
+  it("open resolves failed and keeps the error when the chooser can't be shown", async () => {
+    stubSerial(fakePort({ usbProductId: 67 }));
+    (navigator as any).serial.requestPort = jest.fn(async () => { throw new DOMException("", "SecurityError"); });
+    const t = new WebSerialTransport();
+    expect(await t.open()).toBe("failed");
+    expect((t.lastOpenError as Error).name).toBe("SecurityError");
+  });
+
+  it("open resolves canceled and keeps no error when the chooser is dismissed", async () => {
+    stubSerial(fakePort({ usbProductId: 67 }));
+    (navigator as any).serial.requestPort = jest.fn(async () => { throw new DOMException("", "NotFoundError"); });
+    const t = new WebSerialTransport();
+    expect(await t.open()).toBe("canceled");
+    expect(t.lastOpenError).toBeUndefined();
+  });
+
+  it("forget is reported unsupported when the port has none", async () => {
+    jest.useFakeTimers();
+    const port = fakePort({ usbProductId: 67 });
+    port.open = jest.fn(() => new Promise(() => { /* never settles */ }));
+    const onAbandoned = jest.fn();
+    const t = new WebSerialTransport();
+    const result = t.open(port, { timeoutMs: 20000, onAbandoned });
+    await jest.advanceTimersByTimeAsync(20000);
+    await result;
+    expect(onAbandoned).toHaveBeenCalledWith({ close: "ok" });
+    expect(onAbandoned).toHaveBeenCalledWith({ forget: "unsupported" });
   });
 });
 
