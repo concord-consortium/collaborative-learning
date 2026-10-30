@@ -31,6 +31,10 @@ import "./dataflow-connect-pane.scss";
 // How long a failure announcement stays in its live region before it is cleared.
 const kFailureAnnounceMs = 5000;
 
+// More…'s hover text and description in a view with no right drawer: the authoring and screenshot
+// iframes, and unwrapped /editor/.
+const kHelpUnavailable = "Connection help isn't available in this view. Open the document in CLUE to see it.";
+
 // How each navigation key moves focus: by a signed number of controls, or to the first or last one.
 const kFocusSteps: Record<string, number | "first" | "last"> = {
   ArrowDown: 1, ArrowRight: 1, ArrowUp: -1, ArrowLeft: -1, Home: "first", End: "last"
@@ -48,20 +52,27 @@ interface IPaneControlProps {
   className?: string;
   text: string;
   busy: boolean;
+  // Why the control can't be used in this view. It is then disabled, and the reason is its title:
+  // the hover text, and its description for screen readers.
+  unavailable?: string;
   onActivate: () => void;
 }
 
 // `div role="button"`, not a real button, for the reason given at PanPalette's arrows
 // (dataflow-zoom-pan-buttons.tsx).
-function PaneControl({ label, className, text, busy, onActivate }: IPaneControlProps) {
+function PaneControl({ label, className, text, busy, unavailable, onActivate }: IPaneControlProps) {
+  const disabled = busy || !!unavailable;
   function activate(e: React.SyntheticEvent) {
     e.stopPropagation();
     if ("key" in e) (e as React.KeyboardEvent).preventDefault();
-    if (!busy) onActivate();
+    if (!disabled) onActivate();
   }
+  // With a title the name is given outright, since some name computations put the title ahead of
+  // the text.
   return (
-    <div role="button" tabIndex={0} aria-label={label} aria-disabled={busy || undefined}
-        className={classNames("connect-control", className, { disabled: busy })}
+    <div role="button" tabIndex={0} aria-label={label ?? (unavailable ? text : undefined)}
+        aria-disabled={disabled || undefined} title={unavailable}
+        className={classNames("connect-control", className, { disabled })}
         onClick={activate}
         onKeyDown={(e) => {
           if (e.key === "Enter" || e.key === " ") activate(e);
@@ -80,11 +91,13 @@ interface IConnectPaneProps {
   paneRef: React.MutableRefObject<HTMLDivElement | null>;
   // Opens the help drawer for a failure's kind.
   onOpenHelp?: (kind: HelpKind) => void;
+  // False in a view with no right drawer to show the help in.
+  helpAvailable: boolean;
   onClose: () => void;
 }
 
 const ConnectPane = observer(function ConnectPane(
-    { connection, content, tileId, paneRef, onOpenHelp, onClose }: IConnectPaneProps) {
+    { connection, content, tileId, paneRef, onOpenHelp, helpAvailable, onClose }: IConnectPaneProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const { busyChoice, paneView, actionsEnabled, check } = connection;
   const busy = !!busyChoice;
@@ -221,6 +234,7 @@ const ConnectPane = observer(function ConnectPane(
       <span className="connect-detail-text">{line2?.text}</span>
       {helpKind &&
         <PaneControl className="connect-more" text="More…" busy={false}
+            unavailable={helpAvailable ? undefined : kHelpUnavailable}
             onActivate={() => onOpenHelp?.(helpKind)} />}
     </div>
   );
@@ -336,7 +350,8 @@ export const ConnectDeviceButton = observer(function ConnectDeviceButton({ name 
 
   const pane = isOpen && content && model
     ? <ConnectPane connection={connection} content={content} tileId={model.id} paneRef={paneRef}
-        onOpenHelp={openHelp} onClose={() => content.setConnectPaneOpen(false)} />
+        onOpenHelp={openHelp} helpAvailable={ui.hasRightDrawer}
+        onClose={() => content.setConnectPaneOpen(false)} />
     : undefined;
 
   // The live region sits beside the pane, not in it, so it exists while the pane is closed. It stays

@@ -35,14 +35,15 @@ function helpEvents(operation: string) {
 }
 
 // The drawer, and with `withTile` a Dataflow tile's connect button, sharing one connection. The
-// button is rendered on its own, so a test can unmount it as deleting the tile does.
-function renderHelp({ withTile = false } = {}) {
+// button is rendered on its own, so a test can unmount it as deleting the tile does. `withDrawer`
+// false is a view with no drawer, such as the authoring iframe.
+function renderHelp({ withTile = false, withDrawer = true } = {}) {
   const stores = specStores();
   const connection = getDeviceConnection(stores.serialDevice);
   const content = DataflowContentModel.create();
   const model = TileModel.create({ content });
   const ConnectButton = getToolbarButtonInfo("dataflow", "connect")!.component;
-  render(<Provider stores={stores}><RightDrawer chatTutorAvailable={false} /></Provider>);
+  if (withDrawer) render(<Provider stores={stores}><RightDrawer chatTutorAvailable={false} /></Provider>);
   const tile = withTile
     ? render(
         <ModalProvider>
@@ -228,6 +229,22 @@ describe("ConnectionHelpPanel", () => {
     expect(screen.queryByTestId("right-drawer")).toBeNull();
     expect(helpEvents("hideConnectHelp")).toEqual([expect.objectContaining({ tileId })]);
     act(() => r.stores.serialDevice.clearActiveDevice());
+  });
+
+  it("disables More… in a view with no drawer, and says why", () => {
+    const r = renderHelp({ withTile: true, withDrawer: false });
+    act(() => r.content.setConnectFailure(openFailed));
+    fail(r, openFailed);
+    fireEvent.click(r.trigger());
+    const more = screen.getByRole("button", { name: "More…" });
+    const why = "Connection help isn't available in this view. Open the document in CLUE to see it.";
+    expect(more).toHaveAttribute("aria-disabled", "true");
+    expect(more).toHaveAttribute("title", why);
+    expect(more).toHaveAccessibleDescription(why);
+    fireEvent.click(more);
+    fireEvent.keyDown(more, { key: "Enter" });
+    expect(r.stores.ui.drawerPanel).toBeUndefined();
+    expect(helpEvents("showConnectHelp")).toEqual([]);
   });
 
   it("More… opens the drawer and moves focus to its heading", () => {
