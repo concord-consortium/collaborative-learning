@@ -5,7 +5,7 @@ import stringify from "json-stringify-pretty-compact";
 
 import { Transform } from "rete-area-plugin/_types/area";
 
-import { DataflowProgramModel } from "./dataflow-program-model";
+import { DataflowProgramModel, DataflowProgramModelType } from "./dataflow-program-model";
 import { DEFAULT_DATA_RATE, ProgramDataRates } from "./utilities/node";
 import { SharedVariables, SharedVariablesType } from "../../shared-variables/shared-variables";
 import { isInputVariable, isOutputVariable } from "../../shared-variables/simulations/simulation-utilities";
@@ -18,7 +18,7 @@ import {
 } from "../../../models/shared/shared-data-set";
 import { updateSharedDataSetColors } from "../../../models/shared/shared-data-set-colors";
 import { SharedModelType } from "../../../models/shared/shared-model";
-import { DataSet, addAttributeToDataSet } from "../../../models/data/data-set";
+import { DataSet, IDataSet, addAttributeToDataSet } from "../../../models/data/data-set";
 import { SharedProgramData, SharedProgramDataType } from "../../shared-program-data/shared-program-data";
 
 import { uniqueId } from "../../../utilities/js-utils";
@@ -63,6 +63,17 @@ const kPointAttributeName = "Point";
 function nodeIdFromAttributeId(attributeId: string) {
   const star = attributeId.indexOf("*");
   return star >= 0 ? attributeId.slice(star + 1) : undefined;
+}
+
+/** Each capture column paired with the node it came from. Skips the point column, any column a
+ * student added by hand, and any whose node has since been deleted -- none of which has a node to
+ * keep a name in step with. */
+function captureColumnsWithNodes(dataSet: IDataSet, program: DataflowProgramModelType) {
+  return dataSet.attributes.flatMap(attr => {
+    const nodeId = nodeIdFromAttributeId(attr.id);
+    const node = nodeId ? program.nodes.get(nodeId) : undefined;
+    return node ? [{ attr, node }] : [];
+  });
 }
 
 /** `Program data 14:32:07`. Becomes the dataset's name, which TableContentModel.contentTitle
@@ -236,8 +247,7 @@ export const DataflowContentModel = TileContentModel
       delete (exported as { outputConfig?: unknown }).outputConfig;
       return stringify(exported, {maxLength: 120});
     },
-    /** True when this tile's data came from a continuous recording, so the Ready/Recording/Done
-     * machine should treat it as a recording. Single samples leave it false. */
+    /** Falls back to the row count for a document saved before `recordedRun` existed. */
     get hasRecordedRun(): boolean {
       return self.recordedRun ?? self.dataSet.cases.length > 0;
     },
@@ -348,20 +358,15 @@ export const DataflowContentModel = TileContentModel
      */
     syncColumnNamesFromNodes() {
       withoutUndo();
-      self.dataSet.attributes.forEach(attr => {
-        const nodeId = nodeIdFromAttributeId(attr.id);
-        if (!nodeId) return;
-        const nodeName = self.program.nodes.get(nodeId)?.data.orderedDisplayName;
+      captureColumnsWithNodes(self.dataSet, self.program).forEach(({ attr, node }) => {
+        const nodeName = node.data.orderedDisplayName;
         if (nodeName && attr.name !== nodeName) self.dataSet.setAttributeName(attr.id, nodeName);
       });
     },
     syncNodeNamesFromColumns() {
       withoutUndo();
-      self.dataSet.attributes.forEach(attr => {
-        const nodeId = nodeIdFromAttributeId(attr.id);
-        if (!nodeId || !attr.name) return;
-        const node = self.program.nodes.get(nodeId);
-        if (node && node.data.orderedDisplayName !== attr.name) {
+      captureColumnsWithNodes(self.dataSet, self.program).forEach(({ attr, node }) => {
+        if (attr.name && node.data.orderedDisplayName !== attr.name) {
           node.data.setOrderedDisplayName(attr.name);
         }
       });
@@ -565,16 +570,6 @@ export const DataflowContentModel = TileContentModel
         self.dataSet.removeAttribute(attr.id);
       });
     },
-    /**
-     * Hands every tile sharing this program's dataset its own copy of it, and stops it following
-     * the program. Called when the program's structure changes under a capture: the recorded
-     * numbers describe the program as it was, so they stay with the table while the program is
-     * free to start a new capture.
-     *
-     * Called from the structural actions rather than a reaction, so it lands in the same undo
-     * entry as the change that justified it -- one undo restores the structure AND the link.
-     * Patch application does not call actions, so this cannot re-fire while history replays.
-     */
     clearCases() {
       const ids = self.dataSet.cases.map(({__id__}) => ( __id__));
       self.dataSet.removeCases(ids);
