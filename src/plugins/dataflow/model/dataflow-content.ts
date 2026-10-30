@@ -67,9 +67,16 @@ const kPointAttributeName = "Point";
  * Not by the `<uniqueId>*<nodeId>` that addNewAttrFromNode embeds in a column's id: copying a
  * tile remaps every attribute id through getUpdatedSharedDataSetIds, which is by design in CLUE
  * and drops the node id -- so an id-based pairing would silently stop working on any copy.
+ *
+ * Pairs nothing unless the dataset really holds a capture. Between captures it holds the default
+ * x | y placeholder, whose columns describe no node: pairing those would have the name sync rename
+ * the program's first block to "y".
  */
 function captureColumnsWithNodes(dataSet: IDataSet, program: DataflowProgramModelType) {
   const nodes = Array.from(program.nodes.values());
+  const holdsCapture = dataSet.attributes.length === nodes.length + 1
+    && dataSet.attributes[0]?.name === kPointAttributeName;
+  if (!holdsCapture) return [];
   return nodes.flatMap((node, i) => {
     const attr = dataSet.attributes[i + 1];   // + 1 skips the point column
     return attr ? [{ attr, node }] : [];

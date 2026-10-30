@@ -269,7 +269,7 @@ class DataflowToolTile {
   checkLinkedTableRecordedData(tableTile, tableTitle, attributes, rows) {
     this.checkTableTitle(tableTile, tableTitle);
     tableTile.checkWorkspaceColumnHeaders(attributes);
-    tableTile.checkTableColumnValues(2, rows);
+    tableTile.checkTableColumnValues(2, rows, 1);
   }
   checkEmptyLinkedTable(tableTile, tableTitle, attributes) {
     this.checkTableTitle(tableTile, tableTitle);
