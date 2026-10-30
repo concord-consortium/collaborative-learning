@@ -76,11 +76,31 @@ function captureColumnsWithNodes(dataSet: IDataSet, program: DataflowProgramMode
   });
 }
 
-/** `Program data 14:32:07`. Becomes the dataset's name, which TableContentModel.contentTitle
- * surfaces as the table's header -- so the capture's time is recorded once, for the capture,
- * rather than in a column on every row. */
-function captureName(startedAt: Date) {
-  return `Program data ${startedAt.toLocaleTimeString([], { hour12: false })}`;
+/** `13:12:21`. Built by hand rather than with toLocaleTimeString: stripCaptureTime has to
+ * recognize this exact shape again, and under a locale that punctuates time differently it would
+ * stop matching and stamps would stack up. */
+function formatCaptureTime(at: Date) {
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${pad(at.getHours())}:${pad(at.getMinutes())}:${pad(at.getSeconds())}`;
+}
+
+/** `Program 1 13:12:21` -> `Program 1`. */
+function stripCaptureTime(name?: string) {
+  return name?.replace(/ \d{2}:\d{2}:\d{2}$/, "") ?? "";
+}
+
+/** `Program 1 13:12:21`: the program's own name with the capture's start time appended.
+ *
+ * It becomes the dataset's name, which both DataflowContentModel.contentTitle and
+ * TableContentModel.contentTitle surface -- so program and capture carry one name, renaming either
+ * renames both, and the stamp doubles as the sign that this program has been recorded. The time is
+ * recorded once, for the capture, rather than in a column on every row.
+ *
+ * Derived from the stripped base so a second capture replaces the stamp instead of appending
+ * another one.
+ */
+function captureName(currentName: string | undefined, startedAt: Date) {
+  return `${stripCaptureTime(currentName)} ${formatCaptureTime(startedAt)}`.trim();
 }
 
 export function defaultDataSet(title: string|undefined) {
@@ -251,6 +271,21 @@ export const DataflowContentModel = TileContentModel
     get hasRecordedRun(): boolean {
       return self.recordedRun ?? self.dataSet.cases.length > 0;
     },
+    /** True when the columns already describe the current program: the point column followed by one
+     * per named node, in order.
+     *
+     * prepareCapture rebuilds the columns from scratch, and every rebuild mints new attribute ids.
+     * A linked table holds those ids, so rebuilding under one empties it -- the table keeps
+     * rendering columns the dataset no longer has ("No attribute found for ID"). Table It prepares
+     * the capture and so does the start of a recording, so this is the difference between the two
+     * being one preparation and being a capture that loses its table.
+     */
+    get isCapturePrepared(): boolean {
+      const expected = [kPointAttributeName, ...Array.from(self.program.nodes.values())
+        .map(n => n.data.orderedDisplayName).filter(Boolean)];
+      const actual = self.dataSet.attributes.map(a => a.name);
+      return actual.length === expected.length && actual.every((name, i) => name === expected[i]);
+    },
     get isDataSetEmptyCases(){
       //Used when DF linked to a table, then we clear. Different than isEmpty
       //Since there are two attributes X|Y for the default table, we only want to check if there are no cases
@@ -396,12 +431,19 @@ export const DataflowContentModel = TileContentModel
         // deleted node silently shifts every value one column left. Clearing it makes the next
         // Table It or sample rebuild the columns.
         self.dataSet.removeCases(self.dataSet.cases.map(({ __id__ }) => __id__));
+        self.dataSet.setName(stripCaptureTime(self.dataSet.name));
         return;
       }
 
       // The program walks away from the capture rather than copying it out: the tables keep the
       // dataset they already hold, with the student's numbers intact, and afterAttach's
       // sharedModelSetup reaction gives this program a fresh one.
+      //
+      // The tables also keep the stamped name as their record of when that capture ran, while the
+      // program drops the stamp -- it has no recording any more. sharedModelSetup names the
+      // replacement dataset from the tile's own title, so handing the base name back that way is
+      // all this takes.
+      getTileModel(self)?.setTitle(stripCaptureTime(self.dataSet.name));
       sharedModelManager.removeTileSharedModel(self, sharedModel);
     },
   }))
@@ -596,18 +638,22 @@ export const DataflowContentModel = TileContentModel
       // Explicitly false, so `undefined` keeps meaning "saved before this flag existed". A capture
       // only counts as a recording once the record button says so (setRecordedRun).
       self.recordedRun = false;
-      self.clearAttributes();
-      addAttributeToDataSet(self.dataSet, { name: kPointAttributeName });
-      self.program.nodes.forEach((n) => { //add attributes based on nodes in tile
-        n.data.orderedDisplayName && self.addNewAttrFromNode(n.id, n.data.orderedDisplayName);
-      });
-      self.dataSet.setName(captureName(startedAt));
+      if (!self.isCapturePrepared) {
+        self.clearAttributes();
+        addAttributeToDataSet(self.dataSet, { name: kPointAttributeName });
+        self.program.nodes.forEach((n) => { //add attributes based on nodes in tile
+          n.data.orderedDisplayName && self.addNewAttrFromNode(n.id, n.data.orderedDisplayName);
+        });
+      }
+      self.dataSet.setName(captureName(self.dataSet.name, startedAt));
     },
     setRecordedRun(value: boolean) {
       self.recordedRun = value;
     },
     resetRecording() {
       self.recordedRun = false;
+      // No recording left, so the name should stop claiming one.
+      self.dataSet.setName(stripCaptureTime(self.dataSet.name));
       //clear the dataSet;
       self.clearAttributes();
       self.clearCases();

@@ -11,12 +11,18 @@ let graphTile = new XYPlotToolTile;
 let docEditor = new DocEditor;
 
 const programTitle = "Program 1";
+// Preparing a capture appends its start time to the program's name, so the linked table's header
+// reads "Program 1 14:32:07". Clearing the recording strips it again, back to programTitle.
+const capturedTitle = /^Program 1 \d{2}:\d{2}:\d{2}$/;
 const graphTitle = "Graph 1";
 
 const programNodes = [
   { name: "number", title: "Number 1", attribute: "Number 1" },
   { name: "demo-output", title: "Demo Device 1", attribute: "Demo Device 1" }];
-const linkedTableAttributes = ["Time (sec)", programNodes[0].attribute, programNodes[1].attribute];
+// Point, not "Time (sec)": a capture numbers its points 1, 2, 3 and records its start time in the
+// program's name instead (see prepareCapture). Table It prepares these columns up front, so an
+// empty linked table already carries them; only clearing the recording puts x | y back.
+const linkedTableAttributes = ["Point", programNodes[0].attribute, programNodes[1].attribute];
 const defaultTableAttributes = ["x", "y"];
 const timer1 = 5;
 const timer2 = 3;
@@ -37,17 +43,17 @@ context('Dataflow Tool Tile', function () {
     dataflowToolTile.checkInitialStateButtons();
 
     cy.log("create linked table, verify empty and with recorded data");
-    clueCanvas.clickToolbarButtonLabelled("dataflow", "data-set-view", "Table It!");
-    dataflowToolTile.checkEmptyLinkedTable(tableTile, programTitle, defaultTableAttributes);
+    clueCanvas.clickToolbarButtonLabelled("dataflow", "table-it", "Table It!");
+    dataflowToolTile.checkEmptyLinkedTable(tableTile, capturedTitle, linkedTableAttributes);
 
     dataflowToolTile.recordData("1000", timer1);
-    dataflowToolTile.checkLinkedTableRecordedData(tableTile, programTitle, linkedTableAttributes, timer1);
+    dataflowToolTile.checkLinkedTableRecordedData(tableTile, capturedTitle, linkedTableAttributes, timer1);
 
     dataflowToolTile.clearRecordedData();
     dataflowToolTile.checkEmptyLinkedTable(tableTile, programTitle, defaultTableAttributes);
 
     dataflowToolTile.recordData("1000", timer2);
-    dataflowToolTile.checkLinkedTableRecordedData(tableTile, programTitle, linkedTableAttributes, timer2);
+    dataflowToolTile.checkLinkedTableRecordedData(tableTile, capturedTitle, linkedTableAttributes, timer2);
 
     // dataflowToolTile.clearRecordedData();
     clueCanvas.deleteTile("table");
@@ -123,7 +129,7 @@ context('Dataflow Tool Tile', function () {
     dataflowToolTile.createProgram(programNodes);
     dataflowToolTile.checkInitialStateButtons();
     dataflowToolTile.recordData("1000", timer1);
-    clueCanvas.clickToolbarButtonLabelled("dataflow", "data-set-view", "Table It!");
+    clueCanvas.clickToolbarButtonLabelled("dataflow", "table-it", "Table It!");
 
     // record data
     dataflowToolTile.clearRecordedData();
@@ -134,7 +140,7 @@ context('Dataflow Tool Tile', function () {
 
     // check buttons after reload
     dataflowToolTile.checkRecordedStateButtons();
-    dataflowToolTile.checkLinkedTableRecordedData(tableTile, programTitle, linkedTableAttributes, timer2);
+    dataflowToolTile.checkLinkedTableRecordedData(tableTile, capturedTitle, linkedTableAttributes, timer2);
 
     // play recorded data
     dataflowToolTile.clickPlayButton();
@@ -144,7 +150,7 @@ context('Dataflow Tool Tile', function () {
 
     // check buttons after reload
     dataflowToolTile.checkRecordedStateButtons();
-    dataflowToolTile.checkLinkedTableRecordedData(tableTile, programTitle, linkedTableAttributes, timer2);
+    dataflowToolTile.checkLinkedTableRecordedData(tableTile, capturedTitle, linkedTableAttributes, timer2);
 
     // pause recorded data
     dataflowToolTile.clickPlayButton();
@@ -156,7 +162,7 @@ context('Dataflow Tool Tile', function () {
 
     // check buttons after reload
     dataflowToolTile.checkRecordedStateButtons();
-    dataflowToolTile.checkLinkedTableRecordedData(tableTile, programTitle, linkedTableAttributes, timer2);
+    dataflowToolTile.checkLinkedTableRecordedData(tableTile, capturedTitle, linkedTableAttributes, timer2);
 
     // click clear
     dataflowToolTile.getRecordingClearButton().click();
@@ -166,7 +172,7 @@ context('Dataflow Tool Tile', function () {
 
     // check buttons after reload
     dataflowToolTile.checkRecordedStateButtons();
-    dataflowToolTile.checkLinkedTableRecordedData(tableTile, programTitle, linkedTableAttributes, timer2);
+    dataflowToolTile.checkLinkedTableRecordedData(tableTile, capturedTitle, linkedTableAttributes, timer2);
 
     // record data
     dataflowToolTile.clearRecordedData();

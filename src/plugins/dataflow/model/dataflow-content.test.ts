@@ -315,10 +315,48 @@ describe("prepareCapture", () => {
     expect(content.dataSet.attributes.map(a => a.name)).toEqual(["Point", "Sensor", "Servo"]);
   });
 
-  it("names the dataset with the capture's start time", () => {
+  it("appends the capture's start time to the program's own name", () => {
     const content = setupContentWithTwoNamedNodes("Sensor", "Servo");
+    content.setContentTitle("Program 1");
     content.prepareCapture(new Date(2026, 9, 29, 14, 32, 7));
-    expect(content.dataSet.name).toBe("Program data 14:32:07");
+    expect(content.dataSet.name).toBe("Program 1 14:32:07");
+  });
+
+  // Otherwise a program recorded three times ends up called "Program 1 14:32:07 15:01:02 ...".
+  it("replaces an earlier capture's time rather than appending a second", () => {
+    const content = setupContentWithTwoNamedNodes("Sensor", "Servo");
+    content.setContentTitle("Program 1");
+    content.prepareCapture(new Date(2026, 9, 29, 14, 32, 7));
+    content.prepareCapture(new Date(2026, 9, 29, 15, 1, 2));
+    expect(content.dataSet.name).toBe("Program 1 15:01:02");
+  });
+
+  // Table It prepares the capture and so does the start of a recording. The second preparation
+  // must not mint new attribute ids: the linked table holds the old ones and would go blank.
+  it("keeps the same columns when a prepared capture is prepared again", () => {
+    const content = setupContentWithTwoNamedNodes("Sensor", "Servo");
+    content.prepareCapture();
+    const ids = content.dataSet.attributes.map(a => a.id);
+    content.prepareCapture();
+    expect(content.dataSet.attributes.map(a => a.id)).toEqual(ids);
+  });
+
+  it("rebuilds the columns when the program has changed under them", () => {
+    const content = setupContentWithTwoNamedNodes("Sensor", "Servo");
+    content.prepareCapture();
+    content.program.addNodeSnapshot({
+      id: "node-2", name: "Number", x: 0, y: 0, data: { type: "Number", orderedDisplayName: "Extra" }
+    } as any);
+    content.prepareCapture();
+    expect(content.dataSet.attributes.map(a => a.name)).toEqual(["Point", "Sensor", "Servo", "Extra"]);
+  });
+
+  it("drops the capture time again when the recording is cleared", () => {
+    const content = setupContentWithTwoNamedNodes("Sensor", "Servo");
+    content.setContentTitle("Program 1");
+    content.prepareCapture(new Date(2026, 9, 29, 14, 32, 7));
+    content.resetRecording();
+    expect(content.dataSet.name).toBe("Program 1");
   });
 });
 

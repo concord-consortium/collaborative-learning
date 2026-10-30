@@ -97,6 +97,22 @@ describe("detaching a linked table on a structural change", () => {
     expect(tableContent.dataSet.cases).toHaveLength(1);
   });
 
+  // The time in the name says when that capture ran, so it belongs to the capture: the table keeps
+  // it, and the program -- which no longer has a recording -- goes back to its plain name.
+  it("leaves the capture's time on the table and takes it off the program", async () => {
+    const { content, tableContent, manager } = setupDocumentWithLinkedTable();
+    content.setContentTitle("Program 1");
+    captureOnePoint(content);
+    await settleOn(manager, "DataSet.addCanonicalCasesWithIDs");
+
+    content.program.addNodeSnapshot({
+      id: "node-2", name: "Number", x: 0, y: 0, data: { type: "Number", orderedDisplayName: "Extra" }
+    } as any);
+
+    expect(tableContent.dataSet.name).toMatch(/^Program 1 \d{2}:\d{2}:\d{2}$/);
+    expect(content.dataSet.name).toBe("Program 1");
+  });
+
   it("leaves an empty capture alone", () => {
     const { content } = setupDocumentWithLinkedTable();
     content.program.addNodeSnapshot({

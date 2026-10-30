@@ -11,15 +11,17 @@ interface EditableNodeNameProps {
 export const EditableNodeName: React.FC<EditableNodeNameProps> = observer(
   function EditableNodeName({ node }) {
     const [nodeName, setNodeName] = useState(node.model.orderedDisplayName);
-    const [editing, setEditing] = useState(false);
+    // A ref rather than state: this must not re-render on focus. The input is controlled, so a
+    // render triggered by focusing would rewrite its DOM value and move the caret to the end.
+    const editingRef = useRef(false);
 
     // The model name can change under this input -- renaming the node's column in a linked table
     // writes it (see syncNodeNamesFromColumns). Without this the input keeps its stale draft, and
-    // the next blur saves that draft back over the rename, silently undoing it. Only while not
-    // editing, so a student's half-typed name is never yanked out from under them.
+    // the next blur saves that draft back over the rename, silently undoing it. Not while editing,
+    // so a student's half-typed name is never yanked out from under them.
     useEffect(() => {
-      if (!editing) setNodeName(node.model.orderedDisplayName);
-    }, [editing, node.model.orderedDisplayName]);
+      if (!editingRef.current) setNodeName(node.model.orderedDisplayName);
+    }, [node.model.orderedDisplayName]);
     // Tracks whether the upcoming blur is a discard (Escape) so `saveNodeName`
     // can skip writing. We can't rely on resetting `nodeName` state before the
     // blur — the state update is batched and the blur handler reads the stale
@@ -47,7 +49,7 @@ export const EditableNodeName: React.FC<EditableNodeNameProps> = observer(
     }
 
     function saveNodeName() {
-      setEditing(false);
+      editingRef.current = false;
       if (discardingRef.current || node.readOnly) return;
       nodeName && node.model.setOrderedDisplayName(nodeName);
     }
@@ -67,7 +69,7 @@ export const EditableNodeName: React.FC<EditableNodeNameProps> = observer(
           tabIndex={-1}
           value={valueString}
           onChange={handleInputChange}
-          onFocus={() => setEditing(true)}
+          onFocus={() => { editingRef.current = true; }}
           onBlur={saveNodeName}
           readOnly={node.readOnly}
           onKeyDown={handleKeyDown}
