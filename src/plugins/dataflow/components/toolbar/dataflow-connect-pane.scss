@@ -39,6 +39,11 @@
     &.connect-connected:hover:not(:disabled):not([aria-disabled="true"]):not(.selected) {
       background-color: #82f982;
     }
+
+    // The toolbar's teal triangle is under 3:1 against the green; this darker teal is 3.4:1.
+    &.connect-connected > .corner-triangle {
+      fill: $workspace-teal-dark-1;
+    }
   }
 
   .toolbar-palette.dataflow-connect-pane {
