@@ -1266,24 +1266,20 @@ Add to `dataflow_tool_spec.js`:
 
 `beforeTest`, `clueCanvas` and `dataflowToolTile` are already defined at the top of that spec.
 
-- [ ] **Step 4: Run the affected specs**
+- [ ] **Step 4: Check the specs compile, and leave the run to CI**
 
-Start the dev server first and wait for `compiled successfully`, because a stale bundle fails every
-spec misleadingly:
+The Cypress suite runs on GitHub CI for this project, not locally. Verify only that the spec files
+parse and that nothing still references a deleted helper:
 
 ```bash
-npm start > /tmp/clue-771-dev.log 2>&1 &
-until grep -q "compiled successfully" /tmp/clue-771-dev.log; do sleep 3; done
-
-env -u ELECTRON_RUN_AS_NODE npx cypress run \
-  --spec 'cypress/e2e/functional/tile_tests/dataflow_tool_spec.js,cypress/e2e/functional/tile_tests/dataflow_table_graph_integration_test_spec.js,cypress/e2e/functional/tile_tests/dataflow_tile_keyboard_spec.js' \
-  --config baseUrl=http://localhost:8080/
+npm run lint:build:cypress
+grep -rn "clickPlayButton\|clickPauseButton\|checkRecordedStateButtons\|getRecordingClearButton\|getClearDataWarning\|verifyRecordButton\|getTimeSlider" cypress/
 ```
 
-`env -u ELECTRON_RUN_AS_NODE` is required — that variable breaks the Cypress runner.
+Expected: lint passes with no errors, and the grep returns nothing.
 
-Expected: all specs pass. The keyboard spec's `focusOrder` should need no change: the toolbar is a
-single tab stop via roving tabindex, so adding buttons doesn't add entries.
+The keyboard spec's `focusOrder` should need no change: the toolbar is a single tab stop via roving
+tabindex, so adding buttons doesn't add entries. CI will say otherwise if that's wrong.
 
 - [ ] **Step 5: Commit**
 
@@ -1323,13 +1319,22 @@ hook, so yes).
 
 - [ ] **Step 4: Check it by hand on localhost**
 
-Record a run, confirm the toolbar greys out except Stop, stop it, confirm the program is editable
-and Clear is enabled, press Clear, confirm the table keeps its points and the program's name loses
-its timestamp. Then record again and confirm the points append.
+```bash
+npm start > /tmp/clue-771-dev.log 2>&1 &
+until grep -q "compiled successfully" /tmp/clue-771-dev.log; do sleep 3; done
+```
+
+Then walk the whole loop at http://localhost:8080/: record a run and confirm the toolbar greys out
+except Stop; stop it and confirm the program is editable again and Clear is enabled; press Clear
+and confirm the linked table keeps its points while the program's name loses its timestamp; record
+again and confirm the new points append rather than restarting at 1.
+
+This hand-check is the gate on pushing, because CI's Cypress run happens after the push, not
+before.
 
 - [ ] **Step 5: Open the PR**
 
-Do not push before the hand-check above passes.
+Do not push until the hand-check passes and the user has okayed it.
 
 Take the branch name from the **Create branch** field on
 https://concord-consortium.atlassian.net/browse/CLUE-771 verbatim — a paraphrased name breaks the
@@ -1340,14 +1345,24 @@ git push -u origin <the name Jira's Create branch field gives>
 gh pr create --fill
 ```
 
-Request a Copilot review on this first push — it does not re-run on its own.
+Tick **run regression** on the PR so the full Cypress suite runs, and add the label Codecov needs
+for a reliable project/patch report. Request a Copilot review on this first push — it does not
+re-run on its own.
+
+- [ ] **Step 6: Read the CI regression results**
+
+This is where this branch's real coverage lives. CLUE-740 shipped three bugs that only the Cypress
+specs caught — a double `prepareCapture` that blanked the linked table, a name sync that renamed a
+node to "y", and stale toolbar selectors. Read every failure before assuming it is a flake, and
+fix on the branch rather than retrying the job.
 
 ---
 
 ## Risks
 
-- **The Cypress recording specs are the real coverage.** CLUE-740 shipped three bugs that only the
-  integration spec caught. Expect the same here, and run those specs before believing the branch.
+- **The Cypress recording specs are the real coverage, and they run on CI after the push.** CLUE-740
+  shipped three bugs that only the integration spec caught. The localhost hand-check in Task 11 is
+  the only pre-push gate, so do it properly.
 - **`ToolbarBusyContext` touches a shared component.** Every tile's toolbar buttons run the new
   check, so the inert default matters. Task 3's first test pins it.
 - **`recordedRun`'s removal** is safe only while CLUE-740 is unreleased. Task 2 Step 1 checks.
