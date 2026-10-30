@@ -94,7 +94,7 @@ An attempt starts when the student clicks Connect (or Reconnect) and ends with o
 | `choose` | Connect, and Reconnect when the known port can't be reopened | The browser's device chooser closes | None. It waits on the student. Dismissing it ends the attempt as `canceled`. |
 | `open` | All | The port or USB device is open | **20 s**, then `openTimeout` |
 | `checkFirmware` | Spiker:bit | The firmware answers, or 1.5 s passes | Already bounded |
-| `update` | Spiker:bit, when its firmware is old or missing | The flash finishes and the re-query is done | **10 s with no progress**, then `updateStalled` |
+| `update` | Spiker:bit, when its firmware is old or missing | The flash finishes and the re-query is done | **45 s to the first progress, then 20 s between progress reports**, then `updateStalled` |
 | `waitForData` | All | The first data arrives from the device | **5 s**, then `notResponding` (Spiker:bit) or `noData` (Web Serial devices) |
 
 The pane has two **views**: the device list (Connect buttons) and the connected actions (Reconnect,
@@ -133,6 +133,11 @@ today the reset happens on success, which is the same moment for a Web Serial de
 
 - **If it finishes** before the student clicks Reconnect or Disconnect, the attempt carries on: a
   finished update goes on to make the device active and wait for data.
+- **If a stalled update reports progress again,** it no longer counts as stalled. The pane shows the
+  update and its progress bar again, the toolbar button leaves yellow, and Reconnect and Disconnect
+  are disabled again, as during any update, since closing the board would stop the flash. Another
+  20 s without progress stalls it again. On a Chromebook, a first stall followed by a Reconnect
+  twice broke a flash that was still running.
 - **Late first data** counts as a successful connection. The red message clears, the toolbar button
   turns green, and an open help drawer shows its "It's working now" notice (see the drawer section).
   It is logged as `connectRecovered`. The connect pane, if open, stays open and just updates its
@@ -225,7 +230,7 @@ and "{label}" otherwise.
 | `openFailed` | `open` throws anything else | Couldn't open it. More… | The browser couldn't open the {label}. |
 | `inUse` | The device is held by another tab or app (WebUSB `device-in-use`; the Web Serial equivalent is to be found on the bench) | In use by another tab. More… | Another tab or app is using the {label}. |
 | `updateFailed` | The flash throws | The update failed. More… | The firmware update didn't finish. |
-| `updateStalled` | No update progress for 10 s | Update stalled. More… | The firmware update stopped. |
+| `updateStalled` | No update progress for 45 s from the start, or 20 s after that | Update stalled. More… | The firmware update stopped. |
 | `notResponding` | Spiker:bit: no data 5 s after it became active | Not responding. More… | The {label} isn't sending anything. |
 | `noData` | Arduino or radio hub: no data 5 s after the open | No data yet. More… | The {label} isn't sending anything. |
 | lost | The connection dropped without an unplug | Connection lost. More… | The connection to the {label} was lost. |
@@ -302,6 +307,9 @@ Canceling the device chooser is not a failure: no message, no help.
     reads "**The {label} was unplugged.** Plug it back in and click Connect." or "**The {label}
     isn't connected.** Click Connect to try again.", with no button. The steps stay at full
     strength. The notice stays while the next attempt runs, until its outcome replaces or clears it.
+  - **A stalled update is making progress again.** A teal notice reads "**The update is going
+    again.** Keep the {label} plugged in.", with no button, so "The firmware update stopped."
+    doesn't read as current. A new stall clears it.
   - **The same failure kind again** shows no notice; the steps still apply.
   - A later change replaces the notice: for example, working again after a different failure shows
     the green notice.
@@ -375,7 +383,7 @@ recorded only for steps that happened:
 | `abandonedOpen` | An open given up on settles later, or the best-effort `close()` / `forget()` finish | what each one did |
 | `deviceLost` | An unplug or lost connection is detected (not a Disconnect the user chose), or the firmware update of a stalled Spiker:bit fails | `reason`: `unplugged`, `lost` or `updateFailed` |
 | `showConnectHelp` / `hideConnectHelp` | The help drawer opens or closes | failure `kind`; for hide, `trigger`: `close` (✕) or `closeHelp` (the notice's button) |
-| `connectHelpNotice` | A notice appears in the help drawer, or the student uses its button | `notice`: `working`, `differentProblem`, `unplugged` or `notConnected`, the new `kind` for `differentProblem`, and `action`: `shown` or `clicked` |
+| `connectHelpNotice` | A notice appears in the help drawer, or the student uses its button | `notice`: `working`, `updating`, `differentProblem`, `unplugged` or `notConnected`, the new `kind` for `differentProblem`, and `action`: `shown` or `clicked` |
 | `disconnectDevice`, `resetProgram` | Unchanged | — |
 
 How the log reads:
@@ -401,7 +409,9 @@ changes behavior, the code.
 2. Whether a retry on the same device during a pending open fails fast, and with what error.
 3. What Web Serial reports when another tab or app holds the port, to map it to `inUse`.
 4. What the library's flash `progress` stages and percentages look like, and how often they arrive,
-   since the 10 s no-progress limit depends on them.
+   since the no-progress limits depend on them. On a Chromebook: no progress for about 25 s before
+   the first page (halting the board, filling DAPLink's serial buffers on the first flash after
+   plugging in, a reset and the page checksums), then one report per page, about 8 s apart.
 5. Whether the Arduino sketch and the radio hub send data on their own within 5 s of the open (an
    Arduino resets when its port opens).
 6. How to produce a stalled open at all. If it can't be done on demand, the tests use a fake
@@ -427,7 +437,9 @@ changes behavior, the code.
 
 ## My calls (not discussed; easy to change)
 
-- The limits: 20 s for the open (agreed), 5 s for the first data, and 10 s with no update progress.
+- The limits: 20 s for the open (agreed), 5 s for the first data, and for an update 45 s to its
+  first progress and 20 s between progress reports. The update limits were 10 s until a Chromebook
+  took about 25 s before its first progress and about 8 s per page.
 - The program resets when the device becomes active, not when the pane switches views.
 - A Reconnect keeps the connected actions view throughout.
 - A stall is not final: a stalled step that finishes later carries the attempt on, and late first
