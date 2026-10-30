@@ -353,8 +353,8 @@ Canceling the device chooser is not a failure: no message, no help.
   browser couldn't open the Spiker:bit." This is Doug's review note from CLUE-716.
 - **The progress bar** is a `progressbar` with its value, not announced per change.
 - **More…** joins the pane's arrow-key navigation with the other controls. Where it is disabled
-  because the view has no drawer, it is `aria-disabled`, and the hover text is its description
-  (`aria-describedby`).
+  because the view has no drawer, it is `aria-disabled`, and the hover text is its `title`, which
+  is also its accessible description.
 - **The drawer:**
   - It is a labeled complementary region, like Ada's.
   - Opening it moves focus to its heading.
