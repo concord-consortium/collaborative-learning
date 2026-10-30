@@ -665,7 +665,10 @@ describe("DeviceConnection", () => {
     // A Spiker:bit whose connectAndStream reports the steps the test drives, and ends when the test
     // activates it or fails it.
     function makeSteppedSpikerbit(serialDevice: SerialDevice) {
-      const transport: { write: jest.Mock, close: jest.Mock, onData?: (chunk: string) => void } =
+      const transport: {
+        write: jest.Mock, close: jest.Mock, onData?: (chunk: string) => void,
+        onDisconnect?: (loss: "unplugged" | "lost") => void
+      } =
         { write: jest.fn(), close: jest.fn().mockResolvedValue(undefined) };
       let observer: ISpikerbitConnectObserver = {};
       let settle = { resolve: () => undefined as void, reject: (_e: unknown) => undefined as void };
@@ -981,6 +984,46 @@ describe("DeviceConnection", () => {
         expect(listener.onRecovered).toHaveBeenCalledWith(connection.attempt);
         serialDevice.clearActiveDevice();
       });
+
+    it("a board lost while it waits for first data after a stalled update reports no stall afterward",
+      async () => {
+        const { connection, stepped } = setupSpikerbit();
+        const listener = { onStallChanged: jest.fn(), onLost: jest.fn() };
+        const p = connection.connect("spikerbit", { listener });
+        await flush();
+        stepped.observer().onOpened!();
+        stepped.observer().onFirmwareChecked!(null, true);
+        await jest.advanceTimersByTimeAsync(kUpdateStartMs);
+        expect(await p).toBe("updateStalled");
+        stepped.observer().onUpdateFinished!();
+        await stepped.activate();
+        listener.onStallChanged.mockClear();
+
+        stepped.transport.onDisconnect!("unplugged");
+        expect(listener.onLost).toHaveBeenCalledWith(connection.attempt, "unplugged");
+        await jest.advanceTimersByTimeAsync(kFirstDataTimeoutMs);
+        expect(connection.lastFailure).toBeUndefined();
+        expect(listener.onStallChanged).not.toHaveBeenCalled();
+      });
+
+    it("a stalled update that resumed and then lost its board reports no stall afterward", async () => {
+      const { connection, stepped } = setupSpikerbit();
+      const listener = { onStallChanged: jest.fn(), onLost: jest.fn() };
+      const p = connection.connect("spikerbit", { listener });
+      await flush();
+      stepped.observer().onOpened!();
+      stepped.observer().onFirmwareChecked!(null, true);
+      await jest.advanceTimersByTimeAsync(kUpdateStartMs);
+      expect(await p).toBe("updateStalled");
+      stepped.observer().onUpdateProgress!(20);
+      listener.onStallChanged.mockClear();
+
+      stepped.observer().onLost!("unplugged");
+      expect(listener.onLost).toHaveBeenCalledWith(connection.attempt, "unplugged");
+      await jest.advanceTimersByTimeAsync(kUpdateStallMs);
+      expect(connection.lastFailure).toBeUndefined();
+      expect(listener.onStallChanged).not.toHaveBeenCalled();
+    });
 
     it("disconnect during a stalled update disposes the Spiker:bit device", async () => {
       const { connection, stepped } = setupSpikerbit();
