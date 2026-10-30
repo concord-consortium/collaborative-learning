@@ -67,7 +67,9 @@ export const TileToolbarButton = function ({
   );
 
   return (
-    <Tooltip title={tooltip} {...tipOptions}>
+    // The panel a button opens is its extraContent, inside the tooltip's hover area, where the
+    // tooltip would cover it. So there is no tooltip while the panel shows.
+    <Tooltip title={tooltip} {...tipOptions} disabled={expanded}>
       <button
         type="button"
         className={classNames("toolbar-button", name, colorClass, { selected: selected || highlighted, disabled })}
