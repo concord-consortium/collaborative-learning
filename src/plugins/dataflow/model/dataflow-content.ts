@@ -57,6 +57,14 @@ const kMaxRecordedValues = 10000;
 
 const kPointAttributeName = "Point";
 
+/** addNewAttrFromNode builds a capture column's id as `<uniqueId>*<nodeId>`, which is what lets a
+ * column be traced back to the node it came from. Returns undefined for the point column and for
+ * anything a student added by hand, neither of which carries a node id. */
+function nodeIdFromAttributeId(attributeId: string) {
+  const star = attributeId.indexOf("*");
+  return star >= 0 ? attributeId.slice(star + 1) : undefined;
+}
+
 /** `Program data 14:32:07`. Becomes the dataset's name, which TableContentModel.contentTitle
  * surfaces as the table's header -- so the capture's time is recorded once, for the capture,
  * rather than in a column on every row. */
@@ -325,6 +333,39 @@ export const DataflowContentModel = TileContentModel
     }
   }))
   .actions(self => ({
+    /**
+     * Keeps a capture's column headers and its nodes' names the same, in both directions: renaming
+     * a node renames its column, and renaming a column renames its node. One name, so there is no
+     * conflict to arbitrate and no stale header after a rename -- which matters because a rename
+     * deliberately does not detach, the columns still describing the program.
+     *
+     * Both directions are idempotent, writing only when the two differ, so the pair converges
+     * after one round trip rather than looping.
+     *
+     * withoutUndo because this is derived, not an edit of its own: undoing a rename puts the
+     * original name back and the other side simply follows, instead of needing a second undo and
+     * leaving the two out of step in between.
+     */
+    syncColumnNamesFromNodes() {
+      withoutUndo();
+      self.dataSet.attributes.forEach(attr => {
+        const nodeId = nodeIdFromAttributeId(attr.id);
+        if (!nodeId) return;
+        const nodeName = self.program.nodes.get(nodeId)?.data.orderedDisplayName;
+        if (nodeName && attr.name !== nodeName) self.dataSet.setAttributeName(attr.id, nodeName);
+      });
+    },
+    syncNodeNamesFromColumns() {
+      withoutUndo();
+      self.dataSet.attributes.forEach(attr => {
+        const nodeId = nodeIdFromAttributeId(attr.id);
+        if (!nodeId || !attr.name) return;
+        const node = self.program.nodes.get(nodeId);
+        if (node && node.data.orderedDisplayName !== attr.name) {
+          node.data.setOrderedDisplayName(attr.name);
+        }
+      });
+    },
     detachLinkedTables() {
       // Never reattached by undo, deliberately. A recorded capture describes the program as it
       // was, so re-linking it to a program that has moved on would reintroduce exactly the
@@ -403,6 +444,19 @@ export const DataflowContentModel = TileContentModel
         updateSharedDataSetColors(dataSets);
       },
       {name: "sharedModelSetup", fireImmediately: true}));
+
+      // A rename on either side moves the other. Only this program's current dataset is watched,
+      // so a table that has been detached keeps the headers it was captured with.
+      addDisposer(self, reaction(
+        () => Array.from(self.program.nodes.values())
+          .map(node => `${node.id}:${node.data.orderedDisplayName ?? ""}`).join("|"),
+        () => self.syncColumnNamesFromNodes(),
+        {name: "syncColumnNamesFromNodes"}));
+
+      addDisposer(self, reaction(
+        () => self.dataSet.attributes.map(attr => `${attr.id}:${attr.name}`).join("|"),
+        () => self.syncNodeNamesFromColumns(),
+        {name: "syncNodeNamesFromColumns"}));
 
       // Structure only -- node and connection ids. A rename or a value change leaves the capture's
       // columns describing the program, so neither detaches. A reaction rather than a call inside

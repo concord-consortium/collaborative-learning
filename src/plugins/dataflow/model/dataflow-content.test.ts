@@ -426,3 +426,64 @@ describe("hasRecordedRun", () => {
     expect(legacy.hasRecordedRun).toBe(true);
   });
 });
+
+// One name shared by a node and its column, in both directions. A rename deliberately does not
+// detach -- the columns still describe the program -- so without this the headers go stale.
+describe("node and column name sync", () => {
+  const columnNames = (content: DataflowContentModelType) =>
+    content.dataSet.attributes.map(a => a.name);
+
+  it("renames the column when the node is renamed", () => {
+    const content = setupContentWithTwoNamedNodes("Sensor", "Servo");
+    content.prepareCapture();
+
+    content.program.nodes.get("node-0")!.data.setOrderedDisplayName("Thermometer");
+
+    expect(columnNames(content)).toEqual(["Point", "Thermometer", "Servo"]);
+  });
+
+  it("renames the node when the column is renamed", () => {
+    const content = setupContentWithTwoNamedNodes("Sensor", "Servo");
+    content.prepareCapture();
+    const servoAttr = content.dataSet.attributes[2];
+
+    content.dataSet.setAttributeName(servoAttr.id, "Gripper");
+
+    expect(content.program.nodes.get("node-1")!.data.orderedDisplayName).toBe("Gripper");
+  });
+
+  // Each direction writes only when the two differ, so the pair settles rather than ping-ponging.
+  it("settles instead of looping when a name changes", () => {
+    const content = setupContentWithTwoNamedNodes("Sensor", "Servo");
+    content.prepareCapture();
+
+    content.program.nodes.get("node-0")!.data.setOrderedDisplayName("Thermometer");
+
+    expect(columnNames(content)).toEqual(["Point", "Thermometer", "Servo"]);
+    expect(content.program.nodes.get("node-0")!.data.orderedDisplayName).toBe("Thermometer");
+  });
+
+  // The point column carries no node id, and nothing should try to trace it to one.
+  it("leaves the point column alone", () => {
+    const content = setupContentWithTwoNamedNodes("Sensor", "Servo");
+    content.prepareCapture();
+
+    content.program.nodes.get("node-0")!.data.setOrderedDisplayName("Thermometer");
+
+    expect(content.dataSet.attributes[0].name).toBe("Point");
+  });
+
+  // A capture the program no longer holds describes the old program, so renames must not reach it.
+  it("does not touch a dataset the program has detached", () => {
+    const { content, tableContent } = setupContentWithLinkedTable();
+    const detachedTable = tableContent as any;
+    content.prepareCapture();
+    recordCase(content);
+    const detachedNames = detachedTable.dataSet.attributes.map((a: any) => a.name);
+
+    content.detachLinkedTables();
+    content.program.nodes.get("node-0")?.data.setOrderedDisplayName("Thermometer");
+
+    expect(detachedTable.dataSet.attributes.map((a: any) => a.name)).toEqual(detachedNames);
+  });
+});
