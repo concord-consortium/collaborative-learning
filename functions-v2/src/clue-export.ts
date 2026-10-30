@@ -119,7 +119,7 @@ const isAuthorized = (header: string | undefined) => {
 };
 
 export const clueExport = onRequest({
-  serviceAccount: "clue-export-reader@",
+  serviceAccount: `clue-export-reader@${process.env.GCLOUD_PROJECT}.iam.gserviceaccount.com`,
   secrets: [exportBearer],
   invoker: "public",
   timeoutSeconds: 300,
