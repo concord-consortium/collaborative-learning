@@ -29,6 +29,14 @@ describe("RightDrawer", () => {
     mockUi = UIModel.create({ learningLogWorkspace: { type: LearningLogWorkspace, mode: "1-up" } });
   });
 
+  it("tells the store a drawer is mounted, even while it shows nothing", () => {
+    expect(mockUi.hasRightDrawer).toBe(false);
+    const { unmount } = render(<RightDrawer chatTutorAvailable={false} />);
+    expect(mockUi.hasRightDrawer).toBe(true);
+    unmount();
+    expect(mockUi.hasRightDrawer).toBe(false);
+  });
+
   it("renders nothing while nothing is open", () => {
     const { container } = render(<RightDrawer chatTutorAvailable={false} />);
     expect(container).toBeEmptyDOMElement();

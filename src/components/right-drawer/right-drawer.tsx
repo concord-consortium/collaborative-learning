@@ -1,4 +1,4 @@
-import React, { RefObject, useRef } from "react";
+import React, { RefObject, useEffect, useRef } from "react";
 import { observer } from "mobx-react";
 import classNames from "classnames";
 import { useStores } from "../../hooks/use-stores";
@@ -24,6 +24,12 @@ export const RightDrawer: React.FC<IProps> = observer(function RightDrawer(props
   const { ui } = useStores();
   const { drawerPanel, drawerTab } = ui;
   const tabsRef = useRef<HTMLDivElement>(null);
+
+  // Lets code that opens a panel tell whether this view can show one.
+  useEffect(() => {
+    ui.addRightDrawerHost();
+    return () => ui.removeRightDrawerHost();
+  }, [ui]);
 
   const adaShowing = chatTutorAvailable && ui.showChatTutor;
   // The panel shows when it is the selected tab, or when Ada isn't open to compete with it.
