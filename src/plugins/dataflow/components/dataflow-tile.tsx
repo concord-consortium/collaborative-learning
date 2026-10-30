@@ -13,6 +13,7 @@ import { measureText } from "../../../components/tiles/hooks/use-measure-text";
 import { defaultTileTitleFont } from "../../../components/constants";
 import { TileTitleArea } from "../../../components/tiles/tile-title-area";
 import { TileToolbar } from "../../../components/toolbar/tile-toolbar";
+import { ToolbarBusyContext } from "../../../components/toolbar/tile-toolbar-context";
 import { ReteManager } from "../rete/rete-manager";
 import { DataflowReteManagerContext } from "./dataflow-rete-manager-context";
 import { ClueTileAccessibilityBridge } from "../../../hooks/use-clue-accessibility";
@@ -163,7 +164,11 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
             onProgramContainerRef={el => this.programContainerEl = el}
             onProgramApiRef={api => this.programApi = api}
           />
-          <TileToolbar tileType="dataflow" readOnly={!!readOnly} tileElement={this.props.tileElt} />
+          {/* During a run Stop is the only live control. Context reaches the toolbar through the
+              FloatingPortal it renders into, because a portal preserves the React tree. */}
+          <ToolbarBusyContext.Provider value={{ busy: tileContent.isRecording, exempt: ["stop"] }}>
+            <TileToolbar tileType="dataflow" readOnly={!!readOnly} tileElement={this.props.tileElt} />
+          </ToolbarBusyContext.Provider>
         </div>
         <DataflowConnectTutorialGate
           content={tileContent}

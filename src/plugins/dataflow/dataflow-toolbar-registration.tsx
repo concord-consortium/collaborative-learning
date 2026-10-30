@@ -12,6 +12,8 @@ import { resetProgramForTile } from "./utilities/device-actions";
 import { ConnectDeviceButton } from "./components/toolbar/dataflow-connect-button";
 import { ZoomInButton, ZoomOutButton, FitAllButton, PanButton } from "./components/toolbar/dataflow-zoom-pan-buttons";
 import { DataflowTableButton, RecordSingleSampleButton } from "./components/toolbar/dataflow-table-buttons";
+import { ClearButton, RecordButton, StopButton }
+  from "./components/toolbar/dataflow-recording-buttons";
 
 import DeleteIcon from "../../assets/icons/delete/delete-selection-icon.svg";
 import ResetIcon from "./assets/icons/reset-icon.svg";
@@ -111,6 +113,18 @@ registerTileToolbarButtons('dataflow',
   {
     name: "record-sample",
     component: RecordSingleSampleButton
+  },
+  {
+    name: "record",
+    component: RecordButton
+  },
+  {
+    name: "stop",
+    component: StopButton
+  },
+  {
+    name: "clear",
+    component: ClearButton
   },
   {
     // Dialog-mediated view. Also takes an argument for tile type.
