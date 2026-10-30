@@ -2,7 +2,7 @@ import { kMaxSeq } from "./cc-device-session";
 import { withChecksum } from "./cc-device-protocol";
 import { SerialDevice } from "./serial";
 import { detectFirmwareReply, FirmwareReply, shouldFlash } from "./serial-protocol";
-import { DeviceLoss, IAbandonedOpenInfo, IDeviceTransport } from "./device-transport";
+import { DeviceLoss, IAbandonedOpenInfo, IDeviceTransport, tryAbandonedPart } from "./device-transport";
 
 // The version of the firmware bundled at src/plugins/dataflow/firmware/spikerbit-clue.hex.
 // Keep equal to the `firmware:` number in the HELLO line of spikerbit-clue.ts.
@@ -246,7 +246,8 @@ export class SpikerbitDevice {
 
   // Tries to close the link and forget the device whose open was given up on, and closes the link
   // if that open succeeds later. Nothing here is awaited: a link stuck opening may not close
-  // either, and the time limit mustn't wait for it. Each part reports through
+  // either, and the time limit mustn't wait for it. Close and forget start together, so one that
+  // hangs doesn't keep the other from being tried, and each part reports through
   // observer.onAbandoned as it finishes.
   private abandonOpen(
     settled: Promise<{ status: "opened" } | { status: "failed" }>, observer?: ISpikerbitConnectObserver
@@ -258,18 +259,10 @@ export class SpikerbitDevice {
         console.error("Abandoned open report failed", e);
       }
     };
-    const closeAndForget = async () => {
-      const info: IAbandonedOpenInfo = {};
-      try { await this.connection.disconnect(); info.close = "ok"; } catch { info.close = "failed"; }
-      const forgettable = this.connection.getDevice() as { forget?: () => Promise<void> } | undefined;
-      if (typeof forgettable?.forget === "function") {
-        try { await forgettable.forget(); info.forget = "ok"; } catch { info.forget = "failed"; }
-      } else {
-        info.forget = "unsupported";
-      }
-      report(info);
-    };
-    void closeAndForget();
+    const forgettable = this.connection.getDevice() as { forget?: () => Promise<void> } | undefined;
+    tryAbandonedPart("close", () => this.connection.disconnect(), report);
+    tryAbandonedPart("forget", typeof forgettable?.forget === "function" ? () => forgettable.forget!() : undefined,
+      report);
     void settled.then(async (late) => {
       if (late.status === "opened") {
         await this.connection.disconnect().catch(() => { /* the open is abandoned either way */ });

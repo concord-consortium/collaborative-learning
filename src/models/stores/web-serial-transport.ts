@@ -1,4 +1,4 @@
-import { DeviceLoss, IAbandonedOpenInfo, IDeviceTransport } from "./device-transport";
+import { DeviceLoss, IAbandonedOpenInfo, IDeviceTransport, tryAbandonedPart } from "./device-transport";
 import { SerialDevice } from "./serial";
 
 const textEncoder = new TextEncoder();
@@ -117,7 +117,9 @@ export class WebSerialTransport implements IDeviceTransport {
 
   // Tries to close and forget a port whose open was given up on, and closes it if that open
   // succeeds later. Nothing here is awaited: a port stuck opening may not close either, and the
-  // time limit mustn't wait for it. Each part reports through options.onAbandoned as it finishes.
+  // time limit mustn't wait for it. Close and forget start together, so one that hangs doesn't
+  // keep the other from being tried, and each part reports through options.onAbandoned as it
+  // finishes.
   private abandonOpen(port: SerialPort, settled: Promise<OpenOutcome>, options: IWebSerialOpenOptions) {
     const report = (info: IAbandonedOpenInfo) => {
       try {
@@ -126,18 +128,10 @@ export class WebSerialTransport implements IDeviceTransport {
         console.error("Abandoned open report failed", e);
       }
     };
-    const closeAndForget = async () => {
-      const info: IAbandonedOpenInfo = {};
-      try { await port.close(); info.close = "ok"; } catch { info.close = "failed"; }
-      const forgettable = port as unknown as { forget?: () => Promise<void> };
-      if (typeof forgettable.forget === "function") {
-        try { await forgettable.forget(); info.forget = "ok"; } catch { info.forget = "failed"; }
-      } else {
-        info.forget = "unsupported";
-      }
-      report(info);
-    };
-    void closeAndForget();
+    const forgettable = port as unknown as { forget?: () => Promise<void> };
+    tryAbandonedPart("close", () => port.close(), report);
+    tryAbandonedPart("forget", typeof forgettable.forget === "function" ? () => forgettable.forget!() : undefined,
+      report);
     void settled.then(async (late) => {
       if (late.status === "opened") {
         try { await port.close(); } catch { /* the port is abandoned either way */ }

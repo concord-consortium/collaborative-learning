@@ -22,3 +22,18 @@ export interface IAbandonedOpenInfo {
   forget?: "ok" | "failed" | "unsupported";
   late?: "opened" | "failed";
 }
+
+// Starts one part of giving up on an open, and reports how it ended once it settles. Never throws:
+// `action` runs on a later tick, so even a synchronous throw is reported as "failed". An undefined
+// `action` is reported as "unsupported".
+export function tryAbandonedPart(
+  part: "close" | "forget", action: (() => Promise<void>) | undefined, report: (info: IAbandonedOpenInfo) => void
+) {
+  void Promise.resolve()
+    .then(() => {
+      if (!action) return "unsupported" as const;
+      return action().then(() => "ok" as const);
+    })
+    .catch(() => "failed" as const)
+    .then(result => report({ [part]: result }));
+}

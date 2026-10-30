@@ -261,14 +261,16 @@ describe("WebSerialTransport open steps", () => {
     const result = t.open(port, { timeoutMs: 20000, onAbandoned });
     await jest.advanceTimersByTimeAsync(20000);
     expect(await result).toBe("timeout");
-    expect(onAbandoned).toHaveBeenCalledWith({ close: "failed", forget: "ok" });
+    expect(onAbandoned).toHaveBeenCalledWith({ close: "failed" });
+    expect(onAbandoned).toHaveBeenCalledWith({ forget: "ok" });
   });
 
-  it("open resolves timeout at the limit even when closing the stuck port hangs too", async () => {
+  it("open resolves timeout at the limit when closing the stuck port hangs too, and still tries forget", async () => {
     jest.useFakeTimers();
     const port = fakePort({ usbProductId: 67 });
     port.open = jest.fn(() => new Promise(() => { /* never settles */ }));
     port.close = jest.fn(() => new Promise<void>(() => { /* never settles */ }));
+    port.forget = jest.fn(async () => undefined);
     const onAbandoned = jest.fn();
     const t = new WebSerialTransport();
     let result: WebSerialOpenResult | undefined;
@@ -276,7 +278,8 @@ describe("WebSerialTransport open steps", () => {
     await jest.advanceTimersByTimeAsync(20000);
     expect(result).toBe("timeout");
     expect(port.close).toHaveBeenCalled();
-    expect(onAbandoned).not.toHaveBeenCalled();
+    expect(port.forget).toHaveBeenCalled();
+    expect(onAbandoned.mock.calls).toEqual([[{ forget: "ok" }]]);
   });
 
   it("an onAbandoned that throws doesn't become an unhandled rejection", async () => {
@@ -291,7 +294,8 @@ describe("WebSerialTransport open steps", () => {
     expect(await result).toBe("timeout");
     resolveOpen();
     await jest.advanceTimersByTimeAsync(0);
-    expect(onAbandoned).toHaveBeenCalledTimes(2);
+    // close, forget and the late open each report, and each throws.
+    expect(onAbandoned).toHaveBeenCalledTimes(3);
     expect(console.error).toHaveBeenCalledWith("Abandoned open report failed", expect.any(Error));
   });
 
@@ -362,7 +366,8 @@ describe("WebSerialTransport open steps", () => {
     const result = t.open(port, { timeoutMs: 20000, onAbandoned });
     await jest.advanceTimersByTimeAsync(20000);
     await result;
-    expect(onAbandoned).toHaveBeenCalledWith({ close: "ok", forget: "unsupported" });
+    expect(onAbandoned).toHaveBeenCalledWith({ close: "ok" });
+    expect(onAbandoned).toHaveBeenCalledWith({ forget: "unsupported" });
   });
 });
 

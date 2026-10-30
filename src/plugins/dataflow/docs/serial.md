@@ -160,7 +160,7 @@ carry `targetType: "device"` and `device`: the choice id (`arduino`, `microbitHu
 | `connectProgress` | `attemptId`, `trigger`, `elapsedMs`, `step`, `steps`, `updatePercent` during an update | The attempt is still running 5, 10, 20, 40... s after the click |
 | `connectResult` | `attemptId`, `trigger`, `outcome`, `elapsedMs`, `steps`; for a failure `failedStep` and `error` (`name`, `code`, `message`); for a Spiker:bit `firmware` (`found`, `updated`) | The attempt ends, including `canceled` |
 | `connectRecovered` | `attemptId`, `elapsedMs`, `steps` | An attempt that ended in a stall gets its first data after all |
-| `abandonedOpen` | `attemptId`, and what the `close()`, `forget()` and late settle of the abandoned open did | An open the attempt gave up on settles, or its best-effort close finishes |
+| `abandonedOpen` | `attemptId`, and one of: what `close()` did, what `forget()` did, or how the abandoned open settled | Each of the three finishes; close and forget start together, so one that hangs doesn't hide the other |
 | `deviceLost` | `attemptId`, `reason`: `unplugged`, `lost`, or `updateFailed` for a stalled update whose flash fails later | A device the attempt left open is lost, or a stalled update's flash fails later |
 | `disconnectDevice` | `targetType: "device"`, `device`: the choice that was connected | The user disconnects |
 | `resetProgram` | `targetType: "program"`, `trigger`: `connect`, `reconnect` or `button` | The program is reset |

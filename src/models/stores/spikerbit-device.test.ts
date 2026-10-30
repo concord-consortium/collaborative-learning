@@ -506,9 +506,11 @@ describe("SpikerbitDevice", () => {
         expect(error).toMatchObject({ code: "open-timeout" });
       });
 
-      it("throws open-timeout at the limit even when closing the stuck link hangs too", async () => {
+      it("throws open-timeout at the limit when closing the stuck link hangs too, and still tries forget", async () => {
         const { conn, disconnect } = makeHangingConn();
         disconnect.mockImplementation(() => new Promise<void>(() => { /* never settles */ }));
+        const forget = jest.fn().mockResolvedValue(undefined);
+        conn.device = { forget };
         const observer = { onAbandoned: jest.fn() };
         let error: unknown;
         void new SpikerbitDevice(makeSerialDevice(), conn, { openTimeoutMs: 20000 })
@@ -517,7 +519,8 @@ describe("SpikerbitDevice", () => {
         await jest.advanceTimersByTimeAsync(20000);
         expect(error).toMatchObject({ code: "open-timeout" });
         expect(disconnect).toHaveBeenCalledTimes(1);
-        expect(observer.onAbandoned).not.toHaveBeenCalled();
+        expect(forget).toHaveBeenCalled();
+        expect(observer.onAbandoned.mock.calls).toEqual([[{ forget: "ok" }]]);
       });
 
       it("reports a late failure of the open", async () => {
@@ -546,7 +549,8 @@ describe("SpikerbitDevice", () => {
         await assertion;
 
         expect(forget).toHaveBeenCalled();
-        expect(observer.onAbandoned).toHaveBeenCalledWith(expect.objectContaining({ close: "ok", forget: "ok" }));
+        expect(observer.onAbandoned).toHaveBeenCalledWith({ close: "ok" });
+        expect(observer.onAbandoned).toHaveBeenCalledWith({ forget: "ok" });
       });
 
       it("reports forget as unsupported when the device has none", async () => {
@@ -558,7 +562,7 @@ describe("SpikerbitDevice", () => {
         await jest.advanceTimersByTimeAsync(1000);
         await assertion;
 
-        expect(observer.onAbandoned).toHaveBeenCalledWith(expect.objectContaining({ forget: "unsupported" }));
+        expect(observer.onAbandoned).toHaveBeenCalledWith({ forget: "unsupported" });
       });
     });
   });
