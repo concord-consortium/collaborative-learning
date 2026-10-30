@@ -12,7 +12,7 @@ import { TileModelContext } from "../../../../components/tiles/tile-api";
 import { useReadOnlyContext } from "../../../../components/document/read-only-context";
 import { useStores } from "../../../../hooks/use-stores";
 import { useAnnounce } from "../../../../utilities/use-announce";
-import { kStallKinds, problemHeadline } from "../../model/connect-failures";
+import { ProblemKind, problemHeadline, kStallKinds } from "../../model/connect-failures";
 import { DataflowContentModelType } from "../../model/dataflow-content";
 import {
   DeviceChoice, DeviceConnection, getDeviceConnection, kDeviceChoiceLabels, kDeviceChoiceOrder
@@ -22,6 +22,7 @@ import { connectionStatusInput, connectPaneStatus } from "../../utilities/connec
 import {
   connectDeviceForTile, disconnectDeviceForTile, reconnectDeviceForTile
 } from "../../utilities/device-actions";
+import { openConnectionHelp } from "./connection-help-panel";
 
 import ConnectIcon from "../../assets/icons/connect-icon.svg";
 
@@ -29,6 +30,10 @@ import "./dataflow-connect-pane.scss";
 
 // How long a failure announcement stays in its live region before it is cleared.
 const kFailureAnnounceMs = 5000;
+
+// More…'s hover text and description in a view with no right drawer: the authoring and screenshot
+// iframes, and unwrapped /editor/.
+const kHelpUnavailable = "Connection help isn't available in this view. Open the document in CLUE to see it.";
 
 // How each navigation key moves focus: by a signed number of controls, or to the first or last one.
 const kFocusSteps: Record<string, number | "first" | "last"> = {
@@ -44,22 +49,30 @@ function findTrigger(pane: Element | null | undefined) {
 interface IPaneControlProps {
   // The accessible name, when the visible text alone doesn't say enough
   label?: string;
+  className?: string;
   text: string;
   busy: boolean;
+  // Why the control can't be used in this view. It is then disabled, and the reason is its title:
+  // the hover text, and its description for screen readers.
+  unavailable?: string;
   onActivate: () => void;
 }
 
 // `div role="button"`, not a real button, for the reason given at PanPalette's arrows
 // (dataflow-zoom-pan-buttons.tsx).
-function PaneControl({ label, text, busy, onActivate }: IPaneControlProps) {
+function PaneControl({ label, className, text, busy, unavailable, onActivate }: IPaneControlProps) {
+  const disabled = busy || !!unavailable;
   function activate(e: React.SyntheticEvent) {
     e.stopPropagation();
     if ("key" in e) (e as React.KeyboardEvent).preventDefault();
-    if (!busy) onActivate();
+    if (!disabled) onActivate();
   }
+  // With a title the name is given outright, since some name computations put the title ahead of
+  // the text.
   return (
-    <div role="button" tabIndex={0} aria-label={label} aria-disabled={busy || undefined}
-        className={classNames("connect-control", { disabled: busy })}
+    <div role="button" tabIndex={0} aria-label={label ?? (unavailable ? text : undefined)}
+        aria-disabled={disabled || undefined} title={unavailable}
+        className={classNames("connect-control", className, { disabled })}
         onClick={activate}
         onKeyDown={(e) => {
           if (e.key === "Enter" || e.key === " ") activate(e);
@@ -76,11 +89,15 @@ interface IConnectPaneProps {
   // The pane that is showing now. A slow attempt can outlive the pane that started it, when the
   // user closes and reopens the pane, so its result reads the live pane from here.
   paneRef: React.MutableRefObject<HTMLDivElement | null>;
+  // Opens the help drawer for a failure's kind.
+  onOpenHelp?: (kind: ProblemKind) => void;
+  // False in a view with no right drawer to show the help in.
+  helpAvailable: boolean;
   onClose: () => void;
 }
 
 const ConnectPane = observer(function ConnectPane(
-    { connection, content, tileId, paneRef, onClose }: IConnectPaneProps) {
+    { connection, content, tileId, paneRef, onOpenHelp, helpAvailable, onClose }: IConnectPaneProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const { busyChoice, paneView, actionsEnabled, check } = connection;
   const busy = !!busyChoice;
@@ -202,6 +219,7 @@ const ConnectPane = observer(function ConnectPane(
   };
 
   const { line1, line2, announce } = connectPaneStatus(connectionStatusInput(connection, content.connectFailure));
+  const helpKind = line2?.helpKind;
   const actionsBusy = busy || !actionsEnabled;
 
   // Line 2 always renders, empty when there is nothing to say, so the area never changes height.
@@ -214,6 +232,10 @@ const ConnectPane = observer(function ConnectPane(
           <div className="connect-progress-fill" style={{ width: `${line2.progress}%` }} />
         </div>}
       <span className="connect-detail-text">{line2?.text}</span>
+      {helpKind &&
+        <PaneControl className="connect-more" text="More…" busy={false}
+            unavailable={helpAvailable ? undefined : kHelpUnavailable}
+            onActivate={() => onOpenHelp?.(helpKind)} />}
     </div>
   );
 
@@ -253,7 +275,7 @@ const ConnectPane = observer(function ConnectPane(
 export const ConnectDeviceButton = observer(function ConnectDeviceButton({ name }: IToolbarButtonComponentProps) {
   const model = useContext(TileModelContext);
   const content = model?.content as DataflowContentModelType | undefined;
-  const { serialDevice } = useStores();
+  const { serialDevice, ui } = useStores();
   const readOnly = useReadOnlyContext();
   const connection = getDeviceConnection(serialDevice);
   const isOpen = !!content?.connectPaneOpen;
@@ -320,8 +342,15 @@ export const ConnectDeviceButton = observer(function ConnectDeviceButton({ name 
       ? kDeviceChoiceLabels[attempt.choice] : undefined
   });
 
+  // The help shows the tile's failure when it is the kind asked about.
+  const openHelp = (kind: ProblemKind) => {
+    const topic = model && connection.helpTopic(kind, model.id, content?.connectFailure);
+    if (topic) openConnectionHelp({ connection, ui, topic });
+  };
+
   const pane = isOpen && content && model
     ? <ConnectPane connection={connection} content={content} tileId={model.id} paneRef={paneRef}
+        onOpenHelp={openHelp} helpAvailable={ui.hasRightDrawer}
         onClose={() => content.setConnectPaneOpen(false)} />
     : undefined;
 

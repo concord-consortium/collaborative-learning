@@ -4,6 +4,8 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import { EPanelId, IPanelGroupSpec } from "../../components/app-header";
 import { IBaseProps } from "../../components/base";
 import { ChatTutorSidebar } from "../../components/chat-tutor/chat-sidebar";
+import { ChatTutorLauncher, useCloseChatTutor } from "./chat-tutor-launcher";
+import { RightDrawer } from "../../components/right-drawer/right-drawer";
 import { ClassMenuContainer } from "../../components/class-menu-container";
 import { GroupManagementModal } from "../../components/group/group-management-modal";
 import { NetworkStatus } from "../../components/network-status";
@@ -40,8 +42,8 @@ export const ClueAppHeaderComponent: React.FC<IProps> = observer(function ClueAp
   const myGroup = showGroup ? groups.getGroupById(user.currentGroupId) : undefined;
   const [isGroupManagementModalOpen, setIsGroupManagementModalOpen] = useState(false);
   const [isStudentGroupModalOpen, setIsStudentGroupModalOpen] = useState(false);
-  // Drawer open state lives in the ui store (not local useState) so the workspace layout
-  // can reserve space for the drawer and bump its content over instead of being overlaid.
+  // Ada's open state lives in the ui store (not local useState) so the workspace layout
+  // can make room for her in the right drawer instead of being overlaid.
   const isChatTutorOpen = ui.showChatTutor;
   const headerRef = useRef<HTMLElement>(null);
   const chatTutorLauncherRef = useRef<HTMLButtonElement>(null);
@@ -57,25 +59,9 @@ export const ClueAppHeaderComponent: React.FC<IProps> = observer(function ClueAp
     (appConfig.chatTutorEnabled || !!urlParams.chatTutor)
       && user.isStudent && !!chatTutorDocumentKey && !!chatTutorDocument?.content;
 
-  // Restore focus to the launcher after the drawer closes. The launcher stays mounted but is hidden
-  // while the drawer is open, so it can't be focused synchronously here — the show/hide re-render is
-  // batched and commits after this handler returns. Defer to the effect below, which runs post-commit
-  // once the launcher is visible again (the drawer trap's escape handler returns "handled" specifically
-  // so this launcher-restore stands).
-  const pendingLauncherFocusRef = useRef(false);
-  const handleCloseChatTutor = useCallback(() => {
-    pendingLauncherFocusRef.current = true;
-    ui.setShowChatTutor(false);
-  }, [ui]);
+  const handleCloseChatTutor = useCloseChatTutor(chatTutorLauncherRef);
 
-  useEffect(() => {
-    if (!isChatTutorOpen && pendingLauncherFocusRef.current) {
-      pendingLauncherFocusRef.current = false;
-      chatTutorLauncherRef.current?.focus();
-    }
-  }, [isChatTutorOpen]);
-
-  // Don't leave the drawer flagged open after its document goes away, or it would
+  // Don't leave Ada flagged open after her document goes away, or she would
   // pop back open unrequested when a document loads again.
   useEffect(() => {
     if (!showChatTutorLauncher) {
@@ -248,44 +234,18 @@ export const ClueAppHeaderComponent: React.FC<IProps> = observer(function ClueAp
   };
 
   const renderChatTutorLauncher = () => {
-    // Floating round "AIdeas" button pinned at the viewport's lower-right. Kept mounted (so the ref
-    // stays valid for focus restore on close and aria-controls resolves to the live drawer) but
-    // hidden while the chat drawer is open; it reappears when the drawer closes.
     if (!showChatTutorLauncher) return null;
-    // Feather "message-circle" speech-bubble path.
-    const chatIconPath = "M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8"
-      + "-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48"
-      + " 8.48 0 0 1 8 8v.5z";
-    return (
-      <button
-        type="button"
-        ref={chatTutorLauncherRef}
-        className="chat-tutor-launcher"
-        hidden={isChatTutorOpen}
-        aria-label="Open the AIdeas chat with Ada"
-        aria-expanded={isChatTutorOpen}
-        aria-controls="chat-tutor-sidebar"
-        onClick={() => ui.setShowChatTutor(true)}
-        data-testid="chat-tutor-launcher"
-      >
-        <svg
-          className="chat-tutor-launcher-icon"
-          viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor"
-          strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"
-        >
-          <path d={chatIconPath} />
-        </svg>
-        <span className="chat-tutor-launcher-label">AIdeas</span>
-      </button>
-    );
+    return <ChatTutorLauncher ref={chatTutorLauncherRef} />;
   };
 
-  const renderChatTutorSidebar = () => {
+  const renderChatTutorSidebar = (active: boolean, drawerTabsRef: React.RefObject<HTMLDivElement>) => {
     if (!isChatTutorOpen || !showChatTutorLauncher || !chatTutorDocumentKey || !chatTutorDocument?.content) {
       return null;
     }
     return (
       <ChatTutorSidebar
+        active={active}
+        drawerTabsRef={drawerTabsRef}
         documentKey={chatTutorDocumentKey}
         documentTitle={getDocumentDisplayTitle(unit, chatTutorDocument, appConfig) || problem.title}
         problemPath={problemPath}
@@ -296,49 +256,56 @@ export const ClueAppHeaderComponent: React.FC<IProps> = observer(function ClueAp
     );
   };
 
+  const renderRightDrawer = () => (
+    <RightDrawer chatTutorAvailable={showChatTutorLauncher} renderChatTutor={renderChatTutorSidebar} />
+  );
+
   const renderNonStudentHeader = ({showProblemMenu}: {showProblemMenu: boolean}) => {
     return (
-      <header ref={headerRef} className="app-header" aria-label="CLUE Header">
-        <div className="left">
-          <div className="unit" data-test="investigation-title">
-            <div className="title">
-              {unit.title}
+      <>
+        <header ref={headerRef} className="app-header" aria-label="CLUE Header">
+          <div className="left">
+            <div className="unit" data-test="investigation-title">
+              <div className="title">
+                {unit.title}
+              </div>
+              <div className="investigation">
+                {investigation.title}
+              </div>
             </div>
-            <div className="investigation">
-              {investigation.title}
-            </div>
+            {showProblemMenu &&
+            <>
+              <div className="separator"/>
+              <div className="problem-dropdown" data-test="problem-dropdown">
+                <ProblemMenuContainer />
+              </div>
+            </>
+            }
           </div>
-          {showProblemMenu &&
-          <>
-            <div className="separator"/>
-            <div className="problem-dropdown" data-test="problem-dropdown">
-              <ProblemMenuContainer />
-            </div>
-          </>
-          }
-        </div>
-        <div className="middle">
-          {renderPanelButtons()}
-        </div>
-        <div className="right">
-          <div className="version">CLUE v{appVersion}</div>
-          {renderStudentGroupsButton()}
-          <div className="user teacher" title={getUserTitle()}>
-            <div className="class" data-test="user-class">
-              <ClassMenuContainer />
-            </div>
-            <div className="profile-icon teacher">
-              <div className="profile-icon-inner"/>
-            </div>
+          <div className="middle">
+            {renderPanelButtons()}
           </div>
-          <GroupManagementModal
-            isOpen={isGroupManagementModalOpen}
-            mode="teacher"
-            onClose={handleCloseGroupManagementModal}
-            onSave={handleSaveGroupChanges}
-          />
-        </div>
-      </header>
+          <div className="right">
+            <div className="version">CLUE v{appVersion}</div>
+            {renderStudentGroupsButton()}
+            <div className="user teacher" title={getUserTitle()}>
+              <div className="class" data-test="user-class">
+                <ClassMenuContainer />
+              </div>
+              <div className="profile-icon teacher">
+                <div className="profile-icon-inner"/>
+              </div>
+            </div>
+            <GroupManagementModal
+              isOpen={isGroupManagementModalOpen}
+              mode="teacher"
+              onClose={handleCloseGroupManagementModal}
+              onSave={handleSaveGroupChanges}
+            />
+          </div>
+        </header>
+        {renderRightDrawer()}
+      </>
     );
   };
 
@@ -425,7 +392,7 @@ export const ClueAppHeaderComponent: React.FC<IProps> = observer(function ClueAp
           />
         </div>
       </header>
-      {renderChatTutorSidebar()}
+      {renderRightDrawer()}
     </>
   );
 });

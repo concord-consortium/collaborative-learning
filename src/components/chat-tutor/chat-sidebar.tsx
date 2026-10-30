@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { RefObject, useEffect, useMemo, useRef, useState } from "react";
 import { observer } from "mobx-react";
 import { useStores } from "../../hooks/use-stores";
 import { ProblemModelType } from "../../models/curriculum/problem";
@@ -35,22 +35,28 @@ interface IProps {
   // of the document it actually needs.
   content: IHighlightContentModel | undefined;
   onClose: () => void;
+  // False while another tab in the right drawer is showing. The sidebar stays mounted, so the
+  // unsent message and scroll position are kept, but its focus trap is off.
+  active: boolean;
+  // The right drawer's tab buttons, when it shows them. Ada's focus trap includes them.
+  drawerTabsRef?: RefObject<HTMLElement | null>;
 }
 
-// Right-edge overlay drawer for the AI chat tutor. Mounted only while open (the
-// app-header launcher owns the open/close state); mounting resets the transport, so
-// switching documents or problems while open swaps the conversation.
+// Content of the right drawer's AI chat tutor tab. Mounted only while Ada is open
+// (ui.showChatTutor holds the open state; the launcher and the drawer's Ada tab set it);
+// mounting resets the transport, so switching documents or problems while open swaps the
+// conversation.
 //
 // An observer because the pinned highlight button reflects `content.pinnedHighlightSource`,
 // which can be taken over by another highlight source (a variable chip, say) while this
 // sidebar stays open.
 export const ChatTutorSidebar: React.FC<IProps> = observer((props) => {
-  const { documentKey, documentTitle, problemPath, problem, content, onClose } = props;
+  const { documentKey, documentTitle, problemPath, problem, content, onClose, active, drawerTabsRef } = props;
   const { appConfig, db, user, unit } = useStores();
   const containerRef = useRef<HTMLDivElement>(null);
   const bodyRef = useRef<HTMLDivElement>(null);
 
-  useTutorDrawerTrap({ containerRef, bodyRef, onEscape: onClose });
+  useTutorDrawerTrap({ containerRef, bodyRef, onEscape: onClose, active, drawerTabsRef });
 
   const getRightSummary = useRightDirty(documentKey, content);
 
@@ -98,7 +104,7 @@ export const ChatTutorSidebar: React.FC<IProps> = observer((props) => {
     });
   }, [documentKey, problemPath, problem, getRightSummary, content, appConfig, db, user, unit]);
 
-  // The drawer header makes the conversation scope legible: this conversation is bound
+  // The sidebar header makes the conversation scope legible: this conversation is bound
   // to one workspace document within one problem, and swaps when either changes.
   const header = `${documentTitle} · ${problemPath}`;
   const chat = useChat({ transport, header });

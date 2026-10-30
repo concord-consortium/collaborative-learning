@@ -33,7 +33,7 @@ and **outbound** (a Live Output node → bytes leaving the computer).
 | `MicrobitUsbTransport` | `src/models/stores/spikerbit-device.ts` | `IDeviceTransport` over a micro:bit WebUSB connection: `write()` out, `serialdata` → `onData` in, `status` → `onDisconnect("lost")`, and `navigator.usb`'s `disconnect` for its device → `onDisconnect("unplugged")`. |
 | `SpikerbitDevice` | `src/models/stores/spikerbit-device.ts` | Spiker:bit connect, reset, firmware check and flash; taps `onData` for connect-time firmware detection, then hands the transport to the store. |
 | `SerialDevice` | `src/models/stores/serial.ts` | Transport-agnostic connection store: holds the active transport and the registered channel sources, routes writes (`writeLine`) and inbound parsing (`receive`). `isConnected()` is observable. Keeps `lastLoss`. |
-| `DeviceConnection` | `src/plugins/dataflow/model/device-connection.ts` | App-wide connect, reconnect and disconnect; one instance per `SerialDevice`, from `getDeviceConnection`. Tracks `lastChoice`, `busyChoice` and `connectTutorialDismissal`. Follows the latest `ConnectionAttempt` and exposes `attempt`, `lastFailure`, `paneView`, `actionsEnabled` and `dataReceived`; `currentFailure` drops a stall's failure once its device is no longer open (`holdsDevice`). Keeps the "Is it alive?" check, and exposes `lossReason`, `lossMessage` and `notResponding`. |
+| `DeviceConnection` | `src/plugins/dataflow/model/device-connection.ts` | App-wide connect, reconnect and disconnect; one instance per `SerialDevice`, from `getDeviceConnection`. Tracks `lastChoice`, `busyChoice` and `connectTutorialDismissal`. Follows the latest `ConnectionAttempt` and exposes `attempt`, `lastFailure`, `paneView`, `actionsEnabled` and `dataReceived`; `currentFailure` drops a stall's failure once its device is no longer open (`holdsDevice`). Keeps the "Is it alive?" check, and exposes `lossReason`, `lossMessage` and `notResponding`. Holds the Connection help drawer's state (`help`, set by `openHelp` and cleared by `closeHelp`), whose notices follow `currentProblem`. |
 | `ConnectionAttempt` | `src/plugins/dataflow/model/connection-attempt.ts` | One Connect or Reconnect: its step, step times, view, outcome and failure. See [The connection attempt](#the-connection-attempt). |
 | tile device actions | `src/plugins/dataflow/utilities/device-actions.ts` | Wrap `DeviceConnection` for one tile: they reset the clicking tile's program, log the change, and record a failed attempt's message on the tile. |
 | `parseKeyValueData` | `src/models/stores/serial-protocol.ts` | `keyValue` parser (Arduino): `emg:<n>\r\n` lines → channel values. |
@@ -148,7 +148,8 @@ which says what Reset leaves alone, as soon as the device becomes the active one
 resets, and it also works while a stalled Spiker:bit update holds a board open that isn't active.
 
 **Log events.** Each is a `DATAFLOW_TOOL_CHANGE` event for one tile (`tileId`): the clicking
-tile, or for the connect tutorial's events, the tile it covers. The fields below sit at the top
+tile; for the connect tutorial's events, the tile it covers; and for the Connection help's, the
+tile it was opened from, even after that tile is deleted. The fields below sit at the top
 level of the event. Every event of one attempt carries the same `attemptId`, and the device events
 carry `targetType: "device"` and `device`: the choice id (`arduino`, `microbitHub` or
 `spikerbit`). Step times are `attempt.steps`: ms from the click, for the steps that happened.
@@ -166,6 +167,9 @@ carry `targetType: "device"` and `device`: the choice id (`arduino`, `microbitHu
 | `resetProgram` | `targetType: "program"`, `trigger`: `connect`, `reconnect` or `button` | The program is reset |
 | `showConnectTutorial` | `targetType: "connectTutorial"` | The connect tutorial appears over the tile |
 | `dismissConnectTutorial` | `targetType: "connectTutorial"`, `trigger`: `ok` (OK in this tile), `okInAnotherTile` or `connection` | The tutorial over the tile is dismissed |
+| `showConnectHelp` | `targetType: "connectHelp"`, `kind` | More… opens the Connection help |
+| `hideConnectHelp` | `targetType: "connectHelp"`, `kind`, `trigger`: `close` (✕ or Escape) or `closeHelp` (the working notice's button) | The Connection help closes |
+| `connectHelpNotice` | `targetType: "connectHelp"`, `notice`: `working`, `updating`, `differentProblem`, `unplugged` or `notConnected`; `kind` for `differentProblem`; `action`: `shown` or `clicked` | A notice appears in the Connection help, or the student clicks its button |
 
 - `connectDevice` and `reconnectDevice` mark the click, not a success. A quick attempt logs
   `connectDevice`, `resetProgram` (when the device becomes active) and `connectResult`; anything
@@ -236,7 +240,7 @@ while its device is open (`holdsDevice`): the button and the pane ignore one tha
 
 - **Progress from a stalled update** clears `lastFailure` and calls `onStallChanged` with no
   failure. `updateResumed` is then true: the pane shows the ended attempt's update and progress
-  bar as if it still ran, and the actions are disabled. Another
+  bar as if it still ran, the help's notice is `updating`, and the actions are disabled. Another
   `kUpdateStallMs` without progress sets `lastFailure` to `updateStalled` again, through
   `onStallChanged`.
 - **An update that finishes after all** makes the board active without a second outcome. It no
@@ -279,6 +283,15 @@ record the answer here and change the code if it differs.
    Arduino resets when its port opens.
 5. Whether closing the library connection during a flash stops it cleanly, and whether the next
    connect's update then succeeds.
+
+### Trying the failures without a device
+
+With the `fakeConnectFailure` URL parameter, every Connect ends with that failure kind without
+opening the browser's chooser: `openFailed` (also when the parameter has no value), `openTimeout`,
+`inUse` or `updateFailed`. It works in every `appMode`. The stalls can't be faked this way, since
+their failures show only while a device is open. The failure's error is `FakeConnectFailure`, so
+the help's Details and the `connectResult` log event both say it was faked. Since nothing opens,
+Reconnect never appears.
 
 ### Channel sources
 

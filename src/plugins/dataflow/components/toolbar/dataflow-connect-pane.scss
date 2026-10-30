@@ -106,6 +106,12 @@ $connect-line-height: 18px;
             height: 100%;
           }
         }
+
+        .connect-more {
+          flex: none;
+          line-height: 16px;
+          padding: 0 6px;
+        }
       }
     }
 

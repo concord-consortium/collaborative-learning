@@ -19,7 +19,8 @@ The status area is always exactly two lines tall, so the rows below it never mov
   "Updating. Keep it plugged in.": the warning matters more than the phase, and "Updating
   firmware. Keep it plugged in." didn't fit on one line.
 - **Line 2 is the detail:** the current step, the progress bar and percentage during an update, a
-  gray hint, or a red problem. Red is only for problems.
+  gray hint, or a red problem. Red is only for problems, and a problem is followed by a More… link
+  that opens the [Connection help](#the-connection-help).
 
 Every text fits on one line. Line 2's texts are about 30 characters and never name the device,
 since "micro:bit (radio hub)" alone would fill most of the line; line 1, the connect button's
@@ -43,6 +44,31 @@ with an ellipsis.
 A Connect, Reconnect or Disconnect the student clicked closes the palette when it succeeds, and
 moves focus to the connect button if the palette had it. Otherwise the palette stays open: a stall
 that recovers on its own, with late first data or a finished update, only updates its lines.
+
+## The Connection help
+
+More… opens the Connection help (`components/toolbar/connection-help-panel.tsx`) in the right
+drawer beside the document, where it shares the drawer with Ada. It names the problem, then lists
+steps to try in order, then a Details button that shows a short technical blurb a teacher could
+search for. Its text is from `connect-failures.ts`, and its state is `help` on `DeviceConnection`.
+
+- **It never changes or closes on its own.** The student may be partway through the steps, so the
+  headline, steps and Details stay as they were opened. Only its two status lines, the same as the
+  palette's, follow the connection. It is not a modal: that would block the steps it asks for.
+- **A notice says when things change**, from `currentProblem`: it's working now (with a Close help
+  button, and the steps fade in place), the update is going again, the device was unplugged, it
+  isn't connected, or something else went wrong (with a button that shows the steps for that
+  problem). The same problem again shows no notice, since the steps still apply. Each notice is
+  announced politely.
+- **Closing it**, by ✕, Escape or the working notice's button, moves focus back to More… if the
+  palette still shows it, or else to the connect button.
+- **Only one help shows at a time.** A second More… replaces it.
+- **Where there is no right drawer**, on `/editor/` with `unwrapped` and on the iframe page that
+  authoring and screenshots use, More… is disabled, and its hover text says the help isn't
+  available in that view. Connecting still works there.
+
+To try the help without a device, add `fakeConnectFailure` to the URL: see
+[Trying the failures without a device](serial.md#trying-the-failures-without-a-device).
 
 ## The connect button
 

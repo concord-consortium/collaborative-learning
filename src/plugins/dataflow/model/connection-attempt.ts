@@ -13,7 +13,7 @@ export type StepTime = "chooserClosed" | "opened" | "firmwareChecked" | "updateS
 /**
  * One Connect or Reconnect, from the click to its outcome, and on until its device goes away: a
  * stall ends the attempt, but the device stays open and its first data can still arrive.
- * `DeviceConnection` drives it; the pane and the log read it.
+ * `DeviceConnection` drives it; the pane, the help and the log read it.
  */
 export class ConnectionAttempt {
   readonly id: string;
