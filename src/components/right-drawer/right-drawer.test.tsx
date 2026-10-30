@@ -79,6 +79,18 @@ describe("RightDrawer", () => {
     expect(screen.getByTestId("ada-content")).toBeVisible();
   });
 
+  it("closing Ada while her tab is selected shows the panel", () => {
+    render(<RightDrawer chatTutorAvailable={true} renderChatTutor={renderChatTutor} />);
+    act(() => { mockUi.setShowChatTutor(true); mockUi.openDrawerPanel(panel); });
+    fireEvent.click(screen.getByRole("button", { name: "Ada" }));
+    expect(screen.queryByTestId("panel-content")).not.toBeInTheDocument();
+
+    act(() => mockUi.setShowChatTutor(false));
+    expect(screen.queryByTestId("ada-content")).not.toBeInTheDocument();
+    expect(screen.getByTestId("panel-content")).toBeVisible();
+    expect(screen.getByRole("button", { name: "Connection help" })).toHaveAttribute("aria-pressed", "true");
+  });
+
   it("closing the panel leaves Ada showing if Ada was open, and closes the drawer otherwise", () => {
     render(<RightDrawer chatTutorAvailable={true} renderChatTutor={renderChatTutor} />);
     act(() => { mockUi.setShowChatTutor(true); mockUi.openDrawerPanel(panel); });
