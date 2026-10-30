@@ -610,6 +610,7 @@ context('Arrow Annotations (Sparrows)', function () {
     aa.getAnnotationModeButton().click();
 
     cy.log("The annotation arrow should continue showing when recording");
+    dataflowTile.getDataflowTile().click();     // the toolbar renders only for the selected tile
     dataflowTile.getRecordButton().click();
     // This ought to wait until the first tick happens which will update the timer
     dataflowTile.getCountdownTimer({timeout: 3000}).should("contain", "00:01");
@@ -617,7 +618,7 @@ context('Arrow Annotations (Sparrows)', function () {
     dataflowTile.getStopButton().click();
 
     cy.log("The annotation arrow should continue showing when stopped");
-    dataflowTile.getPlayButton().should("be.enabled");
+    dataflowTile.getStopButton().should("have.attr", "aria-disabled", "true");
     // Briefly wait to make sure the recorded program blocks are now showing
     cy.wait(100);
     aa.getAnnotationArrows().should("have.length", 1);
@@ -631,8 +632,7 @@ context('Arrow Annotations (Sparrows)', function () {
     aa.getAnnotationModeButton().click();
 
     cy.log("Annotations continue showing after clearing the recording");
-    dataflowTile.getRecordingClearButton().click();
-    dataflowTile.getClearDataWarningClear().click();
+    dataflowTile.clearRecordedData();
     dataflowTile.getSamplingRateLabel().should("have.text", "Sampling Rate");
     aa.getAnnotationArrows().should("have.length", 2);
   });

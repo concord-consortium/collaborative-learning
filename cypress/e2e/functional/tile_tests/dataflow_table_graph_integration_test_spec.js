@@ -138,50 +138,23 @@ context('Dataflow Tool Tile', function () {
     // reload while recording
     cy.reload();
 
-    // check buttons after reload
-    dataflowToolTile.checkRecordedStateButtons();
+    // After a reload the run is over -- isRecording is volatile, so nothing resumes.
+    dataflowToolTile.getRecordButton().should("not.have.attr", "aria-disabled");
+    dataflowToolTile.getStopButton().should("have.attr", "aria-disabled", "true");
+    dataflowToolTile.getClearButton().should("not.have.attr", "aria-disabled");
     dataflowToolTile.checkLinkedTableRecordedData(tableTile, capturedTitle, linkedTableAttributes, timer2);
 
-    // play recorded data
-    dataflowToolTile.clickPlayButton();
+    // click clear -- it's immediate now, with no confirmation modal to interrupt
+    dataflowToolTile.getDataflowTile().click();
+    dataflowToolTile.getClearButton().click();
 
-    // reload while playing
+    // reload after clearing
     cy.reload();
 
-    // check buttons after reload
-    dataflowToolTile.checkRecordedStateButtons();
-    dataflowToolTile.checkLinkedTableRecordedData(tableTile, capturedTitle, linkedTableAttributes, timer2);
-
-    // pause recorded data
-    dataflowToolTile.clickPlayButton();
-    cy.wait(1000);
-    dataflowToolTile.clickPauseButton();
-
-    // reload while in pause
-    cy.reload();
-
-    // check buttons after reload
-    dataflowToolTile.checkRecordedStateButtons();
-    dataflowToolTile.checkLinkedTableRecordedData(tableTile, capturedTitle, linkedTableAttributes, timer2);
-
-    // click clear
-    dataflowToolTile.getRecordingClearButton().click();
-
-    // reload before confirming clear
-    cy.reload();
-
-    // check buttons after reload
-    dataflowToolTile.checkRecordedStateButtons();
-    dataflowToolTile.checkLinkedTableRecordedData(tableTile, capturedTitle, linkedTableAttributes, timer2);
-
-    // record data
-    dataflowToolTile.clearRecordedData();
-
-    // reload after confirming clear
-    // cy.reload();
-
-    // check buttons after reload
-    dataflowToolTile.checkInitialStateButtons();
+    // After a reload the run is over -- isRecording is volatile, so nothing resumes.
+    dataflowToolTile.getRecordButton().should("not.have.attr", "aria-disabled");
+    dataflowToolTile.getStopButton().should("have.attr", "aria-disabled", "true");
+    dataflowToolTile.getClearButton().should("not.have.attr", "aria-disabled");
     dataflowToolTile.checkEmptyLinkedTable(tableTile, programTitle, defaultTableAttributes);
   });
 });
