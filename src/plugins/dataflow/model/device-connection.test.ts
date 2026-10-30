@@ -1,3 +1,4 @@
+import { autorun } from "mobx";
 import { SerialDevice } from "../../../models/stores/serial";
 import {
   IMicrobitUsbConnection, ISpikerbitConnectObserver, kSpikerbitFirmwareVersion, SpikerbitDevice
@@ -1220,6 +1221,20 @@ describe("DeviceConnection", () => {
       expect(connection.attempt!.outcome).toBe("updateStalled");
       expect(connection.paneView).toBe("devices");
       expect(stepped.device.dispose).toHaveBeenCalled();
+    });
+
+    it("disconnect clears a watched stall's failure in an action", async () => {
+      const warn = jest.spyOn(console, "warn").mockImplementation(() => undefined);
+      const { connection } = setup([makeTransport(["opened"], { sendsData: false })]);
+      const p = connection.connect("arduino");
+      await jest.advanceTimersByTimeAsync(kFirstDataTimeoutMs);
+      expect(await p).toBe("noData");
+      const stopWatching = autorun(() => connection.lastFailure);
+      await connection.disconnect();
+      stopWatching();
+      expect(connection.lastFailure).toBeUndefined();
+      expect(warn).not.toHaveBeenCalledWith(expect.stringContaining("[MobX]"));
+      warn.mockRestore();
     });
 
     it("disconnect while a Web Serial board waits for its first data ends the attempt as canceled", async () => {

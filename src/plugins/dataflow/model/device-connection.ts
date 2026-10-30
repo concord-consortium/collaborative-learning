@@ -349,7 +349,7 @@ export class DeviceConnection {
     if (starting) this.endAttempt(starting, "canceled");
     this.stopFollowing();
     // A stall's failure goes with its device.
-    this.lastFailure = undefined;
+    runInAction(() => { this.lastFailure = undefined; });
     if (starting?.choice === "spikerbit" && starting.steps.active === undefined) await this.disposeSpikerbit();
     await this.closeDevices();
   }
