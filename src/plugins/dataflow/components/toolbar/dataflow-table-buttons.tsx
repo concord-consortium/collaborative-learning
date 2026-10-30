@@ -41,11 +41,6 @@ function ensureLinkedTable(
   }
 }
 
-interface IViewButtonProps extends IToolbarButtonComponentProps {
-  // The toolbar config passes e.g. ["data-set-view", "Table"] or ["data-set-view", "Graph"].
-  args?: string[];
-}
-
 function useTableButton() {
   const tile = useContext(TileModelContext);
   const addTilesContext = useContext(AddTilesContext);
@@ -58,43 +53,26 @@ function useTableButton() {
     ensureLinkedTable(content, tile, addTilesContext, id => ui.setSelectedTileId(id));
     return true;
   };
-  return { content, tile, addTilesContext, readOnly, ensure };
+  return { content, readOnly, ensure };
 }
 
 /**
- * Dataflow's own Table It. Registered under `data-set-view` for this tile type only -- toolbar
- * buttons are registered per tile type -- so the shared DataSetViewButton that Table, Graph and
- * Data Card use is untouched.
- *
- * Unlike that one it reuses an already-linked table rather than adding a second, which is what
- * keeps a capture tied to the one program it describes.
+ * Dataflow's Table It, registered as "table-it" rather than overriding `data-set-view`: Graph It
+ * uses that name too, and overriding it made one component serve both, which cost Graph It its
+ * icon. Unlike the shared button this reuses an already-linked table rather than adding a second,
+ * which is what keeps a capture tied to the one program it describes.
  */
 export const DataflowTableButton = observer(function DataflowTableButton(
-  { name, args }: IViewButtonProps
+  { name }: IToolbarButtonComponentProps
 ) {
-  const { content, tile, addTilesContext, readOnly, ensure } = useTableButton();
-  // Same args shape the shared DataSetViewButton reads, so one registration still serves both the
-  // Table and Graph entries in the toolbar config.
-  const newTileType = args?.[1] ?? "Table";
-  const Icon = getTileComponentInfo(newTileType)?.Icon;
-
-  function handleClick() {
-    // Only Table gets the reuse behavior: a capture belongs to one table, while a second graph of
-    // the same data is a reasonable thing to want. Graph keeps the shared button's always-create.
-    if (newTileType === "Table") {
-      ensure();
-      return;
-    }
-    const sharedModel = content?.sharedModel;
-    if (!content || !tile || !addTilesContext || !sharedModel) return;
-    addTilesContext.addTileAfter(newTileType, tile, [sharedModel]);
-  }
+  const { content, readOnly, ensure } = useTableButton();
+  const Icon = getTileComponentInfo("Table")?.Icon;
 
   return (
     <TileToolbarButton
       name={name}
-      title={getTileCreateActionName(newTileType)}
-      onClick={handleClick}
+      title={getTileCreateActionName("Table")}
+      onClick={ensure}
       disabled={!content || readOnly}
     >
       {Icon ? <BadgedIcon Icon={Icon} Badge={ViewBadgeIcon} /> : "??"}

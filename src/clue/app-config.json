@@ -366,7 +366,7 @@
       },
       "dataflow": {
         "tools": [
-          ["data-set-view", "Table"],
+          "table-it",
           ["data-set-view", "Graph"],
           "record-sample",
           "delete",

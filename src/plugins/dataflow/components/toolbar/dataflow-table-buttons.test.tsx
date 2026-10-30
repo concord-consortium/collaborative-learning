@@ -17,7 +17,7 @@ jest.mock("firebase/app", () => ({
   functions: () => ({ httpsCallable: () => jest.fn() })
 }));
 
-registerTileTypes(["Dataflow", "Table", "Graph"]);
+registerTileTypes(["Dataflow", "Table"]);
 
 /** A real document, because both buttons key off linkedTableTileId, which walks the shared model
  * manager's tile list — a stubbed content model would test the stub. */
@@ -49,8 +49,7 @@ function setupDocument({ withTable }: { withTable: boolean }) {
 
 function renderButton(
   Component: typeof DataflowTableButton,
-  { withTable, readOnly = false, args }:
-    { withTable: boolean; readOnly?: boolean; args?: string[] }
+  { withTable, readOnly = false }: { withTable: boolean; readOnly?: boolean }
 ) {
   const { content, tile } = setupDocument({ withTable });
   const addTileAfter = jest.fn();
@@ -61,7 +60,7 @@ function renderButton(
         <ReadOnlyContext.Provider value={readOnly}>
           <TileModelContext.Provider value={tile}>
             <AddTilesContext.Provider value={{ addTileAfter } as any}>
-              <Component name="test-button" args={args} />
+              <Component name="test-button" />
             </AddTilesContext.Provider>
           </TileModelContext.Provider>
         </ReadOnlyContext.Provider>
@@ -93,16 +92,6 @@ describe("DataflowTableButton", () => {
     expect(button.getAttribute("aria-disabled")).toBe("true");
   });
 
-  // The toolbar registers one component for both ["data-set-view","Table"] and
-  // ["data-set-view","Graph"], so Graph It must still add a Graph rather than a second Table.
-  it("still adds a Graph for the Graph entry, and does not reuse the linked table", () => {
-    const { button, addTileAfter } = renderButton(DataflowTableButton, {
-      withTable: true, args: ["data-set-view", "Graph"]
-    });
-    fireEvent.click(button);
-    expect(addTileAfter).toHaveBeenCalledTimes(1);
-    expect(addTileAfter.mock.calls[0][0]).toBe("Graph");
-  });
 });
 
 describe("RecordSingleSampleButton", () => {

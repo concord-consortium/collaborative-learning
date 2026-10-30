@@ -533,6 +533,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
         if (tileContent.dataSet.cases.length === 0) {
           tileContent.prepareCapture();
         }
+        tileContent.setRecordedRun(true);
         this.setState({isPlaying: false, playBackIndex: 0}); //reset isPlaying
         this.setState({isRecording: true});
         break;
@@ -553,13 +554,16 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   private determineProgramMode = () => {
     const { isRecording } = this.state;
     const { tileContent } = this.props;
-    if (!isRecording && tileContent.isDataSetEmptyCases){
+    // Keyed on hasRecordedRun, not on "the dataset has cases": a single sample puts rows in the
+    // table without being a recording, and treating it as one made the tile read-only and showed
+    // playback.
+    if (!isRecording && !tileContent.hasRecordedRun){
       return ProgramMode.Ready;
     }
     else if (isRecording){
       return ProgramMode.Recording;
     }
-    else if (!isRecording && !tileContent.isDataSetEmptyCases){
+    else if (!isRecording && tileContent.hasRecordedRun){
      return ProgramMode.Done;
     }
     return ProgramMode.Ready;

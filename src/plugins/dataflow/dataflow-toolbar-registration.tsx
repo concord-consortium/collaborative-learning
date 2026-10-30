@@ -1,6 +1,7 @@
 import React, { useContext } from "react";
 import { observer } from "mobx-react";
 import { DataSetLinkButton } from "../../components/toolbar/data-set-link-button";
+import { DataSetViewButton } from "../../components/toolbar/data-set-view-button";
 import { registerTileToolbarButtons, IToolbarButtonComponentProps }
   from "../../components/toolbar/toolbar-button-manager";
 import { TileToolbarButton } from "../../components/toolbar/tile-toolbar-button";
@@ -95,10 +96,16 @@ const ResetProgramButton = observer(function ResetProgramButton({ name }: IToolb
 registerTileToolbarButtons('dataflow',
 [
   {
-    // Dataflow's own, rather than the shared DataSetViewButton: it reuses an already-linked table
-    // instead of always adding one, which is what keeps a capture tied to the program it
-    // describes. Registration is per tile type, so no other tile is affected.
+    // Immediate view, unchanged and still the shared component. The dataflow toolbar uses it for
+    // Graph It; Table It is "table-it" below, so this one is untouched by CLUE-740.
     name: "data-set-view",
+    component: DataSetViewButton
+  },
+  {
+    // Dataflow's Table It. Its own name rather than overriding data-set-view, so Graph It keeps
+    // the shared behavior and icon. Reuses an already-linked table instead of always adding one,
+    // which is what keeps a capture tied to the program it describes.
+    name: "table-it",
     component: DataflowTableButton
   },
   {
