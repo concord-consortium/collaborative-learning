@@ -804,6 +804,7 @@ context('Dataflow Tool Tile', function () {
     cy.log("the pane's More… link opens the help drawer with the failure's steps");
     cy.get(".connect-more").first().click();
     cy.get(".right-drawer").should("contain", "The browser couldn't open the Arduino.");
+    cy.get("#doc-editor-app").should("have.class", "right-drawer-open");
 
     cy.log("Details shows the error name");
     cy.get(".right-drawer .connection-help-details-toggle").click()
@@ -813,5 +814,6 @@ context('Dataflow Tool Tile', function () {
     cy.log("the close button closes the drawer");
     cy.get(".right-drawer [aria-label='Close connection help']").click();
     cy.get(".right-drawer").should("not.exist");
+    cy.get("#doc-editor-app").should("not.have.class", "right-drawer-open");
   });
 });
