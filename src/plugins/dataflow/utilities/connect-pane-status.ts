@@ -9,8 +9,9 @@ export type PaneLineTone = "plain" | "hint" | "problem";
 
 export interface IPaneStatus {
   line1: string;
-  // `progress` (0-100) draws the progress bar.
-  line2?: { text: string; tone: PaneLineTone; progress?: number };
+  // `progress` (0-100) draws the progress bar. `helpKind` marks a line the component follows with
+  // a "More…" link.
+  line2?: { text: string; tone: PaneLineTone; helpKind?: ProblemKind; progress?: number };
   // Whether line 2 belongs in the live region: problems only.
   announce: boolean;
 }
@@ -28,8 +29,8 @@ export interface IPaneStatusInput {
   updateResumed: boolean;
 }
 
-// The status of the shared connection, showing the tile's `failure`. A stall's failure shows only
-// while its device is open.
+// The status of the shared connection, showing `failure`: the tile's in its pane, or the
+// connection's own in the Connection help. A stall's failure shows only while its device is open.
 export function connectionStatusInput(
   connection: DeviceConnection, failure: IConnectFailure | undefined
 ): IPaneStatusInput {
@@ -51,7 +52,7 @@ type Line2 = NonNullable<IPaneStatus["line2"]>;
 const status = (line1: string, line2?: Line2): IPaneStatus =>
   ({ line1, line2, announce: line2?.tone === "problem" });
 
-const problem = (kind: ProblemKind): Line2 => ({ text: paneProblemText(kind), tone: "problem" });
+const problem = (kind: ProblemKind): Line2 => ({ text: paneProblemText(kind), tone: "problem", helpKind: kind });
 
 export function connectPaneStatus(input: IPaneStatusInput): IPaneStatus {
   const { attempt, isConnected, dataReceived, label, failure, loss, notResponding, check, updateResumed } = input;

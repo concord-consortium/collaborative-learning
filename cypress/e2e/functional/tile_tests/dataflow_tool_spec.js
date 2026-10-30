@@ -766,7 +766,7 @@ context('Dataflow Tool Tile', function () {
     });
   });
 
-  it("shows why a connection failed in the pane", () => {
+  it("shows why a connection failed in the pane and the help drawer", () => {
     const fakePort = {
       getInfo: () => ({}),
       open: () => Promise.reject(new DOMException("Failed to open serial port.", "NetworkError")),
@@ -800,5 +800,20 @@ context('Dataflow Tool Tile', function () {
     cy.get("[aria-label='Connect Arduino']").first().click();
 
     cy.get(".connect-detail.problem").should("contain", "Couldn't open it.");
+
+    cy.log("the pane's More… link opens the help drawer with the failure's steps");
+    cy.get(".connect-more").first().click();
+    cy.get(".right-drawer").should("contain", "The browser couldn't open the Arduino.");
+    cy.get("#doc-editor-app").should("have.class", "right-drawer-open");
+
+    cy.log("Details shows the error name");
+    cy.get(".right-drawer .connection-help-details-toggle").click()
+      .should("have.attr", "aria-expanded", "true");
+    cy.get(".right-drawer .connection-help-details-text").should("contain", "NetworkError");
+
+    cy.log("the close button closes the drawer");
+    cy.get(".right-drawer [aria-label='Close connection help']").click();
+    cy.get(".right-drawer").should("not.exist");
+    cy.get("#doc-editor-app").should("not.have.class", "right-drawer-open");
   });
 });

@@ -426,7 +426,7 @@ describe("Dataflow connect button and pane", () => {
     const headline = "The browser couldn't open the Spiker:bit.";
     const failure = { kind: "openTimeout", choice: "spikerbit", step: "open", elapsedMs: 0 } as const;
 
-    it("announces the problem headline politely when a failure is recorded with the pane closed", () => {
+    it("announces the help headline politely when a failure is recorded with the pane closed", () => {
       const r = renderConnect();
       expect(screen.queryByText(headline)).toBeNull();
       act(() => {
@@ -704,11 +704,27 @@ describe("Dataflow connect button and pane", () => {
       act(() => r.stores.serialDevice.clearActiveDevice());
     });
 
-    it("a failure shows the problem on line 2 and keeps the device rows", () => {
+    it("a failure shows the problem with More… on line 2 and keeps the device rows", () => {
       const r = openPane();
       act(() => r.content.setConnectFailure({ kind: "openFailed", choice: "spikerbit", step: "open", elapsedMs: 0 }));
-      expect(pane().querySelector(".connect-detail.problem")).toHaveTextContent("Couldn't open it.");
+      const detail = pane().querySelector(".connect-detail.problem");
+      expect(detail).toHaveTextContent("Couldn't open it.");
+      const more = within(pane()).getByRole("button", { name: "More…" });
+      expect(more).toHaveClass("connect-more");
+      expect(detail!.contains(more)).toBe(true);
       expect(within(pane()).getAllByRole("button", { name: /^Connect / })).toHaveLength(3);
+    });
+
+    it("More… joins the arrow-key navigation", () => {
+      const r = renderConnect();
+      act(() => r.content.setConnectFailure({ kind: "inUse", choice: "spikerbit", step: "open", elapsedMs: 0 }));
+      fireEvent.click(getTrigger(r.container));
+      const more = within(pane()).getByRole("button", { name: "More…" });
+      const controls = within(pane()).getAllByRole("button");
+      expect(controls[0]).toBe(more);
+      controls[1].focus();
+      fireEvent.keyDown(controls[1], { key: "ArrowUp" });
+      expect(document.activeElement).toBe(more);
     });
 
     it("an attempt from tile A shows its step in tile B's pane; only A records the failure", () => {
@@ -724,6 +740,7 @@ describe("Dataflow connect button and pane", () => {
       expect(a.content.connectFailure).toBeDefined();
       expect(b.content.connectFailure).toBeUndefined();
       expect(pane().querySelector(".connect-detail.problem")).toBeNull();
+      expect(within(pane()).queryByRole("button", { name: "More…" })).toBeNull();
     });
 
     it("step text is outside the live region; a problem is inside it", () => {

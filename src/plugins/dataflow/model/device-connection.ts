@@ -12,8 +12,8 @@ import {
 import { WebSerialOpenResult, WebSerialTransport } from "../../../models/stores/web-serial-transport";
 import spikerbitHex from "../firmware/spikerbit-clue.hex";
 import {
-  AttemptOutcome, AttemptStep, DeviceChoice, errorInfo, FailureKind, IConnectFailure, kDeviceChoiceLabels,
-  kStallKinds
+  AttemptOutcome, AttemptStep, DeviceChoice, errorInfo, FailureKind, ProblemKind, helpDetails, IConnectFailure,
+  kDeviceChoiceLabels, kStallKinds, sameHelp
 } from "./connect-failures";
 import { AttemptTrigger, AttemptView, ConnectionAttempt } from "./connection-attempt";
 
@@ -95,6 +95,39 @@ interface IOpenFailure {
   error?: unknown;
 }
 
+// What the Connection help is about. `tileId` is the tile it was opened from, which its log events
+// name; the help itself follows the connection, so it outlives that tile.
+export interface IHelpTopic {
+  kind: ProblemKind;
+  choice: DeviceChoice;
+  details: string;
+  tileId: string;
+}
+
+// What the help's notices follow: a problem, "working" once data is arriving, a stalled update
+// that is making progress again, or a device that was unplugged or isn't connected, which has no
+// help of its own.
+export type HelpState = ProblemKind | "working" | "updating" | "unplugged" | "notConnected";
+
+// What has changed since the help's topic was shown: the device works now, its update is going
+// again, it has a problem with other help, or it is no longer connected.
+export type HelpNotice =
+  { type: "working" | "updating" | "unplugged" | "notConnected" }
+  | { type: "differentProblem"; topic: IHelpTopic };
+
+// The Connection help's state, kept here rather than in its component, which unmounts while Ada's
+// tab is selected.
+export interface IConnectionHelp {
+  shown: IHelpTopic;
+  notice: HelpNotice | undefined;
+  detailsExpanded: boolean;
+}
+
+export interface IHelpListener {
+  // A notice appeared.
+  onNotice?(notice: HelpNotice): void;
+}
+
 // What dismissed the connect tutorial: OK in one tile, or any connection.
 export type ConnectTutorialDismissal = { by: "ok", tileId: string } | { by: "connection" };
 
@@ -158,6 +191,8 @@ export class DeviceConnection {
   // What first dismissed the connect tutorial, which then stays dismissed on every tile. In memory
   // only, so it can show again after a page reload.
   connectTutorialDismissal: ConnectTutorialDismissal | undefined = undefined;
+  // The Connection help, while it is open.
+  help: IConnectionHelp | undefined = undefined;
 
   private serialDevice: SerialDevice;
   private deps: IDeviceConnectionDeps;
@@ -173,6 +208,10 @@ export class DeviceConnection {
   // the attempt keeps it until then, or until a Disconnect, Connect or Reconnect disposes it.
   private stalledSpikerbit: SpikerbitDevice | undefined = undefined;
   private followed: IFollowedAttempt | undefined = undefined;
+  private helpListener: IHelpListener | undefined = undefined;
+  // Set when the help opens, until its panel moves focus to its heading. Showing the panel again
+  // after Ada's tab leaves focus where it is.
+  private helpFocusRequested = false;
 
   constructor(serialDevice: SerialDevice, deps?: Partial<IDeviceConnectionDeps>) {
     this.serialDevice = serialDevice;
@@ -185,7 +224,7 @@ export class DeviceConnection {
     };
     makeAutoObservable<DeviceConnection,
         "serialDevice" | "deps" | "lastWebSerialTransport" | "spikerbitDevice" | "identifyCheck"
-        | "stalledSpikerbit" | "followed">(
+        | "stalledSpikerbit" | "followed" | "helpListener" | "helpFocusRequested">(
       this,
       {
         serialDevice: false,
@@ -197,6 +236,10 @@ export class DeviceConnection {
         lastFailure: observable.ref,
         stalledSpikerbit: observable.ref,
         followed: false,
+        help: observable.ref,
+        helpListener: false,
+        helpFocusRequested: false,
+        takeHelpFocusRequest: false,
         connect: false,
         reconnect: false,
         disconnect: false,
@@ -208,6 +251,8 @@ export class DeviceConnection {
     reaction(() => this.isConnected, connected => {
       if (connected) this.dismissConnectTutorial({ by: "connection" });
     }, { fireImmediately: true });
+    // The help's steps stay as they were opened; a change in the problem shows as a notice.
+    reaction(() => this.currentProblem, problem => this.problemChanged(problem));
   }
 
   get isConnected() {
@@ -313,6 +358,87 @@ export class DeviceConnection {
   // Why the last device went away without the user asking, while nothing is connected.
   get lossReason(): DeviceLoss | undefined {
     return this.isConnected ? undefined : this.serialDevice.lastLoss?.reason;
+  }
+
+  // The state the connection's help follows now. Undefined while an attempt runs, and while a
+  // device is open with neither a problem nor data.
+  get currentProblem(): HelpState | undefined {
+    const attempt = this.attempt;
+    if (attempt && !attempt.ended) return undefined;
+    if (this.check === "noAnswer") return "noAnswer";
+    const loss = this.lossReason;
+    if (loss) return loss;
+    if (this.lastFailure) return this.lastFailure.kind;
+    if (this.updateResumed) return "updating";
+    if (this.notResponding) return "notResponding";
+    if (this.dataReceived) return "working";
+    return this.holdsDevice ? undefined : "notConnected";
+  }
+
+  // The help topic for a kind, with the failure's details when `failure` is that kind.
+  helpTopic(kind: ProblemKind, tileId: string, failure = this.lastFailure): IHelpTopic | undefined {
+    const matching = failure?.kind === kind ? failure : undefined;
+    const choice = matching?.choice ?? this.lastChoice ?? this.attempt?.choice;
+    return choice && { kind, choice, details: helpDetails(kind, matching), tileId };
+  }
+
+  openHelp(topic: IHelpTopic, listener?: IHelpListener) {
+    this.help = { shown: topic, notice: undefined, detailsExpanded: false };
+    this.helpListener = listener;
+    this.helpFocusRequested = true;
+  }
+
+  // Whether the help's panel should move focus to its heading. Answers true once per opening.
+  takeHelpFocusRequest() {
+    const requested = this.helpFocusRequested;
+    this.helpFocusRequested = false;
+    return requested;
+  }
+
+  showNoticeTopic() {
+    const notice = this.help?.notice;
+    if (notice?.type !== "differentProblem") return;
+    this.help = { shown: notice.topic, notice: undefined, detailsExpanded: false };
+  }
+
+  toggleHelpDetails() {
+    if (this.help) this.help = { ...this.help, detailsExpanded: !this.help.detailsExpanded };
+  }
+
+  closeHelp() {
+    this.help = undefined;
+    this.helpListener = undefined;
+    this.helpFocusRequested = false;
+  }
+
+  // A running attempt leaves the notice as it is until its outcome. Otherwise, with no problem, the
+  // device isn't working any more, so a working notice goes; a different problem's steps still apply.
+  // An unplug or a device that isn't connected keeps the steps, which can say to unplug the board
+  // and click Connect, and gets a notice that says what to do next. So does a stalled update that
+  // is making progress again.
+  private problemChanged(problem: HelpState | undefined) {
+    const help = this.help;
+    if (!help) return;
+    if (problem === undefined) {
+      const attempt = this.attempt;
+      if (help.notice?.type === "working" && !(attempt && !attempt.ended)) {
+        this.help = { ...help, notice: undefined };
+      }
+      return;
+    }
+    const { shown } = help;
+    let notice: HelpNotice | undefined;
+    if (problem === "working" || problem === "updating" || problem === "unplugged" || problem === "notConnected") {
+      notice = { type: problem };
+    } else {
+      // Help on another device names that device, so it is different help even for the same kind.
+      const topic = this.helpTopic(problem, shown.tileId);
+      if (topic && (topic.choice !== shown.choice || !sameHelp(problem, shown.kind, shown.choice))) {
+        notice = { type: "differentProblem", topic };
+      }
+    }
+    this.help = { ...help, notice };
+    if (notice) this.helpListener?.onNotice?.(notice);
   }
 
   get connectTutorialDismissed() {
