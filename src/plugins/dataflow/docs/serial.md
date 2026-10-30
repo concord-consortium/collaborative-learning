@@ -149,9 +149,10 @@ resets, and it also works while a stalled Spiker:bit update holds a board open t
 
 **Log events.** Each is a `DATAFLOW_TOOL_CHANGE` event for one tile (`tileId`): the clicking
 tile, or for the connect tutorial's events, the tile it covers. The fields below sit at the top
-level of the event. Every event of one attempt carries the same `attemptId`, and the device events
-carry `targetType: "device"` and `device`: the choice id (`arduino`, `microbitHub` or
-`spikerbit`). Step times are `attempt.steps`: ms from the click, for the steps that happened.
+level of the event. Every event of one attempt but `resetProgram` carries the same `attemptId`, and
+the device events carry `targetType: "device"` and `device`: the choice id (`arduino`,
+`microbitHub` or `spikerbit`). Step times are `attempt.steps`: ms from the click, for the steps
+that happened.
 
 | `operation` | Other fields | Logged when |
 |---|---|---|
@@ -170,7 +171,7 @@ carry `targetType: "device"` and `device`: the choice id (`arduino`, `microbitHu
 - `connectDevice` and `reconnectDevice` mark the click, not a success. A quick attempt logs
   `connectDevice`, `resetProgram` (when the device becomes active) and `connectResult`; anything
   the student did in between sits between them in time order. A slow attempt adds `connectProgress`
-  events, whose gaps double so a tab left hanging doesn't log every few seconds. A reload or a
+  events, whose times double so a tab left hanging doesn't log every few seconds. A reload or a
   closed tab leaves a start, maybe some progress events and no result.
 - A failed, stalled or `canceled` attempt logs its `connectResult` too, with no `resetProgram`
   unless the device became active first.
@@ -178,7 +179,8 @@ carry `targetType: "device"` and `device`: the choice id (`arduino`, `microbitHu
   attempt had ended with the device open; one before that ends the attempt, which `connectResult`
   records as `unplugged` or `lost`.
 - A tile deleted during an attempt is left alone, but the attempt's events are still logged under
-  its id.
+  its id. They have no document fields, since the logger can't find the document of a deleted
+  tile; `attemptId` still joins them to the click.
 - One OK or one connection dismisses the tutorial on every tile, so each tile it covered logs a
   dismissal; the tile whose OK was clicked has `trigger` `ok`. A tile that closes while the
   tutorial shows, such as a deleted tile, logs no dismissal.
@@ -223,8 +225,8 @@ failure, with its step and how long that step had run.
 
 - A Connect starts on the device list and switches to the actions when the device opens. For a
   Spiker:bit that is the USB open, before the firmware check.
-- A Reconnect keeps the actions throughout, and goes back to the device list only if it fails
-  before the open.
+- A Reconnect keeps the actions while it runs, and goes back to the device list for any outcome
+  but a connection or a stall.
 - `actionsEnabled` is false from the open until the first data arrives or a stall ends the
   attempt, and again while a stalled update is making progress (`updateResumed`).
 - Any failure at or before the open, `updateFailed`, a loss or a cancel leaves the device list.
@@ -232,7 +234,8 @@ failure, with its step and how long that step had run.
 **Stalls and recovery.** `updateStalled`, `noData` and `notResponding` end the attempt, but the
 device stays open and the stalled step keeps running. The actions are enabled, and a stalled
 update keeps the actions view though its board isn't active yet. A stall's failure counts only
-while its device is open (`holdsDevice`): the button and the pane ignore one that outlasted it.
+while its attempt is the connection's and its device is open (`currentFailure`): the button and
+the pane ignore one that outlasted it.
 
 - **Progress from a stalled update** clears `lastFailure` and calls `onStallChanged` with no
   failure. `updateResumed` is then true: the pane shows the ended attempt's update and progress
