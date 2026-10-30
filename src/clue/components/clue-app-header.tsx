@@ -42,8 +42,8 @@ export const ClueAppHeaderComponent: React.FC<IProps> = observer(function ClueAp
   const myGroup = showGroup ? groups.getGroupById(user.currentGroupId) : undefined;
   const [isGroupManagementModalOpen, setIsGroupManagementModalOpen] = useState(false);
   const [isStudentGroupModalOpen, setIsStudentGroupModalOpen] = useState(false);
-  // Drawer open state lives in the ui store (not local useState) so the workspace layout
-  // can reserve space for the drawer and bump its content over instead of being overlaid.
+  // Ada's open state lives in the ui store (not local useState) so the workspace layout
+  // can make room for her in the right drawer instead of being overlaid.
   const isChatTutorOpen = ui.showChatTutor;
   const headerRef = useRef<HTMLElement>(null);
   const chatTutorLauncherRef = useRef<HTMLButtonElement>(null);
@@ -61,7 +61,7 @@ export const ClueAppHeaderComponent: React.FC<IProps> = observer(function ClueAp
 
   const handleCloseChatTutor = useCloseChatTutor(chatTutorLauncherRef);
 
-  // Don't leave the drawer flagged open after its document goes away, or it would
+  // Don't leave Ada flagged open after her document goes away, or she would
   // pop back open unrequested when a document loads again.
   useEffect(() => {
     if (!showChatTutorLauncher) {
