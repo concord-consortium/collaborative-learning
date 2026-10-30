@@ -36,15 +36,16 @@ interface IProps {
   content: IHighlightContentModel | undefined;
   onClose: () => void;
   // False while another tab in the right drawer is showing. The sidebar stays mounted, so the
-  // conversation is kept, but its focus trap is off.
+  // unsent message and scroll position are kept, but its focus trap is off.
   active: boolean;
   // The right drawer's tab buttons, when it shows them. Ada's focus trap includes them.
   drawerTabsRef?: RefObject<HTMLElement | null>;
 }
 
-// Content of the right drawer's AI chat tutor tab. Mounted only while Ada is open (the
-// app-header launcher owns the open/close state); mounting resets the transport, so
-// switching documents or problems while open swaps the conversation.
+// Content of the right drawer's AI chat tutor tab. Mounted only while Ada is open
+// (ui.showChatTutor holds the open state; the launcher and the drawer's Ada tab set it);
+// mounting resets the transport, so switching documents or problems while open swaps the
+// conversation.
 //
 // An observer because the pinned highlight button reflects `content.pinnedHighlightSource`,
 // which can be taken over by another highlight source (a variable chip, say) while this
@@ -103,7 +104,7 @@ export const ChatTutorSidebar: React.FC<IProps> = observer((props) => {
     });
   }, [documentKey, problemPath, problem, getRightSummary, content, appConfig, db, user, unit]);
 
-  // The drawer header makes the conversation scope legible: this conversation is bound
+  // The sidebar header makes the conversation scope legible: this conversation is bound
   // to one workspace document within one problem, and swaps when either changes.
   const header = `${documentTitle} · ${problemPath}`;
   const chat = useChat({ transport, header });
