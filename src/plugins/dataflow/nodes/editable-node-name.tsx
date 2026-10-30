@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { IBaseNode } from './base-node';
 import { observer } from 'mobx-react';
 import { handleBlockChildKeyDown } from './dataflow-node';
@@ -11,6 +11,15 @@ interface EditableNodeNameProps {
 export const EditableNodeName: React.FC<EditableNodeNameProps> = observer(
   function EditableNodeName({ node }) {
     const [nodeName, setNodeName] = useState(node.model.orderedDisplayName);
+    const [editing, setEditing] = useState(false);
+
+    // The model name can change under this input -- renaming the node's column in a linked table
+    // writes it (see syncNodeNamesFromColumns). Without this the input keeps its stale draft, and
+    // the next blur saves that draft back over the rename, silently undoing it. Only while not
+    // editing, so a student's half-typed name is never yanked out from under them.
+    useEffect(() => {
+      if (!editing) setNodeName(node.model.orderedDisplayName);
+    }, [editing, node.model.orderedDisplayName]);
     // Tracks whether the upcoming blur is a discard (Escape) so `saveNodeName`
     // can skip writing. We can't rely on resetting `nodeName` state before the
     // blur — the state update is batched and the blur handler reads the stale
@@ -38,6 +47,7 @@ export const EditableNodeName: React.FC<EditableNodeNameProps> = observer(
     }
 
     function saveNodeName() {
+      setEditing(false);
       if (discardingRef.current || node.readOnly) return;
       nodeName && node.model.setOrderedDisplayName(nodeName);
     }
@@ -57,6 +67,7 @@ export const EditableNodeName: React.FC<EditableNodeNameProps> = observer(
           tabIndex={-1}
           value={valueString}
           onChange={handleInputChange}
+          onFocus={() => setEditing(true)}
           onBlur={saveNodeName}
           readOnly={node.readOnly}
           onKeyDown={handleKeyDown}

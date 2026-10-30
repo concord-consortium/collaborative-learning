@@ -27,17 +27,20 @@ function ensureLinkedTable(
   content: DataflowContentModelType,
   tile: any,
   addTilesContext: any,
-  selectTile: (tileId: string) => void
+  selectTile?: (tileId: string) => void
 ) {
   const existingTableId = content.linkedTableTileId;
   if (existingTableId) {
-    selectTile(existingTableId);
+    selectTile?.(existingTableId);
   } else {
     const sharedModel = content.sharedModel;
     if (!sharedModel) return;
     addTilesContext.addTileAfter("Table", tile, [sharedModel]);
   }
-  if (content.dataSet.cases.length === 0) {
+  // `recordedRun` guards the window between a recording starting and its first tick: the columns
+  // are already prepared but no rows exist yet, and re-preparing would clear the flag and leave
+  // the program in Ready when the recording stops.
+  if (content.dataSet.cases.length === 0 && !content.recordedRun) {
     content.prepareCapture();
   }
 }
@@ -49,9 +52,13 @@ function useTableButton() {
   const readOnly = useReadOnlyContext();
   const content = tile?.content as DataflowContentModelType | undefined;
 
-  const ensure = () => {
+  /** `selectDestination` reveals the table for Table It. Record Single Sample must NOT do it:
+   * a tile toolbar renders only for the selected tile (tile-toolbar.tsx), so selecting the table
+   * takes the sample button off screen and a second sample becomes unclickable. */
+  const ensure = (selectDestination: boolean) => {
     if (!content || !tile || !addTilesContext) return false;
-    ensureLinkedTable(content, tile, addTilesContext, id => ui.setSelectedTileId(id));
+    ensureLinkedTable(content, tile, addTilesContext,
+      selectDestination ? (id: string) => ui.setSelectedTileId(id) : undefined);
     return true;
   };
   return { content, readOnly, ensure };
@@ -73,7 +80,7 @@ export const DataflowTableButton = observer(function DataflowTableButton(
     <TileToolbarButton
       name={name}
       title={getTileCreateActionName("Table")}
-      onClick={ensure}
+      onClick={() => ensure(true)}
       disabled={!content || readOnly}
     >
       {Icon ? <BadgedIcon Icon={Icon} Badge={ViewBadgeIcon} /> : "??"}
@@ -88,7 +95,7 @@ export const RecordSingleSampleButton = observer(function RecordSingleSampleButt
   const { content, readOnly, ensure } = useTableButton();
 
   function handleClick() {
-    if (!ensure() || !content) return;
+    if (!ensure(false) || !content) return;
     recordCase(content);
   }
 

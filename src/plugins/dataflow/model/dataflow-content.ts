@@ -57,22 +57,22 @@ const kMaxRecordedValues = 10000;
 
 const kPointAttributeName = "Point";
 
-/** addNewAttrFromNode builds a capture column's id as `<uniqueId>*<nodeId>`, which is what lets a
- * column be traced back to the node it came from. Returns undefined for the point column and for
- * anything a student added by hand, neither of which carries a node id. */
-function nodeIdFromAttributeId(attributeId: string) {
-  const star = attributeId.indexOf("*");
-  return star >= 0 ? attributeId.slice(star + 1) : undefined;
-}
-
-/** Each capture column paired with the node it came from. Skips the point column, any column a
- * student added by hand, and any whose node has since been deleted -- none of which has a node to
- * keep a name in step with. */
+/** Each capture column paired with the node it came from.
+ *
+ * Paired by POSITION, the same rule recordCase writes by: prepareCapture lays the columns out as
+ * the point number followed by one per node in program order, and recordCase writes node `i` into
+ * column `i + 1`. One pairing rule for both, so if it is ever wrong it is wrong in the same,
+ * visible way.
+ *
+ * Not by the `<uniqueId>*<nodeId>` that addNewAttrFromNode embeds in a column's id: copying a
+ * tile remaps every attribute id through getUpdatedSharedDataSetIds, which is by design in CLUE
+ * and drops the node id -- so an id-based pairing would silently stop working on any copy.
+ */
 function captureColumnsWithNodes(dataSet: IDataSet, program: DataflowProgramModelType) {
-  return dataSet.attributes.flatMap(attr => {
-    const nodeId = nodeIdFromAttributeId(attr.id);
-    const node = nodeId ? program.nodes.get(nodeId) : undefined;
-    return node ? [{ attr, node }] : [];
+  const nodes = Array.from(program.nodes.values());
+  return nodes.flatMap((node, i) => {
+    const attr = dataSet.attributes[i + 1];   // + 1 skips the point column
+    return attr ? [{ attr, node }] : [];
   });
 }
 
@@ -387,8 +387,17 @@ export const DataflowContentModel = TileContentModel
       // Nothing captured yet means nothing to preserve, and detaching would only break a link the
       // student is still setting up.
       if (self.dataSet.cases.length === 0) return;
-      // No tables are following it, so there is nothing to hand it to.
-      if (sharedModelManager.getSharedModelTileIds(sharedModel).every(id => id === self.metadata.id)) return;
+      const followers = sharedModelManager.getSharedModelTileIds(sharedModel)
+        .filter(id => id !== self.metadata.id);
+      if (followers.length === 0) {
+        // Nothing is showing the capture -- the student deleted the table -- so there is nobody to
+        // hand it to. It is still stale, though, and leaving the rows in place would have the next
+        // capture reuse columns built for the old program: recordCase writes by position, so a
+        // deleted node silently shifts every value one column left. Clearing it makes the next
+        // Table It or sample rebuild the columns.
+        self.dataSet.removeCases(self.dataSet.cases.map(({ __id__ }) => __id__));
+        return;
+      }
 
       // The program walks away from the capture rather than copying it out: the tables keep the
       // dataset they already hold, with the student's numbers intact, and afterAttach's

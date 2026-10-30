@@ -565,10 +565,13 @@ context('Dataflow Tool Tile', function () {
     cy.log("the first sample creates the table and lands in it");
     dataflowToolTile.getRecordSampleButton().click();
     tableToolTile.getTableTile().should("exist");
+    tableToolTile.getTableTile().find(".rdg-row:not(.input-row)").should("have.length", 1);
 
     cy.log("a second sample is the next point");
     dataflowToolTile.getRecordSampleButton().click();
-    tableToolTile.getTableTile().find(".rdg-row").should("have.length.at.least", 2);
+    // Excluding .input-row: an editable table always renders one, so "at least 2" was satisfied
+    // by a single sample and the second click proved nothing.
+    tableToolTile.getTableTile().find(".rdg-row:not(.input-row)").should("have.length", 2);
   });
 
   it("Sensor Node and Record Data", () => {

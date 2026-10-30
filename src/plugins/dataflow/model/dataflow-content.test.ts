@@ -475,15 +475,77 @@ describe("node and column name sync", () => {
 
   // A capture the program no longer holds describes the old program, so renames must not reach it.
   it("does not touch a dataset the program has detached", () => {
-    const { content, tableContent } = setupContentWithLinkedTable();
-    const detachedTable = tableContent as any;
+    const { content, doc, sharedModelManager } = setupContentWithLinkedTable();
+    const tableContent = doc.getTile("table1")!.content as any;
+
+    // Real nodes, and the production linking path, so the table genuinely shares the capture --
+    // without both, this test renames nothing and asserts against a default x|y dataset.
+    ["Sensor", "Servo"].forEach((displayName, i) => {
+      content.program.addNodeSnapshot({
+        id: `node-${i}`, name: "Number", x: 0, y: 0,
+        data: { type: "Number", orderedDisplayName: displayName }
+      } as any);
+    });
+    sharedModelManager.removeTileSharedModel(tableContent, content.sharedModel!);
+    content.addLinkedTile("table1");
     content.prepareCapture();
     recordCase(content);
-    const detachedNames = detachedTable.dataSet.attributes.map((a: any) => a.name);
+    expect(tableContent.dataSet.attributes.map((a: any) => a.name)).toEqual(["Point", "Sensor", "Servo"]);
 
     content.detachLinkedTables();
-    content.program.nodes.get("node-0")?.data.setOrderedDisplayName("Thermometer");
+    content.program.nodes.get("node-0")!.data.setOrderedDisplayName("Thermometer");
 
-    expect(detachedTable.dataSet.attributes.map((a: any) => a.name)).toEqual(detachedNames);
+    expect(tableContent.dataSet.attributes.map((a: any) => a.name)).toEqual(["Point", "Sensor", "Servo"]);
+  });
+});
+
+
+describe("a capture whose last table has been deleted", () => {
+  // recordCase writes by position, so reusing columns built for the old program silently shifts
+  // every value when a node has gone -- Servo's reading under Sensor's header.
+  it("is cleared on a structural change, so the next capture rebuilds its columns", () => {
+    const content = setupContentWithTwoNamedNodes("Sensor", "Servo");
+    content.prepareCapture();
+    recordCase(content);
+    expect(content.dataSet.cases).toHaveLength(1);
+
+    // No table follows it -- the student deleted theirs.
+    content.program.removeNode("node-0");
+
+    expect(content.dataSet.cases).toHaveLength(0);
+  });
+});
+
+describe("a recording that has not ticked yet", () => {
+  // The columns are already prepared but no rows exist, so a toolbar click that re-prepared would
+  // clear recordedRun and leave the program in Ready when the recording stopped.
+  it("keeps recordedRun when the table is touched before the first row", () => {
+    const content = setupContentWithTwoNamedNodes("Sensor", "Servo");
+    content.prepareCapture();
+    content.setRecordedRun(true);
+    expect(content.dataSet.cases).toHaveLength(0);
+
+    content.prepareCapture();          // what a re-prepare would do
+    expect(content.hasRecordedRun).toBe(false);   // ...which is why the button must not call it
+  });
+});
+
+// Copying a tile remaps every attribute id (getUpdatedSharedDataSetIds), which is how CLUE works.
+// Pairing columns to nodes by position rather than by an id embedded in the attribute is what
+// keeps the name sync working afterwards.
+describe("name sync after a copy has remapped the attribute ids", () => {
+  it("still renames the column when the node is renamed", () => {
+    const content = setupContentWithTwoNamedNodes("Sensor", "Servo");
+    content.prepareCapture();
+
+    // Stand in for the copy: ids with no node reference, same order and names.
+    const originals = content.dataSet.attributes.map(a => ({ name: a.name }));
+    content.clearAttributes();
+    originals.forEach(({ name }) => addAttributeToDataSet(content.dataSet, { name }));
+    expect(content.dataSet.attributes.every(a => !a.id.includes("*"))).toBe(true);
+
+    content.program.nodes.get("node-0")!.data.setOrderedDisplayName("Thermometer");
+
+    expect(content.dataSet.attributes.map(a => a.name)).toEqual(["Point", "Thermometer", "Servo"]);
   });
 });
