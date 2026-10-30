@@ -26,6 +26,18 @@ export type AttemptOutcome = "connected" | "canceled" | FailureKind | "unplugged
 // The failures where the device is still open but has gone quiet.
 export const kStallKinds: readonly FailureKind[] = ["updateStalled", "notResponding", "noData"];
 
+// The failures the `fakeConnectFailure` URL parameter can stand in for. A stall shows only while
+// its device is open, so it can't be faked without a device.
+export const kFakeableFailures: readonly FailureKind[] = ["openFailed", "openTimeout", "inUse", "updateFailed"];
+
+// The failure the `fakeConnectFailure` URL parameter asks for: the kind it names, or `openFailed`
+// when it has no value. Any other value fakes nothing.
+export function fakeConnectFailure(param: string | null | undefined): FailureKind | undefined {
+  if (param === undefined) return undefined;
+  if (param === null || param === "") return "openFailed";
+  return kFakeableFailures.find(kind => kind === param);
+}
+
 export interface IErrorInfo { name?: string; code?: string; message?: string }
 
 export interface IConnectFailure {

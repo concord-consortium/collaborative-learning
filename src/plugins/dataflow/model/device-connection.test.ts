@@ -209,6 +209,17 @@ describe("DeviceConnection", () => {
     expect(connection.busyChoice).toBeUndefined();
   });
 
+  it("a faked failure ends Connect without asking for a device, and says it was faked", async () => {
+    const { connection, createWebSerialTransport } = setup([makeTransport()], { getFakeFailure: () => "inUse" });
+    expect(await connection.connect("arduino")).toBe("inUse");
+    expect(createWebSerialTransport).not.toHaveBeenCalled();
+    expect(connection.lastFailure).toMatchObject({
+      kind: "inUse", choice: "arduino", error: { name: "FakeConnectFailure" }
+    });
+    expect(connection.busyChoice).toBeUndefined();
+    expect(connection.paneView).toBe("devices");
+  });
+
   it("reconnect with no previous connection returns canceled", async () => {
     const { connection, createWebSerialTransport } = setup([]);
     expect(await connection.reconnect()).toBe("canceled");

@@ -104,6 +104,15 @@ export interface QueryParams {
   mouseSensor?: boolean;
 
   //
+  // DataFlow hardware options, in any appMode
+  //
+
+  // Every DataFlow Connect fails with this failure kind, without asking for a device: openFailed
+  // (also used when there is no value), openTimeout, inUse or updateFailed. For trying the
+  // connection failure messages and help without hardware.
+  fakeConnectFailure?: string;
+
+  //
   // Standalone document editor options (doc-editor.html)
   //
 

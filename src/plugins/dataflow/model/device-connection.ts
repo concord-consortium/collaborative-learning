@@ -10,10 +10,11 @@ import {
   createSpikerbitConnection, makeSpikerbitFlashDataSource
 } from "../../../models/stores/spikerbit-connection";
 import { WebSerialOpenResult, WebSerialTransport } from "../../../models/stores/web-serial-transport";
+import { urlParams } from "../../../utilities/url-params";
 import spikerbitHex from "../firmware/spikerbit-clue.hex";
 import {
-  AttemptOutcome, AttemptStep, DeviceChoice, errorInfo, FailureKind, ProblemKind, helpDetails, IConnectFailure,
-  kDeviceChoiceLabels, kStallKinds, sameHelp
+  AttemptOutcome, AttemptStep, DeviceChoice, errorInfo, FailureKind, fakeConnectFailure, helpDetails,
+  IConnectFailure, kDeviceChoiceLabels, kStallKinds, ProblemKind, sameHelp
 } from "./connect-failures";
 import { AttemptTrigger, AttemptView, ConnectionAttempt } from "./connection-attempt";
 
@@ -135,7 +136,13 @@ export interface IDeviceConnectionDeps {
   createWebSerialTransport(): WebSerialTransport;
   createSpikerbitDevice(serialDevice: SerialDevice): SpikerbitDevice;
   getSpikerbitFlashDataSource(): unknown;
+  // The failure every Connect ends with, without asking the browser for a device, so the failure
+  // messages and help can be tried without hardware.
+  getFakeFailure(): FailureKind | undefined;
 }
+
+// The error a faked failure carries, so its Details and its log events say it was faked.
+const kFakeFailureError = { name: "FakeConnectFailure", message: "Set by the fakeConnectFailure URL parameter." };
 
 const kNoDeviceSelected = "no-device-selected";
 
@@ -220,6 +227,7 @@ export class DeviceConnection {
       createSpikerbitDevice: (device) =>
         new SpikerbitDevice(device, createSpikerbitConnection(), { openTimeoutMs: kOpenTimeoutMs }),
       getSpikerbitFlashDataSource: () => makeSpikerbitFlashDataSource(spikerbitHex),
+      getFakeFailure: () => fakeConnectFailure(urlParams.fakeConnectFailure),
       ...deps
     };
     makeAutoObservable<DeviceConnection,
@@ -453,6 +461,8 @@ export class DeviceConnection {
   async connect(choice: DeviceChoice, options: IAttemptOptions = {}): Promise<ConnectResult> {
     return this.startAttempt(choice, "connect", options, async attempt => {
       await this.closeDevices();
+      const fakeFailure = this.deps.getFakeFailure();
+      if (fakeFailure) return this.endAttempt(attempt, fakeFailure, { error: kFakeFailureError });
       return choice === "spikerbit" ? this.connectSpikerbit(attempt) : this.connectWebSerial(attempt);
     });
   }
