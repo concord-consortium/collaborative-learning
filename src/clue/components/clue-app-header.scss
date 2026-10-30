@@ -441,7 +441,7 @@ $member-size: 18px;
 
 // Floating round "AIdeas" launcher. Rendered from the header for store access, but position:fixed
 // floats it over the workspace — its containing block is the viewport, not the workspace panel. Kept
-// mounted but hidden while the chat drawer is open.
+// mounted but hidden while the right drawer is open, whichever tab is showing.
 // Contrast (measured): $charcoal-dark-3 text on $problem-orange is 8.17:1 (default), 8.85:1 (hover),
 // and 6.42:1 (active $problem-orange-dark-1) — all clear AA 4.5:1; the 1.5px $charcoal border on a
 // white workspace is 4.95:1 (>3:1 non-text). focus-ring(2px) places the ring outside the button.
