@@ -5,7 +5,7 @@ import stringify from "json-stringify-pretty-compact";
 
 import { Transform } from "rete-area-plugin/_types/area";
 
-import { DataflowProgramModel } from "./dataflow-program-model";
+import { DataflowProgramModel, DataflowProgramModelType } from "./dataflow-program-model";
 import { DEFAULT_DATA_RATE, ProgramDataRates } from "./utilities/node";
 import { SharedVariables, SharedVariablesType } from "../../shared-variables/shared-variables";
 import { isInputVariable, isOutputVariable } from "../../shared-variables/simulations/simulation-utilities";
@@ -18,11 +18,12 @@ import {
 } from "../../../models/shared/shared-data-set";
 import { updateSharedDataSetColors } from "../../../models/shared/shared-data-set-colors";
 import { SharedModelType } from "../../../models/shared/shared-model";
-import { DataSet, addAttributeToDataSet } from "../../../models/data/data-set";
+import { DataSet, IDataSet, addAttributeToDataSet } from "../../../models/data/data-set";
 import { SharedProgramData, SharedProgramDataType } from "../../shared-program-data/shared-program-data";
 
 import { uniqueId } from "../../../utilities/js-utils";
 import { getTileContentById, getTileModelById } from "../../../utilities/mst-utils";
+import { kTableTileType } from "../../../models/tiles/table/table-content";
 import { withoutUndo } from "../../../models/history/without-undo";
 import { IDataflowOutputConfig } from "../../../../shared/ai-summarizer/ai-summarizer-types";
 import { getTileModel } from "../../../models/tiles/tile-model";
@@ -53,6 +54,61 @@ export const kDefaultLabel = "Dataflow Node";
 // The intention is to keep the size of the dataset manageable.
 // A case has one value for time and one value for each node
 const kMaxRecordedValues = 10000;
+
+const kPointAttributeName = "Point";
+
+/** Each capture column paired with the node it came from.
+ *
+ * Paired by POSITION, the same rule recordCase writes by: prepareCapture lays the columns out as
+ * the point number followed by one per node in program order, and recordCase writes node `i` into
+ * column `i + 1`. One pairing rule for both, so if it is ever wrong it is wrong in the same,
+ * visible way.
+ *
+ * Not by the `<uniqueId>*<nodeId>` that addNewAttrFromNode embeds in a column's id: copying a
+ * tile remaps every attribute id through getUpdatedSharedDataSetIds, which is by design in CLUE
+ * and drops the node id -- so an id-based pairing would silently stop working on any copy.
+ *
+ * Pairs nothing unless the dataset really holds a capture. Between captures it holds the default
+ * x | y placeholder, whose columns describe no node: pairing those would have the name sync rename
+ * the program's first block to "y".
+ */
+function captureColumnsWithNodes(dataSet: IDataSet, program: DataflowProgramModelType) {
+  const nodes = Array.from(program.nodes.values());
+  const holdsCapture = dataSet.attributes.length === nodes.length + 1
+    && dataSet.attributes[0]?.name === kPointAttributeName;
+  if (!holdsCapture) return [];
+  return nodes.flatMap((node, i) => {
+    const attr = dataSet.attributes[i + 1];   // + 1 skips the point column
+    return attr ? [{ attr, node }] : [];
+  });
+}
+
+/** `13:12:21`. Built by hand rather than with toLocaleTimeString: stripCaptureTime has to
+ * recognize this exact shape again, and under a locale that punctuates time differently it would
+ * stop matching and stamps would stack up. */
+function formatCaptureTime(at: Date) {
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${pad(at.getHours())}:${pad(at.getMinutes())}:${pad(at.getSeconds())}`;
+}
+
+/** `Program 1 13:12:21` -> `Program 1`. */
+function stripCaptureTime(name?: string) {
+  return name?.replace(/ \d{2}:\d{2}:\d{2}$/, "") ?? "";
+}
+
+/** `Program 1 13:12:21`: the program's own name with the capture's start time appended.
+ *
+ * It becomes the dataset's name, which both DataflowContentModel.contentTitle and
+ * TableContentModel.contentTitle surface -- so program and capture carry one name, renaming either
+ * renames both, and the stamp doubles as the sign that this program has been recorded. The time is
+ * recorded once, for the capture, rather than in a column on every row.
+ *
+ * Derived from the stripped base so a second capture replaces the stamp instead of appending
+ * another one.
+ */
+function captureName(currentName: string | undefined, startedAt: Date) {
+  return `${stripCaptureTime(currentName)} ${formatCaptureTime(startedAt)}`.trim();
+}
 
 export function defaultDataSet(title: string|undefined) {
   const dataSet = DataSet.create({
@@ -90,6 +146,15 @@ export const DataflowContentModel = TileContentModel
     type: types.optional(types.literal(kDataflowTileType), kDataflowTileType),
     program: types.optional(DataflowProgramModel, getSnapshot(DataflowProgramModel.create())),
     programDataRate: DEFAULT_DATA_RATE,
+    /** Whether a continuous recording produced this tile's data.
+     *
+     * The Ready/Recording/Done mode used to be derived from "the dataset has any cases", which
+     * made a single sample flip the tile into Done: playback shown, program read-only, the record
+     * button offering Clear. Samples are not a recording and must not do that.
+     *
+     * types.maybe rather than a defaulted boolean, so a document saved before this existed reads
+     * as undefined and falls back to the old meaning -- a saved recording still opens in Done. */
+    recordedRun: types.maybe(types.boolean),
     /**
      * @deprecated Nothing reads or writes this. The canvas now fits all content on every load
      * instead of restoring a saved pan/zoom, so the live transform lives in the volatile
@@ -209,6 +274,25 @@ export const DataflowContentModel = TileContentModel
       delete (exported as { outputConfig?: unknown }).outputConfig;
       return stringify(exported, {maxLength: 120});
     },
+    /** Falls back to the row count for a document saved before `recordedRun` existed. */
+    get hasRecordedRun(): boolean {
+      return self.recordedRun ?? self.dataSet.cases.length > 0;
+    },
+    /** True when the columns already describe the current program: the point column followed by one
+     * per named node, in order.
+     *
+     * prepareCapture rebuilds the columns from scratch, and every rebuild mints new attribute ids.
+     * A linked table holds those ids, so rebuilding under one empties it -- the table keeps
+     * rendering columns the dataset no longer has ("No attribute found for ID"). Table It prepares
+     * the capture and so does the start of a recording, so this is the difference between the two
+     * being one preparation and being a capture that loses its table.
+     */
+    get isCapturePrepared(): boolean {
+      const expected = [kPointAttributeName, ...Array.from(self.program.nodes.values())
+        .map(n => n.data.orderedDisplayName).filter(Boolean)];
+      const actual = self.dataSet.attributes.map(a => a.name);
+      return actual.length === expected.length && actual.every((name, i) => name === expected[i]);
+    },
     get isDataSetEmptyCases(){
       //Used when DF linked to a table, then we clear. Different than isEmpty
       //Since there are two attributes X|Y for the default table, we only want to check if there are no cases
@@ -224,17 +308,26 @@ export const DataflowContentModel = TileContentModel
       });
       return isTileIdFound;
     },
+    /** The Table tile currently sharing this program's dataset, if any. Both Table It and Record
+     * Single Sample key off this: one to avoid making a second table, the other to know whether
+     * it has to make the first one. */
+    get linkedTableTileId(): string | undefined {
+      const sharedModelManager = self.tileEnv?.sharedModelManager;
+      const sharedModel = self.sharedModel;
+      if (!sharedModelManager?.isReady || !sharedModel) return undefined;
+      return sharedModelManager.getSharedModelTileIds(sharedModel)
+        .find(id => getTileModelById(self, id)?.content.type === kTableTileType);
+    },
+    /** Elapsed seconds at a recorded row, derived from its position and the data rate rather than
+     * read from the table -- the first column holds a point ordinal now. For a recording saved
+     * before that change this returns what that column already held, since it was written as
+     * index * rate / 1000. */
     getTimeAtRecordedIndex(index: number) {
       const { dataSet } = self;
       if (!dataSet || index < 0 || index >= dataSet.cases.length) {
         return 0;
       }
-      const timeQuantizedId = dataSet.attributes[0].id;
-      const time = dataSet.getValueAtIndex(index, timeQuantizedId);
-      if (typeof time !== "number") {
-        return 0;
-      }
-      return time;
+      return (index * self.programDataRate) / 1000;
     },
   }))
   .views(self => ({
@@ -292,6 +385,76 @@ export const DataflowContentModel = TileContentModel
     }
   }))
   .actions(self => ({
+    /**
+     * Keeps a capture's column headers and its nodes' names the same, in both directions: renaming
+     * a node renames its column, and renaming a column renames its node. One name, so there is no
+     * conflict to arbitrate and no stale header after a rename -- which matters because a rename
+     * deliberately does not detach, the columns still describing the program.
+     *
+     * Both directions are idempotent, writing only when the two differ, so the pair converges
+     * after one round trip rather than looping.
+     *
+     * withoutUndo because this is derived, not an edit of its own: undoing a rename puts the
+     * original name back and the other side simply follows, instead of needing a second undo and
+     * leaving the two out of step in between.
+     */
+    syncColumnNamesFromNodes() {
+      withoutUndo();
+      captureColumnsWithNodes(self.dataSet, self.program).forEach(({ attr, node }) => {
+        const nodeName = node.data.orderedDisplayName;
+        if (nodeName && attr.name !== nodeName) self.dataSet.setAttributeName(attr.id, nodeName);
+      });
+    },
+    syncNodeNamesFromColumns() {
+      withoutUndo();
+      captureColumnsWithNodes(self.dataSet, self.program).forEach(({ attr, node }) => {
+        if (attr.name && node.data.orderedDisplayName !== attr.name) {
+          node.data.setOrderedDisplayName(attr.name);
+        }
+      });
+    },
+    detachLinkedTables() {
+      // Never reattached by undo, deliberately. A recorded capture describes the program as it
+      // was, so re-linking it to a program that has moved on would reintroduce exactly the
+      // results/program mismatch this exists to prevent. Keeping it off the undo stack is also
+      // what avoids Tree.handleSharedModelChanges resolving `<sharedModelPath>/sharedModel` for
+      // an entry an undo patch has removed, which throws "Not a child".
+      //
+      // This works only because the call comes from a reaction, not from inside the structural
+      // action: withoutUndo is ignored (with a warning) when called from a child action.
+      withoutUndo();
+      const sharedModelManager = self.tileEnv?.sharedModelManager;
+      const sharedModel = self.sharedModel;
+      if (!sharedModelManager?.isReady || !sharedModel) return;
+      // Nothing captured yet means nothing to preserve, and detaching would only break a link the
+      // student is still setting up.
+      if (self.dataSet.cases.length === 0) return;
+      const followers = sharedModelManager.getSharedModelTileIds(sharedModel)
+        .filter(id => id !== self.metadata.id);
+      if (followers.length === 0) {
+        // Nothing is showing the capture -- the student deleted the table -- so there is nobody to
+        // hand it to. It is still stale, though, and leaving the rows in place would have the next
+        // capture reuse columns built for the old program: recordCase writes by position, so a
+        // deleted node silently shifts every value one column left. Clearing it makes the next
+        // Table It or sample rebuild the columns.
+        self.dataSet.removeCases(self.dataSet.cases.map(({ __id__ }) => __id__));
+        self.dataSet.setName(stripCaptureTime(self.dataSet.name));
+        return;
+      }
+
+      // The program walks away from the capture rather than copying it out: the tables keep the
+      // dataset they already hold, with the student's numbers intact, and afterAttach's
+      // sharedModelSetup reaction gives this program a fresh one.
+      //
+      // The tables also keep the stamped name as their record of when that capture ran, while the
+      // program drops the stamp -- it has no recording any more. sharedModelSetup names the
+      // replacement dataset from the tile's own title, so handing the base name back that way is
+      // all this takes.
+      getTileModel(self)?.setTitle(stripCaptureTime(self.dataSet.name));
+      sharedModelManager.removeTileSharedModel(self, sharedModel);
+    },
+  }))
+  .actions(self => ({
     afterAttach() { //
       addDisposer(self, reaction(() => {
         const sharedModelManager = self.tileEnv?.sharedModelManager;
@@ -344,6 +507,31 @@ export const DataflowContentModel = TileContentModel
         updateSharedDataSetColors(dataSets);
       },
       {name: "sharedModelSetup", fireImmediately: true}));
+
+      // A rename on either side moves the other. Only this program's current dataset is watched,
+      // so a table that has been detached keeps the headers it was captured with.
+      addDisposer(self, reaction(
+        () => Array.from(self.program.nodes.values())
+          .map(node => `${node.id}:${node.data.orderedDisplayName ?? ""}`).join("|"),
+        () => self.syncColumnNamesFromNodes(),
+        {name: "syncColumnNamesFromNodes"}));
+
+      addDisposer(self, reaction(
+        () => self.dataSet.attributes.map(attr => `${attr.id}:${attr.name}`).join("|"),
+        () => self.syncNodeNamesFromColumns(),
+        {name: "syncNodeNamesFromColumns"}));
+
+      // Structure only -- node and connection ids. A rename or a value change leaves the capture's
+      // columns describing the program, so neither detaches. A reaction rather than a call inside
+      // each structural action, so that withoutUndo applies; see detachLinkedTables.
+      addDisposer(self, reaction(
+        () => {
+          const nodeIds = Array.from(self.program.nodes.keys()).sort().join(",");
+          const connectionIds = Array.from(self.program.connections.keys()).sort().join(",");
+          return `${nodeIds}|${connectionIds}`;
+        },
+        () => self.detachLinkedTables(),
+        {name: "detachOnStructuralChange"}));
     },
     setProgram(program: any) {
       if (program) {
@@ -446,17 +634,33 @@ export const DataflowContentModel = TileContentModel
     },
   }))
   .actions(self => ({
-    prepareRecording() {
-      self.clearAttributes();
-      // dataSet looks like
-      // Time   |  Node 1 | Node 2 | Node 3 etc
-      //    0   |   val    | val    |  val
-      addAttributeToDataSet(self.dataSet, { name: "Time (sec)" }); //time quantized to nearest sampling rate
-      self.program.nodes.forEach((n) => { //add attributes based on nodes in tile
-        n.data.orderedDisplayName && self.addNewAttrFromNode(n.id, n.data.orderedDisplayName);
-      });
+    /**
+     * Sets the table up for a fresh capture:
+     *   Point | Node 1 | Node 2 | Node 3 ...
+     *     1   |  val   |  val   |  val
+     * The point number stays numeric so the Graph tile infers a numeric x-axis; the capture's
+     * start time goes in the dataset's name instead of a column (see captureName).
+     */
+    prepareCapture(startedAt: Date = new Date()) {
+      // Explicitly false, so `undefined` keeps meaning "saved before this flag existed". A capture
+      // only counts as a recording once the record button says so (setRecordedRun).
+      self.recordedRun = false;
+      if (!self.isCapturePrepared) {
+        self.clearAttributes();
+        addAttributeToDataSet(self.dataSet, { name: kPointAttributeName });
+        self.program.nodes.forEach((n) => { //add attributes based on nodes in tile
+          n.data.orderedDisplayName && self.addNewAttrFromNode(n.id, n.data.orderedDisplayName);
+        });
+      }
+      self.dataSet.setName(captureName(self.dataSet.name, startedAt));
+    },
+    setRecordedRun(value: boolean) {
+      self.recordedRun = value;
     },
     resetRecording() {
+      self.recordedRun = false;
+      // No recording left, so the name should stop claiming one.
+      self.dataSet.setName(stripCaptureTime(self.dataSet.name));
       //clear the dataSet;
       self.clearAttributes();
       self.clearCases();

@@ -1,6 +1,7 @@
 import { applyPatch, getSnapshot, unprotect } from "mobx-state-tree";
 import {
-  defaultDataflowContent, DEFAULT_PROGRAM_ZOOM, DataflowContentModel, DataflowContentModelSnapshotIn
+  defaultDataflowContent, DEFAULT_PROGRAM_ZOOM, DataflowContentModel, DataflowContentModelSnapshotIn,
+  DataflowContentModelType
 } from "./dataflow-content";
 import { newDataRate, newZoom } from "./dataflow-content-test-constants";
 import dataflowThreeNode from "../test-docs/dataflow-1-three-node.json";
@@ -8,6 +9,16 @@ import { DEFAULT_DATA_RATE } from "./utilities/node";
 import { IGeneratorNodeModel } from "../nodes/generator-node";
 import { INumberNodeModel } from "../nodes/number-node";
 import { IDemoOutputNodeModel } from "../nodes/demo-output-node";
+import { DocumentContentModel, DocumentContentSnapshotType } from "../../../models/document/document-content";
+import { IDocumentImportSnapshot } from "../../../models/document/document-content-import-types";
+import { SharedModelDocumentManager } from "../../../models/document/shared-model-document-manager";
+import { ITileEnvironment } from "../../../models/tiles/tile-content";
+import { registerTileTypes } from "../../../register-tile-types";
+import { recordCase } from "./utilities/recording-utilities";
+import { addAttributeToDataSet, addCanonicalCasesToDataSet } from "../../../models/data/data-set";
+import { uniqueId } from "../../../utilities/js-utils";
+
+registerTileTypes(["Dataflow", "Table", "Graph"]);
 
 describe("DataflowContentModel", () => {
   it("should have correct defaults", () => {
@@ -221,4 +232,369 @@ describe("DataflowContentModel", () => {
     });
   });
 
+});
+
+// A real document with a SharedModelDocumentManager, because linkedTableTileId walks the manager's
+// tile list — stubbing it would test the stub. Follows dataflow-node-highlight.test.ts.
+function createDocument(snapshot: IDocumentImportSnapshot) {
+  const sharedModelManager = new SharedModelDocumentManager();
+  const environment: ITileEnvironment = { sharedModelManager };
+  const content = DocumentContentModel.create(snapshot as DocumentContentSnapshotType, environment);
+  sharedModelManager.setDocument(content);
+  return { content, sharedModelManager };
+}
+
+function dataflowContentFrom(doc: any, tileId = "df1") {
+  return doc.getTile(tileId)!.content as DataflowContentModelType;
+}
+
+/** A Dataflow tile alone. Its afterAttach creates the SharedDataSet, so one already exists. */
+function setupContentWithSharedModel() {
+  const { content: doc } = createDocument({ tiles: [{ id: "df1", content: { type: "Dataflow" } as any }] });
+  return dataflowContentFrom(doc);
+}
+
+/** A Dataflow tile plus another tile sharing its dataset. */
+function setupContentWithLinkedTile(otherType: string, otherTileId: string) {
+  const { content: doc, sharedModelManager } = createDocument({
+    tiles: [
+      { id: "df1", content: { type: "Dataflow" } as any },
+      { id: otherTileId, content: { type: otherType } as any }
+    ]
+  });
+  const content = dataflowContentFrom(doc);
+  const otherContent = doc.getTile(otherTileId)!.content;
+  sharedModelManager.addTileSharedModel(otherContent, content.sharedModel!);
+  return { doc, content, otherContent, sharedModelManager };
+}
+
+const setupContentWithLinkedTable = () => {
+  const r = setupContentWithLinkedTile("Table", "table1");
+  return { ...r, tableTileId: "table1", tableContent: r.otherContent };
+};
+const setupContentWithLinkedGraph = () => setupContentWithLinkedTile("Graph", "graph1");
+
+describe("linkedTableTileId", () => {
+  it("is undefined when no tile shares the program's dataset", () => {
+    expect(setupContentWithSharedModel().linkedTableTileId).toBeUndefined();
+  });
+
+  it("returns the id of a Table tile sharing the program's dataset", () => {
+    const { content, tableTileId } = setupContentWithLinkedTable();
+    expect(content.linkedTableTileId).toBe(tableTileId);
+  });
+
+  it("ignores a non-Table tile sharing the dataset", () => {
+    const { content } = setupContentWithLinkedGraph();
+    expect(content.linkedTableTileId).toBeUndefined();
+  });
+});
+
+/** A Dataflow tile whose program holds two named nodes, as a capture's columns come from them. */
+function setupContentWithTwoNamedNodes(...names: string[]) {
+  const content = setupContentWithSharedModel();
+  names.forEach((name, i) => {
+    content.program.addNodeSnapshot({
+      id: `node-${i}`, name: "Number", x: 0, y: 0,
+      data: { type: "Number", orderedDisplayName: name }
+    } as any);
+  });
+  // nodeValue reads from the node's entry for the program's current tick, so a value only exists
+  // once a tick is open and the node has written into it.
+  content.program.addNewTick(uniqueId());
+  names.forEach((_name, i) => {
+    content.program.nodes.get(`node-${i}`)?.data.setNodeValue(400 + i);
+  });
+  return content;
+}
+
+describe("prepareCapture", () => {
+  it("builds a point column followed by one column per named node", () => {
+    const content = setupContentWithTwoNamedNodes("Sensor", "Servo");
+    content.prepareCapture();
+    expect(content.dataSet.attributes.map(a => a.name)).toEqual(["Point", "Sensor", "Servo"]);
+  });
+
+  it("appends the capture's start time to the program's own name", () => {
+    const content = setupContentWithTwoNamedNodes("Sensor", "Servo");
+    content.setContentTitle("Program 1");
+    content.prepareCapture(new Date(2026, 9, 29, 14, 32, 7));
+    expect(content.dataSet.name).toBe("Program 1 14:32:07");
+  });
+
+  // Otherwise a program recorded three times ends up called "Program 1 14:32:07 15:01:02 ...".
+  it("replaces an earlier capture's time rather than appending a second", () => {
+    const content = setupContentWithTwoNamedNodes("Sensor", "Servo");
+    content.setContentTitle("Program 1");
+    content.prepareCapture(new Date(2026, 9, 29, 14, 32, 7));
+    content.prepareCapture(new Date(2026, 9, 29, 15, 1, 2));
+    expect(content.dataSet.name).toBe("Program 1 15:01:02");
+  });
+
+  // Table It prepares the capture and so does the start of a recording. The second preparation
+  // must not mint new attribute ids: the linked table holds the old ones and would go blank.
+  it("keeps the same columns when a prepared capture is prepared again", () => {
+    const content = setupContentWithTwoNamedNodes("Sensor", "Servo");
+    content.prepareCapture();
+    const ids = content.dataSet.attributes.map(a => a.id);
+    content.prepareCapture();
+    expect(content.dataSet.attributes.map(a => a.id)).toEqual(ids);
+  });
+
+  it("rebuilds the columns when the program has changed under them", () => {
+    const content = setupContentWithTwoNamedNodes("Sensor", "Servo");
+    content.prepareCapture();
+    content.program.addNodeSnapshot({
+      id: "node-2", name: "Number", x: 0, y: 0, data: { type: "Number", orderedDisplayName: "Extra" }
+    } as any);
+    content.prepareCapture();
+    expect(content.dataSet.attributes.map(a => a.name)).toEqual(["Point", "Sensor", "Servo", "Extra"]);
+  });
+
+  it("drops the capture time again when the recording is cleared", () => {
+    const content = setupContentWithTwoNamedNodes("Sensor", "Servo");
+    content.setContentTitle("Program 1");
+    content.prepareCapture(new Date(2026, 9, 29, 14, 32, 7));
+    content.resetRecording();
+    expect(content.dataSet.name).toBe("Program 1");
+  });
+});
+
+describe("recordCase", () => {
+  it("writes a 1-based point number in the first column", () => {
+    const content = setupContentWithTwoNamedNodes("Sensor", "Servo");
+    content.prepareCapture();
+    recordCase(content);
+    recordCase(content);
+    const pointId = content.dataSet.attributes[0].id;
+    expect(content.dataSet.getValueAtIndex(0, pointId)).toBe(1);
+    expect(content.dataSet.getValueAtIndex(1, pointId)).toBe(2);
+  });
+
+  // The point column must stay numeric, or the Graph tile infers a categorical x-axis and
+  // getTimeAtRecordedIndex returns 0.
+  it("leaves the point column numeric", () => {
+    const content = setupContentWithTwoNamedNodes("Sensor", "Servo");
+    content.prepareCapture();
+    recordCase(content);
+    recordCase(content);
+    expect(content.dataSet.attributes[0].type).toBe("numeric");
+  });
+
+  // The number comes from the row's position, so a run that starts after single samples continues
+  // from them rather than writing a second point 1.
+  it("numbers from the rows already present", () => {
+    const content = setupContentWithTwoNamedNodes("Sensor", "Servo");
+    content.prepareCapture();
+    recordCase(content);
+    recordCase(content);
+    recordCase(content);
+    const pointId = content.dataSet.attributes[0].id;
+    expect(content.dataSet.getValueAtIndex(2, pointId)).toBe(3);
+  });
+
+  it("writes each node's current value into its own column", () => {
+    const content = setupContentWithTwoNamedNodes("Sensor", "Servo");
+    content.prepareCapture();
+    recordCase(content);
+    const [, sensor, servo] = content.dataSet.attributes;
+    expect(content.dataSet.getValueAtIndex(0, sensor.id)).toBe(400);
+    expect(content.dataSet.getValueAtIndex(0, servo.id)).toBe(401);
+  });
+});
+
+describe("getTimeAtRecordedIndex", () => {
+  it("derives elapsed seconds from the index and the data rate", () => {
+    const content = setupContentWithTwoNamedNodes("Sensor", "Servo");
+    content.setProgramDataRate(100);
+    content.prepareCapture();
+    recordCase(content);
+    recordCase(content);
+    recordCase(content);
+    expect(content.getTimeAtRecordedIndex(0)).toBe(0);
+    expect(content.getTimeAtRecordedIndex(2)).toBeCloseTo(0.2);
+    expect(content.durationOfRecording).toBeCloseTo(0.2);
+  });
+
+  it("returns 0 for an out-of-range index", () => {
+    const content = setupContentWithTwoNamedNodes("Sensor", "Servo");
+    content.prepareCapture();
+    expect(content.getTimeAtRecordedIndex(5)).toBe(0);
+  });
+});
+
+// A single sample puts rows in the table without being a recording. Deriving the program's mode
+// from "the dataset has cases" made one sample flip the tile into Done -- playback shown, program
+// read-only, the record button offering Clear -- which made single-sample capture unusable.
+describe("hasRecordedRun", () => {
+  it("stays false after single samples, so the program keeps running", () => {
+    const content = setupContentWithTwoNamedNodes("Sensor", "Servo");
+    content.prepareCapture();
+    recordCase(content);
+    recordCase(content);
+    expect(content.dataSet.cases).toHaveLength(2);
+    expect(content.hasRecordedRun).toBe(false);
+  });
+
+  it("is true once a recording has been started", () => {
+    const content = setupContentWithTwoNamedNodes("Sensor", "Servo");
+    content.prepareCapture();
+    content.setRecordedRun(true);
+    expect(content.hasRecordedRun).toBe(true);
+  });
+
+  it("goes back to false when the recording is reset", () => {
+    const content = setupContentWithTwoNamedNodes("Sensor", "Servo");
+    content.setRecordedRun(true);
+    content.resetRecording();
+    expect(content.hasRecordedRun).toBe(false);
+  });
+
+  // A document saved before the flag existed has no value for it, and its recording must still
+  // open in Done rather than looking like a fresh program.
+  it("falls back to the row count for a document saved before the flag existed", () => {
+    const legacy = defaultDataflowContent();
+    expect(legacy.recordedRun).toBeUndefined();
+    expect(legacy.hasRecordedRun).toBe(false);
+
+    // Rows with no flag is what a pre-flag saved recording looks like.
+    addAttributeToDataSet(legacy.dataSet, { name: "Time (sec)" });
+    addCanonicalCasesToDataSet(legacy.dataSet, [{ [legacy.dataSet.attributes[0].id]: 0 }]);
+    expect(legacy.recordedRun).toBeUndefined();
+    expect(legacy.hasRecordedRun).toBe(true);
+  });
+});
+
+// One name shared by a node and its column, in both directions. A rename deliberately does not
+// detach -- the columns still describe the program -- so without this the headers go stale.
+describe("node and column name sync", () => {
+  const columnNames = (content: DataflowContentModelType) =>
+    content.dataSet.attributes.map(a => a.name);
+
+  it("renames the column when the node is renamed", () => {
+    const content = setupContentWithTwoNamedNodes("Sensor", "Servo");
+    content.prepareCapture();
+
+    content.program.nodes.get("node-0")!.data.setOrderedDisplayName("Thermometer");
+
+    expect(columnNames(content)).toEqual(["Point", "Thermometer", "Servo"]);
+  });
+
+  it("renames the node when the column is renamed", () => {
+    const content = setupContentWithTwoNamedNodes("Sensor", "Servo");
+    content.prepareCapture();
+    const servoAttr = content.dataSet.attributes[2];
+
+    content.dataSet.setAttributeName(servoAttr.id, "Gripper");
+
+    expect(content.program.nodes.get("node-1")!.data.orderedDisplayName).toBe("Gripper");
+  });
+
+  // Each direction writes only when the two differ, so the pair settles rather than ping-ponging.
+  it("settles instead of looping when a name changes", () => {
+    const content = setupContentWithTwoNamedNodes("Sensor", "Servo");
+    content.prepareCapture();
+
+    content.program.nodes.get("node-0")!.data.setOrderedDisplayName("Thermometer");
+
+    expect(columnNames(content)).toEqual(["Point", "Thermometer", "Servo"]);
+    expect(content.program.nodes.get("node-0")!.data.orderedDisplayName).toBe("Thermometer");
+  });
+
+  // The point column carries no node id, and nothing should try to trace it to one.
+  it("leaves the point column alone", () => {
+    const content = setupContentWithTwoNamedNodes("Sensor", "Servo");
+    content.prepareCapture();
+
+    content.program.nodes.get("node-0")!.data.setOrderedDisplayName("Thermometer");
+
+    expect(content.dataSet.attributes[0].name).toBe("Point");
+  });
+
+  // A capture the program no longer holds describes the old program, so renames must not reach it.
+  // Between captures the dataset holds the default x | y placeholder. Those columns describe no
+  // node, so syncing from them renamed the program's first block to "y".
+  it("does not rename a node after the recording is cleared", () => {
+    const content = setupContentWithTwoNamedNodes("Sensor", "Servo");
+    content.prepareCapture();
+    content.resetRecording();
+    content.syncNodeNamesFromColumns();
+    expect([...content.program.nodes.values()].map(n => n.data.orderedDisplayName))
+      .toEqual(["Sensor", "Servo"]);
+  });
+
+  it("does not touch a dataset the program has detached", () => {
+    const { content, doc, sharedModelManager } = setupContentWithLinkedTable();
+    const tableContent = doc.getTile("table1")!.content as any;
+
+    // Real nodes, and the production linking path, so the table genuinely shares the capture --
+    // without both, this test renames nothing and asserts against a default x|y dataset.
+    ["Sensor", "Servo"].forEach((displayName, i) => {
+      content.program.addNodeSnapshot({
+        id: `node-${i}`, name: "Number", x: 0, y: 0,
+        data: { type: "Number", orderedDisplayName: displayName }
+      } as any);
+    });
+    sharedModelManager.removeTileSharedModel(tableContent, content.sharedModel!);
+    content.addLinkedTile("table1");
+    content.prepareCapture();
+    recordCase(content);
+    expect(tableContent.dataSet.attributes.map((a: any) => a.name)).toEqual(["Point", "Sensor", "Servo"]);
+
+    content.detachLinkedTables();
+    content.program.nodes.get("node-0")!.data.setOrderedDisplayName("Thermometer");
+
+    expect(tableContent.dataSet.attributes.map((a: any) => a.name)).toEqual(["Point", "Sensor", "Servo"]);
+  });
+});
+
+
+describe("a capture whose last table has been deleted", () => {
+  // recordCase writes by position, so reusing columns built for the old program silently shifts
+  // every value when a node has gone -- Servo's reading under Sensor's header.
+  it("is cleared on a structural change, so the next capture rebuilds its columns", () => {
+    const content = setupContentWithTwoNamedNodes("Sensor", "Servo");
+    content.prepareCapture();
+    recordCase(content);
+    expect(content.dataSet.cases).toHaveLength(1);
+
+    // No table follows it -- the student deleted theirs.
+    content.program.removeNode("node-0");
+
+    expect(content.dataSet.cases).toHaveLength(0);
+  });
+});
+
+describe("a recording that has not ticked yet", () => {
+  // The columns are already prepared but no rows exist, so a toolbar click that re-prepared would
+  // clear recordedRun and leave the program in Ready when the recording stopped.
+  it("keeps recordedRun when the table is touched before the first row", () => {
+    const content = setupContentWithTwoNamedNodes("Sensor", "Servo");
+    content.prepareCapture();
+    content.setRecordedRun(true);
+    expect(content.dataSet.cases).toHaveLength(0);
+
+    content.prepareCapture();          // what a re-prepare would do
+    expect(content.hasRecordedRun).toBe(false);   // ...which is why the button must not call it
+  });
+});
+
+// Copying a tile remaps every attribute id (getUpdatedSharedDataSetIds), which is how CLUE works.
+// Pairing columns to nodes by position rather than by an id embedded in the attribute is what
+// keeps the name sync working afterwards.
+describe("name sync after a copy has remapped the attribute ids", () => {
+  it("still renames the column when the node is renamed", () => {
+    const content = setupContentWithTwoNamedNodes("Sensor", "Servo");
+    content.prepareCapture();
+
+    // Stand in for the copy: ids with no node reference, same order and names.
+    const originals = content.dataSet.attributes.map(a => ({ name: a.name }));
+    content.clearAttributes();
+    originals.forEach(({ name }) => addAttributeToDataSet(content.dataSet, { name }));
+    expect(content.dataSet.attributes.every(a => !a.id.includes("*"))).toBe(true);
+
+    content.program.nodes.get("node-0")!.data.setOrderedDisplayName("Thermometer");
+
+    expect(content.dataSet.attributes.map(a => a.name)).toEqual(["Point", "Thermometer", "Servo"]);
+  });
 });

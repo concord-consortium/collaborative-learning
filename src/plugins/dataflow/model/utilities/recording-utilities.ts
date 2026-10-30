@@ -13,16 +13,15 @@ export function getAttributeIdForNode(dataSet: IDataSet, nodeIndex: number) {
   return dataSet.attributes[attrIndex]?.id;
 }
 
-export function recordCase(content: DataflowContentModelType, recordIndex: number) {
-  const { dataSet, programDataRate, program } = content;
+export function recordCase(content: DataflowContentModelType) {
+  const { dataSet, program } = content;
 
-  //Attributes look like Time (quantized) as col 1 followed by all nodes
+  //Attributes look like the point number as col 1 followed by all nodes
   const aCase: ICaseCreation = {};
 
-  //Quantize and write time
-  const timeQuantizedKey = dataSet.attributes[0].id;
-  const recordTimeQuantized = (recordIndex * programDataRate) / 1000; //in seconds
-  aCase[timeQuantizedKey] = recordTimeQuantized;
+  // The point number is the row's position, so a recorded run started after single samples
+  // continues their numbering instead of restarting at 1.
+  aCase[dataSet.attributes[0].id] = dataSet.cases.length + 1;
 
   //loop through attribute (nodes) and write each value
   let idx = 0;

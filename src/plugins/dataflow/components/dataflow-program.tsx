@@ -499,7 +499,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       case ProgramMode.Recording:
         reteManager.tickAndProcessNodes();
         if (!readOnly) {
-          recordCase(this.props.tileContent, recordIndex);
+          recordCase(this.props.tileContent);
         }
         this.incrementRecordIndex();
         break;
@@ -523,7 +523,17 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
 
     switch (programMode){
       case ProgramMode.Ready:
-        tileContent.prepareRecording();
+        // Only when there is nothing to keep, so a run started after single samples appends to
+        // them rather than discarding what the student captured.
+        //
+        // Not yet reachable with samples present: determineProgramMode returns Ready only for an
+        // empty dataset, so a tile holding single samples reports Done and the button offers Clear
+        // rather than Record. Reworking that state machine is CLUE-771; this guard is here so the
+        // append is correct the moment Ready can be reached with rows in the table.
+        if (tileContent.dataSet.cases.length === 0) {
+          tileContent.prepareCapture();
+        }
+        tileContent.setRecordedRun(true);
         this.setState({isPlaying: false, playBackIndex: 0}); //reset isPlaying
         this.setState({isRecording: true});
         break;
@@ -544,13 +554,16 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   private determineProgramMode = () => {
     const { isRecording } = this.state;
     const { tileContent } = this.props;
-    if (!isRecording && tileContent.isDataSetEmptyCases){
+    // Keyed on hasRecordedRun, not on "the dataset has cases": a single sample puts rows in the
+    // table without being a recording, and treating it as one made the tile read-only and showed
+    // playback.
+    if (!isRecording && !tileContent.hasRecordedRun){
       return ProgramMode.Ready;
     }
     else if (isRecording){
       return ProgramMode.Recording;
     }
-    else if (!isRecording && !tileContent.isDataSetEmptyCases){
+    else if (!isRecording && tileContent.hasRecordedRun){
      return ProgramMode.Done;
     }
     return ProgramMode.Ready;

@@ -1,8 +1,10 @@
 import ClueCanvas from '../../../support/elements/common/cCanvas';
 import DataflowToolTile from '../../../support/elements/tile/DataflowToolTile';
+import TableToolTile from '../../../support/elements/tile/TableToolTile';
 
 let clueCanvas = new ClueCanvas;
 let dataflowToolTile = new DataflowToolTile;
+let tableToolTile = new TableToolTile;
 let dragXDestination = 300;
 let dragYDestination = 50;
 
@@ -544,6 +546,34 @@ context('Dataflow Tool Tile', function () {
     cy.get(".primary-workspace [data-testid='connect-device-button']")
       .should("have.class", "connect-attention");
   });
+  // CLUE-740. Covers the two things only a real document shows: the button is actually in the
+  // toolbar after Table It and Graph It, and a sample reaches a table that the click created.
+  it("records single samples into a table it creates", () => {
+    loadEditor(false);
+    clueCanvas.addTile("dataflow");
+    dataflowToolTile.getCreateNodeButton("number").click();
+
+    cy.log("Record Single Sample sits after Table It and Graph It");
+    dataflowToolTile.getRecordSampleButton().should("exist");
+    cy.get(".primary-workspace .dataflow-toolbar .toolbar-button").then($buttons => {
+      const classes = [...$buttons].map(b => b.className);
+      const firstView = classes.findIndex(c => c.includes("data-set-view"));
+      const sample = classes.findIndex(c => c.includes("record-sample"));
+      expect(sample).to.be.greaterThan(firstView);
+    });
+
+    cy.log("the first sample creates the table and lands in it");
+    dataflowToolTile.getRecordSampleButton().click();
+    tableToolTile.getTableTile().should("exist");
+    tableToolTile.getTableTile().find(".rdg-row:not(.input-row)").should("have.length", 1);
+
+    cy.log("a second sample is the next point");
+    dataflowToolTile.getRecordSampleButton().click();
+    // Excluding .input-row: an editable table always renders one, so "at least 2" was satisfied
+    // by a single sample and the second click proved nothing.
+    tableToolTile.getTableTile().find(".rdg-row:not(.input-row)").should("have.length", 2);
+  });
+
   it("Sensor Node and Record Data", () => {
     const sensorNode = "sensor";
     loadEditor(false);

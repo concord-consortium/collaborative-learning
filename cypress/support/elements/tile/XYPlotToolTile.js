@@ -26,8 +26,12 @@ class XYPlotToolTile {
     cy.get('[data-test=link-tile-select]').select(table);
     cy.get('.modal-button').contains("Graph It!").click();
 }
+  // Matches rather than names the option: a program that has recorded carries its capture time in
+  // its name (see captureName in dataflow-content), so the label is "Program 1 14:32:07".
   linkProgram(program) {
-      cy.get('[data-test=link-tile-select]').select(program);
+      cy.get('[data-test=link-tile-select] option').contains(program).then($option => {
+        cy.get('[data-test=link-tile-select]').select($option.text());
+      });
       cy.get('.modal-button').contains("Graph It!").click();
   }
   getGraphDot(workspaceClass) {

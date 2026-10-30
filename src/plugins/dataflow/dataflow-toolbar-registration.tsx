@@ -11,6 +11,7 @@ import { DataflowContentModelType } from "./model/dataflow-content";
 import { resetProgramForTile } from "./utilities/device-actions";
 import { ConnectDeviceButton } from "./components/toolbar/dataflow-connect-button";
 import { ZoomInButton, ZoomOutButton, FitAllButton, PanButton } from "./components/toolbar/dataflow-zoom-pan-buttons";
+import { DataflowTableButton, RecordSingleSampleButton } from "./components/toolbar/dataflow-table-buttons";
 
 import DeleteIcon from "../../assets/icons/delete/delete-selection-icon.svg";
 import ResetIcon from "./assets/icons/reset-icon.svg";
@@ -95,9 +96,21 @@ const ResetProgramButton = observer(function ResetProgramButton({ name }: IToolb
 registerTileToolbarButtons('dataflow',
 [
   {
-    // Immediate view. Takes an argument saying what kind of tile it should create.
+    // Immediate view, unchanged and still the shared component. The dataflow toolbar uses it for
+    // Graph It; Table It is "table-it" below, so this one is untouched by CLUE-740.
     name: "data-set-view",
     component: DataSetViewButton
+  },
+  {
+    // Dataflow's Table It. Its own name rather than overriding data-set-view, so Graph It keeps
+    // the shared behavior and icon. Reuses an already-linked table instead of always adding one,
+    // which is what keeps a capture tied to the program it describes.
+    name: "table-it",
+    component: DataflowTableButton
+  },
+  {
+    name: "record-sample",
+    component: RecordSingleSampleButton
   },
   {
     // Dialog-mediated view. Also takes an argument for tile type.
