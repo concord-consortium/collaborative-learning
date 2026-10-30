@@ -357,6 +357,22 @@ describe("WebSerialTransport open steps", () => {
     expect((t.lastOpenError as Error).name).toBe("NetworkError");
   });
 
+  it("open resolves failed and keeps the error when the chooser can't be shown", async () => {
+    stubSerial(fakePort({ usbProductId: 67 }));
+    (navigator as any).serial.requestPort = jest.fn(async () => { throw new DOMException("", "SecurityError"); });
+    const t = new WebSerialTransport();
+    expect(await t.open()).toBe("failed");
+    expect((t.lastOpenError as Error).name).toBe("SecurityError");
+  });
+
+  it("open resolves canceled and keeps no error when the chooser is dismissed", async () => {
+    stubSerial(fakePort({ usbProductId: 67 }));
+    (navigator as any).serial.requestPort = jest.fn(async () => { throw new DOMException("", "NotFoundError"); });
+    const t = new WebSerialTransport();
+    expect(await t.open()).toBe("canceled");
+    expect(t.lastOpenError).toBeUndefined();
+  });
+
   it("forget is reported unsupported when the port has none", async () => {
     jest.useFakeTimers();
     const port = fakePort({ usbProductId: 67 });

@@ -74,7 +74,9 @@ export class WebSerialTransport implements IDeviceTransport {
       this.deviceFamily = this.determineDeviceFamily(this.deviceInfo);
     } catch (error) {
       console.error("error requesting port: ", error);
-      return (error as Error | undefined)?.name === "NotFoundError" ? "canceled" : "failed";
+      if ((error as Error | undefined)?.name === "NotFoundError") return "canceled";
+      this.lastOpenError = error;
+      return "failed";
     }
     const openingPort = this.port;
     const outcome = await this.openWithLimit(openingPort, options);
