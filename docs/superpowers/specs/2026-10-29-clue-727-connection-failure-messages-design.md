@@ -295,6 +295,13 @@ Canceling the device chooser is not a failure: no message, no help.
     reads "**Something else went wrong:** {new help headline, lowercased}" with **Show steps for
     this**, which replaces the steps with the new kind's and removes the notice. The steps being
     read stay until then.
+  - **The device is unplugged, or isn't connected** (after a Disconnect or a canceled chooser).
+    Without a notice, the steps' present-tense headline ("The {label} isn't sending anything.")
+    reads as if it were still true. But the steps often say to unplug the board and click Connect,
+    so the notice gives the next step rather than saying the steps no longer apply. A teal notice
+    reads "**The {label} was unplugged.** Plug it back in and click Connect." or "**The {label}
+    isn't connected.** Click Connect to try again.", with no button. The steps stay at full
+    strength. The notice stays while the next attempt runs, until its outcome replaces or clears it.
   - **The same failure kind again** shows no notice; the steps still apply.
   - A later change replaces the notice: for example, working again after a different failure shows
     the green notice.
@@ -368,7 +375,7 @@ recorded only for steps that happened:
 | `abandonedOpen` | An open given up on settles later, or the best-effort `close()` / `forget()` finish | what each one did |
 | `deviceLost` | An unplug or lost connection is detected (not a Disconnect the user chose), or the firmware update of a stalled Spiker:bit fails | `reason`: `unplugged`, `lost` or `updateFailed` |
 | `showConnectHelp` / `hideConnectHelp` | The help drawer opens or closes | failure `kind`; for hide, `trigger`: `close` (✕) or `closeHelp` (the notice's button) |
-| `connectHelpNotice` | A notice appears in the help drawer, or the student uses its button | `notice`: `working` or `differentProblem`, the new `kind` for the latter, and `action`: `shown` or `clicked` |
+| `connectHelpNotice` | A notice appears in the help drawer, or the student uses its button | `notice`: `working`, `differentProblem`, `unplugged` or `notConnected`, the new `kind` for `differentProblem`, and `action`: `shown` or `clicked` |
 | `disconnectDevice`, `resetProgram` | Unchanged | — |
 
 How the log reads:
@@ -411,7 +418,7 @@ changes behavior, the code.
     canceled attempt.
   - The pane: the status area keeps the same height in every state, and the text for each state and
     failure kind.
-  - The drawer: opening from More…, the live status, the two notices and their buttons, the steps
+  - The drawer: opening from More…, the live status, the notices and their buttons, the steps
     staying put when the situation changes, tabs with Ada, Ada's launcher and focus trap, and focus
     return.
   - The unseen-error announcement.
