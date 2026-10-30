@@ -38,7 +38,7 @@ jest.mock("./firestore-transport", () => ({
   FirestoreTransport: jest.fn().mockImplementation(() => new FakeTransport())
 }));
 
-// The drawer's focus-trap is orthogonal to highlight ownership and pulls in
+// Ada's focus trap is orthogonal to highlight ownership and pulls in
 // @concord-consortium/accessibility-tools, which does real DOM focus work that jsdom doesn't need to
 // exercise here — a no-op keeps these tests about highlight state, not focus trapping.
 const mockUseTutorDrawerTrap = jest.fn();
