@@ -74,8 +74,9 @@ help. Help for the same problem and device is disabled instead.
 
 **When it opens and closes.** The help's state is on the `DeviceConnection`, not in the palette,
 so it stays through the palette closing and opening, and through the tile it was opened from being
-deleted. It closes only when the student clicks ✕ or a notice's Close help, which log
-`hideConnectHelp`; closing the palette logs nothing.
+deleted. The help is shared: opening the palette again, from this tile or another Dataflow tile,
+shows the same help, notice included. It closes only when the student clicks ✕ or a notice's Close
+help, which log `hideConnectHelp`; closing the palette logs nothing.
 
 **Focus.** Opening the help from Help moves focus to its title. A palette that opens with the help
 already showing focuses its first control, as it always does. Closing the help moves focus to the
@@ -90,7 +91,14 @@ is out of view is scrolled into view when the arrow keys reach it.
 **Placement.** The palette opens below the connect button and flips above it when there is no room
 below; then its bottom edge stays at the button and it grows upward. Its height is capped at the
 room on that side of the button (never less than 200px). Only the help's body scrolls, so the
-header and any notice stay in view.
+header and any notice stay in view. Both columns start at the top, so the two headings stay level.
+
+The palette's `shift` slides the wider palette left to stay within the tile's scroll area, so it
+may no longer line up with the connect button. Where the scroll area is narrower than the palette,
+it sticks out; there is no stacked layout for narrow columns. Opening help in an open palette may
+flip it to the other side of the connect button, whatever `flip` does with the taller palette, and
+opening or closing help may slide it sideways once. A palette that opens with help already showing
+picks its side with the help column counted in its size.
 
 **Screen readers.** The help is part of the palette, so its notices are announced only while the
 palette is open. A notice that appeared while the palette was closed is already in place when the
