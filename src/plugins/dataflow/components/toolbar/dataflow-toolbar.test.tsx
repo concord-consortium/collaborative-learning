@@ -809,6 +809,23 @@ describe("Dataflow connect button and palette", () => {
       expect(document.activeElement).toBe(help);
     });
 
+    it("arrow keys from the help's title go to the neighboring controls in document order", () => {
+      const r = openConnectPalette();
+      act(() => r.content.setConnectFailure(openFailedOn()));
+      fireEvent.click(within(palette()).getByRole("button", { name: "Help" }));
+      const title = palette().querySelector<HTMLElement>(".connection-help-title")!;
+      expect(document.activeElement).toBe(title);
+      const controls = within(palette()).getAllByRole("button");
+      const mainControls = controls.filter(c => !c.closest(".connection-help"));
+
+      fireEvent.keyDown(title, { key: "ArrowDown" });
+      expect(document.activeElement).toBe(within(palette()).getByRole("button", { name: "Close connection help" }));
+
+      act(() => title.focus());
+      fireEvent.keyDown(title, { key: "ArrowUp" });
+      expect(document.activeElement).toBe(mainControls[mainControls.length - 1]);
+    });
+
     it("arrow keys scroll a help control into view", () => {
       // jsdom has no scrollIntoView.
       const original = Object.getOwnPropertyDescriptor(Element.prototype, "scrollIntoView");

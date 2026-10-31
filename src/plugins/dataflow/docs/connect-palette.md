@@ -44,9 +44,9 @@ with an ellipsis.
 A Connect, Reconnect or Disconnect the student clicked closes the palette when it succeeds, and
 moves focus to the connect button if the palette had it. While the Connection help shows, the
 palette stays open instead: the help's notices report the result, and the student may still be
-following its steps. Otherwise the palette stays open: a stall that recovers on its own, with late
-first data or a finished update, only updates its lines. Escape closes the palette, moves focus to
-the connect button, and leaves the help as it is.
+following its steps. A change the student didn't click, such as a stall that recovers on its own
+with late first data or a finished update, never closes the palette; it only updates its lines.
+Escape closes the palette, moves focus to the connect button, and leaves the help as it is.
 
 ## Connection help
 

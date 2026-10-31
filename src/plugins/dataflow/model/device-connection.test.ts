@@ -1455,6 +1455,23 @@ describe("DeviceConnection", () => {
         expect(connection.help).toBeUndefined();
       });
 
+      it("opening help on a stale failure while the device is working sets the working notice", async () => {
+        const transport = makeTransport(["opened"], { sendsData: false });
+        const { connection } = setup([makeTransport(["failed"]), transport]);
+        expect(await connection.connect("arduino")).toBe("openFailed");
+        const topic = connection.helpTopic("openFailed", "tile-1")!;
+        const p = connection.connect("arduino");
+        await jest.advanceTimersByTimeAsync(kFirstDataTimeoutMs);
+        expect(await p).toBe("noData");
+        transport.onData!("emg:1\r\n");
+        expect(connection.currentProblem).toBe("working");
+
+        const listener = { onNotice: jest.fn() };
+        connection.openHelp(topic, listener);
+        expect(connection.help!.notice).toEqual({ type: "working" });
+        expect(listener.onNotice).toHaveBeenCalledWith({ type: "working" });
+      });
+
       it("a different failure sets differentProblem; the same kind sets no notice", async () => {
         const { connection } = setup([
           makeTransport(["failed"]), makeTransport(["opened"], { sendsData: false }), makeTransport(["failed"])

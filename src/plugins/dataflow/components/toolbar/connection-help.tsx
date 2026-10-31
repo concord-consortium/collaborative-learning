@@ -52,8 +52,9 @@ export const ConnectionHelp = observer(function ConnectionHelp({ connection, onC
 
   // The request is taken once, so the title takes focus only when Help opens the help. Without it,
   // the title would take focus again on every later replacement of `help`, such as a Details toggle
-  // or a notice appearing. A palette opened with help already showing lands on its first control,
-  // since the palette's own mount effect runs after this one.
+  // or a notice appearing. A palette opened with help already showing has no request pending, so
+  // it lands on its first control. Only if a request were still pending as the palette mounts would
+  // this effect run first, and the palette's own mount effect, which runs after, would still win.
   useEffect(() => {
     if (connection.takeHelpFocusRequest()) titleRef.current?.focus({ preventScroll: true });
   }, [connection, help]);

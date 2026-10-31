@@ -162,10 +162,21 @@ const ConnectPalette = observer(function ConnectPalette(
     e.preventDefault();
     const controls = Array.from(containerRef.current?.querySelectorAll<HTMLElement>("[role='button']") ?? []);
     if (!controls.length) return;
-    const current = controls.indexOf(document.activeElement as HTMLElement);
-    const next = step === "first" ? 0
-      : step === "last" ? controls.length - 1
-      : (current + step + controls.length) % controls.length;
+    const active = document.activeElement as HTMLElement;
+    const current = controls.indexOf(active);
+    let next: number;
+    if (current >= 0 || step === "first" || step === "last") {
+      next = step === "first" ? 0
+        : step === "last" ? controls.length - 1
+        : (current + step + controls.length) % controls.length;
+    } else {
+      // Focus is on something that isn't a control, such as the help's title: go to the nearest
+      // control after it (or before it), wrapping when there is none.
+      const isAfter = (c: HTMLElement) => active.compareDocumentPosition(c) === Node.DOCUMENT_POSITION_FOLLOWING;
+      const firstAfter = controls.findIndex(isAfter);
+      if (step > 0) next = Math.max(firstAfter, 0);
+      else next = firstAfter < 0 ? controls.length - 1 : (firstAfter || controls.length) - 1;
+    }
     const target = controls[next];
     target.focus({ preventScroll: true });
     // The help's body scrolls on its own, so a control in it can be out of view, and focus() here

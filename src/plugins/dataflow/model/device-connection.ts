@@ -402,6 +402,9 @@ export class DeviceConnection {
     this.help = { shown: topic, notice: undefined, detailsExpanded: false };
     this.helpListener = listener;
     this.helpFocusRequested = true;
+    // A failure stays shown until another attempt starts, so the state may have moved on since the
+    // problem was last reported, such as another tile connecting; this applies it once.
+    this.problemChanged(this.currentProblem);
   }
 
   // Whether the help column should move focus to its heading. Answers true once per opening.
