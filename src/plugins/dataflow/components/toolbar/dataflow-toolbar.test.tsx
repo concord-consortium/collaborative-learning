@@ -784,11 +784,74 @@ describe("Dataflow connect button and palette", () => {
       act(() => r.stores.serialDevice.clearActiveDevice());
     });
 
-    it("a failure shows the problem on line 2 and keeps the device rows", () => {
+    it("a failure shows the problem with Help on line 2 and keeps the device rows", () => {
       const r = openConnectPalette();
       act(() => r.content.setConnectFailure(openFailedOn()));
-      expect(palette().querySelector(".connect-detail.problem")).toHaveTextContent("Couldn't open it.");
+      const detail = palette().querySelector(".connect-detail.problem");
+      expect(detail).toHaveTextContent("Couldn't open it.");
+      const help = within(palette()).getByRole("button", { name: "Help" });
+      expect(help).toHaveClass("connect-help");
+      expect(detail!.contains(help)).toBe(true);
       expect(within(palette()).getAllByRole("button", { name: /^Connect / })).toHaveLength(3);
+    });
+
+    it("Help joins the arrow-key navigation", () => {
+      const r = renderConnect();
+      act(() => r.content.setConnectFailure({
+        attemptId: "attempt-1", kind: "inUse", choice: "spikerbit", step: "open", elapsedMs: 0
+      }));
+      fireEvent.click(getTrigger(r.container));
+      const help = within(palette()).getByRole("button", { name: "Help" });
+      const controls = within(palette()).getAllByRole("button");
+      expect(controls[0]).toBe(help);
+      controls[1].focus();
+      fireEvent.keyDown(controls[1], { key: "ArrowUp" });
+      expect(document.activeElement).toBe(help);
+    });
+
+    it("arrow keys from the help's title go to the neighboring controls in document order", () => {
+      const r = openConnectPalette();
+      act(() => r.content.setConnectFailure(openFailedOn()));
+      fireEvent.click(within(palette()).getByRole("button", { name: "Help" }));
+      const title = palette().querySelector<HTMLElement>(".connection-help-title")!;
+      expect(document.activeElement).toBe(title);
+      const controls = within(palette()).getAllByRole("button");
+      const mainControls = controls.filter(c => !c.closest(".connection-help"));
+
+      fireEvent.keyDown(title, { key: "ArrowDown" });
+      expect(document.activeElement).toBe(within(palette()).getByRole("button", { name: "Close connection help" }));
+
+      act(() => title.focus());
+      fireEvent.keyDown(title, { key: "ArrowUp" });
+      expect(document.activeElement).toBe(mainControls[mainControls.length - 1]);
+    });
+
+    it("arrow keys scroll a help control into view", () => {
+      // jsdom has no scrollIntoView.
+      const original = Object.getOwnPropertyDescriptor(Element.prototype, "scrollIntoView");
+      const scrollIntoView = jest.fn();
+      Element.prototype.scrollIntoView = scrollIntoView;
+      try {
+        const r = openConnectPalette();
+        act(() => r.content.setConnectFailure(openFailedOn()));
+        const help = within(palette()).getByRole("button", { name: "Help" });
+        fireEvent.click(help);
+        act(() => help.focus());
+        fireEvent.keyDown(help, { key: "End" });
+        expect(document.activeElement).toHaveTextContent("Details");
+        expect(scrollIntoView).toHaveBeenCalledWith({ block: "nearest" });
+        expect(scrollIntoView.mock.contexts).toEqual([document.activeElement]);
+        // Controls outside the help's body don't scroll.
+        fireEvent.keyDown(document.activeElement!, { key: "Home" });
+        fireEvent.keyDown(document.activeElement!, { key: "ArrowLeft" });
+        expect(document.activeElement).toHaveTextContent("Details");
+        fireEvent.keyDown(document.activeElement!, { key: "ArrowRight" });
+        expect(document.activeElement).toBe(help);
+        expect(scrollIntoView).toHaveBeenCalledTimes(2);
+      } finally {
+        if (original) Object.defineProperty(Element.prototype, "scrollIntoView", original);
+        else Reflect.deleteProperty(Element.prototype, "scrollIntoView");
+      }
     });
 
     it("an attempt from tile A shows its step in tile B's palette; only A records the failure", () => {
@@ -804,6 +867,7 @@ describe("Dataflow connect button and palette", () => {
       expect(a.content.connectFailure).toBeDefined();
       expect(b.content.connectFailure).toBeUndefined();
       expect(palette().querySelector(".connect-detail.problem")).toBeNull();
+      expect(within(palette()).queryByRole("button", { name: "Help" })).toBeNull();
     });
 
     it("step text is outside the live region; a problem is inside it", () => {
@@ -999,6 +1063,16 @@ describe("Dataflow connect button and palette", () => {
       expect(changes.every(c => c.oldValue?.includes("connect-loss-pulse"))).toBe(true);
     });
 
+    it("'It was unplugged.' has no Help", () => {
+      const r = renderConnect();
+      fakeConnected(r);
+      lose(r, "unplugged");
+      fireEvent.click(getTrigger(r.container));
+      const palette = screen.getByRole("group", { name: "Device connection" });
+      expect(within(palette).getByText("It was unplugged.")).toBeInTheDocument();
+      expect(within(palette).queryByRole("button", { name: "Help" })).toBeNull();
+    });
+
     it("a later loss pulses again", () => {
       jest.useFakeTimers();
       const r = renderConnect();
@@ -1101,6 +1175,38 @@ describe("Dataflow connect button and palette", () => {
     expect(r.content.connectPaletteOpen).toBe(false);
     expect(screen.queryByRole("group", { name: "Device connection" })).toBeNull();
     expect(document.activeElement).toBe(getTrigger(r.container));
+  });
+
+  const helpTopicFor = (r: ReturnType<typeof renderConnect>, kind: "openFailed" | "noData") => ({
+    kind, choice: "spikerbit" as const, details: "Step: open.", tileId: r.tileId
+  });
+
+  it("a successful Connect leaves the palette open while help shows", async () => {
+    const r = openConnectPalette();
+    act(() => r.connection.openHelp(helpTopicFor(r, "openFailed")));
+    jest.spyOn(r.connection, "connect").mockImplementation(async () => {
+      r.stores.serialDevice.setActiveDevice("spikerbit", fakeTransport());
+      return "connected";
+    });
+    act(() => screen.getByRole("button", { name: "Connect Spiker:bit" }).focus());
+    await act(async () => { fireEvent.click(screen.getByRole("button", { name: "Connect Spiker:bit" })); });
+    expect(r.content.connectPaletteOpen).toBe(true);
+    expect(paletteGroup()).toContainElement(document.activeElement as HTMLElement);
+  });
+
+  it("a successful Disconnect leaves the palette open while help shows, with the not-connected notice", async () => {
+    const r = openConnectPalette();
+    fakeConnected(r);
+    act(() => r.connection.openHelp(helpTopicFor(r, "noData")));
+    jest.spyOn(r.connection, "disconnect").mockImplementation(async () => {
+      r.stores.serialDevice.clearActiveDevice();
+    });
+    act(() => screen.getByRole("button", { name: "Disconnect" }).focus());
+    await act(async () => { fireEvent.click(screen.getByRole("button", { name: "Disconnect" })); });
+    expect(r.content.connectPaletteOpen).toBe(true);
+    const helpRegion = screen.getByRole("region", { name: "Connection help" });
+    expect(within(helpRegion).getByText(/isn't connected\./)).toBeInTheDocument();
+    expect(paletteGroup()).toContainElement(document.activeElement as HTMLElement);
   });
 
   // Mocks connection.connect with an attempt that stays pending until the test resolves it.

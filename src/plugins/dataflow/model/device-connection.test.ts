@@ -210,6 +210,17 @@ describe("DeviceConnection", () => {
     expect(connection.busyChoice).toBeUndefined();
   });
 
+  it("a faked failure ends Connect without asking for a device, and says it was faked", async () => {
+    const { connection, createWebSerialTransport } = setup([makeTransport()], { getFakeFailure: () => "inUse" });
+    expect(await connection.connect("arduino")).toBe("inUse");
+    expect(createWebSerialTransport).not.toHaveBeenCalled();
+    expect(connection.lastFailure).toMatchObject({
+      kind: "inUse", choice: "arduino", error: { name: "FakeConnectFailure" }
+    });
+    expect(connection.busyChoice).toBeUndefined();
+    expect(connection.paletteView).toBe("devices");
+  });
+
   it("reconnect with no previous connection returns canceled", async () => {
     const { connection, createWebSerialTransport } = setup([]);
     expect(await connection.reconnect()).toBe("canceled");
@@ -834,6 +845,7 @@ describe("DeviceConnection", () => {
       expect(connection.lastFailure?.kind).toBe("noData");
       await connection.disconnect();
       expect(connection.lastFailure).toBeUndefined();
+      expect(connection.currentProblem).toBe("notConnected");
     });
 
     it("a loss after a noData stall calls onLost and clears lastFailure, so the loss shows", async () => {
@@ -948,14 +960,18 @@ describe("DeviceConnection", () => {
       stepped.observer().onFirmwareChecked!(null, true);
       await jest.advanceTimersByTimeAsync(kUpdateStartMs);
       expect(await p).toBe("updateStalled");
+      expect(connection.currentProblem).toBe("updateStalled");
       expect(connection.updateResumed).toBe(false);
       expect(connection.actionsEnabled).toBe(true);
+      connection.openHelp(connection.helpTopic("updateStalled", "tile-1")!);
 
       stepped.observer().onUpdateProgress!(20);
       expect(connection.lastFailure).toBeUndefined();
       expect(listener.onStallChanged).toHaveBeenLastCalledWith(connection.attempt, undefined);
       expect(connection.updateResumed).toBe(true);
       expect(connection.attempt!.updatePercent).toBe(20);
+      expect(connection.currentProblem).toBe("updating");
+      expect(connection.help!.notice).toEqual({ type: "updating" });
       // Closing the board would stop the flash.
       expect(connection.actionsEnabled).toBe(false);
       expect(connection.paletteView).toBe("actions");
@@ -973,6 +989,7 @@ describe("DeviceConnection", () => {
       expect(listener.onStallChanged).toHaveBeenLastCalledWith(connection.attempt, stall);
       expect(connection.updateResumed).toBe(false);
       expect(connection.actionsEnabled).toBe(true);
+      expect(connection.help!.notice).toBeUndefined();
 
       stepped.observer().onUpdateProgress!(60);
       expect(connection.updateResumed).toBe(true);
@@ -999,6 +1016,7 @@ describe("DeviceConnection", () => {
         stepped.observer().onUpdateFinished!();
         await stepped.activate();
         expect(connection.lastFailure).toBeUndefined();
+        expect(connection.currentProblem).toBeUndefined();
         expect(listener.onStallChanged).toHaveBeenCalledWith(connection.attempt, undefined);
         expect(connection.attempt!.outcome).toBe("updateStalled");
 
@@ -1409,6 +1427,218 @@ describe("DeviceConnection", () => {
       openOptions().onAbandoned!({ late: "opened" });
       expect(listener.onAbandonedOpen).toHaveBeenCalledWith(connection.attempt, { close: "failed", forget: "ok" });
       expect(listener.onAbandonedOpen).toHaveBeenLastCalledWith(connection.attempt, { late: "opened" });
+    });
+
+    describe("the connection help", () => {
+      it("a success after help opens sets the working notice without changing the shown topic", async () => {
+        const transport = makeTransport(["opened"], { sendsData: false });
+        const { connection } = setup([transport]);
+        const p = connection.connect("arduino");
+        expect(connection.currentProblem).toBeUndefined();
+        await jest.advanceTimersByTimeAsync(kFirstDataTimeoutMs);
+        expect(await p).toBe("noData");
+        expect(connection.currentProblem).toBe("noData");
+        const topic = connection.helpTopic("noData", "tile-1")!;
+        expect(topic).toEqual({
+          kind: "noData", choice: "arduino", details: "Step: waitForData. Nothing for 5 s.", tileId: "tile-1"
+        });
+        const listener = { onNotice: jest.fn() };
+        connection.openHelp(topic, listener);
+        expect(connection.help).toEqual({ shown: topic, notice: undefined, detailsExpanded: false });
+
+        transport.onData!("emg:1\r\n");
+        expect(connection.currentProblem).toBe("working");
+        expect(connection.help!.notice).toEqual({ type: "working" });
+        expect(connection.help!.shown).toBe(topic);
+        expect(listener.onNotice).toHaveBeenCalledWith({ type: "working" });
+        connection.closeHelp();
+        expect(connection.help).toBeUndefined();
+      });
+
+      it("opening help on a stale failure while the device is working sets the working notice", async () => {
+        const transport = makeTransport(["opened"], { sendsData: false });
+        const { connection } = setup([makeTransport(["failed"]), transport]);
+        expect(await connection.connect("arduino")).toBe("openFailed");
+        const topic = connection.helpTopic("openFailed", "tile-1")!;
+        const p = connection.connect("arduino");
+        await jest.advanceTimersByTimeAsync(kFirstDataTimeoutMs);
+        expect(await p).toBe("noData");
+        transport.onData!("emg:1\r\n");
+        expect(connection.currentProblem).toBe("working");
+
+        const listener = { onNotice: jest.fn() };
+        connection.openHelp(topic, listener);
+        expect(connection.help!.notice).toEqual({ type: "working" });
+        expect(listener.onNotice).toHaveBeenCalledWith({ type: "working" });
+      });
+
+      it("a different failure sets differentProblem; the same kind sets no notice", async () => {
+        const { connection } = setup([
+          makeTransport(["failed"]), makeTransport(["opened"], { sendsData: false }), makeTransport(["failed"])
+        ]);
+        expect(await connection.connect("arduino")).toBe("openFailed");
+        const shown = connection.helpTopic("openFailed", "tile-1")!;
+        connection.openHelp(shown);
+
+        const p = connection.connect("arduino");
+        await jest.advanceTimersByTimeAsync(kFirstDataTimeoutMs);
+        expect(await p).toBe("noData");
+        const noData = {
+          kind: "noData", choice: "arduino", details: "Step: waitForData. Nothing for 5 s.", tileId: "tile-1"
+        };
+        expect(connection.help!.notice).toEqual({ type: "differentProblem", topic: noData });
+        expect(connection.help!.shown).toBe(shown);
+
+        expect(await connection.connect("arduino")).toBe("openFailed");
+        expect(connection.help!.notice).toBeUndefined();
+        expect(connection.help!.shown).toBe(shown);
+      });
+
+      it("a kind whose help matches the shown one's sets no notice", async () => {
+        const { connection } = setup([makeTransport(["failed"]), makeTransport(["timeout"])]);
+        expect(await connection.connect("arduino")).toBe("openFailed");
+        connection.openHelp(connection.helpTopic("openFailed", "tile-1")!);
+        expect(await connection.connect("arduino")).toBe("openTimeout");
+        expect(connection.help!.notice).toBeUndefined();
+      });
+
+      it("an unplug replaces the working notice; a running attempt leaves a notice alone", async () => {
+        const { transport, finishOpen } = makeOpeningTransport();
+        const first = makeTransport(["opened"], { sendsData: false });
+        const { connection } = setup([first, transport]);
+        const p = connection.connect("arduino");
+        await jest.advanceTimersByTimeAsync(kFirstDataTimeoutMs);
+        expect(await p).toBe("noData");
+        connection.openHelp(connection.helpTopic("noData", "tile-1")!);
+        first.onData!("emg:1\r\n");
+        expect(connection.help!.notice).toEqual({ type: "working" });
+
+        const reconnecting = connection.connect("arduino");
+        expect(connection.currentProblem).toBeUndefined();
+        expect(connection.help!.notice).toEqual({ type: "working" });
+        await finishOpen();
+        transport.onData!("emg:1\r\n");
+        expect(await reconnecting).toBe("connected");
+
+        transport.onDisconnect!("unplugged");
+        expect(connection.lossReason).toBe("unplugged");
+        expect(connection.help!.notice).toEqual({ type: "unplugged" });
+      });
+
+      it("an unplug while the steps are followed keeps them, and the same problem after it clears the notice",
+          async () => {
+        const first = makeTransport(["opened"], { sendsData: false });
+        const { transport: second, finishOpen } = makeOpeningTransport();
+        const { connection } = setup([first, second]);
+        const p = connection.connect("arduino");
+        await jest.advanceTimersByTimeAsync(kFirstDataTimeoutMs);
+        expect(await p).toBe("noData");
+        const shown = connection.helpTopic("noData", "tile-1")!;
+        const listener = { onNotice: jest.fn() };
+        connection.openHelp(shown, listener);
+
+        first.onDisconnect!("unplugged");
+        expect(connection.currentProblem).toBe("unplugged");
+        expect(connection.help).toEqual({ shown, notice: { type: "unplugged" }, detailsExpanded: false });
+        expect(listener.onNotice).toHaveBeenCalledWith({ type: "unplugged" });
+
+        const again = connection.connect("arduino");
+        expect(connection.help!.notice).toEqual({ type: "unplugged" });
+        await finishOpen();
+        await jest.advanceTimersByTimeAsync(kFirstDataTimeoutMs);
+        expect(await again).toBe("noData");
+        expect(connection.help!.notice).toBeUndefined();
+        expect(connection.help!.shown).toBe(shown);
+      });
+
+      it("an unplug replaces a differentProblem notice", async () => {
+        const transport = makeTransport(["opened"], { sendsData: false });
+        const { connection } = setup([makeTransport(["failed"]), transport]);
+        await connection.connect("arduino");
+        connection.openHelp(connection.helpTopic("openFailed", "tile-1")!);
+        const p = connection.connect("arduino");
+        await jest.advanceTimersByTimeAsync(kFirstDataTimeoutMs);
+        expect(await p).toBe("noData");
+        expect(connection.help!.notice).toMatchObject({ type: "differentProblem", topic: { kind: "noData" } });
+        transport.onDisconnect!("unplugged");
+        expect(connection.help!.notice).toEqual({ type: "unplugged" });
+      });
+
+      it("a Disconnect or a canceled chooser sets the notConnected notice", async () => {
+        const { connection } = setup([makeTransport(["opened"], { sendsData: false }), makeTransport(["canceled"])]);
+        const p = connection.connect("arduino");
+        await jest.advanceTimersByTimeAsync(kFirstDataTimeoutMs);
+        expect(await p).toBe("noData");
+        connection.openHelp(connection.helpTopic("noData", "tile-1")!);
+        await connection.disconnect();
+        expect(connection.help!.notice).toEqual({ type: "notConnected" });
+
+        connection.openHelp(connection.helpTopic("noData", "tile-1")!);
+        expect(await connection.connect("arduino")).toBe("canceled");
+        expect(connection.help!.notice).toEqual({ type: "notConnected" });
+      });
+
+      it("the same kind on a different device sets differentProblem with that device's topic", async () => {
+        const { connection } = setup([makeTransport(["failed"]), makeTransport(["failed"])]);
+        expect(await connection.connect("arduino")).toBe("openFailed");
+        connection.openHelp(connection.helpTopic("openFailed", "tile-1")!);
+        expect(await connection.connect("microbitHub")).toBe("openFailed");
+        expect(connection.help!.notice).toEqual({
+          type: "differentProblem",
+          topic: expect.objectContaining({ kind: "openFailed", choice: "microbitHub", tileId: "tile-1" })
+        });
+      });
+
+      it("showNoticeTopic shows the different problem's steps and clears the notice", async () => {
+        const { connection } = setup([makeTransport(["failed"]), makeTransport(["opened"], { sendsData: false })]);
+        await connection.connect("arduino");
+        connection.openHelp(connection.helpTopic("openFailed", "tile-1")!);
+        connection.toggleHelpDetails();
+        expect(connection.help!.detailsExpanded).toBe(true);
+        const p = connection.connect("arduino");
+        await jest.advanceTimersByTimeAsync(kFirstDataTimeoutMs);
+        await p;
+        connection.showNoticeTopic();
+        expect(connection.help).toEqual({
+          shown: expect.objectContaining({ kind: "noData", tileId: "tile-1" }), notice: undefined,
+          detailsExpanded: false
+        });
+      });
+
+      it("a problem found after connecting has details of its own", async () => {
+        const transport = makeTransport();
+        const { connection } = setup([transport]);
+        await connection.connect("arduino");
+        expect(connection.currentProblem).toBe("working");
+        transport.onDisconnect!("lost");
+        expect(connection.currentProblem).toBe("lost");
+        expect(connection.helpTopic("lost", "tile-1")).toEqual({
+          kind: "lost", choice: "arduino", details: "After connecting. The connection closed without an unplug.",
+          tileId: "tile-1"
+        });
+      });
+
+      it("helpShowing is true only for the shown device and the same help", async () => {
+        const { connection } = setup([makeTransport(["failed"])]);
+        expect(await connection.connect("arduino")).toBe("openFailed");
+        const shown = connection.helpTopic("openFailed", "tile-1")!;
+        expect(connection.helpShowing(shown)).toBe(false);
+        connection.openHelp(shown);
+        expect(connection.helpShowing(shown)).toBe(true);
+        expect(connection.helpShowing({ ...shown, kind: "openTimeout" })).toBe(true);
+        expect(connection.helpShowing({ ...shown, kind: "noData" })).toBe(false);
+        expect(connection.helpShowing({ ...shown, choice: "microbitHub" })).toBe(false);
+        connection.closeHelp();
+        expect(connection.helpShowing(shown)).toBe(false);
+      });
+
+      it("takeHelpFocusRequest answers true once per opening", async () => {
+        const { connection } = setup([makeTransport(["failed"])]);
+        await connection.connect("arduino");
+        connection.openHelp(connection.helpTopic("openFailed", "tile-1")!);
+        expect(connection.takeHelpFocusRequest()).toBe(true);
+        expect(connection.takeHelpFocusRequest()).toBe(false);
+      });
     });
   });
 

@@ -95,18 +95,18 @@ describe("connectPaletteStatus", () => {
   it("a failure before or at the open shows the problem on the device list", () => {
     expect(connectPaletteStatus({ ...base, failure: failure("openTimeout") })).toEqual({
       line1: "Not connected",
-      line2: { text: "Stuck while opening.", tone: "problem" }, announce: true
+      line2: { text: "Stuck while opening.", tone: "problem", helpKind: "openTimeout" }, announce: true
     });
   });
 
   it("a stall keeps the connected line", () => {
     expect(connectPaletteStatus({ ...connectedBase, failure: failure("noData") })).toEqual({
       line1: "Connected: Spiker:bit",
-      line2: { text: "No data yet.", tone: "problem" }, announce: true
+      line2: { text: "No data yet.", tone: "problem", helpKind: "noData" }, announce: true
     });
   });
 
-  it("unplugged after connecting", () => {
+  it("unplugged after connecting has no Help", () => {
     expect(connectPaletteStatus({ ...base, loss: "unplugged" })).toEqual({
       line1: "Not connected", line2: { text: "It was unplugged.", tone: "problem" }, announce: true
     });
@@ -115,14 +115,14 @@ describe("connectPaletteStatus", () => {
   it("lost after connecting", () => {
     expect(connectPaletteStatus({ ...base, loss: "lost" })).toEqual({
       line1: "Not connected",
-      line2: { text: "Connection lost.", tone: "problem" }, announce: true
+      line2: { text: "Connection lost.", tone: "problem", helpKind: "lost" }, announce: true
     });
   });
 
   it("not responding later", () => {
     expect(connectPaletteStatus({ ...connectedBase, dataReceived: true, notResponding: true })).toEqual({
       line1: "Connected: Spiker:bit",
-      line2: { text: "Not responding.", tone: "problem" }, announce: true
+      line2: { text: "Not responding.", tone: "problem", helpKind: "notResponding" }, announce: true
     });
   });
 
@@ -136,7 +136,7 @@ describe("connectPaletteStatus", () => {
     });
     expect(connectPaletteStatus({ ...connectedBase, check: "noAnswer" })).toEqual({
       line1: "Connected: Spiker:bit",
-      line2: { text: "No answer.", tone: "problem" }, announce: true
+      line2: { text: "No answer.", tone: "problem", helpKind: "noAnswer" }, announce: true
     });
   });
 

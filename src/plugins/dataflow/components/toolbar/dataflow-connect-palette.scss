@@ -4,6 +4,11 @@
 // The height of each of the palette's two status lines.
 $connect-line-height: 18px;
 
+$connect-palette-width: 270px;
+// How much wider the palette is with the Connection help showing, the gap and divider included.
+$connect-help-width: 300px;
+$connect-column-gap: 8px;
+
 @keyframes connect-slowpulse {
   0% { background-color: $star-yellow; }
   50% { background-color: #eee; }
@@ -47,9 +52,54 @@ $connect-line-height: 18px;
   .toolbar-palette.dataflow-connect-palette {
     @include tile-toolbar;
     box-sizing: border-box;
+    display: flex;
     padding: 8px;
     text-align: left;
-    width: 270px;
+    width: $connect-palette-width;
+
+    &.with-help {
+      width: $connect-palette-width + $connect-help-width;
+    }
+
+    // The palette's own column is the same width with or without the help. Both columns start at
+    // the top, so the two headings are level.
+    .connect-main {
+      align-self: flex-start;
+      flex: 1 1 0;
+      min-width: 0;
+    }
+
+    // As tall as the palette, which grows to fit the help up to the max-height its positioning
+    // sets. Past that, only the body scrolls, so the header, its ✕ and any notice stay in view.
+    .connection-help {
+      align-self: stretch;
+      border-left: solid 1px $workspace-teal;
+      box-sizing: border-box;
+      display: flex;
+      flex: none;
+      flex-direction: column;
+      margin-left: $connect-column-gap;
+      min-height: 0;
+      padding-left: $connect-column-gap;
+      width: $connect-help-width - $connect-column-gap;
+
+      .connection-help-top {
+        flex: none;
+      }
+
+      .connection-help-body {
+        flex: 1 1 auto;
+        min-height: 0;
+        overflow-y: auto;
+      }
+
+      // Compact, so the header row is no taller than the heading beside it.
+      .connection-help-close {
+        flex: none;
+        line-height: 16px;
+        padding: 0 6px;
+      }
+    }
 
     .connect-heading {
       font-weight: bold;
@@ -105,6 +155,13 @@ $connect-line-height: 18px;
             background: $workspace-teal;
             height: 100%;
           }
+        }
+
+        // Fits the line's height.
+        .connect-help {
+          flex: none;
+          line-height: 16px;
+          padding: 0 6px;
         }
       }
     }
