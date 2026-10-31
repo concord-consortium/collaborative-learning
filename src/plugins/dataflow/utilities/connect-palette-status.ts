@@ -9,8 +9,9 @@ export type PaletteLineTone = "plain" | "hint" | "problem";
 
 export interface IPaletteStatus {
   line1: string;
-  // `progress` (0-100) draws the progress bar.
-  line2?: { text: string; tone: PaletteLineTone; progress?: number };
+  // `progress` (0-100) draws the progress bar. `helpKind` marks a line the palette follows with
+  // a Help button.
+  line2?: { text: string; tone: PaletteLineTone; helpKind?: ProblemKind; progress?: number };
   // Whether line 2 belongs in the live region: problems only.
   announce: boolean;
 }
@@ -51,7 +52,7 @@ type Line2 = NonNullable<IPaletteStatus["line2"]>;
 const status = (line1: string, line2?: Line2): IPaletteStatus =>
   ({ line1, line2, announce: line2?.tone === "problem" });
 
-const problem = (kind: ProblemKind): Line2 => ({ text: paletteProblemText(kind), tone: "problem" });
+const problem = (kind: ProblemKind): Line2 => ({ text: paletteProblemText(kind), tone: "problem", helpKind: kind });
 
 export function connectPaletteStatus(input: IPaletteStatusInput): IPaletteStatus {
   const { attempt, isConnected, dataReceived, label, failure, loss, notResponding, check, updateResumed } = input;
