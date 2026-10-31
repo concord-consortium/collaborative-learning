@@ -185,6 +185,7 @@ There are a number of URL parameters that can aid in testing:
 |`fakeClass`     |string                   |Class id for demo, qa, or test modes.|
 |`fakeUser`      |`(student\|teacher):<id>`|Configure user type and (optionally) id.|
 |`qaGroup`       |string                   |Group id for qa, e.g. automated tests.|
+|`fakeConnectFailure`|none, `openFailed`, `openTimeout`, `inUse`, `updateFailed`|Every DataFlow Connect fails this way without asking for a device, so the failure messages and Connection help can be tried without hardware. No value means `openFailed`.|
 |`firebase`      |`emulator\|<URL>`        |Target emulator for firebase realtime database calls.|
 |`firestore`     |`emulator\|<URL>`        |Target emulator for firestore database calls.|
 |`functions`     |`emulator\|<URL>`        |Target emulator-hosted firebase functions.|

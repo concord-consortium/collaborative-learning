@@ -1,6 +1,6 @@
 import {
-  errorInfo, failureDetails, helpDetails, helpTries, kDeviceChoiceLabels, paletteProblemText, problemHeadline,
-  ProblemKind, sameHelp
+  errorInfo, failureDetails, fakeConnectFailure, helpDetails, helpTries, kDeviceChoiceLabels, kFakeableFailures,
+  kStallKinds, paletteProblemText, problemHeadline, ProblemKind, sameHelp
 } from "./connect-failures";
 
 const allHelpKinds: ProblemKind[] = [
@@ -70,5 +70,14 @@ describe("connect failures", () => {
     expect(sameHelp("openFailed", "openTimeout", "arduino")).toBe(true);
     expect(sameHelp("noData", "notResponding", "arduino")).toBe(false);
     expect(sameHelp("updateFailed", "updateStalled", "spikerbit")).toBe(false);
+  });
+  it("fakeConnectFailure takes a fakeable kind, defaults to openFailed, and ignores anything else", () => {
+    expect(fakeConnectFailure(undefined)).toBeUndefined();
+    expect(fakeConnectFailure(null)).toBe("openFailed");
+    expect(fakeConnectFailure("")).toBe("openFailed");
+    for (const kind of kFakeableFailures) expect(fakeConnectFailure(kind)).toBe(kind);
+    expect(fakeConnectFailure("noData")).toBeUndefined();
+    expect(fakeConnectFailure("bogus")).toBeUndefined();
+    for (const kind of kStallKinds) expect(kFakeableFailures).not.toContain(kind);
   });
 });

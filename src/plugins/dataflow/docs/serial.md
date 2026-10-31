@@ -283,6 +283,15 @@ record the answer here and change the code if it differs.
 5. Whether closing the library connection during a flash stops it cleanly, and whether the next
    connect's update then succeeds.
 
+### Trying the failures without a device
+
+With the `fakeConnectFailure` URL parameter, every Connect ends with that failure kind without
+opening the browser's chooser: `openFailed` (also when the parameter has no value), `openTimeout`,
+`inUse` or `updateFailed`. It works in every `appMode`. The stalls can't be faked this way, since
+their failures show only while a device is open. The failure's error is `FakeConnectFailure`, so
+the help's Details and the `connectResult` log event both say it was faked. Since nothing opens,
+Reconnect never appears.
+
 ### Channel sources
 
 Each DataFlow tile owns its own `NodeChannelInfo[]`. While a tile is mounted and editable,
