@@ -4,7 +4,7 @@ import React, {
 import { observer } from "mobx-react";
 import { isAlive } from "mobx-state-tree";
 import classNames from "classnames";
-import { autoUpdate, flip, getOverflowAncestors, offset, shift, useFloating } from "@floating-ui/react";
+import { autoUpdate, flip, getOverflowAncestors, offset, shift, size, useFloating } from "@floating-ui/react";
 import { TileToolbarButton } from "../../../../components/toolbar/tile-toolbar-button";
 import { useTileToolbarTileElement } from "../../../../components/toolbar/tile-toolbar-context";
 import { IToolbarButtonComponentProps } from "../../../../components/toolbar/toolbar-button-manager";
@@ -31,6 +31,10 @@ import "./dataflow-connect-palette.scss";
 
 // How long a failure announcement stays in its live region before it is cleared.
 const kFailureAnnounceMs = 5000;
+
+// The palette's least height, used when the room beside the connect button is smaller. It keeps the
+// help's header and a notice in view with some of the help's body below them to scroll.
+const kMinPaletteHeight = 200;
 
 // How each navigation key moves focus: by a signed number of controls, or to the first or last one.
 const kFocusSteps: Record<string, number | "first" | "last"> = {
@@ -82,7 +86,16 @@ const ConnectPalette = observer(function ConnectPalette(
     middleware: [
       offset(1),
       flip({ fallbackPlacements: ["top-start"], boundary }),
-      shift({ boundary })
+      shift({ boundary }),
+      // Caps the height at the room on the palette's side of the button, so a tall help column
+      // scrolls instead of running past the scroll area. With the palette above the button, its
+      // bottom edge stays at the button and it grows upward.
+      size({
+        boundary,
+        apply({ availableHeight, elements }) {
+          elements.floating.style.maxHeight = `${Math.max(availableHeight, kMinPaletteHeight)}px`;
+        }
+      })
     ],
     elements: { reference: triggerElement }
   });
@@ -153,7 +166,11 @@ const ConnectPalette = observer(function ConnectPalette(
     const next = step === "first" ? 0
       : step === "last" ? controls.length - 1
       : (current + step + controls.length) % controls.length;
-    controls[next].focus({ preventScroll: true });
+    const target = controls[next];
+    target.focus({ preventScroll: true });
+    // The help's body scrolls on its own, so a control in it can be out of view, and focus() here
+    // doesn't scroll.
+    if (target.closest(".connection-help-body")) target.scrollIntoView?.({ block: "nearest" });
   }
 
   // A successful action closes the palette; the trigger's name and color then report the result.

@@ -809,6 +809,34 @@ describe("Dataflow connect button and palette", () => {
       expect(document.activeElement).toBe(help);
     });
 
+    it("arrow keys scroll a help control into view", () => {
+      // jsdom has no scrollIntoView.
+      const original = Object.getOwnPropertyDescriptor(Element.prototype, "scrollIntoView");
+      const scrollIntoView = jest.fn();
+      Element.prototype.scrollIntoView = scrollIntoView;
+      try {
+        const r = openConnectPalette();
+        act(() => r.content.setConnectFailure(openFailedOn()));
+        const help = within(palette()).getByRole("button", { name: "Help" });
+        fireEvent.click(help);
+        act(() => help.focus());
+        fireEvent.keyDown(help, { key: "End" });
+        expect(document.activeElement).toHaveTextContent("Details");
+        expect(scrollIntoView).toHaveBeenCalledWith({ block: "nearest" });
+        expect(scrollIntoView.mock.contexts).toEqual([document.activeElement]);
+        // Controls outside the help's body don't scroll.
+        fireEvent.keyDown(document.activeElement!, { key: "Home" });
+        fireEvent.keyDown(document.activeElement!, { key: "ArrowLeft" });
+        expect(document.activeElement).toHaveTextContent("Details");
+        fireEvent.keyDown(document.activeElement!, { key: "ArrowRight" });
+        expect(document.activeElement).toBe(help);
+        expect(scrollIntoView).toHaveBeenCalledTimes(2);
+      } finally {
+        if (original) Object.defineProperty(Element.prototype, "scrollIntoView", original);
+        else Reflect.deleteProperty(Element.prototype, "scrollIntoView");
+      }
+    });
+
     it("an attempt from tile A shows its step in tile B's palette; only A records the failure", () => {
       const stores = specStores();
       const a = renderConnect({ stores });
@@ -1159,8 +1187,9 @@ describe("Dataflow connect button and palette", () => {
     act(() => screen.getByRole("button", { name: "Disconnect" }).focus());
     await act(async () => { fireEvent.click(screen.getByRole("button", { name: "Disconnect" })); });
     expect(r.content.connectPaletteOpen).toBe(true);
-    expect(screen.getByText(/isn't connected\./)).toBeInTheDocument();
-    expect(document.activeElement).not.toBe(document.body);
+    const helpRegion = screen.getByRole("region", { name: "Connection help" });
+    expect(within(helpRegion).getByText(/isn't connected\./)).toBeInTheDocument();
+    expect(paletteGroup()).toContainElement(document.activeElement as HTMLElement);
   });
 
   // Mocks connection.connect with an attempt that stays pending until the test resolves it.

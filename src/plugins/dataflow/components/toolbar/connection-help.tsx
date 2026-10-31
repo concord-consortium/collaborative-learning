@@ -7,6 +7,8 @@ import { helpTries, kDeviceChoiceLabels, kHelpSuccessLine, problemHeadline } fro
 import { DeviceConnection, HelpNotice, IHelpTopic } from "../../model/device-connection";
 import { PaletteControl } from "./palette-control";
 
+import "./connection-help.scss";
+
 type HelpOperation = "showConnectHelp" | "hideConnectHelp" | "connectHelpNotice";
 
 // Logs from the tile the help was opened from, even after that tile is deleted.

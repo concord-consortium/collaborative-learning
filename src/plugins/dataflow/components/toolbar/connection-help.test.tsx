@@ -259,6 +259,10 @@ describe("ConnectionHelp", () => {
     expect(helpEvents("hideConnectHelp")).toEqual([expect.objectContaining({
       tileId: r.model.id, change: { targetType: "connectHelp", kind: "noData", trigger: "closeHelp" }
     })]);
+    // The click is logged before the help closes.
+    const logged = jest.mocked(logTileChangeEvent).mock.calls
+      .map(([, params]) => [params.operation, (params.change as { action?: string }).action]);
+    expect(logged.slice(-2)).toEqual([["connectHelpNotice", "clicked"], ["hideConnectHelp", undefined]]);
     act(() => r.stores.serialDevice.clearActiveDevice());
   });
 

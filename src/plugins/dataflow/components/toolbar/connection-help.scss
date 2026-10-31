@@ -1,0 +1,86 @@
+@import "../../../../components/vars";
+@import "../../../../components/mixins";
+
+// The Connection help's content. Its place in the palette, what scrolls, and its ✕ are styled with
+// the palette (dataflow-connect-palette.scss).
+.connection-help {
+  .connection-help-header {
+    align-items: flex-start;
+    display: flex;
+    gap: 8px;
+    justify-content: space-between;
+    margin-bottom: 6px;
+  }
+
+  // Styled like the palette's "Device connection" heading.
+  .connection-help-title {
+    font-weight: bold;
+    min-width: 0;
+
+    @include focus-ring(1px);
+  }
+
+  .connection-help-notice {
+    align-items: flex-start;
+    border-radius: 4px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 8px;
+    padding: 8px;
+
+    &.working {
+      background: $learninglog-green-light-8;
+      border: solid 1px $learninglog-green;
+    }
+
+    &.different-problem {
+      background: $problem-orange-light-8;
+      border: solid 1px $problem-orange;
+    }
+
+    &.updating,
+    &.not-connected {
+      background: $workspace-teal-light-9;
+      border: solid 1px $workspace-teal;
+    }
+  }
+
+  .connection-help-body {
+    p {
+      margin: 0 0 8px;
+    }
+
+    ol {
+      margin: 0 0 12px;
+      padding-left: 20px;
+
+      li {
+        margin-bottom: 6px;
+      }
+    }
+  }
+
+  // Stay in place under the working notice, so nothing jumps.
+  .connection-help-steps.faded {
+    opacity: 0.5;
+  }
+
+  .connection-help-headline {
+    font-weight: bold;
+  }
+
+  // Details sizes to its text rather than spanning the column.
+  .connection-help-details {
+    align-items: flex-start;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .connection-help-details-text {
+    font-family: monospace;
+    font-size: 12px;
+    overflow-wrap: anywhere;
+  }
+}
