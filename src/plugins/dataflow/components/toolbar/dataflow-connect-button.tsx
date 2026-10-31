@@ -157,10 +157,12 @@ const ConnectPalette = observer(function ConnectPalette(
   }
 
   // A successful action closes the palette; the trigger's name and color then report the result.
-  // The palette may have been closed and reopened during the attempt, so this closes whichever one
-  // is showing, and moves focus to the trigger only if that palette held it.
+  // While the Connection help shows, the palette stays open instead, since the help's notices
+  // report the result and the student may still be following its steps. The palette may have been
+  // closed and reopened during the attempt, so this closes whichever one is showing, and moves
+  // focus to the trigger only if that palette held it.
   function closeAfterSuccess() {
-    if (!isAlive(content)) return;
+    if (!isAlive(content) || connection.help) return;
     const live = paletteRef.current;
     const paletteHadFocus = !!live && live.contains(document.activeElement);
     const trigger = findTrigger(live);

@@ -1132,6 +1132,37 @@ describe("Dataflow connect button and palette", () => {
     expect(document.activeElement).toBe(getTrigger(r.container));
   });
 
+  const helpTopicFor = (r: ReturnType<typeof renderConnect>, kind: "openFailed" | "noData") => ({
+    kind, choice: "spikerbit" as const, details: "Step: open.", tileId: r.tileId
+  });
+
+  it("a successful Connect leaves the palette open while help shows", async () => {
+    const r = openConnectPalette();
+    act(() => r.connection.openHelp(helpTopicFor(r, "openFailed")));
+    jest.spyOn(r.connection, "connect").mockImplementation(async () => {
+      r.stores.serialDevice.setActiveDevice("spikerbit", fakeTransport());
+      return "connected";
+    });
+    act(() => screen.getByRole("button", { name: "Connect Spiker:bit" }).focus());
+    await act(async () => { fireEvent.click(screen.getByRole("button", { name: "Connect Spiker:bit" })); });
+    expect(r.content.connectPaletteOpen).toBe(true);
+    expect(paletteGroup()).toContainElement(document.activeElement as HTMLElement);
+  });
+
+  it("a successful Disconnect leaves the palette open while help shows, with the not-connected notice", async () => {
+    const r = openConnectPalette();
+    fakeConnected(r);
+    act(() => r.connection.openHelp(helpTopicFor(r, "noData")));
+    jest.spyOn(r.connection, "disconnect").mockImplementation(async () => {
+      r.stores.serialDevice.clearActiveDevice();
+    });
+    act(() => screen.getByRole("button", { name: "Disconnect" }).focus());
+    await act(async () => { fireEvent.click(screen.getByRole("button", { name: "Disconnect" })); });
+    expect(r.content.connectPaletteOpen).toBe(true);
+    expect(screen.getByText(/isn't connected\./)).toBeInTheDocument();
+    expect(document.activeElement).not.toBe(document.body);
+  });
+
   // Mocks connection.connect with an attempt that stays pending until the test resolves it.
   function pendingConnect(r: ReturnType<typeof renderConnect>) {
     let resolveConnect: (result: ConnectResult) => void = () => undefined;

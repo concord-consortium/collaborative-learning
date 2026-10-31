@@ -1,17 +1,21 @@
 import React from "react";
 import { act, fireEvent, render, screen, within } from "@testing-library/react";
 import { runInAction } from "mobx";
+import { destroy } from "mobx-state-tree";
 import { Provider } from "mobx-react";
 import { ModalProvider } from "react-modal-hook";
 import { TileModelContext } from "../../../../components/tiles/tile-api";
 import { getToolbarButtonInfo } from "../../../../components/toolbar/toolbar-button-manager";
 import { LogEventName } from "../../../../lib/logger-types";
+import { SerialDevice } from "../../../../models/stores/serial";
 import { specStores } from "../../../../models/stores/spec-stores";
 import { logTileChangeEvent } from "../../../../models/tiles/log/log-tile-change-event";
 import { TileModel } from "../../../../models/tiles/tile-model";
 import { IConnectFailure, kHelpSuccessLine } from "../../model/connect-failures";
+import { ConnectionAttempt } from "../../model/connection-attempt";
 import { DataflowContentModel } from "../../model/dataflow-content";
 import { getDeviceConnection } from "../../model/device-connection";
+import { openConnectionHelp } from "./connection-help";
 import "../../dataflow-toolbar-registration";
 import "../../dataflow-registration";
 
@@ -20,6 +24,14 @@ jest.mock("../../../../models/tiles/log/log-tile-change-event", () => ({ logTile
 const openFailed: IConnectFailure = {
   attemptId: "attempt-1", kind: "openFailed", choice: "arduino", step: "open", elapsedMs: 1200
 };
+
+const noData: IConnectFailure = {
+  attemptId: "attempt-2", kind: "noData", choice: "arduino", step: "waitForData", elapsedMs: 5000
+};
+
+const fakeTransport = () => ({
+  close: jest.fn(), write: jest.fn(), onData: undefined, onDisconnect: undefined
+}) as unknown as Parameters<SerialDevice["setActiveDevice"]>[1];
 
 function helpEvents(operation: string) {
   return jest.mocked(logTileChangeEvent).mock.calls
@@ -61,6 +73,50 @@ function renderFailedTile(failure = openFailed) {
   });
   fireEvent.click(tile.trigger());
   return { ...tile, stores, connection };
+}
+
+// A tile whose Arduino is open but sends nothing, with the help for that showing in its palette.
+function renderStalledTile() {
+  const stores = specStores();
+  const connection = getDeviceConnection(stores.serialDevice);
+  const tile = renderTile(stores);
+  act(() => {
+    stores.serialDevice.setActiveDevice("arduino", fakeTransport());
+    runInAction(() => {
+      connection.lastChoice = noData.choice;
+      connection.lastFailure = noData;
+    });
+    tile.content.setConnectFailure(noData);
+  });
+  fireEvent.click(tile.trigger());
+  act(() => openConnectionHelp(connection, connection.helpTopic("noData", tile.model.id)!));
+  return { ...tile, stores, connection };
+}
+
+// Records a stall on a tile that showed another problem, with the Arduino open as the stall needs.
+function stallOnArduino(r: ReturnType<typeof renderFailedTile>) {
+  const attempt = new ConnectionAttempt("arduino", "connect");
+  const stall = { ...noData, attemptId: attempt.id };
+  act(() => {
+    r.stores.serialDevice.setActiveDevice("arduino", fakeTransport());
+    runInAction(() => {
+      attempt.opened("waitForData");
+      attempt.end("noData", stall);
+      r.connection.attempt = attempt;
+      r.connection.lastFailure = stall;
+    });
+    r.content.setConnectFailure(stall);
+  });
+}
+
+type Rendered = ReturnType<typeof renderStalledTile>;
+
+// The stalled Arduino starts sending data.
+function startData(r: Pick<Rendered, "connection" | "stores">) {
+  act(() => runInAction(() => {
+    r.connection.lastFailure = undefined;
+    r.stores.serialDevice.markDataReceived();
+  }));
 }
 
 const palette = () => screen.getByRole("group", { name: "Device connection" });
@@ -178,5 +234,155 @@ describe("ConnectionHelp", () => {
     fireEvent.click(b.trigger());
     expect(region()).toBeInTheDocument();
     expect(document.activeElement).toBe(screen.getByRole("button", { name: "Connect Arduino" }));
+  });
+
+  it("Close help closes the help, logs the notice and hideConnectHelp, and focuses the palette's first control", () => {
+    const r = renderStalledTile();
+    startData(r);
+    const notice = within(region()).getByRole("status");
+    expect(notice).toHaveTextContent("It's working now. The Arduino is sending data.");
+    expect(within(notice).getByText("It's working now.").tagName).toBe("STRONG");
+    expect(within(region()).getByText("The Arduino isn't sending anything.").closest(".connection-help-steps"))
+      .toHaveClass("faded");
+    expect(helpEvents("connectHelpNotice")).toEqual([expect.objectContaining({
+      tileId: r.model.id, change: { targetType: "connectHelp", notice: "working", action: "shown" }
+    })]);
+
+    fireEvent.click(within(notice).getByRole("button", { name: "Close help" }));
+    expect(screen.queryByRole("region", { name: "Connection help" })).toBeNull();
+    expect(r.connection.help).toBeUndefined();
+    expect(palette()).toBeInTheDocument();
+    expect(document.activeElement).toBe(palette().querySelector("[role='button']"));
+    expect(helpEvents("connectHelpNotice")[1]).toEqual(expect.objectContaining({
+      change: { targetType: "connectHelp", notice: "working", action: "clicked" }
+    }));
+    expect(helpEvents("hideConnectHelp")).toEqual([expect.objectContaining({
+      tileId: r.model.id, change: { targetType: "connectHelp", kind: "noData", trigger: "closeHelp" }
+    })]);
+    act(() => r.stores.serialDevice.clearActiveDevice());
+  });
+
+  it("Show steps for this replaces the steps, focuses the title and logs connectHelpNotice clicked", () => {
+    const r = renderFailedTile();
+    fireEvent.click(help());
+    stallOnArduino(r);
+    const notice = within(region()).getByRole("status");
+    expect(notice).toHaveTextContent("Something else went wrong: the Arduino isn't sending anything.");
+    expect(within(region()).getByText("The browser couldn't open the Arduino.").closest(".connection-help-steps"))
+      .not.toHaveClass("faded");
+
+    fireEvent.click(within(notice).getByRole("button", { name: "Show steps for this" }));
+    expect(within(region()).getByRole("status")).toBeEmptyDOMElement();
+    expect(within(region()).queryByText("The browser couldn't open the Arduino.")).toBeNull();
+    expect(within(region()).getByText("The Arduino isn't sending anything.")).toBeInTheDocument();
+    expect(within(region()).getAllByRole("listitem")[0]).toHaveTextContent("Click Reconnect.");
+    expect(document.activeElement).toHaveClass("connection-help-title");
+    expect(helpEvents("connectHelpNotice")).toEqual([
+      expect.objectContaining({
+        change: { targetType: "connectHelp", notice: "differentProblem", kind: "noData", action: "shown" }
+      }),
+      expect.objectContaining({
+        tileId: r.model.id,
+        change: { targetType: "connectHelp", notice: "differentProblem", kind: "noData", action: "clicked" }
+      })
+    ]);
+    act(() => r.stores.serialDevice.clearActiveDevice());
+  });
+
+  it("Help next to a different problem replaces the help and clears the notice", () => {
+    const r = renderFailedTile();
+    fireEvent.click(help());
+    stallOnArduino(r);
+    expect(within(region()).getByText(/Something else went wrong/)).toBeInTheDocument();
+    expect(within(palette()).getByText("No data yet.")).toBeInTheDocument();
+    expect(help()).not.toHaveAttribute("aria-disabled");
+    fireEvent.click(help());
+    expect(within(region()).getByText("The Arduino isn't sending anything.")).toBeInTheDocument();
+    expect(within(region()).queryByText(/Something else went wrong/)).toBeNull();
+    act(() => r.stores.serialDevice.clearActiveDevice());
+  });
+
+  it("an unplug or a disconnect shows what to do next, and leaves the steps as they were", () => {
+    const r = renderStalledTile();
+    act(() => runInAction(() => {
+      r.connection.lastFailure = undefined;
+      r.stores.serialDevice.clearActiveDevice("unplugged");
+    }));
+    const notice = within(region()).getByRole("status");
+    expect(notice).toHaveTextContent("The Arduino was unplugged. Plug it back in and click Connect.");
+    expect(within(notice).getByText("The Arduino was unplugged.").tagName).toBe("STRONG");
+    expect(within(notice).queryByRole("button")).toBeNull();
+    expect(within(region()).getByText("The Arduino isn't sending anything.").closest(".connection-help-steps"))
+      .not.toHaveClass("faded");
+
+    act(() => r.stores.serialDevice.clearLastLoss());
+    expect(notice).toHaveTextContent("The Arduino isn't connected. Click Connect to try again.");
+    expect(helpEvents("connectHelpNotice")).toEqual([
+      expect.objectContaining({
+        tileId: r.model.id, change: { targetType: "connectHelp", notice: "unplugged", action: "shown" }
+      }),
+      expect.objectContaining({
+        tileId: r.model.id, change: { targetType: "connectHelp", notice: "notConnected", action: "shown" }
+      })
+    ]);
+  });
+
+  it("keeps working when the tile that opened it is deleted", () => {
+    const r = renderStalledTile();
+    const tileId = r.model.id;
+    destroy(r.model);
+    r.unmount();
+    startData(r);
+
+    const b = renderTile(r.stores);
+    fireEvent.click(b.trigger());
+    expect(within(region()).getByRole("status")).toHaveTextContent("It's working now.");
+    fireEvent.click(within(region()).getByRole("button", { name: "Close help" }));
+    expect(r.connection.help).toBeUndefined();
+    expect(helpEvents("hideConnectHelp")).toEqual([expect.objectContaining({ tileId })]);
+    act(() => r.stores.serialDevice.clearActiveDevice());
+  });
+
+  it("the help stays when the palette closes by Escape, outside click or the connect button, and shows again", () => {
+    const r = renderFailedTile();
+    fireEvent.click(help());
+    const closers: Array<() => void> = [
+      () => press("Escape"),
+      () => fireEvent.pointerDown(document.body),
+      () => fireEvent.click(r.trigger())
+    ];
+    closers.forEach(close => {
+      close();
+      expect(r.content.connectPaletteOpen).toBe(false);
+      expect(screen.queryByRole("region", { name: "Connection help" })).toBeNull();
+      fireEvent.click(r.trigger());
+      expect(within(region()).getByText("The browser couldn't open the Arduino.")).toBeInTheDocument();
+      expect(document.activeElement).toBe(palette().querySelector("[role='button']"));
+      expect(document.activeElement).not.toHaveClass("connection-help-title");
+    });
+    expect(r.connection.help).toBeDefined();
+    expect(helpEvents("hideConnectHelp")).toEqual([]);
+  });
+
+  it("a notice that appears while the palette is closed is there when it opens", () => {
+    const r = renderStalledTile();
+    press("Escape");
+    expect(screen.queryByRole("region", { name: "Connection help" })).toBeNull();
+    startData(r);
+    fireEvent.click(r.trigger());
+    expect(within(region()).getByText("It's working now.")).toBeInTheDocument();
+    act(() => r.stores.serialDevice.clearActiveDevice());
+  });
+
+  it("another tile's palette shows the same help, and ✕ there closes it for both", () => {
+    const a = renderFailedTile();
+    fireEvent.click(help());
+    press("Escape");
+    const b = renderTile(a.stores);
+    fireEvent.click(b.trigger());
+    expect(within(region()).getByText("The browser couldn't open the Arduino.")).toBeInTheDocument();
+    fireEvent.click(within(region()).getByRole("button", { name: "Close connection help" }));
+    expect(a.connection.help).toBeUndefined();
+    expect(helpEvents("hideConnectHelp")).toHaveLength(1);
   });
 });
