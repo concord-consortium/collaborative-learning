@@ -42,8 +42,59 @@ with an ellipsis.
 ## When it closes
 
 A Connect, Reconnect or Disconnect the student clicked closes the palette when it succeeds, and
-moves focus to the connect button if the palette had it. Otherwise the palette stays open: a stall
-that recovers on its own, with late first data or a finished update, only updates its lines.
+moves focus to the connect button if the palette had it. While the Connection help shows, the
+palette stays open instead: the help's notices report the result, and the student may still be
+following its steps. Otherwise the palette stays open: a stall that recovers on its own, with late
+first data or a finished update, only updates its lines. Escape closes the palette, moves focus to
+the connect button, and leaves the help as it is.
+
+## Connection help
+
+A problem on line 2 has a Help button after its text. Help is an action, not a status: it opens
+the Connection help (`ConnectionHelp` in `components/toolbar/connection-help.tsx`) as a second
+column on the right of the palette, which grows from 270px to about 570px. The palette's own
+column keeps its place and width. While the help for that problem is showing, Help is disabled,
+with the title "This problem's help is showing."
+
+The column holds, top to bottom:
+
+- A header, "Connection help", with a ✕ ("Close connection help") that closes it.
+- A notice, when the problem has changed since the help opened (below). It is in a live region.
+- The headline, which names the device ("The browser couldn't open the Arduino.").
+- "Try these in order. When it works, the connect button turns green.", then the numbered tries.
+  A later try can be marked "Still not working?"
+- Details, a toggle that shows the error behind the problem, such as its error name.
+
+The steps stay as they were opened, so they don't change under the student. The notice says what
+has changed, following `currentProblem` on the connection: "It's working now" (with Close help),
+"The update is going again", "Something else went wrong" (with Show steps for this, which replaces
+the steps with that problem's), "The device was unplugged", or "The device isn't connected".
+Opening Help for a different problem, or for the same problem on a different device, replaces the
+help. Help for the same problem and device is disabled instead.
+
+**When it opens and closes.** The help's state is on the `DeviceConnection`, not in the palette,
+so it stays through the palette closing and opening, and through the tile it was opened from being
+deleted. It closes only when the student clicks ✕ or a notice's Close help, which log
+`hideConnectHelp`; closing the palette logs nothing.
+
+**Focus.** Opening the help from Help moves focus to its title. A palette that opens with the help
+already showing focuses its first control, as it always does. Closing the help moves focus to the
+palette's first control, which is Help when a problem shows. Showing steps for a notice moves
+focus to the title above the new steps. There is no focus trap: Tab leaves the palette as it does
+without help.
+
+**Keyboard.** The help's controls are `div role="button"` like the palette's, and come after the
+palette's own in the arrow, Home and End order. The steps scroll on their own, so a control that
+is out of view is scrolled into view when the arrow keys reach it.
+
+**Placement.** The palette opens below the connect button and flips above it when there is no room
+below; then its bottom edge stays at the button and it grows upward. Its height is capped at the
+room on that side of the button (never less than 200px). Only the help's body scrolls, so the
+header and any notice stay in view.
+
+**Screen readers.** The help is part of the palette, so its notices are announced only while the
+palette is open. A notice that appeared while the palette was closed is already in place when the
+palette opens, so it is not announced then.
 
 ## The connect button
 
