@@ -784,11 +784,29 @@ describe("Dataflow connect button and palette", () => {
       act(() => r.stores.serialDevice.clearActiveDevice());
     });
 
-    it("a failure shows the problem on line 2 and keeps the device rows", () => {
+    it("a failure shows the problem with Help on line 2 and keeps the device rows", () => {
       const r = openConnectPalette();
       act(() => r.content.setConnectFailure(openFailedOn()));
-      expect(palette().querySelector(".connect-detail.problem")).toHaveTextContent("Couldn't open it.");
+      const detail = palette().querySelector(".connect-detail.problem");
+      expect(detail).toHaveTextContent("Couldn't open it.");
+      const help = within(palette()).getByRole("button", { name: "Help" });
+      expect(help).toHaveClass("connect-help");
+      expect(detail!.contains(help)).toBe(true);
       expect(within(palette()).getAllByRole("button", { name: /^Connect / })).toHaveLength(3);
+    });
+
+    it("Help joins the arrow-key navigation", () => {
+      const r = renderConnect();
+      act(() => r.content.setConnectFailure({
+        attemptId: "attempt-1", kind: "inUse", choice: "spikerbit", step: "open", elapsedMs: 0
+      }));
+      fireEvent.click(getTrigger(r.container));
+      const help = within(palette()).getByRole("button", { name: "Help" });
+      const controls = within(palette()).getAllByRole("button");
+      expect(controls[0]).toBe(help);
+      controls[1].focus();
+      fireEvent.keyDown(controls[1], { key: "ArrowUp" });
+      expect(document.activeElement).toBe(help);
     });
 
     it("an attempt from tile A shows its step in tile B's palette; only A records the failure", () => {
@@ -804,6 +822,7 @@ describe("Dataflow connect button and palette", () => {
       expect(a.content.connectFailure).toBeDefined();
       expect(b.content.connectFailure).toBeUndefined();
       expect(palette().querySelector(".connect-detail.problem")).toBeNull();
+      expect(within(palette()).queryByRole("button", { name: "Help" })).toBeNull();
     });
 
     it("step text is outside the live region; a problem is inside it", () => {
@@ -997,6 +1016,16 @@ describe("Dataflow connect button and palette", () => {
       expect(pulsing(r)).toBe(true);
       // Taking the class off and putting it back would replay the animation.
       expect(changes.every(c => c.oldValue?.includes("connect-loss-pulse"))).toBe(true);
+    });
+
+    it("'It was unplugged.' has no Help", () => {
+      const r = renderConnect();
+      fakeConnected(r);
+      lose(r, "unplugged");
+      fireEvent.click(getTrigger(r.container));
+      const palette = screen.getByRole("group", { name: "Device connection" });
+      expect(within(palette).getByText("It was unplugged.")).toBeInTheDocument();
+      expect(within(palette).queryByRole("button", { name: "Help" })).toBeNull();
     });
 
     it("a later loss pulses again", () => {

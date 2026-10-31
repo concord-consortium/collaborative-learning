@@ -22,6 +22,8 @@ import { connectionStatusInput, connectPaletteStatus } from "../../utilities/con
 import {
   connectDeviceForTile, disconnectDeviceForTile, reconnectDeviceForTile
 } from "../../utilities/device-actions";
+import { ConnectionHelp, openConnectionHelp } from "./connection-help";
+import { PaletteControl } from "./palette-control";
 
 import ConnectIcon from "../../assets/icons/connect-icon.svg";
 
@@ -40,34 +42,6 @@ const kFocusSteps: Record<string, number | "first" | "last"> = {
 // here.
 function findTrigger(palette: Element | null | undefined) {
   return palette?.parentElement?.querySelector<HTMLButtonElement>("button.toolbar-button.connect") ?? null;
-}
-
-interface IPaletteControlProps {
-  // The accessible name, when the visible text alone doesn't say enough
-  label?: string;
-  text: string;
-  busy: boolean;
-  onActivate: () => void;
-}
-
-// `div role="button"`, not a real button, for the reason given at PanPalette's arrows
-// (dataflow-zoom-pan-buttons.tsx).
-function PaletteControl({ label, text, busy, onActivate }: IPaletteControlProps) {
-  function activate(e: React.SyntheticEvent) {
-    e.stopPropagation();
-    if ("key" in e) (e as React.KeyboardEvent).preventDefault();
-    if (!busy) onActivate();
-  }
-  return (
-    <div role="button" tabIndex={0} aria-label={label} aria-disabled={busy || undefined}
-        className={classNames("connect-control", { disabled: busy })}
-        onClick={activate}
-        onKeyDown={(e) => {
-          if (e.key === "Enter" || e.key === " ") activate(e);
-        }}>
-      {text}
-    </div>
-  );
 }
 
 interface IConnectPaletteProps {
@@ -123,11 +97,17 @@ const ConnectPalette = observer(function ConnectPalette(
     setTriggerElement(findTrigger(containerRef.current));
   }, []);
 
-  useEffect(() => {
-    // preventScroll: the first render sits at an unpositioned spot, and focus() would scroll to it.
+  // preventScroll: the first render sits at an unpositioned spot, and focus() would scroll to it.
+  // Help sits in the status area, above every other control, so when the help closes this lands on
+  // Help if one shows, and on the palette's first control otherwise.
+  const focusFirstControl = useCallback(() => {
     containerRef.current?.querySelector<HTMLElement>("[role='button']")?.focus({ preventScroll: true });
-    // Mount-only, as in PanPalette.
   }, []);
+
+  useEffect(() => {
+    focusFirstControl();
+    // Mount-only, as in PanPalette.
+  }, [focusFirstControl]);
 
   // Swapping the device list for the connected actions, or back, unmounts the focused control and
   // drops focus to <body>. If the palette held focus, move it to the palette's first control.
@@ -139,10 +119,8 @@ const ConnectPalette = observer(function ConnectPalette(
       return;
     }
     const active = document.activeElement;
-    if (holdsFocus.current && (!active || active === document.body)) {
-      containerRef.current?.querySelector<HTMLElement>("[role='button']")?.focus({ preventScroll: true });
-    }
-  }, [paletteView]);
+    if (holdsFocus.current && (!active || active === document.body)) focusFirstControl();
+  }, [paletteView, focusFirstControl]);
 
   function handleFocus() {
     holdsFocus.current = true;
@@ -204,6 +182,11 @@ const ConnectPalette = observer(function ConnectPalette(
 
   const { line1, line2, announce } = connectPaletteStatus(connectionStatusInput(connection, content.connectFailure));
   const actionsBusy = busy || !actionsEnabled;
+  // Help for the problem on line 2, with the tile's failure's details when it is that problem.
+  const helpKind = line2?.helpKind;
+  const helpTopic = helpKind &&
+    connection.helpTopic(helpKind, tileId, connection.currentFailure(content.connectFailure));
+  const helpShowing = !!helpTopic && connection.helpShowing(helpTopic);
 
   // Line 2 always renders, empty when there is nothing to say, so the area never changes height.
   // Only a problem goes in the live region; steps and the progress bar are not announced.
@@ -215,38 +198,46 @@ const ConnectPalette = observer(function ConnectPalette(
           <div className="connect-progress-fill" style={{ width: `${line2.progress}%` }} />
         </div>}
       <span className="connect-detail-text">{line2?.text}</span>
+      {helpTopic &&
+        <PaletteControl className="connect-help" text="Help" disabled={helpShowing}
+            title={helpShowing ? "This problem's help is showing." : undefined}
+            onActivate={() => openConnectionHelp(connection, helpTopic)} />}
     </div>
   );
 
   return (
-    <div ref={setContainer} className="toolbar-palette dataflow-connect-palette" style={floatingStyles}
+    <div ref={setContainer} style={floatingStyles}
+        className={classNames("toolbar-palette dataflow-connect-palette", { "with-help": !!connection.help })}
         role="group" aria-labelledby={headingId} onKeyDownCapture={handleKeyDownCapture}
         onFocus={handleFocus} onBlur={handleBlur}>
-      <div className="connect-heading" id={headingId}>Device connection</div>
-      <div className="connect-status">
-        <div role="status">
-          <div className="connect-status-line">{line1}</div>
-          {announce && detail}
-        </div>
-        {!announce && detail}
-      </div>
-      {paletteView === "actions"
-        ? <div className="connect-actions">
-            <PaletteControl text="Reconnect" busy={actionsBusy} onActivate={reconnect} />
-            <PaletteControl text="Disconnect" busy={actionsBusy} onActivate={disconnect} />
-            {connection.canIdentify &&
-              <PaletteControl text="Is it alive?" busy={actionsBusy || check === "checking"}
-                  onActivate={() => { void connection.identify(); }} />}
+      <div className="connect-main">
+        <div className="connect-heading" id={headingId}>Device connection</div>
+        <div className="connect-status">
+          <div role="status">
+            <div className="connect-status-line">{line1}</div>
+            {announce && detail}
           </div>
-        : <div className="connect-devices">
-            {kDeviceChoiceOrder.map(choice => (
-              <div key={choice} className="connect-device-row">
-                <span className="connect-device-label">{kDeviceChoiceLabels[choice]}</span>
-                <PaletteControl label={`Connect ${kDeviceChoiceLabels[choice]}`} text="Connect" busy={busy}
-                    onActivate={() => connect(choice)} />
-              </div>
-            ))}
-          </div>}
+          {!announce && detail}
+        </div>
+        {paletteView === "actions"
+          ? <div className="connect-actions">
+              <PaletteControl text="Reconnect" disabled={actionsBusy} onActivate={reconnect} />
+              <PaletteControl text="Disconnect" disabled={actionsBusy} onActivate={disconnect} />
+              {connection.canIdentify &&
+                <PaletteControl text="Is it alive?" disabled={actionsBusy || check === "checking"}
+                    onActivate={() => { void connection.identify(); }} />}
+            </div>
+          : <div className="connect-devices">
+              {kDeviceChoiceOrder.map(choice => (
+                <div key={choice} className="connect-device-row">
+                  <span className="connect-device-label">{kDeviceChoiceLabels[choice]}</span>
+                  <PaletteControl label={`Connect ${kDeviceChoiceLabels[choice]}`} text="Connect"
+                      disabled={busy} onActivate={() => connect(choice)} />
+                </div>
+              ))}
+            </div>}
+      </div>
+      <ConnectionHelp connection={connection} onClosed={focusFirstControl} />
     </div>
   );
 });
