@@ -167,9 +167,12 @@ that happened.
 | `deviceLost` | `attemptId`, `reason`: `unplugged`, `lost`, or `updateFailed` for a stalled update whose flash fails later; for `updateFailed`, `failedStep` and `error` as in `connectResult` | A device the attempt left open is lost, or a stalled update's flash fails later |
 | `disconnectDevice` | `targetType: "device"`, `device`: the choice that was connected | The user disconnects |
 | `resetProgram` | `targetType: "program"`, `trigger`: `connect`, `reconnect` or `button` | The program is reset |
+| `showConnectPalette` | `targetType: "connectPalette"`, `buttonState`: `idle`, `attention` or `connected` | The connect button opens the palette; closing it isn't logged |
 | `showConnectTutorial` | `targetType: "connectTutorial"` | The connect tutorial appears over the tile |
 | `dismissConnectTutorial` | `targetType: "connectTutorial"`, `trigger`: `ok` (OK in this tile), `okInAnotherTile` or `connection` | The tutorial over the tile is dismissed |
 
+- Clicking the toolbar's connect button only opens the palette, which logs `showConnectPalette`. An
+  attempt starts at the palette's Connect or Reconnect.
 - `connectDevice` and `reconnectDevice` mark the click, not a success. Up to v7.7.0 they were
   logged only when the device connected, with no `attemptId`, so in older logs they mean a success.
   A quick attempt logs `connectDevice`, `resetProgram` (when the device becomes active) and

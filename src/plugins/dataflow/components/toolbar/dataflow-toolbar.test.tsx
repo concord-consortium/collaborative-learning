@@ -443,6 +443,20 @@ describe("Dataflow connect button and palette", () => {
     expect(getTrigger(container)).toHaveAttribute("aria-expanded", "false");
   });
 
+  it("logs the palette opening, with the button's state, but not its closing", () => {
+    const r = renderConnect();
+    act(() => r.content.setNeedsDevice(true));
+    (logTileChangeEvent as jest.Mock).mockClear();
+    press(getTrigger(r.container));
+    expect(logTileChangeEvent).toHaveBeenCalledTimes(1);
+    expect(logTileChangeEvent).toHaveBeenCalledWith(LogEventName.DATAFLOW_TOOL_CHANGE, {
+      tileId: r.tileId, operation: "showConnectPalette",
+      change: { targetType: "connectPalette", buttonState: "attention" }
+    });
+    press(getTrigger(r.container));
+    expect(logTileChangeEvent).toHaveBeenCalledTimes(1);
+  });
+
   describe("announcing a failure the student can't see", () => {
     const headline = "The browser couldn't open the Spiker:bit.";
     const failure = {

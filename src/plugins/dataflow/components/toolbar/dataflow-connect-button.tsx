@@ -12,6 +12,8 @@ import { TileModelContext } from "../../../../components/tiles/tile-api";
 import { useReadOnlyContext } from "../../../../components/document/read-only-context";
 import { useStores } from "../../../../hooks/use-stores";
 import { useAnnounce } from "../../../../utilities/use-announce";
+import { LogEventName } from "../../../../lib/logger-types";
+import { logTileChangeEvent } from "../../../../models/tiles/log/log-tile-change-event";
 import { kStallKinds, problemHeadline } from "../../model/connect-failures";
 import { DataflowContentModelType } from "../../model/dataflow-content";
 import {
@@ -334,6 +336,19 @@ export const ConnectDeviceButton = observer(function ConnectDeviceButton({ name 
       ? kDeviceChoiceLabels[attempt.choice] : undefined
   });
 
+  // Opening the palette starts nothing, but says the student went looking, and the button's state
+  // says whether something there was asking for attention.
+  const togglePalette = () => {
+    if (!content) return;
+    if (!isOpen && model) {
+      logTileChangeEvent(LogEventName.DATAFLOW_TOOL_CHANGE, {
+        tileId: model.id, operation: "showConnectPalette",
+        change: { targetType: "connectPalette", buttonState: state }
+      });
+    }
+    content.setConnectPaletteOpen(!isOpen);
+  };
+
   const palette = isOpen && content && model
     ? <ConnectPalette connection={connection} content={content} tileId={model.id} paletteRef={paletteRef}
         onClose={() => content.setConnectPaletteOpen(false)} />
@@ -354,7 +369,7 @@ export const ConnectDeviceButton = observer(function ConnectDeviceButton({ name 
         colorClass={classNames(`connect-${state}`, { "connect-loss-pulse": lossPulse })}
         dataTestId="connect-device-button" disabled={readOnly || !content}
         disabledMessage="Connecting a device isn't available in a read-only view"
-        onClick={() => content?.setConnectPaletteOpen(!isOpen)} extraContent={extraContent}>
+        onClick={togglePalette} extraContent={extraContent}>
       <ConnectIcon />
       {/* Only marks the button as opening a palette: the whole button opens it, and aria-expanded
           already announces that. */}
