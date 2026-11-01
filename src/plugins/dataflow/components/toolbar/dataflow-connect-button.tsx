@@ -281,6 +281,16 @@ export const ConnectDeviceButton = observer(function ConnectDeviceButton({ name 
     }
   }, [unseenError, failure, announce]);
 
+  // A connection lost while the palette is closed is announced the same way. An unplug isn't: the
+  // student just did it. A loss while the palette is open shows there, so it is never announced.
+  const { lossAt, lossReason, lossMessage } = connection;
+  const announcedLossAt = useRef(lossAtMount);
+  useEffect(() => {
+    if (lossAt === undefined || lossAt === announcedLossAt.current) return;
+    announcedLossAt.current = lossAt;
+    if (!isOpen && lossReason === "lost" && lossMessage) announce(lossMessage);
+  }, [isOpen, lossAt, lossReason, lossMessage, announce]);
+
   // Deselecting the tile unmounts the toolbar; the model volatile would otherwise stay open. Deleting
   // the tile destroys the content before this runs.
   useEffect(() => () => {

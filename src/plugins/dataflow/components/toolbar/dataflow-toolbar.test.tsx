@@ -489,6 +489,37 @@ describe("Dataflow connect button and palette", () => {
       expect(screen.queryByText(headline)).toBeNull();
     });
 
+    it("announces a lost connection with the palette closed, but not an unplug", () => {
+      const r = renderConnect();
+      const region = r.container.querySelector("[role='status'][aria-live='polite']");
+      fakeConnected(r);
+      act(() => r.stores.serialDevice.activeTransport!.onDisconnect!("unplugged"));
+      expect(region).toBeEmptyDOMElement();
+
+      fakeConnected(r);
+      act(() => r.stores.serialDevice.activeTransport!.onDisconnect!("lost"));
+      expect(region).toHaveTextContent("The connection to the Spiker:bit was lost.");
+    });
+
+    it("does not announce a lost connection with the palette open, even once it closes", () => {
+      const r = openConnectPalette();
+      fakeConnected(r);
+      act(() => r.stores.serialDevice.activeTransport!.onDisconnect!("lost"));
+      act(() => r.content.setConnectPaletteOpen(false));
+      const region = r.container.querySelector("[role='status'][aria-live='polite']");
+      expect(region).toBeEmptyDOMElement();
+    });
+
+    it("does not announce a loss from before the toolbar mounted", () => {
+      const stores = specStores();
+      const first = renderConnect({ stores });
+      fakeConnected(first);
+      act(() => first.stores.serialDevice.activeTransport!.onDisconnect!("lost"));
+      first.unmount();
+      const r = renderConnect({ stores });
+      expect(r.container.querySelector("[role='status'][aria-live='polite']")).toBeEmptyDOMElement();
+    });
+
     it("does not announce a stale unseen failure on mount", () => {
       const content = DataflowContentModel.create();
       content.setConnectFailure(failure);

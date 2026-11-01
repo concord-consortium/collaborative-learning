@@ -61,4 +61,7 @@ an attempt runs, its tooltip names the device being connected. See `connect-butt
   `connect-failures.ts`), such as "The browser couldn't open the Arduino." The toolbar, and the
   live region with it, exists only while the tile is selected, so a failure recorded while the
   tile isn't selected is never announced. The connect button still turns yellow.
+- A connection lost while the palette is closed is announced the same way, with
+  `DeviceConnection.lossMessage`, such as "The connection to the Spiker:bit was lost." An unplug
+  isn't announced, since the student just did it; it shows in the button's tooltip and the palette.
 - The controls are `div role="button"`, and the arrow keys, Home and End move between them.
