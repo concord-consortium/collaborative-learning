@@ -63,8 +63,9 @@ export interface IAttemptListener {
   onEnded?(attempt: ConnectionAttempt): void;
   // The first data arrived after a stall ended the attempt.
   onRecovered?(attempt: ConnectionAttempt): void;
-  // After a stall ended the attempt, the stall changed: a stalled update finished, so it no longer
-  // stalls (undefined), or the board it then made active sent no data in time (that failure).
+  // After a stall ended the attempt, the stall changed. It cleared (undefined) when a stalled update
+  // made progress again or finished, and a new stall replaced it (that failure) when the update
+  // stalled again or the board it made active sent no data in time.
   onStallChanged?(attempt: ConnectionAttempt, failure: IConnectFailure | undefined): void;
   // An open the attempt gave up on was closed and forgotten, or settled late.
   onAbandonedOpen?(attempt: ConnectionAttempt, info: IAbandonedOpenInfo): void;
