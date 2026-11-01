@@ -9,7 +9,7 @@ describe("connect failures", () => {
   it("palette problem texts match the spec and never name a device", () => {
     expect(paletteProblemText("openTimeout")).toBe("Stuck while opening.");
     expect(paletteProblemText("openFailed")).toBe("Couldn't open it.");
-    expect(paletteProblemText("inUse")).toBe("In use by another tab.");
+    expect(paletteProblemText("inUse")).toBe("In use by another tab or app.");
     expect(paletteProblemText("updateFailed")).toBe("The update failed.");
     expect(paletteProblemText("updateStalled")).toBe("Update stalled.");
     expect(paletteProblemText("notResponding")).toBe("Not responding.");

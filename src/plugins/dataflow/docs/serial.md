@@ -602,7 +602,8 @@ the answer for 3 s. The check remembers the `CcDeviceSession` it asked and count
 object is active, so it survives the palette closing and never shows an earlier board's answer.
 
 A Spiker:bit connect that fails because another tab or app has claimed the board (the library's
-`device-in-use` error) returns `"inUse"`, which the palette reports as "In use by another tab."
+`device-in-use` error) returns `"inUse"`, which the palette reports as "In use by another tab or
+app."
 
 ## Hidden pages
 

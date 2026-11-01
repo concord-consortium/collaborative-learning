@@ -56,7 +56,7 @@ export function errorInfo(e: unknown): IErrorInfo | undefined {
 const kPaletteProblemTexts: Record<ProblemKind, string> = {
   openTimeout: "Stuck while opening.",
   openFailed: "Couldn't open it.",
-  inUse: "In use by another tab.",
+  inUse: "In use by another tab or app.",
   updateFailed: "The update failed.",
   updateStalled: "Update stalled.",
   notResponding: "Not responding.",
