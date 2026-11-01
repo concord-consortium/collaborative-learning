@@ -646,9 +646,9 @@ export class DeviceConnection {
         opened = true;
         this.markOpened(attempt, "checkFirmware");
       },
-      onFirmwareChecked: (reply, willUpdate) => {
+      onFirmwareChecked: (reply, willUpdate, check) => {
         if (!following()) return;
-        attempt.firmwareChecked(describeFirmware(reply), willUpdate);
+        attempt.firmwareChecked(describeFirmware(reply), willUpdate, check);
         if (willUpdate) limitUpdate(kUpdateStartMs);
       },
       onUpdateProgress: percent => {

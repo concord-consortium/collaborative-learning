@@ -1,5 +1,6 @@
 import { makeAutoObservable } from "mobx";
 import { uniqueId } from "../../../utilities/js-utils";
+import { IFirmwareCheckInfo } from "../../../models/stores/spikerbit-device";
 import { AttemptOutcome, AttemptStep, DeviceChoice, IConnectFailure, kStallKinds } from "./connect-failures";
 
 export type AttemptTrigger = "connect" | "reconnect";
@@ -9,6 +10,15 @@ export type AttemptView = "devices" | "actions";
 
 export type StepTime = "chooserClosed" | "opened" | "firmwareChecked" | "updateStarted"
   | "updateFinished" | "active" | "firstData";
+
+// A Spiker:bit's firmware: what it answered with (null for no answer), whether it was updated, and
+// what the board sent during the check (see IFirmwareCheckInfo).
+export interface IAttemptFirmware {
+  found: string | null;
+  updated: boolean;
+  checkBytes?: number;
+  checkRetried?: boolean;
+}
 
 /**
  * One Connect or Reconnect, from the click to its outcome, and on until its device goes away: a
@@ -29,7 +39,7 @@ export class ConnectionAttempt {
   actionsEnabled = false;
   outcome: AttemptOutcome | undefined = undefined;
   failure: IConnectFailure | undefined = undefined;
-  firmware: { found: string | null; updated: boolean } | undefined = undefined;
+  firmware: IAttemptFirmware | undefined = undefined;
   // The first data arrived after a stall had ended the attempt.
   recovered = false;
   // When the current step started, in ms from startedAt.
@@ -81,9 +91,10 @@ export class ConnectionAttempt {
   }
 
   // `found` describes the firmware the board answered with, or is null when it didn't answer.
-  firmwareChecked(found: string | null, willUpdate: boolean) {
+  // `check` is what the board sent during the check.
+  firmwareChecked(found: string | null, willUpdate: boolean, check?: IFirmwareCheckInfo) {
     this.record("firmwareChecked");
-    this.firmware = { found, updated: false };
+    this.firmware = { found, updated: false, checkBytes: check?.bytes, checkRetried: check?.retried };
     if (willUpdate) {
       this.record("updateStarted");
       this.setStep("update");

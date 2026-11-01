@@ -321,10 +321,34 @@ describe("SpikerbitDevice", () => {
       await new SpikerbitDevice(makeSerialDevice(), conn, { firmwareQueryTimeoutMs: 50 })
         .connectAndStream("HEX", observer);
 
-      expect(observer.onFirmwareChecked).toHaveBeenCalledWith(expect.objectContaining({ kind: "ccDevice" }), true);
+      expect(observer.onFirmwareChecked)
+        .toHaveBeenCalledWith(expect.objectContaining({ kind: "ccDevice" }), true, expect.anything());
       expect(observer.onUpdateProgress).toHaveBeenCalledTimes(1);
       expect(observer.onUpdateProgress).toHaveBeenCalledWith(50);
       expect(observer.onUpdateFinished).toHaveBeenCalledTimes(1);
+      warn.mockRestore();
+    });
+
+    // Tells a silent board from one whose answer was cut off or came too late.
+    it("reports how many bytes the board sent during the check", async () => {
+      const warn = jest.spyOn(console, "warn").mockImplementation(() => undefined);
+      // A board running something other than Spiker:bit firmware, such as a MakeCode program,
+      // answers neither the reset nor the query.
+      const check = async (respondHello: string | null) => {
+        const conn = new FakeConnection();
+        conn.respondHello = respondHello;
+        conn.knowsReset = respondHello !== null;
+        const observer = { onFirmwareChecked: jest.fn() };
+        await new SpikerbitDevice(makeSerialDevice(), conn, { firmwareQueryTimeoutMs: 50 })
+          .connectAndStream("HEX", observer);
+        return observer.onFirmwareChecked.mock.calls[0];
+      };
+
+      expect(await check(null)).toEqual([null, true, { bytes: 0, retried: false }]);
+      const [reply, willUpdate, info] = await check("garbled\r\n");
+      expect(reply).toBeNull();
+      expect(willUpdate).toBe(true);
+      expect(info.bytes).toBeGreaterThan(0);
       warn.mockRestore();
     });
 

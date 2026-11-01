@@ -160,7 +160,7 @@ that happened.
 | `connectDevice` | `attemptId` | Connect is clicked |
 | `reconnectDevice` | `attemptId` | Reconnect is clicked |
 | `connectProgress` | `attemptId`, `trigger`, `elapsedMs`, `step`, `steps`, `updatePercent` during an update; the browser's conditions so far (see below) | The attempt is still running 5, 10, 20, 40... s after the click |
-| `connectResult` | `attemptId`, `trigger`, `outcome`, `elapsedMs`, `steps`; for a failure `failedStep` and `error` (`name`, `code`, `message`); for a Spiker:bit `firmware` (`found`, `updated`); the browser's conditions during the attempt (see below) | The attempt ends, including `canceled` |
+| `connectResult` | `attemptId`, `trigger`, `outcome`, `elapsedMs`, `steps`; for a failure `failedStep` and `error` (`name`, `code`, `message`); for a Spiker:bit `firmware` (`found`, `updated`, `checkBytes`, `checkRetried`); the browser's conditions during the attempt (see below) | The attempt ends, including `canceled` |
 | `connectRecovered` | `attemptId`, `elapsedMs`, `steps` | An attempt that ended in a stall gets its first data after all |
 | `connectStallChanged` | `attemptId`, `stall`: the new stall's kind (`updateStalled`, `noData` or `notResponding`) or `cleared`; `step`: the stalled step, for a stall; `elapsedMs`, `steps` | After a stall ended the attempt, the stall changed: a stalled update made progress again, stalled again or finished, or the board it then made active sent no data in time |
 | `abandonedOpen` | `attemptId`, and one of: what `close()` did, what `forget()` did, or how the abandoned open settled | Each of the three finishes; close and forget start together, so one that hangs doesn't hide the other |
@@ -186,6 +186,11 @@ that happened.
   hidden. A Spiker:bit connection reads and writes on the main thread, so a busy one slows the
   firmware check and the flash. Chrome slows timers in a hidden tab, so a sample the tab was hidden
   for doesn't count toward the lag.
+- A Spiker:bit's `firmware.found` is null when the board didn't answer the firmware check in time,
+  which leads to an update. `checkBytes`, how many bytes the board sent during the check, and
+  `checkRetried`, whether the query was sent a second time, tell a board that sent nothing, such as
+  one running a MakeCode program that writes nothing to serial, from one whose answer was cut off or
+  came too late. A board on current firmware that answered late is updated for nothing.
 - A failed, stalled or `canceled` attempt logs its `connectResult` too, with no `resetProgram`
   unless the device became active first.
 - Only a Disconnect the user chooses logs `disconnectDevice`. An unplug logs `deviceLost` when the

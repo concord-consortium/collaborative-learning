@@ -60,14 +60,22 @@ export interface IMicrobitUsbConnection {
   getDevice(): unknown;
 }
 
+// What the board sent during a firmware check, so a board that didn't answer can be told from one
+// whose answer was cut off or came too late: how many bytes arrived, and whether the query was sent
+// a second time.
+export interface IFirmwareCheckInfo {
+  bytes: number;
+  retried: boolean;
+}
+
 // What connectAndStream reports as the connection proceeds, so a caller can show its steps.
 export interface ISpikerbitConnectObserver {
   // The USB open started. `afterChooser` is whether the browser's chooser was shown first.
   onOpening?(afterChooser: boolean): void;
   onOpened?(): void;
   // `reply` is what the board answered with, or null when it didn't answer; `willUpdate` is
-  // whether the firmware is about to be flashed.
-  onFirmwareChecked?(reply: FirmwareReply | null, willUpdate: boolean): void;
+  // whether the firmware is about to be flashed; `check` is what the board sent meanwhile.
+  onFirmwareChecked?(reply: FirmwareReply | null, willUpdate: boolean, check?: IFirmwareCheckInfo): void;
   // 0-100. Every call counts as progress.
   onUpdateProgress?(percent: number): void;
   onUpdateFinished?(): void;
@@ -160,6 +168,8 @@ export class SpikerbitDevice {
   // When the latest connect-time chunk arrived, and when the backlog was first seen to have
   // drained (a read shorter than kDaplinkReadBytes) since the latest "!!" and "?".
   private lastDataAt = 0;
+  // What the current or last firmware check received (see IFirmwareCheckInfo).
+  private checkInfo: IFirmwareCheckInfo = { bytes: 0, retried: false };
   private shortReadAt: number | undefined;
 
   constructor(serialDevice: SerialDevice, connection: IMicrobitUsbConnection, options?: SpikerbitDeviceOptions) {
@@ -286,7 +296,7 @@ export class SpikerbitDevice {
     this.resetSeq = kFirstResetSeq;
     const running = await this.queryFirmware();
     const willUpdate = shouldFlash(running, kSpikerbitDeviceName, kSpikerbitFirmwareVersion);
-    observer?.onFirmwareChecked?.(running, willUpdate);
+    observer?.onFirmwareChecked?.(running, willUpdate, { ...this.checkInfo });
     this.throwIfDisconnected(run);
     if (willUpdate) {
       // USB connection stays Connected through a flash (DAPLink interface chip is untouched) and
@@ -318,6 +328,7 @@ export class SpikerbitDevice {
   // once the transport becomes the active device.
   private handleFirmwareData = (data: string) => {
     this.lastDataAt = Date.now();
+    this.checkInfo.bytes += data.length;
     if (data.length < kDaplinkReadBytes && this.shortReadAt === undefined) {
       this.shortReadAt = this.lastDataAt;
     }
@@ -336,6 +347,7 @@ export class SpikerbitDevice {
   // first: cc-device-protocol.md, "Connecting".
   private async queryFirmware(): Promise<FirmwareReply | null> {
     this.detectedReply = null;
+    this.checkInfo = { bytes: 0, retried: false };
     const started = Date.now();
     await this.writeResetAndQuery();
     let retried = false;
@@ -349,6 +361,7 @@ export class SpikerbitDevice {
             ?? (now - this.lastDataAt >= kDrainQuietMs ? this.lastDataAt + kDrainQuietMs : undefined);
           if (drainedAt !== undefined && now - drainedAt >= kRetryAfterDrainMs) {
             retried = true;
+            this.checkInfo.retried = true;
             this.writeResetAndQuery().catch((e) => console.warn("Spiker:bit serialWrite failed", e));
           }
         }

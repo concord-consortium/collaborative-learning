@@ -919,11 +919,11 @@ describe("DeviceConnection", () => {
       const p = connection.connect("spikerbit", { listener });
       await flush();
       stepped.observer().onOpened!();
-      stepped.observer().onFirmwareChecked!(null, true);
+      stepped.observer().onFirmwareChecked!(null, true, { bytes: 15, retried: true });
       await jest.advanceTimersByTimeAsync(kUpdateStartMs);
       expect(await p).toBe("updateStalled");
       stepped.observer().onUpdateFinished!();
-      expect(connection.attempt!.firmware).toEqual({ found: null, updated: true });
+      expect(connection.attempt!.firmware).toEqual({ found: null, updated: true, checkBytes: 15, checkRetried: true });
       expect(connection.attempt!.steps.updateFinished).toEqual(expect.any(Number));
       await stepped.activate();
       expect(connection.attempt!.steps.active).toEqual(expect.any(Number));
