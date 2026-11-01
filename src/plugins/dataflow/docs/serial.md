@@ -142,7 +142,8 @@ disconnects the library connection; the device is kept for Reconnect.
 **Tile device actions.** The palette, the top-bar menu and the `reset` button call the tile device
 actions in `device-actions.ts`, which wrap `DeviceConnection` and log `DATAFLOW_TOOL_CHANGE`
 events with the operations `connectDevice`, `reconnectDevice`, `connectProgress`, `connectResult`,
-`connectRecovered`, `abandonedOpen`, `deviceLost`, `disconnectDevice` and `resetProgram`. A
+`connectRecovered`, `connectStallChanged`, `abandonedOpen`, `deviceLost`, `disconnectDevice` and
+`resetProgram`. A
 connect or reconnect resets only the clicking tile's program, through `resetProgramForTile`,
 which says what Reset leaves alone, as soon as the device becomes the active one. Disconnect never
 resets, and it also works while a stalled Spiker:bit update holds a board open that isn't active.
@@ -161,8 +162,9 @@ that happened.
 | `connectProgress` | `attemptId`, `trigger`, `elapsedMs`, `step`, `steps`, `updatePercent` during an update | The attempt is still running 5, 10, 20, 40... s after the click |
 | `connectResult` | `attemptId`, `trigger`, `outcome`, `elapsedMs`, `steps`; for a failure `failedStep` and `error` (`name`, `code`, `message`); for a Spiker:bit `firmware` (`found`, `updated`) | The attempt ends, including `canceled` |
 | `connectRecovered` | `attemptId`, `elapsedMs`, `steps` | An attempt that ended in a stall gets its first data after all |
+| `connectStallChanged` | `attemptId`, `stall`: the new stall's kind (`updateStalled`, `noData` or `notResponding`) or `cleared`; `step`: the stalled step, for a stall; `elapsedMs`, `steps` | After a stall ended the attempt, the stall changed: a stalled update made progress again, stalled again or finished, or the board it then made active sent no data in time |
 | `abandonedOpen` | `attemptId`, and one of: what `close()` did, what `forget()` did, or how the abandoned open settled | Each of the three finishes; close and forget start together, so one that hangs doesn't hide the other |
-| `deviceLost` | `attemptId`, `reason`: `unplugged`, `lost`, or `updateFailed` for a stalled update whose flash fails later | A device the attempt left open is lost, or a stalled update's flash fails later |
+| `deviceLost` | `attemptId`, `reason`: `unplugged`, `lost`, or `updateFailed` for a stalled update whose flash fails later; for `updateFailed`, `failedStep` and `error` as in `connectResult` | A device the attempt left open is lost, or a stalled update's flash fails later |
 | `disconnectDevice` | `targetType: "device"`, `device`: the choice that was connected | The user disconnects |
 | `resetProgram` | `targetType: "program"`, `trigger`: `connect`, `reconnect` or `button` | The program is reset |
 | `showConnectTutorial` | `targetType: "connectTutorial"` | The connect tutorial appears over the tile |

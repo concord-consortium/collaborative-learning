@@ -626,12 +626,16 @@ describe("device actions", () => {
     expect(content.connectFailure?.kind).toBe("updateStalled");
 
     connection.lastFailure = {
-      attemptId: attempt!.id, kind: "updateFailed", choice: "spikerbit", step: "update", elapsedMs: 12000
+      attemptId: attempt!.id, kind: "updateFailed", choice: "spikerbit", step: "update", elapsedMs: 12000,
+      error: { code: "E1", message: "flash failed" }
     };
     listener.onLost?.(attempt!, "updateFailed");
 
     expect(content.connectFailure?.kind).toBe("updateFailed");
-    expectLogMatching("deviceLost", { reason: "updateFailed" });
+    expectLogMatching("deviceLost", {
+      attemptId: attempt!.id, reason: "updateFailed", failedStep: "update",
+      error: { code: "E1", message: "flash failed" }
+    });
   });
 
   it.each(["unplugged", "lost"] as const)(
@@ -739,6 +743,10 @@ describe("device actions", () => {
     listener.onStallChanged?.(attempt!, undefined);
     expect(content.connectFailure).toBeUndefined();
     expect(content.unseenConnectError).toBe(false);
+    expectLogMatching("connectStallChanged", {
+      targetType: "device", device: "spikerbit", attemptId: attempt!.id, stall: "cleared",
+      elapsedMs: expect.any(Number), steps: attempt!.steps
+    });
 
     const stall: IConnectFailure = {
       attemptId: attempt!.id, kind: "notResponding", choice: "spikerbit", step: "waitForData", elapsedMs: 5000
@@ -746,6 +754,25 @@ describe("device actions", () => {
     listener.onStallChanged?.(attempt!, stall);
     expect(content.connectFailure).toEqual(stall);
     expect(content.unseenConnectError).toBe(true);
+    expectLogMatching("connectStallChanged", {
+      attemptId: attempt!.id, stall: "notResponding", step: "waitForData"
+    });
+  });
+
+  it("a stall change is logged for a tile deleted meanwhile", async () => {
+    const content = makeContent();
+    let attempt: ConnectionAttempt | undefined;
+    let listener: IAttemptListener = {};
+    const connection = makeConnection((a, l) => {
+      attempt = a;
+      listener = l;
+      return Promise.resolve(endAttempt(a, l, "updateStalled", { step: "update" }));
+    });
+    await connectDeviceForTile({ connection, content, tileId, choice: "spikerbit" });
+    destroy(content);
+
+    listener.onStallChanged?.(attempt!, undefined);
+    expectLogMatching("connectStallChanged", { attemptId: attempt!.id, stall: "cleared" });
   });
 
   it("a canceled connect records no failure", async () => {
