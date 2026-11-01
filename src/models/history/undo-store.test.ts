@@ -352,7 +352,9 @@ it("does not use an active entry after it completes", async () => {
   const unhandledRejections: unknown[] = [];
   const onUnhandledRejection = (reason: unknown) => unhandledRejections.push(reason);
   process.on("unhandledRejection", onUnhandledRejection);
-  // MST's default ("warn") would only log a read of a destroyed node.
+  // Jest doesn't run src/initialize-app.tsx, and even there the switch to "error" is off
+  // (kEnableLivelinessChecking), so this would be MST's default, "warn". That only logs a read
+  // of a destroyed node.
   const previousLivelinessChecking = getLivelinessChecking();
   setLivelinessChecking("error");
 
