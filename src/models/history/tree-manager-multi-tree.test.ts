@@ -675,6 +675,13 @@ describe("TreeManager multi-tree support", () => {
         .toThrow("The entry already exists");
     });
   });
+
+  describe("endExchange", () => {
+    it("rejects ending an exchange on an entry that isn't active", () => {
+      const { manager } = setupManager();
+      expect(() => manager.endExchange("missing", "x")).toThrow("There isn't an active entry");
+    });
+  });
 });
 
 // Keeps TS happy about the interface export even though we don't use it
