@@ -97,37 +97,38 @@ async function runAttempt(
   let stopResetWatch: (() => void) | undefined;
   let stopRespondingWatch: (() => void) | undefined;
   // A busy main thread slows a connection that reads and writes on it, so each attempt logs how busy
-  // the browser was.
+  // the browser was. The meter runs while the attempt's device is open, so the events after
+  // connectResult carry how busy it was since the attempt's previous event.
   const meter = startBrowserMeter();
   const alive = () => isAlive(content);
 
   const listener: IAttemptListener = {
     onEnded: attempt => {
       stopCheckpoints?.();
-      meter.stop();
       const { outcome, failure, firmware } = attempt;
       // A stalled device can still become active, so its reset stays armed. A connected or stalled
-      // device stays open, so whether it answers is still watched.
+      // device stays open, so whether it answers, and how busy the browser is, are still watched.
       const stalled = !!outcome && (kStallKinds as readonly string[]).includes(outcome);
       if (!stalled) stopResetWatch?.();
       if (!stalled && outcome !== "connected") stopRespondingWatch?.();
+      // The first window covers the whole attempt, since connectProgress reads the meter from its start.
       logDeviceEvent(tileId, "connectResult", attempt.choice, {
         ...attemptDetails(attempt), outcome, elapsedMs: attempt.elapsedMs,
-        failedStep: failure?.step, error: failure?.error, firmware, ...meter.read()
+        failedStep: failure?.step, error: failure?.error, firmware, ...meter.readWindow()
       });
       if (failure && alive()) recordFailure(content, failure);
     },
     onRecovered: attempt => {
       stopResetWatch?.();
       logDeviceEvent(tileId, "connectRecovered", attempt.choice, {
-        attemptId: attempt.id, elapsedMs: attempt.elapsedMs, steps: attempt.steps
+        attemptId: attempt.id, elapsedMs: attempt.elapsedMs, steps: attempt.steps, ...meter.readWindow()
       });
       if (alive()) content.clearConnectFailure();
     },
     onStallChanged: (attempt, failure) => {
       logDeviceEvent(tileId, "connectStallChanged", attempt.choice, {
         attemptId: attempt.id, stall: failure?.kind ?? "cleared", step: failure?.step,
-        elapsedMs: attempt.elapsedMs, steps: attempt.steps
+        elapsedMs: attempt.elapsedMs, steps: attempt.steps, ...meter.readWindow()
       });
       if (!alive()) return;
       if (failure) recordFailure(content, failure);
@@ -143,7 +144,7 @@ async function runAttempt(
       // show. Any other loss shows as the loss, so a stall's failure goes.
       const failure = reason === "updateFailed" ? connection.lastFailure : undefined;
       logDeviceEvent(tileId, "deviceLost", attempt.choice, {
-        attemptId: attempt.id, reason, failedStep: failure?.step, error: failure?.error
+        attemptId: attempt.id, reason, failedStep: failure?.step, error: failure?.error, ...meter.readWindow()
       });
       if (!alive()) return;
       if (failure) recordFailure(content, failure);
@@ -175,19 +176,24 @@ async function runAttempt(
       (notResponding, was) => {
         if (notResponding === undefined || was === undefined) return;
         logDeviceEvent(tileId, "deviceResponding", started.choice, {
-          attemptId: started.id, responding: !notResponding, elapsedMs: started.elapsedMs
+          attemptId: started.id, responding: !notResponding, elapsedMs: started.elapsedMs, ...meter.readWindow()
         });
       });
-    const stopWatchEnd = when(() => replaced() || letGo(), () => stopReaction());
-    stopRespondingWatch = () => {
+    const stopWatches = () => {
       stopReaction();
+      meter.stop();
+    };
+    const stopWatchEnd = when(() => replaced() || letGo(), stopWatches);
+    stopRespondingWatch = () => {
+      stopWatches();
       stopWatchEnd();
     };
+  } else {
+    meter.stop();
   }
 
   const finalOutcome = await result;
   stopCheckpoints?.();
-  meter.stop();
   return finalOutcome;
 }
 

@@ -161,11 +161,11 @@ that happened.
 | `reconnectDevice` | `attemptId` | Reconnect is clicked |
 | `connectProgress` | `attemptId`, `trigger`, `elapsedMs`, `step`, `steps`, `updatePercent` during an update; the browser's conditions so far (see below) | The attempt is still running 5, 10, 20, 40... s after the click |
 | `connectResult` | `attemptId`, `trigger`, `outcome`, `elapsedMs`, `steps`; for a failure `failedStep` and `error` (`name`, `code`, `message`); for a Spiker:bit `firmware` (`found`, `updated`, `checkBytes`, `checkRetried`); the browser's conditions during the attempt (see below) | The attempt ends, including `canceled` |
-| `connectRecovered` | `attemptId`, `elapsedMs`, `steps` | An attempt that ended in a stall gets its first data after all |
-| `connectStallChanged` | `attemptId`, `stall`: the new stall's kind (`updateStalled`, `noData` or `notResponding`) or `cleared`; `step`: the stalled step, for a stall; `elapsedMs`, `steps` | After a stall ended the attempt, the stall changed: a stalled update made progress again, stalled again or finished, or the board it then made active sent no data in time |
+| `connectRecovered` | `attemptId`, `elapsedMs`, `steps`; the browser's conditions since the attempt's previous event | An attempt that ended in a stall gets its first data after all |
+| `connectStallChanged` | `attemptId`, `stall`: the new stall's kind (`updateStalled`, `noData` or `notResponding`) or `cleared`; `step`: the stalled step, for a stall; `elapsedMs`, `steps`; the browser's conditions since the attempt's previous event | After a stall ended the attempt, the stall changed: a stalled update made progress again, stalled again or finished, or the board it then made active sent no data in time |
 | `abandonedOpen` | `attemptId`, and one of: what `close()` did, what `forget()` did, or how the abandoned open settled | Each of the three finishes; close and forget start together, so one that hangs doesn't hide the other |
-| `deviceLost` | `attemptId`, `reason`: `unplugged`, `lost`, or `updateFailed` for a stalled update whose flash fails later; for `updateFailed`, `failedStep` and `error` as in `connectResult` | A device the attempt left open is lost, or a stalled update's flash fails later |
-| `deviceResponding` | `attemptId`, `responding`: `false` when the connected device stops answering, `true` when it answers again; `elapsedMs` | A connected Spiker:bit's session stops or starts answering pings (`notResponding`). A disconnect or a loss isn't logged here |
+| `deviceLost` | `attemptId`, `reason`: `unplugged`, `lost`, or `updateFailed` for a stalled update whose flash fails later; for `updateFailed`, `failedStep` and `error` as in `connectResult`; the browser's conditions since the attempt's previous event | A device the attempt left open is lost, or a stalled update's flash fails later |
+| `deviceResponding` | `attemptId`, `responding`: `false` when the connected device stops answering, `true` when it answers again; `elapsedMs`; the browser's conditions since the attempt's previous event | A connected Spiker:bit's session stops or starts answering pings (`notResponding`). A disconnect or a loss isn't logged here |
 | `identifyDevice` | `attemptId` of the attempt that connected it, `result`: `answered` or `noAnswer` | The "Is it alive?" check finishes |
 | `disconnectDevice` | `targetType: "device"`, `device`: the choice that was connected | The user disconnects |
 | `resetProgram` | `targetType: "program"`, `trigger`: `connect`, `reconnect` or `button` | The program is reset |
@@ -185,7 +185,10 @@ that happened.
   and on average, which is how long the main thread was busy, and `hiddenMs`, how long the tab was
   hidden. A Spiker:bit connection reads and writes on the main thread, so a busy one slows the
   firmware check and the flash. Chrome slows timers in a hidden tab, so a sample the tab was hidden
-  for doesn't count toward the lag.
+  for doesn't count toward the lag. `connectProgress` and `connectResult` count from the click. The
+  meter keeps running while the attempt's device is open, after a stall or a connection, and each
+  later event counts from the attempt's previous event that carries them, so a slow page during a
+  long flash or a connected session isn't averaged with a quiet start.
 - A Spiker:bit's `firmware.found` is null when the board didn't answer the firmware check in time,
   which leads to an update. `checkBytes`, how many bytes the board sent during the check, and
   `checkRetried`, whether the query was sent a second time, tell a board that sent nothing, such as

@@ -52,6 +52,8 @@ function endAttempt(
   return outcome;
 }
 
+const connections: Array<{ holdsDevice: boolean }> = [];
+
 // A stand-in for DeviceConnection whose attempts are driven by the test. Like the real one, it
 // creates the attempt synchronously inside connect or reconnect.
 function makeConnection(
@@ -96,6 +98,7 @@ function makeConnection(
   };
   connection.connect.mockImplementation((choice: DeviceChoice, o?: IAttemptOptions) => start(choice, "connect", o));
   connection.reconnect.mockImplementation((o?: IAttemptOptions) => start(opts.lastChoice!, "reconnect", o));
+  connections.push(connection);
   return connection as unknown as DeviceConnection & { attempt: ConnectionAttempt | undefined };
 }
 
@@ -121,6 +124,12 @@ function loggedChanges(operation: string) {
 describe("device actions", () => {
   beforeEach(() => {
     (logTileChangeEvent as jest.Mock).mockClear();
+  });
+
+  // Lets each test's devices go, which ends their watches and browser meters.
+  afterEach(() => {
+    runInAction(() => connections.forEach(c => { c.holdsDevice = false; }));
+    connections.length = 0;
   });
 
   it("newAttemptId makes a new id each time", () => {
@@ -242,7 +251,7 @@ describe("device actions", () => {
       const connection = makeConnection((attempt, listener) => new Promise<AttemptOutcome>(resolve => {
         attempt.opened("waitForData");
         finish = () => resolve(endAttempt(attempt, listener, "connected"));
-      }));
+      }), { paletteView: "actions" });
       const acting = connectDeviceForTile({ connection, content: makeContent(), tileId, choice: "arduino" });
 
       expect(kCheckpointStartMs).toBe(5000);
@@ -266,7 +275,53 @@ describe("device actions", () => {
       }));
       await jest.advanceTimersByTimeAsync(60000);
       expect(loggedChanges("connectProgress").length).toBe(3);
-      // The meter stopped with the attempt.
+      // The meter runs while the device is connected, and stops when it is let go.
+      expect(jest.getTimerCount()).toBe(1);
+      await disconnectDeviceForTile({ connection, content: makeContent(), tileId });
+      expect(jest.getTimerCount()).toBe(0);
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
+  it("the events after a stall carry the lag since the attempt's previous event", async () => {
+    jest.useFakeTimers();
+    try {
+      let attempt: ConnectionAttempt | undefined;
+      let listener: IAttemptListener = {};
+      const connection = makeConnection((a, l) => new Promise<AttemptOutcome>(resolve => {
+        attempt = a;
+        listener = l;
+        a.opened("checkFirmware");
+        a.firmwareChecked(null, true);
+        setTimeout(() => resolve(endAttempt(a, l, "updateStalled", { step: "update" })), 1000);
+      }));
+      const block = async (ms: number) => {
+        jest.setSystemTime(Date.now() + ms);
+        await jest.advanceTimersByTimeAsync(kLagSampleMs);
+      };
+      const acting = connectDeviceForTile({ connection, content: makeContent(), tileId, choice: "spikerbit" });
+      await block(3000);
+      await jest.advanceTimersByTimeAsync(1000);
+      await acting;
+      expect(loggedChanges("connectResult")[0]).toEqual(expect.objectContaining({ lagMaxMs: 3000 }));
+
+      await block(800);
+      listener.onStallChanged?.(attempt!, undefined);
+      expect(loggedChanges("connectStallChanged")[0]).toEqual(expect.objectContaining({
+        lagMaxMs: 800, lagMeanMs: expect.any(Number), hiddenMs: 0
+      }));
+
+      await jest.advanceTimersByTimeAsync(kLagSampleMs * 4);
+      attempt!.activated();
+      attempt!.dataArrived();
+      listener.onRecovered?.(attempt!);
+      expect(loggedChanges("connectRecovered")[0]).toEqual(expect.objectContaining({ lagMaxMs: 0, lagMeanMs: 0 }));
+
+      await block(500);
+      listener.onLost?.(attempt!, "lost");
+      expect(loggedChanges("deviceLost")[0]).toEqual(expect.objectContaining({ lagMaxMs: 500 }));
+      // A lost device stops the meter.
       expect(jest.getTimerCount()).toBe(0);
     } finally {
       jest.useRealTimers();
@@ -624,7 +679,8 @@ describe("device actions", () => {
     runInAction(() => { device.notResponding = true; });
     expectLogMatching("deviceResponding", {
       targetType: "device", device: "spikerbit", attemptId: attempt!.id, responding: false,
-      elapsedMs: expect.any(Number)
+      elapsedMs: expect.any(Number), lagMaxMs: expect.any(Number), lagMeanMs: expect.any(Number),
+      hiddenMs: expect.any(Number)
     });
     runInAction(() => { device.notResponding = false; });
     expectLogMatching("deviceResponding", { attemptId: attempt!.id, responding: true });

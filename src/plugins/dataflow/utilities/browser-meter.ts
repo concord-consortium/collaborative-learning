@@ -10,15 +10,25 @@ export interface IBrowserConditions {
   hiddenMs: number;
 }
 
+interface ILagTotals {
+  maxMs: number;
+  totalMs: number;
+  samples: number;
+}
+
+const noLag = (): ILagTotals => ({ maxMs: 0, totalMs: 0, samples: 0 });
+
 /**
  * Measures how busy the browser is while something slow runs, such as a device connection that
- * reads from and writes to the device on the main thread. `read` gives the conditions so far.
+ * reads from and writes to the device on the main thread. `read` gives the conditions since the
+ * meter started. `readWindow` gives them since the previous `readWindow`, or since the meter
+ * started, and starts a new window, so a reading late in a long run isn't diluted by its start.
  */
 export function startBrowserMeter() {
-  let lagMaxMs = 0;
-  let lagTotalMs = 0;
-  let samples = 0;
+  const whole = noLag();
+  let recent = noLag();
   let hiddenMs = 0;
+  let recentHiddenStart = 0;
   let hiddenSince = document.visibilityState === "hidden" ? Date.now() : undefined;
   let sampleSawHidden = hiddenSince !== undefined;
   let expectedAt = Date.now() + kLagSampleMs;
@@ -39,25 +49,37 @@ export function startBrowserMeter() {
     const now = Date.now();
     if (!sampleSawHidden) {
       const lag = Math.max(0, now - expectedAt);
-      lagMaxMs = Math.max(lagMaxMs, lag);
-      lagTotalMs += lag;
-      samples++;
+      for (const totals of [whole, recent]) {
+        totals.maxMs = Math.max(totals.maxMs, lag);
+        totals.totalMs += lag;
+        totals.samples++;
+      }
     }
     sampleSawHidden = hiddenSince !== undefined;
     expectedAt = now + kLagSampleMs;
     timer = setTimeout(sample, kLagSampleMs);
   };
 
+  const hiddenSoFar = () => hiddenMs + (hiddenSince !== undefined ? Date.now() - hiddenSince : 0);
+  const conditions = (totals: ILagTotals, hidden: number): IBrowserConditions => ({
+    lagMaxMs: totals.maxMs,
+    lagMeanMs: totals.samples ? Math.round(totals.totalMs / totals.samples) : 0,
+    hiddenMs: hidden
+  });
+
   document.addEventListener("visibilitychange", handleVisibilityChange);
   timer = setTimeout(sample, kLagSampleMs);
 
   return {
     read(): IBrowserConditions {
-      return {
-        lagMaxMs,
-        lagMeanMs: samples ? Math.round(lagTotalMs / samples) : 0,
-        hiddenMs: hiddenMs + (hiddenSince !== undefined ? Date.now() - hiddenSince : 0)
-      };
+      return conditions(whole, hiddenSoFar());
+    },
+    readWindow(): IBrowserConditions {
+      const hidden = hiddenSoFar();
+      const result = conditions(recent, hidden - recentHiddenStart);
+      recent = noLag();
+      recentHiddenStart = hidden;
+      return result;
     },
     stop() {
       clearTimeout(timer);

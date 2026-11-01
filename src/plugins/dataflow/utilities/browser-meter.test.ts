@@ -53,6 +53,23 @@ describe("startBrowserMeter", () => {
     meter.stop();
   });
 
+  it("reads a window since the previous window, while read covers the whole run", () => {
+    const meter = startBrowserMeter();
+    block(400);
+    jest.advanceTimersByTime(kLagSampleMs);
+    expect(meter.readWindow()).toEqual({ lagMaxMs: 400, lagMeanMs: 400, hiddenMs: 0 });
+
+    block(100);
+    jest.advanceTimersByTime(kLagSampleMs);
+    setVisibility("hidden");
+    block(1000);
+    setVisibility("visible");
+    expect(meter.readWindow()).toEqual({ lagMaxMs: 100, lagMeanMs: 100, hiddenMs: 1000 });
+    expect(meter.readWindow()).toEqual({ lagMaxMs: 0, lagMeanMs: 0, hiddenMs: 0 });
+    expect(meter.read()).toEqual({ lagMaxMs: 400, lagMeanMs: 250, hiddenMs: 1000 });
+    meter.stop();
+  });
+
   it("stops sampling once stopped", () => {
     const meter = startBrowserMeter();
     meter.stop();
