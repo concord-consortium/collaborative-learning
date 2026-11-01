@@ -1,5 +1,7 @@
 import { cloneDeep } from "lodash";
-import { flow, getSnapshot, getType, Instance, types } from "mobx-state-tree";
+import {
+  flow, getLivelinessChecking, getSnapshot, getType, Instance, setLivelinessChecking, types
+} from "mobx-state-tree";
 import { nanoid } from "nanoid";
 import { ITileProps } from "src/components/tiles/tile-component";
 import { SharedModel, SharedModelType } from "../shared/shared-model";
@@ -342,6 +344,40 @@ it("can redo a tile change", async () => {
     undoEntry,
     redoEntry
   ]);
+});
+
+// A completed entry is copied into the document history and the active entry is destroyed, so
+// nothing may keep using the active entry once it completes.
+it("does not use an active entry after it completes", async () => {
+  const unhandledRejections: unknown[] = [];
+  const onUnhandledRejection = (reason: unknown) => unhandledRejections.push(reason);
+  process.on("unhandledRejection", onUnhandledRejection);
+  // Jest's default ("warn") would only log a read of a destroyed node.
+  const previousLivelinessChecking = getLivelinessChecking();
+  setLivelinessChecking("error");
+
+  try {
+    const {tileContent, manager, undoStore} = setupDocument();
+    tileContent.setFlag(true);
+    await expectEntryToBeComplete(manager, 1);
+
+    undoStore.undo();
+    await expectEntryToBeComplete(manager, 2);
+
+    undoStore.redo();
+    await expectEntryToBeComplete(manager, 3);
+    // Give anything that runs after an entry completes a chance to fail.
+    await wait(1);
+
+    expect(unhandledRejections).toEqual([]);
+    expect(tileContent.flag).toBe(true);
+    expect(manager.activeHistoryEntries.length).toBe(0);
+    // The undo store's reference resolves to the copy in the document history.
+    expect(undoStore.history[0]).toBe(manager.document.history[0]);
+  } finally {
+    setLivelinessChecking(previousLivelinessChecking);
+    process.removeListener("unhandledRejection", onUnhandledRejection);
+  }
 });
 
 

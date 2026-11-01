@@ -65,7 +65,7 @@ export const UndoStore = types
     // Start a non-undoable action with this id
     // TODO: we are using a fake tree id of "manager" here. This is currently
     // working, but we probably want to review this approach.
-    const historyEntry = manager.createHistoryEntry({
+    manager.createHistoryEntry({
       id: historyEntryId,
       exchangeId,
       tree: "manager",
@@ -133,7 +133,7 @@ export const UndoStore = types
     // way each tree has a chance to add a new exchange to the history
     // entry which will keep it "recording" until that new exchange is
     // also finished.
-    manager.endExchange(historyEntry, exchangeId);
+    manager.endExchange(historyEntryId, exchangeId);
   });
 
   return {

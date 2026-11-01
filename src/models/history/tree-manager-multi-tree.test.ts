@@ -614,7 +614,7 @@ describe("TreeManager multi-tree support", () => {
       const { manager } = setupManager();
 
       const historyEntryId = nanoid();
-      const entry = manager.createHistoryEntry({
+      manager.createHistoryEntry({
         id: historyEntryId,
         exchangeId: "create",
         tree: "treeA",
@@ -650,11 +650,29 @@ describe("TreeManager multi-tree support", () => {
         inversePatches: [],
       });
 
-      expect(entry.state).toBe("complete");
       const historySnap = getSnapshot(manager.document.history);
       expect(historySnap.length).toBe(1);
+      expect(historySnap[0].state).toBe("complete");
       const storedRecords = historySnap[0].records as ReadonlyArray<{ tree: string }>;
       expect(storedRecords.map(r => r.tree).sort()).toEqual(["treeA", "treeB"]);
+    });
+  });
+
+  describe("createHistoryEntry", () => {
+    it("rejects an id that is already active", () => {
+      const { manager } = setupManager();
+      const entryInfo = {
+        id: nanoid(),
+        exchangeId: "create",
+        tree: "treeA",
+        model: "TestTree",
+        action: "/duplicate",
+        undoable: true,
+      };
+      manager.createHistoryEntry(entryInfo);
+
+      expect(() => manager.createHistoryEntry({ ...entryInfo, exchangeId: "second" }))
+        .toThrow("The entry already exists");
     });
   });
 });

@@ -1,5 +1,5 @@
 import {
-  types, Instance, flow, IJsonPatch, detach, destroy, toGenerator
+  types, Instance, flow, IJsonPatch, destroy, getSnapshot, toGenerator
 } from "mobx-state-tree";
 import { nanoid } from "nanoid";
 import { TreeAPI } from "./tree-api";
@@ -159,10 +159,6 @@ export const TreeManager = types
     return self.undoStore;
   },
 
-  findHistoryEntry(historyEntryId: string) {
-    return self.document.history.find(entry => entry.id === historyEntryId);
-  },
-
   findHistoryEntryIndex(historyEntryId: string) {
     return self.document.history.findIndex(entry => entry.id === historyEntryId);
   },
@@ -178,11 +174,16 @@ export const TreeManager = types
 }))
 .actions(self => {
   return {
-    completeHistoryEntry(entry: Instance<typeof HistoryEntry>) {
-      entry.state = "complete";
+    completeHistoryEntry(activeEntry: Instance<typeof HistoryEntry>) {
+      activeEntry.state = "complete";
 
-      // Remove the entry from the activeHistoryEntries
-      detach(entry);
+      // The entry is copied into the history instead of being moved with `detach`. Detaching
+      // makes MST walk every identifier in the tree, and the history can hold thousands of
+      // entries, so each completed entry would get slower. Because the active entry is
+      // destroyed here, nothing may keep a reference to it. That is why createHistoryEntry
+      // doesn't return the entry and the actions that work on an active entry take its id.
+      const snapshot = getSnapshot(activeEntry);
+      destroy(activeEntry);
 
       // If the history entry resulted in no changes don't add it to the real
       // history.
@@ -192,8 +193,7 @@ export const TreeManager = types
       // state. For example if a button was clicked even if it didn't change the
       // state we might want to show that somehow. There are lots of entries
       // that are empty though, so they are removed for the time being.
-      if (entry.records.length === 0) {
-        destroy(entry);
+      if (snapshot.records.length === 0) {
         return;
       }
 
@@ -201,8 +201,8 @@ export const TreeManager = types
       // the index written into the firestore entry document
       const newLocalIndex = self.document.history.length;
 
-      // Re-attach the entry to the actual history
-      self.document.history.push(entry);
+      self.document.history.push(snapshot);
+      const entry = self.document.history[newLocalIndex];
 
       // Add the entry to the undo stack if it is undoable.
       //
@@ -332,10 +332,15 @@ export const TreeManager = types
     return Promise.resolve();
   },
 
-  endExchange(entry: Instance<typeof HistoryEntry>, exchangeId: string) {
+  endExchange(historyEntryId: string, exchangeId: string) {
+    const entry = self.findActiveHistoryEntry(historyEntryId);
+    if (!entry) {
+      throw new Error(`There isn't an active entry for ${ json({historyEntryId, exchangeId})}`);
+    }
+
     const openExchangeValue = entry.activeExchanges.get(exchangeId);
     if (!openExchangeValue) {
-      throw new Error(`There is no active exchange matching ${ json({historyEntryId: entry.id, exchangeId}) }`);
+      throw new Error(`There is no active exchange matching ${ json({historyEntryId, exchangeId}) }`);
     }
 
     entry.activeExchanges.delete(exchangeId);
@@ -349,7 +354,10 @@ export const TreeManager = types
 
   createHistoryEntry(entryInfo: ICreateHistoryEntry) {
     const {id: historyEntryId, exchangeId, action} = entryInfo;
-    if (self.findHistoryEntry(historyEntryId) || self.findActiveHistoryEntry(historyEntryId)) {
+    // Only the active entries are checked. Each id is a new nanoid, so a match in the
+    // document history would mean a random collision, and scanning the history on every
+    // new entry gets slow once it holds thousands of entries.
+    if (self.findActiveHistoryEntry(historyEntryId)) {
       throw new Error(`The entry already exists ${ json({historyEntryId})}`);
     }
     const entry = HistoryEntry.create({
@@ -358,8 +366,6 @@ export const TreeManager = types
     self.activeHistoryEntries.push(entry);
 
     entry.activeExchanges.set(exchangeId, `TreeManager.createHistoryEntry ${action}`);
-
-    return entry;
   },
 
   setNumHistoryEntriesAppliedFromFirestore: flow(
@@ -456,7 +462,7 @@ export const TreeManager = types
           exchangeName: entry.activeExchanges.get(exchangeId)});
     }
 
-    self.endExchange(entry, exchangeId);
+    self.endExchange(historyEntryId, exchangeId);
   },
 
   /**
