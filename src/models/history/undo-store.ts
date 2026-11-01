@@ -138,32 +138,21 @@ export const UndoStore = types
 
   return {
     addHistoryEntry(entry: Instance<typeof HistoryEntry>) {
-      // Find if there is already an HistoryEntry with this
-      // historyEntryId. This action is called each time a new
-      // TreePatchRecord is added to the HistoryEntry. If the
-      // HistoryEntry has already been added then we don't modify it,
-      // but we do always reset the undoIdx to the end of the history.
+      // This is called once for each new undoable entry, after it is added to the
+      // document history. It doesn't check whether the entry is already on the undo
+      // stack: that would scan the whole stack, which gets slow once it holds
+      // thousands of entries.
 
       if (DEBUG_UNDO) {
         // eslint-disable-next-line no-console
         console.log(`adding to undo history`, (entry as any).toJSON()/*.action*/);
       }
-      const existingEntry = self.findHistoryEntry(entry.id);
-      if (!existingEntry) {
-        // This is a new user action, so if they had undone some amount already
-        // we delete the part of the history that was past this undone point
-        self.history.splice(self.undoIdx);
-        self.history.push(entry);
-      }
-
-      // Reset the undoIdx to the end of the history, this is because it is a
-      // user action so if the user had been undoing things, once they start
-      // doing new things they can no longer 'redo' what was undone before.
-      //
-      // The fact that the undoIdx is reset in all cases even with an existing
-      // entry is kind of confusing. This happens because if additional patches
-      // are being added to an existing entry these are still user triggered
-      // patches. So this needs to prevent the ability to redo.
+      // This is a new user action, so if they had undone some amount already
+      // we delete the part of the history that was past this undone point.
+      // Once they start doing new things they can no longer 'redo' what was
+      // undone before.
+      self.history.splice(self.undoIdx);
+      self.history.push(entry);
       self.undoIdx = self.history.length;
     },
 
