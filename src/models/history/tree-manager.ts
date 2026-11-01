@@ -353,9 +353,9 @@ export const TreeManager = types
 
     createHistoryEntry(entryInfo: ICreateHistoryEntry) {
       const {id: historyEntryId, exchangeId, action} = entryInfo;
-      // Only the active entries are checked. Each id is a new nanoid, so a match in the
-      // document history would mean a random collision, and scanning the history on every
-      // new entry gets slow once it holds thousands of entries.
+      // Callers give each new entry a unique id (see TreeManagerAPI.addHistoryEntry), so only
+      // the active entries are checked. Scanning the document history for every new entry
+      // gets slow once it holds thousands of entries.
       if (self.findActiveHistoryEntry(historyEntryId)) {
         throw new Error(`The entry already exists ${ json({historyEntryId})}`);
       }
