@@ -489,22 +489,21 @@ describe("Dataflow connect button and palette", () => {
     expect(document.activeElement).toBe(within(group).getAllByRole("button")[0]);
   });
 
-  // The palette sits inside the tooltip's hover area. A pointer moving onto it from outside enters
-  // that area, as the mouseenter on the palette's parent stands in for here.
-  it("hovering the button shows its tooltip, but not while the palette is open", async () => {
+  // A pointer moving onto the palette enters the palette's parent, as the mouseenter stands in for here.
+  it("hovering the palette shows no tooltip, and hovering the button still does", async () => {
     const { container } = renderConnect();
     const trigger = getTrigger(container);
     const tooltip = () => document.querySelector(".tippy-popper");
-    fireEvent.mouseEnter(trigger.parentElement!);
-    await waitFor(() => expect(tooltip()).not.toBeNull());
-
-    // The click that opens the palette comes with the pointer over the button.
     fireEvent.click(trigger);
-    await waitFor(() => expect(tooltip()).toBeNull());
     const palette = screen.getByRole("group", { name: "Device connection" }).closest(".dataflow-connect-palette")!;
+    // Neither the tooltip nor the browser's own title is on an element around the palette.
+    expect(palette.closest("[data-tooltipped], [title]")).toBeNull();
     fireEvent.mouseEnter(palette.parentElement!);
     await act(() => new Promise(resolve => setTimeout(resolve, 50)));
     expect(tooltip()).toBeNull();
+
+    fireEvent.mouseEnter(trigger.parentElement!);
+    await waitFor(() => expect(tooltip()).not.toBeNull());
   });
 
   it("Escape closes the palette and returns focus to the trigger", () => {

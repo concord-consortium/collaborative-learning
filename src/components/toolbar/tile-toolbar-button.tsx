@@ -67,30 +67,34 @@ export const TileToolbarButton = function ({
   );
 
   return (
-    // The panel a button opens is its extraContent, inside the tooltip's hover area, where the
-    // tooltip would cover it. So there is no tooltip while the panel shows.
-    <Tooltip title={tooltip} {...tipOptions} disabled={expanded}>
-      <button
-        type="button"
-        className={classNames("toolbar-button", name, colorClass, { selected: selected || highlighted, disabled })}
-        // Use aria-disabled instead of HTML disabled so buttons remain keyboard-focusable
-        aria-disabled={disabled || undefined}
-        aria-label={title}
-        aria-pressed={selected !== undefined ? selected : undefined}
-        aria-expanded={expanded}
-        onClick={disabled ? handleDisabledClick : handleOnClick}
-        onMouseDown={disabled ? undefined : onMouseDown}
-        onMouseUp={disabled ? undefined : onMouseUp}
-        onTouchStart={disabled ? undefined : onTouchStart}
-        onTouchEnd={disabled ? undefined : onTouchEnd}
-        data-testid={dataTestId}
-      >
-        {children}
-      </button>
+    // The tooltip wraps the button alone, so the panel a button opens (its extraContent) is outside
+    // the tooltip's hover area and the tooltip can't cover it. The toolbar's CSS finds a row's first
+    // and last buttons by the div around each one, so that is this inline div, and the tooltip's
+    // element is a span.
+    <div style={{ display: "inline" }}>
+      <Tooltip title={tooltip} {...tipOptions} tag="span">
+        <button
+          type="button"
+          className={classNames("toolbar-button", name, colorClass, { selected: selected || highlighted, disabled })}
+          // Use aria-disabled instead of HTML disabled so buttons remain keyboard-focusable
+          aria-disabled={disabled || undefined}
+          aria-label={title}
+          aria-pressed={selected !== undefined ? selected : undefined}
+          aria-expanded={expanded}
+          onClick={disabled ? handleDisabledClick : handleOnClick}
+          onMouseDown={disabled ? undefined : onMouseDown}
+          onMouseUp={disabled ? undefined : onMouseUp}
+          onTouchStart={disabled ? undefined : onTouchStart}
+          onTouchEnd={disabled ? undefined : onTouchEnd}
+          data-testid={dataTestId}
+        >
+          {children}
+        </button>
+      </Tooltip>
       {announcement && (
         <span role="status" aria-live="assertive" className="visually-hidden">{announcement}</span>
       )}
       {extraContent}
-    </Tooltip>
+    </div>
   );
 };
