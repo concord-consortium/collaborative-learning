@@ -29,16 +29,19 @@ export interface IPaletteStatusInput {
 }
 
 // The status of the shared connection, showing the tile's `failure` if it still counts (see
-// `currentFailure`).
+// `currentFailure`). Without one, it shows the connection's stall, as the toolbar button does, since
+// a stall holds the device every tile shares. Another tile's failed attempt shows only in that tile.
 export function connectionStatusInput(
   connection: DeviceConnection, failure: IConnectFailure | undefined
 ): IPaletteStatusInput {
+  const shared = connection.currentFailure(connection.lastFailure);
+  const sharedStall = shared && kStallKinds.includes(shared.kind) ? shared : undefined;
   return {
     attempt: connection.attempt,
     isConnected: connection.isConnected,
     dataReceived: connection.dataReceived,
     label: connection.label,
-    failure: connection.currentFailure(failure),
+    failure: connection.currentFailure(failure) ?? sharedStall,
     loss: connection.lossReason,
     notResponding: connection.notResponding,
     check: connection.check,

@@ -763,6 +763,21 @@ describe("Dataflow connect button and palette", () => {
       expect(getTrigger(r.container).getAttribute("aria-label")).toBe("Couldn't connect. Click for details.");
     });
 
+    // Tile B's button shows the connection's stall, so its palette does too.
+    it("tile A's stall shows in tile B's palette", () => {
+      const stores = specStores();
+      const a = renderConnect({ stores });
+      openConnectPalette({ stores });
+      stalledUpdate(a);
+      expect(within(palette()).getByText("Update stalled.")).toBeInTheDocument();
+
+      act(() => runInAction(() => { a.connection.lastFailure = undefined; }));
+      act(() => a.stores.serialDevice.clearActiveDevice());
+      stalledArduino(a);
+      expect(within(palette()).getByText("No data yet.")).toBeInTheDocument();
+      act(() => a.stores.serialDevice.clearActiveDevice());
+    });
+
     it("a tile's stall no longer shows once its device is gone", () => {
       const r = renderConnect();
       stalledArduino(r);
