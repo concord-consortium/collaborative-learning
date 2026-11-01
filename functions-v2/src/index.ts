@@ -8,6 +8,7 @@ export {onAnalysisDocumentPending} from "./on-analysis-document-pending";
 export {onAnalysisDocumentImaged} from "./on-analysis-document-imaged";
 export {onClassDataDocWritten} from "./on-class-data-doc-written";
 export {chatTutorOnWrite} from "./chat-tutor";
+export {clueExport} from "./clue-export";
 
 import {createFirestoreMetadataDocument} from "./create-firestore-metadata-document";
 import {postDocumentComment} from "./post-document-comment";

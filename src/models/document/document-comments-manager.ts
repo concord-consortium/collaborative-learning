@@ -18,6 +18,16 @@ export const LOCAL_COMMENT = "local";
 // up. Comfortably above Shutterbug's ~45s budget plus the model call.
 const kRemoteCommentExpiryMs = 120_000;
 
+// When a pending request stops looking slow and starts looking stuck. Well short of the expiry
+// above, which is pinned to the evaluation function's own 120s budget and so cannot be lowered
+// without reporting failure on evaluations that are merely slow.
+export const kSlowRemoteCommentMs = 45_000;
+
+/** Which path gave up on an Ideas request, carried on the failure log so a dead server can be
+ * told from a dead connection. */
+export type IdeasFailureReason =
+  "expired" | "server-failed" | "client-deadline" | "client-error";
+
 export type CommentWithId = WithId<CommentDocument>;
 export type PendingCommentType = typeof REMOTE_COMMENT | typeof LOCAL_COMMENT;
 
@@ -37,6 +47,9 @@ export interface IPendingRemoteComment extends IPendingComment {
   /** Called when this entry leaves the queue, so the caller can detach anything it set up (e.g. a
    * Realtime Database listener). */
   dispose?: () => void;
+  /** Reports a failure the caller should log. The manager holds no document or store reference and
+   * should keep none, so it says a failure happened and the caller decides what that means. */
+  onFailure?: (reason: IdeasFailureReason) => void;
 }
 
 interface IQueueRemoteCommentParams {
@@ -45,6 +58,7 @@ interface IQueueRemoteCommentParams {
   checkCompleted: (comments: CommentWithId[]) => boolean;
   requestId?: string;
   dispose?: () => void;
+  onFailure?: (reason: IdeasFailureReason) => void;
 }
 
 /** The completion status the analysis pipeline writes for an evaluation request — see
@@ -107,8 +121,17 @@ export class DocumentCommentsManager {
    * empty-document click, until the handler returns). */
   ideasClickInProgress = false;
 
+  /** Pending remote entries that have passed kSlowRemoteCommentMs. A set of ids rather than a
+   * flag: a flag would only be correct while canRequestIdeas allows one remote entry at a time,
+   * and would desync silently the day that gate changes. */
+  private slowRemoteCommentIds = new Set<string>();
+
   constructor() {
     makeAutoObservable(this, {}, { autoBind: true });
+  }
+
+  get hasSlowRemoteComment() {
+    return this.slowRemoteCommentIds.size > 0;
   }
 
   /** Whether a new Ideas click may make a request: false while one is in progress or an AI
@@ -196,6 +219,7 @@ export class DocumentCommentsManager {
 
     runInAction(() => {
       this.pendingComments = this.pendingComments.filter(p => !ids.has(p.id));
+      ids.forEach(id => this.slowRemoteCommentIds.delete(id));
     });
 
     removed.forEach(p => {
@@ -203,7 +227,9 @@ export class DocumentCommentsManager {
     });
   }
 
-  queueRemoteComment({ triggeredAt, source, checkCompleted, requestId, dispose }: IQueueRemoteCommentParams) {
+  queueRemoteComment(
+    { triggeredAt, source, checkCompleted, requestId, dispose, onFailure }: IQueueRemoteCommentParams
+  ) {
     const id = `${source}-comment-${nanoid()}`;
 
     const timer = setTimeout(() => {
@@ -212,12 +238,18 @@ export class DocumentCommentsManager {
       // rather than letting the bubble vanish unexplained.
       if (requestId && requestId === this.latestIdeasRequestId) {
         this.showStatusMessage(IDEAS_REQUEST_FAILED_MESSAGE);
+        onFailure?.("expired");
       }
       this.checkPendingComments();
     }, kRemoteCommentExpiryMs);
 
+    const slowTimer = setTimeout(() => {
+      runInAction(() => { this.slowRemoteCommentIds.add(id); });
+    }, kSlowRemoteCommentMs);
+
     const wrappedDispose = () => {
       clearTimeout(timer);
+      clearTimeout(slowTimer);
       dispose?.();
     };
 
@@ -229,7 +261,8 @@ export class DocumentCommentsManager {
       checkCompleted,
       requestId,
       expiresAt: Date.now() + kRemoteCommentExpiryMs,
-      dispose: wrappedDispose
+      dispose: wrappedDispose,
+      onFailure
     };
 
     this.pendingComments.push(pending);
@@ -268,13 +301,10 @@ export class DocumentCommentsManager {
     if (!status?.requestId) return;
     if (status.outcome === "commented") return;
 
-    const matchingIds = new Set(
-      this.pendingComments
-        .filter((p): p is IPendingRemoteComment =>
-          p.postingType === REMOTE_COMMENT && p.requestId === status.requestId)
-        .map(p => p.id)
-    );
-    this.removePendingComments(matchingIds);
+    const matching = this.pendingComments
+      .filter((p): p is IPendingRemoteComment =>
+        p.postingType === REMOTE_COMMENT && p.requestId === status.requestId);
+    this.removePendingComments(new Set(matching.map(p => p.id)));
 
     // Only the latest click's status may change what the student sees — an older request
     // resolving late must not show a message over a click the student already made.
@@ -285,6 +315,7 @@ export class DocumentCommentsManager {
           break;
         case "failed":
           this.showStatusMessage(IDEAS_REQUEST_FAILED_MESSAGE);
+          matching.forEach(p => p.onFailure?.("server-failed"));
           break;
         default: {
           // EvaluationOutcome (shared/shared.ts) gained a value this switch doesn't handle, so
@@ -321,5 +352,6 @@ export class DocumentCommentsManager {
     });
     this.comments = [];
     this.pendingComments = [];
+    this.slowRemoteCommentIds.clear();
   }
 }

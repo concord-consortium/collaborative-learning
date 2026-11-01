@@ -1,5 +1,14 @@
 # Firestore database structure
 
+## Read outside CLUE: `clueExport`
+
+The `clueExport` function in `functions-v2` hands student documents to report-server's CLUE document export, which researchers download with cc-data. It reads, under `authed/<escapedPortalDomain>`:
+
+- `documents`, queried by `context_id` and `uid`: `offeringId`, `type`, `visibility`, `title`, `unit`, `investigation`, `problem`, `groupId`, `network`, `tools` and `createdAt`;
+- `documents/{docId}/history`, ordered by `index` then document id: `index`, `created`, `previousEntryId` and `entry`.
+
+A change to these paths or fields needs `functions-v2/src/clue-export-walk.ts` and its emulator tests updated too, or the export silently loses data. If the rows the export answers change, report-server and cc-data change with them.
+
 ## Analysis queue
 
 Outside of the main collections for users and documents, there is a collection of information about the status of documents submitted for AI analysis.  The top-level collection for this is `analysis`. Within that there is a queue containing the various statuses: `pending`, `imaged`, `done`, `failedImaging`, and `failedAnalyzing`. These contain status documents keyed by documentIds.

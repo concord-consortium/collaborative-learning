@@ -64,7 +64,13 @@ export class FirestoreTransport implements ChatTransport {
   // mirrors the parent doc's problemInstalled flag; a not-yet-created parent reads
   // as false, so the first send attaches LEFT
   private problemInstalled = false;
+  // "The server has this one", so it is recorded only on acknowledgement: claiming before delivery
+  // would let a concurrent send skip a workspace whose only carrier then failed, leaving the tutor
+  // blind to the student's work. The sequence keeps a late older send from overwriting a newer
+  // record, which would re-attach a workspace the server already has.
   private lastSentRightHash: string | undefined;
+  private rightSendSeq = 0;
+  private lastSentRightSeq = 0;
   private onStatus?: (status: ChatStatus) => void;
 
   constructor(private readonly opts: FirestoreTransportOptions) {}
@@ -230,9 +236,12 @@ export class FirestoreTransport implements ChatTransport {
       message[right.field] = right.value;
     }
 
+    const sendSeq = ++this.rightSendSeq;
+
     await this.messagesRef().add(message);
 
-    if (decision.attachRight && right) {
+    if (decision.attachRight && right && sendSeq > this.lastSentRightSeq) {
+      this.lastSentRightSeq = sendSeq;
       this.lastSentRightHash = right.hash;
     }
   }

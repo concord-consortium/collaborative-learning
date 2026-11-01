@@ -10,11 +10,13 @@ import { BasicEditableTileTitle } from "../../components/tiles/basic-editable-ti
 import { TileToolbar } from "../../components/toolbar/tile-toolbar";
 import { ITileProps } from "../../components/tiles/tile-component";
 import { useFirebaseFunction } from "../../hooks/use-firebase-function";
+import { Logger } from "../../lib/logger";
+import { LogEventName } from "../../lib/logger-types";
 import { useStores } from "../../hooks/use-stores";
 import { useUserContext } from "../../hooks/use-user-context";
 import { DocumentContentModel } from "../../models/document/document-content";
 import { getDocumentIdentifier } from "../../models/document/document-utils";
-import { AI_TILE_EMPTY_MESSAGE } from "../../models/document/ai-evaluation-messages";
+import { AI_TILE_EMPTY_MESSAGE, AI_TILE_REQUEST_FAILED_MESSAGE } from "../../models/document/ai-evaluation-messages";
 import { liveProblemsFromUnit } from "../../models/curriculum/unit-utils";
 import { AIContentModelType, logAiEvent } from "./ai-content";
 import { changeSlashesToUnderscores } from "./ai-utils";
@@ -39,6 +41,10 @@ export const AIComponent: React.FC<ITileProps> = observer((props) => {
   // Text to restore when a request is invalidated with no successor to finish the job (e.g. the
   // class context disappears mid-request). Shared across runs, and cleared once no longer needed.
   const previousTextRef = useRef<string | undefined>(undefined);
+  // The refreshCount this effect last ran against. The effect also reruns when userContext, the
+  // document or unit config changes, so "has ever been refreshed" would misread those as the
+  // student asking — see userRequested below.
+  const lastRefreshCountRef = useRef(content.refreshCount);
 
   useEffect(() => {
     onRegisterTileApi({
@@ -58,6 +64,11 @@ export const AIComponent: React.FC<ITileProps> = observer((props) => {
 
     const generation = ++requestGenerationRef.current;
     const isCurrent = () => requestGenerationRef.current === generation;
+    // True only when refreshCount moved since the last run of this effect, i.e. the student
+    // clicked Update to cause THIS run. A rerun from any other dependency is automatic, however
+    // many times they clicked before. Decides whether a failure is theirs to see — see the catch.
+    const userRequested = content.refreshCount > lastRefreshCountRef.current;
+    lastRefreshCountRef.current = content.refreshCount;
     // Undo a superseded run's own blanking before anything else runs, so this run starts from real
     // text — otherwise this run's own capture below would save the blank, not the good text.
     if (previousTextRef.current !== undefined) {
@@ -139,12 +150,24 @@ export const AIComponent: React.FC<ITileProps> = observer((props) => {
             setLastUpdated(new Date(timestamp._seconds*1000));
           }
         } catch (error) {
-          // Restore rather than leave the blank text set above; no-op if nothing was cleared, a
-          // newer refresh has taken over, or the tile was deleted mid-request — writing to a
-          // destroyed node would throw and hide the error this is trying to report.
-          if (isCurrent() && previousTextRef.current !== undefined && isAlive(content)) {
-            content.setText(previousTextRef.current);
-            previousTextRef.current = undefined;
+          // A requested refresh reports: restoring would look like a refresh that did nothing, and
+          // this message is document content, the same tradeoff AI_TILE_EMPTY_MESSAGE makes above.
+          // An automatic one restores instead, so a transient failure cannot replace a good saved
+          // answer. A superseded run is neither, and isAlive guards a tile deleted mid-request.
+          if (isCurrent() && isAlive(content)) {
+            if (userRequested) {
+              content.setText(AI_TILE_REQUEST_FAILED_MESSAGE);
+              previousTextRef.current = undefined;
+            } else if (previousTextRef.current !== undefined) {
+              content.setText(previousTextRef.current);
+              previousTextRef.current = undefined;
+            }
+            // Logged either way; console.error reaches nobody, as Rollbar captures only uncaught
+            // errors. Its own event, not logAiEvent: that cascades into QUESTION_ANSWERS_CHANGE
+            // for a tile inside a Question tile, carrying the prompt and sibling answers.
+            Logger.log(LogEventName.AI_TILE_REQUEST_FAILED, {
+              tileId: model.id, documentId: identifier, userRequested
+            });
           }
           console.error("Failed to query AI", error);
         } finally {

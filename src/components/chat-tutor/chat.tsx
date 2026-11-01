@@ -1,7 +1,7 @@
 import React, { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import classNames from "classnames";
 import { v4 as uuidv4 } from "uuid";
-import { UseChatResult } from "./use-chat";
+import { kReplyDeadlineMs, kTimeoutMessage, UseChatResult } from "./use-chat";
 import { ChatTurn } from "./transport";
 
 import "./chat.scss";
@@ -119,9 +119,13 @@ const DebugTurn: React.FC<{ turn: ChatTurn }> = ({ turn }) => {
 
 export const Chat: React.FC<IProps> = ({ chat, onClose, closeLabel, transcriptTitle, introText,
     onHighlightHover, onHighlightToggle, activeHighlightKey, enableHighlights = false }) => {
-  const { turns, error, pending, sendMessage, header } = chat;
+  const { turns, error, pending, timedOut, sendMessage, header } = chat;
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
+  // Identifies the newest submit. Once the release timer below frees the composer, an earlier send
+  // can still settle: without this its finally would re-enable the composer mid-send, and its
+  // catch would overwrite whatever the student has since typed with the old message.
+  const sendGenRef = useRef(0);
   const [copied, setCopied] = useState(false);
   const listRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -224,12 +228,21 @@ export const Chat: React.FC<IProps> = ({ chat, onClose, closeLabel, transcriptTi
     if (!text || sending) return;
     setSending(true);
     setInput("");
+    // An offline add() stays pending indefinitely, so awaiting it for the UI would hold the
+    // composer disabled past the deadline meant to end exactly that. This bounds the UI only: the
+    // write keeps running and still reconciles if it lands.
+    const gen = ++sendGenRef.current;
+    const isNewest = () => gen === sendGenRef.current;
+    const release = setTimeout(() => { if (isNewest()) setSending(false); }, kReplyDeadlineMs);
     try {
       await sendMessage(text);
     } catch {
-      setInput(text); // restore so the student can retry (error surfaced by the hook)
+      // Restore so the student can retry (the error itself is surfaced by the hook). Never over
+      // text they have typed since: a superseded send's message is not what they are writing now.
+      if (isNewest()) setInput(prev => prev || text);
     } finally {
-      setSending(false);
+      clearTimeout(release);
+      if (isNewest()) setSending(false);
     }
   };
 
@@ -338,7 +351,7 @@ export const Chat: React.FC<IProps> = ({ chat, onClose, closeLabel, transcriptTi
 
       {/* single polite live region announcing the completed assistant reply */}
       <div className="visually-hidden" aria-live="polite" data-testid="chat-live">
-        {!pending && lastAssistantText ? `Ada said: ${lastAssistantText}` : ""}
+        {!pending && !timedOut && lastAssistantText ? `Ada said: ${lastAssistantText}` : ""}
       </div>
 
       {/* Pinning a highlight moves a ring onto an object elsewhere in the document, where nothing
@@ -360,7 +373,8 @@ export const Chat: React.FC<IProps> = ({ chat, onClose, closeLabel, transcriptTi
           {activeHighlightLabel ? `Highlighting ${activeHighlightLabel}` : ""}
         </div>}
 
-      {error && <div className="chat-error" role="alert" data-testid="chat-error">{error}</div>}
+      {(error || timedOut) &&
+        <div className="chat-error" role="alert" data-testid="chat-error">{error ?? kTimeoutMessage}</div>}
 
       <form className="chat-composer" onSubmit={onSubmit} data-testid="chat-composer">
         <label htmlFor={inputId} className="visually-hidden">Message Ada</label>

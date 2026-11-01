@@ -54,7 +54,9 @@
         "firebase-debug.*.log",
         "*.local",
         "*.log",
-        "coverage"
+        "coverage",
+        "emulator-data",
+        "emulator-data/**"
       ]
     },
     {

@@ -24,6 +24,7 @@ import {
 } from "../../utilities/device-actions";
 
 import ConnectIcon from "../../assets/icons/connect-icon.svg";
+import SmallCornerTriangle from "../../../../assets/icons/small-corner-triangle.svg";
 
 import "./dataflow-connect-palette.scss";
 
@@ -101,7 +102,7 @@ const ConnectPalette = observer(function ConnectPalette(
       : [];
     return scrollers.length ? scrollers : "clippingAncestors";
   }, [tileElement]);
-  const { refs, floatingStyles } = useFloating({
+  const { refs, floatingStyles, placement } = useFloating({
     open: true,
     placement: "bottom-start",
     whileElementsMounted: autoUpdate,
@@ -219,7 +220,8 @@ const ConnectPalette = observer(function ConnectPalette(
   );
 
   return (
-    <div ref={setContainer} className="toolbar-palette dataflow-connect-palette" style={floatingStyles}
+    <div ref={setContainer} className={classNames("toolbar-palette", "dataflow-connect-palette", placement)}
+        style={floatingStyles}
         role="group" aria-labelledby={headingId} onKeyDownCapture={handleKeyDownCapture}
         onFocus={handleFocus} onBlur={handleBlur}>
       <div className="connect-heading" id={headingId}>Device connection</div>
@@ -344,6 +346,9 @@ export const ConnectDeviceButton = observer(function ConnectDeviceButton({ name 
         disabledMessage="Connecting a device isn't available in a read-only view"
         onClick={() => content?.setConnectPaletteOpen(!isOpen)} extraContent={extraContent}>
       <ConnectIcon />
+      {/* Only marks the button as opening a palette: the whole button opens it, and aria-expanded
+          already announces that. */}
+      <SmallCornerTriangle className="corner-triangle" aria-hidden="true" data-testid="connect-expand-triangle" />
     </TileToolbarButton>
   );
 });

@@ -76,6 +76,19 @@
       background-color: $workspace-teal-light-4;
     }
 
+    // The small triangle in the corner of a button that opens a palette. Render it as a direct child
+    // of the button, as TileToolbarButton renders its children.
+    &:has(> .corner-triangle) {
+      position: relative;
+    }
+
+    > .corner-triangle {
+      position: absolute;
+      bottom: 2px;
+      right: 2px;
+      fill: $workspace-teal;
+    }
+
     // Inputs inside a button (eg, for image upload)
     // are sized to be the size of the button.
     input {
