@@ -503,13 +503,15 @@ describe("Dataflow connect button and palette", () => {
       expect(screen.queryByText(headline)).toBeNull();
     });
 
-    it("announces a lost connection with the palette closed, but not an unplug", () => {
+    it("announces a lost connection with the palette closed, but not an unplug", async () => {
       const r = renderConnect();
       const region = r.container.querySelector("[role='status'][aria-live='polite']");
       fakeConnected(r);
       act(() => r.stores.serialDevice.activeTransport!.onDisconnect!("unplugged"));
       expect(region).toBeEmptyDOMElement();
 
+      // A loss is known by its time, so the next one has to come at least a millisecond later.
+      await act(() => new Promise(resolve => setTimeout(resolve, 2)));
       fakeConnected(r);
       act(() => r.stores.serialDevice.activeTransport!.onDisconnect!("lost"));
       expect(region).toHaveTextContent("The connection to the Spiker:bit was lost.");
