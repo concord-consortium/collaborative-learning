@@ -170,11 +170,12 @@ that happened.
 | `showConnectTutorial` | `targetType: "connectTutorial"` | The connect tutorial appears over the tile |
 | `dismissConnectTutorial` | `targetType: "connectTutorial"`, `trigger`: `ok` (OK in this tile), `okInAnotherTile` or `connection` | The tutorial over the tile is dismissed |
 
-- `connectDevice` and `reconnectDevice` mark the click, not a success. A quick attempt logs
-  `connectDevice`, `resetProgram` (when the device becomes active) and `connectResult`; anything
-  the student did in between sits between them in time order. A slow attempt adds `connectProgress`
-  events, whose times double so a tab left hanging doesn't log every few seconds. A reload or a
-  closed tab leaves a start, maybe some progress events and no result.
+- `connectDevice` and `reconnectDevice` mark the click, not a success. Up to v7.7.0 they were
+  logged only when the device connected, with no `attemptId`, so in older logs they mean a success.
+  A quick attempt logs `connectDevice`, `resetProgram` (when the device becomes active) and
+  `connectResult`; anything the student did in between sits between them in time order. A slow
+  attempt adds `connectProgress` events, whose times double so a tab left hanging doesn't log every
+  few seconds. A reload or a closed tab leaves a start, maybe some progress events and no result.
 - A failed, stalled or `canceled` attempt logs its `connectResult` too, with no `resetProgram`
   unless the device became active first.
 - Only a Disconnect the user chooses logs `disconnectDevice`. An unplug logs `deviceLost` when the
