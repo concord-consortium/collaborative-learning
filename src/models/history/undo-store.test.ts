@@ -352,7 +352,7 @@ it("does not use an active entry after it completes", async () => {
   const unhandledRejections: unknown[] = [];
   const onUnhandledRejection = (reason: unknown) => unhandledRejections.push(reason);
   process.on("unhandledRejection", onUnhandledRejection);
-  // Jest's default ("warn") would only log a read of a destroyed node.
+  // MST's default ("warn") would only log a read of a destroyed node.
   const previousLivelinessChecking = getLivelinessChecking();
   setLivelinessChecking("error");
 
