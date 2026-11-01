@@ -67,20 +67,23 @@ function makeConnection(
       if (outcomeOrDrive === "connected") attempt.activated();
       return endAttempt(attempt, listener, outcomeOrDrive);
     };
-  // Only `attempt` is observable, as on the real connection, so a reaction can see it replaced.
+  // Only `attempt` and `holdsDevice` are observable, as on the real connection, so a reaction can see
+  // the attempt replaced or the device let go. A stalled attempt's device stays open until a
+  // Disconnect.
   const connection = observable({
     lastChoice: opts.lastChoice,
     isConnected: opts.isConnected ?? false,
     busyChoice: opts.busyChoice,
     paletteView: opts.paletteView ?? (opts.isConnected ? "actions" : "devices"),
+    holdsDevice: true,
     attempt: undefined as ConnectionAttempt | undefined,
     lastFailure: undefined as IConnectFailure | undefined,
     connect: jest.fn(),
     reconnect: jest.fn(),
-    disconnect: jest.fn().mockResolvedValue(undefined)
+    disconnect: jest.fn(async () => runInAction(() => { connection.holdsDevice = false; }))
   }, {
-    lastChoice: false, isConnected: false, busyChoice: false, paletteView: false, attempt: observable.ref,
-    lastFailure: false, connect: false, reconnect: false, disconnect: false
+    lastChoice: false, isConnected: false, busyChoice: false, paletteView: false, holdsDevice: observable,
+    attempt: observable.ref, lastFailure: false, connect: false, reconnect: false, disconnect: false
   });
   const start = (choice: DeviceChoice, trigger: "connect" | "reconnect", o: IAttemptOptions = {}) => {
     const attempt = new ConnectionAttempt(choice, trigger, o.attemptId);
@@ -726,6 +729,22 @@ describe("device actions", () => {
     stalled!.activated();
     expect(ops()).not.toContain("resetProgram");
     expect(content.program.recentTicks.length).toBeGreaterThan(1);
+  });
+
+  it("a stalled update's reset ends when a Disconnect lets its board go", async () => {
+    const content = makeContent();
+    let stalled: ConnectionAttempt | undefined;
+    const connection = makeConnection(async (a, l) => {
+      stalled = a;
+      await Promise.resolve();
+      return endAttempt(a, l, "updateStalled", { step: "update" });
+    }, { paletteView: "actions" });
+    const watched = () => !!getObserverTree(stalled!, "steps").observers?.length;
+    await connectDeviceForTile({ connection, content, tileId, choice: "spikerbit" });
+    expect(watched()).toBe(true);
+
+    await disconnectDeviceForTile({ connection, content, tileId });
+    expect(watched()).toBe(false);
   });
 
   it("a stall that changes after the attempt ended updates the tile's failure", async () => {
