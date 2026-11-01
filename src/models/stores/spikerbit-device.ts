@@ -217,7 +217,8 @@ export class SpikerbitDevice {
 
   // Races connection.connect() against openTimeoutMs, counted from the library's "Connecting"
   // stage so the time in its chooser doesn't count. When the limit wins, the open is given up on
-  // (see abandonOpen) and this rejects at once.
+  // (see abandonOpen) and this rejects at once. The library gives up on the open itself 10 s after
+  // that stage, so a longer limit is only a backstop for a hang its own limit doesn't cover.
   private async openWithLimit(observer?: ISpikerbitConnectObserver) {
     let choosing = false;
     let opening = false;

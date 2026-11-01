@@ -198,7 +198,7 @@ until then.
 | Step | Applies to | Ends when | Limit |
 |---|---|---|---|
 | `choose` | Connect, and a Reconnect that falls back to the chooser | The device chooser closes | None. Dismissing it ends the attempt as `canceled`. |
-| `open` | All | The port or USB device is open | `kOpenTimeoutMs` (20 s), then `openTimeout` |
+| `open` | All | The port or USB device is open | `kOpenTimeoutMs` (20 s), then `openTimeout`. For a Spiker:bit, the library's own 10 s limit comes first. |
 | `checkFirmware` | Spiker:bit | The firmware answers, or 1.5 s passes | Already bounded |
 | `update` | Spiker:bit with old or missing firmware | The flash finishes and the re-query is done | `kUpdateStartMs` (45 s) to the first progress, then `kUpdateStallMs` (20 s) between progress reports, then `updateStalled` |
 | `waitForData` | All | The first data arrives | `kFirstDataTimeoutMs` (5 s) from when the device became active, then `notResponding` (Spiker:bit) or `noData` |
@@ -213,7 +213,10 @@ fails, so a slow close after it can't be taken for a stall. The library's `conne
 Spiker:bit's chooser itself. It reports a `"FindingDevice"` progress stage before the chooser and
 `"Connecting"` once a device is chosen, or at once for a board it knows. `SpikerbitDevice` starts
 its limit at `"Connecting"` and reports it as `onOpening`, which records `chooserClosed` when the
-chooser was shown, so the time in the chooser never counts.
+chooser was shown, so the time in the chooser never counts. The library gives up on the USB open
+itself 10 s after that same stage (see below), so for a Spiker:bit its limit ends the attempt
+first. `kOpenTimeoutMs` is only a backstop there, for a hang the library's limit doesn't cover or a
+later library version without one.
 
 Other failures: Web Serial's `"failed"` is `openFailed`. A Spiker:bit's `device-in-use` is
 `inUse`, the library's own 10 s limit on the USB open (code `timeout`) is `openTimeout`, any
@@ -271,13 +274,15 @@ succeeds later. Neither is awaited, since a stuck device may not close either. E
 happened through the listener's `onAbandonedOpen`. A retry while the browser still has the old
 open pending is expected to be refused at once with an `InvalidStateError`, which
 `WebSerialTransport` resolves as `"stillOpening"`; that is `openTimeout` too. Unplugging the device
-is what reliably ends a pending open.
+is what reliably ends a pending open. A Spiker:bit's open reaches the library's 10 s limit before
+CLUE's, and the library's timeout is an ordinary failure, so `abandonedOpen` is expected only from
+Web Serial.
 
 **Not yet verified on hardware.** The design works around these unknowns. When one is checked,
 record the answer here and change the code if it differs.
 
-1. Whether `close()` or `forget()` ends a pending open, for Web Serial and for WebUSB. The
-   `abandonedOpen` log event records what each did, so classroom logs can answer this.
+1. Whether `close()` or `forget()` ends a pending Web Serial open. The `abandonedOpen` log event
+   records what each did, so classroom logs can answer this.
 2. Whether a retry during a pending open fails fast with an `InvalidStateError`.
 3. What Web Serial reports when another tab or app holds the port. Until it is known, that case is
    `openFailed`, not `inUse`.
