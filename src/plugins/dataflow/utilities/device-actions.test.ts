@@ -14,6 +14,7 @@ import { SerialDevice } from "../../../models/stores/serial";
 import { DeviceLoss } from "../../../models/stores/device-transport";
 import { WebSerialTransport } from "../../../models/stores/web-serial-transport";
 import { connectionStatusInput, connectPaletteStatus } from "./connect-palette-status";
+import { kLagSampleMs } from "./browser-meter";
 import {
   connectDeviceForTile, disconnectDeviceForTile, kCheckpointStartMs, newAttemptId, reconnectDeviceForTile,
   resetProgramForTile
@@ -250,11 +251,20 @@ describe("device actions", () => {
         steps: { opened: expect.any(Number) }, attemptId: expect.any(String)
       }));
       expect(progress[0].updatePercent).toBeUndefined();
+      expect(progress[0]).toEqual(expect.objectContaining({ lagMaxMs: 0, lagMeanMs: 0, hiddenMs: 0 }));
 
+      // A main thread busy for 3 s.
+      jest.setSystemTime(Date.now() + 3000);
+      await jest.advanceTimersByTimeAsync(kLagSampleMs);
       finish();
       await acting;
+      expect(loggedChanges("connectResult")[0]).toEqual(expect.objectContaining({
+        lagMaxMs: 3000, lagMeanMs: expect.any(Number), hiddenMs: 0
+      }));
       await jest.advanceTimersByTimeAsync(60000);
       expect(loggedChanges("connectProgress").length).toBe(3);
+      // The meter stopped with the attempt.
+      expect(jest.getTimerCount()).toBe(0);
     } finally {
       jest.useRealTimers();
     }

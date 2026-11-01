@@ -159,8 +159,8 @@ that happened.
 |---|---|---|
 | `connectDevice` | `attemptId` | Connect is clicked |
 | `reconnectDevice` | `attemptId` | Reconnect is clicked |
-| `connectProgress` | `attemptId`, `trigger`, `elapsedMs`, `step`, `steps`, `updatePercent` during an update | The attempt is still running 5, 10, 20, 40... s after the click |
-| `connectResult` | `attemptId`, `trigger`, `outcome`, `elapsedMs`, `steps`; for a failure `failedStep` and `error` (`name`, `code`, `message`); for a Spiker:bit `firmware` (`found`, `updated`) | The attempt ends, including `canceled` |
+| `connectProgress` | `attemptId`, `trigger`, `elapsedMs`, `step`, `steps`, `updatePercent` during an update; the browser's conditions so far (see below) | The attempt is still running 5, 10, 20, 40... s after the click |
+| `connectResult` | `attemptId`, `trigger`, `outcome`, `elapsedMs`, `steps`; for a failure `failedStep` and `error` (`name`, `code`, `message`); for a Spiker:bit `firmware` (`found`, `updated`); the browser's conditions during the attempt (see below) | The attempt ends, including `canceled` |
 | `connectRecovered` | `attemptId`, `elapsedMs`, `steps` | An attempt that ended in a stall gets its first data after all |
 | `connectStallChanged` | `attemptId`, `stall`: the new stall's kind (`updateStalled`, `noData` or `notResponding`) or `cleared`; `step`: the stalled step, for a stall; `elapsedMs`, `steps` | After a stall ended the attempt, the stall changed: a stalled update made progress again, stalled again or finished, or the board it then made active sent no data in time |
 | `abandonedOpen` | `attemptId`, and one of: what `close()` did, what `forget()` did, or how the abandoned open settled | Each of the three finishes; close and forget start together, so one that hangs doesn't hide the other |
@@ -179,6 +179,11 @@ that happened.
   `connectResult`; anything the student did in between sits between them in time order. A slow
   attempt adds `connectProgress` events, whose times double so a tab left hanging doesn't log every
   few seconds. A reload or a closed tab leaves a start, maybe some progress events and no result.
+- The browser's conditions are `lagMaxMs` and `lagMeanMs`, how late a 250 ms timer fired at worst
+  and on average, which is how long the main thread was busy, and `hiddenMs`, how long the tab was
+  hidden. A Spiker:bit connection reads and writes on the main thread, so a busy one slows the
+  firmware check and the flash. Chrome slows timers in a hidden tab, so a sample the tab was hidden
+  for doesn't count toward the lag.
 - A failed, stalled or `canceled` attempt logs its `connectResult` too, with no `resetProgram`
   unless the device became active first.
 - Only a Disconnect the user chooses logs `disconnectDevice`. An unplug logs `deviceLost` when the

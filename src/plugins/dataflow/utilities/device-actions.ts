@@ -4,6 +4,7 @@ import { LogEventName } from "../../../lib/logger-types";
 import { logTileChangeEvent } from "../../../models/tiles/log/log-tile-change-event";
 import { DataflowContentModelType } from "../model/dataflow-content";
 import { uniqueId } from "../../../utilities/js-utils";
+import { IBrowserConditions, startBrowserMeter } from "./browser-meter";
 import { IConnectFailure, kStallKinds } from "../model/connect-failures";
 import { ConnectionAttempt } from "../model/connection-attempt";
 import {
@@ -53,10 +54,10 @@ function attemptDetails(attempt: ConnectionAttempt) {
 }
 
 /**
- * Logs `connectProgress` 5, 10, 20, 40... s after the click while the attempt runs. Returns a
- * function that stops the checkpoints.
+ * Logs `connectProgress` 5, 10, 20, 40... s after the click while the attempt runs, with the browser's
+ * conditions so far. Returns a function that stops the checkpoints.
  */
-function startCheckpoints(tileId: string, attempt: ConnectionAttempt) {
+function startCheckpoints(tileId: string, attempt: ConnectionAttempt, conditions: () => IBrowserConditions) {
   let timer: ReturnType<typeof setTimeout> | undefined;
   const scheduleAt = (checkpointMs: number) => {
     // Measured against the clock, so a late timer doesn't push the later checkpoints off.
@@ -65,7 +66,7 @@ function startCheckpoints(tileId: string, attempt: ConnectionAttempt) {
       if (attempt.ended) return;
       logDeviceEvent(tileId, "connectProgress", attempt.choice, {
         ...attemptDetails(attempt), elapsedMs: attempt.elapsedMs, step: attempt.step,
-        updatePercent: attempt.step === "update" ? attempt.updatePercent : undefined
+        updatePercent: attempt.step === "update" ? attempt.updatePercent : undefined, ...conditions()
       });
       scheduleAt(checkpointMs * 2);
     }, Math.max(0, checkpointMs - attempt.elapsedMs));
@@ -94,17 +95,21 @@ async function runAttempt(
   const attemptId = newAttemptId();
   let stopCheckpoints: (() => void) | undefined;
   let stopResetWatch: (() => void) | undefined;
+  // A busy main thread slows a connection that reads and writes on it, so each attempt logs how busy
+  // the browser was.
+  const meter = startBrowserMeter();
   const alive = () => isAlive(content);
 
   const listener: IAttemptListener = {
     onEnded: attempt => {
       stopCheckpoints?.();
+      meter.stop();
       // A stalled device can still become active, so its reset stays armed.
       if (!attempt.outcome || !(kStallKinds as readonly string[]).includes(attempt.outcome)) stopResetWatch?.();
       const { outcome, failure, firmware } = attempt;
       logDeviceEvent(tileId, "connectResult", attempt.choice, {
         ...attemptDetails(attempt), outcome, elapsedMs: attempt.elapsedMs,
-        failedStep: failure?.step, error: failure?.error, firmware
+        failedStep: failure?.step, error: failure?.error, firmware, ...meter.read()
       });
       if (failure && alive()) recordFailure(content, failure);
     },
@@ -148,7 +153,7 @@ async function runAttempt(
   // The attempt exists as soon as connect or reconnect is called, unless nothing was started.
   const started = connection.attempt;
   if (started?.id === attemptId) {
-    stopCheckpoints = startCheckpoints(tileId, started);
+    stopCheckpoints = startCheckpoints(tileId, started, meter.read);
     // A stalled attempt's watch outlives the attempt, so it also ends once a newer attempt replaces
     // it or a Disconnect lets its board go, after which that board can't become active.
     const replaced = () => connection.attempt !== started;
@@ -162,6 +167,7 @@ async function runAttempt(
 
   const finalOutcome = await result;
   stopCheckpoints?.();
+  meter.stop();
   return finalOutcome;
 }
 
