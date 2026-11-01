@@ -16,8 +16,8 @@ import { WebSerialTransport } from "../../../models/stores/web-serial-transport"
 import { connectionStatusInput, connectPaletteStatus } from "./connect-palette-status";
 import { kLagSampleMs } from "./browser-meter";
 import {
-  connectDeviceForTile, disconnectDeviceForTile, kCheckpointStartMs, newAttemptId, reconnectDeviceForTile,
-  resetProgramForTile
+  connectDeviceForTile, disconnectDeviceForTile, identifyDeviceForTile, kCheckpointStartMs, newAttemptId,
+  reconnectDeviceForTile, resetProgramForTile
 } from "./device-actions";
 
 jest.mock("../../../models/tiles/log/log-tile-change-event", () => ({ logTileChangeEvent: jest.fn() }));
@@ -68,12 +68,13 @@ function makeConnection(
       if (outcomeOrDrive === "connected") attempt.activated();
       return endAttempt(attempt, listener, outcomeOrDrive);
     };
-  // Only `attempt` and `holdsDevice` are observable, as on the real connection, so a reaction can see
-  // the attempt replaced or the device let go. A stalled attempt's device stays open until a
-  // Disconnect.
+  // Only `attempt`, `isConnected`, `notResponding` and `holdsDevice` are observable, as on the real
+  // connection, so a reaction can see the attempt replaced, the device answer or the device let go. A
+  // stalled attempt's device stays open until a Disconnect.
   const connection = observable({
     lastChoice: opts.lastChoice,
     isConnected: opts.isConnected ?? false,
+    notResponding: false,
     busyChoice: opts.busyChoice,
     paletteView: opts.paletteView ?? (opts.isConnected ? "actions" : "devices"),
     holdsDevice: true,
@@ -81,10 +82,12 @@ function makeConnection(
     lastFailure: undefined as IConnectFailure | undefined,
     connect: jest.fn(),
     reconnect: jest.fn(),
-    disconnect: jest.fn(async () => runInAction(() => { connection.holdsDevice = false; }))
+    disconnect: jest.fn(async () => runInAction(() => { connection.holdsDevice = false; })),
+    identify: jest.fn()
   }, {
-    lastChoice: false, isConnected: false, busyChoice: false, paletteView: false, holdsDevice: observable,
-    attempt: observable.ref, lastFailure: false, connect: false, reconnect: false, disconnect: false
+    lastChoice: false, isConnected: observable, notResponding: observable, busyChoice: false, paletteView: false,
+    holdsDevice: observable, attempt: observable.ref, lastFailure: false, connect: false, reconnect: false,
+    disconnect: false, identify: false
   });
   const start = (choice: DeviceChoice, trigger: "connect" | "reconnect", o: IAttemptOptions = {}) => {
     const attempt = new ConnectionAttempt(choice, trigger, o.attemptId);
@@ -602,6 +605,48 @@ describe("device actions", () => {
     expectLogMatching("abandonedOpen", {
       targetType: "device", device: "arduino", attemptId: attempt!.id,
       close: "ok", forget: "unsupported", late: "opened"
+    });
+  });
+
+  it("logs a connected device that stops answering, and answers again", async () => {
+    const content = makeContent();
+    let attempt: ConnectionAttempt | undefined;
+    const connection = makeConnection((a, l) => {
+      attempt = a;
+      a.activated();
+      runInAction(() => { (connection as { isConnected: boolean }).isConnected = true; });
+      return Promise.resolve(endAttempt(a, l, "connected"));
+    });
+    const device = connection as unknown as { notResponding: boolean, isConnected: boolean };
+    await connectDeviceForTile({ connection, content, tileId, choice: "spikerbit" });
+    expect(ops()).not.toContain("deviceResponding");
+
+    runInAction(() => { device.notResponding = true; });
+    expectLogMatching("deviceResponding", {
+      targetType: "device", device: "spikerbit", attemptId: attempt!.id, responding: false,
+      elapsedMs: expect.any(Number)
+    });
+    runInAction(() => { device.notResponding = false; });
+    expectLogMatching("deviceResponding", { attemptId: attempt!.id, responding: true });
+    expect(loggedChanges("deviceResponding").length).toBe(2);
+
+    // A disconnect isn't the device answering again, and ends the watch.
+    runInAction(() => { device.notResponding = true; });
+    runInAction(() => { device.isConnected = false; device.notResponding = false; });
+    await disconnectDeviceForTile({ connection, content, tileId });
+    expect(loggedChanges("deviceResponding").length).toBe(3);
+    expect(getObserverTree(connection, "notResponding").observers ?? []).toHaveLength(0);
+  });
+
+  it("logs the result of the Is it alive? check", async () => {
+    const connection = makeConnection("connected", { lastChoice: "spikerbit" });
+    (connection.identify as jest.Mock).mockResolvedValue("noAnswer");
+    await connectDeviceForTile({ connection, content: makeContent(), tileId, choice: "spikerbit" });
+
+    await identifyDeviceForTile({ connection, tileId });
+
+    expectLog("identifyDevice", {
+      targetType: "device", device: "spikerbit", attemptId: connection.attempt!.id, result: "noAnswer"
     });
   });
 

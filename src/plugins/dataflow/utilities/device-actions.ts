@@ -1,4 +1,4 @@
-import { when } from "mobx";
+import { reaction, when } from "mobx";
 import { isAlive } from "mobx-state-tree";
 import { LogEventName } from "../../../lib/logger-types";
 import { logTileChangeEvent } from "../../../models/tiles/log/log-tile-change-event";
@@ -95,6 +95,7 @@ async function runAttempt(
   const attemptId = newAttemptId();
   let stopCheckpoints: (() => void) | undefined;
   let stopResetWatch: (() => void) | undefined;
+  let stopRespondingWatch: (() => void) | undefined;
   // A busy main thread slows a connection that reads and writes on it, so each attempt logs how busy
   // the browser was.
   const meter = startBrowserMeter();
@@ -104,9 +105,12 @@ async function runAttempt(
     onEnded: attempt => {
       stopCheckpoints?.();
       meter.stop();
-      // A stalled device can still become active, so its reset stays armed.
-      if (!attempt.outcome || !(kStallKinds as readonly string[]).includes(attempt.outcome)) stopResetWatch?.();
       const { outcome, failure, firmware } = attempt;
+      // A stalled device can still become active, so its reset stays armed. A connected or stalled
+      // device stays open, so whether it answers is still watched.
+      const stalled = !!outcome && (kStallKinds as readonly string[]).includes(outcome);
+      if (!stalled) stopResetWatch?.();
+      if (!stalled && outcome !== "connected") stopRespondingWatch?.();
       logDeviceEvent(tileId, "connectResult", attempt.choice, {
         ...attemptDetails(attempt), outcome, elapsedMs: attempt.elapsedMs,
         failedStep: failure?.step, error: failure?.error, firmware, ...meter.read()
@@ -134,6 +138,7 @@ async function runAttempt(
     },
     onLost: (attempt, reason) => {
       stopResetWatch?.();
+      stopRespondingWatch?.();
       // A stalled update whose flash fails later leaves the connection with that failure, to log and
       // show. Any other loss shows as the loss, so a stall's failure goes.
       const failure = reason === "updateFailed" ? connection.lastFailure : undefined;
@@ -163,6 +168,21 @@ async function runAttempt(
         resetProgramForTile({ content, tileId, trigger });
       }
     });
+    // A connected device that stops answering, then answers again, while this attempt's device is
+    // the connection's. A disconnect or a loss isn't a change in answering.
+    const stopReaction = reaction(
+      () => connection.isConnected && !replaced() ? connection.notResponding : undefined,
+      (notResponding, was) => {
+        if (notResponding === undefined || was === undefined) return;
+        logDeviceEvent(tileId, "deviceResponding", started.choice, {
+          attemptId: started.id, responding: !notResponding, elapsedMs: started.elapsedMs
+        });
+      });
+    const stopWatchEnd = when(() => replaced() || letGo(), () => stopReaction());
+    stopRespondingWatch = () => {
+      stopReaction();
+      stopWatchEnd();
+    };
   }
 
   const finalOutcome = await result;
@@ -184,6 +204,15 @@ export function reconnectDeviceForTile(o: IConnectionOptions): Promise<ConnectRe
   if (connection.busyChoice || !connection.lastChoice) return Promise.resolve("canceled");
   return runAttempt({ ...o, trigger: "reconnect", device: connection.lastChoice },
     options => connection.reconnect(options));
+}
+
+/**
+ * Runs the "Is it alive?" check on the connected device and logs its result.
+ */
+export async function identifyDeviceForTile({ connection, tileId }: { connection: DeviceConnection; tileId: string }) {
+  const result = await connection.identify();
+  logDeviceEvent(tileId, "identifyDevice", connection.lastChoice, { attemptId: connection.attempt?.id, result });
+  return result;
 }
 
 /**

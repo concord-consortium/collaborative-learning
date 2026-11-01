@@ -142,8 +142,8 @@ disconnects the library connection; the device is kept for Reconnect.
 **Tile device actions.** The palette, the top-bar menu and the `reset` button call the tile device
 actions in `device-actions.ts`, which wrap `DeviceConnection` and log `DATAFLOW_TOOL_CHANGE`
 events with the operations `connectDevice`, `reconnectDevice`, `connectProgress`, `connectResult`,
-`connectRecovered`, `connectStallChanged`, `abandonedOpen`, `deviceLost`, `disconnectDevice` and
-`resetProgram`. A
+`connectRecovered`, `connectStallChanged`, `abandonedOpen`, `deviceLost`, `deviceResponding`,
+`identifyDevice`, `disconnectDevice` and `resetProgram`. A
 connect or reconnect resets only the clicking tile's program, through `resetProgramForTile`,
 which says what Reset leaves alone, as soon as the device becomes the active one. Disconnect never
 resets, and it also works while a stalled Spiker:bit update holds a board open that isn't active.
@@ -165,6 +165,8 @@ that happened.
 | `connectStallChanged` | `attemptId`, `stall`: the new stall's kind (`updateStalled`, `noData` or `notResponding`) or `cleared`; `step`: the stalled step, for a stall; `elapsedMs`, `steps` | After a stall ended the attempt, the stall changed: a stalled update made progress again, stalled again or finished, or the board it then made active sent no data in time |
 | `abandonedOpen` | `attemptId`, and one of: what `close()` did, what `forget()` did, or how the abandoned open settled | Each of the three finishes; close and forget start together, so one that hangs doesn't hide the other |
 | `deviceLost` | `attemptId`, `reason`: `unplugged`, `lost`, or `updateFailed` for a stalled update whose flash fails later; for `updateFailed`, `failedStep` and `error` as in `connectResult` | A device the attempt left open is lost, or a stalled update's flash fails later |
+| `deviceResponding` | `attemptId`, `responding`: `false` when the connected device stops answering, `true` when it answers again; `elapsedMs` | A connected Spiker:bit's session stops or starts answering pings (`notResponding`). A disconnect or a loss isn't logged here |
+| `identifyDevice` | `attemptId` of the attempt that connected it, `result`: `answered` or `noAnswer` | The "Is it alive?" check finishes |
 | `disconnectDevice` | `targetType: "device"`, `device`: the choice that was connected | The user disconnects |
 | `resetProgram` | `targetType: "program"`, `trigger`: `connect`, `reconnect` or `button` | The program is reset |
 | `showConnectPalette` | `targetType: "connectPalette"`, `buttonState`: `idle`, `attention` or `connected` | The connect button opens the palette; closing it isn't logged |

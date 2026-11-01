@@ -22,7 +22,7 @@ import {
 import { connectButtonState, connectButtonTooltip } from "../../utilities/connect-button-state";
 import { connectionStatusInput, connectPaletteStatus } from "../../utilities/connect-palette-status";
 import {
-  connectDeviceForTile, disconnectDeviceForTile, reconnectDeviceForTile
+  connectDeviceForTile, disconnectDeviceForTile, identifyDeviceForTile, reconnectDeviceForTile
 } from "../../utilities/device-actions";
 
 import ConnectIcon from "../../assets/icons/connect-icon.svg";
@@ -240,7 +240,7 @@ const ConnectPalette = observer(function ConnectPalette(
             <PaletteControl text="Disconnect" busy={actionsBusy} onActivate={disconnect} />
             {connection.canIdentify &&
               <PaletteControl text="Is it alive?" busy={actionsBusy || check === "checking"}
-                  onActivate={() => { void connection.identify(); }} />}
+                  onActivate={() => { void identifyDeviceForTile({ connection, tileId }); }} />}
           </div>
         : <div className="connect-devices">
             {kDeviceChoiceOrder.map(choice => (
