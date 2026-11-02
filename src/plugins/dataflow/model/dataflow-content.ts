@@ -639,22 +639,6 @@ export const DataflowContentModel = TileContentModel
       }
       self.dataSet.setName(captureName(self.dataSet.name, startedAt));
     },
-    /**
-     * Empties the capture in place, leaving the table linked and showing a fresh x | y pair.
-     *
-     * Deliberately not detachLinkedTables: a detach hands the table its rows and stops it
-     * following, so the student sees nothing change and Clear looks broken. This is the one path
-     * that destroys recorded data, and unlike the detach it stays on the undo stack -- no
-     * withoutUndo here -- so an accidental Clear is recoverable.
-     */
-    clearRecording() {
-      // The name should stop claiming a recording this no longer holds.
-      self.dataSet.setName(stripCaptureTime(self.dataSet.name));
-      self.clearAttributes();
-      self.clearCases();
-      addAttributeToDataSet(self.dataSet, { name: "x" });
-      addAttributeToDataSet(self.dataSet, { name: "y" });
-    },
   }))
   // Its own block so `self` can see prepareCapture: within one .actions() block, `self` does not
   // include the actions that block is defining.
@@ -668,6 +652,20 @@ export const DataflowContentModel = TileContentModel
     },
     stopRecording() {
       self.isRecording = false;
+    },
+    /**
+     * Returns the table to the state Table It would leave it in: the capture's columns, empty,
+     * ready for the next run. Not the x | y default -- the program and its node names are still
+     * known, so a cleared table should still describe the program rather than going generic.
+     *
+     * Deliberately not detachLinkedTables: a detach hands the table its rows and stops it
+     * following, so the student sees nothing change and Clear looks broken. This is the one path
+     * that destroys recorded data, and unlike the detach it stays on the undo stack -- no
+     * withoutUndo here -- so an accidental Clear is recoverable.
+     */
+    clearRecording() {
+      self.clearCases();
+      self.prepareCapture();
     },
   }));
 

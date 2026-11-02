@@ -155,7 +155,18 @@ describe("ClearButton", () => {
     expect(content.linkedTableTileId).toBe("table1");
   });
 
-  it("takes the capture's time back off the name", () => {
+  // A cleared table should still describe the program, exactly as Table It leaves it, rather than
+  // reverting to a generic x | y pair.
+  it("leaves the capture's columns in place, ready for the next run", () => {
+    const { content, button } = setupWithTable();
+    expect(content.dataSet.attributes.map(a => a.name)).toEqual(["Point", "Sensor"]);
+
+    fireEvent.click(button);
+
+    expect(content.dataSet.attributes.map(a => a.name)).toEqual(["Point", "Sensor"]);
+  });
+
+  it("restamps the name, since the next run starts from here", () => {
     const { content, button } = setupWithTable();
     content.setContentTitle("Program 1");
     act(() => { content.prepareCapture(new Date(2026, 10, 2, 14, 32, 7)); });
@@ -163,7 +174,8 @@ describe("ClearButton", () => {
 
     fireEvent.click(button);
 
-    expect(content.dataSet.name).toBe("Program 1");
+    expect(content.dataSet.name).toMatch(/^Program 1 \d{2}:\d{2}:\d{2}$/);
+    expect(content.dataSet.name).not.toBe("Program 1 14:32:07");
   });
 
   it("disables itself once the recording is cleared", () => {

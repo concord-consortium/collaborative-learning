@@ -12,7 +12,7 @@ let docEditor = new DocEditor;
 
 const programTitle = "Program 1";
 // Preparing a capture appends its start time to the program's name, so the linked table's header
-// reads "Program 1 14:32:07". Clearing the recording strips it again, back to programTitle.
+// reads "Program 1 14:32:07". Clearing restamps it, since the next run starts from there.
 const capturedTitle = /^Program 1 \d{2}:\d{2}:\d{2}$/;
 const graphTitle = "Graph 1";
 
@@ -23,7 +23,6 @@ const programNodes = [
 // program's name instead (see prepareCapture). Table It prepares these columns up front, so an
 // empty linked table already carries them; only clearing the recording puts x | y back.
 const linkedTableAttributes = ["Point", programNodes[0].attribute, programNodes[1].attribute];
-const defaultTableAttributes = ["x", "y"];
 const timer1 = 5;
 const timer2 = 3;
 
@@ -49,10 +48,10 @@ context('Dataflow Tool Tile', function () {
     dataflowToolTile.recordData("1000", timer1);
     dataflowToolTile.checkLinkedTableRecordedData(tableTile, capturedTitle, linkedTableAttributes, timer1);
 
-    // Clear empties the table in place and leaves it linked, so the next run reuses it.
+    // Clear returns the table to the state Table It leaves: the capture's columns, empty.
     dataflowToolTile.clearRecordedData();
     dataflowToolTile.getClearButton().should("have.attr", "aria-disabled", "true");
-    dataflowToolTile.checkEmptyLinkedTable(tableTile, programTitle, defaultTableAttributes);
+    dataflowToolTile.checkEmptyLinkedTable(tableTile, capturedTitle, linkedTableAttributes);
 
     dataflowToolTile.recordData("1000", timer2);
     dataflowToolTile.checkLinkedTableRecordedData(tableTile, capturedTitle, linkedTableAttributes, timer2);
@@ -158,6 +157,6 @@ context('Dataflow Tool Tile', function () {
     dataflowToolTile.getStopButton().should("have.attr", "aria-disabled", "true");
     // Nothing recorded any more, so there is nothing left to clear.
     dataflowToolTile.getClearButton().should("have.attr", "aria-disabled", "true");
-    dataflowToolTile.checkEmptyLinkedTable(tableTile, programTitle, defaultTableAttributes);
+    dataflowToolTile.checkEmptyLinkedTable(tableTile, capturedTitle, linkedTableAttributes);
   });
 });
