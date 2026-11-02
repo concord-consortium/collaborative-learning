@@ -7,9 +7,9 @@ import { TileToolbarButton } from "../../../../components/toolbar/tile-toolbar-b
 import { IToolbarButtonComponentProps } from "../../../../components/toolbar/toolbar-button-manager";
 import { DataflowContentModelType } from "../../model/dataflow-content";
 
-import RecordIcon from "../../assets/topbar-buttons/record-icon.svg";
-import StopIcon from "../../assets/topbar-buttons/stop-icon.svg";
-import ClearIcon from "../../assets/topbar-buttons/clear-icon.svg";
+import RecordIcon from "../../assets/icons/record-icon.svg";
+import StopIcon from "../../assets/icons/stop-icon.svg";
+import ClearIcon from "../../assets/icons/clear-icon.svg";
 
 /** The one control that stays live while recording; dataflow-tile exempts it from the busy toolbar. */
 export const kStopButtonName = "stop";
