@@ -137,20 +137,13 @@ export const UndoStore = types
   });
 
   return {
+    /** Call once per newly completed undoable entry; it does not check for duplicates. */
     addHistoryEntry(entry: Instance<typeof HistoryEntry>) {
-      // This is called once for each new undoable entry, after it is added to the
-      // document history. It doesn't check whether the entry is already on the undo
-      // stack: that would scan the whole stack, which gets slow once it holds
-      // thousands of entries.
-
       if (DEBUG_UNDO) {
         // eslint-disable-next-line no-console
         console.log(`adding to undo history`, (entry as any).toJSON()/*.action*/);
       }
-      // This is a new user action, so if they had undone some amount already
-      // we delete the part of the history that was past this undone point.
-      // Once they start doing new things they can no longer 'redo' what was
-      // undone before.
+      // A new action discards anything that was undone, so it can no longer be redone.
       self.history.splice(self.undoIdx);
       self.history.push(entry);
       self.undoIdx = self.history.length;
