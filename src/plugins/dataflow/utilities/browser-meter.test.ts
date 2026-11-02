@@ -70,6 +70,19 @@ describe("startBrowserMeter", () => {
     meter.stop();
   });
 
+  it("counts an overdue sample in a reading taken before its timer fires", () => {
+    const meter = startBrowserMeter();
+    // Busy until 400 ms after the timer was due.
+    block(kLagSampleMs + 400);
+    expect(meter.readWindow()).toEqual({ lagMaxMs: 400, lagMeanMs: 400, hiddenMs: 0 });
+    // The overdue timer was replaced, so the busy time isn't counted again.
+    jest.advanceTimersByTime(kLagSampleMs);
+    expect(meter.readWindow()).toEqual({ lagMaxMs: 0, lagMeanMs: 0, hiddenMs: 0 });
+    expect(meter.read()).toEqual({ lagMaxMs: 400, lagMeanMs: 200, hiddenMs: 0 });
+    expect(jest.getTimerCount()).toBe(1);
+    meter.stop();
+  });
+
   it("stops sampling once stopped", () => {
     const meter = startBrowserMeter();
     meter.stop();

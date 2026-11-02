@@ -33,6 +33,7 @@ export function startBrowserMeter() {
   let sampleSawHidden = hiddenSince !== undefined;
   let expectedAt = Date.now() + kLagSampleMs;
   let timer: ReturnType<typeof setTimeout> | undefined;
+  let stopped = false;
 
   const handleVisibilityChange = () => {
     const now = Date.now();
@@ -60,6 +61,14 @@ export function startBrowserMeter() {
     timer = setTimeout(sample, kLagSampleMs);
   };
 
+  // A reading taken while the timer is overdue, such as one from a handler that ran first after the
+  // main thread was busy, takes the overdue sample first, so that lag counts toward this reading.
+  const takeOverdueSample = () => {
+    if (stopped || Date.now() <= expectedAt) return;
+    clearTimeout(timer);
+    sample();
+  };
+
   const hiddenSoFar = () => hiddenMs + (hiddenSince !== undefined ? Date.now() - hiddenSince : 0);
   const conditions = (totals: ILagTotals, hidden: number): IBrowserConditions => ({
     lagMaxMs: totals.maxMs,
@@ -72,9 +81,11 @@ export function startBrowserMeter() {
 
   return {
     read(): IBrowserConditions {
+      takeOverdueSample();
       return conditions(whole, hiddenSoFar());
     },
     readWindow(): IBrowserConditions {
+      takeOverdueSample();
       const hidden = hiddenSoFar();
       const result = conditions(recent, hidden - recentHiddenStart);
       recent = noLag();
@@ -82,6 +93,7 @@ export function startBrowserMeter() {
       return result;
     },
     stop() {
+      stopped = true;
       clearTimeout(timer);
       document.removeEventListener("visibilitychange", handleVisibilityChange);
     }
