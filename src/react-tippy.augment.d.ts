@@ -2,7 +2,9 @@
 // `class Tooltip extends React.Component<TooltipProps>` but TooltipProps
 // has no `children`. Under @types/react@18, Component no longer implicitly
 // allows children, so callers fail with TS2769. This adds children back to
-// the published TooltipProps interface via declaration merging.
+// the published TooltipProps interface via declaration merging. It also adds
+// `tag`, the element the Tooltip renders around its children ("div" by
+// default), which the component supports but index.d.ts leaves out.
 //
 // This file must be a module (the empty export below) for the
 // `declare module` block to act as augmentation rather than override.
@@ -11,6 +13,7 @@ import type { ReactNode } from "react";
 declare module "react-tippy" {
   interface TooltipProps {
     children?: ReactNode;
+    tag?: keyof JSX.IntrinsicElements;
   }
 }
 
