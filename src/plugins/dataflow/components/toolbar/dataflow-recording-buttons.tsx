@@ -6,6 +6,7 @@ import { useReadOnlyContext } from "../../../../components/document/read-only-co
 import { TileToolbarButton } from "../../../../components/toolbar/tile-toolbar-button";
 import { IToolbarButtonComponentProps } from "../../../../components/toolbar/toolbar-button-manager";
 import { DataflowContentModelType } from "../../model/dataflow-content";
+import { useLinkedTable } from "./dataflow-table-buttons";
 
 import RecordIcon from "../../assets/icons/record-icon.svg";
 import StopIcon from "../../assets/icons/stop-icon.svg";
@@ -20,14 +21,22 @@ function useRecordingContent() {
   return { content: tile?.content as DataflowContentModelType | undefined, readOnly };
 }
 
-/** Starts a run, appending to whatever the table already holds. */
+/**
+ * Starts a run, appending to whatever the table already holds.
+ *
+ * Makes a table first when the program has none, for the same reason Record Single Sample does: a
+ * recording whose points land nowhere visible looks like a program that is doing nothing. Does not
+ * select that table -- a tile toolbar renders only for the selected tile, so selecting it would
+ * take Stop off screen mid-run.
+ */
 export const RecordButton = observer(function RecordButton({ name }: IToolbarButtonComponentProps) {
   const { content, readOnly } = useRecordingContent();
+  const { ensure } = useLinkedTable();
   return (
     <TileToolbarButton
       name={name}
       title="Record data"
-      onClick={() => content?.startRecording()}
+      onClick={() => { if (ensure(false)) content?.startRecording(); }}
       disabled={!content || readOnly || content.isRecording}
       disabledMessage="Stop the current recording to start another"
     >
@@ -55,14 +64,10 @@ export const StopButton = observer(function StopButton({ name }: IToolbarButtonC
 });
 
 /**
- * Parts the program from its recording. Calls detachLinkedTables directly rather than through a
- * wrapper action: that method calls withoutUndo(), which MST ignores (with a warning) when it runs
- * inside a child action, and putting the detach back on the undo stack reintroduces the "Not a
- * child" crash CLUE-740 documented.
+ * Empties the recording, leaving the table linked and showing a fresh x | y pair.
  *
- * No confirmation, because the usual case hands the student's points to the linked table rather
- * than destroying them. Where nothing is following, there is no table to hand them to and the rows
- * are dropped -- they were invisible in that state anyway, since no tile was displaying them.
+ * No confirmation: "clear" is a word students understand, a recording is cheap to redo, and unlike
+ * the structural-change detach this stays on the undo stack.
  */
 export const ClearButton = observer(function ClearButton({ name }: IToolbarButtonComponentProps) {
   const { content, readOnly } = useRecordingContent();
@@ -71,7 +76,7 @@ export const ClearButton = observer(function ClearButton({ name }: IToolbarButto
     <TileToolbarButton
       name={name}
       title="Clear recording"
-      onClick={() => content?.detachLinkedTables()}
+      onClick={() => content?.clearRecording()}
       disabled={!content || readOnly || content.isRecording || !hasData}
       disabledMessage="Record some data to enable this action"
     >

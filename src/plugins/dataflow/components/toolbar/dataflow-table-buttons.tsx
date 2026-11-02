@@ -44,7 +44,7 @@ function ensureLinkedTable(
   }
 }
 
-function useTableButton() {
+export function useLinkedTable() {
   const tile = useContext(TileModelContext);
   const addTilesContext = useContext(AddTilesContext);
   const ui = useUIStore();
@@ -72,7 +72,7 @@ function useTableButton() {
 export const DataflowTableButton = observer(function DataflowTableButton(
   { name }: IToolbarButtonComponentProps
 ) {
-  const { content, readOnly, ensure } = useTableButton();
+  const { content, readOnly, ensure } = useLinkedTable();
   const Icon = getTileComponentInfo("Table")?.Icon;
 
   return (
@@ -91,7 +91,7 @@ export const DataflowTableButton = observer(function DataflowTableButton(
 export const RecordSingleSampleButton = observer(function RecordSingleSampleButton(
   { name }: IToolbarButtonComponentProps
 ) {
-  const { content, readOnly, ensure } = useTableButton();
+  const { content, readOnly, ensure } = useLinkedTable();
 
   function handleClick() {
     if (!ensure(false) || !content) return;

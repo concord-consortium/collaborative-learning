@@ -406,9 +406,10 @@ export const DataflowContentModel = TileContentModel
       // what avoids Tree.handleSharedModelChanges resolving `<sharedModelPath>/sharedModel` for
       // an entry an undo patch has removed, which throws "Not a child".
       //
-      // This works only because every caller invokes it as a root MST action -- the structural
-      // change reaction and the Clear toolbar button. withoutUndo is ignored (with a warning) from
-      // inside a child action, so it must never be wrapped in another action.
+      // This works only because the call comes from a reaction, not from inside the structural
+      // action: withoutUndo is ignored (with a warning) when called from a child action. Clear
+      // does not come through here -- it empties the capture in place (see clearRecording), so a
+      // student can see it happen.
       withoutUndo();
       const sharedModelManager = self.tileEnv?.sharedModelManager;
       const sharedModel = self.sharedModel;
@@ -637,6 +638,22 @@ export const DataflowContentModel = TileContentModel
         });
       }
       self.dataSet.setName(captureName(self.dataSet.name, startedAt));
+    },
+    /**
+     * Empties the capture in place, leaving the table linked and showing a fresh x | y pair.
+     *
+     * Deliberately not detachLinkedTables: a detach hands the table its rows and stops it
+     * following, so the student sees nothing change and Clear looks broken. This is the one path
+     * that destroys recorded data, and unlike the detach it stays on the undo stack -- no
+     * withoutUndo here -- so an accidental Clear is recoverable.
+     */
+    clearRecording() {
+      // The name should stop claiming a recording this no longer holds.
+      self.dataSet.setName(stripCaptureTime(self.dataSet.name));
+      self.clearAttributes();
+      self.clearCases();
+      addAttributeToDataSet(self.dataSet, { name: "x" });
+      addAttributeToDataSet(self.dataSet, { name: "y" });
     },
   }))
   // Its own block so `self` can see prepareCapture: within one .actions() block, `self` does not

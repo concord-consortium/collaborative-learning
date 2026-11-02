@@ -3,7 +3,7 @@ import { act, fireEvent, render, screen } from "@testing-library/react";
 import { Provider } from "mobx-react";
 import { ModalProvider } from "react-modal-hook";
 
-import { TileModelContext } from "../../../../components/tiles/tile-api";
+import { AddTilesContext, TileModelContext } from "../../../../components/tiles/tile-api";
 import { ReadOnlyContext } from "../../../../components/document/read-only-context";
 import { createDocumentModel } from "../../../../models/document/document";
 import { ProblemDocument } from "../../../../models/document/document-types";
@@ -32,18 +32,21 @@ function setup(Component: typeof RecordButton, readOnly = false) {
     data: { type: "Number", orderedDisplayName: "Sensor" }
   } as any);
 
+  const addTileAfter = jest.fn();
   render(
     <ModalProvider>
       <Provider stores={specStores()}>
         <ReadOnlyContext.Provider value={readOnly}>
           <TileModelContext.Provider value={tile}>
-            <Component name="test-button" />
+            <AddTilesContext.Provider value={{ addTileAfter } as any}>
+              <Component name="test-button" />
+            </AddTilesContext.Provider>
           </TileModelContext.Provider>
         </ReadOnlyContext.Provider>
       </Provider>
     </ModalProvider>
   );
-  return { content, button: screen.getByRole("button") };
+  return { content, addTileAfter, button: screen.getByRole("button") };
 }
 
 describe("RecordButton", () => {
@@ -52,6 +55,14 @@ describe("RecordButton", () => {
     fireEvent.click(button);
     expect(content.isRecording).toBe(true);
     expect(content.dataSet.attributes.map(a => a.name)).toEqual(["Point", "Sensor"]);
+  });
+
+  // A recording whose points land nowhere visible looks like a program doing nothing.
+  it("makes a table when the program has none", () => {
+    const { button, addTileAfter } = setup(RecordButton);
+    fireEvent.click(button);
+    expect(addTileAfter).toHaveBeenCalledTimes(1);
+    expect(addTileAfter.mock.calls[0][0]).toBe("Table");
   });
 
   it("is disabled while a recording is running", () => {
@@ -108,7 +119,9 @@ function setupWithTable() {
       <Provider stores={specStores()}>
         <ReadOnlyContext.Provider value={false}>
           <TileModelContext.Provider value={tile}>
-            <ClearButton name="test-button" />
+            <AddTilesContext.Provider value={{ addTileAfter: jest.fn() } as any}>
+              <ClearButton name="test-button" />
+            </AddTilesContext.Provider>
           </TileModelContext.Provider>
         </ReadOnlyContext.Provider>
       </Provider>
@@ -129,16 +142,28 @@ describe("ClearButton", () => {
     expect(button.getAttribute("aria-disabled")).toBe("true");
   });
 
-  // Non-destructive: the table keeps the student's points, the program walks away from them.
-  it("leaves the linked table's data intact and unlinks the program", () => {
+  // The table must visibly empty and stay linked. Detaching instead left every row on screen, so
+  // the button looked broken -- which is what sent this back for a second pass.
+  it("empties the linked table and keeps it linked", () => {
     const { content, tableContent, button } = setupWithTable();
     expect(content.linkedTableTileId).toBe("table1");
 
     fireEvent.click(button);
 
-    expect(tableContent.dataSet.cases).toHaveLength(1);
-    expect(content.linkedTableTileId).toBeUndefined();
+    expect(tableContent.dataSet.cases).toHaveLength(0);
     expect(content.dataSet.cases).toHaveLength(0);
+    expect(content.linkedTableTileId).toBe("table1");
+  });
+
+  it("takes the capture's time back off the name", () => {
+    const { content, button } = setupWithTable();
+    content.setContentTitle("Program 1");
+    act(() => { content.prepareCapture(new Date(2026, 10, 2, 14, 32, 7)); });
+    expect(content.dataSet.name).toBe("Program 1 14:32:07");
+
+    fireEvent.click(button);
+
+    expect(content.dataSet.name).toBe("Program 1");
   });
 
   it("disables itself once the recording is cleared", () => {
