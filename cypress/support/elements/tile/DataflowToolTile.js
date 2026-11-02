@@ -170,7 +170,7 @@ class DataflowToolTile {
     this.selectSamplingRate(samplingRate);
     this.getDataflowTile().click();     // the toolbar renders only for the selected tile
     this.getRecordButton().click();
-    this.getCountdownTimer({timeout: (timer + 2) * 1000}).should("contain", "000:0" + timer.toString());
+    this.getCountdownTimer({timeout: (timer + 2) * 1000}).should("contain", "00:0" + timer.toString());
   }
   // No confirmation modal: Clear empties the table in place.
   clearRecordedData() {
