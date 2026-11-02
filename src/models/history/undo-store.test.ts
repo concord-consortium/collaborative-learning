@@ -347,15 +347,13 @@ it("can redo a tile change", async () => {
   ]);
 });
 
-// A completed entry is copied into the document history and the active entry is destroyed, so
-// nothing may keep using the active entry once it completes.
+// The active entry is destroyed when it completes.
 it("does not use an active entry after it completes", async () => {
   const unhandledRejections: unknown[] = [];
   const onUnhandledRejection = (reason: unknown) => unhandledRejections.push(reason);
   process.on("unhandledRejection", onUnhandledRejection);
-  // Jest doesn't run src/initialize-app.tsx, and even there the switch to "error" is off
-  // (kEnableLivelinessChecking), so this would be MST's default, "warn". That only logs a read
-  // of a destroyed node.
+  // Jest doesn't run src/initialize-app.tsx, so liveliness checking is MST's default, "warn", which
+  // only logs use of a destroyed node; this test needs it to throw.
   const previousLivelinessChecking = getLivelinessChecking();
   setLivelinessChecking("error");
 
