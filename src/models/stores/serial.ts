@@ -29,6 +29,9 @@ export class SerialDevice {
   ccDeviceSession: CcDeviceSession | undefined;
   // Cleared by `setActiveDevice` and `clearLastLoss`.
   lastLoss: IDeviceLossRecord | undefined;
+  // True once the active transport has delivered any data. Reset by `setActiveDevice` and
+  // `clearActiveDevice`.
+  dataReceived = false;
   // Functions that each return the channels of one tile. Inbound data is delivered to the
   // channels of every registered source.
   private channelSources = new Set<() => NodeChannelInfo[]>();
@@ -46,10 +49,13 @@ export class SerialDevice {
       ccDeviceSession: observable.ref,
       lastLoss: observable.ref,
       deviceFamily: observable,
+      dataReceived: observable,
       setActiveDevice: action,
       clearActiveDevice: action,
       recordUnplug: action,
-      clearLastLoss: action
+      recordLoss: action,
+      clearLastLoss: action,
+      markDataReceived: action
     });
   }
 
@@ -87,9 +93,14 @@ export class SerialDevice {
     this.ccDeviceSession?.stop();
     this.ccDeviceSession = undefined;
     this.lastLoss = undefined;
+    this.dataReceived = false;
     this.activeTransport = transport;
     this.deviceFamily = deviceFamily;
-    transport.onData = (chunk: string) => { if (this.activeTransport === transport) this.receive(chunk); };
+    transport.onData = (chunk: string) => {
+      if (this.activeTransport !== transport) return;
+      this.markDataReceived();
+      this.receive(chunk);
+    };
     transport.onDisconnect = (loss) => {
       if (loss === "unplugged") this.recordUnplug(transport);
       else if (this.activeTransport === transport) this.clearActiveDevice(loss);
@@ -118,6 +129,7 @@ export class SerialDevice {
     this.ccDeviceSession = undefined;
     this.activeTransport = undefined;
     this.deviceFamily = undefined;
+    this.dataReceived = false;
     this.localBuffer = "";
     // Reset so a prior Web Serial session's value can't stick to a later WebUSB device, which
     // never raises the browser connect/disconnect events this flag gates the connect-button UI on.
@@ -136,8 +148,18 @@ export class SerialDevice {
     }
   }
 
+  // Records the loss of a device that was open but never became active, such as a Spiker:bit
+  // unplugged during its firmware update.
+  public recordLoss(transport: IDeviceTransport, reason: DeviceLoss){
+    this.lastLoss = { reason, transport, at: Date.now() };
+  }
+
   public clearLastLoss(){
     this.lastLoss = undefined;
+  }
+
+  public markDataReceived(){
+    this.dataReceived = true;
   }
 
   // Central inbound router: dispatch a serial chunk to the parser for the connected

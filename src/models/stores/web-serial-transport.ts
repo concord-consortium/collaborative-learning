@@ -1,4 +1,4 @@
-import { DeviceLoss, IDeviceTransport } from "./device-transport";
+import { DeviceLoss, IAbandonedOpenInfo, IDeviceTransport, tryAbandonedPart } from "./device-transport";
 import { SerialDevice } from "./serial";
 
 const textEncoder = new TextEncoder();
@@ -14,7 +14,18 @@ function log(message: string) {
 // of port state.
 const kArduinoUsbProductId = 67;
 
-export type WebSerialOpenResult = "opened" | "canceled" | "failed";
+export type WebSerialOpenResult = "opened" | "canceled" | "failed" | "timeout" | "stillOpening";
+
+export interface IWebSerialOpenOptions {
+  // Give up on port.open after this long. No limit when omitted.
+  timeoutMs?: number;
+  // The chooser closed with a port, or a port was given.
+  onChosen?(): void;
+  // Called after an abandoned port is closed and forgotten, and again when its open settles late.
+  onAbandoned?(info: IAbandonedOpenInfo): void;
+}
+
+type OpenOutcome = { status: "opened" } | { status: "failed"; error: unknown } | { status: "timeout" };
 
 export class WebSerialTransport implements IDeviceTransport {
   onData?: (chunk: string) => void;
@@ -26,6 +37,8 @@ export class WebSerialTransport implements IDeviceTransport {
   // The port most recently given to or chosen in open(); unlike `port`, it is kept after close()
   // so it can be reopened.
   lastPort: SerialPort | null = null;
+  // The error behind a "failed" or "stillOpening" result from open().
+  lastOpenError: unknown;
   private writer: WritableStreamDefaultWriter | undefined;
   // The read loop's current reader. It holds a lock on `port.readable`, which must be
   // released before the port can be closed.
@@ -48,19 +61,34 @@ export class WebSerialTransport implements IDeviceTransport {
   }
 
   // Opens `port`, or asks the user to choose one when none is given, then resolves
-  // deviceFamily/deviceInfo. Resolves "canceled" if the user dismisses the chooser, and
-  // "failed" for any other error or a port that cannot be opened for writing.
-  public async open(port?: SerialPort): Promise<WebSerialOpenResult> {
+  // deviceFamily/deviceInfo. Resolves "canceled" if the user dismisses the chooser, "timeout" if
+  // port.open hasn't settled within options.timeoutMs, "stillOpening" if the browser says the port
+  // is already opening, and "failed" for any other error or a port that cannot be opened for writing.
+  public async open(port?: SerialPort, options: IWebSerialOpenOptions = {}): Promise<WebSerialOpenResult> {
+    this.lastOpenError = undefined;
     try {
       this.port = port ?? await navigator.serial.requestPort();
       this.lastPort = this.port;
+      options.onChosen?.();
       this.deviceInfo = await this.port.getInfo();
       this.deviceFamily = this.determineDeviceFamily(this.deviceInfo);
     } catch (error) {
       console.error("error requesting port: ", error);
-      return (error as Error | undefined)?.name === "NotFoundError" ? "canceled" : "failed";
+      if ((error as Error | undefined)?.name === "NotFoundError") return "canceled";
+      this.lastOpenError = error;
+      return "failed";
     }
-    await this.port.open({ baudRate: 9600 }).catch((e: any) => console.error(e));
+    const openingPort = this.port;
+    const outcome = await this.openWithLimit(openingPort, options);
+    if (outcome.status === "timeout") {
+      this.port = null;
+      return "timeout";
+    }
+    if (outcome.status === "failed") {
+      console.error("error opening port: ", outcome.error);
+      this.lastOpenError = outcome.error;
+      return (outcome.error as Error | undefined)?.name === "InvalidStateError" ? "stillOpening" : "failed";
+    }
     if (!this.port.writable) {
       console.error("Port is not writable");
       await this.closePort();
@@ -68,6 +96,50 @@ export class WebSerialTransport implements IDeviceTransport {
     }
     this.writer = this.port.writable.getWriter();
     return "opened";
+  }
+
+  // Races port.open against the time limit. When the limit wins, the port is given up on (see
+  // abandonOpen) and this resolves at once.
+  private async openWithLimit(port: SerialPort, options: IWebSerialOpenOptions): Promise<OpenOutcome> {
+    const opening = port.open({ baudRate: 9600 });
+    const settled: Promise<OpenOutcome> = opening.then(
+      () => ({ status: "opened" as const }),
+      (error: unknown) => ({ status: "failed" as const, error })
+    );
+    if (options.timeoutMs == null) return settled;
+
+    let timeoutId: ReturnType<typeof setTimeout> | undefined;
+    const timedOut = new Promise<OpenOutcome>((resolve) => {
+      timeoutId = setTimeout(() => resolve({ status: "timeout" }), options.timeoutMs);
+    });
+    const outcome = await Promise.race([settled, timedOut]).finally(() => clearTimeout(timeoutId));
+    if (outcome.status === "timeout") this.abandonOpen(port, settled, options);
+    return outcome;
+  }
+
+  // Tries to close and forget a port whose open was given up on, and closes it if that open
+  // succeeds later. Nothing here is awaited: a port stuck opening may not close either, and the
+  // time limit mustn't wait for it. Close and forget start together, so one that hangs doesn't
+  // keep the other from being tried, and each part reports through options.onAbandoned as it
+  // finishes.
+  private abandonOpen(port: SerialPort, settled: Promise<OpenOutcome>, options: IWebSerialOpenOptions) {
+    const report = (info: IAbandonedOpenInfo) => {
+      try {
+        options.onAbandoned?.(info);
+      } catch (e) {
+        console.error("Abandoned open report failed", e);
+      }
+    };
+    const forgettable = port as unknown as { forget?: () => Promise<void> };
+    tryAbandonedPart("close", () => port.close(), report);
+    tryAbandonedPart("forget", typeof forgettable.forget === "function" ? () => forgettable.forget!() : undefined,
+      report);
+    void settled.then(async (late) => {
+      if (late.status === "opened") {
+        try { await port.close(); } catch { /* the port is abandoned either way */ }
+      }
+      report({ late: late.status === "opened" ? "opened" : "failed" });
+    });
   }
 
   public write(line: string){
