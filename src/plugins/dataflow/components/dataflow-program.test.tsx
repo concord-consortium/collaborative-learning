@@ -118,10 +118,6 @@ describe("DataflowProgram rete manager routing", () => {
 });
 
 describe("DataflowProgram recording lifecycle", () => {
-  beforeEach(() => {
-    MockedReteManager.mockClear();
-  });
-
   it("stops a recording left running when the component unmounts", () => {
     const content = createContent();
     const { unmount } = renderProgram(content);

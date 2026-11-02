@@ -21,7 +21,7 @@ const programNodes = [
   { name: "demo-output", title: "Demo Device 1", attribute: "Demo Device 1" }];
 // Point, not "Time (sec)": a capture numbers its points 1, 2, 3 and records its start time in the
 // program's name instead (see prepareCapture). Table It prepares these columns up front, so an
-// empty linked table already carries them; only clearing the recording puts x | y back.
+// empty linked table already carries them.
 const linkedTableAttributes = ["Point", programNodes[0].attribute, programNodes[1].attribute];
 const timer1 = 5;
 const timer2 = 3;

@@ -23,7 +23,7 @@ function fakeTransport(): IDeviceTransport {
 
 async function openProgram(
   nodes: Array<ReturnType<typeof sensorNode | typeof numberNode>>,
-  options: { readOnly?: boolean; playback?: boolean; connected?: boolean } = {}
+  options: { readOnly?: boolean; connected?: boolean } = {}
 ) {
   const content = DataflowContentModel.create();
   nodes.forEach(node => content.program.addNode(node));
@@ -31,7 +31,7 @@ async function openProgram(
   if (options.connected) stores.serialDevice.setActiveDevice("arduino", fakeTransport());
   const manager = new ReteManager(
     content.program, "tile1", document.createElement("div"), content, stores,
-    options.readOnly, options.playback ?? false
+    options.readOnly
   );
   await manager.setupComplete;
   // Let anything the manager queued after setup run before the test makes its edits.
@@ -100,19 +100,13 @@ describe("ReteManager needs-a-device on open", () => {
     expect(content.showConnectTutorialOnOpen).toBe(false);
   });
 
-  it("does not flag a manager constructed with playback", async () => {
-    const { content, manager } = await openProgram([sensorNode("s1", "emg")], { playback: true });
-    managers.push(manager);
-    expect(content.showConnectTutorialOnOpen).toBe(false);
-  });
-
   it("does not flag when the manager is disposed before setup finishes", async () => {
     // Disposing mid-setup makes the manager warn that it was asked to process.
     jest.spyOn(console, "warn").mockImplementation(() => undefined);
     const content = DataflowContentModel.create();
     content.program.addNode(sensorNode("s1", "emg"));
     const manager = new ReteManager(
-      content.program, "tile1", document.createElement("div"), content, specStores(), false, false
+      content.program, "tile1", document.createElement("div"), content, specStores(), false
     );
     manager.dispose();
     await manager.setupComplete;

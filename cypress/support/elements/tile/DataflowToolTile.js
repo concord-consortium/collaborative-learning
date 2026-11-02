@@ -172,7 +172,7 @@ class DataflowToolTile {
     this.getRecordButton().click();
     this.getCountdownTimer({timeout: (timer + 2) * 1000}).should("contain", "000:0" + timer.toString());
   }
-  // No modal any more: Clear hands the linked table its points rather than destroying them.
+  // No confirmation modal: Clear empties the table in place.
   clearRecordedData() {
     this.getDataflowTile().click();
     this.getClearButton().click();

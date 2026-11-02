@@ -12,7 +12,7 @@ import RecordIcon from "../../assets/icons/record-icon.svg";
 import StopIcon from "../../assets/icons/stop-icon.svg";
 import ClearIcon from "../../assets/icons/clear-icon.svg";
 
-/** The one control that stays live while recording; dataflow-tile exempts it from the busy toolbar. */
+/** Shared with dataflow-tile's busy-toolbar exemption. */
 export const kStopButtonName = "stop";
 
 function useRecordingContent() {
@@ -30,8 +30,7 @@ function useRecordingContent() {
  * take Stop off screen mid-run.
  */
 export const RecordButton = observer(function RecordButton({ name }: IToolbarButtonComponentProps) {
-  const { content, readOnly } = useRecordingContent();
-  const { ensure } = useLinkedTable();
+  const { content, readOnly, ensure } = useLinkedTable();
   return (
     <TileToolbarButton
       name={name}
@@ -64,7 +63,8 @@ export const StopButton = observer(function StopButton({ name }: IToolbarButtonC
 });
 
 /**
- * Empties the recording, leaving the table linked and showing a fresh x | y pair.
+ * Empties the recording in place, leaving the table linked and showing the capture's columns
+ * (see clearRecording).
  *
  * No confirmation: "clear" is a word students understand, a recording is cheap to redo, and unlike
  * the structural-change detach this stays on the undo stack.

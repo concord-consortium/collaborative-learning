@@ -57,7 +57,6 @@ describe("RecordButton", () => {
     expect(content.dataSet.attributes.map(a => a.name)).toEqual(["Point", "Sensor"]);
   });
 
-  // A recording whose points land nowhere visible looks like a program doing nothing.
   it("makes a table when the program has none", () => {
     const { button, addTileAfter } = setup(RecordButton);
     fireEvent.click(button);
@@ -142,8 +141,7 @@ describe("ClearButton", () => {
     expect(button.getAttribute("aria-disabled")).toBe("true");
   });
 
-  // The table must visibly empty and stay linked. Detaching instead left every row on screen, so
-  // the button looked broken -- which is what sent this back for a second pass.
+  // Detaching instead left every row on screen, so the button looked broken.
   it("empties the linked table and keeps it linked", () => {
     const { content, tableContent, button } = setupWithTable();
     expect(content.linkedTableTileId).toBe("table1");
@@ -155,8 +153,7 @@ describe("ClearButton", () => {
     expect(content.linkedTableTileId).toBe("table1");
   });
 
-  // A cleared table should still describe the program, exactly as Table It leaves it, rather than
-  // reverting to a generic x | y pair.
+  // A cleared table should still describe the program, exactly as Table It leaves it.
   it("leaves the capture's columns in place, ready for the next run", () => {
     const { content, button } = setupWithTable();
     expect(content.dataSet.attributes.map(a => a.name)).toEqual(["Point", "Sensor"]);

@@ -387,7 +387,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     if (!this.toolDiv || !this.props.program) return;
 
     const reteManager = new ReteManager(this.props.program, this.tileId,
-      this.toolDiv, this.props.tileContent, this.stores, this.props.readOnly, false);
+      this.toolDiv, this.props.tileContent, this.stores, this.props.readOnly);
 
     this.reteManager = reteManager;
     this.reportActiveReteManager();

@@ -13,8 +13,12 @@ const kAtBottomSlackPx = 4;
 const kSmoothMinIntervalMs = 400;
 
 // Beyond this a smooth scroll crawls rather than reading as motion, so jump instead. Reached when
-// several rows arrive at once, or on the first row after the student scrolls back down.
+// several rows arrive at once -- a bulk load, or an undo.
 const kSmoothMaxDistancePx = 240;
+
+// How long to treat scroll events as our own after starting a smooth scroll. Comfortably longer
+// than a browser's animation for a row-sized distance.
+const kAnimationWindowMs = 500;
 
 /** Honors the OS setting. matchMedia is absent under jsdom, hence the optional call. */
 function prefersReducedMotion() {
@@ -36,11 +40,16 @@ export function useFollowNewRows(gridRef: RefObject<DataGridHandle>, rowCount: n
   const following = useRef(true);
   const lastRowCount = useRef(rowCount);
   const lastRowAt = useRef(0);
+  const animatingUntil = useRef(0);
 
   useEffect(() => {
     const element = gridRef.current?.element;
     if (!element) return;
     const handleScroll = () => {
+      // Ignore the events our own smooth scroll emits. They report positions short of the bottom,
+      // which would read as the student scrolling away -- and if a row arrived mid-animation the
+      // hook would stop following for good, leaving exactly the frozen table it exists to prevent.
+      if (Date.now() < animatingUntil.current) return;
       following.current =
         element.scrollHeight - element.scrollTop - element.clientHeight <= kAtBottomSlackPx;
     };
@@ -61,6 +70,10 @@ export function useFollowNewRows(gridRef: RefObject<DataGridHandle>, rowCount: n
     const top = element.scrollHeight;
     const distance = top - element.scrollTop - element.clientHeight;
     const smooth = !rapid && !prefersReducedMotion() && distance <= kSmoothMaxDistancePx;
+
+    // A row arriving mid-animation re-issues this, which retargets the animation at the new bottom
+    // rather than leaving it to finish one row short.
+    animatingUntil.current = smooth ? now + kAnimationWindowMs : 0;
 
     // scrollTo rather than the grid's scrollToCell, which also moves the selected cell -- following
     // the data must not steal a cell the student is editing.

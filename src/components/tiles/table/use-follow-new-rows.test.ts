@@ -7,15 +7,17 @@ function makeElement({ scrollHeight = 500, clientHeight = 100, scrollTop = 400 }
   const listeners: Array<() => void> = [];
   const element = {
     scrollHeight, clientHeight, scrollTop,
-    scrollTo: jest.fn((options: ScrollToOptions) => { element.scrollTop = options.top ?? 0; }),
+    scrollTo: jest.fn((options: ScrollToOptions) => {
+      element.scrollTop = Math.min(options.top ?? 0, element.scrollHeight - element.clientHeight);
+    }),
     addEventListener: (_type: string, fn: () => void) => listeners.push(fn),
     removeEventListener: jest.fn()
   };
   return { element, scroll: () => listeners.forEach(fn => fn()) };
 }
 
-/** The hook scrolls instantly when rows arrive within kSmoothMinIntervalMs of each other. */
-function advancePastRapidWindow() {
+/** Pins Date.now so a test controls which side of kSmoothMinIntervalMs a row lands on. */
+function freezeTime() {
   jest.spyOn(Date, "now").mockReturnValue(Date.now() + 10_000);
 }
 
@@ -34,14 +36,13 @@ describe("useFollowNewRows", () => {
     grid.element.scrollHeight = 530;
     rerender({ count: 6 });
 
-    expect(grid.element.scrollTop).toBe(530);
+    expect(grid.element.scrollTop).toBe(430);
   });
 
-  // An instantaneous jump is hard to read as "a new row arrived".
   it("scrolls smoothly when rows arrive slowly enough to see", () => {
     const grid = makeElement();
     const { rerender } = renderFollow(grid, 5);
-    advancePastRapidWindow();
+    freezeTime();
 
     grid.element.scrollHeight = 530;
     rerender({ count: 6 });
@@ -49,15 +50,32 @@ describe("useFollowNewRows", () => {
     expect(grid.element.scrollTo).toHaveBeenCalledWith({ top: 530, behavior: "smooth" });
   });
 
-  // A smooth scroll outlasts the gap between rows at a fast sampling rate, so the view would fall
-  // behind and the unfinished animation's scroll events would read as the student scrolling away.
   it("jumps when rows arrive faster than the animation", () => {
     const grid = makeElement();
     const { rerender } = renderFollow(grid, 5);
-    advancePastRapidWindow();
+    freezeTime();
 
     grid.element.scrollHeight = 530;
     rerender({ count: 6 });
+    grid.element.scrollHeight = 560;
+    rerender({ count: 7 });
+
+    expect(grid.element.scrollTo).toHaveBeenLastCalledWith({ top: 560, behavior: "auto" });
+  });
+
+  // The bug this closes: a row arriving mid-animation used to leave the animation finishing one
+  // row short of the bottom, whose scroll event then read as "the student scrolled away" -- and
+  // nothing ever scrolled again. 500ms is a shipped sampling rate, so this was reachable.
+  it("keeps following when a row arrives mid-animation", () => {
+    const grid = makeElement();
+    const { rerender } = renderFollow(grid, 5);
+    freezeTime();
+
+    grid.element.scrollHeight = 530;
+    rerender({ count: 6 });                 // smooth scroll starts
+
+    grid.element.scrollTop = 415;           // an intermediate frame of that animation
+    grid.scroll();
     grid.element.scrollHeight = 560;
     rerender({ count: 7 });
 
@@ -73,7 +91,6 @@ describe("useFollowNewRows", () => {
     expect(grid.element.scrollTop).toBe(400);
   });
 
-  // A student reading earlier rows must not be yanked back by the next recorded point.
   it("stops following once the student scrolls away from the bottom", () => {
     const grid = makeElement();
     const { rerender } = renderFollow(grid, 5);
@@ -99,6 +116,6 @@ describe("useFollowNewRows", () => {
     grid.element.scrollHeight = 560;
     rerender({ count: 7 });
 
-    expect(grid.element.scrollTop).toBe(560);
+    expect(grid.element.scrollTop).toBe(460);
   });
 });
