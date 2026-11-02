@@ -16,6 +16,7 @@ import { useColumnResize } from "./use-column-resize";
 import { useContentChangeHandlers } from "./use-content-change-handlers";
 import { useControlsColumn } from "./use-controls-column";
 import { useDataSet } from "./use-data-set";
+import { useFollowNewRows } from "./use-follow-new-rows";
 import { useGridContext } from "./use-grid-context";
 import { useMeasureColumnWidth } from "./use-measure-column-width";
 import { useModelDataSet } from "./use-model-data-set";
@@ -195,6 +196,8 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
     gridContext, dataSet, isLinked, content, readOnly: !!readOnly, columnChanges, headerHeight, rowHeight,
     ...rowLabelProps, showRowLabels, measureColumnWidth, lookupImage, onSort,
   });
+
+  useFollowNewRows(gridRef, rows.length);
 
   // Keep columns/rows accessible to keyboard-nav handlers without triggering re-renders.
   // selectedCellRef is sourced from useDataSet (destructured below as selectedCell).
