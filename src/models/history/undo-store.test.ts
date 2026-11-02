@@ -1,6 +1,7 @@
 import { cloneDeep } from "lodash";
 import {
-  flow, getLivelinessChecking, getSnapshot, getType, Instance, setLivelinessChecking, types
+  flow, getLivelinessChecking, getSnapshot, getType, Instance, onPatch, resolveIdentifier, setLivelinessChecking,
+  types
 } from "mobx-state-tree";
 import { nanoid } from "nanoid";
 import { ITileProps } from "src/components/tiles/tile-component";
@@ -379,6 +380,30 @@ it("does not use an active entry after it completes", async () => {
   } finally {
     setLivelinessChecking(previousLivelinessChecking);
     process.removeListener("unhandledRejection", onUnhandledRejection);
+  }
+});
+
+// MST requires identifiers to be unique within a tree, and resolving one that two nodes share
+// throws. So the active entry has to be gone before its copy is added to the history.
+it("never has an active entry and its copy in the tree at once", async () => {
+  const {tileContent, manager} = setupDocument();
+  const resolveErrors: unknown[] = [];
+  const disposer = onPatch(manager, patch => {
+    if (patch.op === "add" && patch.path.startsWith("/document/history/")) {
+      try {
+        resolveIdentifier(HistoryEntry, manager, (patch.value as HistoryEntrySnapshot).id);
+      } catch (e) {
+        resolveErrors.push(e);
+      }
+    }
+  });
+
+  try {
+    tileContent.setFlag(true);
+    await expectEntryToBeComplete(manager, 1);
+    expect(resolveErrors).toEqual([]);
+  } finally {
+    disposer();
   }
 });
 
