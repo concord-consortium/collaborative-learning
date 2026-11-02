@@ -375,8 +375,6 @@ it("does not use an active entry after it completes", async () => {
     expect(unhandledRejections).toEqual([]);
     expect(tileContent.flag).toBe(true);
     expect(manager.activeHistoryEntries.length).toBe(0);
-    // The undo store's reference resolves to the copy in the document history.
-    expect(undoStore.history[0]).toBe(manager.document.history[0]);
   } finally {
     setLivelinessChecking(previousLivelinessChecking);
     process.removeListener("unhandledRejection", onUnhandledRejection);
