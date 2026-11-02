@@ -183,3 +183,23 @@ fails. That story produced four vacuous tests before this became routine.
    independent of playback.
 3. The ticket describes "the pause control" becoming active. There is no pause once playback is
    gone; the control is Stop, and it ends the run.
+
+## Changed during implementation
+
+Two decisions recorded above did not survive contact with the running build. Recorded here rather
+than edited away, so the reasoning stays legible.
+
+**Clear detaches -> Clear empties in place.** The design had Clear hand the linked table its rows
+and stop it following, on the grounds that nothing was destroyed. In testing that read as a broken
+button: the table kept every row on screen, so pressing Clear appeared to do nothing. It now calls
+`clearRecording()`, which empties the capture and re-prepares it, leaving the table linked and
+showing the capture's columns -- the state Table It would leave. That is destructive, but unlike
+the detach it stays on the undo stack. `detachLinkedTables` is unchanged and still runs from the
+structural-change reaction.
+
+**Record now creates a table.** The design left table creation to Table It and Record Single
+Sample. A recording whose points land nowhere visible looks like a program doing nothing, so Record
+ensures a linked table the same way Record Single Sample already did.
+
+Also added, outside the design's scope: the Table tile follows its newest row as rows arrive
+(`useFollowNewRows`), without which a recording's points land below the fold.

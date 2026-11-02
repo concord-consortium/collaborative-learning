@@ -535,6 +535,38 @@ describe("ToolbarBusyContext", () => {
     expect(renderButton(true).getAttribute("aria-disabled")).toBe("true");
   });
 
+  // The pan button's corner triangle has its own onClick with stopPropagation, so a disabled
+  // button's bubbling handler never sees it -- the palette opened mid-recording.
+  it("blocks a nested handler that stops propagation", () => {
+    const nested = jest.fn();
+    render(
+      <ToolbarBusyContext.Provider value={{ busy: true }}>
+        <TileToolbarButton name="pan" title="Pan" onClick={jest.fn()}>
+          <span data-testid="corner" onClick={e => { e.stopPropagation(); nested(); }} />
+        </TileToolbarButton>
+      </ToolbarBusyContext.Provider>
+    );
+
+    fireEvent.click(screen.getByTestId("corner"));
+
+    expect(nested).not.toHaveBeenCalled();
+  });
+
+  it("lets a nested handler run when the button is not busy", () => {
+    const nested = jest.fn();
+    render(
+      <ToolbarBusyContext.Provider value={{ busy: false }}>
+        <TileToolbarButton name="pan" title="Pan" onClick={jest.fn()}>
+          <span data-testid="corner" onClick={e => { e.stopPropagation(); nested(); }} />
+        </TileToolbarButton>
+      </ToolbarBusyContext.Provider>
+    );
+
+    fireEvent.click(screen.getByTestId("corner"));
+
+    expect(nested).toHaveBeenCalled();
+  });
+
   it("leaves an exempt button enabled", () => {
     expect(renderButton(true, ["zoom-in"]).getAttribute("aria-disabled")).toBeNull();
   });

@@ -433,10 +433,12 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
 
     reteManager.tickAndProcessNodes();
     if (tileContent.isRecording && !readOnly) {
-      recordCase(tileContent);
-      // The cap is 10000/(nodes + 1) cases, so a long run ends itself rather than growing forever.
+      // Checked before appending, not after: Record stays available once a run hits the cap, and
+      // appending first would let every further click push the dataset one row past it.
       if (tileContent.dataSet.cases.length >= tileContent.maxRecordableCases) {
         tileContent.stopRecording();
+      } else {
+        recordCase(tileContent);
       }
     }
     reteManager.updateSharedProgramData();

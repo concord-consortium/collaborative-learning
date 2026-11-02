@@ -82,7 +82,11 @@ export const TileToolbarButton = function ({
         aria-label={title}
         aria-pressed={selected !== undefined ? selected : undefined}
         aria-expanded={expanded}
-        onClick={isDisabled ? handleDisabledClick : handleOnClick}
+        // Capture phase, because a child with its own stopPropagation -- the pan button's corner
+        // triangle -- would otherwise act while the button is disabled: the bubbling handler below
+        // never runs for it. Handling the disabled case here means onClick must not repeat it.
+        onClickCapture={isDisabled ? handleDisabledClick : undefined}
+        onClick={isDisabled ? undefined : handleOnClick}
         onMouseDown={isDisabled ? undefined : onMouseDown}
         onMouseUp={isDisabled ? undefined : onMouseUp}
         onTouchStart={isDisabled ? undefined : onTouchStart}
