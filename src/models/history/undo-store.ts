@@ -65,7 +65,7 @@ export const UndoStore = types
     // Start a non-undoable action with this id
     // TODO: we are using a fake tree id of "manager" here. This is currently
     // working, but we probably want to review this approach.
-    const historyEntry = manager.createHistoryEntry({
+    manager.createHistoryEntry({
       id: historyEntryId,
       exchangeId,
       tree: "manager",
@@ -133,37 +133,19 @@ export const UndoStore = types
     // way each tree has a chance to add a new exchange to the history
     // entry which will keep it "recording" until that new exchange is
     // also finished.
-    manager.endExchange(historyEntry, exchangeId);
+    manager.endExchange(historyEntryId, exchangeId);
   });
 
   return {
+    /** Call once per newly completed undoable entry; it does not check for duplicates. */
     addHistoryEntry(entry: Instance<typeof HistoryEntry>) {
-      // Find if there is already an HistoryEntry with this
-      // historyEntryId. This action is called each time a new
-      // TreePatchRecord is added to the HistoryEntry. If the
-      // HistoryEntry has already been added then we don't modify it,
-      // but we do always reset the undoIdx to the end of the history.
-
       if (DEBUG_UNDO) {
         // eslint-disable-next-line no-console
         console.log(`adding to undo history`, (entry as any).toJSON()/*.action*/);
       }
-      const existingEntry = self.findHistoryEntry(entry.id);
-      if (!existingEntry) {
-        // This is a new user action, so if they had undone some amount already
-        // we delete the part of the history that was past this undone point
-        self.history.splice(self.undoIdx);
-        self.history.push(entry);
-      }
-
-      // Reset the undoIdx to the end of the history, this is because it is a
-      // user action so if the user had been undoing things, once they start
-      // doing new things they can no longer 'redo' what was undone before.
-      //
-      // The fact that the undoIdx is reset in all cases even with an existing
-      // entry is kind of confusing. This happens because if additional patches
-      // are being added to an existing entry these are still user triggered
-      // patches. So this needs to prevent the ability to redo.
+      // A new action discards anything that was undone, so it can no longer be redone.
+      self.history.splice(self.undoIdx);
+      self.history.push(entry);
       self.undoIdx = self.history.length;
     },
 
