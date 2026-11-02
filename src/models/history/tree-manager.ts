@@ -176,12 +176,9 @@ export const TreeManager = types
   function completeHistoryEntry(activeEntry: Instance<typeof HistoryEntry>) {
     activeEntry.state = "complete";
 
-    // The entry is copied into the history instead of being moved with `detach`. Detaching
-    // makes MST walk every identifier in the tree, and the history can hold thousands of
-    // entries, so each completed entry would get slower. Because the active entry is
-    // destroyed here, nothing may keep a reference to it. That is why createHistoryEntry
-    // doesn't return the entry and the actions that work on an active entry take its id. This
-    // takes the entry, so it is a function that only endExchange calls, not an action.
+    // Copied rather than detached: detach walks every identifier in the tree, and the history
+    // grows to thousands of entries. The active entry is destroyed, so code refers to active
+    // entries by id only.
     const snapshot = getSnapshot(activeEntry);
     destroy(activeEntry);
 
@@ -353,9 +350,8 @@ export const TreeManager = types
 
     createHistoryEntry(entryInfo: ICreateHistoryEntry) {
       const {id: historyEntryId, exchangeId, action} = entryInfo;
-      // Callers give each new entry a unique id (see TreeManagerAPI.addHistoryEntry), so only
-      // the active entries are checked. Scanning the document history for every new entry
-      // gets slow once it holds thousands of entries.
+      // Ids are unique by contract (TreeManagerAPI.addHistoryEntry), so only active entries are
+      // checked; a history scan would grow with the history.
       if (self.findActiveHistoryEntry(historyEntryId)) {
         throw new Error(`The entry already exists ${ json({historyEntryId})}`);
       }
