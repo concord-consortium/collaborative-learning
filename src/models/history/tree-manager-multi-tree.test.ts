@@ -5,6 +5,7 @@ import {
 import { TreeManager } from "./tree-manager";
 import { HistoryEntrySnapshot } from "./history";
 import { PatchApplicationError } from "./tree";
+import { LoadApplicationError } from "./playback-patch-source";
 
 // These tests exercise the multi-tree code paths in TreeManager
 // (replayHistoryToTrees, goToHistoryEntryPosition, addTreePatchRecord) without
@@ -72,7 +73,8 @@ const TestTree = types.model("TestTree", {
   },
 
   applyPatchesFromManager(
-    _historyEntryId: string, _exchangeId: string, patchesToApply: readonly IJsonPatch[]
+    _historyEntryId: string, _exchangeId: string, patchesToApply: readonly IJsonPatch[],
+    loads?: readonly IJsonPatch[]
   ) {
     if (self.unexpectedErrorOnNextApply !== undefined) {
       const err = self.unexpectedErrorOnNextApply;
@@ -92,6 +94,13 @@ const TestTree = types.model("TestTree", {
       throw new PatchApplicationError(numApplied, e);
     } finally {
       disposer();
+    }
+    if (loads && loads.length > 0) {
+      try {
+        applyPatch(self, loads);
+      } catch (e) {
+        throw new LoadApplicationError(e);
+      }
     }
     return Promise.resolve();
   },
