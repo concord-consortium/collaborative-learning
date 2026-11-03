@@ -148,6 +148,80 @@ describe("JsonHistoryCopy", () => {
     expect(copy.getJson("/content/tileMap/t1/content")).toEqual(after);
   });
 
+  describe("with a virtual conversion", () => {
+    const t1Path = "/content/tileMap/t1";
+    // Two v1 entries, then a conversion history never recorded at position 2, then a v2 entry.
+    const history = () => [
+      HistoryEntry.create(makeEntry(
+        [{ path: `${kPrefix}/text`, value: "b" }], [{ path: `${kPrefix}/text`, value: "a" }])),
+      HistoryEntry.create(makeEntry(
+        [{ path: `${kPrefix}/text`, value: "c" }], [{ path: `${kPrefix}/text`, value: "b" }])),
+      HistoryEntry.create(makeEntry(
+        [{ path: `${kPrefix}/label`, value: "d" }], [{ path: `${kPrefix}/label`, value: "c" }]))
+    ];
+    const v1Tile = (text: string) => ({ id: "t1", content: { type: "VersionedTestTile", text } });
+    const endJson = () => ({
+      content: { tileMap: { t1: { id: "t1", content: { type: "VersionedTestTile", version: "2", label: "d" } } } }
+    });
+
+    it("applies a virtual conversion's inverse when crossing it backward and its forward patches " +
+        "when crossing it forward", () => {
+      const entries = history();
+      const copy = new JsonHistoryCopy(kTreeId, endJson(), 3);
+      copy.setVirtualConversions([{ path: t1Path, position: 2, oldJson: v1Tile("c") }]);
+      expect(copy.oldestReachablePosition).toBe(0);
+
+      expect(copy.moveTo(entries, 0)).toEqual({ position: 0 });
+      expect(copy.getJson(t1Path)).toEqual(v1Tile("a"));
+      expect(copy.moveTo(entries, 1)).toEqual({ position: 1 });
+      expect(copy.getJson(t1Path)).toEqual(v1Tile("b"));
+
+      // Handing over the same conversion again keeps the patches computed for it.
+      copy.setVirtualConversions([{ path: t1Path, position: 2, oldJson: v1Tile("c") }]);
+      expect(copy.moveTo(entries, 2)).toEqual({ position: 2 });
+      expect(copy.getJson(t1Path)).toEqual(
+        { id: "t1", content: { type: "VersionedTestTile", version: "2", label: "c" } });
+      expect(copy.moveTo(entries, 3)).toEqual({ position: 3 });
+      expect(copy.getJson("")).toEqual(endJson());
+    });
+
+    it("stops at a virtual conversion without old JSON", () => {
+      const entries = history();
+      const copy = new JsonHistoryCopy(kTreeId, endJson(), 3);
+      copy.setVirtualConversions([{ path: t1Path, position: 2, oldJson: undefined }]);
+      expect(copy.oldestReachablePosition).toBe(2);
+
+      expect(copy.moveTo(entries, 0)).toEqual({ position: 2, unavailable: true });
+      expect(copy.position).toBe(2);
+      expect(copy.getJson(t1Path)).toEqual(
+        { id: "t1", content: { type: "VersionedTestTile", version: "2", label: "c" } });
+      // A move that ends at the boundary doesn't cross it.
+      expect(copy.moveTo(entries, 3)).toEqual({ position: 3 });
+      expect(copy.moveTo(entries, 2)).toEqual({ position: 2 });
+    });
+
+    it("stays converted when the entry before a virtual conversion doesn't undo", () => {
+      const entries = history();
+      entries[1] = HistoryEntry.create(makeEntry(
+        [{ path: "/content/tileMap/NOPE/x", value: 1 }], [{ path: "/content/tileMap/NOPE/x", value: 0 }]));
+      const copy = new JsonHistoryCopy(kTreeId, endJson(), 3);
+      copy.setVirtualConversions([{ path: t1Path, position: 2, oldJson: v1Tile("c") }]);
+
+      expect(copy.moveTo(entries, 0)).toMatchObject({ position: 2, failure: { historyIndex: 1 } });
+      expect(copy.getJson(t1Path)).toEqual(
+        { id: "t1", content: { type: "VersionedTestTile", version: "2", label: "c" } });
+    });
+
+    it("stops at a virtual conversion whose model isn't in the copy", () => {
+      const entries = history();
+      const copy = new JsonHistoryCopy(kTreeId, endJson(), 3);
+      copy.setVirtualConversions([{ path: "/content/tileMap/t9", position: 2, oldJson: v1Tile("c") }]);
+
+      expect(copy.moveTo(entries, 0)).toEqual({ position: 2, unavailable: true });
+      expect(copy.oldestReachablePosition).toBe(2);
+    });
+  });
+
   it("getJson resolves escaped paths and returns undefined for unresolved ones", () => {
     const copy = new JsonHistoryCopy(kTreeId, { "a/b": { "c~d": [10, 20] } }, 0);
     expect(copy.getJson("/a~1b/c~0d/1")).toBe(20);
