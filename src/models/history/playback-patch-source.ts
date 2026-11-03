@@ -32,9 +32,8 @@ export const defaultPatchSource: IPlaybackPatchSource = {
 };
 
 /**
- * Thrown by a tree when applying its loads fails. Unlike a
- * PatchApplicationError there is no count of applied patches to roll back
- * from, so playback treats it as an unexpected error.
+ * Thrown by a tree when applying its loads fails. The loads are applied after
+ * all of the tree's patches, so playback rolls back the whole move.
  */
 export class LoadApplicationError extends Error {
   readonly cause: unknown;

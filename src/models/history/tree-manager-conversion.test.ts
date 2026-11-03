@@ -323,6 +323,44 @@ describe("playback across a conversion entry", () => {
     expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining("Rollback of tree 'doc1' failed: cannot convert"));
   });
 
+  it("rolls back the move when MST rejects an old tile's load", async () => {
+    const t2TextPath = "/content/tileMap/t2/content/text";
+    const oldEntries = [
+      makeEntry([replaceRecord(`${t1Path}/content/text`, "a", "b")]),
+      makeEntry([replaceRecord(t2TextPath, "p", "q")]),
+      makeEntry([replaceRecord(`${t1Path}/content/text`, "b", "c")])
+    ];
+    const content = {
+      tileMap: { ...t1Content().tileMap, t2: { id: "t2", content: { type: "TestTile", text: "q" } } }
+    };
+    const { document, manager, endPosition, copyJson } = await setupConvertedDocument(content, oldEntries);
+    const t2 = document.content!.tileMap.get("t2")!.content as TestTileType;
+    // The conversion of t1 at position 0 gives content that MST rejects.
+    const convertSnapshot = versionedTestTileSchema.convertSnapshot;
+    jest.spyOn(versionedTestTileSchema, "convertSnapshot").mockImplementation((tile: any) => {
+      const converted: any = convertSnapshot(tile);
+      return tile.content.text === "a" ? { ...converted, content: { ...converted.content, items: "bad" } } : converted;
+    });
+    const warnSpy = jest.spyOn(console, "warn").mockImplementation(() => undefined);
+
+    await manager.goToHistoryEntryPosition(0);
+
+    expect(manager.numHistoryEventsApplied).toBe(endPosition);
+    expect(manager.jsonHistoryCopy!.position).toBe(endPosition);
+    expect(manager.historyPlaybackFailures.map(f => [f.historyIndex, f.direction]))
+      .toEqual([[endPosition - 1, "undo"]]);
+    expect(t2.text).toBe("q");
+    expect(getTile(document, "t1").label).toBe("x");
+    expectTileToMatchConvertedJson(getTile(document, "t1"), copyJson(t1Path));
+    expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining("Load application failed"));
+
+    // A move that doesn't reach the rejected position still works.
+    await manager.goToHistoryEntryPosition(1);
+    expect(manager.numHistoryEventsApplied).toBe(1);
+    expect(t2.text).toBe("p");
+    expect(getTile(document, "t1").label).toBe("b");
+  });
+
   it("never builds a JSON copy for a document without conversions", async () => {
     const tilePath = "/content/tileMap/t1/content/text";
     const docContent = DocumentContentModel.create({

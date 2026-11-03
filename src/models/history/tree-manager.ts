@@ -10,7 +10,8 @@ import { TreePatchRecord, HistoryEntry, TreePatchRecordSnapshot,
 import { DEBUG_HISTORY } from "../../lib/debug";
 import { PatchApplicationError } from "./tree";
 import {
-  collectModelPaths, createOldModelPatchSource, defaultPatchSource, hasOldValue, IPlaybackPatchSource
+  collectModelPaths, createOldModelPatchSource, defaultPatchSource, hasOldValue, IPlaybackPatchSource,
+  LoadApplicationError
 } from "./playback-patch-source";
 import { IJsonCopyMoveResult, JsonHistoryCopy } from "./json-history-copy";
 import { getHistoryBridges, IVirtualConversion } from "./history-bridges";
@@ -761,7 +762,7 @@ export const TreeManager = types
     });
     yield Promise.all(startPromises);
 
-    // Apply the batched patches to each tree in parallel. Two kinds of
+    // Apply the batched patches to each tree in parallel. Three kinds of
     // failure can happen during the apply phase:
     //
     // 1. PatchApplicationError — a recoverable patch-apply failure.
@@ -773,11 +774,15 @@ export const TreeManager = types
     //    entries rolled back; trees that failed have their own partial
     //    rollback plus any entries they applied past the stop position.
     //
-    // 2. Any other error — a bug, by construction: applyPatchesFromManager
+    // 2. LoadApplicationError — MST rejected an old model's converted
+    //    state. The tree applied all of its patches before its loads, so
+    //    it is rolled back like a tree that succeeded. The move doesn't
+    //    advance (stopPosition = initialPosition), and the rollback's
+    //    loads put the old models back as they were at initialPosition.
+    //
+    // 3. Any other error — a bug, by construction: applyPatchesFromManager
     //    wraps patch-apply failures as PatchApplicationError, and there
     //    is no IO/network path that could produce a transient failure.
-    //    A LoadApplicationError lands here too: loads carry no count of
-    //    applied patches, so there is nothing to roll back from.
     //    We refuse to advance at all (stopPosition = initialPosition),
     //    roll back any tree that succeeded in the batch, leave the
     //    failing tree alone (we don't know how far it got), record a
@@ -808,6 +813,7 @@ export const TreeManager = types
     const results: TreeApplyResult[] = [];
     const failedResults: FailedResult[] = [];
     const unexpectedResults: UnexpectedResult[] = [];
+    const loadFailures: { treeId: string; error: LoadApplicationError }[] = [];
 
     const applyPromises = Object.entries(treePatches).map(async ([treeId, patches]) => {
       const loads = treeLoads[treeId];
@@ -830,6 +836,10 @@ export const TreeManager = types
           };
           results.push(failedResult);
           failedResults.push(failedResult);
+        } else if (e instanceof LoadApplicationError) {
+          // Every patch applied, so the tree is rolled back like one that succeeded.
+          results.push({ treeId, tree, segments });
+          loadFailures.push({ treeId, error: e });
         } else {
           // Do NOT rethrow: route this through the playback-failure
           // handling below so the user and developer both see it.
@@ -843,17 +853,18 @@ export const TreeManager = types
     });
     yield Promise.all(applyPromises);
 
-    const hasAnyFailure = failedResults.length > 0 || unexpectedResults.length > 0;
+    const hasAnyFailure = failedResults.length > 0 || unexpectedResults.length > 0 || loadFailures.length > 0;
     // Default to the requested target; the failure branch below may change
     // it to a previous position depending on the direction we are moving in
     // if some patches couldn't be applied.
     let stopPosition: number = targetPosition;
 
     if (hasAnyFailure) {
-      if (unexpectedResults.length > 0) {
-        // Conservative: refuse to advance. We don't know how far the
-        // failing tree got, so we re-anchor all trees to where we
-        // started and don't touch the failing tree at all.
+      if (unexpectedResults.length > 0 || loadFailures.length > 0) {
+        // Conservative: refuse to advance. We don't know how far a tree
+        // that failed unexpectedly got, so we re-anchor all trees to where
+        // we started and don't touch that tree at all. A load failure has
+        // no history index to stop at.
         stopPosition = initialPosition;
       } else {
         const failedIndices = failedResults.map(r => r.failure.historyIndex);
@@ -999,15 +1010,28 @@ export const TreeManager = types
         );
       }
 
-      // Record unexpected-error failures. We anchor the failure marker
-      // to unexpectedIndex, since we don't know where within the batch
-      // the error originated. If that index isn't a valid history
-      // position, skip the marker but still console.error so the bug is
-      // visible to developers.
+      // Record load failures and unexpected-error failures. We anchor the
+      // failure marker to unexpectedIndex, since we don't know where within
+      // the batch the error originated. If that index isn't a valid history
+      // position, skip the marker but still log the error so it is visible
+      // to developers.
       const unexpectedEntry =
         unexpectedIndex >= 0 && unexpectedIndex < self.document.history.length
           ? self.document.history.at(unexpectedIndex)
           : undefined;
+      for (const { treeId, error } of loadFailures) {
+        if (unexpectedEntry && !recordedIndices.has(unexpectedIndex)) {
+          recordedIndices.add(unexpectedIndex);
+          self.historyPlaybackFailures.push({
+            historyEntry: unexpectedEntry,
+            historyIndex: unexpectedIndex,
+            direction: directionStr,
+            errorMessage: error.message
+          });
+        }
+        console.warn(`Tree '${treeId}' failed to ${directionStr} to history position ${targetPosition}: ` +
+          error.message);
+      }
       for (const r of unexpectedResults) {
         const err = r.unexpected.error;
         const errMessage = err instanceof Error ? err.message : String(err);
