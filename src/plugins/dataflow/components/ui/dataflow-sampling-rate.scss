@@ -9,21 +9,26 @@ $rate-border: #b7b7b7;
 $rate-pill-radius: 12px;
 $rate-pill-height: 22px;
 
+// The header is a flex row inside a tile that can be narrowed to a couple of hundred pixels, so
+// every part of it has to refuse to shrink or the label breaks across two lines.
 .topbar-sampleratetext {
   display: flex;
   align-items: center;
+  flex-shrink: 0;
 
   .samplerate-label {
     font-size: 12px;
     font-weight: 500;
     color: $rate-text;
     margin-right: 6px;
+    white-space: nowrap;
   }
 }
 
 .topbar-datarate {
   display: flex;
   align-items: center;
+  flex-shrink: 0;
 
   select {
     height: $rate-pill-height;
@@ -54,6 +59,8 @@ $rate-pill-height: 22px;
 .recording-elapsed {
   display: flex;
   align-items: center;
+  flex-shrink: 0;
+  white-space: nowrap;
   height: $rate-pill-height;
   margin-left: 8px;
   padding: 0 8px;

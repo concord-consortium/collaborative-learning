@@ -168,6 +168,7 @@ $gray-text: #242424;
   .topbar-center-container{
     display: flex;
     align-items: center;
+    flex-shrink: 0;
   }
 
   .topbar-right {
