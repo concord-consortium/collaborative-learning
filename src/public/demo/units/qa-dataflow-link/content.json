@@ -18,7 +18,9 @@
         ],
         "tools": ["table-it", ["data-set-view", "Graph"], ["data-set-link", "Graph"],
                   "record", "stop", "clear",
-                  "delete", "group", "ungroup", "|", "zoom-in", "zoom-out", "fit-all", "pan"]
+                  "|", "group", "ungroup",
+                  "|", "zoom-in", "zoom-out", "fit-all", "pan",
+                  "|", "delete"]
       },
       "ai": {
         "systemPrompt": "You are a helpful, collaborative student, who always talks like a pirate."
