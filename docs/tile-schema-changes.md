@@ -98,7 +98,10 @@ older one. Everything else is done for you.
 ## How playback crosses the change
 
 Playback only does extra work for a document whose history has a conversion entry, or an entry in
-a legacy format that a registered history bridge recognizes. Other documents play back as before,
+a legacy format that a registered history bridge recognizes. A bridge
+([history-bridges.ts](../src/models/history/history-bridges.ts)) finds conversions that history never
+recorded; DataFlow's [legacy bridge](../src/plugins/dataflow/model/legacy-dataflow-history-bridge.ts)
+is the example. Other documents play back as before,
 with no JSON copy.
 
 When it does, playback keeps a JSON copy of the document beside the MST trees and applies every
@@ -109,7 +112,9 @@ the MST tile as usual. A tile that is old at either end is **loaded**: playback 
 result, in the same action as the move's other patches.
 
 If an entry doesn't apply to the JSON copy, or `convertSnapshot` throws, playback stops there and
-shows the failure banner.
+shows the failure banner. If a bridge can't rebuild a tile's old state, playback treats that
+boundary as the oldest position it can reach and says "Earlier history isn't available." It does
+not show the failure banner.
 
 ## Ids
 
