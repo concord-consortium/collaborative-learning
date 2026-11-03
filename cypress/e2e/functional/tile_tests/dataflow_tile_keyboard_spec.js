@@ -21,7 +21,7 @@ context('Dataflow keyboard accessibility (CLUE-455)', function () {
     ['data-testid', 'rate-select'],
     ['data-testid', 'add-sensor-button'],
     // The toolbar is one tab stop (roving tabindex), so only its first button appears here.
-    ['class', 'table-it'],
+    ['class', 'connect'],
     ['class', 'tool-tile-drag-handle-wrapper'],
     ['class', 'tool-tile-resize-handle-wrapper'],
   ];
