@@ -61,8 +61,8 @@ Two consequences worth knowing:
 
 ### The server owns the gate
 
-`on-analyzable-doc-written.ts` records the history index it evaluated at, **after** a successful
-evaluation. The clients only read it.
+The server records the history index it evaluated at, **after** the evaluation succeeds. The
+clients only read it.
 
 This matters: if a client wrote the gate when it *started* a request, a failed or timed-out
 evaluation would leave the gate advanced and the next attempt wrongly blocked. With the server as
@@ -89,13 +89,32 @@ loop costing exactly the money this story saves. The gate is a sibling:
 
 which the trigger pattern does not match.
 
+### The server gate applies only to unrequested evaluations
+
+Found while planning: if the server skipped a **requested** evaluation, the Ideas client would wait
+for a comment that never arrives and eventually show its failure message. The server therefore
+skips only when the write carries no `requestId` — which is exactly the session-end case, since
+`setLastEditedNow` passes one for an Ideas click and none on unmount.
+
+The client gate still stops the common duplicate request before it is made. The server gate covers
+requirement 1 and is not a backstop for requirement 2, as earlier drafts of this design assumed.
+
+### The evaluation is queued, not performed, at the trigger
+
+`on-analyzable-doc-written` writes an `AnalysisQueueDocument`; the comment is written two functions
+later, in `on-analysis-document-imaged`. So the index is **captured at enqueue** and carried on the
+queue document, then written to the gate when the comment lands. Capturing at enqueue rather than
+at success matters: the student may have edited in between, and the gate must record the content
+that was actually evaluated.
+
 ### Who reads and writes what
 
 | Surface | Reads | Writes | Purpose |
 |---|---|---|---|
 | Ideas button (`document.tsx`) | `evaluationGate` | — | immediate feedback to the student |
 | Session end (`use-document-sync-to-firebase`) | — | — | unchanged; the server decides |
-| Server evaluation (`on-analyzable-doc-written`) | `evaluationGate`, history | `evaluationGate` | the actual cost control |
+| Enqueue (`on-analyzable-doc-written`) | `evaluationGate`, history | — | skips unrequested evaluations |
+| Success (`on-analysis-document-imaged`) | — | `evaluationGate` | advances the gate |
 | AI tile (`ai-tile.tsx`) | tile model prop | tile model prop | separate flow, own gate |
 
 The AI tile keeps its own gate on its content model, beside `refreshCount`. It does not go through
@@ -103,9 +122,8 @@ the comments evaluation at all, so putting it in `evaluationGate` would couple t
 Per-tile also means two AI tiles in one document gate independently, which is what their separate
 prompts imply.
 
-**The client gate is for feedback; the server gate is for cost.** The server sits at the one choke
-point every evaluation passes through, so it catches the session-end rerun and backstops the Ideas
-press regardless of which client asked or whether that client gated correctly.
+**The client gate is for feedback; the server gate is for cost.** They cover different triggers
+rather than one backstopping the other.
 
 ### What goes in `shared/`
 
