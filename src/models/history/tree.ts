@@ -6,6 +6,7 @@ import { DocumentContentModelType } from "../document/document-content";
 import { SharedModelMapSnapshotOutType } from "../document/shared-model-entry";
 import { SharedModelType } from "../shared/shared-model";
 import { ITileModel, TileModel } from "../tiles/tile-model";
+import { LoadApplicationError } from "./playback-patch-source";
 import { TreeManagerAPI } from "./tree-manager-api";
 
 /**
@@ -181,7 +182,16 @@ export const Tree = types.model("Tree", {
     // the undefined/missing case AND the empty-string case upfront because
     // neither form should appear in recorded history patches, and either
     // would silently corrupt the numApplied counter.
-    applyPatchesFromManager(historyEntryId: string, exchangeId: string, patchesToApply: readonly IJsonPatch[]) {
+    //
+    // `loads` are applied after the patches, inside the same action, so
+    // observers see the patches and the loads as one change. Loads are
+    // whole-model `replace` patches that update the existing nodes in place.
+    // Each one emits many onPatch events (one per changed field), so they
+    // can't be mapped back to an input index. That is why they are applied
+    // after the counter is disposed and aren't counted. A failure while
+    // applying them is thrown as a LoadApplicationError.
+    applyPatchesFromManager(historyEntryId: string, exchangeId: string, patchesToApply: readonly IJsonPatch[],
+        loads?: readonly IJsonPatch[]) {
       for (const patch of patchesToApply) {
         if (!patch.path) {
           // Throw PatchApplicationError (with numApplied=0) so this
@@ -209,6 +219,14 @@ export const Tree = types.model("Tree", {
         throw new PatchApplicationError(numApplied, e);
       } finally {
         disposer();
+      }
+
+      if (loads && loads.length > 0) {
+        try {
+          applyPatch(self, loads);
+        } catch (e) {
+          throw new LoadApplicationError(e);
+        }
       }
 
       // We return a promise because the API is async

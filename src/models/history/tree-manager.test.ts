@@ -1,5 +1,6 @@
 import { nanoid } from "nanoid";
 import { cloneDeep } from "lodash";
+import { reaction } from "mobx";
 import { getSnapshot, getType, Instance, types } from "mobx-state-tree";
 import { ITileProps } from "src/components/tiles/tile-component";
 import { SharedModel, SharedModelType } from "../shared/shared-model";
@@ -10,7 +11,7 @@ import { registerTileContentInfo } from "../tiles/tile-content-info";
 import { DocumentContentModel, DocumentContentSnapshotType } from "../document/document-content";
 import { createDocumentModel } from "../document/document";
 import { ProblemDocument } from "../document/document-types";
-import { CDocument, TreeManager } from "./tree-manager";
+import { CDocument, FAKE_EXCHANGE_ID, FAKE_HISTORY_ENTRY_ID, TreeManager } from "./tree-manager";
 import { HistoryEntrySnapshot } from "./history";
 import { expectEntryToBeComplete } from "./undo-store-test-utils";
 
@@ -123,7 +124,7 @@ function setupDocument(initialContent? : DocumentContentSnapshotType) {
   const manager = docModel.treeManagerAPI as Instance<typeof TreeManager>;
   const undoStore = manager.undoStore;
 
-  return {docContent, sharedModel, tileContent, manager, undoStore};
+  return {docModel, docContent, sharedModel, tileContent, manager, undoStore};
 }
 
 const updateFlag = {
@@ -365,6 +366,23 @@ it("can replay the history entries", async () => {
 
   // The history should not change after it is replayed
   expect(getSnapshot(manager.document.history)).toEqual(history);
+});
+
+it("applies loads in the same action as patches", async () => {
+  const {docModel, docContent, tileContent} = setupDocument();
+  const tile = docContent.tileMap.get("t1")!;
+  const spy = jest.fn();
+  const dispose = reaction(() => [tileContent.flag, tileContent.actionText], spy);
+
+  await docModel.applyPatchesFromManager(FAKE_HISTORY_ENTRY_ID, FAKE_EXCHANGE_ID,
+    [{op: "replace", path: "/content/tileMap/t1/content/flag", value: true}],
+    [{op: "replace", path: "/content/tileMap/t1",
+      value: {...getSnapshot(tile), content: {...getSnapshot(tile.content), flag: true, actionText: "loaded"}}}]);
+  dispose();
+
+  expect(spy).toHaveBeenCalledTimes(1);
+  expect(spy.mock.calls[0][0]).toEqual([true, "loaded"]);
+  expect(docContent.tileMap.get("t1")).toBe(tile);
 });
 
 // A history entry containing a patch that references a non-existent tile.

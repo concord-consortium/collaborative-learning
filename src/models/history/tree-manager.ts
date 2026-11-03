@@ -6,9 +6,10 @@ import { TreeAPI } from "./tree-api";
 import { IUndoManager, UndoStore } from "./undo-store";
 import { TreePatchRecord, HistoryEntry, TreePatchRecordSnapshot,
   HistoryOperation,
-  ICreateHistoryEntry, HistoryEntrySnapshot, getEntryPatchesForTree} from "./history";
+  ICreateHistoryEntry, HistoryEntrySnapshot} from "./history";
 import { DEBUG_HISTORY } from "../../lib/debug";
 import { PatchApplicationError } from "./tree";
+import { defaultPatchSource, IPlaybackPatchSource } from "./playback-patch-source";
 import { IDocumentMetadata } from "../../../shared/shared";
 import { Firestore } from "../../lib/firestore";
 import { UserContextProvider } from "../stores/user-context-provider";
@@ -543,6 +544,9 @@ export const TreeManager = types
     // Capture the starting position so unexpected-error handling can
     // anchor its failure recording and rollback to a known-safe point.
     const initialPosition = self.numHistoryEventsApplied;
+    // Every patch this move applies, forward or in a rollback, comes from
+    // the source, along with any loads each tree applies after its patches.
+    const source: IPlaybackPatchSource = defaultPatchSource;
     // Disable shared model syncing on all of the trees. This is
     // different than when the undo store applies patches because in
     // this case we are going to apply lots of history entries all at
@@ -570,7 +574,7 @@ export const TreeManager = types
     const startingIndex = direction === 1 ? self.numHistoryEventsApplied : self.numHistoryEventsApplied - 1;
     const endingIndex = direction === 1 ? newHistoryPosition : newHistoryPosition - 1;
     // A history entry may contain multiple records for the same tree
-    // (e.g. tile update + shared-model update). getEntryPatchesForTree
+    // (e.g. tile update + shared-model update). source.getPatches
     // aggregates them into one ordered list per tree so we can push a
     // single segment per tree per history entry — that way rollback on
     // failure covers all records in the entry, not just one.
@@ -584,7 +588,7 @@ export const TreeManager = types
         if (!patches) {
           throw new Error(`treePatches missing entry for known tree '${treeId}'`);
         }
-        const entryPatches = getEntryPatchesForTree(historyEntry, treeId, opType);
+        const entryPatches = source.getPatches(historyEntry, treeId, opType);
         if (entryPatches.length > 0) {
           patches.push(...entryPatches);
           treePatchSegments[treeId].push({ historyIndex: i, patchCount: entryPatches.length });
@@ -607,6 +611,8 @@ export const TreeManager = types
     // 2. Any other error — a bug, by construction: applyPatchesFromManager
     //    wraps patch-apply failures as PatchApplicationError, and there
     //    is no IO/network path that could produce a transient failure.
+    //    A LoadApplicationError lands here too: loads carry no count of
+    //    applied patches, so there is nothing to roll back from.
     //    We refuse to advance at all (stopPosition = initialPosition),
     //    roll back any tree that succeeded in the batch, leave the
     //    failing tree alone (we don't know how far it got), record a
@@ -638,19 +644,24 @@ export const TreeManager = types
     const failedResults: FailedResult[] = [];
     const unexpectedResults: UnexpectedResult[] = [];
 
+    // Compute every tree's loads before any tree is applied.
+    const treeLoads: Record<string, IJsonPatch[]> = {};
+    Object.keys(treePatches).forEach(treeId => treeLoads[treeId] = source.getLoads(treeId));
+
     const applyPromises = Object.entries(treePatches).map(async ([treeId, patches]) => {
-      if (!patches || patches.length === 0) return;
+      const loads = treeLoads[treeId];
+      if ((!patches || patches.length === 0) && loads.length === 0) return;
       const tree = self.trees[treeId];
       if (!tree) return;
       const segments = treePatchSegments[treeId];
       try {
-        await tree.applyPatchesFromManager(FAKE_HISTORY_ENTRY_ID, FAKE_EXCHANGE_ID, patches);
+        await tree.applyPatchesFromManager(FAKE_HISTORY_ENTRY_ID, FAKE_EXCHANGE_ID, patches ?? [], loads);
         results.push({ treeId, tree, segments });
       } catch (e) {
         if (e instanceof PatchApplicationError) {
           const { historyIndex, appliedInEntry } = findFailedSegment(e.numApplied, segments);
           // Each segment has a unique historyIndex because
-          // getEntryPatchesForTree aggregates per-entry.
+          // source.getPatches aggregates per-entry.
           const failingSegIdx = segments.findIndex(s => s.historyIndex === historyIndex);
           const failedResult: FailedResult = {
             treeId, tree, segments,
@@ -739,7 +750,7 @@ export const TreeManager = types
           if (appliedInEntry > 0) {
             const failedEntry = self.document.history.at(historyIndex);
             if (failedEntry) {
-              const oppositePatches = getEntryPatchesForTree(failedEntry, r.treeId, oppositeOp);
+              const oppositePatches = source.getPatches(failedEntry, r.treeId, oppositeOp);
               rollbackPatches.push(
                 ...oppositePatches.slice(oppositePatches.length - appliedInEntry)
               );
@@ -756,16 +767,17 @@ export const TreeManager = types
           if (needsRollback(seg.historyIndex)) {
             const entry = self.document.history.at(seg.historyIndex);
             if (entry) {
-              const oppositePatches = getEntryPatchesForTree(entry, r.treeId, oppositeOp);
+              const oppositePatches = source.getPatches(entry, r.treeId, oppositeOp);
               rollbackPatches.push(...oppositePatches);
             }
           }
         }
 
-        if (rollbackPatches.length > 0) {
+        const rollbackLoads = source.getLoads(r.treeId);
+        if (rollbackPatches.length > 0 || rollbackLoads.length > 0) {
           try {
             await r.tree.applyPatchesFromManager(
-              FAKE_HISTORY_ENTRY_ID, FAKE_EXCHANGE_ID, rollbackPatches);
+              FAKE_HISTORY_ENTRY_ID, FAKE_EXCHANGE_ID, rollbackPatches, rollbackLoads);
           } catch (rollbackError) {
             // Rollback itself failed — trees are now out of sync and
             // we can't recover automatically. Log and continue.
