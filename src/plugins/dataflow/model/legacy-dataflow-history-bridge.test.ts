@@ -90,6 +90,16 @@ describe("isLegacyDataflowPatch", () => {
       .toBe(true);
   });
 
+  it("is true for a program, content or tile value holding a legacy program saved without an id", () => {
+    const noIdProgram = { nodes: {}, values: {} };
+    expect(isLegacyDataflowPatch(patch(kProgramPath, noIdProgram))).toBe(true);
+    expect(isLegacyDataflowPatch(patch(`${kTilePath}/content`, { program: noIdProgram }))).toBe(true);
+    expect(isLegacyDataflowPatch({ op: "add", path: kTilePath, value: { content: { program: noIdProgram } } }))
+      .toBe(true);
+    expect(isLegacyDataflowPatch({ op: "add", path: kTilePath, value: { content: { program: { nodes: {} } } } }))
+      .toBe(false);
+  });
+
   it("is true for a patch that sets the legacy program id", () => {
     expect(isLegacyDataflowPatch(patch(`${kProgramPath}/id`, "dataflow@0.1.0"))).toBe(true);
     expect(isLegacyDataflowPatch(patch(`${kProgramPath}/id`, "dataflow@1"))).toBe(false);
@@ -186,6 +196,34 @@ describe("playback of legacy DataFlow history", () => {
       expect(manager.numHistoryEventsApplied).toBe(fixture.history.length);
       expect(getProgramJson(document)).toEqual(endProgram);
     });
+  });
+
+  it("crosses the boundary to the add of a legacy program saved without an id", async () => {
+    const { fixture, document, manager } = loadFixture("no-id-program-add");
+    const addedProgram: any = fixture.history[0].records![0].patches[0].value.content.program;
+    expect(addedProgram.id).toBeUndefined();
+    expect(addedProgram.values).toBeDefined();
+    const endProgram = getProgramJson(document);
+    const [conversion] = legacyDataflowHistoryBridge.findVirtualConversions(manager.document.history, kTreeId);
+    expect(conversion.oldJson).toBeDefined();
+
+    // The second entry adds a legacy node, so the tile has to be converted when playback stops
+    // after it.
+    const nodeAdd = fixture.history[1].records![0].patches[0];
+    const legacyNodeId = nodeAdd.path.split("/").pop();
+    await manager.goToHistoryEntryPosition(2);
+    expect(manager.historyPlaybackFailures).toEqual([]);
+    expect(manager.numHistoryEventsApplied).toBe(2);
+    expect(Object.keys(getProgramJson(document).nodes)).toEqual([`${legacyNodeId}@t1`]);
+
+    await manager.goToHistoryEntryPosition(0);
+    expect(manager.historyPlaybackFailures).toEqual([]);
+    expect(manager.numHistoryEventsApplied).toBe(0);
+    expect(document.content!.tileMap.get("t1")).toBeUndefined();
+
+    await manager.goToHistoryEntryPosition(fixture.history.length);
+    expect(manager.historyPlaybackFailures).toEqual([]);
+    expect(getProgramJson(document)).toEqual(endProgram);
   });
 
   it("stops at the boundary of a tile with no add entry", async () => {
