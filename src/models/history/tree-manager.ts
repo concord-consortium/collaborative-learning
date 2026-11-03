@@ -6,7 +6,7 @@ import { TreeAPI } from "./tree-api";
 import { IUndoManager, UndoStore } from "./undo-store";
 import { TreePatchRecord, HistoryEntry, TreePatchRecordSnapshot,
   HistoryOperation,
-  ICreateHistoryEntry} from "./history";
+  ICreateHistoryEntry, HistoryEntrySnapshot, getEntryPatchesForTree} from "./history";
 import { DEBUG_HISTORY } from "../../lib/debug";
 import { PatchApplicationError } from "./tree";
 import { IDocumentMetadata } from "../../../shared/shared";
@@ -29,30 +29,6 @@ export interface HistoryPlaybackFailure {
 interface PatchSegment {
   historyIndex: number;
   patchCount: number;
-}
-
-/**
- * Build the list of patches for a single history entry that a tree
- * would receive in a given direction, in the same order and record
- * ordering that goToHistoryEntryPosition uses when batching. Used to
- * reconstruct patches without needing the onPatch-collected inverses.
- */
-function getEntryPatchesForTree(
-  historyEntry: Instance<typeof HistoryEntry>,
-  treeId: string,
-  opType: HistoryOperation
-): IJsonPatch[] {
-  let records = [...historyEntry.records];
-  if (opType === HistoryOperation.Undo) {
-    records = records.reverse();
-  }
-  const result: IJsonPatch[] = [];
-  for (const entryRecord of records) {
-    if (entryRecord.tree === treeId) {
-      result.push(...entryRecord.getPatches(opType));
-    }
-  }
-  return result;
 }
 
 /**
@@ -152,7 +128,12 @@ export const TreeManager = types
    * History entries whose patches could not be applied. A patch may fail
    * in one direction but not the other, so entries include the direction.
    */
-  historyPlaybackFailures: [] as HistoryPlaybackFailure[]
+  historyPlaybackFailures: [] as HistoryPlaybackFailure[],
+  /**
+   * The entry that records the conversion of old tiles at load. It waits here, outside the
+   * history, until just before the first local entry is completed.
+   */
+  pendingConversionEntry: undefined as HistoryEntrySnapshot | undefined
 }))
 .views((self) => ({
   get undoManager() : IUndoManager {
@@ -192,6 +173,16 @@ export const TreeManager = types
     // that are empty though, so they are removed for the time being.
     if (snapshot.records.length === 0) {
       return;
+    }
+
+    // Flush the pending conversion entry so it comes before the first local entry. It is never
+    // undoable, so it is not added to the undo store and does not change the revisionId.
+    if (self.pendingConversionEntry) {
+      const conversionIndex = self.document.history.length;
+      self.document.history.push(self.pendingConversionEntry);
+      self.pendingConversionEntry = undefined;
+      self.historyManager?.onHistoryEntryCompleted(
+        self.document, self.document.history[conversionIndex], conversionIndex);
     }
 
     // Save the index in the local history. This is used to figure out
@@ -234,6 +225,10 @@ export const TreeManager = types
      */
     addHistoryEntryAfterApplying(entry: Instance<typeof HistoryEntry>) {
       self.document.history.push(entry);
+    },
+
+    setPendingConversionEntry(entry: HistoryEntrySnapshot | undefined) {
+      self.pendingConversionEntry = entry;
     },
 
     setChangeDocument(cDoc: CDocumentType) {
