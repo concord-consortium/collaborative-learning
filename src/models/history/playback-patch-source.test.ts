@@ -170,6 +170,17 @@ describe("createOldModelPatchSource", () => {
   });
 });
 
+describe("defaultPatchSource", () => {
+  it("applies a recorded entry's patches and never a conversion entry's", () => {
+    const patch = { path: "/content/tileMap/t1/content/text", value: "a" };
+    expect(defaultPatchSource.getPatches(makeEntry([patch]), kTreeId, HistoryOperation.Redo))
+      .toEqual([{ op: "replace", ...patch }]);
+    const conversion = makeEntry([patch], [patch], true);
+    expect(defaultPatchSource.getPatches(conversion, kTreeId, HistoryOperation.Redo)).toEqual([]);
+    expect(defaultPatchSource.getPatches(conversion, kTreeId, HistoryOperation.Undo)).toEqual([]);
+  });
+});
+
 describe("collectModelPaths", () => {
   it("finds tiles inside ancestor patch values", () => {
     const entries = [
