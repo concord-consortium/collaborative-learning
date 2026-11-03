@@ -81,6 +81,21 @@ describe("createOldModelPatchSource", () => {
     expect(add.value).toBe(load.value);
   });
 
+  it("never shares nested objects with the JSON copy", () => {
+    const shared = { ...oldTile("t1"), extra: { nested: { a: 1 } } };
+    const copy = makeCopy({ tileMap: { t1: shared, t2: { id: "t2", extra: { nested: { a: 2 } }, content: {
+      type: "VersionedTestTile", version: "2", label: "x", items: [] } } } });
+    const source = createOldModelPatchSource({
+      copy, treeId: kTreeId, oldPaths: new Set([t1Path, "/content/tileMap/t2"])
+    });
+    const loads = source.getLoads(kTreeId);
+    loads.forEach(load => {
+      const copyValue: any = copy.getJson(load.path);
+      expect((load.value as any).extra.nested).toEqual(copyValue.extra.nested);
+      expect((load.value as any).extra.nested).not.toBe(copyValue.extra.nested);
+    });
+  });
+
   it("keeps a remove of an old tile", () => {
     const copy = makeCopy({ tileMap: {} });
     const entry = makeEntry([{ op: "remove", path: t1Path }]);

@@ -148,10 +148,9 @@ export function createOldModelPatchSource(
       memo = new Map();
     }
     if (!memo.has(path)) {
-      const json = copy.getJson(path);
-      const converted = convertModelJsonAtPath(path, json);
-      // never hand out the copy's own object
-      memo.set(path, converted === json ? cloneDeep(json) : converted);
+      // convert a clone: converters are shallow, so their result can still share nested objects
+      // with the input, and the copy's objects must never reach MST
+      memo.set(path, convertModelJsonAtPath(path, cloneDeep(copy.getJson(path))));
     }
     return memo.get(path);
   };
