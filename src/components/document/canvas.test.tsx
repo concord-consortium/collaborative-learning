@@ -3,11 +3,18 @@ import React from "react";
 import { Provider } from "mobx-react";
 import { ModalProvider } from "react-modal-hook";
 import { CanvasComponent } from "./canvas";
-import { createDocumentModel } from "../../models/document/document";
+import { createDocumentModel, DocumentModelType } from "../../models/document/document";
 import { ProblemDocument } from "../../models/document/document-types";
 import { specStores } from "../../models/stores/spec-stores";
 import { createSingleTileContent } from "../../utilities/test-utils";
 import { FirestoreHistoryManager } from "../../models/history/firestore-history-manager";
+import { HistoryEntry, HistoryOperation } from "../../models/history/history";
+import { applyJsonPatches } from "../../models/history/json-patch";
+import {
+  kVersionedTestTileType, VersionedTestTileType
+} from "../../models/history/schema-conversion-test-types";
+import { TreeManagerType } from "../../models/history/tree-manager";
+import { registerTileComponentInfo } from "../../models/tiles/tile-component-info";
 
 // This is needed so MST can deserialize snapshots referring to tools
 import { registerTileTypes } from "../../register-tile-types";
@@ -153,6 +160,50 @@ describe("Canvas Component", () => {
     );
 
     expect(moveSpy).toHaveBeenCalledTimes(1);
+  });
+
+  // The live document's content can be replaced after it loads, which converts its old tiles
+  // again with new ids. The playback copy is made from the live content, so the entry it is
+  // handed must give those ids.
+  it("hands the playback copy the conversion entry rebuilt for replaced content", () => {
+    registerTileComponentInfo({
+      type: kVersionedTestTileType, Component: () => null, tileEltClass: "versioned-test-tile"
+    });
+    let copyTreeManager: TreeManagerType | undefined;
+    jest.spyOn(FirestoreHistoryManager.prototype as any, "subscribeToFirestoreHistory")
+      .mockImplementation(function(this: FirestoreHistoryManager) {
+        copyTreeManager = this.treeManager;
+      });
+    jest.spyOn(FirestoreHistoryManager.prototype as any, "waitUntilEnvironmentAndMetadataDocReady")
+      .mockResolvedValue(undefined);
+
+    const oldContent = () => ({
+      tileMap: { t1: { id: "t1", content: { type: kVersionedTestTileType, text: "c", items: [{ value: "a" }] } } }
+    });
+    const document = createDocumentModel({
+      type: ProblemDocument, title: "old", uid: "1", key: "old", createdAt: 1, visibility: "public",
+      content: oldContent() as any
+    });
+    document.setContent(oldContent() as any);
+    document.setShowPlaybackControls(true);
+
+    const stores = specStores();
+    render(
+      <Provider stores={stores}>
+        <ModalProvider>
+          <CanvasComponent context="test" document={document} readOnly={true} showPlayback={true} />
+        </ModalProvider>
+      </Provider>
+    );
+
+    const localEntry = copyTreeManager?.localConversionEntry;
+    expect(localEntry).toBeDefined();
+    const docJson: any = { content: oldContent() };
+    applyJsonPatches(docJson, HistoryEntry.create(localEntry!).records[0].getPatches(HistoryOperation.Redo));
+    const copyDocument = copyTreeManager!.mainDocument as unknown as DocumentModelType;
+    const copyTile = copyDocument.content!.tileMap.get("t1")!.content as VersionedTestTileType;
+    expect(docJson.content.tileMap.t1.content.items.map((item: any) => item.id))
+      .toEqual(copyTile.items.map(item => item.id));
   });
 
 });
