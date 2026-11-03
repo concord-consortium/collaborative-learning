@@ -2,13 +2,13 @@ import { IJsonPatch } from "mobx-state-tree";
 import { HistoryEntryType } from "../../../models/history/history";
 import { IHistoryBridge, IVirtualConversion } from "../../../models/history/history-bridges";
 import { applyJsonPatches, JsonPatchError, toJsonValue } from "../../../models/history/json-patch";
-import { STATE_VERSION_RETE_V1 } from "./dataflow-state-versions";
+import { getDataflowProgramVersion, STATE_VERSION_RETE_V1 } from "./dataflow-state-versions";
 
 /**
- * Legacy DataFlow tiles (program `dataflow@0.1.0`) were converted to the current format before
- * history recorded conversion entries, so their history goes straight from legacy entries to
- * current ones. This bridge finds that boundary for each tile and rebuilds the legacy tile there,
- * so playback can cross it.
+ * Legacy DataFlow tiles (program `dataflow@0.1.0`, or a program with no id and a `values` map)
+ * were converted to the current format before history recorded conversion entries, so their
+ * history goes straight from legacy entries to current ones. This bridge finds that boundary for
+ * each tile and rebuilds the legacy tile there, so playback can cross it.
  */
 
 const kTilePathPattern = /^\/content\/tileMap\/([^/]+)(.*)$/;
@@ -18,23 +18,25 @@ function getTileId(path: string) {
   return kTilePathPattern.exec(path)?.[1];
 }
 
-function hasLegacyProgramId(program: any) {
-  return program?.id === STATE_VERSION_RETE_V1;
+function isLegacyProgram(program: any) {
+  return program != null && typeof program === "object" &&
+    getDataflowProgramVersion(program) === STATE_VERSION_RETE_V1;
 }
 
 /**
  * True when a patch on a DataFlow tile uses the legacy program format: a path into the legacy
  * `values` map, a numeric node id, a node's legacy `inputs` or `outputs`, a program, content
- * or tile value holding a legacy program, or the legacy id set on the program.
+ * or tile value holding a legacy program (with the legacy id, or with no id and a `values` map),
+ * or the legacy id set on the program.
  */
 export function isLegacyDataflowPatch(patch: IJsonPatch): boolean {
   const match = kTilePathPattern.exec(patch.path);
   if (!match) return false;
   const rest = match[2];
   const value: any = patch.value;
-  if (rest === "") return hasLegacyProgramId(value?.content?.program);
-  if (rest === "/content") return hasLegacyProgramId(value?.program);
-  if (rest === kProgramPath) return hasLegacyProgramId(value);
+  if (rest === "") return isLegacyProgram(value?.content?.program);
+  if (rest === "/content") return isLegacyProgram(value?.program);
+  if (rest === kProgramPath) return isLegacyProgram(value);
   if (rest === `${kProgramPath}/id`) return value === STATE_VERSION_RETE_V1;
   if (!rest.startsWith(`${kProgramPath}/`)) return false;
 

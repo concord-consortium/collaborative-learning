@@ -9,7 +9,7 @@ import DataflowToolComponent from "./components/dataflow-tile";
 
 import Icon from "./assets/program.svg";
 import HeaderIcon from "./assets/program-tile-id.svg";
-import { STATE_VERSION_CURRENT } from "./model/dataflow-state-versions";
+import { getDataflowProgramVersion, STATE_VERSION_CURRENT } from "./model/dataflow-state-versions";
 import { convertLegacyDataflowProgram } from "./model/convert-legacy-dataflow";
 import { legacyDataflowHistoryBridge } from "./model/legacy-dataflow-history-bridge";
 
@@ -38,7 +38,7 @@ registerTileContentInfo({
   tileSnapshotPreProcessor,
   schemaVersion: {
     currentVersion: STATE_VERSION_CURRENT,
-    getVersion: tile => tile?.content?.program?.id ?? STATE_VERSION_CURRENT,
+    getVersion: tile => getDataflowProgramVersion(tile?.content?.program),
     convertSnapshot: tileSnapshotPreProcessor
   }
 });

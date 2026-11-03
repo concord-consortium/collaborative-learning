@@ -16,4 +16,9 @@ describe("Dataflow schemaVersion", () => {
   it("treats a tile with no program as current", () => {
     expect(schemaVersion.getVersion({ content: {} })).toBe("dataflow@1");
   });
+
+  it("treats a program with no id as legacy only when it has the legacy values map", () => {
+    expect(schemaVersion.getVersion({ content: { program: { nodes: {}, values: {} } } })).toBe("dataflow@0.1.0");
+    expect(schemaVersion.getVersion({ content: { program: { nodes: {} } } })).toBe("dataflow@1");
+  });
 });
