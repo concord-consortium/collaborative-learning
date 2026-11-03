@@ -3,6 +3,7 @@ import {
 } from "./model/dataflow-content";
 import { registerTileComponentInfo } from "../../models/tiles/tile-component-info";
 import { registerTileContentInfo } from "../../models/tiles/tile-content-info";
+import { registerHistoryBridge } from "../../models/history/history-bridges";
 import { TileMetadataModel } from "../../models/tiles/tile-metadata";
 import DataflowToolComponent from "./components/dataflow-tile";
 
@@ -10,6 +11,7 @@ import Icon from "./assets/program.svg";
 import HeaderIcon from "./assets/program-tile-id.svg";
 import { STATE_VERSION_CURRENT, STATE_VERSION_RETE_V1 } from "./model/dataflow-state-versions";
 import { convertLegacyDataflowProgram } from "./model/convert-legacy-dataflow";
+import { legacyDataflowHistoryBridge } from "./model/legacy-dataflow-history-bridge";
 
 function getDataflowTileVersion(tileSnap: any): string {
   return tileSnap?.content?.program?.id ?? STATE_VERSION_CURRENT;
@@ -51,6 +53,8 @@ registerTileContentInfo({
     convertSnapshot: convertDataflowTileSnapshot
   }
 });
+
+registerHistoryBridge(legacyDataflowHistoryBridge);
 
 registerTileComponentInfo({
   type: kDataflowTileType,
