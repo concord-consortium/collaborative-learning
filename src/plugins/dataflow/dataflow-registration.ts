@@ -33,7 +33,12 @@ registerTileContentInfo({
   defaultHeight: kDataflowDefaultHeight,
   defaultContent: defaultDataflowContent,
   isDataProvider: true,
-  tileSnapshotPreProcessor
+  tileSnapshotPreProcessor,
+  schemaVersion: {
+    currentVersion: STATE_VERSION_CURRENT,
+    getVersion: tile => tile?.content?.program?.id ?? STATE_VERSION_CURRENT,
+    convertSnapshot: tileSnapshotPreProcessor
+  }
 });
 
 registerTileComponentInfo({
