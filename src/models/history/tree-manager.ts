@@ -1,15 +1,20 @@
 import {
-  types, Instance, flow, IJsonPatch, destroy, getSnapshot, toGenerator
+  types, Instance, flow, IAnyStateTreeNode, IJsonPatch, destroy, getSnapshot, toGenerator
 } from "mobx-state-tree";
 import { nanoid } from "nanoid";
 import { TreeAPI } from "./tree-api";
 import { IUndoManager, UndoStore } from "./undo-store";
 import { TreePatchRecord, HistoryEntry, TreePatchRecordSnapshot,
-  HistoryOperation,
+  HistoryOperation, HistoryEntryType,
   ICreateHistoryEntry, HistoryEntrySnapshot} from "./history";
 import { DEBUG_HISTORY } from "../../lib/debug";
 import { PatchApplicationError } from "./tree";
-import { defaultPatchSource, IPlaybackPatchSource } from "./playback-patch-source";
+import {
+  collectModelPaths, createOldModelPatchSource, defaultPatchSource, hasOldValue, IPlaybackPatchSource
+} from "./playback-patch-source";
+import { IJsonCopyMoveResult, JsonHistoryCopy } from "./json-history-copy";
+import { toJsonValue } from "./json-patch";
+import { isOldModelJsonAtPath } from "./schema-conversion";
 import { IDocumentMetadata } from "../../../shared/shared";
 import { Firestore } from "../../lib/firestore";
 import { UserContextProvider } from "../stores/user-context-provider";
@@ -61,6 +66,33 @@ function findFailedSegment(numApplied: number, segments: PatchSegment[]) {
  * @returns
  */
 const json = (value: any) => JSON.stringify(value);
+
+// The entries a move from `from` to `to` crosses, in history order.
+function getEntriesBetween(history: readonly HistoryEntryType[], from: number, to: number) {
+  return from < to ? history.slice(from, to) : history.slice(to, from);
+}
+
+/**
+ * Moves the JSON copy toward `target` and builds the patch source for the move. A model is
+ * treated as old when it is old in the copy at either end of the move, when a patch in the move
+ * carries an old version of it, or when a conversion entry in the move changes it. The copy can
+ * stop short of `target`; the source covers only the entries up to where it stopped.
+ */
+function moveJsonCopy(copy: JsonHistoryCopy, history: readonly HistoryEntryType[], treeId: string,
+    target: number): { moved: IJsonCopyMoveResult; source: IPlaybackPatchSource } {
+  const start = copy.position;
+  const requestedPaths = collectModelPaths(getEntriesBetween(history, start, target), treeId);
+  const oldAtStart = new Set([...requestedPaths].filter(path => isOldModelJsonAtPath(path, copy.getJson(path))));
+
+  const moved = copy.moveTo(history, target);
+
+  const entries = getEntriesBetween(history, start, moved.position);
+  const conversionPaths = collectModelPaths(entries.filter(entry => entry.isConversion), treeId);
+  const oldPaths = new Set([...collectModelPaths(entries, treeId)].filter(path =>
+    oldAtStart.has(path) || isOldModelJsonAtPath(path, copy.getJson(path)) ||
+    hasOldValue(entries, treeId, path) || conversionPaths.has(path)));
+  return { moved, source: createOldModelPatchSource({ copy, treeId, oldPaths }) };
+}
 
 export const FAKE_HISTORY_ENTRY_ID = "FAKE_HISTORY_ENTRY_ID";
 export const FAKE_EXCHANGE_ID = "FAKE_EXCHANGE_ID";
@@ -139,8 +171,37 @@ export const TreeManager = types
    * A conversion entry that the live document has not uploaded yet, handed to a playback copy.
    * The copy appends it after the Firestore entries, so it counts toward the starting position.
    */
-  localConversionEntry: undefined as HistoryEntrySnapshot | undefined
+  localConversionEntry: undefined as HistoryEntrySnapshot | undefined,
+  /**
+   * A JSON copy of the main document that playback keeps at the current position when the
+   * history crosses a schema conversion. It is built on the first move that needs it.
+   */
+  jsonHistoryCopy: undefined as JsonHistoryCopy | undefined
 }))
+.views((self) => {
+  // The history only grows during playback, so the scan resumes where it stopped.
+  let scannedHistory: unknown;
+  let scannedLength = 0;
+  let hasConversion = false;
+  return {
+    /**
+     * True when playback needs a JSON copy of the document: when the history holds a
+     * conversion entry.
+     */
+    get needsJsonCopy() {
+      const history = self.document.history;
+      if (scannedHistory !== history || history.length < scannedLength) {
+        scannedHistory = history;
+        scannedLength = 0;
+        hasConversion = false;
+      }
+      for (; scannedLength < history.length && !hasConversion; scannedLength++) {
+        hasConversion = !!history[scannedLength].isConversion;
+      }
+      return hasConversion;
+    }
+  };
+})
 .views((self) => ({
   get undoManager() : IUndoManager {
     return self.undoStore;
@@ -544,18 +605,42 @@ export const TreeManager = types
     // Capture the starting position so unexpected-error handling can
     // anchor its failure recording and rollback to a known-safe point.
     const initialPosition = self.numHistoryEventsApplied;
+    const history = self.document.history;
+
+    // Records one failure per (historyIndex, direction) pair.
+    const recordFailure = (historyIndex: number, failureDirection: "undo" | "redo", errorMessage: string) => {
+      const historyEntry = history.at(historyIndex);
+      if (!historyEntry) return;
+      if (self.historyPlaybackFailures.some(f =>
+          f.historyIndex === historyIndex && f.direction === failureDirection)) return;
+      self.historyPlaybackFailures.push({ historyEntry, historyIndex, direction: failureDirection, errorMessage });
+    };
+
     // Every patch this move applies, forward or in a rollback, comes from
     // the source, along with any loads each tree applies after its patches.
-    const source: IPlaybackPatchSource = defaultPatchSource;
-    // Disable shared model syncing on all of the trees. This is
-    // different than when the undo store applies patches because in
-    // this case we are going to apply lots of history entries all at
-    // once. We use FAKE ids here so any responses from tree are
-    // not recorded in the history.
-    const startPromises = trees.map(tree => {
-      return tree.startApplyingPatchesFromManager(FAKE_HISTORY_ENTRY_ID, FAKE_EXCHANGE_ID);
-    });
-    yield Promise.all(startPromises);
+    let source: IPlaybackPatchSource = defaultPatchSource;
+    // Where this move goes. A JSON copy can stop it short of the requested position.
+    let targetPosition = newHistoryPosition;
+    // Only a history that crosses a schema conversion has a JSON copy. The copy moves first:
+    // it finds an entry that doesn't apply, and it says which models are old.
+    let copy: JsonHistoryCopy | undefined;
+    if (self.needsJsonCopy && self.mainDocument) {
+      copy = self.jsonHistoryCopy;
+      if (!copy) {
+        const documentJson: object = toJsonValue(getSnapshot(self.mainDocument as unknown as IAnyStateTreeNode));
+        copy = self.jsonHistoryCopy = new JsonHistoryCopy(self.mainDocument.key, documentJson, initialPosition);
+      }
+      const { moved, source: oldModelSource } =
+        moveJsonCopy(copy, history, self.mainDocument.key, newHistoryPosition);
+      source = oldModelSource;
+      targetPosition = moved.position;
+      if (moved.failure) {
+        const { historyIndex, direction: failureDirection, message } = moved.failure;
+        recordFailure(historyIndex, failureDirection, message);
+        console.warn(`History entry ${historyIndex} failed to ${failureDirection}: ${message}`);
+      }
+      if (targetPosition === initialPosition) return;
+    }
 
     const treePatches: Record<string, IJsonPatch[] | undefined> = {};
     // Track which history entry each patch came from, per tree.
@@ -569,10 +654,16 @@ export const TreeManager = types
     // startingIndex and endingIndex are so we don't add the currentHistoryEvent into patches
     // because we are going to assume that it has already been played, and we don't want to play it
     // again if we are going forward.
-    const direction = newHistoryPosition > self.numHistoryEventsApplied ? 1 : -1;
+    const direction = targetPosition > initialPosition ? 1 : -1;
     const opType = direction === 1 ? HistoryOperation.Redo : HistoryOperation.Undo;
-    const startingIndex = direction === 1 ? self.numHistoryEventsApplied : self.numHistoryEventsApplied - 1;
-    const endingIndex = direction === 1 ? newHistoryPosition : newHistoryPosition - 1;
+    const directionStr = direction === 1 ? "redo" : "undo";
+    const startingIndex = direction === 1 ? initialPosition : initialPosition - 1;
+    const endingIndex = direction === 1 ? targetPosition : targetPosition - 1;
+    // An error that can't be placed in the batch is recorded at the first entry the batch was
+    // about to touch:
+    //   - Forward: initialPosition (next entry to apply)
+    //   - Backward: initialPosition - 1 (first entry to undo)
+    const unexpectedIndex = direction === 1 ? initialPosition : initialPosition - 1;
     // A history entry may contain multiple records for the same tree
     // (e.g. tile update + shared-model update). source.getPatches
     // aggregates them into one ordered list per tree so we can push a
@@ -580,21 +671,44 @@ export const TreeManager = types
     // failure covers all records in the entry, not just one.
     // Using the same helper for both the initial batching and the
     // rollback ensures the two paths produce matching orderings.
-    for (let i=startingIndex; i !== endingIndex; i=i+direction) {
-      const historyEntry = self.document.history.at(i);
-      if (!historyEntry) continue;
-      for (const treeId of Object.keys(self.trees)) {
-        const patches = treePatches[treeId];
-        if (!patches) {
-          throw new Error(`treePatches missing entry for known tree '${treeId}'`);
-        }
-        const entryPatches = source.getPatches(historyEntry, treeId, opType);
-        if (entryPatches.length > 0) {
-          patches.push(...entryPatches);
-          treePatchSegments[treeId].push({ historyIndex: i, patchCount: entryPatches.length });
+    // Every tree's loads are computed here too, so nothing is applied when a conversion throws.
+    const treeLoads: Record<string, IJsonPatch[]> = {};
+    try {
+      for (let i=startingIndex; i !== endingIndex; i=i+direction) {
+        const historyEntry = history.at(i);
+        if (!historyEntry) continue;
+        for (const treeId of Object.keys(self.trees)) {
+          const patches = treePatches[treeId];
+          if (!patches) {
+            throw new Error(`treePatches missing entry for known tree '${treeId}'`);
+          }
+          const entryPatches = source.getPatches(historyEntry, treeId, opType);
+          if (entryPatches.length > 0) {
+            patches.push(...entryPatches);
+            treePatchSegments[treeId].push({ historyIndex: i, patchCount: entryPatches.length });
+          }
         }
       }
+      Object.keys(treePatches).forEach(treeId => treeLoads[treeId] = source.getLoads(treeId));
+    } catch (e) {
+      if (!copy) throw e;
+      // A conversion of an old model threw. The move doesn't advance.
+      copy.moveTo(history, initialPosition);
+      const errMessage = e instanceof Error ? e.message : String(e);
+      recordFailure(unexpectedIndex, directionStr, `Could not convert an old model: ${errMessage}`);
+      console.error(`Could not convert an old model at history position ${targetPosition}:`, e);
+      return;
     }
+
+    // Disable shared model syncing on all of the trees. This is
+    // different than when the undo store applies patches because in
+    // this case we are going to apply lots of history entries all at
+    // once. We use FAKE ids here so any responses from tree are
+    // not recorded in the history.
+    const startPromises = trees.map(tree => {
+      return tree.startApplyingPatchesFromManager(FAKE_HISTORY_ENTRY_ID, FAKE_EXCHANGE_ID);
+    });
+    yield Promise.all(startPromises);
 
     // Apply the batched patches to each tree in parallel. Two kinds of
     // failure can happen during the apply phase:
@@ -644,10 +758,6 @@ export const TreeManager = types
     const failedResults: FailedResult[] = [];
     const unexpectedResults: UnexpectedResult[] = [];
 
-    // Compute every tree's loads before any tree is applied.
-    const treeLoads: Record<string, IJsonPatch[]> = {};
-    Object.keys(treePatches).forEach(treeId => treeLoads[treeId] = source.getLoads(treeId));
-
     const applyPromises = Object.entries(treePatches).map(async ([treeId, patches]) => {
       const loads = treeLoads[treeId];
       if ((!patches || patches.length === 0) && loads.length === 0) return;
@@ -686,7 +796,7 @@ export const TreeManager = types
     // Default to the requested target; the failure branch below may change
     // it to a previous position depending on the direction we are moving in
     // if some patches couldn't be applied.
-    let stopPosition: number = newHistoryPosition;
+    let stopPosition: number = targetPosition;
 
     if (hasAnyFailure) {
       if (unexpectedResults.length > 0) {
@@ -720,7 +830,10 @@ export const TreeManager = types
       const oppositeOp = opType === HistoryOperation.Redo
         ? HistoryOperation.Undo
         : HistoryOperation.Redo;
-      const directionStr = direction === 1 ? "redo" : "undo";
+
+      // The copy moves to the stop position first, so the rollback's loads hold the old models'
+      // state there.
+      copy?.moveTo(history, stopPosition);
 
       // Build and apply per-tree rollback batches.
       //
@@ -741,39 +854,53 @@ export const TreeManager = types
       // have a trustworthy numApplied count and can't safely roll back
       // their state. We leave them as-is and rely on the recorded
       // playback-failure + console.error to surface the bug.
-      const rollbackPromises = results.map(async (r) => {
-        if (r.unexpected) return;
-        const rollbackPatches: IJsonPatch[] = [];
+      //
+      // Every rollback batch and its loads are built before any is applied. Building one can
+      // throw when a conversion of an old model fails.
+      const rollbacks: { r: TreeApplyResult; patches: IJsonPatch[]; loads: IJsonPatch[] }[] = [];
+      for (const r of results) {
+        if (r.unexpected) continue;
+        try {
+          const rollbackPatches: IJsonPatch[] = [];
 
-        if (r.failure) {
-          const { historyIndex, appliedInEntry } = r.failure;
-          if (appliedInEntry > 0) {
-            const failedEntry = self.document.history.at(historyIndex);
-            if (failedEntry) {
-              const oppositePatches = source.getPatches(failedEntry, r.treeId, oppositeOp);
-              rollbackPatches.push(
-                ...oppositePatches.slice(oppositePatches.length - appliedInEntry)
-              );
+          if (r.failure) {
+            const { historyIndex, appliedInEntry } = r.failure;
+            if (appliedInEntry > 0) {
+              const failedEntry = history.at(historyIndex);
+              if (failedEntry) {
+                const oppositePatches = source.getPatches(failedEntry, r.treeId, oppositeOp);
+                rollbackPatches.push(
+                  ...oppositePatches.slice(oppositePatches.length - appliedInEntry)
+                );
+              }
             }
           }
-        }
 
-        // Fully-applied segments (those before the failing segment, or
-        // all segments if this tree didn't fail), in reverse application
-        // order. Only those "past" the stop position need rollback.
-        const failingSegIdx = r.failure ? r.failure.failingSegIdx : r.segments.length;
-        for (let i = failingSegIdx - 1; i >= 0; i--) {
-          const seg = r.segments[i];
-          if (needsRollback(seg.historyIndex)) {
-            const entry = self.document.history.at(seg.historyIndex);
-            if (entry) {
-              const oppositePatches = source.getPatches(entry, r.treeId, oppositeOp);
-              rollbackPatches.push(...oppositePatches);
+          // Fully-applied segments (those before the failing segment, or
+          // all segments if this tree didn't fail), in reverse application
+          // order. Only those "past" the stop position need rollback.
+          const failingSegIdx = r.failure ? r.failure.failingSegIdx : r.segments.length;
+          for (let i = failingSegIdx - 1; i >= 0; i--) {
+            const seg = r.segments[i];
+            if (needsRollback(seg.historyIndex)) {
+              const entry = history.at(seg.historyIndex);
+              if (entry) {
+                const oppositePatches = source.getPatches(entry, r.treeId, oppositeOp);
+                rollbackPatches.push(...oppositePatches);
+              }
             }
           }
-        }
 
-        const rollbackLoads = source.getLoads(r.treeId);
+          rollbacks.push({ r, patches: rollbackPatches, loads: source.getLoads(r.treeId) });
+        } catch (buildError) {
+          console.warn(
+            `Rollback of tree '${r.treeId}' failed: ${(buildError as Error).message}. ` +
+            `Trees may be in an inconsistent state.`
+          );
+        }
+      }
+
+      const rollbackPromises = rollbacks.map(async ({ r, patches: rollbackPatches, loads: rollbackLoads }) => {
         if (rollbackPatches.length > 0 || rollbackLoads.length > 0) {
           try {
             await r.tree.applyPatchesFromManager(
@@ -822,13 +949,10 @@ export const TreeManager = types
       }
 
       // Record unexpected-error failures. We anchor the failure marker
-      // to the first entry the batch was about to touch, since we don't
-      // know where within the batch the error originated:
-      //   - Forward: initialPosition (next entry to apply)
-      //   - Backward: initialPosition - 1 (first entry to undo)
-      // If that index isn't a valid history position, skip the marker
-      // but still console.error so the bug is visible to developers.
-      const unexpectedIndex = direction === 1 ? initialPosition : initialPosition - 1;
+      // to unexpectedIndex, since we don't know where within the batch
+      // the error originated. If that index isn't a valid history
+      // position, skip the marker but still console.error so the bug is
+      // visible to developers.
       const unexpectedEntry =
         unexpectedIndex >= 0 && unexpectedIndex < self.document.history.length
           ? self.document.history.at(unexpectedIndex)

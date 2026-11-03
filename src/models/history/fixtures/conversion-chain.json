@@ -1,0 +1,226 @@
+{
+  "endDocument": {
+    "uid": "1",
+    "type": "problem",
+    "key": "doc1",
+    "remoteContext": "",
+    "createdAt": 0,
+    "properties": {},
+    "content": {
+      "rowMap": {},
+      "rowOrder": [],
+      "tileMap": {
+        "t1": {
+          "id": "t1",
+          "fixedPosition": false,
+          "content": {
+            "type": "VersionedTestTile",
+            "version": "2",
+            "label": "x",
+            "items": [
+              {
+                "id": "bqgX2YRMtwayG979",
+                "value": "a"
+              }
+            ]
+          }
+        }
+      },
+      "sharedModelMap": {},
+      "annotations": {}
+    },
+    "comments": {},
+    "groupUserConnections": {},
+    "changeCount": 0
+  },
+  "entries": [
+    {
+      "id": "old-1",
+      "tree": "doc1",
+      "model": "Test",
+      "action": "/oldAction",
+      "undoable": true,
+      "created": 1793735885187,
+      "records": [
+        {
+          "tree": "doc1",
+          "action": "/oldAction",
+          "patches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/text",
+              "value": "b"
+            }
+          ],
+          "inversePatches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/text",
+              "value": "a"
+            }
+          ]
+        }
+      ],
+      "state": "complete",
+      "triggeringBatchIds": []
+    },
+    {
+      "id": "old-2",
+      "tree": "doc1",
+      "model": "Test",
+      "action": "/oldAction",
+      "undoable": true,
+      "created": 1793735885187,
+      "records": [
+        {
+          "tree": "doc1",
+          "action": "/oldAction",
+          "patches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/text",
+              "value": "c"
+            }
+          ],
+          "inversePatches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/text",
+              "value": "b"
+            }
+          ]
+        }
+      ],
+      "state": "complete",
+      "triggeringBatchIds": []
+    },
+    {
+      "id": "old-3",
+      "tree": "doc1",
+      "model": "Test",
+      "action": "/oldAction",
+      "undoable": true,
+      "created": 1793735885187,
+      "records": [
+        {
+          "tree": "doc1",
+          "action": "/oldAction",
+          "patches": [
+            {
+              "op": "add",
+              "path": "/content/tileMap/t1/content/items/0",
+              "value": {
+                "value": "a"
+              }
+            }
+          ],
+          "inversePatches": [
+            {
+              "op": "remove",
+              "path": "/content/tileMap/t1/content/items/0"
+            }
+          ]
+        }
+      ],
+      "state": "complete",
+      "triggeringBatchIds": []
+    },
+    {
+      "id": "3PtEk2aKIM_Lv7MLHXEIy",
+      "tree": "doc1",
+      "model": "DocumentContent",
+      "action": "/convertSchemas",
+      "undoable": false,
+      "created": 1793735885203,
+      "records": [
+        {
+          "tree": "doc1",
+          "action": "/convertSchemas",
+          "patches": [
+            {
+              "op": "add",
+              "path": "/content/tileMap/t1/content/items/0/id",
+              "value": "bqgX2YRMtwayG979"
+            },
+            {
+              "op": "remove",
+              "path": "/content/tileMap/t1/content/text"
+            },
+            {
+              "op": "add",
+              "path": "/content/tileMap/t1/content/version",
+              "value": "2"
+            },
+            {
+              "op": "add",
+              "path": "/content/tileMap/t1/content/label",
+              "value": "c"
+            },
+            {
+              "op": "add",
+              "path": "/content/tileMap/t1/fixedPosition",
+              "value": false
+            }
+          ],
+          "inversePatches": [
+            {
+              "op": "remove",
+              "path": "/content/tileMap/t1/fixedPosition"
+            },
+            {
+              "op": "add",
+              "path": "/content/tileMap/t1/content/text",
+              "value": "c"
+            },
+            {
+              "op": "remove",
+              "path": "/content/tileMap/t1/content/version"
+            },
+            {
+              "op": "remove",
+              "path": "/content/tileMap/t1/content/label"
+            },
+            {
+              "op": "remove",
+              "path": "/content/tileMap/t1/content/items/0/id"
+            }
+          ]
+        }
+      ],
+      "state": "complete",
+      "triggeringBatchIds": [],
+      "isConversion": true,
+      "background": true
+    },
+    {
+      "id": "cW-w2SvxgN3ULWbgo0ogX",
+      "tree": "doc1",
+      "model": "VersionedTestTile",
+      "action": "/content/tileMap/t1/content/setLabel",
+      "undoable": true,
+      "created": 1793735885201,
+      "records": [
+        {
+          "tree": "doc1",
+          "action": "/content/tileMap/t1/content/setLabel",
+          "patches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/label",
+              "value": "x"
+            }
+          ],
+          "inversePatches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/label",
+              "value": "c"
+            }
+          ]
+        }
+      ],
+      "state": "complete",
+      "triggeringBatchIds": []
+    }
+  ]
+}

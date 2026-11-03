@@ -1,4 +1,4 @@
-import { Instance, types } from "mobx-state-tree";
+import { getSnapshot, Instance, types } from "mobx-state-tree";
 import firebase from "firebase/app";
 import { deferred } from "promise-assist";
 import { Firestore } from "../../lib/firestore";
@@ -14,6 +14,7 @@ import { when } from "mobx";
 import { HistoryEntry, HistoryEntrySnapshot } from "./history";
 import { FirestoreHistoryManager, HistoryStatus } from "./firestore-history-manager";
 import { UserContextProvider } from "../stores/user-context-provider";
+import { kVersionedTestTileType, VersionedTestTileType } from "./schema-conversion-test-types";
 
 jest.mock("./history-firestore");
 // This adds the mock api types to these two functions
@@ -254,7 +255,35 @@ describe("history loading", () => {
       expect(treeManager.numHistoryEventsApplied).toBe(1);
     });
 
-    it.todo("can move back across a local conversion entry with no Firestore history");
+    it("can move back across a local conversion entry with no Firestore history", async () => {
+      const liveDocument = createDocumentModel({
+        uid: "1", type: ProblemDocument, key: "test",
+        content: { tileMap: { t1: { id: "t1", content: { type: kVersionedTestTileType, text: "c" } } } } as any
+      });
+      const liveManager = liveDocument.treeManagerAPI as Instance<typeof TreeManager>;
+
+      // The playback copy is made from the live, converted document.
+      const playbackDocument = createDocumentModel(getSnapshot(liveDocument));
+      const treeManager = playbackDocument.treeManagerAPI as Instance<typeof TreeManager>;
+      treeManager.setLocalConversionEntry(liveManager.pendingConversionEntry);
+      const { historyManager } = setupFirestoreHistoryManager(treeManager);
+      getLastHistoryEntry.mockResolvedValue(undefined);
+      loadHistory.mockImplementation((firestore, path, historyLoaded) => {
+        historyLoaded([]);
+        return () => undefined;
+      });
+      await historyManager.subscribeToFirestoreHistory();
+      await when(() => treeManager.numHistoryEventsApplied !== undefined);
+      expect(treeManager.numHistoryEventsApplied).toBe(1);
+
+      await treeManager.goToHistoryEntryPosition(0);
+
+      expect(treeManager.historyPlaybackFailures).toEqual([]);
+      expect(treeManager.numHistoryEventsApplied).toBe(0);
+      expect(treeManager.jsonHistoryCopy?.getJson("/content/tileMap/t1/content/text")).toBe("c");
+      const tile = playbackDocument.content!.tileMap.get("t1")!.content as VersionedTestTileType;
+      expect(tile.label).toBe("c");
+    });
   });
 
   describe("subscribeToFirestoreHistory", () => {
