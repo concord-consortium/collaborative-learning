@@ -33,7 +33,9 @@ function makeEntry(patches: PatchSpec[], inversePatches: PatchSpec[] = [], isCon
   return HistoryEntry.create({
     id: nanoid(), created: Date.now(), tree: kTreeId, model: "DocumentContent", action: "/test",
     undoable: true, isConversion, state: "complete", triggeringBatchIds: [],
-    records: [{ tree: kTreeId, action: "/test", patches: toPatches(patches), inversePatches: toPatches(inversePatches) }]
+    records: [{
+      tree: kTreeId, action: "/test", patches: toPatches(patches), inversePatches: toPatches(inversePatches)
+    }]
   } as any);
 }
 
@@ -128,7 +130,9 @@ describe("createOldModelPatchSource", () => {
     const [tileMapPatch] = source.getPatches(replaceTileMap, kTreeId, HistoryOperation.Redo);
     expect((tileMapPatch.value as any).t1.content.version).toBe("2");
 
-    const addShared = makeEntry([{ op: "add", path: "/content/sharedModelMap/sm1", value: { sharedModel: sm, tiles: ["t1"] } }]);
+    const addShared = makeEntry([
+      { op: "add", path: "/content/sharedModelMap/sm1", value: { sharedModel: sm, tiles: ["t1"] } }
+    ]);
     const [sharedPatch] = source.getPatches(addShared, kTreeId, HistoryOperation.Redo);
     expect((sharedPatch.value as any).sharedModel).toEqual(
       { id: "sm1", type: "VersionedTestSharedModel", version: "2", value: "x" });
