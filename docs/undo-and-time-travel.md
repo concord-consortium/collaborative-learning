@@ -4,6 +4,8 @@ When a tile is used in a CLUE document, the history of changes to that tile's co
 
 The history entries are based on the actions called on the tile's content model. If one action (the parent) calls another action (a child), a single entry is recorded with the name of the parent action.  This single entry has the changes from the parent and child actions.
 
+If you change the saved format of a tile or shared model, see [tile-schema-changes.md](./tile-schema-changes.md) so that time travel still works across the change.
+
 ## withoutUndo
 
 If you want an action to be part of the time travel history, but not part of the undo stack you can use `withoutUndo()`. 
