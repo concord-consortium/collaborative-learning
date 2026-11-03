@@ -1,7 +1,9 @@
 import { cloneDeep } from "lodash";
 import {
-  convertContentJson, convertJsonAtPath, convertModelJsonAtPath, getModelPath, isOldModelJsonAtPath
+  buildConversionEntry, convertContentJson, convertJsonAtPath, convertModelJsonAtPath, getModelPath,
+  isOldModelJsonAtPath
 } from "./schema-conversion";
+import { HistoryEntry } from "./history";
 import { registerTileContentInfo } from "../tiles/tile-content-info";
 import { TileContentModel } from "../tiles/tile-content";
 import "./schema-conversion-test-types";
@@ -99,5 +101,20 @@ describe("convertJsonAtPath", () => {
     expect(convertJsonAtPath("/content/rowMap", value)).toBe(value);
     expect(convertJsonAtPath("/content/tileMap/t1/content/label", "x")).toBe("x");
     expect(convertJsonAtPath("/content/tileMap", undefined)).toBeUndefined();
+  });
+});
+
+describe("buildConversionEntry", () => {
+  afterEach(() => jest.restoreAllMocks());
+
+  // An entry that is loaded again, as a viewer's local entry is on every history sync, keeps the
+  // time it was built.
+  it("stamps the entry with the time it is built", () => {
+    jest.spyOn(Date, "now").mockReturnValue(1234);
+    const entry = buildConversionEntry("doc1",
+      [{ path: "/content/tileMap/t1", before: oldTile("t1"), after: newTile("t1") }]);
+    jest.spyOn(Date, "now").mockReturnValue(5678);
+    expect(entry.created).toBe(1234);
+    expect(HistoryEntry.create(entry).created.getTime()).toBe(1234);
   });
 });
