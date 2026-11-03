@@ -58,6 +58,13 @@ export const HistoryEntry = types.model("HistoryEntry", {
    * entries created by this client and on legacy pre-feature entries.
    */
   uid: types.maybe(types.string),
+  /**
+   * True on the entry that records the conversion of old tiles and shared models to their
+   * current format at load. It is never applied to a live document or put on the undo stack.
+   */
+  isConversion: types.maybe(types.boolean),
+  /** True on entries that the user did not cause directly. */
+  background: types.maybe(types.boolean),
 })
 .volatile(self => ({
   // The value of the map should be the name of the exchange. This is useful
@@ -94,4 +101,28 @@ export interface HistoryEntryType extends Instance<typeof HistoryEntry> {}
 export enum HistoryOperation {
   Undo = "undo",
   Redo = "redo"
+}
+
+/**
+ * Build the list of patches for a single history entry that a tree
+ * would receive in a given direction, in the same order and record
+ * ordering that goToHistoryEntryPosition uses when batching. Used to
+ * reconstruct patches without needing the onPatch-collected inverses.
+ */
+export function getEntryPatchesForTree(
+  historyEntry: Instance<typeof HistoryEntry>,
+  treeId: string,
+  opType: HistoryOperation
+): IJsonPatch[] {
+  let records = [...historyEntry.records];
+  if (opType === HistoryOperation.Undo) {
+    records = records.reverse();
+  }
+  const result: IJsonPatch[] = [];
+  for (const entryRecord of records) {
+    if (entryRecord.tree === treeId) {
+      result.push(...entryRecord.getPatches(opType));
+    }
+  }
+  return result;
 }

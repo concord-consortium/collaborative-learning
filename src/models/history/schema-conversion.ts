@@ -1,6 +1,9 @@
+import { nanoid } from "nanoid";
 import { getSharedModelInfoByType } from "../shared/shared-model-registry";
 import { getTileContentInfo } from "../tiles/tile-content-info";
 import { ISchemaVersionInfo } from "../tiles/schema-version-info";
+import { HistoryEntrySnapshot } from "./history";
+import { diffJson } from "./json-patch";
 
 const kTileMapPath = "/content/tileMap";
 const kSharedModelMapPath = "/content/sharedModelMap";
@@ -123,4 +126,30 @@ export function convertContentJson(content: any): { content: any; convertedPaths
   const newContent: Record<string, any> = { ...content, tileMap: tiles.map };
   if (content.sharedModelMap) newContent.sharedModelMap = shared.map;
   return { content: newContent, convertedPaths };
+}
+
+const kConvertSchemasAction = "/convertSchemas";
+
+/**
+ * Builds the entry that records the conversion of old models to the current format, as the
+ * patches that turn the stored JSON into the converted JSON. It is flagged `isConversion` and
+ * is not undoable.
+ */
+export function buildConversionEntry(
+  treeId: string, changes: { path: string; before: unknown; after: unknown }[]
+): HistoryEntrySnapshot {
+  const patches = changes.flatMap(({ path, before, after }) => diffJson(before, after, path));
+  // TreePatchRecord.getPatches(Undo) reverses inversePatches, so they are stored in reverse
+  const inversePatches = changes.flatMap(({ path, before, after }) => diffJson(after, before, path)).reverse();
+  return {
+    id: nanoid(),
+    tree: treeId,
+    model: "DocumentContent",
+    action: kConvertSchemasAction,
+    undoable: false,
+    isConversion: true,
+    background: true,
+    state: "complete",
+    records: [{ tree: treeId, action: kConvertSchemasAction, patches, inversePatches }]
+  };
 }

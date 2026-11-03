@@ -1,4 +1,7 @@
-import { applySnapshot, types, Instance, SnapshotIn, onAction, addDisposer, destroy, typecheck } from "mobx-state-tree";
+import {
+  applySnapshot, types, Instance, SnapshotIn, onAction, addDisposer, destroy, typecheck, isStateTreeNode,
+  getSnapshot, resolvePath
+} from "mobx-state-tree";
 import { forEach } from "lodash";
 import { QueryClient, UseQueryResult } from "react-query";
 import { autorun } from "mobx";
@@ -21,6 +24,8 @@ import { Tree } from "../history/tree";
 import { TreeMonitor } from "../history/tree-monitor";
 import { ITileEnvironment } from "../tiles/tile-content";
 import { TreeManager } from "../history/tree-manager";
+import { buildConversionEntry, convertContentJson } from "../history/schema-conversion";
+import { toJsonValue } from "../history/json-patch";
 import { ESupportType } from "../curriculum/support";
 import { kSharedDataSetType, SharedDataSet, SharedDataSetType } from "../shared/shared-data-set";
 import { createFormulaDataSetProxy } from "../data/formula-data-set-proxy";
@@ -375,6 +380,10 @@ export const getDocumentContext = (document: DocumentModelType): IDocumentContex
  * @param snapshot
  * @returns
  */
+function resolveJsonPath(json: any, path: string) {
+  return path.split("/").slice(1).reduce((value, segment) => value?.[segment], json);
+}
+
 export const createDocumentModel = (snapshot?: DocumentModelSnapshotType) => {
   const sharedModelManager = new SharedModelDocumentManager();
   const formulaManager = new FormulaManager();
@@ -387,7 +396,24 @@ export const createDocumentModel = (snapshot?: DocumentModelSnapshotType) => {
   try {
     let document: DocumentModelType;
     try {
-      document = DocumentModel.create(snapshot, fullEnvironment);
+      // Old tiles are converted before MST sees them, so the conversion can be recorded as JSON
+      // patches. Group documents are not converted here; the tile snapshot preprocessors convert
+      // them as MST loads them, and no conversion is recorded.
+      const originalContent = snapshot?.content;
+      const conversion = snapshot && originalContent && !isStateTreeNode(originalContent) && !snapshot.concurrent
+        ? convertContentJson(originalContent)
+        : undefined;
+      document = DocumentModel.create(
+        snapshot && conversion ? { ...snapshot, content: conversion.content } : snapshot, fullEnvironment);
+      if (conversion?.convertedPaths.length) {
+        const changes = conversion.convertedPaths.map(path => ({
+          path,
+          before: toJsonValue(resolveJsonPath({ content: originalContent }, path)),
+          after: toJsonValue(getSnapshot(resolvePath(document, path) as any))
+        }));
+        const manager = document.treeManagerAPI as Instance<typeof TreeManager> | undefined;
+        manager?.setPendingConversionEntry(buildConversionEntry(document.key, changes));
+      }
     } catch (e) {
       if (!snapshot?.content ) {
         // More info is logged about this error in the next catch statement
