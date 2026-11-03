@@ -1,3 +1,4 @@
+import { ISchemaVersionInfo } from "../tiles/schema-version-info";
 import { SharedModel } from "./shared-model";
 
 export interface ISharedModelInfo {
@@ -5,6 +6,8 @@ export interface ISharedModelInfo {
   modelClass: typeof SharedModel;
   // Set to true if model supports `name` and `setName` methods.
   hasName: boolean;
+  // If supplied, the shared model's JSON has versions and older ones can be converted to the current one.
+  schemaVersion?: ISchemaVersionInfo;
 }
 
 const gSharedModelInfoMap: Record<string, ISharedModelInfo> = {};
