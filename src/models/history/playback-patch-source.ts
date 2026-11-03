@@ -1,5 +1,10 @@
 import { IJsonPatch } from "mobx-state-tree";
+import { cloneDeep } from "lodash";
 import { getEntryPatchesForTree, HistoryEntryType, HistoryOperation } from "./history";
+import { JsonHistoryCopy } from "./json-history-copy";
+import {
+  convertJsonAtPath, convertModelJsonAtPath, getModelPath, isOldModelJsonAtPath
+} from "./schema-conversion";
 
 /**
  * Where `TreeManager.goToHistoryEntryPosition` gets the patches it applies
@@ -41,4 +46,150 @@ export class LoadApplicationError extends Error {
     this.name = "LoadApplicationError";
     this.cause = cause;
   }
+}
+
+const kTileMapPath = "/content/tileMap";
+const kSharedModelMapPath = "/content/sharedModelMap";
+
+function isObject(value: unknown): value is Record<string, any> {
+  return !!value && typeof value === "object" && !Array.isArray(value);
+}
+
+function sharedModelPathOf(id: string) {
+  return `${kSharedModelMapPath}/${id}/sharedModel`;
+}
+
+// The paths of the models inside `value`, which is the JSON at the ancestor path `path`.
+function getContainedModelPaths(path: string, value: unknown): string[] {
+  if (!isObject(value)) return [];
+  const tilePaths = (tileMap: unknown) =>
+    isObject(tileMap) ? Object.keys(tileMap).map(id => `${kTileMapPath}/${id}`) : [];
+  const sharedPaths = (sharedModelMap: unknown) =>
+    isObject(sharedModelMap)
+      ? Object.keys(sharedModelMap).filter(id => isObject(sharedModelMap[id]?.sharedModel)).map(sharedModelPathOf)
+      : [];
+
+  if (path === "/content") return [...tilePaths(value.tileMap), ...sharedPaths(value.sharedModelMap)];
+  if (path === kTileMapPath) return tilePaths(value);
+  if (path === kSharedModelMapPath) return sharedPaths(value);
+  if (path.startsWith(`${kSharedModelMapPath}/`) && path.split("/").length === 4) {
+    return isObject(value.sharedModel) ? [sharedModelPathOf(path.split("/")[3])] : [];
+  }
+  return [];
+}
+
+// The JSON at `modelPath` inside `value`, which is the JSON at the ancestor path `path`.
+function getJsonWithin(path: string, value: unknown, modelPath: string): unknown {
+  let result: any = value;
+  for (const segment of modelPath.slice(path.length).split("/").slice(1)) {
+    if (!isObject(result)) return undefined;
+    result = result[segment];
+  }
+  return result;
+}
+
+// Both directions are read so a model that is added or removed in either one is found.
+function getAllPatches(entries: readonly HistoryEntryType[], treeId: string) {
+  return entries.flatMap(entry => [
+    ...getEntryPatchesForTree(entry, treeId, HistoryOperation.Redo),
+    ...getEntryPatchesForTree(entry, treeId, HistoryOperation.Undo)
+  ]);
+}
+
+/**
+ * Returns the model paths of every patch in the entries. A patch at an ancestor of a model, such
+ * as a replace of `/content/tileMap`, also contributes every model its value contains.
+ */
+export function collectModelPaths(entries: readonly HistoryEntryType[], treeId: string): Set<string> {
+  const paths = new Set<string>();
+  getAllPatches(entries, treeId).forEach(patch => {
+    const modelPath = getModelPath(patch.path);
+    if (modelPath) {
+      paths.add(modelPath);
+    } else {
+      getContainedModelPaths(patch.path, patch.value).forEach(path => paths.add(path));
+    }
+  });
+  return paths;
+}
+
+/**
+ * True when any patch at or above `modelPath` carries a value holding an old version of the model.
+ */
+export function hasOldValue(entries: readonly HistoryEntryType[], treeId: string, modelPath: string): boolean {
+  return getAllPatches(entries, treeId).some(patch => {
+    if (patch.value === undefined) return false;
+    if (patch.path === modelPath) return isOldModelJsonAtPath(modelPath, patch.value);
+    if (modelPath.startsWith(`${patch.path}/`)) {
+      return isOldModelJsonAtPath(modelPath, getJsonWithin(patch.path, patch.value, modelPath));
+    }
+    return false;
+  });
+}
+
+/**
+ * A patch source for one tree whose models in `oldPaths` are in an old format at either end of a
+ * move. Recorded patches inside those models are dropped. Each such model is instead loaded once,
+ * with its state at the copy's position converted to the current format. Other trees use the
+ * default source.
+ */
+export function createOldModelPatchSource(
+  args: { copy: JsonHistoryCopy; treeId: string; oldPaths: ReadonlySet<string> }
+): IPlaybackPatchSource {
+  const { copy, treeId, oldPaths } = args;
+  const oldPathList = [...oldPaths];
+  let memoPosition: number | undefined;
+  let memo = new Map<string, unknown>();
+
+  // Each old model is converted once per position, so an add and the load share the same object.
+  const convertedTarget = (path: string) => {
+    if (memoPosition !== copy.position) {
+      memoPosition = copy.position;
+      memo = new Map();
+    }
+    if (!memo.has(path)) {
+      const json = copy.getJson(path);
+      const converted = convertModelJsonAtPath(path, json);
+      // never hand out the copy's own object
+      memo.set(path, converted === json ? cloneDeep(json) : converted);
+    }
+    return memo.get(path);
+  };
+
+  const isAncestorOfOldPath = (path: string) => oldPathList.some(oldPath => oldPath.startsWith(`${path}/`));
+
+  return {
+    getPatches(entry, entryTreeId, opType) {
+      if (entryTreeId !== treeId) return defaultPatchSource.getPatches(entry, entryTreeId, opType);
+      if (entry.isLoadEntry) return [];
+
+      const result: IJsonPatch[] = [];
+      getEntryPatchesForTree(entry, treeId, opType).forEach(patch => {
+        const modelPath = getModelPath(patch.path);
+        if (modelPath && oldPaths.has(modelPath)) {
+          if (patch.path !== modelPath) return;
+          if (patch.op === "remove") {
+            result.push(patch);
+          } else {
+            const value = copy.getJson(modelPath) !== undefined
+              ? convertedTarget(modelPath)
+              : convertModelJsonAtPath(modelPath, patch.value);
+            result.push({ ...patch, value });
+          }
+        } else if (!modelPath && patch.value !== undefined && isAncestorOfOldPath(patch.path)) {
+          result.push({ ...patch, value: convertJsonAtPath(patch.path, patch.value) });
+        } else {
+          result.push(patch);
+        }
+      });
+      return result;
+    },
+
+    getLoads(loadTreeId) {
+      if (loadTreeId !== treeId) return defaultPatchSource.getLoads(loadTreeId);
+      return oldPathList
+        .filter(path => copy.getJson(path) !== undefined)
+        .map(path => ({ op: "replace", path, value: convertedTarget(path) }));
+    }
+  };
 }
