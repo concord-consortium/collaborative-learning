@@ -81,4 +81,13 @@ describe("DataflowProgramTopbar while recording", () => {
     expect(screen.getByTestId("rate-select")).toBeDisabled();
     expect(screen.getByTestId("recording-elapsed")).toBeInTheDocument();
   });
+
+  // The denominator is how long this program could still record; it shrinks as blocks are added.
+  it("shows the elapsed time over the recordable window", () => {
+    const { tileContent } = renderTopbar(false);
+    act(() => { tileContent.startRecording(); });
+
+    expect(screen.getByTestId("recording-elapsed").textContent)
+      .toMatch(/^\d{2}:\d{2}\/\d{2,}:\d{2}$/);
+  });
 });

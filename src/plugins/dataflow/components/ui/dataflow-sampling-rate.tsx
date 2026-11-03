@@ -1,7 +1,7 @@
 import React from "react";
 import { observer } from "mobx-react";
 import { ProgramDataRate } from "../../model/utilities/node";
-import { DataflowContentModelType } from "../../model/dataflow-content";
+import { DataflowContentModelType, formatTime } from "../../model/dataflow-content";
 import { useReadOnlyContext } from "../../../../components/document/read-only-context";
 
 import "./dataflow-sampling-rate.scss";
@@ -21,6 +21,11 @@ export const DataflowSamplingRate = observer(function DataflowSamplingRate(props
   const { onRateSelectClick, dataRate, rateOptions, tileContent } = props;
   const readOnly = useReadOnlyContext();
   const recording = tileContent.isRecording;
+
+  // How long this program could record before filling the document's share of data points.
+  // maxRecordableCases divides a fixed budget by the node count, so adding a block shortens the
+  // window -- which is the point: the denominator says what this program can still capture.
+  const maxDuration = Math.floor((dataRate / 1000) * tileContent.maxRecordableCases);
 
   return (
     <>
@@ -42,7 +47,7 @@ export const DataflowSamplingRate = observer(function DataflowSamplingRate(props
       </div>
       {recording &&
         <div className="recording-elapsed" data-testid="recording-elapsed">
-          {tileContent.durationOfRecordingFormatted}
+          {`${tileContent.durationOfRecordingFormatted}/${formatTime(maxDuration)}`}
         </div>}
     </>
   );
