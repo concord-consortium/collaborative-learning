@@ -214,4 +214,20 @@
       background: none;
     }
   }
+
+  // Stacks above the other two alerts, which can still be showing from an earlier seek when
+  // playback reaches the oldest position it can show.
+  .playback-history-unavailable {
+    @include playback-alert;
+    bottom: calc(100% + 2 * #{$playback-alert-height});
+    max-width: 90%;
+    text-align: center;
+
+    // Rendered from the start, like the request error, and must not paint an empty pill.
+    &:empty {
+      padding: 0;
+      border: 0;
+      background: none;
+    }
+  }
 }

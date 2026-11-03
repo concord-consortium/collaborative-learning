@@ -113,6 +113,26 @@ describe("PlaybackComponent", () => {
       .toHaveTextContent("Could not find the requested point");
   });
 
+  it("shows that earlier history isn't available at the oldest reachable position", () => {
+    const docModel = setupDocument();
+    const treeManager = docModel.treeManagerAPI as Instance<typeof TreeManager>;
+    render(<PlaybackComponent document={docModel} historyManager={makeHistoryManager()}
+              requestedHistoryId={undefined} />);
+    const region = screen.getByTestId("playback-history-unavailable");
+    expect(region).toHaveAttribute("role", "status");
+    expect(region).toBeEmptyDOMElement();
+
+    act(() => {
+      treeManager.setOldestReachablePosition(1);
+    });
+    expect(region).toHaveTextContent("Earlier history isn't available.");
+
+    act(() => {
+      treeManager.setNumHistoryEntriesApplied(0);
+    });
+    expect(region).toBeEmptyDOMElement();
+  });
+
   it("says nothing when there is no request error", () => {
     const historyManager = makeHistoryManager();
     render(<PlaybackComponent document={setupDocument()} historyManager={historyManager}
