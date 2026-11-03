@@ -24,8 +24,8 @@ function hasLegacyProgramId(program: any) {
 
 /**
  * True when a patch on a DataFlow tile uses the legacy program format: a path into the legacy
- * `values` map, a numeric node id, a node's legacy `inputs` or `outputs`, or a program, content
- * or tile value holding a legacy program.
+ * `values` map, a numeric node id, a node's legacy `inputs` or `outputs`, a program, content
+ * or tile value holding a legacy program, or the legacy id set on the program.
  */
 export function isLegacyDataflowPatch(patch: IJsonPatch): boolean {
   const match = kTilePathPattern.exec(patch.path);
@@ -35,6 +35,7 @@ export function isLegacyDataflowPatch(patch: IJsonPatch): boolean {
   if (rest === "") return hasLegacyProgramId(value?.content?.program);
   if (rest === "/content") return hasLegacyProgramId(value?.program);
   if (rest === kProgramPath) return hasLegacyProgramId(value);
+  if (rest === `${kProgramPath}/id`) return value === STATE_VERSION_RETE_V1;
   if (!rest.startsWith(`${kProgramPath}/`)) return false;
 
   const segments = rest.slice(kProgramPath.length + 1).split("/");
