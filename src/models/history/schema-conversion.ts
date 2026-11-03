@@ -143,6 +143,7 @@ export function buildConversionEntry(
   const inversePatches = changes.flatMap(({ path, before, after }) => diffJson(after, before, path)).reverse();
   return {
     id: nanoid(),
+    created: Date.now(),
     tree: treeId,
     model: "DocumentContent",
     action: kConvertSchemasAction,
