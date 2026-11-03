@@ -35,8 +35,9 @@ older one. Everything else is done for you.
 ## The checklist
 
 1. **Bump the version.** The version lives wherever your type keeps it (DataFlow's `program.id`,
-   Drawing's `version`, and so on). A type that has never had one adds one with its first schema
-   change.
+   Drawing's `version`, and so on). It need not be a single field: DataFlow reads a program with no
+   id as legacy when it has a `values` map. A type that has never had one adds one with its first
+   schema change.
 2. **Register `schemaVersion`** if the type has none. It goes in the tile's
    `registerTileContentInfo` call, or in the shared model's `registerSharedModelInfo` call. The
    shape is `ISchemaVersionInfo` in
@@ -99,10 +100,10 @@ older one. Everything else is done for you.
 
 Playback only does extra work for a document whose history has a conversion entry, or an entry in
 a legacy format that a registered history bridge recognizes. A bridge
-([history-bridges.ts](../src/models/history/history-bridges.ts)) finds conversions that history never
-recorded; DataFlow's [legacy bridge](../src/plugins/dataflow/model/legacy-dataflow-history-bridge.ts)
-is the example. Other documents play back as before,
-with no JSON copy.
+([history-bridges.ts](../src/models/history/history-bridges.ts)) finds conversions that history
+never recorded; DataFlow's
+[legacy bridge](../src/plugins/dataflow/model/legacy-dataflow-history-bridge.ts) is the example.
+Other documents play back as before, with no JSON copy.
 
 When it does, playback keeps a JSON copy of the document beside the MST trees and applies every
 entry it crosses to that copy as stored. At each move it asks `getVersion` about the tiles the move
@@ -172,10 +173,12 @@ code change is made for this here. This is a description of what the change woul
 
 ## Group documents
 
-Group documents don't record conversion entries yet, and their playback has no conversion step.
-Two problems are unsolved for them. Clients converting the same old document at the same time each
-make their own conversion entry. A tab still running an older release can't apply a newer
-conversion's entries and would keep writing old-format ones.
+Group documents don't record conversion entries yet. Their playback works like any other
+document's: the history bridges and the JSON copy apply to it, so legacy DataFlow history in a
+group document plays back across the conversion. Two problems are unsolved for them. Clients
+converting the same old document at the same time each make their own conversion entry. A tab
+still running an older release can't apply a newer conversion's entries and would keep writing
+old-format ones.
 
 The planned answer is that a client that receives a conversion entry whose version it doesn't know
 stops editing and asks for a reload. That check can only stop clients that already have it. So a
