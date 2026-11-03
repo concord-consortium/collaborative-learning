@@ -133,7 +133,12 @@ export const TreeManager = types
    * The entry that records the conversion of old tiles at load. It waits here, outside the
    * history, until just before the first local entry is completed.
    */
-  pendingConversionEntry: undefined as HistoryEntrySnapshot | undefined
+  pendingConversionEntry: undefined as HistoryEntrySnapshot | undefined,
+  /**
+   * A conversion entry that the live document has not uploaded yet, handed to a playback copy.
+   * The copy appends it after the Firestore entries, so it counts toward the starting position.
+   */
+  localConversionEntry: undefined as HistoryEntrySnapshot | undefined
 }))
 .views((self) => ({
   get undoManager() : IUndoManager {
@@ -229,6 +234,10 @@ export const TreeManager = types
 
     setPendingConversionEntry(entry: HistoryEntrySnapshot | undefined) {
       self.pendingConversionEntry = entry;
+    },
+
+    setLocalConversionEntry(entry: HistoryEntrySnapshot | undefined) {
+      self.localConversionEntry = entry;
     },
 
     setChangeDocument(cDoc: CDocumentType) {
@@ -364,11 +373,13 @@ export const TreeManager = types
         self.numHistoryEventsApplied = undefined;
 
         const lastHistoryEntry = yield* toGenerator(getLastHistoryEntry(firestore, docPath));
+        // The local conversion entry is appended after all of the Firestore entries.
+        const localEntryCount = self.localConversionEntry ? 1 : 0;
         if (lastHistoryEntry) {
-          self.numHistoryEventsApplied = lastHistoryEntry.index + 1;
+          self.numHistoryEventsApplied = lastHistoryEntry.index + 1 + localEntryCount;
         } else {
           // If there is no entry then we have an empty document
-          self.numHistoryEventsApplied = 0;
+          self.numHistoryEventsApplied = localEntryCount;
         }
       }
     ),

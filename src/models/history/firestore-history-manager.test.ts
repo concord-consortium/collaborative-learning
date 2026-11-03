@@ -213,6 +213,50 @@ describe("history loading", () => {
     });
   });
 
+  describe("local conversion entry", () => {
+    const conv: HistoryEntrySnapshot = { id: "conv", isConversion: true };
+
+    async function subscribeWithLocalEntry(entries: HistoryEntrySnapshot[]) {
+      const { treeManager } = setupDocument();
+      const { historyManager } = setupFirestoreHistoryManager(treeManager);
+      treeManager.setLocalConversionEntry(conv);
+      getLastHistoryEntry.mockResolvedValue(undefined);
+      loadHistory.mockImplementation((firestore, path, historyLoaded) => {
+        historyLoaded(entries.map((entry, index) => ({ index, entry })));
+        return () => undefined;
+      });
+      await historyManager.subscribeToFirestoreHistory();
+      return treeManager;
+    }
+
+    it("appends a local conversion entry missing from Firestore", async () => {
+      const treeManager = await subscribeWithLocalEntry([{ id: "a1" }, { id: "a2" }]);
+      const ids = treeManager.document.history.map(e => e.id);
+      expect(ids).toHaveLength(3);
+      expect(ids[2]).toBe("conv");
+    });
+
+    it("does not duplicate a local conversion entry already in Firestore", async () => {
+      const treeManager = await subscribeWithLocalEntry([{ id: "a1" }, { id: "conv" }]);
+      expect(treeManager.document.history.map(e => e.id)).toEqual(["a1", "conv"]);
+    });
+
+    it("counts the local conversion entry in the starting position", async () => {
+      const { treeManager } = setupDocument();
+      treeManager.setLocalConversionEntry(conv);
+
+      getLastHistoryEntry.mockResolvedValue({ index: 10, id: "x" });
+      await treeManager.setNumHistoryEntriesAppliedFromFirestore({} as Firestore, "");
+      expect(treeManager.numHistoryEventsApplied).toBe(12);
+
+      getLastHistoryEntry.mockResolvedValue(undefined);
+      await treeManager.setNumHistoryEntriesAppliedFromFirestore({} as Firestore, "");
+      expect(treeManager.numHistoryEventsApplied).toBe(1);
+    });
+
+    it.todo("can move back across a local conversion entry with no Firestore history");
+  });
+
   describe("subscribeToFirestoreHistory", () => {
     it("results in zero history entries if loadHistory does nothing", async () => {
       const { treeManager } = setupDocument();
