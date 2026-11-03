@@ -90,6 +90,12 @@ describe("isLegacyDataflowPatch", () => {
       .toBe(true);
   });
 
+  it("is true for a patch that sets the legacy program id", () => {
+    expect(isLegacyDataflowPatch(patch(`${kProgramPath}/id`, "dataflow@0.1.0"))).toBe(true);
+    expect(isLegacyDataflowPatch(patch(`${kProgramPath}/id`, "dataflow@1"))).toBe(false);
+    expect(isLegacyDataflowPatch(patch(`${kProgramPath}/id`, undefined))).toBe(false);
+  });
+
   it("is false for current-format and unrelated patches", () => {
     const currentProgram = { id: "dataflow@1", nodes: {}, connections: {} };
     expect(isLegacyDataflowPatch(patch(`${kProgramPath}/nodes/1@t1/x`, 10))).toBe(false);
