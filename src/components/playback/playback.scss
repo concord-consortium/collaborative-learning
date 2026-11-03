@@ -215,11 +215,12 @@
     }
   }
 
-  // Stacks above the other two alerts, which can still be showing from an earlier seek when
-  // playback reaches the oldest position it can show.
+  // Takes the slot of .playback-failure-warning, right above the bar: a seek that stops at the
+  // oldest reachable position clears that warning, so the two never show at once. The request
+  // error stacks above both.
   .playback-history-unavailable {
     @include playback-alert;
-    bottom: calc(100% + 2 * #{$playback-alert-height});
+    bottom: 100%;
     max-width: 90%;
     text-align: center;
 

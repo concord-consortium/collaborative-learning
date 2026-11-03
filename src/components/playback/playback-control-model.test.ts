@@ -578,6 +578,41 @@ describe("PlaybackControlModel", () => {
       expect(model.currentStopIndex).toBe(2);
     });
 
+    describe("with history that can't be rebuilt before position 2", () => {
+      // Stands in for a seek through the tree manager that stops short at `stop`.
+      function stopSeeksAt(treeManager: Instance<typeof TreeManager>, stop: number) {
+        jest.spyOn(treeManager, "goToHistoryEntryPosition").mockImplementation((async () => {
+          treeManager.setNumHistoryEntriesApplied(stop);
+          treeManager.setOldestReachablePosition(2);
+        }) as any);
+      }
+
+      afterEach(() => {
+        jest.restoreAllMocks();
+      });
+
+      it("doesn't warn when a seek stops at the oldest reachable position", async () => {
+        const { model, treeManager } = setupModel(4);
+        stopSeeksAt(treeManager, 2);
+
+        await model.goToSliderStop(0);
+
+        expect(model.playbackFailureWarning).toBeNull();
+        expect(model.currentStopIndex).toBe(2);
+        expect(model.sliderValue).toBe(2);
+      });
+
+      it("still warns when a seek stops short anywhere else", async () => {
+        const { model, treeManager } = setupModel(4);
+        stopSeeksAt(treeManager, 3);
+
+        await model.goToSliderStop(0);
+
+        expect(model.playbackFailureWarning).toBeTruthy();
+        expect(model.currentStopIndex).toBe(3);
+      });
+    });
+
     it("clears an earlier warning once a seek lands where it was asked to", async () => {
       const { model } = setupModel(4, { appliedPosition: 0, failingEntryIndex: 2 });
       await jestSpyConsole("warn", async () => {
