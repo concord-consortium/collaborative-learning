@@ -625,7 +625,9 @@ context('Arrow Annotations (Sparrows)', function () {
 
     cy.log("New annotations can be made on a recorded program");
     aa.getAnnotationModeButton().click();
-    aa.getAnnotationButtons().should("have.length", 4);
+    // No total asserted here: recording created a linked table, whose cells are annotatable too,
+    // and how many rows it captured depends on how many ticks fit in the wait above. The program's
+    // four blocks are still the first four buttons, because the table sits after the dataflow tile.
     aa.getAnnotationButtons().eq(1).click({ force: true });
     aa.getAnnotationButtons().eq(3).click();
     aa.getAnnotationArrows().should("have.length", 2);
