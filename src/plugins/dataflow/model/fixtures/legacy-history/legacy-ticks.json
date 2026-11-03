@@ -1,0 +1,843 @@
+{
+  "description": "From the study, cut down to one DataFlow tile. A legacy tile is copied in, legacy setProgram entries change only its values, and current-format entries follow.",
+  "content": {
+    "rowMap": {
+      "r1": {
+        "id": "r1",
+        "isSectionHeader": false,
+        "tiles": [
+          {
+            "tileId": "t1"
+          }
+        ]
+      }
+    },
+    "rowOrder": [
+      "r1"
+    ],
+    "tileMap": {
+      "t1": {
+        "id": "t1",
+        "fixedPosition": false,
+        "content": {
+          "type": "Dataflow",
+          "program": {
+            "id": "dataflow@1",
+            "nodes": {
+              "3489@t1": {
+                "id": "3489@t1",
+                "name": "Timer",
+                "x": 70.93223485922617,
+                "y": 108.00281247256474,
+                "data": {
+                  "type": "Timer",
+                  "plot": false,
+                  "orderedDisplayName": "Timer (on/off) 1",
+                  "tickEntries": {
+                    "19df3Tw8sKtQnFr_": {
+                      "nodeValue": "0",
+                      "open": true
+                    },
+                    "0U6Jhk3j1JwvJZC5": {
+                      "nodeValue": "0"
+                    },
+                    "legacyTick": {
+                      "nodeValue": "0"
+                    }
+                  },
+                  "timeOn": 5,
+                  "timeOnUnits": "sec",
+                  "timeOff": 5,
+                  "timeOffUnits": "sec"
+                }
+              },
+              "3490@t1": {
+                "id": "3490@t1",
+                "name": "Demo Output",
+                "x": 433.29272174835506,
+                "y": 57.67205761835143,
+                "data": {
+                  "type": "Demo Output",
+                  "plot": false,
+                  "orderedDisplayName": "Demo Output 2",
+                  "tickEntries": {
+                    "19df3Tw8sKtQnFr_": {
+                      "nodeValue": "0",
+                      "open": true
+                    },
+                    "0U6Jhk3j1JwvJZC5": {
+                      "nodeValue": "0"
+                    },
+                    "legacyTick": {
+                      "nodeValue": "0"
+                    }
+                  },
+                  "outputType": "Light Bulb"
+                }
+              }
+            },
+            "connections": {
+              "He06Tnr7z0YhX9cC": {
+                "id": "He06Tnr7z0YhX9cC",
+                "source": "3489@t1",
+                "sourceOutput": "value",
+                "target": "3490@t1",
+                "targetInput": "nodeValue"
+              }
+            },
+            "recentTicks": [
+              "legacyTick",
+              "0U6Jhk3j1JwvJZC5",
+              "19df3Tw8sKtQnFr_"
+            ]
+          },
+          "programDataRate": 1000,
+          "programZoom": {
+            "dx": 0,
+            "dy": 0,
+            "scale": 0.95
+          }
+        }
+      }
+    }
+  },
+  "history": [
+    {
+      "id": "e1",
+      "tree": "doc1",
+      "action": "/content/handleDragCopyTiles",
+      "undoable": true,
+      "created": 1700000000000,
+      "records": [
+        {
+          "tree": "doc1",
+          "action": "/content/handleDragCopyTiles",
+          "patches": [
+            {
+              "op": "add",
+              "path": "/content/tileMap/t1",
+              "value": {
+                "id": "t1",
+                "title": "Program 1",
+                "content": {
+                  "type": "Dataflow",
+                  "program": {
+                    "id": "dataflow@0.1.0",
+                    "nodes": {
+                      "3489": {
+                        "id": 3489,
+                        "name": "Timer",
+                        "x": 70.93223485922617,
+                        "y": 108.00281247256474,
+                        "inputs": {},
+                        "outputs": {
+                          "num": {
+                            "connections": {
+                              "3490-undefined-nodeValue": {
+                                "node": 3490,
+                                "input": "nodeValue",
+                                "data": {}
+                              }
+                            }
+                          }
+                        },
+                        "data": {
+                          "plot": false,
+                          "orderedDisplayName": "Timer (on/off) 1",
+                          "timeOnUnits": "sec",
+                          "timeOn": 5,
+                          "timeOffUnits": "sec",
+                          "timeOff": 5
+                        }
+                      },
+                      "3490": {
+                        "id": 3490,
+                        "name": "Demo Output",
+                        "x": 433.29272174835506,
+                        "y": 57.67205761835143,
+                        "inputs": {
+                          "nodeValue": {
+                            "connections": {
+                              "3489-num-undefined": {
+                                "node": 3489,
+                                "output": "num",
+                                "data": {}
+                              }
+                            }
+                          }
+                        },
+                        "outputs": {},
+                        "data": {
+                          "orderedDisplayName": "Demo Output 2",
+                          "outputType": "Light Bulb",
+                          "demoOutput": 1
+                        }
+                      }
+                    },
+                    "values": {
+                      "3489": {
+                        "currentValues": {
+                          "nodeValue": 1
+                        },
+                        "recentValues": {
+                          "nodeValue": "[0,0,0,0,1,1,1,1]"
+                        }
+                      },
+                      "3490": {
+                        "currentValues": {
+                          "nodeValue": 1
+                        },
+                        "recentValues": {
+                          "nodeValue": "[0,0,0,1,1,1]"
+                        }
+                      }
+                    }
+                  },
+                  "programDataRate": 1000,
+                  "programZoom": {
+                    "dx": 0,
+                    "dy": 0,
+                    "scale": 0.95
+                  }
+                }
+              }
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/title",
+              "value": "Program 1"
+            }
+          ],
+          "inversePatches": [
+            {
+              "op": "remove",
+              "path": "/content/tileMap/t1"
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/title",
+              "value": "Program 1"
+            }
+          ]
+        }
+      ],
+      "state": "complete"
+    },
+    {
+      "id": "e2",
+      "tree": "doc1",
+      "action": "/content/tileMap/t1/content/setProgram",
+      "undoable": true,
+      "created": 1700000001000,
+      "records": [
+        {
+          "tree": "doc1",
+          "action": "/content/tileMap/t1/content/setProgram",
+          "patches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/values/3489/recentValues/nodeValue",
+              "value": "[]"
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/values/3490/recentValues/nodeValue",
+              "value": "[]"
+            }
+          ],
+          "inversePatches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/values/3489/recentValues/nodeValue",
+              "value": "[0,0,0,0,1,1,1,1]"
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/values/3490/recentValues/nodeValue",
+              "value": "[0,0,0,1,1,1]"
+            }
+          ]
+        }
+      ],
+      "state": "complete"
+    },
+    {
+      "id": "e3",
+      "tree": "doc1",
+      "action": "/content/tileMap/t1/content/setProgramZoom",
+      "undoable": true,
+      "created": 1700000002000,
+      "records": [
+        {
+          "tree": "doc1",
+          "action": "/content/tileMap/t1/content/setProgramZoom",
+          "patches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/programZoom/scale",
+              "value": 0.9500000000000001
+            }
+          ],
+          "inversePatches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/programZoom/scale",
+              "value": 0.95
+            }
+          ]
+        }
+      ],
+      "state": "complete"
+    },
+    {
+      "id": "e4",
+      "tree": "doc1",
+      "action": "/content/tileMap/t1/content/setProgramZoom",
+      "undoable": true,
+      "created": 1700000003000,
+      "records": [
+        {
+          "tree": "doc1",
+          "action": "/content/tileMap/t1/content/setProgramZoom",
+          "patches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/programZoom/scale",
+              "value": 1
+            }
+          ],
+          "inversePatches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/programZoom/scale",
+              "value": 0.9500000000000001
+            }
+          ]
+        }
+      ],
+      "state": "complete"
+    },
+    {
+      "id": "e5",
+      "tree": "doc1",
+      "action": "/content/tileMap/t1/content/setProgramZoom",
+      "undoable": true,
+      "created": 1700000004000,
+      "records": [
+        {
+          "tree": "doc1",
+          "action": "/content/tileMap/t1/content/setProgramZoom",
+          "patches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/programZoom/scale",
+              "value": 1.05
+            }
+          ],
+          "inversePatches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/programZoom/scale",
+              "value": 1
+            }
+          ]
+        }
+      ],
+      "state": "complete"
+    },
+    {
+      "id": "e6",
+      "tree": "doc1",
+      "action": "/content/tileMap/t1/content/setProgramZoom",
+      "undoable": true,
+      "created": 1700000005000,
+      "records": [
+        {
+          "tree": "doc1",
+          "action": "/content/tileMap/t1/content/setProgramZoom",
+          "patches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/programZoom/scale",
+              "value": 1.1
+            }
+          ],
+          "inversePatches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/programZoom/scale",
+              "value": 1.05
+            }
+          ]
+        }
+      ],
+      "state": "complete"
+    },
+    {
+      "id": "e7",
+      "tree": "doc1",
+      "action": "/content/tileMap/t1/content/setProgramZoom",
+      "undoable": true,
+      "created": 1700000006000,
+      "records": [
+        {
+          "tree": "doc1",
+          "action": "/content/tileMap/t1/content/setProgramZoom",
+          "patches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/programZoom/scale",
+              "value": 1.1500000000000001
+            }
+          ],
+          "inversePatches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/programZoom/scale",
+              "value": 1.1
+            }
+          ]
+        }
+      ],
+      "state": "complete"
+    },
+    {
+      "id": "e8",
+      "tree": "doc1",
+      "action": "/content/tileMap/t1/content/setProgramZoom",
+      "undoable": true,
+      "created": 1700000007000,
+      "records": [
+        {
+          "tree": "doc1",
+          "action": "/content/tileMap/t1/content/setProgramZoom",
+          "patches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/programZoom/scale",
+              "value": 1.2000000000000002
+            }
+          ],
+          "inversePatches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/programZoom/scale",
+              "value": 1.1500000000000001
+            }
+          ]
+        }
+      ],
+      "state": "complete"
+    },
+    {
+      "id": "e9",
+      "tree": "doc1",
+      "action": "/content/tileMap/t1/content/setProgramZoom",
+      "undoable": true,
+      "created": 1700000008000,
+      "records": [
+        {
+          "tree": "doc1",
+          "action": "/content/tileMap/t1/content/setProgramZoom",
+          "patches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/programZoom/scale",
+              "value": 1.2500000000000002
+            }
+          ],
+          "inversePatches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/programZoom/scale",
+              "value": 1.2000000000000002
+            }
+          ]
+        }
+      ],
+      "state": "complete"
+    },
+    {
+      "id": "e10",
+      "tree": "doc1",
+      "action": "/content/tileMap/t1/content/setProgramZoom",
+      "undoable": true,
+      "created": 1700000009000,
+      "records": [
+        {
+          "tree": "doc1",
+          "action": "/content/tileMap/t1/content/setProgramZoom",
+          "patches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/programZoom/scale",
+              "value": 1.3000000000000003
+            }
+          ],
+          "inversePatches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/programZoom/scale",
+              "value": 1.2500000000000002
+            }
+          ]
+        }
+      ],
+      "state": "complete"
+    },
+    {
+      "id": "e11",
+      "tree": "doc1",
+      "action": "/content/tileMap/t1/content/setProgramZoom",
+      "undoable": true,
+      "created": 1700000010000,
+      "records": [
+        {
+          "tree": "doc1",
+          "action": "/content/tileMap/t1/content/setProgramZoom",
+          "patches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/programZoom/scale",
+              "value": 1.2500000000000002
+            }
+          ],
+          "inversePatches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/programZoom/scale",
+              "value": 1.3000000000000003
+            }
+          ]
+        }
+      ],
+      "state": "complete"
+    },
+    {
+      "id": "e12",
+      "tree": "doc1",
+      "action": "/content/tileMap/t1/content/setProgramZoom",
+      "undoable": true,
+      "created": 1700000011000,
+      "records": [
+        {
+          "tree": "doc1",
+          "action": "/content/tileMap/t1/content/setProgramZoom",
+          "patches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/programZoom/scale",
+              "value": 1.2000000000000002
+            }
+          ],
+          "inversePatches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/programZoom/scale",
+              "value": 1.2500000000000002
+            }
+          ]
+        }
+      ],
+      "state": "complete"
+    },
+    {
+      "id": "e13",
+      "tree": "doc1",
+      "action": "/content/tileMap/t1/content/setProgramZoom",
+      "undoable": true,
+      "created": 1700000012000,
+      "records": [
+        {
+          "tree": "doc1",
+          "action": "/content/tileMap/t1/content/setProgramZoom",
+          "patches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/programZoom/scale",
+              "value": 1.1500000000000001
+            }
+          ],
+          "inversePatches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/programZoom/scale",
+              "value": 1.2000000000000002
+            }
+          ]
+        }
+      ],
+      "state": "complete"
+    },
+    {
+      "id": "e14",
+      "tree": "doc1",
+      "action": "/content/tileMap/t1/content/setProgramZoom",
+      "undoable": true,
+      "created": 1700000013000,
+      "records": [
+        {
+          "tree": "doc1",
+          "action": "/content/tileMap/t1/content/setProgramZoom",
+          "patches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/programZoom/scale",
+              "value": 1.1
+            }
+          ],
+          "inversePatches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/programZoom/scale",
+              "value": 1.1500000000000001
+            }
+          ]
+        }
+      ],
+      "state": "complete"
+    },
+    {
+      "id": "e15",
+      "tree": "doc1",
+      "action": "/content/tileMap/t1/content/setProgramZoom",
+      "undoable": true,
+      "created": 1700000014000,
+      "records": [
+        {
+          "tree": "doc1",
+          "action": "/content/tileMap/t1/content/setProgramZoom",
+          "patches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/programZoom/scale",
+              "value": 1.05
+            }
+          ],
+          "inversePatches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/programZoom/scale",
+              "value": 1.1
+            }
+          ]
+        }
+      ],
+      "state": "complete"
+    },
+    {
+      "id": "e16",
+      "tree": "doc1",
+      "action": "/content/tileMap/t1/content/setProgramZoom",
+      "undoable": true,
+      "created": 1700000015000,
+      "records": [
+        {
+          "tree": "doc1",
+          "action": "/content/tileMap/t1/content/setProgramZoom",
+          "patches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/programZoom/scale",
+              "value": 1
+            }
+          ],
+          "inversePatches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/programZoom/scale",
+              "value": 1.05
+            }
+          ]
+        }
+      ],
+      "state": "complete"
+    },
+    {
+      "id": "e17",
+      "tree": "doc1",
+      "action": "/content/tileMap/t1/content/setProgramZoom",
+      "undoable": true,
+      "created": 1700000016000,
+      "records": [
+        {
+          "tree": "doc1",
+          "action": "/content/tileMap/t1/content/setProgramZoom",
+          "patches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/programZoom/scale",
+              "value": 0.95
+            }
+          ],
+          "inversePatches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/programZoom/scale",
+              "value": 1
+            }
+          ]
+        }
+      ],
+      "state": "complete"
+    },
+    {
+      "id": "e18",
+      "tree": "doc1",
+      "action": "/content/tileMap/t1/content/program/tickAndProcess",
+      "undoable": true,
+      "created": 1700000017000,
+      "records": [
+        {
+          "tree": "doc1",
+          "action": "/content/tileMap/t1/content/program/tickAndProcess",
+          "patches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/nodes/3489@t1/data/tickEntries/legacyTick/nodeValue",
+              "value": "0"
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/nodes/3490@t1/data/tickEntries/legacyTick/nodeValue",
+              "value": "0"
+            },
+            {
+              "op": "add",
+              "path": "/content/tileMap/t1/content/program/recentTicks/1",
+              "value": "0U6Jhk3j1JwvJZC5"
+            },
+            {
+              "op": "add",
+              "path": "/content/tileMap/t1/content/program/nodes/3489@t1/data/tickEntries/0U6Jhk3j1JwvJZC5",
+              "value": {
+                "open": true,
+                "nodeValue": "0"
+              }
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/nodes/3489@t1/data/tickEntries/legacyTick/open"
+            },
+            {
+              "op": "add",
+              "path": "/content/tileMap/t1/content/program/nodes/3490@t1/data/tickEntries/0U6Jhk3j1JwvJZC5",
+              "value": {
+                "open": true,
+                "nodeValue": "0"
+              }
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/nodes/3490@t1/data/tickEntries/legacyTick/open"
+            }
+          ],
+          "inversePatches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/nodes/3489@t1/data/tickEntries/legacyTick/nodeValue",
+              "value": "1"
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/nodes/3490@t1/data/tickEntries/legacyTick/nodeValue",
+              "value": "1"
+            },
+            {
+              "op": "remove",
+              "path": "/content/tileMap/t1/content/program/recentTicks/1"
+            },
+            {
+              "op": "remove",
+              "path": "/content/tileMap/t1/content/program/nodes/3489@t1/data/tickEntries/0U6Jhk3j1JwvJZC5"
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/nodes/3489@t1/data/tickEntries/legacyTick/open",
+              "value": true
+            },
+            {
+              "op": "remove",
+              "path": "/content/tileMap/t1/content/program/nodes/3490@t1/data/tickEntries/0U6Jhk3j1JwvJZC5"
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/nodes/3490@t1/data/tickEntries/legacyTick/open",
+              "value": true
+            }
+          ]
+        }
+      ],
+      "state": "complete"
+    },
+    {
+      "id": "e19",
+      "tree": "doc1",
+      "action": "/content/tileMap/t1/content/program/tickAndProcess",
+      "undoable": true,
+      "created": 1700000018000,
+      "records": [
+        {
+          "tree": "doc1",
+          "action": "/content/tileMap/t1/content/program/tickAndProcess",
+          "patches": [
+            {
+              "op": "add",
+              "path": "/content/tileMap/t1/content/program/recentTicks/2",
+              "value": "19df3Tw8sKtQnFr_"
+            },
+            {
+              "op": "add",
+              "path": "/content/tileMap/t1/content/program/nodes/3489@t1/data/tickEntries/19df3Tw8sKtQnFr_",
+              "value": {
+                "open": true,
+                "nodeValue": "0"
+              }
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/nodes/3489@t1/data/tickEntries/0U6Jhk3j1JwvJZC5/open"
+            },
+            {
+              "op": "add",
+              "path": "/content/tileMap/t1/content/program/nodes/3490@t1/data/tickEntries/19df3Tw8sKtQnFr_",
+              "value": {
+                "open": true,
+                "nodeValue": "0"
+              }
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/nodes/3490@t1/data/tickEntries/0U6Jhk3j1JwvJZC5/open"
+            }
+          ],
+          "inversePatches": [
+            {
+              "op": "remove",
+              "path": "/content/tileMap/t1/content/program/recentTicks/2"
+            },
+            {
+              "op": "remove",
+              "path": "/content/tileMap/t1/content/program/nodes/3489@t1/data/tickEntries/19df3Tw8sKtQnFr_"
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/nodes/3489@t1/data/tickEntries/0U6Jhk3j1JwvJZC5/open",
+              "value": true
+            },
+            {
+              "op": "remove",
+              "path": "/content/tileMap/t1/content/program/nodes/3490@t1/data/tickEntries/19df3Tw8sKtQnFr_"
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/nodes/3490@t1/data/tickEntries/0U6Jhk3j1JwvJZC5/open",
+              "value": true
+            }
+          ]
+        }
+      ],
+      "state": "complete"
+    }
+  ]
+}

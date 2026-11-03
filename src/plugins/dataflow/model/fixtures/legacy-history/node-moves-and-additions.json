@@ -1,0 +1,1117 @@
+{
+  "description": "From the study, cut down to one DataFlow tile. Legacy entries add and move nodes, and current-format entries follow.",
+  "content": {
+    "rowMap": {
+      "r1": {
+        "id": "r1",
+        "isSectionHeader": false,
+        "tiles": [
+          {
+            "tileId": "t1"
+          }
+        ]
+      }
+    },
+    "rowOrder": [
+      "r1"
+    ],
+    "tileMap": {
+      "t1": {
+        "id": "t1",
+        "content": {
+          "type": "Dataflow",
+          "program": {
+            "id": "dataflow@1",
+            "nodes": {
+              "60@t1": {
+                "id": "60@t1",
+                "name": "Control",
+                "x": 224.333251953125,
+                "y": 98.66667175292969,
+                "data": {
+                  "type": "Control",
+                  "plot": false,
+                  "orderedDisplayName": "Hold 1",
+                  "tickEntries": {
+                    "WFWHWXHmoWyjP0JE": {
+                      "nodeValue": "0",
+                      "open": true
+                    },
+                    "legacyTick": {
+                      "nodeValue": "0"
+                    }
+                  },
+                  "controlOperator": "Hold Current",
+                  "waitDuration": 0
+                }
+              },
+              "63@t1": {
+                "id": "63@t1",
+                "name": "Generator",
+                "x": 15,
+                "y": 49.33335876464844,
+                "data": {
+                  "type": "Generator",
+                  "plot": false,
+                  "orderedDisplayName": "Generator 2",
+                  "tickEntries": {
+                    "WFWHWXHmoWyjP0JE": {
+                      "nodeValue": "0.93",
+                      "open": true
+                    },
+                    "legacyTick": {
+                      "nodeValue": "0.93"
+                    }
+                  },
+                  "generatorType": "Sine",
+                  "amplitude": 1,
+                  "period": 10,
+                  "periodUnits": "sec"
+                }
+              },
+              "66@t1": {
+                "id": "66@t1",
+                "name": "Number",
+                "x": 27.66668701171875,
+                "y": 314.6667022705078,
+                "data": {
+                  "type": "Number",
+                  "plot": false,
+                  "orderedDisplayName": "Number 3",
+                  "tickEntries": {
+                    "WFWHWXHmoWyjP0JE": {
+                      "nodeValue": "0",
+                      "open": true
+                    },
+                    "legacyTick": {
+                      "nodeValue": "0"
+                    }
+                  },
+                  "value": 0
+                }
+              },
+              "76@t1": {
+                "id": "76@t1",
+                "name": "Demo Output",
+                "x": 424.99995214290317,
+                "y": 116.00006242228378,
+                "data": {
+                  "type": "Demo Output",
+                  "plot": false,
+                  "orderedDisplayName": "Demo Output 4",
+                  "tickEntries": {
+                    "WFWHWXHmoWyjP0JE": {
+                      "nodeValue": "0",
+                      "open": true
+                    },
+                    "legacyTick": {
+                      "nodeValue": "0"
+                    }
+                  },
+                  "outputType": "Grabber"
+                }
+              }
+            },
+            "connections": {},
+            "recentTicks": [
+              "legacyTick",
+              "WFWHWXHmoWyjP0JE"
+            ]
+          },
+          "programDataRate": 1000,
+          "programZoom": {
+            "dx": 0,
+            "dy": 0,
+            "scale": 1
+          }
+        }
+      }
+    }
+  },
+  "history": [
+    {
+      "id": "e1",
+      "tree": "doc1",
+      "action": "/addTile",
+      "undoable": true,
+      "created": 1700000000000,
+      "records": [
+        {
+          "tree": "doc1",
+          "action": "/addTile",
+          "patches": [
+            {
+              "op": "add",
+              "path": "/content/tileMap/t1",
+              "value": {
+                "id": "t1",
+                "title": "Program 1",
+                "content": {
+                  "type": "Dataflow",
+                  "program": {
+                    "nodes": {},
+                    "values": {}
+                  },
+                  "programDataRate": 1000,
+                  "programZoom": {
+                    "dx": 0,
+                    "dy": 0,
+                    "scale": 1
+                  }
+                }
+              }
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/title"
+            }
+          ],
+          "inversePatches": [
+            {
+              "op": "remove",
+              "path": "/content/tileMap/t1"
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/title",
+              "value": "Program 1"
+            }
+          ]
+        }
+      ],
+      "state": "complete"
+    },
+    {
+      "id": "e2",
+      "tree": "doc1",
+      "action": "/content/tileMap/t1/content/setProgram",
+      "undoable": true,
+      "created": 1700000001000,
+      "records": [
+        {
+          "tree": "doc1",
+          "action": "/content/tileMap/t1/content/setProgram",
+          "patches": [
+            {
+              "op": "add",
+              "path": "/content/tileMap/t1/content/program/nodes/60",
+              "value": {
+                "id": 60,
+                "name": "Control",
+                "x": 193,
+                "y": 138.6666717529297,
+                "inputs": {
+                  "num2": {
+                    "connections": {}
+                  },
+                  "num1": {
+                    "connections": {}
+                  }
+                },
+                "outputs": {
+                  "num": {
+                    "connections": {}
+                  }
+                },
+                "data": {
+                  "plot": false,
+                  "orderedDisplayName": "Hold 1",
+                  "controlOperator": "Hold Current",
+                  "waitDuration": 0
+                }
+              }
+            },
+            {
+              "op": "add",
+              "path": "/content/tileMap/t1/content/program/values/60",
+              "value": {
+                "currentValues": {},
+                "recentValues": {}
+              }
+            }
+          ],
+          "inversePatches": [
+            {
+              "op": "remove",
+              "path": "/content/tileMap/t1/content/program/nodes/60"
+            },
+            {
+              "op": "remove",
+              "path": "/content/tileMap/t1/content/program/values/60"
+            }
+          ]
+        }
+      ],
+      "state": "complete"
+    },
+    {
+      "id": "e3",
+      "tree": "doc1",
+      "action": "/content/tileMap/t1/content/setProgram",
+      "undoable": true,
+      "created": 1700000002000,
+      "records": [
+        {
+          "tree": "doc1",
+          "action": "/content/tileMap/t1/content/setProgram",
+          "patches": [
+            {
+              "op": "add",
+              "path": "/content/tileMap/t1/content/program/values/60/currentValues/nodeValue"
+            },
+            {
+              "op": "add",
+              "path": "/content/tileMap/t1/content/program/values/60/recentValues/nodeValue",
+              "value": "[]"
+            }
+          ],
+          "inversePatches": [
+            {
+              "op": "remove",
+              "path": "/content/tileMap/t1/content/program/values/60/currentValues/nodeValue"
+            },
+            {
+              "op": "remove",
+              "path": "/content/tileMap/t1/content/program/values/60/recentValues/nodeValue"
+            }
+          ]
+        }
+      ],
+      "state": "complete"
+    },
+    {
+      "id": "e4",
+      "tree": "doc1",
+      "action": "/content/tileMap/t1/content/setProgram",
+      "undoable": true,
+      "created": 1700000003000,
+      "records": [
+        {
+          "tree": "doc1",
+          "action": "/content/tileMap/t1/content/setProgram",
+          "patches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/nodes/60/x",
+              "value": 224.333251953125
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/nodes/60/y",
+              "value": 98.66667175292969
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/values/60/recentValues/nodeValue",
+              "value": "[null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null]"
+            }
+          ],
+          "inversePatches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/nodes/60/x",
+              "value": 193
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/nodes/60/y",
+              "value": 138.6666717529297
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/values/60/recentValues/nodeValue",
+              "value": "[]"
+            }
+          ]
+        }
+      ],
+      "state": "complete"
+    },
+    {
+      "id": "e5",
+      "tree": "doc1",
+      "action": "/content/tileMap/t1/content/setProgram",
+      "undoable": true,
+      "created": 1700000004000,
+      "records": [
+        {
+          "tree": "doc1",
+          "action": "/content/tileMap/t1/content/setProgram",
+          "patches": [
+            {
+              "op": "add",
+              "path": "/content/tileMap/t1/content/program/nodes/63",
+              "value": {
+                "id": 63,
+                "name": "Generator",
+                "x": 111.66668701171875,
+                "y": 84.00001525878906,
+                "inputs": {},
+                "outputs": {
+                  "num": {
+                    "connections": {}
+                  }
+                },
+                "data": {
+                  "plot": false,
+                  "orderedDisplayName": "Generator 2",
+                  "generatorType": "Sine",
+                  "amplitudeUnits": "",
+                  "amplitude": 1,
+                  "periodUnits": "sec",
+                  "period": 10
+                }
+              }
+            },
+            {
+              "op": "add",
+              "path": "/content/tileMap/t1/content/program/values/63",
+              "value": {
+                "currentValues": {},
+                "recentValues": {}
+              }
+            }
+          ],
+          "inversePatches": [
+            {
+              "op": "remove",
+              "path": "/content/tileMap/t1/content/program/nodes/63"
+            },
+            {
+              "op": "remove",
+              "path": "/content/tileMap/t1/content/program/values/63"
+            }
+          ]
+        }
+      ],
+      "state": "complete"
+    },
+    {
+      "id": "e6",
+      "tree": "doc1",
+      "action": "/content/tileMap/t1/content/setProgram",
+      "undoable": true,
+      "created": 1700000005000,
+      "records": [
+        {
+          "tree": "doc1",
+          "action": "/content/tileMap/t1/content/setProgram",
+          "patches": [
+            {
+              "op": "add",
+              "path": "/content/tileMap/t1/content/program/values/63/currentValues/nodeValue",
+              "value": 0
+            },
+            {
+              "op": "add",
+              "path": "/content/tileMap/t1/content/program/values/63/recentValues/nodeValue",
+              "value": "[]"
+            }
+          ],
+          "inversePatches": [
+            {
+              "op": "remove",
+              "path": "/content/tileMap/t1/content/program/values/63/currentValues/nodeValue"
+            },
+            {
+              "op": "remove",
+              "path": "/content/tileMap/t1/content/program/values/63/recentValues/nodeValue"
+            }
+          ]
+        }
+      ],
+      "state": "complete"
+    },
+    {
+      "id": "e7",
+      "tree": "doc1",
+      "action": "/content/tileMap/t1/content/setProgram",
+      "undoable": true,
+      "created": 1700000006000,
+      "records": [
+        {
+          "tree": "doc1",
+          "action": "/content/tileMap/t1/content/setProgram",
+          "patches": [
+            {
+              "op": "add",
+              "path": "/content/tileMap/t1/content/program/nodes/66",
+              "value": {
+                "id": 66,
+                "name": "Number",
+                "x": 96.33331298828125,
+                "y": 396.00001525878906,
+                "inputs": {},
+                "outputs": {
+                  "num": {
+                    "connections": {}
+                  }
+                },
+                "data": {
+                  "plot": false,
+                  "orderedDisplayName": "Number 3",
+                  "nodeValueUnits": ""
+                }
+              }
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/values/63/currentValues/nodeValue",
+              "value": 0.88
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/values/63/recentValues/nodeValue",
+              "value": "[0.76,0.99,0.88]"
+            },
+            {
+              "op": "add",
+              "path": "/content/tileMap/t1/content/program/values/66",
+              "value": {
+                "currentValues": {},
+                "recentValues": {}
+              }
+            }
+          ],
+          "inversePatches": [
+            {
+              "op": "remove",
+              "path": "/content/tileMap/t1/content/program/nodes/66"
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/values/63/currentValues/nodeValue",
+              "value": 0
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/values/63/recentValues/nodeValue",
+              "value": "[]"
+            },
+            {
+              "op": "remove",
+              "path": "/content/tileMap/t1/content/program/values/66"
+            }
+          ]
+        }
+      ],
+      "state": "complete"
+    },
+    {
+      "id": "e8",
+      "tree": "doc1",
+      "action": "/content/tileMap/t1/content/setProgram",
+      "undoable": true,
+      "created": 1700000007000,
+      "records": [
+        {
+          "tree": "doc1",
+          "action": "/content/tileMap/t1/content/setProgram",
+          "patches": [
+            {
+              "op": "add",
+              "path": "/content/tileMap/t1/content/program/values/66/currentValues/nodeValue",
+              "value": 0
+            },
+            {
+              "op": "add",
+              "path": "/content/tileMap/t1/content/program/values/66/recentValues/nodeValue",
+              "value": "[]"
+            }
+          ],
+          "inversePatches": [
+            {
+              "op": "remove",
+              "path": "/content/tileMap/t1/content/program/values/66/currentValues/nodeValue"
+            },
+            {
+              "op": "remove",
+              "path": "/content/tileMap/t1/content/program/values/66/recentValues/nodeValue"
+            }
+          ]
+        }
+      ],
+      "state": "complete"
+    },
+    {
+      "id": "e9",
+      "tree": "doc1",
+      "action": "/content/tileMap/t1/content/setProgram",
+      "undoable": true,
+      "created": 1700000008000,
+      "records": [
+        {
+          "tree": "doc1",
+          "action": "/content/tileMap/t1/content/setProgram",
+          "patches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/nodes/63/x",
+              "value": 15
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/nodes/63/y",
+              "value": 49.33335876464844
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/values/63/currentValues/nodeValue",
+              "value": -0.73
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/values/63/recentValues/nodeValue",
+              "value": "[0.76,0.99,0.88,0.41,-0.2,-0.73]"
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/values/66/recentValues/nodeValue",
+              "value": "[0,0,0]"
+            }
+          ],
+          "inversePatches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/nodes/63/x",
+              "value": 111.66668701171875
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/nodes/63/y",
+              "value": 84.00001525878906
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/values/63/currentValues/nodeValue",
+              "value": 0.88
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/values/63/recentValues/nodeValue",
+              "value": "[0.76,0.99,0.88]"
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/values/66/recentValues/nodeValue",
+              "value": "[]"
+            }
+          ]
+        }
+      ],
+      "state": "complete"
+    },
+    {
+      "id": "e10",
+      "tree": "doc1",
+      "action": "/content/tileMap/t1/content/setProgram",
+      "undoable": true,
+      "created": 1700000009000,
+      "records": [
+        {
+          "tree": "doc1",
+          "action": "/content/tileMap/t1/content/setProgram",
+          "patches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/nodes/66/x",
+              "value": 27.66668701171875
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/nodes/66/y",
+              "value": 314.6667022705078
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/values/63/currentValues/nodeValue",
+              "value": -0.86
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/values/63/recentValues/nodeValue",
+              "value": "[0.76,0.99,0.88,0.41,-0.2,-0.73,-1,-0.86]"
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/values/66/recentValues/nodeValue",
+              "value": "[0,0,0,0,0]"
+            }
+          ],
+          "inversePatches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/nodes/66/x",
+              "value": 96.33331298828125
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/nodes/66/y",
+              "value": 396.00001525878906
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/values/63/currentValues/nodeValue",
+              "value": -0.73
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/values/63/recentValues/nodeValue",
+              "value": "[0.76,0.99,0.88,0.41,-0.2,-0.73]"
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/values/66/recentValues/nodeValue",
+              "value": "[0,0,0]"
+            }
+          ]
+        }
+      ],
+      "state": "complete"
+    },
+    {
+      "id": "e11",
+      "tree": "doc1",
+      "action": "/content/tileMap/t1/content/setProgram",
+      "undoable": true,
+      "created": 1700000010000,
+      "records": [
+        {
+          "tree": "doc1",
+          "action": "/content/tileMap/t1/content/setProgram",
+          "patches": [
+            {
+              "op": "add",
+              "path": "/content/tileMap/t1/content/program/nodes/76",
+              "value": {
+                "id": 76,
+                "name": "Demo Output",
+                "x": 450.33331298828125,
+                "y": 265.3333282470703,
+                "inputs": {
+                  "nodeValue": {
+                    "connections": {}
+                  }
+                },
+                "outputs": {},
+                "data": {
+                  "orderedDisplayName": "Demo Output 4",
+                  "outputType": "Light Bulb",
+                  "demoOutput": 0
+                }
+              }
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/values/63/currentValues/nodeValue",
+              "value": 0.73
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/values/63/recentValues/nodeValue",
+              "value": "[0.76,0.99,0.88,0.41,-0.2,-0.73,-1,-0.86,-0.4,0.21,0.73]"
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/values/66/recentValues/nodeValue",
+              "value": "[0,0,0,0,0,0,0,0]"
+            },
+            {
+              "op": "add",
+              "path": "/content/tileMap/t1/content/program/values/76",
+              "value": {
+                "currentValues": {},
+                "recentValues": {}
+              }
+            }
+          ],
+          "inversePatches": [
+            {
+              "op": "remove",
+              "path": "/content/tileMap/t1/content/program/nodes/76"
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/values/63/currentValues/nodeValue",
+              "value": -0.86
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/values/63/recentValues/nodeValue",
+              "value": "[0.76,0.99,0.88,0.41,-0.2,-0.73,-1,-0.86]"
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/values/66/recentValues/nodeValue",
+              "value": "[0,0,0,0,0]"
+            },
+            {
+              "op": "remove",
+              "path": "/content/tileMap/t1/content/program/values/76"
+            }
+          ]
+        }
+      ],
+      "state": "complete"
+    },
+    {
+      "id": "e12",
+      "tree": "doc1",
+      "action": "/content/tileMap/t1/content/setProgram",
+      "undoable": true,
+      "created": 1700000011000,
+      "records": [
+        {
+          "tree": "doc1",
+          "action": "/content/tileMap/t1/content/setProgram",
+          "patches": [
+            {
+              "op": "add",
+              "path": "/content/tileMap/t1/content/program/values/76/currentValues/nodeValue",
+              "value": 0
+            },
+            {
+              "op": "add",
+              "path": "/content/tileMap/t1/content/program/values/76/recentValues/nodeValue",
+              "value": "[]"
+            }
+          ],
+          "inversePatches": [
+            {
+              "op": "remove",
+              "path": "/content/tileMap/t1/content/program/values/76/currentValues/nodeValue"
+            },
+            {
+              "op": "remove",
+              "path": "/content/tileMap/t1/content/program/values/76/recentValues/nodeValue"
+            }
+          ]
+        }
+      ],
+      "state": "complete"
+    },
+    {
+      "id": "e13",
+      "tree": "doc1",
+      "action": "/content/tileMap/t1/content/setProgram",
+      "undoable": true,
+      "created": 1700000012000,
+      "records": [
+        {
+          "tree": "doc1",
+          "action": "/content/tileMap/t1/content/setProgram",
+          "patches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/nodes/76/x",
+              "value": 424.99995214290317
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/nodes/76/y",
+              "value": 116.00006242228378
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/values/63/currentValues/nodeValue",
+              "value": 0.4
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/values/63/recentValues/nodeValue",
+              "value": "[0.76,0.99,0.88,0.41,-0.2,-0.73,-1,-0.86,-0.4,0.21,0.73,1,0.85,0.4]"
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/values/66/recentValues/nodeValue",
+              "value": "[0,0,0,0,0,0,0,0,0,0,0]"
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/values/76/recentValues/nodeValue",
+              "value": "[0,0,0]"
+            }
+          ],
+          "inversePatches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/nodes/76/x",
+              "value": 450.33331298828125
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/nodes/76/y",
+              "value": 265.3333282470703
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/values/63/currentValues/nodeValue",
+              "value": 0.73
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/values/63/recentValues/nodeValue",
+              "value": "[0.76,0.99,0.88,0.41,-0.2,-0.73,-1,-0.86,-0.4,0.21,0.73]"
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/values/66/recentValues/nodeValue",
+              "value": "[0,0,0,0,0,0,0,0]"
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/values/76/recentValues/nodeValue",
+              "value": "[]"
+            }
+          ]
+        }
+      ],
+      "state": "complete"
+    },
+    {
+      "id": "e14",
+      "tree": "doc1",
+      "action": "/content/tileMap/t1/content/setProgram",
+      "undoable": true,
+      "created": 1700000013000,
+      "records": [
+        {
+          "tree": "doc1",
+          "action": "/content/tileMap/t1/content/setProgram",
+          "patches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/nodes/76/data/outputType",
+              "value": "Grabber"
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/values/63/currentValues/nodeValue",
+              "value": -0.44
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/values/63/recentValues/nodeValue",
+              "value": "[0.85,0.4,-0.2,-0.77,-0.99,-0.87,-0.41,0.21,0.73,1,0.87,0.41,-0.19,-0.74,-0.99,-0.86,-0.44]"
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/values/66/recentValues/nodeValue",
+              "value": "[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]"
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/values/76/recentValues/nodeValue",
+              "value": "[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]"
+            }
+          ],
+          "inversePatches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/nodes/76/data/outputType",
+              "value": "Light Bulb"
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/values/63/currentValues/nodeValue",
+              "value": 0.4
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/values/63/recentValues/nodeValue",
+              "value": "[0.76,0.99,0.88,0.41,-0.2,-0.73,-1,-0.86,-0.4,0.21,0.73,1,0.85,0.4]"
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/values/66/recentValues/nodeValue",
+              "value": "[0,0,0,0,0,0,0,0,0,0,0]"
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/values/76/recentValues/nodeValue",
+              "value": "[0,0,0]"
+            }
+          ]
+        }
+      ],
+      "state": "complete"
+    },
+    {
+      "id": "e15",
+      "tree": "doc1",
+      "action": "/content/tileMap/t1/content/setProgram",
+      "undoable": true,
+      "created": 1700000014000,
+      "records": [
+        {
+          "tree": "doc1",
+          "action": "/content/tileMap/t1/content/setProgram",
+          "patches": [
+            {
+              "op": "add",
+              "path": "/content/tileMap/t1/content/program/nodes/76/inputs/tilt",
+              "value": {
+                "connections": {}
+              }
+            }
+          ],
+          "inversePatches": [
+            {
+              "op": "remove",
+              "path": "/content/tileMap/t1/content/program/nodes/76/inputs/tilt"
+            }
+          ]
+        }
+      ],
+      "state": "complete"
+    },
+    {
+      "id": "e16",
+      "tree": "doc1",
+      "action": "/content/tileMap/t1/content/program/processAfterProgramChange",
+      "undoable": true,
+      "created": 1700000015000,
+      "records": [
+        {
+          "tree": "doc1",
+          "action": "/content/tileMap/t1/content/program/processAfterProgramChange",
+          "patches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/nodes/60@t1/data/tickEntries/legacyTick/nodeValue",
+              "value": "0"
+            }
+          ],
+          "inversePatches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/nodes/60@t1/data/tickEntries/legacyTick/nodeValue"
+            }
+          ]
+        }
+      ],
+      "state": "complete"
+    },
+    {
+      "id": "e17",
+      "tree": "doc1",
+      "action": "/content/tileMap/t1/content/program/tickAndProcess",
+      "undoable": true,
+      "created": 1700000016000,
+      "records": [
+        {
+          "tree": "doc1",
+          "action": "/content/tileMap/t1/content/program/tickAndProcess",
+          "patches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/nodes/63@t1/data/tickEntries/legacyTick/nodeValue",
+              "value": "0.93"
+            },
+            {
+              "op": "add",
+              "path": "/content/tileMap/t1/content/program/recentTicks/1",
+              "value": "WFWHWXHmoWyjP0JE"
+            },
+            {
+              "op": "add",
+              "path": "/content/tileMap/t1/content/program/nodes/60@t1/data/tickEntries/WFWHWXHmoWyjP0JE",
+              "value": {
+                "open": true,
+                "nodeValue": "0"
+              }
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/nodes/60@t1/data/tickEntries/legacyTick/open"
+            },
+            {
+              "op": "add",
+              "path": "/content/tileMap/t1/content/program/nodes/63@t1/data/tickEntries/WFWHWXHmoWyjP0JE",
+              "value": {
+                "open": true,
+                "nodeValue": "0.93"
+              }
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/nodes/63@t1/data/tickEntries/legacyTick/open"
+            },
+            {
+              "op": "add",
+              "path": "/content/tileMap/t1/content/program/nodes/66@t1/data/tickEntries/WFWHWXHmoWyjP0JE",
+              "value": {
+                "open": true,
+                "nodeValue": "0"
+              }
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/nodes/66@t1/data/tickEntries/legacyTick/open"
+            },
+            {
+              "op": "add",
+              "path": "/content/tileMap/t1/content/program/nodes/76@t1/data/tickEntries/WFWHWXHmoWyjP0JE",
+              "value": {
+                "open": true,
+                "nodeValue": "0"
+              }
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/nodes/76@t1/data/tickEntries/legacyTick/open"
+            }
+          ],
+          "inversePatches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/nodes/63@t1/data/tickEntries/legacyTick/nodeValue",
+              "value": "-0.44"
+            },
+            {
+              "op": "remove",
+              "path": "/content/tileMap/t1/content/program/recentTicks/1"
+            },
+            {
+              "op": "remove",
+              "path": "/content/tileMap/t1/content/program/nodes/60@t1/data/tickEntries/WFWHWXHmoWyjP0JE"
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/nodes/60@t1/data/tickEntries/legacyTick/open",
+              "value": true
+            },
+            {
+              "op": "remove",
+              "path": "/content/tileMap/t1/content/program/nodes/63@t1/data/tickEntries/WFWHWXHmoWyjP0JE"
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/nodes/63@t1/data/tickEntries/legacyTick/open",
+              "value": true
+            },
+            {
+              "op": "remove",
+              "path": "/content/tileMap/t1/content/program/nodes/66@t1/data/tickEntries/WFWHWXHmoWyjP0JE"
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/nodes/66@t1/data/tickEntries/legacyTick/open",
+              "value": true
+            },
+            {
+              "op": "remove",
+              "path": "/content/tileMap/t1/content/program/nodes/76@t1/data/tickEntries/WFWHWXHmoWyjP0JE"
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/nodes/76@t1/data/tickEntries/legacyTick/open",
+              "value": true
+            }
+          ]
+        }
+      ],
+      "state": "complete"
+    }
+  ]
+}
