@@ -414,6 +414,13 @@ export class FirestoreHistoryManager {
 
     const history: HistoryEntrySnapshot[] = historyDocs.map(doc => doc.entry);
 
+    // A conversion entry the live document hasn't uploaded yet goes at the end,
+    // unless it has been uploaded since the playback copy was made.
+    const { localConversionEntry } = treeManager;
+    if (localConversionEntry && !history.some(entry => entry.id === localConversionEntry.id)) {
+      history.push(localConversionEntry);
+    }
+
     if (!treeManager.document) {
       const cDocument = CDocument.create({history});
       treeManager.setChangeDocument(cDocument);
