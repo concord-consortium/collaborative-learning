@@ -347,9 +347,11 @@ export class PlaybackControlModel {
         // is not where the reader clicked.
         const actual = this.treeManager.numHistoryEventsApplied;
         const blocked = threw || (actual !== undefined && actual !== position);
-        // Stopping where earlier history can't be rebuilt is not a failure. The playback
-        // component says that earlier history isn't available instead.
-        const atOldestReachable = !threw && actual === this.treeManager.oldestReachablePosition;
+        // Going back, stopping where earlier history can't be rebuilt is not a failure. The
+        // playback component says that earlier history isn't available instead. A forward seek
+        // that stops there was blocked by an entry, so it still warns.
+        const atOldestReachable = !threw && actual !== undefined && position < actual &&
+          actual === this.treeManager.oldestReachablePosition;
         // Once the playback copy is out of step, no move can succeed until the history is
         // reopened, which makes a new copy.
         this.playbackFailureWarning = this.treeManager.jsonCopyOutOfStep
