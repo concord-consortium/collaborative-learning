@@ -1,0 +1,4039 @@
+{
+  "description": "From the study, cut down to one DataFlow tile. Legacy entries add connections and later delete them, some legacy patches come from undo entries, and current-format entries follow.",
+  "content": {
+    "rowMap": {
+      "r1": {
+        "id": "r1",
+        "isSectionHeader": false,
+        "tiles": [
+          {
+            "tileId": "t1"
+          }
+        ]
+      }
+    },
+    "rowOrder": [
+      "r1"
+    ],
+    "tileMap": {
+      "t1": {
+        "id": "t1",
+        "content": {
+          "type": "Dataflow",
+          "program": {
+            "id": "dataflow@1",
+            "nodes": {
+              "601@t1": {
+                "id": "601@t1",
+                "name": "Sensor",
+                "x": 98.35967909271697,
+                "y": 47.614244980276354,
+                "data": {
+                  "type": "Sensor",
+                  "plot": true,
+                  "orderedDisplayName": "Sensor 1",
+                  "tickEntries": {
+                    "48k_kDUOuoRBFYjr": {
+                      "nodeValue": "NaN",
+                      "open": true
+                    },
+                    "legacyTick": {
+                      "nodeValue": "NaN"
+                    }
+                  },
+                  "sensorType": "emg-reading",
+                  "sensor": "none"
+                }
+              },
+              "606@t1": {
+                "id": "606@t1",
+                "name": "Number",
+                "x": 118.06961096731128,
+                "y": 232.518043813367,
+                "data": {
+                  "type": "Number",
+                  "plot": false,
+                  "orderedDisplayName": "Number 2",
+                  "tickEntries": {
+                    "48k_kDUOuoRBFYjr": {
+                      "nodeValue": "400",
+                      "open": true
+                    },
+                    "legacyTick": {
+                      "nodeValue": "400"
+                    }
+                  },
+                  "value": 400
+                }
+              },
+              "611@t1": {
+                "id": "611@t1",
+                "name": "Math",
+                "x": 358.7996826171875,
+                "y": 156.47756958007812,
+                "data": {
+                  "type": "Math",
+                  "plot": false,
+                  "orderedDisplayName": "Math 3",
+                  "tickEntries": {
+                    "48k_kDUOuoRBFYjr": {
+                      "nodeValue": "NaN",
+                      "open": true
+                    },
+                    "legacyTick": {
+                      "nodeValue": "NaN"
+                    }
+                  },
+                  "mathOperator": "Divide"
+                }
+              }
+            },
+            "connections": {
+              "b9E-Hy7MdKZ0Fpp7": {
+                "id": "b9E-Hy7MdKZ0Fpp7",
+                "source": "606@t1",
+                "sourceOutput": "value",
+                "target": "611@t1",
+                "targetInput": "num2"
+              },
+              "UvWqBpR956LHCmQO": {
+                "id": "UvWqBpR956LHCmQO",
+                "source": "601@t1",
+                "sourceOutput": "value",
+                "target": "611@t1",
+                "targetInput": "num1"
+              }
+            },
+            "recentTicks": [
+              "legacyTick",
+              "48k_kDUOuoRBFYjr"
+            ]
+          },
+          "programDataRate": 1000,
+          "programZoom": {
+            "dx": -49.36846923828125,
+            "dy": -15.3021240234375,
+            "scale": 0.8499999999999999
+          }
+        }
+      }
+    }
+  },
+  "history": [
+    {
+      "id": "e1",
+      "tree": "doc1",
+      "action": "/content/userAddTile",
+      "undoable": true,
+      "created": 1700000000000,
+      "records": [
+        {
+          "tree": "doc1",
+          "action": "/content/userAddTile",
+          "patches": [
+            {
+              "op": "add",
+              "path": "/content/tileMap/t1",
+              "value": {
+                "id": "t1",
+                "title": "Program 1",
+                "content": {
+                  "type": "Dataflow",
+                  "program": {
+                    "nodes": {},
+                    "values": {}
+                  },
+                  "programDataRate": 1000,
+                  "programZoom": {
+                    "dx": 0,
+                    "dy": 0,
+                    "scale": 1
+                  }
+                }
+              }
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/title"
+            }
+          ],
+          "inversePatches": [
+            {
+              "op": "remove",
+              "path": "/content/tileMap/t1"
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/title",
+              "value": "Program 1"
+            }
+          ]
+        }
+      ],
+      "state": "complete"
+    },
+    {
+      "id": "e2",
+      "tree": "doc1",
+      "action": "/content/tileMap/t1/content/setProgram",
+      "undoable": true,
+      "created": 1700000001000,
+      "records": [
+        {
+          "tree": "doc1",
+          "action": "/content/tileMap/t1/content/setProgram",
+          "patches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/id",
+              "value": "dataflow@0.1.0"
+            }
+          ],
+          "inversePatches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/id"
+            }
+          ]
+        }
+      ],
+      "state": "complete"
+    },
+    {
+      "id": "e3",
+      "tree": "doc1",
+      "action": "/content/tileMap/t1/content/setProgram",
+      "undoable": true,
+      "created": 1700000002000,
+      "records": [
+        {
+          "tree": "doc1",
+          "action": "/content/tileMap/t1/content/setProgram",
+          "patches": [
+            {
+              "op": "add",
+              "path": "/content/tileMap/t1/content/program/nodes/601",
+              "value": {
+                "id": 601,
+                "name": "Sensor",
+                "x": 95.236572265625,
+                "y": 98.6114501953125,
+                "inputs": {},
+                "outputs": {
+                  "num": {
+                    "connections": {}
+                  }
+                },
+                "data": {
+                  "plot": false,
+                  "orderedDisplayName": "Sensor 1",
+                  "type": "none",
+                  "sensor": "none",
+                  "virtual": false
+                }
+              }
+            },
+            {
+              "op": "add",
+              "path": "/content/tileMap/t1/content/program/values/601",
+              "value": {
+                "currentValues": {},
+                "recentValues": {}
+              }
+            }
+          ],
+          "inversePatches": [
+            {
+              "op": "remove",
+              "path": "/content/tileMap/t1/content/program/nodes/601"
+            },
+            {
+              "op": "remove",
+              "path": "/content/tileMap/t1/content/program/values/601"
+            }
+          ]
+        }
+      ],
+      "state": "complete"
+    },
+    {
+      "id": "e4",
+      "tree": "doc1",
+      "action": "/content/tileMap/t1/content/setProgram",
+      "undoable": true,
+      "created": 1700000003000,
+      "records": [
+        {
+          "tree": "doc1",
+          "action": "/content/tileMap/t1/content/setProgram",
+          "patches": [
+            {
+              "op": "add",
+              "path": "/content/tileMap/t1/content/program/values/601/currentValues/nodeValue"
+            },
+            {
+              "op": "add",
+              "path": "/content/tileMap/t1/content/program/values/601/recentValues/nodeValue",
+              "value": "[]"
+            }
+          ],
+          "inversePatches": [
+            {
+              "op": "remove",
+              "path": "/content/tileMap/t1/content/program/values/601/currentValues/nodeValue"
+            },
+            {
+              "op": "remove",
+              "path": "/content/tileMap/t1/content/program/values/601/recentValues/nodeValue"
+            }
+          ]
+        }
+      ],
+      "state": "complete"
+    },
+    {
+      "id": "e5",
+      "tree": "doc1",
+      "action": "/content/tileMap/t1/content/setProgramZoom",
+      "undoable": true,
+      "created": 1700000004000,
+      "records": [
+        {
+          "tree": "doc1",
+          "action": "/content/tileMap/t1/content/setProgramZoom",
+          "patches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/programZoom/dx",
+              "value": 2.51025390625
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/programZoom/dy",
+              "value": -157.15673828125
+            }
+          ],
+          "inversePatches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/programZoom/dx",
+              "value": 0
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/programZoom/dy",
+              "value": 0
+            }
+          ]
+        }
+      ],
+      "state": "complete"
+    },
+    {
+      "id": "e6",
+      "tree": "doc1",
+      "action": "/content/tileMap/t1/content/setProgramZoom",
+      "undoable": true,
+      "created": 1700000005000,
+      "records": [
+        {
+          "tree": "doc1",
+          "action": "/content/tileMap/t1/content/setProgramZoom",
+          "patches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/programZoom/dx",
+              "value": 3.346923828125
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/programZoom/dy",
+              "value": -162.94671630859375
+            }
+          ],
+          "inversePatches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/programZoom/dx",
+              "value": 2.51025390625
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/programZoom/dy",
+              "value": -157.15673828125
+            }
+          ]
+        }
+      ],
+      "state": "complete"
+    },
+    {
+      "id": "e7",
+      "tree": "doc1",
+      "action": "/content/tileMap/t1/content/setProgramZoom",
+      "undoable": true,
+      "created": 1700000006000,
+      "records": [
+        {
+          "tree": "doc1",
+          "action": "/content/tileMap/t1/content/setProgramZoom",
+          "patches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/programZoom/dy",
+              "value": -165.42813110351562
+            }
+          ],
+          "inversePatches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/programZoom/dy",
+              "value": -162.94671630859375
+            }
+          ]
+        }
+      ],
+      "state": "complete"
+    },
+    {
+      "id": "e8",
+      "tree": "doc1",
+      "action": "/content/tileMap/t1/content/setProgramZoom",
+      "undoable": true,
+      "created": 1700000007000,
+      "records": [
+        {
+          "tree": "doc1",
+          "action": "/content/tileMap/t1/content/setProgramZoom",
+          "patches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/programZoom/dx",
+              "value": 7.1124267578125
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/programZoom/dy",
+              "value": -210.92086791992188
+            }
+          ],
+          "inversePatches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/programZoom/dx",
+              "value": 3.346923828125
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/programZoom/dy",
+              "value": -165.42813110351562
+            }
+          ]
+        }
+      ],
+      "state": "complete"
+    },
+    {
+      "id": "e9",
+      "tree": "doc1",
+      "action": "/content/tileMap/t1/content/setProgramZoom",
+      "undoable": true,
+      "created": 1700000008000,
+      "records": [
+        {
+          "tree": "doc1",
+          "action": "/content/tileMap/t1/content/setProgramZoom",
+          "patches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/programZoom/dx",
+              "value": -1.255126953125
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/programZoom/dy",
+              "value": -182.798095703125
+            }
+          ],
+          "inversePatches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/programZoom/dx",
+              "value": 7.1124267578125
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/programZoom/dy",
+              "value": -210.92086791992188
+            }
+          ]
+        }
+      ],
+      "state": "complete"
+    },
+    {
+      "id": "e10",
+      "tree": "doc1",
+      "action": "/content/tileMap/t1/content/setProgramZoom",
+      "undoable": true,
+      "created": 1700000009000,
+      "records": [
+        {
+          "tree": "doc1",
+          "action": "/content/tileMap/t1/content/setProgramZoom",
+          "patches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/programZoom/dx",
+              "value": -4.6021728515625
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/programZoom/dy",
+              "value": -172.87240600585938
+            }
+          ],
+          "inversePatches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/programZoom/dx",
+              "value": -1.255126953125
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/programZoom/dy",
+              "value": -182.798095703125
+            }
+          ]
+        }
+      ],
+      "state": "complete"
+    },
+    {
+      "id": "e11",
+      "tree": "doc1",
+      "action": "/content/tileMap/t1/content/setProgramZoom",
+      "undoable": true,
+      "created": 1700000010000,
+      "records": [
+        {
+          "tree": "doc1",
+          "action": "/content/tileMap/t1/content/setProgramZoom",
+          "patches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/programZoom/dx",
+              "value": -32.6334228515625
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/programZoom/dy",
+              "value": -69.06625366210938
+            }
+          ],
+          "inversePatches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/programZoom/dx",
+              "value": -4.6021728515625
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/programZoom/dy",
+              "value": -172.87240600585938
+            }
+          ]
+        }
+      ],
+      "state": "complete"
+    },
+    {
+      "id": "e12",
+      "tree": "doc1",
+      "action": "/content/tileMap/t1/content/setProgramZoom",
+      "undoable": true,
+      "created": 1700000011000,
+      "records": [
+        {
+          "tree": "doc1",
+          "action": "/content/tileMap/t1/content/setProgramZoom",
+          "patches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/programZoom/dx",
+              "value": -33.0517578125
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/programZoom/dy",
+              "value": -60.79486083984375
+            }
+          ],
+          "inversePatches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/programZoom/dx",
+              "value": -32.6334228515625
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/programZoom/dy",
+              "value": -69.06625366210938
+            }
+          ]
+        }
+      ],
+      "state": "complete"
+    },
+    {
+      "id": "e13",
+      "tree": "doc1",
+      "action": "/content/tileMap/t1/content/setProgramZoom",
+      "undoable": true,
+      "created": 1700000012000,
+      "records": [
+        {
+          "tree": "doc1",
+          "action": "/content/tileMap/t1/content/setProgramZoom",
+          "patches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/programZoom/dx",
+              "value": -33.47021484375
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/programZoom/dy",
+              "value": -57.072723388671875
+            }
+          ],
+          "inversePatches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/programZoom/dx",
+              "value": -33.0517578125
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/programZoom/dy",
+              "value": -60.79486083984375
+            }
+          ]
+        }
+      ],
+      "state": "complete"
+    },
+    {
+      "id": "e14",
+      "tree": "doc1",
+      "action": "/content/tileMap/t1/content/setProgramZoom",
+      "undoable": true,
+      "created": 1700000013000,
+      "records": [
+        {
+          "tree": "doc1",
+          "action": "/content/tileMap/t1/content/setProgramZoom",
+          "patches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/programZoom/dx",
+              "value": -33.8885498046875
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/programZoom/dy",
+              "value": -48.80133056640625
+            }
+          ],
+          "inversePatches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/programZoom/dx",
+              "value": -33.47021484375
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/programZoom/dy",
+              "value": -57.072723388671875
+            }
+          ]
+        }
+      ],
+      "state": "complete"
+    },
+    {
+      "id": "e15",
+      "tree": "doc1",
+      "action": "/content/tileMap/t1/content/setProgramZoom",
+      "undoable": true,
+      "created": 1700000014000,
+      "records": [
+        {
+          "tree": "doc1",
+          "action": "/content/tileMap/t1/content/setProgramZoom",
+          "patches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/programZoom/dx",
+              "value": -33.47021484375
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/programZoom/dy",
+              "value": -40.9434814453125
+            }
+          ],
+          "inversePatches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/programZoom/dx",
+              "value": -33.8885498046875
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/programZoom/dy",
+              "value": -48.80133056640625
+            }
+          ]
+        }
+      ],
+      "state": "complete"
+    },
+    {
+      "id": "e16",
+      "tree": "doc1",
+      "action": "/content/tileMap/t1/content/setProgramZoom",
+      "undoable": true,
+      "created": 1700000015000,
+      "records": [
+        {
+          "tree": "doc1",
+          "action": "/content/tileMap/t1/content/setProgramZoom",
+          "patches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/programZoom/dy",
+              "value": -37.22137451171875
+            }
+          ],
+          "inversePatches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/programZoom/dy",
+              "value": -40.9434814453125
+            }
+          ]
+        }
+      ],
+      "state": "complete"
+    },
+    {
+      "id": "e17",
+      "tree": "doc1",
+      "action": "/content/tileMap/t1/content/setProgramZoom",
+      "undoable": true,
+      "created": 1700000016000,
+      "records": [
+        {
+          "tree": "doc1",
+          "action": "/content/tileMap/t1/content/setProgramZoom",
+          "patches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/programZoom/dy",
+              "value": -28.122802734375
+            }
+          ],
+          "inversePatches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/programZoom/dy",
+              "value": -37.22137451171875
+            }
+          ]
+        }
+      ],
+      "state": "complete"
+    },
+    {
+      "id": "e18",
+      "tree": "doc1",
+      "action": "/content/tileMap/t1/content/setProgramZoom",
+      "undoable": true,
+      "created": 1700000017000,
+      "records": [
+        {
+          "tree": "doc1",
+          "action": "/content/tileMap/t1/content/setProgramZoom",
+          "patches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/programZoom/dy",
+              "value": -19.85137939453125
+            }
+          ],
+          "inversePatches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/programZoom/dy",
+              "value": -28.122802734375
+            }
+          ]
+        }
+      ],
+      "state": "complete"
+    },
+    {
+      "id": "e19",
+      "tree": "doc1",
+      "action": "/content/tileMap/t1/content/setProgramZoom",
+      "undoable": true,
+      "created": 1700000018000,
+      "records": [
+        {
+          "tree": "doc1",
+          "action": "/content/tileMap/t1/content/setProgramZoom",
+          "patches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/programZoom/dy",
+              "value": -15.7156982421875
+            }
+          ],
+          "inversePatches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/programZoom/dy",
+              "value": -19.85137939453125
+            }
+          ]
+        }
+      ],
+      "state": "complete"
+    },
+    {
+      "id": "e20",
+      "tree": "doc1",
+      "action": "/content/tileMap/t1/content/setProgramZoom",
+      "undoable": true,
+      "created": 1700000019000,
+      "records": [
+        {
+          "tree": "doc1",
+          "action": "/content/tileMap/t1/content/setProgramZoom",
+          "patches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/programZoom/dy",
+              "value": -6.61712646484375
+            }
+          ],
+          "inversePatches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/programZoom/dy",
+              "value": -15.7156982421875
+            }
+          ]
+        }
+      ],
+      "state": "complete"
+    },
+    {
+      "id": "e21",
+      "tree": "doc1",
+      "action": "/content/tileMap/t1/content/setProgramZoom",
+      "undoable": true,
+      "created": 1700000020000,
+      "records": [
+        {
+          "tree": "doc1",
+          "action": "/content/tileMap/t1/content/setProgramZoom",
+          "patches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/programZoom/dx",
+              "value": -33.8885498046875
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/programZoom/dy",
+              "value": 50.45556640625
+            }
+          ],
+          "inversePatches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/programZoom/dx",
+              "value": -33.47021484375
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/programZoom/dy",
+              "value": -6.61712646484375
+            }
+          ]
+        }
+      ],
+      "state": "complete"
+    },
+    {
+      "id": "e22",
+      "tree": "doc1",
+      "action": "/content/tileMap/t1/content/setProgram",
+      "undoable": true,
+      "created": 1700000021000,
+      "records": [
+        {
+          "tree": "doc1",
+          "action": "/content/tileMap/t1/content/setProgram",
+          "patches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/nodes/601/data/type",
+              "value": "O2"
+            }
+          ],
+          "inversePatches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/nodes/601/data/type",
+              "value": "none"
+            }
+          ]
+        }
+      ],
+      "state": "complete"
+    },
+    {
+      "id": "e23",
+      "tree": "doc1",
+      "action": "/content/tileMap/t1/content/setProgram",
+      "undoable": true,
+      "created": 1700000022000,
+      "records": [
+        {
+          "tree": "doc1",
+          "action": "/content/tileMap/t1/content/setProgram",
+          "patches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/nodes/601/data/type",
+              "value": "emg-reading"
+            }
+          ],
+          "inversePatches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/nodes/601/data/type",
+              "value": "O2"
+            }
+          ]
+        }
+      ],
+      "state": "complete"
+    },
+    {
+      "id": "e24",
+      "tree": "doc1",
+      "action": "/content/tileMap/t1/content/setProgram",
+      "undoable": true,
+      "created": 1700000023000,
+      "records": [
+        {
+          "tree": "doc1",
+          "action": "/content/tileMap/t1/content/setProgram",
+          "patches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/nodes/601/x",
+              "value": 98.35967909271697
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/nodes/601/y",
+              "value": 47.614244980276354
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/values/601/recentValues/nodeValue",
+              "value": "[null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null]"
+            }
+          ],
+          "inversePatches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/nodes/601/x",
+              "value": 95.236572265625
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/nodes/601/y",
+              "value": 98.6114501953125
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/values/601/recentValues/nodeValue",
+              "value": "[]"
+            }
+          ]
+        }
+      ],
+      "state": "complete"
+    },
+    {
+      "id": "e25",
+      "tree": "doc1",
+      "action": "/content/tileMap/t1/content/setProgram",
+      "undoable": true,
+      "created": 1700000024000,
+      "records": [
+        {
+          "tree": "doc1",
+          "action": "/content/tileMap/t1/content/setProgram",
+          "patches": [
+            {
+              "op": "add",
+              "path": "/content/tileMap/t1/content/program/nodes/606",
+              "value": {
+                "id": 606,
+                "name": "Number",
+                "x": 207.14117431640625,
+                "y": 255.36956787109375,
+                "inputs": {},
+                "outputs": {
+                  "num": {
+                    "connections": {}
+                  }
+                },
+                "data": {
+                  "plot": false,
+                  "orderedDisplayName": "Number 2",
+                  "nodeValueUnits": ""
+                }
+              }
+            },
+            {
+              "op": "add",
+              "path": "/content/tileMap/t1/content/program/values/606",
+              "value": {
+                "currentValues": {},
+                "recentValues": {}
+              }
+            }
+          ],
+          "inversePatches": [
+            {
+              "op": "remove",
+              "path": "/content/tileMap/t1/content/program/nodes/606"
+            },
+            {
+              "op": "remove",
+              "path": "/content/tileMap/t1/content/program/values/606"
+            }
+          ]
+        }
+      ],
+      "state": "complete"
+    },
+    {
+      "id": "e26",
+      "tree": "doc1",
+      "action": "/content/tileMap/t1/content/setProgram",
+      "undoable": true,
+      "created": 1700000025000,
+      "records": [
+        {
+          "tree": "doc1",
+          "action": "/content/tileMap/t1/content/setProgram",
+          "patches": [
+            {
+              "op": "add",
+              "path": "/content/tileMap/t1/content/program/values/606/currentValues/nodeValue",
+              "value": 0
+            },
+            {
+              "op": "add",
+              "path": "/content/tileMap/t1/content/program/values/606/recentValues/nodeValue",
+              "value": "[]"
+            }
+          ],
+          "inversePatches": [
+            {
+              "op": "remove",
+              "path": "/content/tileMap/t1/content/program/values/606/currentValues/nodeValue"
+            },
+            {
+              "op": "remove",
+              "path": "/content/tileMap/t1/content/program/values/606/recentValues/nodeValue"
+            }
+          ]
+        }
+      ],
+      "state": "complete"
+    },
+    {
+      "id": "e27",
+      "tree": "doc1",
+      "action": "/content/tileMap/t1/content/setProgram",
+      "undoable": true,
+      "created": 1700000026000,
+      "records": [
+        {
+          "tree": "doc1",
+          "action": "/content/tileMap/t1/content/setProgram",
+          "patches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/nodes/606/x",
+              "value": 118.06961096731128
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/nodes/606/y",
+              "value": 232.518043813367
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/values/606/recentValues/nodeValue",
+              "value": "[0,0]"
+            }
+          ],
+          "inversePatches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/nodes/606/x",
+              "value": 207.14117431640625
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/nodes/606/y",
+              "value": 255.36956787109375
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/values/606/recentValues/nodeValue",
+              "value": "[]"
+            }
+          ]
+        }
+      ],
+      "state": "complete"
+    },
+    {
+      "id": "e28",
+      "tree": "doc1",
+      "action": "/content/tileMap/t1/content/setProgram",
+      "undoable": true,
+      "created": 1700000027000,
+      "records": [
+        {
+          "tree": "doc1",
+          "action": "/content/tileMap/t1/content/setProgram",
+          "patches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/values/606/currentValues/nodeValue",
+              "value": 400
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/values/606/recentValues/nodeValue",
+              "value": "[0,0,0,0,0,0,0,0,0]"
+            }
+          ],
+          "inversePatches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/values/606/currentValues/nodeValue",
+              "value": 0
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/values/606/recentValues/nodeValue",
+              "value": "[0,0]"
+            }
+          ]
+        }
+      ],
+      "state": "complete"
+    },
+    {
+      "id": "e29",
+      "tree": "doc1",
+      "action": "/content/tileMap/t1/content/setProgram",
+      "undoable": true,
+      "created": 1700000028000,
+      "records": [
+        {
+          "tree": "doc1",
+          "action": "/content/tileMap/t1/content/setProgram",
+          "patches": [
+            {
+              "op": "add",
+              "path": "/content/tileMap/t1/content/program/nodes/611",
+              "value": {
+                "id": 611,
+                "name": "Math",
+                "x": 358.7996826171875,
+                "y": 156.47756958007812,
+                "inputs": {
+                  "num1": {
+                    "connections": {}
+                  },
+                  "num2": {
+                    "connections": {}
+                  }
+                },
+                "outputs": {
+                  "num": {
+                    "connections": {}
+                  }
+                },
+                "data": {
+                  "plot": false,
+                  "orderedDisplayName": "Math 3",
+                  "mathOperator": "Add"
+                }
+              }
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/values/606/recentValues/nodeValue",
+              "value": "[0,0,0,0,0,0,0,0,0,400]"
+            },
+            {
+              "op": "add",
+              "path": "/content/tileMap/t1/content/program/values/611",
+              "value": {
+                "currentValues": {},
+                "recentValues": {}
+              }
+            }
+          ],
+          "inversePatches": [
+            {
+              "op": "remove",
+              "path": "/content/tileMap/t1/content/program/nodes/611"
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/values/606/recentValues/nodeValue",
+              "value": "[0,0,0,0,0,0,0,0,0]"
+            },
+            {
+              "op": "remove",
+              "path": "/content/tileMap/t1/content/program/values/611"
+            }
+          ]
+        }
+      ],
+      "state": "complete"
+    },
+    {
+      "id": "e30",
+      "tree": "doc1",
+      "action": "/content/tileMap/t1/content/setProgram",
+      "undoable": true,
+      "created": 1700000029000,
+      "records": [
+        {
+          "tree": "doc1",
+          "action": "/content/tileMap/t1/content/setProgram",
+          "patches": [
+            {
+              "op": "add",
+              "path": "/content/tileMap/t1/content/program/values/611/currentValues/nodeValue"
+            },
+            {
+              "op": "add",
+              "path": "/content/tileMap/t1/content/program/values/611/recentValues/nodeValue",
+              "value": "[]"
+            }
+          ],
+          "inversePatches": [
+            {
+              "op": "remove",
+              "path": "/content/tileMap/t1/content/program/values/611/currentValues/nodeValue"
+            },
+            {
+              "op": "remove",
+              "path": "/content/tileMap/t1/content/program/values/611/recentValues/nodeValue"
+            }
+          ]
+        }
+      ],
+      "state": "complete"
+    },
+    {
+      "id": "e31",
+      "tree": "doc1",
+      "action": "/content/tileMap/t1/content/setProgram",
+      "undoable": true,
+      "created": 1700000030000,
+      "records": [
+        {
+          "tree": "doc1",
+          "action": "/content/tileMap/t1/content/setProgram",
+          "patches": [
+            {
+              "op": "add",
+              "path": "/content/tileMap/t1/content/program/nodes/601/outputs/num/connections/611-undefined-num1",
+              "value": {
+                "node": 611,
+                "input": "num1",
+                "data": {}
+              }
+            },
+            {
+              "op": "add",
+              "path": "/content/tileMap/t1/content/program/nodes/611/inputs/num1/connections/601-num-undefined",
+              "value": {
+                "node": 601,
+                "output": "num",
+                "data": {}
+              }
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/values/606/recentValues/nodeValue",
+              "value": "[0,0,0,0,0,0,0,0,0,400,400,400,400]"
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/values/611/recentValues/nodeValue",
+              "value": "[null,null,null]"
+            }
+          ],
+          "inversePatches": [
+            {
+              "op": "remove",
+              "path": "/content/tileMap/t1/content/program/nodes/601/outputs/num/connections/611-undefined-num1"
+            },
+            {
+              "op": "remove",
+              "path": "/content/tileMap/t1/content/program/nodes/611/inputs/num1/connections/601-num-undefined"
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/values/606/recentValues/nodeValue",
+              "value": "[0,0,0,0,0,0,0,0,0,400]"
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/values/611/recentValues/nodeValue",
+              "value": "[]"
+            }
+          ]
+        }
+      ],
+      "state": "complete"
+    },
+    {
+      "id": "e32",
+      "tree": "doc1",
+      "action": "/content/tileMap/t1/content/setProgram",
+      "undoable": true,
+      "created": 1700000031000,
+      "records": [
+        {
+          "tree": "doc1",
+          "action": "/content/tileMap/t1/content/setProgram",
+          "patches": [
+            {
+              "op": "add",
+              "path": "/content/tileMap/t1/content/program/nodes/606/outputs/num/connections/611-undefined-num2",
+              "value": {
+                "node": 611,
+                "input": "num2",
+                "data": {}
+              }
+            },
+            {
+              "op": "add",
+              "path": "/content/tileMap/t1/content/program/nodes/611/inputs/num2/connections/606-num-undefined",
+              "value": {
+                "node": 606,
+                "output": "num",
+                "data": {}
+              }
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/values/606/recentValues/nodeValue",
+              "value": "[0,0,0,0,0,0,0,0,0,400,400,400,400,400,400]"
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/values/611/recentValues/nodeValue",
+              "value": "[null,null,null,null,null]"
+            }
+          ],
+          "inversePatches": [
+            {
+              "op": "remove",
+              "path": "/content/tileMap/t1/content/program/nodes/606/outputs/num/connections/611-undefined-num2"
+            },
+            {
+              "op": "remove",
+              "path": "/content/tileMap/t1/content/program/nodes/611/inputs/num2/connections/606-num-undefined"
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/values/606/recentValues/nodeValue",
+              "value": "[0,0,0,0,0,0,0,0,0,400,400,400,400]"
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/values/611/recentValues/nodeValue",
+              "value": "[null,null,null]"
+            }
+          ]
+        }
+      ],
+      "state": "complete"
+    },
+    {
+      "id": "e33",
+      "tree": "doc1",
+      "action": "/content/tileMap/t1/content/setProgram",
+      "undoable": true,
+      "created": 1700000032000,
+      "records": [
+        {
+          "tree": "doc1",
+          "action": "/content/tileMap/t1/content/setProgram",
+          "patches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/nodes/611/data/mathOperator",
+              "value": "Divide"
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/values/606/recentValues/nodeValue",
+              "value": "[0,0,0,0,0,0,0,0,0,400,400,400,400,400,400,400,400]"
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/values/611/recentValues/nodeValue",
+              "value": "[null,null,null,null,null,null,null]"
+            }
+          ],
+          "inversePatches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/nodes/611/data/mathOperator",
+              "value": "Add"
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/values/606/recentValues/nodeValue",
+              "value": "[0,0,0,0,0,0,0,0,0,400,400,400,400,400,400]"
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/values/611/recentValues/nodeValue",
+              "value": "[null,null,null,null,null]"
+            }
+          ]
+        }
+      ],
+      "state": "complete"
+    },
+    {
+      "id": "e34",
+      "tree": "doc1",
+      "action": "/content/tileMap/t1/content/setProgramZoom",
+      "undoable": true,
+      "created": 1700000033000,
+      "records": [
+        {
+          "tree": "doc1",
+          "action": "/content/tileMap/t1/content/setProgramZoom",
+          "patches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/programZoom/scale",
+              "value": 0.95
+            }
+          ],
+          "inversePatches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/programZoom/scale",
+              "value": 1
+            }
+          ]
+        }
+      ],
+      "state": "complete"
+    },
+    {
+      "id": "e35",
+      "tree": "doc1",
+      "action": "/content/tileMap/t1/content/setProgramZoom",
+      "undoable": true,
+      "created": 1700000034000,
+      "records": [
+        {
+          "tree": "doc1",
+          "action": "/content/tileMap/t1/content/setProgramZoom",
+          "patches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/programZoom/scale",
+              "value": 0.8999999999999999
+            }
+          ],
+          "inversePatches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/programZoom/scale",
+              "value": 0.95
+            }
+          ]
+        }
+      ],
+      "state": "complete"
+    },
+    {
+      "id": "e36",
+      "tree": "doc1",
+      "action": "/content/tileMap/t1/content/setProgramZoom",
+      "undoable": true,
+      "created": 1700000035000,
+      "records": [
+        {
+          "tree": "doc1",
+          "action": "/content/tileMap/t1/content/setProgramZoom",
+          "patches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/programZoom/scale",
+              "value": 0.8499999999999999
+            }
+          ],
+          "inversePatches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/programZoom/scale",
+              "value": 0.8999999999999999
+            }
+          ]
+        }
+      ],
+      "state": "complete"
+    },
+    {
+      "id": "e37",
+      "tree": "doc1",
+      "action": "/content/tileMap/t1/content/setProgramZoom",
+      "undoable": true,
+      "created": 1700000036000,
+      "records": [
+        {
+          "tree": "doc1",
+          "action": "/content/tileMap/t1/content/setProgramZoom",
+          "patches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/programZoom/scale",
+              "value": 0.7999999999999998
+            }
+          ],
+          "inversePatches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/programZoom/scale",
+              "value": 0.8499999999999999
+            }
+          ]
+        }
+      ],
+      "state": "complete"
+    },
+    {
+      "id": "e38",
+      "tree": "doc1",
+      "action": "/content/tileMap/t1/content/setProgramZoom",
+      "undoable": true,
+      "created": 1700000037000,
+      "records": [
+        {
+          "tree": "doc1",
+          "action": "/content/tileMap/t1/content/setProgramZoom",
+          "patches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/programZoom/scale",
+              "value": 0.7499999999999998
+            }
+          ],
+          "inversePatches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/programZoom/scale",
+              "value": 0.7999999999999998
+            }
+          ]
+        }
+      ],
+      "state": "complete"
+    },
+    {
+      "id": "e39",
+      "tree": "doc1",
+      "action": "/content/tileMap/t1/content/setProgramZoom",
+      "undoable": true,
+      "created": 1700000038000,
+      "records": [
+        {
+          "tree": "doc1",
+          "action": "/content/tileMap/t1/content/setProgramZoom",
+          "patches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/programZoom/scale",
+              "value": 0.6999999999999997
+            }
+          ],
+          "inversePatches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/programZoom/scale",
+              "value": 0.7499999999999998
+            }
+          ]
+        }
+      ],
+      "state": "complete"
+    },
+    {
+      "id": "e40",
+      "tree": "doc1",
+      "action": "/content/tileMap/t1/content/setProgramZoom",
+      "undoable": true,
+      "created": 1700000039000,
+      "records": [
+        {
+          "tree": "doc1",
+          "action": "/content/tileMap/t1/content/setProgramZoom",
+          "patches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/programZoom/scale",
+              "value": 0.6499999999999997
+            }
+          ],
+          "inversePatches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/programZoom/scale",
+              "value": 0.6999999999999997
+            }
+          ]
+        }
+      ],
+      "state": "complete"
+    },
+    {
+      "id": "e41",
+      "tree": "doc1",
+      "action": "/content/tileMap/t1/content/setProgram",
+      "undoable": true,
+      "created": 1700000040000,
+      "records": [
+        {
+          "tree": "doc1",
+          "action": "/content/tileMap/t1/content/setProgram",
+          "patches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/values/606/recentValues/nodeValue",
+              "value": "[400,400,400,400,400,400,400,400,400,400,400,400,400,400,400,400,400]"
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/values/611/recentValues/nodeValue",
+              "value": "[null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null]"
+            }
+          ],
+          "inversePatches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/values/606/recentValues/nodeValue",
+              "value": "[0,0,0,0,0,0,0,0,0,400,400,400,400,400,400,400,400]"
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/values/611/recentValues/nodeValue",
+              "value": "[null,null,null,null,null,null,null]"
+            }
+          ]
+        }
+      ],
+      "state": "complete"
+    },
+    {
+      "id": "e42",
+      "tree": "doc1",
+      "action": "/content/tileMap/t1/content/setProgram",
+      "undoable": true,
+      "created": 1700000041000,
+      "records": [
+        {
+          "tree": "doc1",
+          "action": "/content/tileMap/t1/content/setProgram",
+          "patches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/nodes/601/data/plot",
+              "value": true
+            }
+          ],
+          "inversePatches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/nodes/601/data/plot",
+              "value": false
+            }
+          ]
+        }
+      ],
+      "state": "complete"
+    },
+    {
+      "id": "e43",
+      "tree": "doc1",
+      "action": "/content/tileMap/t1/content/setProgramZoom",
+      "undoable": true,
+      "created": 1700000042000,
+      "records": [
+        {
+          "tree": "doc1",
+          "action": "/content/tileMap/t1/content/setProgramZoom",
+          "patches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/programZoom/dx",
+              "value": 48.53173828125
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/programZoom/dy",
+              "value": -270.88856506347656
+            }
+          ],
+          "inversePatches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/programZoom/dx",
+              "value": -33.8885498046875
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/programZoom/dy",
+              "value": 50.45556640625
+            }
+          ]
+        }
+      ],
+      "state": "complete"
+    },
+    {
+      "id": "e44",
+      "tree": "doc1",
+      "action": "/content/tileMap/t1/content/setProgramZoom",
+      "undoable": true,
+      "created": 1700000043000,
+      "records": [
+        {
+          "tree": "doc1",
+          "action": "/content/tileMap/t1/content/setProgramZoom",
+          "patches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/programZoom/dx",
+              "value": 52.7154541015625
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/programZoom/dy",
+              "value": -287.8449401855469
+            }
+          ],
+          "inversePatches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/programZoom/dx",
+              "value": 48.53173828125
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/programZoom/dy",
+              "value": -270.88856506347656
+            }
+          ]
+        }
+      ],
+      "state": "complete"
+    },
+    {
+      "id": "e45",
+      "tree": "doc1",
+      "action": "/content/tileMap/t1/content/setProgramZoom",
+      "undoable": true,
+      "created": 1700000044000,
+      "records": [
+        {
+          "tree": "doc1",
+          "action": "/content/tileMap/t1/content/setProgramZoom",
+          "patches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/programZoom/dx",
+              "value": 53.9705810546875
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/programZoom/dy",
+              "value": -293.6349182128906
+            }
+          ],
+          "inversePatches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/programZoom/dx",
+              "value": 52.7154541015625
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/programZoom/dy",
+              "value": -287.8449401855469
+            }
+          ]
+        }
+      ],
+      "state": "complete"
+    },
+    {
+      "id": "e46",
+      "tree": "doc1",
+      "action": "/content/tileMap/t1/content/setProgramZoom",
+      "undoable": true,
+      "created": 1700000045000,
+      "records": [
+        {
+          "tree": "doc1",
+          "action": "/content/tileMap/t1/content/setProgramZoom",
+          "patches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/programZoom/dx",
+              "value": 58.154296875
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/programZoom/dy",
+              "value": -303.56060791015625
+            }
+          ],
+          "inversePatches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/programZoom/dx",
+              "value": 53.9705810546875
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/programZoom/dy",
+              "value": -293.6349182128906
+            }
+          ]
+        }
+      ],
+      "state": "complete"
+    },
+    {
+      "id": "e47",
+      "tree": "doc1",
+      "action": "/content/tileMap/t1/content/setProgramZoom",
+      "undoable": true,
+      "created": 1700000046000,
+      "records": [
+        {
+          "tree": "doc1",
+          "action": "/content/tileMap/t1/content/setProgramZoom",
+          "patches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/programZoom/dx",
+              "value": 74.889404296875
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/programZoom/dy",
+              "value": -323.4119873046875
+            }
+          ],
+          "inversePatches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/programZoom/dx",
+              "value": 58.154296875
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/programZoom/dy",
+              "value": -303.56060791015625
+            }
+          ]
+        }
+      ],
+      "state": "complete"
+    },
+    {
+      "id": "e48",
+      "tree": "manager",
+      "action": "undo",
+      "undoable": false,
+      "created": 1700000047000,
+      "records": [
+        {
+          "tree": "doc1",
+          "action": "/applyPatchesFromManager",
+          "patches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/programZoom/dy",
+              "value": -303.56060791015625
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/programZoom/dx",
+              "value": 58.154296875
+            }
+          ],
+          "inversePatches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/programZoom/dy",
+              "value": -323.4119873046875
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/programZoom/dx",
+              "value": 74.889404296875
+            }
+          ]
+        }
+      ],
+      "state": "complete"
+    },
+    {
+      "id": "e49",
+      "tree": "manager",
+      "action": "undo",
+      "undoable": false,
+      "created": 1700000048000,
+      "records": [
+        {
+          "tree": "doc1",
+          "action": "/applyPatchesFromManager",
+          "patches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/programZoom/dy",
+              "value": -293.6349182128906
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/programZoom/dx",
+              "value": 53.9705810546875
+            }
+          ],
+          "inversePatches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/programZoom/dy",
+              "value": -303.56060791015625
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/programZoom/dx",
+              "value": 58.154296875
+            }
+          ]
+        }
+      ],
+      "state": "complete"
+    },
+    {
+      "id": "e50",
+      "tree": "manager",
+      "action": "undo",
+      "undoable": false,
+      "created": 1700000049000,
+      "records": [
+        {
+          "tree": "doc1",
+          "action": "/applyPatchesFromManager",
+          "patches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/programZoom/dy",
+              "value": -287.8449401855469
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/programZoom/dx",
+              "value": 52.7154541015625
+            }
+          ],
+          "inversePatches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/programZoom/dy",
+              "value": -293.6349182128906
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/programZoom/dx",
+              "value": 53.9705810546875
+            }
+          ]
+        }
+      ],
+      "state": "complete"
+    },
+    {
+      "id": "e51",
+      "tree": "manager",
+      "action": "undo",
+      "undoable": false,
+      "created": 1700000050000,
+      "records": [
+        {
+          "tree": "doc1",
+          "action": "/applyPatchesFromManager",
+          "patches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/programZoom/dy",
+              "value": -270.88856506347656
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/programZoom/dx",
+              "value": 48.53173828125
+            }
+          ],
+          "inversePatches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/programZoom/dy",
+              "value": -287.8449401855469
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/programZoom/dx",
+              "value": 52.7154541015625
+            }
+          ]
+        }
+      ],
+      "state": "complete"
+    },
+    {
+      "id": "e52",
+      "tree": "manager",
+      "action": "undo",
+      "undoable": false,
+      "created": 1700000051000,
+      "records": [
+        {
+          "tree": "doc1",
+          "action": "/applyPatchesFromManager",
+          "patches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/programZoom/dy",
+              "value": 50.45556640625
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/programZoom/dx",
+              "value": -33.8885498046875
+            }
+          ],
+          "inversePatches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/programZoom/dy",
+              "value": -270.88856506347656
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/programZoom/dx",
+              "value": 48.53173828125
+            }
+          ]
+        }
+      ],
+      "state": "complete"
+    },
+    {
+      "id": "e53",
+      "tree": "manager",
+      "action": "undo",
+      "undoable": false,
+      "created": 1700000052000,
+      "records": [
+        {
+          "tree": "doc1",
+          "action": "/applyPatchesFromManager",
+          "patches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/nodes/601/data/plot",
+              "value": false
+            }
+          ],
+          "inversePatches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/nodes/601/data/plot",
+              "value": true
+            }
+          ]
+        }
+      ],
+      "state": "complete"
+    },
+    {
+      "id": "e54",
+      "tree": "manager",
+      "action": "undo",
+      "undoable": false,
+      "created": 1700000053000,
+      "records": [
+        {
+          "tree": "doc1",
+          "action": "/applyPatchesFromManager",
+          "patches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/values/611/recentValues/nodeValue",
+              "value": "[null,null,null,null,null,null,null]"
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/values/606/recentValues/nodeValue",
+              "value": "[0,0,0,0,0,0,0,0,0,400,400,400,400,400,400,400,400]"
+            }
+          ],
+          "inversePatches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/values/611/recentValues/nodeValue",
+              "value": "[null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null]"
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/values/606/recentValues/nodeValue",
+              "value": "[400,400,400,400,400,400,400,400,400,400,400,400,400,400,400,400,400]"
+            }
+          ]
+        }
+      ],
+      "state": "complete"
+    },
+    {
+      "id": "e55",
+      "tree": "manager",
+      "action": "undo",
+      "undoable": false,
+      "created": 1700000054000,
+      "records": [
+        {
+          "tree": "doc1",
+          "action": "/applyPatchesFromManager",
+          "patches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/programZoom/scale",
+              "value": 0.6999999999999997
+            }
+          ],
+          "inversePatches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/programZoom/scale",
+              "value": 0.6499999999999997
+            }
+          ]
+        }
+      ],
+      "state": "complete"
+    },
+    {
+      "id": "e56",
+      "tree": "manager",
+      "action": "undo",
+      "undoable": false,
+      "created": 1700000055000,
+      "records": [
+        {
+          "tree": "doc1",
+          "action": "/applyPatchesFromManager",
+          "patches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/programZoom/scale",
+              "value": 0.7499999999999998
+            }
+          ],
+          "inversePatches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/programZoom/scale",
+              "value": 0.6999999999999997
+            }
+          ]
+        }
+      ],
+      "state": "complete"
+    },
+    {
+      "id": "e57",
+      "tree": "manager",
+      "action": "undo",
+      "undoable": false,
+      "created": 1700000056000,
+      "records": [
+        {
+          "tree": "doc1",
+          "action": "/applyPatchesFromManager",
+          "patches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/programZoom/scale",
+              "value": 0.7999999999999998
+            }
+          ],
+          "inversePatches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/programZoom/scale",
+              "value": 0.7499999999999998
+            }
+          ]
+        }
+      ],
+      "state": "complete"
+    },
+    {
+      "id": "e58",
+      "tree": "manager",
+      "action": "undo",
+      "undoable": false,
+      "created": 1700000057000,
+      "records": [
+        {
+          "tree": "doc1",
+          "action": "/applyPatchesFromManager",
+          "patches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/programZoom/scale",
+              "value": 0.8499999999999999
+            }
+          ],
+          "inversePatches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/programZoom/scale",
+              "value": 0.7999999999999998
+            }
+          ]
+        }
+      ],
+      "state": "complete"
+    },
+    {
+      "id": "e59",
+      "tree": "doc1",
+      "action": "/content/tileMap/t1/content/setProgram",
+      "undoable": true,
+      "created": 1700000058000,
+      "records": [
+        {
+          "tree": "doc1",
+          "action": "/content/tileMap/t1/content/setProgram",
+          "patches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/nodes/601/data/plot",
+              "value": true
+            },
+            {
+              "op": "add",
+              "path": "/content/tileMap/t1/content/program/nodes/638",
+              "value": {
+                "id": 638,
+                "name": "Sensor",
+                "x": 112.37511268028851,
+                "y": 697.5598614032456,
+                "inputs": {},
+                "outputs": {
+                  "num": {
+                    "connections": {}
+                  }
+                },
+                "data": {
+                  "plot": false,
+                  "orderedDisplayName": "Sensor 4",
+                  "type": "none",
+                  "sensor": "none",
+                  "virtual": false
+                }
+              }
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/values/606/recentValues/nodeValue",
+              "value": "[400,400,400,400,400,400,400,400,400,400,400,400,400,400,400,400,400]"
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/values/611/recentValues/nodeValue",
+              "value": "[null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null]"
+            },
+            {
+              "op": "add",
+              "path": "/content/tileMap/t1/content/program/values/638",
+              "value": {
+                "currentValues": {},
+                "recentValues": {}
+              }
+            }
+          ],
+          "inversePatches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/nodes/601/data/plot",
+              "value": false
+            },
+            {
+              "op": "remove",
+              "path": "/content/tileMap/t1/content/program/nodes/638"
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/values/606/recentValues/nodeValue",
+              "value": "[0,0,0,0,0,0,0,0,0,400,400,400,400,400,400,400,400]"
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/values/611/recentValues/nodeValue",
+              "value": "[null,null,null,null,null,null,null]"
+            },
+            {
+              "op": "remove",
+              "path": "/content/tileMap/t1/content/program/values/638"
+            }
+          ]
+        }
+      ],
+      "state": "complete"
+    },
+    {
+      "id": "e60",
+      "tree": "doc1",
+      "action": "/content/tileMap/t1/content/setProgram",
+      "undoable": true,
+      "created": 1700000059000,
+      "records": [
+        {
+          "tree": "doc1",
+          "action": "/content/tileMap/t1/content/setProgram",
+          "patches": [
+            {
+              "op": "add",
+              "path": "/content/tileMap/t1/content/program/values/638/currentValues/nodeValue"
+            },
+            {
+              "op": "add",
+              "path": "/content/tileMap/t1/content/program/values/638/recentValues/nodeValue",
+              "value": "[]"
+            }
+          ],
+          "inversePatches": [
+            {
+              "op": "remove",
+              "path": "/content/tileMap/t1/content/program/values/638/currentValues/nodeValue"
+            },
+            {
+              "op": "remove",
+              "path": "/content/tileMap/t1/content/program/values/638/recentValues/nodeValue"
+            }
+          ]
+        }
+      ],
+      "state": "complete"
+    },
+    {
+      "id": "e61",
+      "tree": "doc1",
+      "action": "/content/tileMap/t1/content/setProgram",
+      "undoable": true,
+      "created": 1700000060000,
+      "records": [
+        {
+          "tree": "doc1",
+          "action": "/content/tileMap/t1/content/setProgram",
+          "patches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/nodes/638/x",
+              "value": 31.799709202779212
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/nodes/638/y",
+              "value": 682.2904648722185
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/values/638/recentValues/nodeValue",
+              "value": "[null,null]"
+            }
+          ],
+          "inversePatches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/nodes/638/x",
+              "value": 112.37511268028851
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/nodes/638/y",
+              "value": 697.5598614032456
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/values/638/recentValues/nodeValue",
+              "value": "[]"
+            }
+          ]
+        }
+      ],
+      "state": "complete"
+    },
+    {
+      "id": "e62",
+      "tree": "doc1",
+      "action": "/content/tileMap/t1/content/setProgram",
+      "undoable": true,
+      "created": 1700000061000,
+      "records": [
+        {
+          "tree": "doc1",
+          "action": "/content/tileMap/t1/content/setProgram",
+          "patches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/nodes/638/data/type",
+              "value": "emg-reading"
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/values/638/recentValues/nodeValue",
+              "value": "[]"
+            }
+          ],
+          "inversePatches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/nodes/638/data/type",
+              "value": "none"
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/values/638/recentValues/nodeValue",
+              "value": "[null,null]"
+            }
+          ]
+        }
+      ],
+      "state": "complete"
+    },
+    {
+      "id": "e63",
+      "tree": "doc1",
+      "action": "/content/tileMap/t1/content/setProgram",
+      "undoable": true,
+      "created": 1700000062000,
+      "records": [
+        {
+          "tree": "doc1",
+          "action": "/content/tileMap/t1/content/setProgram",
+          "patches": [
+            {
+              "op": "add",
+              "path": "/content/tileMap/t1/content/program/nodes/651",
+              "value": {
+                "id": 651,
+                "name": "Number",
+                "x": 129.5993276742789,
+                "y": 879.3661733774043,
+                "inputs": {},
+                "outputs": {
+                  "num": {
+                    "connections": {}
+                  }
+                },
+                "data": {
+                  "plot": false,
+                  "orderedDisplayName": "Number 5",
+                  "nodeValueUnits": ""
+                }
+              }
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/values/638/recentValues/nodeValue",
+              "value": "[null,null,null,null,null,null]"
+            },
+            {
+              "op": "add",
+              "path": "/content/tileMap/t1/content/program/values/651",
+              "value": {
+                "currentValues": {},
+                "recentValues": {}
+              }
+            }
+          ],
+          "inversePatches": [
+            {
+              "op": "remove",
+              "path": "/content/tileMap/t1/content/program/nodes/651"
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/values/638/recentValues/nodeValue",
+              "value": "[]"
+            },
+            {
+              "op": "remove",
+              "path": "/content/tileMap/t1/content/program/values/651"
+            }
+          ]
+        }
+      ],
+      "state": "complete"
+    },
+    {
+      "id": "e64",
+      "tree": "doc1",
+      "action": "/content/tileMap/t1/content/setProgram",
+      "undoable": true,
+      "created": 1700000063000,
+      "records": [
+        {
+          "tree": "doc1",
+          "action": "/content/tileMap/t1/content/setProgram",
+          "patches": [
+            {
+              "op": "add",
+              "path": "/content/tileMap/t1/content/program/values/651/currentValues/nodeValue",
+              "value": 0
+            },
+            {
+              "op": "add",
+              "path": "/content/tileMap/t1/content/program/values/651/recentValues/nodeValue",
+              "value": "[]"
+            }
+          ],
+          "inversePatches": [
+            {
+              "op": "remove",
+              "path": "/content/tileMap/t1/content/program/values/651/currentValues/nodeValue"
+            },
+            {
+              "op": "remove",
+              "path": "/content/tileMap/t1/content/program/values/651/recentValues/nodeValue"
+            }
+          ]
+        }
+      ],
+      "state": "complete"
+    },
+    {
+      "id": "e65",
+      "tree": "doc1",
+      "action": "/content/tileMap/t1/content/setProgram",
+      "undoable": true,
+      "created": 1700000064000,
+      "records": [
+        {
+          "tree": "doc1",
+          "action": "/content/tileMap/t1/content/setProgram",
+          "patches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/nodes/651/x",
+              "value": 49.6855451493233
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/nodes/651/y",
+              "value": 873.2038775170168
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/values/638/recentValues/nodeValue",
+              "value": "[null,null,null,null,null,null,null]"
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/values/651/recentValues/nodeValue",
+              "value": "[0]"
+            }
+          ],
+          "inversePatches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/nodes/651/x",
+              "value": 129.5993276742789
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/nodes/651/y",
+              "value": 879.3661733774043
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/values/638/recentValues/nodeValue",
+              "value": "[null,null,null,null,null,null]"
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/values/651/recentValues/nodeValue",
+              "value": "[]"
+            }
+          ]
+        }
+      ],
+      "state": "complete"
+    },
+    {
+      "id": "e66",
+      "tree": "doc1",
+      "action": "/content/tileMap/t1/content/setProgram",
+      "undoable": true,
+      "created": 1700000065000,
+      "records": [
+        {
+          "tree": "doc1",
+          "action": "/content/tileMap/t1/content/setProgram",
+          "patches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/values/638/recentValues/nodeValue",
+              "value": "[null,null,null,null,null,null,null,null,null,null,null]"
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/values/651/currentValues/nodeValue",
+              "value": 400
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/values/651/recentValues/nodeValue",
+              "value": "[0,0,0,0,0]"
+            }
+          ],
+          "inversePatches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/values/638/recentValues/nodeValue",
+              "value": "[null,null,null,null,null,null,null]"
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/values/651/currentValues/nodeValue",
+              "value": 0
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/values/651/recentValues/nodeValue",
+              "value": "[0]"
+            }
+          ]
+        }
+      ],
+      "state": "complete"
+    },
+    {
+      "id": "e67",
+      "tree": "doc1",
+      "action": "/content/tileMap/t1/content/setProgram",
+      "undoable": true,
+      "created": 1700000066000,
+      "records": [
+        {
+          "tree": "doc1",
+          "action": "/content/tileMap/t1/content/setProgram",
+          "patches": [
+            {
+              "op": "add",
+              "path": "/content/tileMap/t1/content/program/nodes/662",
+              "value": {
+                "id": 662,
+                "name": "Math",
+                "x": 316.69057992788476,
+                "y": 788.5721998948321,
+                "inputs": {
+                  "num1": {
+                    "connections": {}
+                  },
+                  "num2": {
+                    "connections": {}
+                  }
+                },
+                "outputs": {
+                  "num": {
+                    "connections": {}
+                  }
+                },
+                "data": {
+                  "plot": false,
+                  "orderedDisplayName": "Math 6",
+                  "mathOperator": "Add"
+                }
+              }
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/values/638/recentValues/nodeValue",
+              "value": "[null,null,null,null,null,null,null,null,null,null,null,null]"
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/values/651/recentValues/nodeValue",
+              "value": "[0,0,0,0,0,400]"
+            },
+            {
+              "op": "add",
+              "path": "/content/tileMap/t1/content/program/values/662",
+              "value": {
+                "currentValues": {},
+                "recentValues": {}
+              }
+            }
+          ],
+          "inversePatches": [
+            {
+              "op": "remove",
+              "path": "/content/tileMap/t1/content/program/nodes/662"
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/values/638/recentValues/nodeValue",
+              "value": "[null,null,null,null,null,null,null,null,null,null,null]"
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/values/651/recentValues/nodeValue",
+              "value": "[0,0,0,0,0]"
+            },
+            {
+              "op": "remove",
+              "path": "/content/tileMap/t1/content/program/values/662"
+            }
+          ]
+        }
+      ],
+      "state": "complete"
+    },
+    {
+      "id": "e68",
+      "tree": "doc1",
+      "action": "/content/tileMap/t1/content/setProgram",
+      "undoable": true,
+      "created": 1700000067000,
+      "records": [
+        {
+          "tree": "doc1",
+          "action": "/content/tileMap/t1/content/setProgram",
+          "patches": [
+            {
+              "op": "add",
+              "path": "/content/tileMap/t1/content/program/values/662/currentValues/nodeValue"
+            },
+            {
+              "op": "add",
+              "path": "/content/tileMap/t1/content/program/values/662/recentValues/nodeValue",
+              "value": "[]"
+            }
+          ],
+          "inversePatches": [
+            {
+              "op": "remove",
+              "path": "/content/tileMap/t1/content/program/values/662/currentValues/nodeValue"
+            },
+            {
+              "op": "remove",
+              "path": "/content/tileMap/t1/content/program/values/662/recentValues/nodeValue"
+            }
+          ]
+        }
+      ],
+      "state": "complete"
+    },
+    {
+      "id": "e69",
+      "tree": "doc1",
+      "action": "/content/tileMap/t1/content/setProgram",
+      "undoable": true,
+      "created": 1700000068000,
+      "records": [
+        {
+          "tree": "doc1",
+          "action": "/content/tileMap/t1/content/setProgram",
+          "patches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/nodes/662/data/mathOperator",
+              "value": "Divide"
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/values/638/recentValues/nodeValue",
+              "value": "[null,null,null,null,null,null,null,null,null,null,null,null,null,null]"
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/values/651/recentValues/nodeValue",
+              "value": "[0,0,0,0,0,400,400,400]"
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/values/662/recentValues/nodeValue",
+              "value": "[null,null]"
+            }
+          ],
+          "inversePatches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/nodes/662/data/mathOperator",
+              "value": "Add"
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/values/638/recentValues/nodeValue",
+              "value": "[null,null,null,null,null,null,null,null,null,null,null,null]"
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/values/651/recentValues/nodeValue",
+              "value": "[0,0,0,0,0,400]"
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/values/662/recentValues/nodeValue",
+              "value": "[]"
+            }
+          ]
+        }
+      ],
+      "state": "complete"
+    },
+    {
+      "id": "e70",
+      "tree": "doc1",
+      "action": "/content/tileMap/t1/content/setProgram",
+      "undoable": true,
+      "created": 1700000069000,
+      "records": [
+        {
+          "tree": "doc1",
+          "action": "/content/tileMap/t1/content/setProgram",
+          "patches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/values/638/recentValues/nodeValue",
+              "value": "[null,null,null,null,null,null,null,null,null,null,null,null,null,null,null]"
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/values/651/recentValues/nodeValue",
+              "value": "[0,0,0,0,0,400,400,400,400]"
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/values/662/recentValues/nodeValue",
+              "value": "[null,null,null]"
+            }
+          ],
+          "inversePatches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/values/638/recentValues/nodeValue",
+              "value": "[null,null,null,null,null,null,null,null,null,null,null,null,null,null]"
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/values/651/recentValues/nodeValue",
+              "value": "[0,0,0,0,0,400,400,400]"
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/values/662/recentValues/nodeValue",
+              "value": "[null,null]"
+            }
+          ]
+        }
+      ],
+      "state": "complete"
+    },
+    {
+      "id": "e71",
+      "tree": "doc1",
+      "action": "/content/tileMap/t1/content/setProgram",
+      "undoable": true,
+      "created": 1700000070000,
+      "records": [
+        {
+          "tree": "doc1",
+          "action": "/content/tileMap/t1/content/setProgram",
+          "patches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/values/638/recentValues/nodeValue",
+              "value": "[null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null]"
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/values/651/recentValues/nodeValue",
+              "value": "[0,0,0,0,0,400,400,400,400,400]"
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/values/662/recentValues/nodeValue",
+              "value": "[null,null,null,null]"
+            }
+          ],
+          "inversePatches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/values/638/recentValues/nodeValue",
+              "value": "[null,null,null,null,null,null,null,null,null,null,null,null,null,null,null]"
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/values/651/recentValues/nodeValue",
+              "value": "[0,0,0,0,0,400,400,400,400]"
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/values/662/recentValues/nodeValue",
+              "value": "[null,null,null]"
+            }
+          ]
+        }
+      ],
+      "state": "complete"
+    },
+    {
+      "id": "e72",
+      "tree": "doc1",
+      "action": "/content/tileMap/t1/content/setProgram",
+      "undoable": true,
+      "created": 1700000071000,
+      "records": [
+        {
+          "tree": "doc1",
+          "action": "/content/tileMap/t1/content/setProgram",
+          "patches": [
+            {
+              "op": "add",
+              "path": "/content/tileMap/t1/content/program/nodes/638/outputs/num/connections/662-undefined-num1",
+              "value": {
+                "node": 662,
+                "input": "num1",
+                "data": {}
+              }
+            },
+            {
+              "op": "add",
+              "path": "/content/tileMap/t1/content/program/nodes/662/inputs/num1/connections/638-num-undefined",
+              "value": {
+                "node": 638,
+                "output": "num",
+                "data": {}
+              }
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/values/638/recentValues/nodeValue",
+              "value": "[null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null]"
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/values/651/recentValues/nodeValue",
+              "value": "[0,0,0,0,0,400,400,400,400,400,400,400,400]"
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/values/662/recentValues/nodeValue",
+              "value": "[null,null,null,null,null,null,null]"
+            }
+          ],
+          "inversePatches": [
+            {
+              "op": "remove",
+              "path": "/content/tileMap/t1/content/program/nodes/638/outputs/num/connections/662-undefined-num1"
+            },
+            {
+              "op": "remove",
+              "path": "/content/tileMap/t1/content/program/nodes/662/inputs/num1/connections/638-num-undefined"
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/values/638/recentValues/nodeValue",
+              "value": "[null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null]"
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/values/651/recentValues/nodeValue",
+              "value": "[0,0,0,0,0,400,400,400,400,400]"
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/values/662/recentValues/nodeValue",
+              "value": "[null,null,null,null]"
+            }
+          ]
+        }
+      ],
+      "state": "complete"
+    },
+    {
+      "id": "e73",
+      "tree": "doc1",
+      "action": "/content/tileMap/t1/content/setProgram",
+      "undoable": true,
+      "created": 1700000072000,
+      "records": [
+        {
+          "tree": "doc1",
+          "action": "/content/tileMap/t1/content/setProgram",
+          "patches": [
+            {
+              "op": "add",
+              "path": "/content/tileMap/t1/content/program/nodes/651/outputs/num/connections/662-undefined-num2",
+              "value": {
+                "node": 662,
+                "input": "num2",
+                "data": {}
+              }
+            },
+            {
+              "op": "add",
+              "path": "/content/tileMap/t1/content/program/nodes/662/inputs/num2/connections/651-num-undefined",
+              "value": {
+                "node": 651,
+                "output": "num",
+                "data": {}
+              }
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/values/651/recentValues/nodeValue",
+              "value": "[0,0,0,0,0,400,400,400,400,400,400,400,400,400]"
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/values/662/recentValues/nodeValue",
+              "value": "[null,null,null,null,null,null,null,null]"
+            }
+          ],
+          "inversePatches": [
+            {
+              "op": "remove",
+              "path": "/content/tileMap/t1/content/program/nodes/651/outputs/num/connections/662-undefined-num2"
+            },
+            {
+              "op": "remove",
+              "path": "/content/tileMap/t1/content/program/nodes/662/inputs/num2/connections/651-num-undefined"
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/values/651/recentValues/nodeValue",
+              "value": "[0,0,0,0,0,400,400,400,400,400,400,400,400]"
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/values/662/recentValues/nodeValue",
+              "value": "[null,null,null,null,null,null,null]"
+            }
+          ]
+        }
+      ],
+      "state": "complete"
+    },
+    {
+      "id": "e74",
+      "tree": "doc1",
+      "action": "/content/tileMap/t1/content/setProgram",
+      "undoable": true,
+      "created": 1700000073000,
+      "records": [
+        {
+          "tree": "doc1",
+          "action": "/content/tileMap/t1/content/setProgram",
+          "patches": [
+            {
+              "op": "add",
+              "path": "/content/tileMap/t1/content/program/nodes/687",
+              "value": {
+                "id": 687,
+                "name": "Live Output",
+                "x": 597.7122145432695,
+                "y": 869.0655048076927,
+                "inputs": {
+                  "nodeValue": {
+                    "connections": {}
+                  }
+                },
+                "outputs": {},
+                "data": {
+                  "orderedDisplayName": "Live Output 7",
+                  "outputType": "Gripper 2.0",
+                  "hubSelect": "micro:bit hub a",
+                  "liveOutputType": "Gripper 2.0"
+                }
+              }
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/values/651/recentValues/nodeValue",
+              "value": "[400,400,400,400,400,400,400,400,400,400,400,400,400,400,400,400,400]"
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/values/662/recentValues/nodeValue",
+              "value": "[null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null]"
+            },
+            {
+              "op": "add",
+              "path": "/content/tileMap/t1/content/program/values/687",
+              "value": {
+                "currentValues": {},
+                "recentValues": {}
+              }
+            }
+          ],
+          "inversePatches": [
+            {
+              "op": "remove",
+              "path": "/content/tileMap/t1/content/program/nodes/687"
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/values/651/recentValues/nodeValue",
+              "value": "[0,0,0,0,0,400,400,400,400,400,400,400,400,400]"
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/values/662/recentValues/nodeValue",
+              "value": "[null,null,null,null,null,null,null,null]"
+            },
+            {
+              "op": "remove",
+              "path": "/content/tileMap/t1/content/program/values/687"
+            }
+          ]
+        }
+      ],
+      "state": "complete"
+    },
+    {
+      "id": "e75",
+      "tree": "doc1",
+      "action": "/content/tileMap/t1/content/setProgram",
+      "undoable": true,
+      "created": 1700000074000,
+      "records": [
+        {
+          "tree": "doc1",
+          "action": "/content/tileMap/t1/content/setProgram",
+          "patches": [
+            {
+              "op": "add",
+              "path": "/content/tileMap/t1/content/program/values/687/currentValues/nodeValue",
+              "value": 0
+            },
+            {
+              "op": "add",
+              "path": "/content/tileMap/t1/content/program/values/687/recentValues/nodeValue",
+              "value": "[]"
+            }
+          ],
+          "inversePatches": [
+            {
+              "op": "remove",
+              "path": "/content/tileMap/t1/content/program/values/687/currentValues/nodeValue"
+            },
+            {
+              "op": "remove",
+              "path": "/content/tileMap/t1/content/program/values/687/recentValues/nodeValue"
+            }
+          ]
+        }
+      ],
+      "state": "complete"
+    },
+    {
+      "id": "e76",
+      "tree": "doc1",
+      "action": "/content/tileMap/t1/content/setProgram",
+      "undoable": true,
+      "created": 1700000075000,
+      "records": [
+        {
+          "tree": "doc1",
+          "action": "/content/tileMap/t1/content/setProgram",
+          "patches": [
+            {
+              "op": "add",
+              "path": "/content/tileMap/t1/content/program/nodes/662/outputs/num/connections/687-undefined-nodeValue",
+              "value": {
+                "node": 687,
+                "input": "nodeValue",
+                "data": {}
+              }
+            },
+            {
+              "op": "add",
+              "path": "/content/tileMap/t1/content/program/nodes/687/inputs/nodeValue/connections/662-num-undefined",
+              "value": {
+                "node": 662,
+                "output": "num",
+                "data": {}
+              }
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/nodes/687/data/hubSelect",
+              "value": "⚠️ connect device"
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/values/687/currentValues/nodeValue"
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/values/687/recentValues/nodeValue",
+              "value": "[0,0,0]"
+            }
+          ],
+          "inversePatches": [
+            {
+              "op": "remove",
+              "path": "/content/tileMap/t1/content/program/nodes/662/outputs/num/connections/687-undefined-nodeValue"
+            },
+            {
+              "op": "remove",
+              "path": "/content/tileMap/t1/content/program/nodes/687/inputs/nodeValue/connections/662-num-undefined"
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/nodes/687/data/hubSelect",
+              "value": "micro:bit hub a"
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/values/687/currentValues/nodeValue",
+              "value": 0
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/values/687/recentValues/nodeValue",
+              "value": "[]"
+            }
+          ]
+        }
+      ],
+      "state": "complete"
+    },
+    {
+      "id": "e77",
+      "tree": "doc1",
+      "action": "/content/tileMap/t1/content/setProgram",
+      "undoable": true,
+      "created": 1700000076000,
+      "records": [
+        {
+          "tree": "doc1",
+          "action": "/content/tileMap/t1/content/setProgram",
+          "patches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/nodes/687/x",
+              "value": 520.0103456087702
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/nodes/687/y",
+              "value": 805.1231168610665
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/values/687/recentValues/nodeValue",
+              "value": "[0,0,0,null]"
+            }
+          ],
+          "inversePatches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/nodes/687/x",
+              "value": 597.7122145432695
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/nodes/687/y",
+              "value": 869.0655048076927
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/values/687/recentValues/nodeValue",
+              "value": "[0,0,0]"
+            }
+          ]
+        }
+      ],
+      "state": "complete"
+    },
+    {
+      "id": "e78",
+      "tree": "doc1",
+      "action": "/content/tileMap/t1/content/setProgram",
+      "undoable": true,
+      "created": 1700000077000,
+      "records": [
+        {
+          "tree": "doc1",
+          "action": "/content/tileMap/t1/content/setProgram",
+          "patches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/nodes/638/x",
+              "value": 29.225059061128597
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/values/687/recentValues/nodeValue",
+              "value": "[0,0,0,null,null,null,null,null,null,null,null,null,null,null,null,null]"
+            }
+          ],
+          "inversePatches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/nodes/638/x",
+              "value": 31.799709202779212
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/values/687/recentValues/nodeValue",
+              "value": "[0,0,0,null]"
+            }
+          ]
+        }
+      ],
+      "state": "complete"
+    },
+    {
+      "id": "e79",
+      "tree": "doc1",
+      "action": "/content/tileMap/t1/content/setProgram",
+      "undoable": true,
+      "created": 1700000078000,
+      "records": [
+        {
+          "tree": "doc1",
+          "action": "/content/tileMap/t1/content/setProgram",
+          "patches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/values/687/recentValues/nodeValue",
+              "value": "[0,0,0,null,null,null,null,null,null,null,null,null,null,null,null,null,null]"
+            }
+          ],
+          "inversePatches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/values/687/recentValues/nodeValue",
+              "value": "[0,0,0,null,null,null,null,null,null,null,null,null,null,null,null,null]"
+            }
+          ]
+        }
+      ],
+      "state": "complete"
+    },
+    {
+      "id": "e80",
+      "tree": "doc1",
+      "action": "/content/tileMap/t1/content/setProgram",
+      "undoable": true,
+      "created": 1700000079000,
+      "records": [
+        {
+          "tree": "doc1",
+          "action": "/content/tileMap/t1/content/setProgram",
+          "patches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/values/687/recentValues/nodeValue",
+              "value": "[null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null]"
+            }
+          ],
+          "inversePatches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/values/687/recentValues/nodeValue",
+              "value": "[0,0,0,null,null,null,null,null,null,null,null,null,null,null,null,null,null]"
+            }
+          ]
+        }
+      ],
+      "state": "complete"
+    },
+    {
+      "id": "e81",
+      "tree": "doc1",
+      "action": "/content/tileMap/t1/content/setProgram",
+      "undoable": true,
+      "created": 1700000080000,
+      "records": [
+        {
+          "tree": "doc1",
+          "action": "/content/tileMap/t1/content/setProgram",
+          "patches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/nodes/651/data/orderedDisplayName",
+              "value": "Number 4"
+            },
+            {
+              "op": "remove",
+              "path": "/content/tileMap/t1/content/program/nodes/662/inputs/num1/connections/638-num-undefined"
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/nodes/662/data/orderedDisplayName",
+              "value": "Math 5"
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/nodes/687/data/orderedDisplayName",
+              "value": "Live Output 6"
+            },
+            {
+              "op": "remove",
+              "path": "/content/tileMap/t1/content/program/nodes/638"
+            },
+            {
+              "op": "remove",
+              "path": "/content/tileMap/t1/content/program/values/638"
+            }
+          ],
+          "inversePatches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/nodes/651/data/orderedDisplayName",
+              "value": "Number 5"
+            },
+            {
+              "op": "add",
+              "path": "/content/tileMap/t1/content/program/nodes/662/inputs/num1/connections/638-num-undefined",
+              "value": {
+                "node": 638,
+                "output": "num",
+                "data": {}
+              }
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/nodes/662/data/orderedDisplayName",
+              "value": "Math 6"
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/nodes/687/data/orderedDisplayName",
+              "value": "Live Output 7"
+            },
+            {
+              "op": "add",
+              "path": "/content/tileMap/t1/content/program/nodes/638",
+              "value": {
+                "id": 638,
+                "name": "Sensor",
+                "x": 29.225059061128597,
+                "y": 682.2904648722185,
+                "inputs": {},
+                "outputs": {
+                  "num": {
+                    "connections": {
+                      "662-undefined-num1": {
+                        "node": 662,
+                        "input": "num1",
+                        "data": {}
+                      }
+                    }
+                  }
+                },
+                "data": {
+                  "plot": false,
+                  "orderedDisplayName": "Sensor 4",
+                  "type": "emg-reading",
+                  "sensor": "none",
+                  "virtual": false
+                }
+              }
+            },
+            {
+              "op": "add",
+              "path": "/content/tileMap/t1/content/program/values/638",
+              "value": {
+                "currentValues": {},
+                "recentValues": {
+                  "nodeValue": "[null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null]"
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "state": "complete"
+    },
+    {
+      "id": "e82",
+      "tree": "doc1",
+      "action": "/content/tileMap/t1/content/setProgram",
+      "undoable": true,
+      "created": 1700000081000,
+      "records": [
+        {
+          "tree": "doc1",
+          "action": "/content/tileMap/t1/content/setProgram",
+          "patches": [
+            {
+              "op": "remove",
+              "path": "/content/tileMap/t1/content/program/nodes/662/inputs/num2/connections/651-num-undefined"
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/nodes/662/data/orderedDisplayName",
+              "value": "Math 4"
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/nodes/687/data/orderedDisplayName",
+              "value": "Live Output 5"
+            },
+            {
+              "op": "remove",
+              "path": "/content/tileMap/t1/content/program/nodes/651"
+            },
+            {
+              "op": "remove",
+              "path": "/content/tileMap/t1/content/program/values/651"
+            }
+          ],
+          "inversePatches": [
+            {
+              "op": "add",
+              "path": "/content/tileMap/t1/content/program/nodes/662/inputs/num2/connections/651-num-undefined",
+              "value": {
+                "node": 651,
+                "output": "num",
+                "data": {}
+              }
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/nodes/662/data/orderedDisplayName",
+              "value": "Math 5"
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/nodes/687/data/orderedDisplayName",
+              "value": "Live Output 6"
+            },
+            {
+              "op": "add",
+              "path": "/content/tileMap/t1/content/program/nodes/651",
+              "value": {
+                "id": 651,
+                "name": "Number",
+                "x": 49.6855451493233,
+                "y": 873.2038775170168,
+                "inputs": {},
+                "outputs": {
+                  "num": {
+                    "connections": {
+                      "662-undefined-num2": {
+                        "node": 662,
+                        "input": "num2",
+                        "data": {}
+                      }
+                    }
+                  }
+                },
+                "data": {
+                  "plot": false,
+                  "orderedDisplayName": "Number 4",
+                  "nodeValueUnits": ""
+                }
+              }
+            },
+            {
+              "op": "add",
+              "path": "/content/tileMap/t1/content/program/values/651",
+              "value": {
+                "currentValues": {
+                  "nodeValue": 400
+                },
+                "recentValues": {
+                  "nodeValue": "[400,400,400,400,400,400,400,400,400,400,400,400,400,400,400,400,400]"
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "state": "complete"
+    },
+    {
+      "id": "e83",
+      "tree": "doc1",
+      "action": "/content/tileMap/t1/content/setProgram",
+      "undoable": true,
+      "created": 1700000082000,
+      "records": [
+        {
+          "tree": "doc1",
+          "action": "/content/tileMap/t1/content/setProgram",
+          "patches": [
+            {
+              "op": "remove",
+              "path": "/content/tileMap/t1/content/program/nodes/687/inputs/nodeValue/connections/662-num-undefined"
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/nodes/687/data/orderedDisplayName",
+              "value": "Live Output 4"
+            },
+            {
+              "op": "remove",
+              "path": "/content/tileMap/t1/content/program/nodes/662"
+            },
+            {
+              "op": "remove",
+              "path": "/content/tileMap/t1/content/program/values/662"
+            }
+          ],
+          "inversePatches": [
+            {
+              "op": "add",
+              "path": "/content/tileMap/t1/content/program/nodes/687/inputs/nodeValue/connections/662-num-undefined",
+              "value": {
+                "node": 662,
+                "output": "num",
+                "data": {}
+              }
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/nodes/687/data/orderedDisplayName",
+              "value": "Live Output 5"
+            },
+            {
+              "op": "add",
+              "path": "/content/tileMap/t1/content/program/nodes/662",
+              "value": {
+                "id": 662,
+                "name": "Math",
+                "x": 316.69057992788476,
+                "y": 788.5721998948321,
+                "inputs": {
+                  "num1": {
+                    "connections": {}
+                  },
+                  "num2": {
+                    "connections": {}
+                  }
+                },
+                "outputs": {
+                  "num": {
+                    "connections": {
+                      "687-undefined-nodeValue": {
+                        "node": 687,
+                        "input": "nodeValue",
+                        "data": {}
+                      }
+                    }
+                  }
+                },
+                "data": {
+                  "plot": false,
+                  "orderedDisplayName": "Math 4",
+                  "mathOperator": "Divide"
+                }
+              }
+            },
+            {
+              "op": "add",
+              "path": "/content/tileMap/t1/content/program/values/662",
+              "value": {
+                "currentValues": {},
+                "recentValues": {
+                  "nodeValue": "[null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null]"
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "state": "complete"
+    },
+    {
+      "id": "e84",
+      "tree": "doc1",
+      "action": "/content/tileMap/t1/content/setProgram",
+      "undoable": true,
+      "created": 1700000083000,
+      "records": [
+        {
+          "tree": "doc1",
+          "action": "/content/tileMap/t1/content/setProgram",
+          "patches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/values/687/currentValues/nodeValue",
+              "value": 0
+            }
+          ],
+          "inversePatches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/values/687/currentValues/nodeValue"
+            }
+          ]
+        }
+      ],
+      "state": "complete"
+    },
+    {
+      "id": "e85",
+      "tree": "doc1",
+      "action": "/content/tileMap/t1/content/setProgram",
+      "undoable": true,
+      "created": 1700000084000,
+      "records": [
+        {
+          "tree": "doc1",
+          "action": "/content/tileMap/t1/content/setProgram",
+          "patches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/values/687/currentValues/nodeValue"
+            }
+          ],
+          "inversePatches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/values/687/currentValues/nodeValue",
+              "value": 0
+            }
+          ]
+        }
+      ],
+      "state": "complete"
+    },
+    {
+      "id": "e86",
+      "tree": "doc1",
+      "action": "/content/tileMap/t1/content/setProgram",
+      "undoable": true,
+      "created": 1700000085000,
+      "records": [
+        {
+          "tree": "doc1",
+          "action": "/content/tileMap/t1/content/setProgram",
+          "patches": [
+            {
+              "op": "remove",
+              "path": "/content/tileMap/t1/content/program/nodes/687"
+            },
+            {
+              "op": "remove",
+              "path": "/content/tileMap/t1/content/program/values/687"
+            }
+          ],
+          "inversePatches": [
+            {
+              "op": "add",
+              "path": "/content/tileMap/t1/content/program/nodes/687",
+              "value": {
+                "id": 687,
+                "name": "Live Output",
+                "x": 520.0103456087702,
+                "y": 805.1231168610665,
+                "inputs": {
+                  "nodeValue": {
+                    "connections": {}
+                  }
+                },
+                "outputs": {},
+                "data": {
+                  "orderedDisplayName": "Live Output 4",
+                  "outputType": "Gripper 2.0",
+                  "hubSelect": "⚠️ connect device",
+                  "liveOutputType": "Gripper 2.0"
+                }
+              }
+            },
+            {
+              "op": "add",
+              "path": "/content/tileMap/t1/content/program/values/687",
+              "value": {
+                "currentValues": {},
+                "recentValues": {
+                  "nodeValue": "[null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null]"
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "state": "complete"
+    },
+    {
+      "id": "e87",
+      "tree": "doc1",
+      "action": "/content/tileMap/t1/content/program/processAfterProgramChange",
+      "undoable": true,
+      "created": 1700000086000,
+      "records": [
+        {
+          "tree": "doc1",
+          "action": "/content/tileMap/t1/content/program/processAfterProgramChange",
+          "patches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/nodes/611@t1/data/tickEntries/legacyTick/nodeValue",
+              "value": "NaN"
+            }
+          ],
+          "inversePatches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/nodes/611@t1/data/tickEntries/legacyTick/nodeValue"
+            }
+          ]
+        }
+      ],
+      "state": "complete"
+    },
+    {
+      "id": "e88",
+      "tree": "doc1",
+      "action": "/content/tileMap/t1/content/program/tickAndProcess",
+      "undoable": true,
+      "created": 1700000087000,
+      "records": [
+        {
+          "tree": "doc1",
+          "action": "/content/tileMap/t1/content/program/tickAndProcess",
+          "patches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/nodes/601@t1/data/tickEntries/legacyTick/nodeValue",
+              "value": "NaN"
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/nodes/611@t1/data/tickEntries/legacyTick/nodeValue",
+              "value": "NaN"
+            },
+            {
+              "op": "add",
+              "path": "/content/tileMap/t1/content/program/recentTicks/1",
+              "value": "48k_kDUOuoRBFYjr"
+            },
+            {
+              "op": "add",
+              "path": "/content/tileMap/t1/content/program/nodes/601@t1/data/tickEntries/48k_kDUOuoRBFYjr",
+              "value": {
+                "open": true,
+                "nodeValue": "NaN"
+              }
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/nodes/601@t1/data/tickEntries/legacyTick/open"
+            },
+            {
+              "op": "add",
+              "path": "/content/tileMap/t1/content/program/nodes/606@t1/data/tickEntries/48k_kDUOuoRBFYjr",
+              "value": {
+                "open": true,
+                "nodeValue": "400"
+              }
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/nodes/606@t1/data/tickEntries/legacyTick/open"
+            },
+            {
+              "op": "add",
+              "path": "/content/tileMap/t1/content/program/nodes/611@t1/data/tickEntries/48k_kDUOuoRBFYjr",
+              "value": {
+                "open": true,
+                "nodeValue": "NaN"
+              }
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/nodes/611@t1/data/tickEntries/legacyTick/open"
+            }
+          ],
+          "inversePatches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/nodes/601@t1/data/tickEntries/legacyTick/nodeValue"
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/nodes/611@t1/data/tickEntries/legacyTick/nodeValue",
+              "value": "NaN"
+            },
+            {
+              "op": "remove",
+              "path": "/content/tileMap/t1/content/program/recentTicks/1"
+            },
+            {
+              "op": "remove",
+              "path": "/content/tileMap/t1/content/program/nodes/601@t1/data/tickEntries/48k_kDUOuoRBFYjr"
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/nodes/601@t1/data/tickEntries/legacyTick/open",
+              "value": true
+            },
+            {
+              "op": "remove",
+              "path": "/content/tileMap/t1/content/program/nodes/606@t1/data/tickEntries/48k_kDUOuoRBFYjr"
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/nodes/606@t1/data/tickEntries/legacyTick/open",
+              "value": true
+            },
+            {
+              "op": "remove",
+              "path": "/content/tileMap/t1/content/program/nodes/611@t1/data/tickEntries/48k_kDUOuoRBFYjr"
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/nodes/611@t1/data/tickEntries/legacyTick/open",
+              "value": true
+            }
+          ]
+        }
+      ],
+      "state": "complete"
+    },
+    {
+      "id": "e89",
+      "tree": "doc1",
+      "action": "/content/tileMap/t1/content/setProgramZoom",
+      "undoable": true,
+      "created": 1700000088000,
+      "records": [
+        {
+          "tree": "doc1",
+          "action": "/content/tileMap/t1/content/setProgramZoom",
+          "patches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/programZoom/dx",
+              "value": -43.51116943359375
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/programZoom/dy",
+              "value": 5.37640380859375
+            }
+          ],
+          "inversePatches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/programZoom/dx",
+              "value": -33.8885498046875
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/programZoom/dy",
+              "value": 50.45556640625
+            }
+          ]
+        }
+      ],
+      "state": "complete"
+    },
+    {
+      "id": "e90",
+      "tree": "doc1",
+      "action": "/content/tileMap/t1/content/setProgramZoom",
+      "undoable": true,
+      "created": 1700000089000,
+      "records": [
+        {
+          "tree": "doc1",
+          "action": "/content/tileMap/t1/content/setProgramZoom",
+          "patches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/programZoom/dx",
+              "value": -49.36846923828125
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/programZoom/dy",
+              "value": -15.3021240234375
+            }
+          ],
+          "inversePatches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/programZoom/dx",
+              "value": -43.51116943359375
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/programZoom/dy",
+              "value": 5.37640380859375
+            }
+          ]
+        }
+      ],
+      "state": "complete"
+    }
+  ]
+}

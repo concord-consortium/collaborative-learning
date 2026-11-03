@@ -1,0 +1,262 @@
+{
+  "description": "Synthetic: the study has no whole-program setProgram. A legacy tile is added, a legacy setProgram replaces its whole program, and a current-format entry moves a node.",
+  "synthetic": true,
+  "content": {
+    "rowMap": {
+      "r1": {
+        "id": "r1",
+        "isSectionHeader": false,
+        "tiles": [
+          {
+            "tileId": "t1"
+          }
+        ]
+      }
+    },
+    "rowOrder": [
+      "r1"
+    ],
+    "tileMap": {
+      "t1": {
+        "id": "t1",
+        "title": "Program 1",
+        "content": {
+          "type": "Dataflow",
+          "program": {
+            "id": "dataflow@1",
+            "recentTicks": [
+              "legacyTick"
+            ],
+            "nodes": {
+              "1@t1": {
+                "id": "1@t1",
+                "name": "Number",
+                "x": 150,
+                "y": 20,
+                "data": {
+                  "type": "Number",
+                  "plot": false,
+                  "orderedDisplayName": "Number 1",
+                  "tickEntries": {
+                    "legacyTick": {
+                      "open": true,
+                      "nodeValue": "3"
+                    }
+                  },
+                  "value": 3
+                }
+              },
+              "2@t1": {
+                "id": "2@t1",
+                "name": "Demo Output",
+                "x": 300,
+                "y": 20,
+                "data": {
+                  "type": "Demo Output",
+                  "plot": false,
+                  "orderedDisplayName": "Demo Output 1",
+                  "tickEntries": {
+                    "legacyTick": {
+                      "open": true,
+                      "nodeValue": "3"
+                    }
+                  },
+                  "outputType": "Light Bulb"
+                }
+              }
+            },
+            "connections": {
+              "c1": {
+                "id": "c1",
+                "source": "1@t1",
+                "sourceOutput": "value",
+                "target": "2@t1",
+                "targetInput": "nodeValue"
+              }
+            }
+          },
+          "programDataRate": 1000,
+          "programZoom": {
+            "dx": 0,
+            "dy": 0,
+            "scale": 1
+          }
+        }
+      }
+    }
+  },
+  "history": [
+    {
+      "id": "e1",
+      "tree": "doc1",
+      "action": "/content/addTile",
+      "undoable": true,
+      "created": 1700000001000,
+      "records": [
+        {
+          "tree": "doc1",
+          "action": "/content/addTile",
+          "patches": [
+            {
+              "op": "add",
+              "path": "/content/tileMap/t1",
+              "value": {
+                "id": "t1",
+                "title": "Program 1",
+                "content": {
+                  "type": "Dataflow",
+                  "program": {
+                    "id": "dataflow@0.1.0",
+                    "nodes": {},
+                    "values": {}
+                  },
+                  "programDataRate": 1000,
+                  "programZoom": {
+                    "dx": 0,
+                    "dy": 0,
+                    "scale": 1
+                  }
+                }
+              }
+            }
+          ],
+          "inversePatches": [
+            {
+              "op": "remove",
+              "path": "/content/tileMap/t1"
+            }
+          ]
+        }
+      ],
+      "state": "complete"
+    },
+    {
+      "id": "e2",
+      "tree": "doc1",
+      "action": "/content/tileMap/t1/content/setProgram",
+      "undoable": true,
+      "created": 1700000002000,
+      "records": [
+        {
+          "tree": "doc1",
+          "action": "/content/tileMap/t1/content/setProgram",
+          "patches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program",
+              "value": {
+                "id": "dataflow@0.1.0",
+                "nodes": {
+                  "1": {
+                    "id": 1,
+                    "name": "Number",
+                    "x": 100,
+                    "y": 20,
+                    "inputs": {},
+                    "outputs": {
+                      "num": {
+                        "connections": {
+                          "2-undefined-nodeValue": {
+                            "node": 2,
+                            "input": "nodeValue",
+                            "data": {}
+                          }
+                        }
+                      }
+                    },
+                    "data": {
+                      "plot": false,
+                      "orderedDisplayName": "Number 1",
+                      "nodeValueUnits": ""
+                    }
+                  },
+                  "2": {
+                    "id": 2,
+                    "name": "Demo Output",
+                    "x": 300,
+                    "y": 20,
+                    "outputs": {},
+                    "inputs": {
+                      "nodeValue": {
+                        "connections": {
+                          "1-num-undefined": {
+                            "node": 1,
+                            "output": "num",
+                            "data": {}
+                          }
+                        }
+                      }
+                    },
+                    "data": {
+                      "plot": false,
+                      "orderedDisplayName": "Demo Output 1",
+                      "outputType": "Light Bulb"
+                    }
+                  }
+                },
+                "values": {
+                  "1": {
+                    "currentValues": {
+                      "nodeValue": 3
+                    },
+                    "recentValues": {
+                      "nodeValue": "[3]"
+                    }
+                  },
+                  "2": {
+                    "currentValues": {
+                      "nodeValue": 3
+                    },
+                    "recentValues": {
+                      "nodeValue": "[3]"
+                    }
+                  }
+                }
+              }
+            }
+          ],
+          "inversePatches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program",
+              "value": {
+                "id": "dataflow@0.1.0",
+                "nodes": {},
+                "values": {}
+              }
+            }
+          ]
+        }
+      ],
+      "state": "complete"
+    },
+    {
+      "id": "e3",
+      "tree": "doc1",
+      "action": "/content/tileMap/t1/content/program/nodes/1@t1/setPosition",
+      "undoable": true,
+      "created": 1700000003000,
+      "records": [
+        {
+          "tree": "doc1",
+          "action": "/content/tileMap/t1/content/program/nodes/1@t1/setPosition",
+          "patches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/nodes/1@t1/x",
+              "value": 150
+            }
+          ],
+          "inversePatches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/nodes/1@t1/x",
+              "value": 100
+            }
+          ]
+        }
+      ],
+      "state": "complete"
+    }
+  ]
+}
