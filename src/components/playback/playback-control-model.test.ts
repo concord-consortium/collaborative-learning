@@ -611,6 +611,17 @@ describe("PlaybackControlModel", () => {
         expect(model.playbackFailureWarning).toBeTruthy();
         expect(model.currentStopIndex).toBe(3);
       });
+
+      it("still warns when a forward seek from the oldest reachable position is blocked there",
+          async () => {
+        const { model, treeManager } = setupModel(4, { appliedPosition: 2 });
+        stopSeeksAt(treeManager, 2);
+
+        await model.goToSliderStop(4);
+
+        expect(model.playbackFailureWarning).toBeTruthy();
+        expect(model.currentStopIndex).toBe(2);
+      });
     });
 
     it("clears an earlier warning once a seek lands where it was asked to", async () => {
