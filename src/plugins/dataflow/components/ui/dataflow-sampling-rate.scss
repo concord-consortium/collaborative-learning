@@ -16,9 +16,11 @@ $rate-control-height: 22px;
   display: flex;
   align-items: center;
   flex-shrink: 0;
+  margin-left: 3px;
 
   .samplerate-label {
-    font-size: 12px;
+    // 14px to match the labelling elsewhere in the tile, including the node labels.
+    font-size: 14px;
     font-weight: 500;
     color: $rate-text;
     margin-right: 6px;
