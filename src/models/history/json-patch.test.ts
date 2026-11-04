@@ -74,6 +74,17 @@ describe("applyJsonPatches", () => {
     expect(doc.m["a/b~c"]).toBe(1);
   });
 
+  it("never reaches objects outside the document through inherited properties", () => {
+    const paths = ["/__proto__/polluted", "/constructor/prototype/polluted", "/a/__proto__"];
+    paths.forEach(path => {
+      const doc: any = { a: {} };
+      expect(() => applyJsonPatches(doc, [{ op: "add", path, value: { polluted: 1 } }]))
+        .toThrow(JsonPatchError);
+      expect(({} as any).polluted).toBeUndefined();
+      expect(Object.getPrototypeOf(doc.a)).toBe(Object.prototype);
+    });
+  });
+
   it("does not share inserted values with the frozen patch", () => {
     const doc: any = { a: {} };
     const patch: IJsonPatch = deepFreeze({ op: "add", path: "/a/x", value: { n: { m: 1 } } });

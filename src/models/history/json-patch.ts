@@ -37,9 +37,13 @@ function applyJsonPatch(doc: object, patch: IJsonPatch) {
 
   const segments = patch.path.split("/").slice(1).map(unescapeSegment);
   const key = segments.pop() as string;
+  // Only own properties are followed, and `__proto__` is never set, so a patch from stored
+  // history can't reach `Object.prototype` or change an object's prototype.
+  if (key === "__proto__") throw new Error(`unsafe path segment in ${patch.path}`);
   let parent: any = doc;
   for (const segment of segments) {
-    parent = parent != null && typeof parent === "object" ? parent[segment] : undefined;
+    parent = parent != null && typeof parent === "object" && Object.hasOwn(parent, segment)
+      ? parent[segment] : undefined;
   }
   if (parent == null || typeof parent !== "object") {
     throw new Error(`parent of ${patch.path} does not resolve to an object or array`);
