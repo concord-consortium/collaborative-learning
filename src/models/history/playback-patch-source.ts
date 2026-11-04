@@ -113,7 +113,8 @@ export function collectModelPaths(entries: readonly HistoryEntryType[], treeId: 
 }
 
 /**
- * True when any patch at or above `modelPath` carries a value holding an old version of the model.
+ * True when any patch at or above `modelPath` carries a value holding the model in an old format,
+ * one its converter accepts.
  */
 export function hasOldValue(entries: readonly HistoryEntryType[], treeId: string, modelPath: string): boolean {
   return getAllPatches(entries, treeId).some(patch => {
@@ -140,16 +141,16 @@ export function createOldModelPatchSource(
   let memoPosition: number | undefined;
   let memo = new Map<string, unknown>();
 
-  // Each old model is converted once per position, so an add and the load share the same object.
+  // Each model's target state is built once per position, so an add and the load share the same object.
   const convertedTarget = (path: string) => {
     if (memoPosition !== copy.position) {
       memoPosition = copy.position;
       memo = new Map();
     }
     if (!memo.has(path)) {
-      // convert a clone: converters are shallow, so their result can still share nested objects
-      // with the input, and the copy's objects must never reach MST
-      memo.set(path, convertModelJsonAtPath(path, cloneDeep(copy.getJson(path))));
+      // A model that isn't old at the target, such as one its converter declines, is loaded as
+      // the copy has it, cloned so the copy's objects never reach MST.
+      memo.set(path, copy.getConvertedModel(path) ?? cloneDeep(copy.getJson(path)));
     }
     return memo.get(path);
   };

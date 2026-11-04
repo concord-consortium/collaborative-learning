@@ -4,7 +4,7 @@ import { cloneDeep } from "lodash";
 import { getSnapshot } from "mobx-state-tree";
 import {
   buildLoadEntry, convertContentJson, convertJsonAtPath, convertModelJsonAtPath, convertOldModelJsonAtPath,
-  getModelPath, isNonCurrentModelJsonAtPath
+  getModelPath, isNonCurrentModelJsonAtPath, isOldModelJsonAtPath
 } from "./schema-conversion";
 import { HistoryEntry, HistoryOperation } from "./history";
 import { applyJsonPatches } from "./json-patch";
@@ -58,6 +58,19 @@ describe("isNonCurrentModelJsonAtPath", () => {
     expect(convertModelJsonAtPath("/content/tileMap/t1", unregistered)).toBe(unregistered);
     expect(isNonCurrentModelJsonAtPath("/content/sharedModelMap/s/sharedModel", { id: "s", type: "NoSuch" }))
       .toBe(false);
+  });
+});
+
+describe("isOldModelJsonAtPath", () => {
+  it("detects old versions", () => {
+    expect(isOldModelJsonAtPath("/content/tileMap/t1", oldTile("t1"))).toBe(true);
+    expect(isOldModelJsonAtPath("/content/tileMap/t1", newTile("t1"))).toBe(false);
+    expect(isOldModelJsonAtPath("/content/sharedModelMap/sm1/sharedModel", oldShared("sm1"))).toBe(true);
+  });
+  it("treats a model its converter declines as current, and one whose conversion throws as old", () => {
+    expect(isOldModelJsonAtPath("/content/tileMap/t3", newerTile("t3"))).toBe(false);
+    expect(isOldModelJsonAtPath("/content/sharedModelMap/sm3/sharedModel", newerShared("sm3"))).toBe(false);
+    expect(isOldModelJsonAtPath("/content/tileMap/t1", oldTile("t1", "THROW"))).toBe(true);
   });
 });
 

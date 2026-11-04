@@ -13,6 +13,7 @@ import { HistoryEntry, HistoryEntrySnapshot } from "./history";
 import { JsonHistoryCopy } from "./json-history-copy";
 import { toJsonValue } from "./json-patch";
 import { buildLoadEntry } from "./schema-conversion";
+import { kVersionedTestTileType, versionedTestTileSchema } from "./schema-conversion-test-types";
 
 const TestTile = TileContentModel
   .named("TestTile")
@@ -146,6 +147,51 @@ describe("JsonHistoryCopy", () => {
     expect(copy.getJson("/content/tileMap/t1/content")).toEqual(before);
     expect(copy.moveTo([entry], 1)).toEqual({ position: 1 });
     expect(copy.getJson("/content/tileMap/t1/content")).toEqual(after);
+  });
+
+  describe("getConvertedModel", () => {
+    const t1Path = "/content/tileMap/t1";
+    const tileAt = (version: string | undefined, text: string) => ({
+      id: "t1", content: { type: kVersionedTestTileType, version, text, label: text, items: [{ value: "a" }] }
+    });
+    const copyOf = (tile: unknown) => new JsonHistoryCopy(kTreeId, { content: { tileMap: { t1: tile } } }, 1);
+    const textEntry = (from: string, to: string) => HistoryEntry.create({
+      id: nanoid(), created: Date.now(), tree: kTreeId, model: "Test", action: "/test", undoable: true,
+      state: "complete", triggeringBatchIds: [],
+      records: [{ tree: kTreeId, action: "/test",
+        patches: [{ op: "replace", path: `${t1Path}/content/text`, value: to }],
+        inversePatches: [{ op: "replace", path: `${t1Path}/content/text`, value: from }] }]
+    });
+
+    afterEach(() => jest.restoreAllMocks());
+
+    it("converts an old model once per position, from a clone", () => {
+      const copy = copyOf(tileAt(undefined, "b"));
+      const spy = jest.spyOn(versionedTestTileSchema, "convertSnapshot");
+
+      expect(copy.isOldModel(t1Path)).toBe(true);
+      const converted: any = copy.getConvertedModel(t1Path);
+      expect(converted.content.label).toBe("b");
+      expect(spy).toHaveBeenCalledTimes(1);
+      expect(spy.mock.calls[0][0]).not.toBe(copy.getJson(t1Path));
+
+      copy.moveTo([textEntry("a", "b")], 0);
+      expect((copy.getConvertedModel(t1Path) as any).content.label).toBe("a");
+      expect(spy).toHaveBeenCalledTimes(2);
+    });
+
+    it("returns undefined for a current model and for one its converter declines", () => {
+      expect(copyOf(tileAt("2", "b")).getConvertedModel(t1Path)).toBeUndefined();
+      const declined = copyOf(tileAt("3", "b"));
+      expect(declined.getConvertedModel(t1Path)).toBeUndefined();
+      expect(declined.isOldModel(t1Path)).toBe(false);
+    });
+
+    it("treats a model whose conversion throws as old, and throws when it is asked for", () => {
+      const copy = copyOf(tileAt(undefined, "THROW"));
+      expect(copy.isOldModel(t1Path)).toBe(true);
+      expect(() => copy.getConvertedModel(t1Path)).toThrow("cannot convert");
+    });
   });
 
   it("getJson resolves escaped paths and returns undefined for unresolved ones", () => {

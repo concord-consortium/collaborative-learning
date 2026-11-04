@@ -261,8 +261,10 @@ backward across a load entry, its inverse patches return the copy to the old for
 old entries before it then apply to the copy as they were recorded.
 
 **Which tiles are old.** Playback calls `getVersion` on the JSON copy of each tile the move touched,
-at both ends of the move. A tile that is current at both ends has its patches applied to the MST
-tree as today. A tile that is old at either end is loaded: playback runs `convertSnapshot` on its
+at both ends of the move, and `convertSnapshot` where the version differs (section 1). A tile that
+is current at both ends has its patches applied to the MST tree as today, and so does a tile its
+converter declines. The copy keeps each tile's conversion at its position until it moves, so
+checking a tile and then loading it converts it once. A tile that is old at either end is loaded: playback runs `convertSnapshot` on its
 JSON at the target position and puts the result into the MST tile, so the MST tree always holds
 current-format tiles. "Either end" covers a move that crosses the conversion: going forward out of
 the old region, the MST tile holds a converted copy with made-up ids, and the new-format patches

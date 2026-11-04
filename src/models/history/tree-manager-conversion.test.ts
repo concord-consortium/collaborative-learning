@@ -235,6 +235,41 @@ describe("playback across a conversion entry", () => {
     expect(manager.historyPlaybackFailures).toEqual([]);
   });
 
+  it("applies the patches of a tile its converter declines to MST, without loading it", async () => {
+    const t3Path = "/content/tileMap/t3";
+    // The test tile's converter doesn't know version 3, so it declines this tile.
+    const newerTile = { id: "t3", content: { type: kVersionedTestTileType, version: "3", label: "q", items: [] } };
+    const oldEntries = [
+      makeEntry([replaceRecord(`${t1Path}/content/text`, "a", "c")]),
+      makeEntry([replaceRecord(`${t3Path}/content/label`, "p", "q")])
+    ];
+    const { document, manager, endPosition } =
+      await setupConvertedDocument({ tileMap: { t1: oldTile("t1", "c"), t3: newerTile } }, oldEntries);
+
+    // Record what each move hands the document's tree.
+    const tree = manager.trees[kTreeId];
+    const applied: { patches: readonly IJsonPatch[]; loads: readonly IJsonPatch[] }[] = [];
+    manager.trees[kTreeId] = new Proxy(tree, {
+      get(target, prop) {
+        if (prop !== "applyPatchesFromManager") return (target as any)[prop];
+        return (entryId: string, exchangeId: string, patches: readonly IJsonPatch[], loads?: readonly IJsonPatch[]) => {
+          applied.push({ patches, loads: loads ?? [] });
+          return target.applyPatchesFromManager(entryId, exchangeId, patches, loads);
+        };
+      }
+    });
+
+    for (const [position, label] of [[1, "p"], [endPosition, "q"]] as const) {
+      applied.length = 0;
+      await manager.goToHistoryEntryPosition(position);
+      expect(getTile(document, "t3").label).toBe(label);
+      expect(getTile(document, "t3").version).toBe("3");
+      expect(applied.flatMap(a => a.patches)).toContainEqual(replace(`${t3Path}/content/label`, label));
+      expect(applied.flatMap(a => a.loads).map(load => load.path)).toEqual([t1Path]);
+    }
+    expect(manager.historyPlaybackFailures).toEqual([]);
+  });
+
   it("stops with the failure banner when an old entry doesn't apply to the JSON copy", async () => {
     const badPath = `${t1Path}/content/missing/deep`;
     const oldEntries = [

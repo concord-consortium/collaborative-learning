@@ -58,12 +58,25 @@ export function convertOldModelJsonAtPath(modelPath: string, json: unknown): unk
  * True when the model JSON at `modelPath` has a version that isn't current, whether older or newer.
  * Versions are opaque strings, so only the converter can tell the two apart, and this doesn't run
  * it. A model the converter declines, such as one saved by a newer release, counts too;
- * convertOldModelJsonAtPath leaves those out.
+ * isOldModelJsonAtPath leaves those out. It is the cheap check to make before converting.
  */
 export function isNonCurrentModelJsonAtPath(modelPath: string, json: unknown): boolean {
   if (!isObject(json)) return false;
   const info = getSchemaVersion(modelPath, json);
   return !!info && info.getVersion(json) !== info.currentVersion;
+}
+
+/**
+ * True when the model JSON at `modelPath` is old (see convertOldModelJsonAtPath), which runs the
+ * converter when the version differs. A model whose conversion throws is old: the converter took
+ * it and failed, and converting it again throws where the caller can report the failure.
+ */
+export function isOldModelJsonAtPath(modelPath: string, json: unknown): boolean {
+  try {
+    return convertOldModelJsonAtPath(modelPath, json) !== undefined;
+  } catch {
+    return true;
+  }
 }
 
 /**

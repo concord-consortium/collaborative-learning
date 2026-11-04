@@ -16,7 +16,6 @@ import {
 } from "./playback-patch-source";
 import { IJsonCopyMoveResult, JsonHistoryCopy } from "./json-history-copy";
 import { toJsonValue } from "./json-patch";
-import { isOldModelJsonAtPath } from "./schema-conversion";
 import { IDocumentMetadata } from "../../../shared/shared";
 import { Firestore } from "../../lib/firestore";
 import { UserContextProvider } from "../stores/user-context-provider";
@@ -89,14 +88,14 @@ function moveJsonCopy(copy: JsonHistoryCopy, history: readonly HistoryEntryType[
     target: number): { moved: IJsonCopyMoveResult; source: IPlaybackPatchSource } {
   const start = copy.position;
   const requestedPaths = collectModelPaths(getEntriesBetween(history, start, target), treeId);
-  const oldAtStart = new Set([...requestedPaths].filter(path => isOldModelJsonAtPath(path, copy.getJson(path))));
+  const oldAtStart = new Set([...requestedPaths].filter(path => copy.isOldModel(path)));
 
   const moved = copy.moveTo(history, target);
 
   const entries = getEntriesBetween(history, start, moved.position);
   const conversionPaths = collectModelPaths(entries.filter(entry => entry.isLoadEntry), treeId);
   const oldPaths = new Set([...collectModelPaths(entries, treeId)].filter(path =>
-    oldAtStart.has(path) || isOldModelJsonAtPath(path, copy.getJson(path)) ||
+    oldAtStart.has(path) || copy.isOldModel(path) ||
     hasOldValue(entries, treeId, path) || conversionPaths.has(path)));
   return { moved, source: createOldModelPatchSource({ copy, treeId, oldPaths }) };
 }

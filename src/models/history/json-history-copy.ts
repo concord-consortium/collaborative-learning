@@ -1,4 +1,6 @@
+import { cloneDeep } from "lodash";
 import { applyJsonPatches, JsonPatchError } from "./json-patch";
+import { convertOldModelJsonAtPath, isNonCurrentModelJsonAtPath } from "./schema-conversion";
 import { getEntryPatchesForTree, HistoryEntryType, HistoryOperation } from "./history";
 
 export interface IJsonCopyMoveResult {
@@ -14,6 +16,8 @@ export interface IJsonCopyMoveResult {
 export class JsonHistoryCopy {
   private json: object;
   private _position: number;
+  // Each model's conversion at the copy's position, kept until the copy moves.
+  private convertedModels = new Map<string, { converted?: unknown; failed?: boolean; error?: unknown }>();
 
   constructor(private treeId: string, documentJson: object, position: number) {
     this.json = documentJson;
@@ -43,11 +47,50 @@ export class JsonHistoryCopy {
   }
 
   /**
+   * The model at `modelPath` converted to the current format when it is old at the copy's
+   * position, or undefined when it isn't: its version is current, its type has none, or its
+   * converter declines it. A clone is converted: converters are shallow, so their result can share
+   * nested objects with their input, and the copy's objects must never reach MST. Each model is
+   * converted at most once per position, and one whose conversion throws throws again each time.
+   */
+  getConvertedModel(modelPath: string): unknown {
+    let result = this.convertedModels.get(modelPath);
+    if (!result) {
+      const json = this.getJson(modelPath);
+      try {
+        result = {
+          converted: isNonCurrentModelJsonAtPath(modelPath, json)
+            ? convertOldModelJsonAtPath(modelPath, cloneDeep(json))
+            : undefined
+        };
+      } catch (error) {
+        result = { failed: true, error };
+      }
+      this.convertedModels.set(modelPath, result);
+    }
+    if (result.failed) throw result.error;
+    return result.converted;
+  }
+
+  /**
+   * True when the model at `modelPath` is old at the copy's position. A model whose conversion
+   * throws is old; getConvertedModel throws for it where the caller can report the failure.
+   */
+  isOldModel(modelPath: string): boolean {
+    try {
+      return this.getConvertedModel(modelPath) !== undefined;
+    } catch {
+      return true;
+    }
+  }
+
+  /**
    * Applies entries one at a time, in the same direction and record order as
    * `goToHistoryEntryPosition`. An entry that fails is undone and left unapplied, and the
    * move stops there.
    */
   moveTo(history: readonly HistoryEntryType[], target: number): IJsonCopyMoveResult {
+    this.convertedModels.clear();
     const forward = target > this._position;
     const opType = forward ? HistoryOperation.Redo : HistoryOperation.Undo;
     const oppositeOp = forward ? HistoryOperation.Undo : HistoryOperation.Redo;
