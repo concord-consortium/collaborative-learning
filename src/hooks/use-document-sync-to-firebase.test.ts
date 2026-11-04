@@ -679,19 +679,21 @@ describe("useDocumentSyncToFirebase hook", () => {
       }
     });
 
-    it("sends the newest committed snapshot on pagehide for an individual document", async () => {
+    // A document whose content writes wait until a test resolves them, with a stub commit source.
+    function setupSaving(documentOverrides?: Partial<SnapshotIn<typeof DocumentModel>>) {
       const writes: Array<{ values: Record<string, any>, resolve: () => void }> = [];
       const contentUpdate = jest.fn((values: Record<string, any>) =>
         new Promise<void>(resolve => { writes.push({ values, resolve }); }));
-      const { user, fb, firestore, document } = specArgs(ProblemDocument, "xyz");
+      const args = specArgs(ProblemDocument, "xyz", {}, documentOverrides);
+      const { user, fb, firestore, document } = args;
       mockRef.mockImplementation((path: string) => path === `${user.id}/content/${document.key}`
-        ? { update: contentUpdate }
+        ? { update: contentUpdate, child: () => ({ on: jest.fn(), off: jest.fn() }) }
         : { update: (value: any) => Promise.resolve(mockUpdate(value)) });
       const treeManager = document.treeManagerAPI as TreeManagerType;
       const commits = new StubCommitSource();
       treeManager.setHistoryManager(commits);
       treeManager.exactness.startAt("e0");
-      const { unmount } = renderHook(() => useDocumentSyncToFirebase(user, fb, firestore, document));
+      const mount = () => renderHook(() => useDocumentSyncToFirebase(user, fb, firestore, document));
 
       // Adds a tile and returns the id of the last entry that completed.
       async function addTile() {
@@ -702,6 +704,18 @@ describe("useDocumentSyncToFirebase hook", () => {
         remove();
         return ids[ids.length - 1];
       }
+
+      async function resolveWrites() {
+        writes.forEach(write => write.resolve());
+        await flush();
+      }
+
+      return { ...args, commits, contentUpdate, writes, mount, addTile, resolveWrites };
+    }
+
+    it("sends the newest committed snapshot on pagehide for an individual document", async () => {
+      const { addTile, commits, contentUpdate, mount, resolveWrites, writes } = setupSaving();
+      const { unmount } = mount();
 
       commits.commit(await addTile());
       expect(contentUpdate).toHaveBeenCalledTimes(1);
@@ -715,9 +729,68 @@ describe("useDocumentSyncToFirebase hook", () => {
       expect(Object.keys(JSON.parse(writes[1].values.content).tileMap)).toHaveLength(2);
       expect(mockSetLastEditedOnDisconnect).toHaveBeenCalledTimes(1);
 
-      writes.forEach(write => write.resolve());
-      await flush();
+      await resolveWrites();
       unmount();
+    });
+
+    it("doesn't listen for pagehide on a group document", () => {
+      const addListener = jest.spyOn(window, "addEventListener");
+      const getSender = jest.spyOn(senderModule, "getContentSaveSender");
+      try {
+        const { mount } = setupSaving({ concurrent: true });
+        const { unmount } = mount();
+        expect(getSender).toHaveBeenCalledTimes(1);
+        expect(addListener.mock.calls.some(([type]) => (type as string) === "pagehide")).toBe(false);
+        unmount();
+      } finally {
+        addListener.mockRestore();
+        getSender.mockRestore();
+      }
+    });
+
+    it("sets the last edited time when the sender finishes saving after unmount", async () => {
+      const handlers = [{}];
+      mockSetLastEditedOnDisconnect.mockReturnValue(handlers);
+      const { addTile, commits, document, mount, resolveWrites, user } = setupSaving();
+      const { unmount } = mount();
+      commits.commit(await addTile());
+      unmount();
+      expect(mockSetLastEditedNow).not.toHaveBeenCalled();
+
+      await resolveWrites();
+      expect(mockSetLastEditedNow).toHaveBeenCalledTimes(1);
+      expect(mockSetLastEditedNow).toHaveBeenCalledWith(user, document.key, user.id, handlers);
+    });
+
+    it("keeps the disconnect handlers when the document is mounted again while its sender is saving",
+        async () => {
+      const handlers = [{}];
+      mockSetLastEditedOnDisconnect.mockReturnValue(handlers);
+      const { addTile, commits, contentUpdate, document, mount, resolveWrites, user } = setupSaving();
+      const first = mount();
+      commits.commit(await addTile());
+      first.unmount();
+      const second = mount();
+      await resolveWrites();
+      expect(mockSetLastEditedNow).not.toHaveBeenCalled();
+
+      commits.commit(await addTile());
+      jest.advanceTimersByTime(senderModule.kMinimumSaveGapMs);
+      expect(contentUpdate).toHaveBeenCalledTimes(2);
+      await resolveWrites();
+      expect(mockSetLastEditedOnDisconnect).toHaveBeenCalledTimes(1);
+      second.unmount();
+      expect(mockSetLastEditedNow).toHaveBeenCalledTimes(1);
+      expect(mockSetLastEditedNow).toHaveBeenCalledWith(user, document.key, user.id, handlers);
+    });
+
+    it("sets the last edited time at once when nothing is left to save at unmount", async () => {
+      const { addTile, commits, mount, resolveWrites } = setupSaving();
+      const { unmount } = mount();
+      commits.commit(await addTile());
+      await resolveWrites();
+      unmount();
+      expect(mockSetLastEditedNow).toHaveBeenCalledTimes(1);
     });
   });
 });

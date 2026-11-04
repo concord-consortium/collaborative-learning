@@ -13,6 +13,9 @@ import { Firestore } from "src/lib/firestore";
 import { getContentSaveSender } from "../models/document/content-save-sender";
 import { logDocumentEvent } from "../models/document/log-document-event";
 
+// Kept for each document, since its content save sender can outlive the hook and be attached again.
+const disconnectHandlersByDocument = new WeakMap<DocumentModelType, OnDisconnect[]>();
+
 function debugLog(...args: any[]) {
   // eslint-disable-next-line no-console
   DEBUG_SAVE && console.log(...args);
@@ -38,15 +41,14 @@ export function useDocumentSyncToFirebase(
 ) {
   const { key, type, uid, contentStatus } = document;
   const { content: contentPath, metadata, typedMetadata } = firebase.getDocumentPaths(user, document);
-  const disconnectHandlers = useRef<OnDisconnect[]|undefined>(undefined);
 
   const handlePresenceChange = useMemo(() => (snapshot: any) => {
     // When we come online after being offline, need to note that the onDisconnect events will have been fired.
     // So the next time the document is modified, it needs to be set up again.
     if (snapshot.val() === true) {
-      disconnectHandlers.current = undefined;
+      disconnectHandlersByDocument.delete(document);
     }
-  }, []);
+  }, [document]);
 
   // TODO: when running in doc-editor this warning was printed constantly
   // Ideally we'd figure out how to separate the syncing from the document stuff so the doc-editor can use
@@ -81,14 +83,9 @@ export function useDocumentSyncToFirebase(
         if (!readOnly && commonSyncEnabled) {
           firebase.onlineStatusRef.off('value', handlePresenceChange);
         }
-        // If an onDisconnect is set, remove it and set the updated timestamp to now.
-        if (disconnectHandlers.current) {
-          firebase.setLastEditedNow(user, key, uid, disconnectHandlers.current);
-        }
       };
     }
-  }, [readOnly, contentStatus, document.treeMonitor, firebase, user, key, uid,
-      handlePresenceChange, commonSyncEnabled]);
+  }, [readOnly, contentStatus, document.treeMonitor, firebase, handlePresenceChange, commonSyncEnabled]);
 
   if (!readOnly && DEBUG_DOCUMENT) {
     // provide the document to the console so developers can inspect its content
@@ -214,15 +211,24 @@ export function useDocumentSyncToFirebase(
       contentRef: firebase.ref(contentPath),
       updateTools: tools => updateFirestoreDocumentProp("tools", tools),
       beforeWrite: () => {
-        if (!disconnectHandlers.current) {
-          disconnectHandlers.current = firebase.setLastEditedOnDisconnect(user, key, uid);
+        if (!disconnectHandlersByDocument.has(document)) {
+          disconnectHandlersByDocument.set(document, firebase.setLastEditedOnDisconnect(user, key, uid));
         }
       },
       onContentSaved: (savedDocument, lastHistoryEntryId) => {
         debugLog(`DEBUG: Updated document content for ${type} document ${key}:`, savedDocument.changeCount);
         onContentSavedRef.current?.(savedDocument, lastHistoryEntryId);
       },
-      logEvent: (event, params) => logDocumentEvent(event, { document, ...params })
+      logEvent: (event, params) => logDocumentEvent(event, { document, ...params }),
+      // Once the last save is sent, an onDisconnect that was set is removed and the updated timestamp
+      // is set to now. This can request the session-end evaluation, so it waits for that save.
+      onDrained: () => {
+        const disconnectHandlers = disconnectHandlersByDocument.get(document);
+        if (disconnectHandlers) {
+          disconnectHandlersByDocument.delete(document);
+          firebase.setLastEditedNow(user, key, uid, disconnectHandlers);
+        }
+      }
     });
     // A group document has other writers, so it saves through its usual checks.
     const handlePageHide = () => sender.handlePageHide();

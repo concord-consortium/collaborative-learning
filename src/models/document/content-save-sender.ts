@@ -51,6 +51,8 @@ export interface IContentSaveSenderOptions {
   getMinimumGapMs?: (save: IPendingSave) => number;
   // Picks a group document save's wait, between 0 and 1. Math.random when unset.
   random?: () => number;
+  // Called when the sender stops after it was detached, once its last save has been sent.
+  onDrained?: () => void;
 }
 
 interface IQueuedSave extends IPendingSave {
@@ -217,7 +219,7 @@ interface IFallbackEpisode {
  * Once every attachment is detached the sender keeps saving until a save covers the latest change,
  * which on an individual document has to be an exact save, or 30 seconds pass. Then an individual
  * document makes one intermediate save if the latest change isn't saved, and the sender is
- * disposed. Attaching it again before then keeps it going.
+ * disposed, after calling onDrained. Attaching it again before then keeps it going.
  */
 export class ContentSaveSender {
   private options: IContentSaveSenderOptions;
@@ -294,8 +296,17 @@ export class ContentSaveSender {
 
   private checkDrained() {
     if (this.isDraining && this.isLatestChangeSaved()) {
-      this.dispose();
+      this.finishDrain();
     }
+  }
+
+  private finishDrain() {
+    try {
+      this.options.onDrained?.();
+    } catch (error) {
+      console.error("Failed to finish saving content", error);
+    }
+    this.dispose();
   }
 
   /**
@@ -324,7 +335,7 @@ export class ContentSaveSender {
     } catch (error) {
       console.error("Failed to send the last content save", error);
     }
-    this.dispose();
+    this.finishDrain();
   };
 
   // Whether a completed write, or one in flight, holds the latest change.

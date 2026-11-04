@@ -1482,6 +1482,66 @@ describe("ContentSaveSender", () => {
       expect(contentRef.writes[2].values).toMatchObject({ lastHistoryEntryId: c });
     });
 
+    it("disposes a group document's drain once its latest change is saved", async () => {
+      // by its own save
+      const own = track(setup({}, true));
+      const a = await own.edit("alpha");
+      own.commits.commit(a);
+      own.sender.detach();
+      own.contentRef.writes[0].resolve();
+      await flush();
+      const next = track({ sender: getContentSaveSender(own.document,
+        { contentRef: own.contentRef, updateTools: () => Promise.resolve() }) }).sender;
+      expect(next).not.toBe(own.sender);
+
+      // by another member's save that reaches this client's newest committed entry
+      const other = track(setup({ random: () => 0.5 }, true));
+      const b = await other.edit("bravo");
+      other.commits.commit(b);
+      other.sender.detach();
+      other.contentRef.fireEnvelope({ lastHistoryEntryId: b, lastHistoryEntryIndex: 1, settled: true });
+      await flush();
+      jest.advanceTimersByTime(kGroupSaveJitterMs);
+      expect(other.contentRef.update).not.toHaveBeenCalled();
+      const replaced = track({ sender: getContentSaveSender(other.document,
+        { contentRef: other.contentRef, updateTools: () => Promise.resolve() }) }).sender;
+      expect(replaced).not.toBe(other.sender);
+    });
+
+    it("calls onDrained when a drain ends, but not when it is canceled or the sender is disposed", async () => {
+      const onDrained = jest.fn();
+      const { commits, contentRef, document, edit, sender } = track(setup({ onDrained }));
+      const a = await edit("alpha");
+      commits.commit(a);
+      sender.detach();
+      getContentSaveSender(document, { contentRef, updateTools: () => Promise.resolve(), onDrained });
+      contentRef.writes[0].resolve();
+      await flush();
+      expect(onDrained).not.toHaveBeenCalled();
+
+      // the timeout calls it once the last intermediate save is sent
+      await edit("bravo");
+      jest.advanceTimersByTime(kIntermediateSaveIntervalMs);
+      expect(contentRef.update).toHaveBeenCalledTimes(2);
+      await edit("charlie");
+      sender.detach();
+      jest.advanceTimersByTime(kSenderUnmountLimitMs - 1);
+      expect(onDrained).not.toHaveBeenCalled();
+      jest.advanceTimersByTime(1);
+      expect(contentRef.update).toHaveBeenCalledTimes(3);
+      expect(onDrained).toHaveBeenCalledTimes(1);
+
+      // nothing left to save at detach calls it at once
+      const idle = jest.fn();
+      const nothingToSave = track(setup({ onDrained: idle }));
+      nothingToSave.sender.detach();
+      expect(idle).toHaveBeenCalledTimes(1);
+
+      const disposedDirectly = jest.fn();
+      track(setup({ onDrained: disposedDirectly })).sender.dispose();
+      expect(disposedDirectly).not.toHaveBeenCalled();
+    });
+
     it("keeps a fallback episode open across a detach and attach", async () => {
       const logEvent = jest.fn();
       const { contentRef, document, edit, sender } = track(setup({ logEvent }));
