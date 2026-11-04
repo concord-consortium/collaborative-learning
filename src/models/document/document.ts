@@ -68,9 +68,10 @@ function resolveJsonPath(json: any, path: string) {
 
 /**
  * Converts the old tiles and shared models in stored content before MST sees them, so the
- * conversion can be recorded as JSON patches. Group documents are not converted here; the tile
- * snapshot preprocessors convert them as MST loads them, and no conversion is recorded. Returns
- * undefined when the content is not converted here.
+ * conversion can be recorded as JSON patches. Concurrent documents (group and class-wide) are not
+ * converted here; their snapshot preprocessors convert them as MST loads them, and no conversion
+ * is recorded. Returns undefined for those, for content that is already an MST node, and for empty
+ * content; otherwise the result, with no converted paths when nothing is old.
  */
 function convertStoredContent(content: unknown, concurrent?: boolean) {
   return content && !isStateTreeNode(content) && !concurrent ? convertContentJson(content) : undefined;
