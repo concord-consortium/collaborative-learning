@@ -200,6 +200,12 @@ the diff between each old tile's JSON and its converted JSON, built once history
   so the copy finds it. The one gap is playback opened in the short window after the converted
   content is saved and before the entry is written. That is left to CLUE-751, which handles the
   order of content and history saves.
+- **Content replaced after load.** `setContent` replaces a loaded document's content. It runs
+  when the content listener updates a document a teacher monitors, or one of the owner's own
+  documents that isn't open, and when a network document's content is fetched. It converts the
+  incoming content the same way the load does. It rebuilds the pending entry from that content,
+  or clears it when nothing is old, so a pending entry always describes the stored content against
+  the live content. Only the pending entry changes; one already in history stays.
 - **Group documents** record conversion entries only once section 4 is built. *My call.* Until
   then they behave as today. A schema change that relies on section 4 can't ship before it anyway.
 
@@ -308,8 +314,11 @@ number of entries:
 
 ### 4. Group documents (design only)
 
-Two problems only group documents have. This story designs the answer; building it is a follow-up,
-and until it ships, group documents don't record conversion entries (section 2).
+Two problems only group documents have. This story designs the answer; building it is two
+follow-ups, and until they ship, group documents don't record conversion entries (section 2).
+CLUE-792 makes a group-document client that receives a conversion entry stop editing and ask for a
+reload, without applying the entry. CLUE-793 builds the rest of this section. CLUE-792 ships at
+least one release before CLUE-793.
 
 **Concurrent conversions.** Two clients on the new release can open an old group document at about
 the same time. Each converts it with its own random ids and records its own conversion entry. Only
@@ -488,6 +497,26 @@ a follow-up story.
 - **Performance check** (with the harness, not in CI): play the longest legacy DataFlow history at
   full speed and confirm playback stays responsive and doesn't crash.
 
+## Delivery
+
+The story ships as three stacked PRs, merged in order. Each one is useful on its own.
+
+1. **Record conversion entries.** The `schemaVersion` registration, the JSON patch applier and diff,
+   detecting old tiles at load and in `setContent`, building the conversion entry and flushing it
+   into history, and DataFlow's `schemaVersion`. Today's playback skips conversion entries in this
+   PR, so recording one never changes what playback shows. A test checks that a plain JSON patch
+   library rebuilds the end state across a conversion entry.
+2. **Play back across conversion entries.** The tree API for loads, the JSON copy, the playback
+   patch source, crossing a conversion in both directions, rollback, and handing a pending entry to
+   the playback copy (sections 3 and 7).
+3. **Bridge legacy DataFlow history.** The history-bridge registry and virtual conversions, the
+   "earlier history isn't available" boundary, the DataFlow bridge (section 6), and the developer
+   doc (section 8).
+
+Group documents are left out of all three (section 4).
+
+A change to this design made in a later PR updates this document in that PR.
+
 ## Related work
 
 - **CLUE-760** (background entries): its `isLegacyBackgroundEntry` rule recognizes legacy DataFlow
@@ -497,8 +526,9 @@ a follow-up story.
   fix needs. It should also cover playback opened after converted content is saved but before the
   conversion entry is written (section 2).
 - **CLUE-783** (large history performance): the batched apply that the old-tile loads join.
-- **Follow-up: group documents** (section 4). It must ship at least one release before the first
-  schema change that relies on it.
+- **CLUE-792** (group documents stop editing on a conversion entry) and **CLUE-793** (group
+  documents record conversion entries and merge them with concurrent edits): section 4. CLUE-792
+  must ship at least one release before CLUE-793.
 - **Follow-up: storing legacy DataFlow conversion entries**, so dumb services can cross the legacy
   conversion. Inserting an entry into a stored chain (its index and the next entry's
   `previousEntryId`) is that story's problem.
