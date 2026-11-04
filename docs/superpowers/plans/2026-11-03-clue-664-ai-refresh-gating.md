@@ -546,13 +546,23 @@ and reads results through `admin.firestore()`. The existing
 requested/unrequested cases on it. `setGate`, `setLastHistoryIndex`, `writeEvaluation` and
 `queueDocExists` above are placeholders for that file's own idioms, not functions to create.
 
-- [ ] **Step 2: Run them to verify they fail**
+- [ ] **Step 2: You cannot run them here — say so and move on**
+
+**There is no Firebase emulator on this machine** (no `firebase` CLI, no Java), so
+`npm test -- on-analyzable-doc-written` cannot run and neither can the usual red-green cycle or any
+mutation test for this task.
+
+CI runs these tests for real, via
+`firebase emulators:exec --only firestore,database --project demo-test "npm test"` in
+`.github/workflows/functions-v2.yml`, so they are genuine coverage — just not coverage you can
+confirm before pushing. Write them carefully, state in your report that they are unverified, and do
+not claim a red-green cycle you did not observe.
+
+What you *can* check locally:
 
 ```bash
-cd functions-v2 && npm test -- on-analyzable-doc-written
+cd functions-v2 && npx tsc --noEmit -p tsconfig.json && npm run lint
 ```
-
-Expected: FAIL — the unchanged document is enqueued.
 
 - [ ] **Step 3: Add the gate check and capture the index**
 
@@ -616,19 +626,20 @@ Import the shared pieces:
 import {hasChangedSinceEvaluation, kEvaluationGateKey} from "../../shared/ai-evaluation-gate";
 ```
 
-- [ ] **Step 4: Run the tests**
+- [ ] **Step 4: Verify what can be verified**
 
 ```bash
-cd functions-v2 && npm test -- on-analyzable-doc-written && npx tsc --noEmit -p tsconfig.json
+cd functions-v2 && npx tsc --noEmit -p tsconfig.json && npm run lint
 ```
 
-Expected: PASS, no type errors.
+Expected: no errors. The tests themselves run on CI, not here.
 
-- [ ] **Step 5: Mutation-test**
+- [ ] **Step 5: Reason through the mutations instead of running them**
 
-Change `if (!requestId) {` to `if (true) {` and rerun. Expected: "always enqueues a requested
-evaluation" FAILS. Restore, then delete the whole gate block and rerun: "does not enqueue an
-unrequested evaluation" FAILS. Restore. Report both verbatim.
+No emulator means no mutation testing for this task. Instead, state in your report what each test
+would catch and why: which assertion fails if `if (!requestId)` becomes `if (true)`, and which
+fails if the gate block is deleted. If you cannot name a failing assertion for either, the test is
+not pinning the behavior and needs rewriting before it reaches CI.
 
 - [ ] **Step 6: Commit**
 
@@ -692,18 +703,18 @@ Import:
 import {kEvaluationGateKey} from "../../shared/ai-evaluation-gate";
 ```
 
-- [ ] **Step 4: Run the tests**
+- [ ] **Step 4: Verify what can be verified**
 
 ```bash
-cd functions-v2 && npm test && npx tsc --noEmit -p tsconfig.json
+cd functions-v2 && npx tsc --noEmit -p tsconfig.json && npm run lint
 ```
 
-Expected: PASS, no type errors.
+Expected: no errors. As in Task 6, the tests run on CI rather than here.
 
-- [ ] **Step 5: Mutation-test**
+- [ ] **Step 5: Reason through the mutation instead of running it**
 
-Move the gate write to before the `commentRef.set` call and make that call throw. Expected: "leaves
-the gate alone when the analysis fails" FAILS. Restore. Report verbatim.
+Name the assertion that fails if the gate write is moved ahead of `commentRef.set`, and say why. If
+you cannot, the test is not pinning "advances on success alone".
 
 - [ ] **Step 6: Commit**
 
@@ -746,10 +757,10 @@ git commit -m "CLUE-664: document that unchanged documents are not re-evaluated"
 npx tsc --noEmit -p tsconfig.json
 npx jest
 npm run lint:build
-cd functions-v2 && npm test && cd ..
+cd functions-v2 && npx tsc --noEmit -p tsconfig.json && npm run lint && cd ..
 ```
 
-Expected: 0 errors throughout.
+Expected: 0 errors throughout. `functions-v2`'s own tests cannot run here — CI runs them.
 
 - [ ] **Step 2: Run the four lenses**
 
@@ -768,7 +779,9 @@ In a unit with `aiEvaluation` set: press Ideas and let it complete; press Ideas 
 editing and confirm the nudge with no request; edit a tile and confirm Ideas requests again. Repeat
 for an AI tile's Update button.
 
-The server side cannot be checked this way — its emulator tests in Task 6 and 7 are the evidence.
+The server side cannot be checked this way. Its evidence arrives in two stages: the CI
+functions-v2 job runs the emulator tests on push, and staging is where the behavior itself is
+confirmed.
 
 - [ ] **Step 4: Open the PR**
 
@@ -781,8 +794,10 @@ Tick **run regression** only if the user asks. Request a Copilot review on the f
 
 ## Risks
 
-- **The server side has no localhost loop.** Its emulator tests carry the weight. Both functions
-  already have test files using `firebase-functions-test`, so the harness exists.
+- **The server side has no localhost loop and no local emulator** (no `firebase` CLI, no Java).
+  Tasks 6 and 7 ship tests that are unverified until CI runs them, and no mutation testing is
+  possible for them here. Staging is where the behavior gets confirmed. Treat the CI functions-v2
+  job on the first push as the real red-green moment.
 - **Two awaits were added to the Ideas click.** They run before the request id is minted, so a
   double click during them is handled by the existing `canRequestIdeas` gate — verify that holds.
 - **`getSimpleDocumentPath(documentKey)`** returns a path *relative* to the Firestore root
