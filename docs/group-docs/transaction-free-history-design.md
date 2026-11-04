@@ -252,7 +252,7 @@ When a client opens a document, it:
 
 The saved-doc invariant — established by the [GD-18 settled-state saves](group-docs-completed-work.md#gd-18-settled-state-document-saves-clue-751) — is that the doc reflects canonical state at the recorded `tips`. Without that invariant, late-comer loads can diverge from canonical (see § Why the prerequisite is needed below).
 
-Performance concern: for a long-lived document with many entries between saved tips and current head, this is O(N) work on every open; needs measurement. Mitigations are out of scope here (see GD-18 in the [completed-work log](group-docs-completed-work.md#gd-18-settled-state-document-saves-clue-751)).
+Performance concern: for a long-lived document with many entries between saved tips and current head, this is O(N) work on every open; needs measurement. Mitigations are out of scope here; the known one is server-side periodic snapshots of the canonical state.
 
 ### Why the prerequisite is needed
 

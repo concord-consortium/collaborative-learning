@@ -145,7 +145,7 @@ Reproduction scripts and observed behavior for each case live in [test-scripts/s
 
 ### GD-18: Settled-State Document Saves
 
-Done. Group documents now save only from a settled history, and every content save records whether its `lastHistoryEntryId` is exact. See [completed work](group-docs-completed-work.md#gd-18-settled-state-document-saves-clue-751). Prerequisite for GD-19.
+Done. Group documents save only from a settled history, and every content save records whether its `lastHistoryEntryId` is exact. See [completed work](group-docs-completed-work.md#gd-18-settled-state-document-saves-clue-751). Prerequisite for GD-19.
 
 ### GD-19: Transaction-Free History
 
@@ -252,7 +252,7 @@ Best done after [GD-16: E2E Test Framework](#gd-16-e2e-test-framework) lands so 
 
 Hardening the existing infrastructure to prevent silent failures and data loss in edge cases. Specific items, locations, and proposed fixes live in [group-docs-implementation-todos.md](group-docs-implementation-todos.md). Highlights:
 
-- Race condition in initial history load (explicitly deferred by GD-6). A group document loaded from an envelope saved with `settled: true` no longer has it. An envelope saved without `settled` (from before GD-18) still does: the content and Firestore's last entry are read separately, so an entry committed between the two reads is skipped, and that session's saves are still marked settled.
+- Race condition in initial history load (explicitly deferred by GD-6). A group document loaded from an envelope saved with `settled: true` doesn't have it. One loaded from an envelope without `settled` does: the content and Firestore's last entry are read separately, so an entry committed between the two reads is skipped, and that session's saves are marked settled anyway.
 - Race in the upload path. After an upload transaction commits, another client's entry chained after ours can reach the listener before the transaction promise resolves. `detectAndResolveFork` then sees our committed entries still in `completedHistoryEntryQueue` and can roll them back, and the success path's `splice(0, entriesToUpload.length)` can drop entries queued while the upload ran, which are never uploaded. A client can then look settled while holding a non-canonical state. The window is narrow. GD-19 removes it: a local entry leaves the pending set only when its own echo arrives, and there is no transaction promise or splice.
 - Error handling when metadata promise rejects (silent infinite failure loop)
 - Unhandled promise in recursive upload
