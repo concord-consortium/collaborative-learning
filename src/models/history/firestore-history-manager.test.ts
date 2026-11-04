@@ -142,6 +142,7 @@ describe("history loading", () => {
       // In the real world this callback will be delayed until the history documents
       // are actually loaded from firebase
       const historyEntryDocs = entries.map((entry, index) => ({
+        id: `e${index}`,
         index,
         entry
       }));
@@ -230,8 +231,8 @@ describe("history loading", () => {
         // In the real world this callback will be delayed until the history documents
         // are actually loaded from firebase
         historyLoaded([
-          { index: 1, entry: { id: "a1" } },
-          { index: 2, entry: { id: "a2" } }
+          { id: "a1", index: 1, entry: { id: "a1" } },
+          { id: "a2", index: 2, entry: { id: "a2" } }
         ]);
         return () => undefined;
       });
@@ -484,7 +485,7 @@ describe("history loading", () => {
       const { historyManager } = setupFirestoreHistoryManager(treeManager);
       getLastHistoryEntry.mockResolvedValue(undefined);
       loadHistory.mockImplementation((firestore, path, historyLoaded) => {
-        historyLoaded([{ index: 0, entry: { id: "a1" } }, { index: 1, entry: { id: "a2" } }]);
+        historyLoaded([{ id: "a1", index: 0, entry: { id: "a1" } }, { id: "a2", index: 1, entry: { id: "a2" } }]);
         return () => undefined;
       });
       const goToSpy = mockCompletedSeek(treeManager);

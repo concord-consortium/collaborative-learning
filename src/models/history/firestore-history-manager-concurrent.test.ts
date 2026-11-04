@@ -256,7 +256,7 @@ function makeWrapperDoc(
   previousEntryId: string | undefined,
   entry: HistoryEntrySnapshot,
 ): IFirestoreHistoryEntryDoc {
-  return { index, previousEntryId, entry };
+  return { id: entry.id ?? `e${index}`, index, previousEntryId, entry };
 }
 
 describe("FirestoreHistoryManagerConcurrent", () => {

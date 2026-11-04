@@ -6,7 +6,7 @@ import { TreeAPI } from "./tree-api";
 import { IUndoManager, UndoStore } from "./undo-store";
 import { TreePatchRecord, HistoryEntry, TreePatchRecordSnapshot,
   HistoryOperation,
-  ICreateHistoryEntry} from "./history";
+  ICreateHistoryEntry, HistoryEntrySnapshot} from "./history";
 import { DEBUG_HISTORY } from "../../lib/debug";
 import { PatchApplicationError } from "./tree";
 import { IDocumentMetadata } from "../../../shared/shared";
@@ -633,6 +633,46 @@ export const TreeManager = types
     // and print a warning to the console.
     // One way might be using unique history_entry_ids that we mark as closed
     // after the finish call.
+  }),
+
+  /**
+   * Apply entries that were saved after the content was last saved, when a document loads.
+   *
+   * The entries are applied one at a time, and application stops at the first one that
+   * fails. They aren't added to `document.history` or reported as completed: they are
+   * already in Firestore.
+   */
+  applyEntriesAtLoad: flow(function* applyEntriesAtLoad(snapshots: HistoryEntrySnapshot[]) {
+    const trees = Object.values(self.trees);
+    // FAKE ids keep what the trees do while applying out of the history.
+    yield Promise.all(trees.map(tree => {
+      return tree.startApplyingPatchesFromManager(FAKE_HISTORY_ENTRY_ID, FAKE_EXCHANGE_ID);
+    }));
+
+    let applied = 0;
+    let error: string | undefined;
+    for (const snapshot of snapshots) {
+      const treePatches: Record<string, IJsonPatch[]> = {};
+      HistoryEntry.create(snapshot).records.forEach(record => {
+        (treePatches[record.tree] ??= []).push(...record.getPatches(HistoryOperation.Redo));
+      });
+      try {
+        yield Promise.all(Object.entries(treePatches).map(([treeId, patches]) => {
+          return patches.length > 0
+            ? self.trees[treeId]?.applyPatchesFromManager(FAKE_HISTORY_ENTRY_ID, FAKE_EXCHANGE_ID, patches)
+            : undefined;
+        }));
+      } catch (e) {
+        error = e instanceof Error ? e.message : String(e);
+        break;
+      }
+      applied++;
+    }
+
+    yield Promise.all(trees.map(tree => {
+      return tree.finishApplyingPatchesFromManager(FAKE_HISTORY_ENTRY_ID, FAKE_EXCHANGE_ID);
+    }));
+    return error === undefined ? { applied } : { applied, error };
   }),
 
   goToHistoryEntryPosition: flow(function* goToHistoryEntryPosition(

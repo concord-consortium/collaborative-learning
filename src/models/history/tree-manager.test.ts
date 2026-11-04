@@ -824,3 +824,34 @@ describe("entry completion, open-entry timeout and late records", () => {
     });
   });
 });
+
+describe("applying entries at load", () => {
+  it("applies entries at load without adding them to history", async () => {
+    const { tileContent, manager } = setupDocument();
+    const entries = [makeRealHistoryEntry(updateFlag), makeRealHistoryEntry(action1)];
+    const listener = jest.fn();
+    manager.addEntryCompletedListener(listener);
+
+    const result = await manager.applyEntriesAtLoad(entries);
+
+    expect(result).toEqual({ applied: 2 });
+    expect(tileContent.flag).toBe(true);
+    expect(tileContent.actionText).toBe("action 1");
+    expect(manager.document.history.length).toBe(0);
+    expect(listener).not.toHaveBeenCalled();
+    expect(manager.exactness.notExactReason).toBeUndefined();
+  });
+
+  it("stops at the first entry that fails to apply and reports how many applied", async () => {
+    const { tileContent, manager } = setupDocument();
+    const entries = [
+      makeRealHistoryEntry(action1), makeRealHistoryEntry(failingEntry), makeRealHistoryEntry(action2)
+    ];
+
+    const result = await manager.applyEntriesAtLoad(entries);
+
+    expect(result.applied).toBe(1);
+    expect(result.error).toEqual(expect.any(String));
+    expect(tileContent.actionText).toBe("action 1");
+  });
+});
