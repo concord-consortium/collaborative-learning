@@ -1,6 +1,7 @@
+import { observable, runInAction } from "mobx";
 import {
   addDisposer, addMiddleware, getSnapshot, IJsonPatch, Instance,
-  isActionContextThisOrChildOf, isAlive, recordPatches, tryResolve
+  isActionContextThisOrChildOf, isAlive, onPatch, recordPatches, tryResolve
 } from "mobx-state-tree";
 import { nanoid } from "nanoid";
 import { DocumentContentModelType } from "../document/document-content";
@@ -19,6 +20,16 @@ export class TreeMonitor {
   tree: Instance<typeof Tree>;
   manager: TreeManagerAPI;
   private enabled = false;
+
+  // Top-level calls between onStart and onFinish. A flow stays here while it is suspended.
+  private trackedCalls = new Set<{ call: IActionTrackingMiddleware3Call<CallEnv>, env: CallEnv }>();
+  private runningCallCountBox = observable.box(0);
+
+  /**
+   * Called when the tree changes while monitoring is enabled and no tracked call is running,
+   * so no history entry will describe the change.
+   */
+  onUnrecordedChange?: () => void;
 
   constructor(tree: Instance<typeof Tree>,  manager: TreeManagerAPI, includeHooks: boolean) {
     // We don't care how `this` is handled by createActionTrackingMiddleware
@@ -146,6 +157,7 @@ export class TreeMonitor {
           exchangeId,
           undoable: true
         };
+        self.trackCall(call, call.env);
       },
       onFinish(call, error) {
         const env = call.env;
@@ -155,6 +167,7 @@ export class TreeMonitor {
         // DEBUG:
         // console.log("onFinish", getActionPath(call));
 
+        self.untrackCall(call);
         call.env = undefined;
 
         const { recorder } = env;
@@ -195,6 +208,45 @@ export class TreeMonitor {
     // We might need an option to not add this disposer, but it seems it would generally
     // ge a good thing to do.
     addDisposer(tree, middlewareDisposer);
+
+    // While monitoring is enabled every top-level action is tracked, so a patch that arrives
+    // with nothing tracked came from outside an action or otherwise bypassed the middleware.
+    const patchDisposer = onPatch(tree, () => {
+      if (this.enabled && this.trackedCalls.size === 0) {
+        this.onUnrecordedChange?.();
+      }
+    });
+    addDisposer(tree, patchDisposer);
+  }
+
+  get runningCallCount() {
+    return this.runningCallCountBox.get();
+  }
+
+  /**
+   * The running calls that have already changed the tree. Their changes are not in any
+   * history entry until the call finishes.
+   */
+  getRunningCallsWithChanges() {
+    const result: Array<{ action: string, historyEntryId: string }> = [];
+    this.trackedCalls.forEach(({ call, env }) => {
+      if (env.recorder.patches.length > 0) {
+        result.push({ action: getActionPath(call), historyEntryId: env.historyEntryId });
+      }
+    });
+    return result;
+  }
+
+  private trackCall(call: IActionTrackingMiddleware3Call<CallEnv>, env: CallEnv) {
+    this.trackedCalls.add({ call, env });
+    runInAction(() => this.runningCallCountBox.set(this.trackedCalls.size));
+  }
+
+  private untrackCall(call: IActionTrackingMiddleware3Call<CallEnv>) {
+    this.trackedCalls.forEach(entry => {
+      if (entry.call === call) this.trackedCalls.delete(entry);
+    });
+    runInAction(() => this.runningCallCountBox.set(this.trackedCalls.size));
   }
 
   enableMonitoring() {

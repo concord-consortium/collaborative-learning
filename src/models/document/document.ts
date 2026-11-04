@@ -330,6 +330,7 @@ export const DocumentModel = Tree.named("Document")
       const manager = TreeManager.create({document: {}, undoStore: {}});
       self.treeManagerAPI = manager;
       self.treeMonitor = new TreeMonitor(self, manager, false);
+      self.treeMonitor.onUnrecordedChange = () => manager.exactness.markNotExact("unrecorded-change");
       manager.setMainDocument(self);
       // Clean up the manager when this document is destroyed this doesn't
       // happen automatically because the manager is stored in volatile state.
