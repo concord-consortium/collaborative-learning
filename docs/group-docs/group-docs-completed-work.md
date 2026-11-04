@@ -55,6 +55,33 @@ Two changes touching the same tile (even at disjoint sub-paths) still conflict â
 
 Design and out-of-scope items: [merge-independent-forks-design.md](../superpowers/specs/2026-04-22-merge-independent-forks-design.md).
 
+## GD-18: Settled-state document saves (CLUE-751)
+
+Every RTDB content save now records whether its `lastHistoryEntryId` is exact, so the saved content is known to be the document's state at that entry, and that entry is already in Firestore. Group documents save only from a settled history, so the saved content is canonical state at a known position. Implementation: `ContentSaveSender` in [src/models/document/content-save-sender.ts](../../src/models/document/content-save-sender.ts), with the commit and settled signals supplied by `FirestoreHistoryManagerConcurrent` in [src/models/history/firestore-history-manager-concurrent.ts](../../src/models/history/firestore-history-manager-concurrent.ts). The sender is a plain class that replaces the react-query mutation and lodash throttle; it sends one write at a time, always the newest state, and shows `Retrying` when writes keep failing.
+
+**Saving the snapshot taken when an entry completes.** A content snapshot is kept when each local history entry completes. Once that entry commits (the upload transaction succeeds), the sender saves the snapshot, stamped with the entry's id and its Firestore index. The snapshot is usable only if, when the entry completed, no other entry was open and no tracked flow that had changed state was running. A snapshot is also voided if another member's entry is applied, or a fork rollback or merge happens, before its entry commits. This lets a lone runner whose entries complete faster than they upload keep making exact saves, each one upload behind. A group document never saves content from a local entry that hasn't committed, and never makes an intermediate save: other members save in its place, and history holds every canonical entry.
+
+**Idle members save the current state when settled.** An idle member has no local entries of its own, so it saves its current content when its history is settled: nothing queued or uploading, no apply in progress, nothing in the download buffer, and no entry open. The save is stamped with the last canonical entry (`expectedRemoteHead` and its index), not the last entry in local history, because after a fork rollback that is a local-only revert entry.
+
+**Stale-check and jitter.** Before a group save, the sender compares the save's chain index with the `lastHistoryEntryIndex` on the envelope. If the envelope is already at or past it, the save is skipped. Otherwise it waits a random 0 to 200 ms, checks again, and saves. Local history can't order two entry ids from before the load point, which is why the index is stored. A committing writer learns of its commit before the other members receive the entry, so it usually saves first and the idle members skip. An envelope without an index or without `settled` can't be ordered against a save, so it counts as behind.
+
+**The envelope listener.** A group document listens to the envelope's `lastHistoryEntryId`, `lastHistoryEntryIndex` and `settled` children, not its content. It drives the stale-check, and when the envelope reaches this client's newest committed entry, the save indicator shows Saved even though another member made the save. The activity recorder is told the saved id the same way, so it doesn't wait out its timeout for every change an active editor makes.
+
+**The envelope fields.** `DBDocument` in [src/lib/db-types.ts](../../src/lib/db-types.ts) gains these optional fields:
+
+- `settled: true` on an exact save. It is positive on purpose: envelopes saved before this change lack it, and readers treat them like intermediate saves.
+- `exactSince` on an exact save: the entry from which history recreates the content. It carries forward while each load is exact, and restarts at the loaded id when it isn't.
+- `lastHistoryEntryIndex` on every save: the stamped entry's Firestore `index`.
+- `unsettled` on an intermediate save, holding evidence for debugging (open entries, running flows, uncommitted entry ids, why the session stopped being exact). Each save clears the other kind's fields.
+
+A session stops being exact when it can't vouch for its content, for example when a remote entry fails to apply or the content changed with no entry recording it. A client whose remote apply failed leaves the session not exact and stops saving content, rather than save a state its id doesn't describe.
+
+**The initial load from a settled envelope.** When the envelope has `settled: true` and an index, the initial load of a group document starts from the envelope's entry and applies only the entries after it, instead of reading the content and Firestore's last entry separately. That removes the initial-load race for these envelopes, and `exactSince` carries forward. Envelopes without `settled` keep the old behavior.
+
+**Individual documents.** The same sender saves individual documents (any document that isn't `concurrent`) using the same snapshot rule, plus intermediate saves when no exact save has been possible for 5 seconds, since an individual document has a single writer and would otherwise lose work. An individual document loaded behind its history applies the missing entries at load, up to 200.
+
+What GD-18 left unbuilt, including the group upload race, is listed under [GD-22](group-docs-plan.md#gd-22-reliability-and-robustness).
+
 ## CLUE-483: UI Disruption Testing
 
 Tested whether transient UI disruptions from concurrent editing are tolerable in practice. Reframed the [requires active interaction] cases catalogued in [test-scripts/](test-scripts/) to be exercised by one person across two browser sessions using GD-3's pause/resume (5-second resume delay), and split each Result row into Expected vs. Actual.

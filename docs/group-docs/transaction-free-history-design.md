@@ -3,9 +3,9 @@
 **Status**: Early draft — partial design, several open questions remain
 **Date**: 2026-04-28
 **Author**: Scott Cytacki (with Claude)
-**Related**: [group-docs-plan.md](group-docs-plan.md), [group-docs-current-state.md](group-docs-current-state.md), [background-entries-design.md](background-entries-design.md), [settled-state-doc-saves-design.md](settled-state-doc-saves-design.md), GD-6 / CLUE-485, CLUE-379
+**Related**: [group-docs-plan.md](group-docs-plan.md), [group-docs-current-state.md](group-docs-current-state.md), [background-entries-design.md](background-entries-design.md), [GD-18 settled-state document saves](group-docs-completed-work.md#gd-18-settled-state-document-saves-clue-751), GD-6 / CLUE-485, CLUE-379
 
-**Prerequisite**: [settled-state-doc-saves-design.md](settled-state-doc-saves-design.md) — this design assumes the saved doc reflects canonical state at a known canonical position. Today's code does not guarantee that; the prerequisite design lands the invariant.
+**Prerequisite**: [GD-18 settled-state document saves](group-docs-completed-work.md#gd-18-settled-state-document-saves-clue-751) (done) — this design assumes the saved doc reflects canonical state at a known canonical position. GD-18 lands that invariant for saves marked `settled: true`; envelopes saved before it lack the mark.
 
 ## Summary
 
@@ -250,9 +250,9 @@ When a client opens a document, it:
 2. Loads canonical entries from Firestore that come after the saved tips, ordered by `serverTimestamp`.
 3. For each entry in canonical order: applies via the receive-side state machine (treating each as a delivered remote).
 
-The saved-doc invariant — established by the [settled-state-doc-saves prerequisite](settled-state-doc-saves-design.md) — is that the doc reflects canonical state at the recorded `tips`. Without that invariant, late-comer loads can diverge from canonical (see § Why the prerequisite is needed below).
+The saved-doc invariant — established by the [GD-18 settled-state saves](group-docs-completed-work.md#gd-18-settled-state-document-saves-clue-751) — is that the doc reflects canonical state at the recorded `tips`. Without that invariant, late-comer loads can diverge from canonical (see § Why the prerequisite is needed below).
 
-Performance concern: for a long-lived document with many entries between saved tips and current head, this is O(N) work on every open; needs measurement. Mitigations are out of scope here (see settled-state-doc-saves design).
+Performance concern: for a long-lived document with many entries between saved tips and current head, this is O(N) work on every open; needs measurement. Mitigations are out of scope here (see GD-18 in the [completed-work log](group-docs-completed-work.md#gd-18-settled-state-document-saves-clue-751)).
 
 ### Why the prerequisite is needed
 
@@ -264,7 +264,7 @@ Without the saved-doc-reflects-canonical invariant, the following anomaly is pos
 - D opens the document. D loads saved-doc state P + b1, but canonical state is P + a1 (b1 lost).
 - D doesn't know b1 is in the loaded state. D applies canonical entries since saved tips and reaches some inconsistent state.
 
-The settled-state-doc-saves design ensures B doesn't save the doc while b1 is in flight or unresolved; the saved doc only ever reflects canonical state. With that invariant, D's load is correct.
+GD-18 ensures B doesn't save the doc while b1 is in flight or unresolved; the saved doc only ever reflects canonical state. With that invariant, D's load is correct.
 
 ## Open questions
 
@@ -333,7 +333,7 @@ Group documents are experimental, so it's acceptable that older clients can't re
 
 Once that release is broadly deployed, the migration can begin and set a new `documentSchemaVersion` on each migrated document. Old clients running the pre-deploy release fail loudly with a recognizable error; clients without the pre-deploy would corrupt silently, so the pre-deploy is a hard prerequisite.
 
-This prep is small but has lead time — it must be **deployed and broadly adopted** (not just merged) before this migration starts. It's called out from the [classroom-readiness doc](group-docs-classroom-readiness.md), the [settled-state-doc-saves design](settled-state-doc-saves-design.md), and the [GD-19 plan section](group-docs-plan.md#gd-19-transaction-free-history) so it can be scheduled early.
+This prep is small but has lead time — it must be **deployed and broadly adopted** (not just merged) before this migration starts. It's called out from the [classroom-readiness doc](group-docs-classroom-readiness.md), the [GD-18 settled-state saves](group-docs-completed-work.md#gd-18-settled-state-document-saves-clue-751), and the [GD-19 plan section](group-docs-plan.md#gd-19-transaction-free-history) so it can be scheduled early.
 
 ### Interaction with the background channel
 

@@ -11,14 +11,13 @@ Documentation for CLUE's group-document feature: multiple users collaborating on
 ## Current state and history
 
 - [group-docs-current-state.md](group-docs-current-state.md) — What works today, what doesn't, and known severe issues for users testing the feature.
-- [group-docs-completed-work.md](group-docs-completed-work.md) — Completed group-document work in landing order: GD-1 through GD-6, GD-9, and the CLUE-483 UI disruption testing pass.
+- [group-docs-completed-work.md](group-docs-completed-work.md) — Completed group-document work in landing order: GD-1 through GD-6, GD-9, GD-18, and the CLUE-483 UI disruption testing pass.
 - [group-docs-implementation-todos.md](group-docs-implementation-todos.md) — Internal code TODOs in the legacy concurrent history manager. Most are subsumed by GD-19; referenced from GD-22.
 
 ## Design specs
 
 Detailed designs for individual plan items.
 
-- [settled-state-doc-saves-design.md](settled-state-doc-saves-design.md) — Design for [GD-18](group-docs-plan.md#gd-18-settled-state-document-saves). Save the doc only when the receive-side state machine is settled. Status: design complete.
 - [transaction-free-history-design.md](transaction-free-history-design.md) — Design for [GD-19](group-docs-plan.md#gd-19-transaction-free-history). Replace the per-document Firestore transaction with a multi-parent DAG. Status: early draft.
 - [background-entries-design.md](background-entries-design.md) — Design for [GD-20](group-docs-plan.md#gd-20-background-entries-dataflow). Make tick-rate dataflow changes ordinary history entries with a `background` flag. Status: draft for review.
 - [collaborative-text-tile-editing-design.md](collaborative-text-tile-editing-design.md) — Design notes for [GD-21](group-docs-plan.md#gd-21-collaborative-text-tile-editing). Fine-grained text patches plus a Slate-aware applier that preserves cursor and selection on remote updates. Status: no concrete design yet.
