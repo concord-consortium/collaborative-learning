@@ -34,10 +34,10 @@ customer.
 ## Goals
 
 - **Stored history is a correct chain of JSON patches.** Old entries apply to old-format state, a
-  conversion entry takes the content from the old format to the new, and new entries apply to the
+  load entry takes the content from the old format to the new, and new entries apply to the
   new format. Anything that can apply JSON patches can rebuild the document at any entry, in either
   direction, without CLUE's code.
-- **A client that converts content records a conversion entry** with forward and inverse patches
+- **A client that converts content records a load entry** with forward and inverse patches
   between the old and new forms of each converted tile.
 - **A schema change needs little beyond what it needs today**: a version bump, a conversion function
   on plain JSON in place of a snapshot preprocessor, and a function that reads a tile's version from
@@ -58,7 +58,7 @@ customer.
   drop their conversion code. Nothing here rules that out, and conversion functions on plain JSON
   (section 1) are what such a script would run. How it keeps the chain correct is that story's
   problem.
-- **Backfilling conversion entries into stored legacy DataFlow histories.** A document whose stored
+- **Backfilling load entries into stored legacy DataFlow histories.** A document whose stored
   content is still legacy gets one the next time its owner edits it, like any other conversion. For
   the rest, CLUE builds them in memory at read time (section 6). A follow-up script can store them
   so dumb services can cross the legacy conversion too.
@@ -81,9 +81,9 @@ customer.
 - **Playback never shows a state it can't vouch for.** When an entry doesn't apply, or an old tile
   can't be loaded, playback stops there and says so (section 7). It doesn't guess.
 - **Documents with no conversions must not get slower to play back.** Large histories play back
-  fast since CLUE-783, and that must stay true. A document with no conversion entries and no legacy
+  fast since CLUE-783, and that must stay true. A document with no load entries and no legacy
   entries plays back exactly as it does today, after a scan of its entries.
-- **The conversion entry must never be applied to a live document's MST tree.** Its inverse would
+- **The load entry must never be applied to a live document's MST tree.** Its inverse would
   put old-format content into a live document, which the next load converts again with new random
   ids.
 
@@ -91,7 +91,7 @@ customer.
 
 1. **Release N** ships the schema change: the version bump, the conversion function, and the version
    reader if the type doesn't have one. From then on, a client that converts content records a
-   conversion entry, and playback crosses it.
+   load entry, and playback crosses it.
 2. Nothing else is required. The conversion function stays as long as old content or old history
    exists, as snapshot migrations do today.
 3. **Optionally, later:** if playback across the conversion is too slow for a tile that writes many
@@ -149,7 +149,7 @@ current one. Other tiles' existing preprocessors stay as they are until a tile r
 under this process.
 
 `getVersion` and `convertSnapshot` are plain functions on JSON with no MST or store imports, so a
-script can use them. A dumb service needs neither, because the conversion entry carries the change as
+script can use them. A dumb service needs neither, because the load entry carries the change as
 patches.
 
 **Ids are the tile's choice.** Where a conversion has to make new ids, it may make them
@@ -159,7 +159,11 @@ deterministic, for example from the tile id and an old index the way legacy Data
 the conversion hard to maintain, it uses random ids, and playback pays the churn. The developer doc
 (section 8) explains the tradeoff.
 
-### 2. The conversion entry
+### 2. The load entry
+
+A load entry records the changes CLUE made to the stored content while loading it. Today those are
+schema conversions. It is meant to grow into CLUE-788's load-time drift entry: one entry per load,
+holding every change loading made, not only schema conversions (see Related work).
 
 **Why today's code records nothing.** `createDocumentModel` builds the document with
 `DocumentModel.create(snapshot)` ([document.ts](../../../src/models/document/document.ts)), and the
@@ -167,7 +171,7 @@ preprocessors run inside that call, so the model starts out converted. The `Tree
 afterward, in the document's `afterCreate`, and it records patches only from actions on an existing
 tree. As far as MST is concerned nothing changed. Old content that enters through an action (pasting
 an old tile, a legacy `setProgram` value) is converted as its node is created, so its recorded patch
-carries the converted value and needs no conversion entry.
+carries the converted value and needs no load entry.
 
 **What it holds.** One entry per load that converted anything. It has a record with ordinary forward
 and inverse patches, so any JSON patch applier can cross it:
@@ -176,15 +180,17 @@ and inverse patches, so any JSON patch applier can cross it:
   back. They come from a generic JSON diff of the tile's snapshot before conversion and its
   snapshot after, under the tile's path (`/content/tileMap/<tileId>`). They are fine-grained, not a
   whole-tile replace. The diff is of the whole tile, not just its content, because some
-  preprocessors move fields between the two (Table and Geometry moved `title`).
+  preprocessors move fields between the two (Table and Geometry moved `title`). The snapshot after
+  is the tile's snapshot in the created MST model, so MST's defaults for that tile are in the entry
+  too.
 - Shared models converted at the same load go in the same entry, under
   `/content/sharedModelMap/<id>/sharedModel`.
 - The developer writes nothing for this. The diff is generic.
 
-**It is flagged as a conversion entry** so the parts of CLUE that apply entries to live MST trees can
-recognize it. The flag is `isConversion`.
+**It is flagged as a load entry** so the parts of CLUE that apply entries to live MST trees can
+recognize it. The flag is `isLoadEntry`.
 
-| Who | What it does with a conversion entry |
+| Who | What it does with a load entry |
 |---|---|
 | Undo | Never undoable. |
 | Concurrent manager (group documents) | Section 4. |
@@ -204,13 +210,13 @@ the document is created and kept pending.
 - **The client that saves the document** (the owner's) keeps it pending and puts it into history,
   to be uploaded, just before the first local entry that changes the content. Content is saved
   only when it changes, so an entry that changes only the document's title or other metadata
-  leaves the conversion entry pending. Flushing it then would store it next to old content, and
+  leaves the load entry pending. Flushing it then would store it next to old content, and
   the next load would convert again with new ids.
 - **A read-only viewer** (a teacher or researcher) keeps it pending and never uploads it.
 - **The playback copy needs it too.** Playback builds its document from a snapshot of the live,
   already converted document and loads history from Firestore itself (`createHistoryDocumentCopy`
   in [canvas.tsx](../../../src/components/document/canvas.tsx)). That copy sees no conversion, so a
-  viewer's live document hands its pending conversion entry to the copy. A saving client's entry
+  viewer's live document hands its pending load entry to the copy. A saving client's entry
   is uploaded, and Firestore's local cache shows a pending write to listeners in the same browser,
   so the copy finds it. The one gap is playback opened in the short window after the converted
   content is saved and before the entry is written. That is left to CLUE-751, which handles the
@@ -221,7 +227,7 @@ the document is created and kept pending.
   incoming content the same way the load does. It rebuilds the pending entry from that content,
   or clears it when nothing is old, so a pending entry always describes the stored content against
   the live content. Only the pending entry changes; one already in history stays.
-- **Group documents** record conversion entries only once section 4 is built. *My call.* Until
+- **Group documents** record load entries only once section 4 is built. *My call.* Until
   then they behave as today. A schema change that relies on section 4 can't ship before it anyway.
 
 *My call:* it carries CLUE-760's `background: true` (this story adds the optional field if CLUE-760
@@ -230,7 +236,7 @@ hasn't landed yet), since it is produced by code, not by a person.
 **It stays in history for good.** Nothing deletes or rewrites it, so the content's saved
 `lastHistoryEntryId` and links from logged events can point at it safely.
 
-**Known limit: its size.** A conversion entry's size grows with what the conversion touches. Each
+**Known limit: its size.** A load entry's size grows with what the conversion touches. Each
 changed value is stored in both directions, and each patch carries its full path. An entry is
 uploaded as one Firestore document, and Firestore allows 1 MiB per document. Legacy DataFlow
 programs are small, so this story's conversions are well under it. A story that adds a conversion
@@ -245,13 +251,13 @@ documents need the bridge in section 6.
 
 ### 3. Playback across a conversion
 
-**A JSON copy of the document.** When a document's history has a conversion entry (or legacy
+**A JSON copy of the document.** When a document's history has a load entry (or legacy
 entries, section 6), playback keeps a plain JSON copy of each tree beside the MST playback trees.
 Every entry playback crosses is applied to the JSON copy as stored, in either direction, the
-conversion entry included. A document with neither skips all of this and plays back as today.
+load entry included. A document with neither skips all of this and plays back as today.
 
 The JSON copy starts from the same snapshot as the MST trees: the current, converted document. Going
-backward across a conversion entry, its inverse patches return the copy to the old format, and the
+backward across a load entry, its inverse patches return the copy to the old format, and the
 old entries before it then apply to the copy as they were recorded.
 
 **Which tiles are old.** Playback calls `getVersion` on the JSON copy of each tile the move touched,
@@ -341,37 +347,37 @@ In this design, "group documents" means every document with the `concurrent` fla
 documents, and class-wide collaborative documents such as the driving-question board.
 
 Two problems only group documents have. This story designs the answer; building it is two
-follow-ups, and until they ship, group documents don't record conversion entries (section 2).
+follow-ups, and until they ship, group documents don't record load entries (section 2).
 CLUE-792, "Concurrent documents: stop editing when a conversion entry arrives", makes a client that
-receives a conversion entry stop editing and ask for a reload, without applying the entry. CLUE-793,
+receives a load entry stop editing and ask for a reload, without applying the entry. CLUE-793,
 "Concurrent documents: record conversion entries and merge them with concurrent edits", builds the
 rest of this section. CLUE-792 ships at least one release before CLUE-793.
 
 **Concurrent conversions.** Two clients on the new release can open an old group document at about
-the same time. Each converts it with its own random ids and records its own conversion entry. Only
+the same time. Each converts it with its own random ids and records its own load entry. Only
 one can land first.
 
-- **A conversion entry is never rolled back.** Rolling it back would apply its inverse to the live
+- **A load entry is never rolled back.** Rolling it back would apply its inverse to the live
   tree (see Anti-goals). So the concurrent manager excludes it from `rollbackLocalEntries`.
-- **An incoming conversion entry conflicts with every uncommitted local entry**
+- **An incoming load entry conflicts with every uncommitted local entry**
   (`partitionLocalEntriesForMerge` in [entry-scopes.ts](../../../src/models/history/entry-scopes.ts)),
-  so they are all rolled back. Any entry that lands after a conversion entry was made by a client
+  so they are all rolled back. Any entry that lands after a load entry was made by a client
   that had already received it.
-- **The converting client holds edits until its conversion entry is committed.** That is normally a
+- **The converting client holds edits until its load entry is committed.** That is normally a
   moment, and it means there are no uncommitted edits on top of the conversion.
 - **If another client's entries land first,** the converting client rebuilds the affected tiles from
   the pre-conversion JSON it kept. It applies the incoming entries to that JSON. If one of them is a
-  conversion entry for the tile, the JSON is now the winner's converted tile, with the winner's ids;
+  load entry for the tile, the JSON is now the winner's converted tile, with the winner's ids;
   the client loads it into its tile and drops its own conversion for that tile. If they are
   old-format edits, the client converts the JSON again, loads it, and rebuilds its uncommitted
-  conversion entry from the new diff.
+  load entry from the new diff.
 - A tile with deterministic ids makes this cheaper, since both clients' conversions agree, but
   the design can't rely on it, because ids are each tile's choice.
 
 **Clients on different releases.** A tab still on an older release can't apply a newer conversion's
 entries, and its own entries would be in the old format.
 
-- **A client that receives a conversion entry whose new version it doesn't know stops editing.** It
+- **A client that receives a load entry converting to a version it doesn't know stops editing.** It
   makes the document read-only and says its copy of CLUE is out of date and needs a reload.
 - **Only clients released with the check can be stopped this way.** An earlier client keeps editing
   in the old format. So the check has to ship at least one release before the first schema change
@@ -390,9 +396,9 @@ and a later story starts playback from it.
 
 ### 6. The legacy DataFlow bridge
 
-Legacy DataFlow documents converted before conversion entries existed have stored histories that go
-straight from legacy entries to new-format entries. Playback builds the missing conversion entry in
-memory, and from there the general mechanism takes over. A tile that a stored conversion entry
+Legacy DataFlow documents converted before load entries existed have stored histories that go
+straight from legacy entries to new-format entries. Playback builds the missing load entry in
+memory, and from there the general mechanism takes over. A tile that a stored load entry
 already covers needs no bridge.
 
 - **Finding the boundary.** For each DataFlow tile, the last legacy entry before its first
@@ -401,7 +407,7 @@ already covers needs no bridge.
   connection paths, or a `program` value whose `id` is `"dataflow@0.1.0"`. Legacy patches appear in
   many actions, not only `setProgram` (`setSlate` and `addCanonicalCases`, for example), so the check
   is by path, not by action.
-- **The old state at the boundary.** The conversion entry needs the tile's legacy JSON at the
+- **The old state at the boundary.** The load entry needs the tile's legacy JSON at the
   boundary, and the stored content only has the converted form. The candidates, in order of
   preference:
   1. **Replay forward from the start.** If a document's history starts from a known state, applying
@@ -416,7 +422,7 @@ already covers needs no bridge.
 
   The harness decides which works on the study's documents. The builder may combine them, for
   example forward replay where the start is known and the reverse conversion elsewhere.
-- **Then** the in-memory conversion entry is the diff between that legacy tile and the converted
+- **Then** the in-memory load entry is the diff between that legacy tile and the converted
   tile at the boundary, as in section 2.
 
 The harness is an uncommitted, throwaway Jest file, `src/models/history/zz-local-replay.test.ts`,
@@ -432,7 +438,7 @@ non-schema causes (see Non-goals) or on a legacy shape the PR names as one the b
 ### 7. When playback can't go further
 
 - **An entry doesn't apply to the JSON copy.** The chain is broken there: a non-schema bug, or a
-  conversion with no conversion entry. Playback shows today's failure banner.
+  conversion with no load entry. Playback shows today's failure banner.
 - **The legacy bridge can't build the old state.** Playback treats the boundary as the oldest
   position it can reach and says earlier history isn't available, not the failure banner. *My
   call.*
@@ -472,7 +478,7 @@ A new doc, `docs/tile-schema-changes.md`, linked from
 
 ### 9. Auditing the other tiles
 
-Past snapshot migrations in other tiles have no conversion entries either, so their old history may
+Past snapshot migrations in other tiles have no load entries either, so their old history may
 already be broken. Check each, and say whether playback of those documents breaks today. Known
 candidates:
 
@@ -493,12 +499,12 @@ a follow-up story.
   the same state as applying them to MST trees, wherever the MST apply succeeds. This checks the
   JSON patch applier against MST's handling of maps, arrays, `add` and `replace`, which dumb services
   rely on too.
-- **Conversion entry.** Recorded once at a load that converted something. Its inverse patches take
+- **Load entry.** Recorded once at a load that converted something. Its inverse patches take
   the converted JSON back to the stored old JSON exactly, and its forward patches take that back to
   the converted JSON. It isn't undoable. A viewer keeps it in memory and hands it to the playback
   copy.
 - **Crossing the conversion boundary.** Every schema change gets this test. Start from an old-format
-  document with old-format history. Load it so the conversion runs and the conversion entry is
+  document with old-format history. Load it so the conversion runs and the load entry is
   recorded, then add new-format entries. Scrub backward to the start and forward to the end. No
   playback failures. At every position, the JSON copy equals a plain replay of the stored entries,
   and each MST tile equals its JSON run through `convertSnapshot`, ids aside.
@@ -511,7 +517,7 @@ a follow-up story.
 - **Shared models.** A test-only shared model type with a version and a migration goes through the
   same path.
 - **Dumb rebuild.** Starting from the end document, a plain JSON patch library with no CLUE code
-  undoes every entry back to the start and redoes them all, conversion entry included. One test
+  undoes every entry back to the start and redoes them all, load entry included. One test
   runs it on a stored fixture, which pins the stored format. Its fixture is recorded through the
   real document load and tree manager. Another runs it on a chain the current code records in the
   test, with a conversion that shortens an array, so the order of the stored inverse patches
@@ -524,7 +530,7 @@ a follow-up story.
   the harness.
 - **Can't go further.** A failed legacy bridge shows "earlier history isn't available", not the
   failure banner.
-- **No slowdown.** A document with no conversion entries and no legacy entries never builds a JSON
+- **No slowdown.** A document with no load entries and no legacy entries never builds a JSON
   copy.
 - **Performance check** (with the harness, not in CI): play the longest legacy DataFlow history at
   full speed and confirm playback stays responsive and doesn't crash.
@@ -533,15 +539,15 @@ a follow-up story.
 
 The story ships as three stacked PRs, merged in order. Each one is useful on its own.
 
-1. **Record conversion entries.** The `schemaVersion` registration, the JSON patch applier and diff,
-   detecting old tiles and shared models at load and in `setContent`, building the conversion entry
-   (flagged `isConversion`) and flushing it into history before the first local entry that changes
-   the content, and DataFlow's `schemaVersion`. Today's playback skips conversion entries' patches
-   in this PR, so a conversion entry shows as one more stop with no change. It carries
+1. **Record load entries.** The `schemaVersion` registration, the JSON patch applier and diff,
+   detecting old tiles and shared models at load and in `setContent`, building the load entry
+   (flagged `isLoadEntry`) and flushing it into history before the first local entry that changes
+   the content, and DataFlow's `schemaVersion`. Today's playback skips load entries' patches
+   in this PR, so a load entry shows as one more stop with no change. It carries
    `background: true`, and CLUE-760 hides background entries on the slider. Tests with a plain JSON
    patch library and no CLUE code take the end document back to its start and forward again,
-   across a conversion entry.
-2. **Play back across conversion entries.** The tree API for loads, the JSON copy, the playback
+   across a load entry.
+2. **Play back across load entries.** The tree API for loads, the JSON copy, the playback
    patch source, crossing a conversion in both directions, rolling back a move that fails part-way,
    and handing a pending entry to the playback copy (sections 3 and 7).
 3. **Bridge legacy DataFlow history.** The history-bridge registry and virtual conversions, the
@@ -559,12 +565,23 @@ A change to this design made in a later PR updates this document in that PR.
   working; a future rewrite script would have to keep it working or retire it.
 - **CLUE-751** (settled-state saves): makes `lastHistoryEntryId` exact, which the content-behind-history
   fix needs. It should also cover playback opened after converted content is saved but before the
-  conversion entry is written (section 2).
+  load entry is written (section 2).
 - **CLUE-783** (large history performance): the batched apply that the old-tile loads join.
+- **CLUE-788** (drift between stored content and what MST loads):
+  - The load entry is meant to grow into its load-time drift entry: one entry per load, holding
+    every change loading made, not only schema conversions.
+  - In-session drift, changes made with no entry open, is different. MST can represent it, so it
+    should be an ordinary background entry, not a load entry, or playback would skip it.
+  - Playback (Delivery 2) decides which models are old, and loads them instead of applying their
+    patches, from the versions in the JSON copy. It also loads each model that a load entry in the
+    move changes. Before the load entry, though, a model whose change wasn't a version conversion
+    is current, so playback applies its recorded patches to MST rather than loading it from the
+    JSON copy. A load entry that carries non-version changes would update the JSON copy without
+    MST reloading that model at those positions. CLUE-788's design has to settle that.
 - **CLUE-792** ("Concurrent documents: stop editing when a conversion entry arrives") and
   **CLUE-793** ("Concurrent documents: record conversion entries and merge them with concurrent
   edits"): section 4. CLUE-792 must ship at least one release before CLUE-793.
-- **Follow-up: storing legacy DataFlow conversion entries**, so dumb services can cross the legacy
+- **Follow-up: storing legacy DataFlow load entries**, so dumb services can cross the legacy
   conversion. Inserting an entry into a stored chain (its index and the next entry's
   `previousEntryId`) is that story's problem.
 - **Follow-ups:** patch-level migrations for DataFlow and the Simulator if the performance check
@@ -588,7 +605,7 @@ A change to this design made in a later PR updates this document in that PR.
   supported and their churn is accepted.
 - Tiles provide `getVersion`, since the version lives inside the tile's content.
 - Shared models follow the same pattern.
-- Group documents: an incoming conversion entry beats uncommitted local entries, and a client that
+- Group documents: an incoming load entry beats uncommitted local entries, and a client that
   doesn't know its version stops editing. This story designs it (section 4); building it is a
   follow-up.
 - The audit checks its conclusions against real documents.
@@ -598,8 +615,8 @@ A change to this design made in a later PR updates this document in that PR.
 
 ## My calls (check these)
 
-- Group documents don't record conversion entries until section 4 is built.
-- The conversion entry carries `background: true`, and this story adds the field if CLUE-760 hasn't.
+- Group documents don't record load entries until section 4 is built.
+- The load entry carries `background: true`, and this story adds the field if CLUE-760 hasn't.
 - Each old tile is loaded once per move, at its state at the target position, in the same action as
   the other tiles' patches.
 - Conversion is a registered `convertSnapshot` on the whole tile's JSON, and the type's MST
@@ -617,10 +634,10 @@ A change to this design made in a later PR updates this document in that PR.
 
 ## Left to the builder
 
-- *Settled in PR 1:* the flag is `isConversion`, and the registration is an optional
+- *Settled in PR 1:* the flag is `isLoadEntry`, and the registration is an optional
   `schemaVersion` (`getVersion`, `currentVersion`, `convertSnapshot`) on both the tile and the
   shared model registrations.
-- The JSON patch library and the diff used to build conversion entries.
+- The JSON patch library and the diff used to build load entries.
 - The tree API for applying patches and loading old tiles in one action.
 - Which of the three legacy bridge approaches to use, decided with the harness.
 - The "earlier history isn't available" wording and slider treatment.

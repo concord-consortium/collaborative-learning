@@ -24,7 +24,7 @@ import { Tree } from "../history/tree";
 import { TreeMonitor } from "../history/tree-monitor";
 import { ITileEnvironment } from "../tiles/tile-content";
 import { TreeManager } from "../history/tree-manager";
-import { buildConversionEntry, convertContentJson } from "../history/schema-conversion";
+import { buildLoadEntry, convertContentJson } from "../history/schema-conversion";
 import { toJsonValue } from "../history/json-patch";
 import { ESupportType } from "../curriculum/support";
 import { kSharedDataSetType, SharedDataSet, SharedDataSetType } from "../shared/shared-data-set";
@@ -78,10 +78,10 @@ function convertStoredContent(content: unknown, concurrent?: boolean) {
 }
 
 /**
- * Builds the entry that records the conversion of `originalContent`'s old models into the
+ * Builds the load entry that records the conversion of `originalContent`'s old models into the
  * document's content, or undefined when nothing was converted.
  */
-function buildDocumentConversionEntry(document: IAnyStateTreeNode, treeId: string, originalContent: unknown,
+function buildDocumentLoadEntry(document: IAnyStateTreeNode, treeId: string, originalContent: unknown,
     convertedPaths: string[]) {
   if (!convertedPaths.length) return undefined;
   const changes = convertedPaths.map(path => ({
@@ -89,7 +89,7 @@ function buildDocumentConversionEntry(document: IAnyStateTreeNode, treeId: strin
     before: toJsonValue(resolveJsonPath({ content: originalContent }, path)),
     after: toJsonValue(getSnapshot(resolvePath(document, path)))
   }));
-  return buildConversionEntry(treeId, changes);
+  return buildLoadEntry(treeId, changes);
 }
 
 export const DocumentModel = Tree.named("Document")
@@ -260,13 +260,13 @@ export const DocumentModel = Tree.named("Document")
         const sharedModelManager = getSharedModelManager(self);
         (sharedModelManager as ISharedModelDocumentManager).setDocument(self.content);
       }
-      // The pending conversion entry turns the stored content into the live content, so it is
+      // The pending load entry turns the stored content into the live content, so it is
       // rebuilt from the new content, or cleared when nothing in it is old. An entry that has
       // already been flushed is in the history and stays there.
       if (conversion) {
         const manager = self.treeManagerAPI as Instance<typeof TreeManager> | undefined;
-        manager?.setPendingConversionEntry(
-          buildDocumentConversionEntry(self, self.key, snapshot, conversion.convertedPaths));
+        manager?.setPendingLoadEntry(
+          buildDocumentLoadEntry(self, self.key, snapshot, conversion.convertedPaths));
       }
     },
 
@@ -437,10 +437,10 @@ export const createDocumentModel = (snapshot?: DocumentModelSnapshotType) => {
       document = DocumentModel.create(
         snapshot && conversion ? { ...snapshot, content: conversion.content } : snapshot, fullEnvironment);
       const entry = conversion &&
-        buildDocumentConversionEntry(document, document.key, originalContent, conversion.convertedPaths);
+        buildDocumentLoadEntry(document, document.key, originalContent, conversion.convertedPaths);
       if (entry) {
         const manager = document.treeManagerAPI as Instance<typeof TreeManager> | undefined;
-        manager?.setPendingConversionEntry(entry);
+        manager?.setPendingLoadEntry(entry);
       }
     } catch (e) {
       if (!snapshot?.content ) {

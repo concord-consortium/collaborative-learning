@@ -135,10 +135,10 @@ export const TreeManager = types
    */
   historyPlaybackFailures: [] as HistoryPlaybackFailure[],
   /**
-   * The conversion entry for the content as loaded or last set, kept out of the history until it
+   * The load entry for the content as loaded or last set, kept out of the history until it
    * is flushed (see completeHistoryEntry).
    */
-  pendingConversionEntry: undefined as HistoryEntrySnapshot | undefined
+  pendingLoadEntry: undefined as HistoryEntrySnapshot | undefined
 }))
 .views((self) => ({
   get undoManager() : IUndoManager {
@@ -180,17 +180,17 @@ export const TreeManager = types
       return;
     }
 
-    // Flush the pending conversion entry just before the first local entry that changes the content.
+    // Flush the pending load entry just before the first local entry that changes the content.
     // Content is saved only when it changes, so flushing before a metadata-only entry (a title change)
     // would store the entry next to old content. The next load would convert that content again with
     // new ids, breaking the stored chain. The entry isn't undoable, so it skips the undo store and
     // leaves revisionId alone.
-    if (self.pendingConversionEntry && entryChangesContent(snapshot)) {
-      const conversionIndex = self.document.history.length;
-      self.document.history.push(self.pendingConversionEntry);
-      self.pendingConversionEntry = undefined;
+    if (self.pendingLoadEntry && entryChangesContent(snapshot)) {
+      const loadEntryIndex = self.document.history.length;
+      self.document.history.push(self.pendingLoadEntry);
+      self.pendingLoadEntry = undefined;
       self.historyManager?.onHistoryEntryCompleted(
-        self.document, self.document.history[conversionIndex], conversionIndex);
+        self.document, self.document.history[loadEntryIndex], loadEntryIndex);
     }
 
     // Save the index in the local history. This is used to figure out
@@ -235,8 +235,8 @@ export const TreeManager = types
       self.document.history.push(entry);
     },
 
-    setPendingConversionEntry(entry: HistoryEntrySnapshot | undefined) {
-      self.pendingConversionEntry = entry;
+    setPendingLoadEntry(entry: HistoryEntrySnapshot | undefined) {
+      self.pendingLoadEntry = entry;
     },
 
     setChangeDocument(cDoc: CDocumentType) {

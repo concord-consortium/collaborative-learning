@@ -154,20 +154,20 @@ export function convertContentJson(content: any): { content: any; convertedPaths
   return { content: newContent, convertedPaths };
 }
 
-// The conversion entry's action and model names are stored in Firestore history entries: never
+// The load entry's action and model names are stored in Firestore history entries: never
 // rename or remove them.
-const kConvertSchemasAction = "/convertSchemas";
-const kConversionEntryModel = "DocumentContent";
+const kLoadContentAction = "/loadContent";
+const kLoadEntryModel = "DocumentContent";
 
 // An entry is uploaded as one Firestore document, and Firestore limits a document to 1 MiB.
 const kMaxEntryBytes = 1048576;
 
 /**
- * Builds the entry that records the conversion of old models to the current format, as the
- * patches that turn the stored JSON into the converted JSON. It is flagged `isConversion` and
- * is not undoable.
+ * Builds the load entry, which records the changes CLUE made to the stored content while loading
+ * it. Today those are the conversions of old models to the current format, as the patches that
+ * turn the stored JSON into the converted JSON. It is flagged `isLoadEntry` and is not undoable.
  */
-export function buildConversionEntry(
+export function buildLoadEntry(
   treeId: string, changes: { path: string; before: unknown; after: unknown }[]
 ): HistoryEntrySnapshot {
   const patches = changes.flatMap(({ path, before, after }) => diffJson(before, after, path));
@@ -178,19 +178,19 @@ export function buildConversionEntry(
     // Stamped here, not when the entry is added to a history, so every copy of it shows the same time.
     created: Date.now(),
     tree: treeId,
-    model: kConversionEntryModel,
-    action: kConvertSchemasAction,
+    model: kLoadEntryModel,
+    action: kLoadContentAction,
     undoable: false,
-    isConversion: true,
+    isLoadEntry: true,
     background: true,
     state: "complete",
-    records: [{ tree: treeId, action: kConvertSchemasAction, patches, inversePatches }]
+    records: [{ tree: treeId, action: kLoadContentAction, patches, inversePatches }]
   };
   // The entry's size grows with what the conversion touches. Nothing splits or shrinks an entry
   // that is too large, so say so where it can be found.
   const size = new TextEncoder().encode(JSON.stringify(entry)).length;
   if (size > kMaxEntryBytes) {
-    console.error(`The conversion entry for document ${treeId} is ${size} bytes, over the ` +
+    console.error(`The load entry for document ${treeId} is ${size} bytes, over the ` +
       `${kMaxEntryBytes}-byte limit on a Firestore document, so it can't be uploaded.`);
   }
   return entry;

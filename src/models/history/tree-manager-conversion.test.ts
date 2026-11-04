@@ -41,7 +41,7 @@ const oldTile = (id: string, text: string, items: string[] = []) => ({
 
 /**
  * Creates a document from old content, gives it old history ending at that content, then makes
- * an edit, which records the conversion entry and the edit. The document ends at the last entry.
+ * an edit, which records the load entry and the edit. The document ends at the last entry.
  */
 async function setupConvertedDocument(content: any, oldEntries: HistoryEntrySnapshot[]) {
   const document = createDocumentModel({ uid: "1", type: ProblemDocument, key: kTreeId, content });
@@ -101,14 +101,14 @@ describe("dumb rebuild of a chain recorded by the current code", () => {
       async () => {
     const { manager, endJson } = await setupConvertedDocument({ tileMap: { t1: storedTile() } }, oldEntries());
     const entries: IStoredEntry[] = JSON.parse(JSON.stringify(getSnapshot(manager.document.history)));
-    const conversionIndex = entries.findIndex(entry => entry.isConversion);
-    expect(conversionIndex).toBe(3);
+    const loadEntryIndex = entries.findIndex(entry => entry.isLoadEntry);
+    expect(loadEntryIndex).toBe(3);
     expect(endJson.content.tileMap.t1.content.items).toHaveLength(1);
 
     const { positions, end } = rebuildBackAndForth(endJson, entries);
     expect(positions[0].content.tileMap.t1).toEqual(oldTile("t1", "a"));
-    expect(positions[conversionIndex].content.tileMap.t1).toEqual(storedTile());
-    expect(positions[conversionIndex + 1].content.tileMap.t1.content.version).toBe("2");
+    expect(positions[loadEntryIndex].content.tileMap.t1).toEqual(storedTile());
+    expect(positions[loadEntryIndex + 1].content.tileMap.t1.content.version).toBe("2");
     expect(end).toEqual(endJson);
   });
 });

@@ -59,12 +59,13 @@ export const HistoryEntry = types.model("HistoryEntry", {
    */
   uid: types.maybe(types.string),
   /**
-   * True on the entry that records the conversion of old tiles and shared models to their
-   * current format, when a document loads or its content is replaced. It is never applied to a
-   * live document or put on the undo stack.
+   * True on a load entry: the entry that records the changes CLUE made to the stored content
+   * while loading it, when a document loads or its content is replaced. Today those are the
+   * conversions of old tiles and shared models to their current format. It is never applied to
+   * a live document or put on the undo stack.
    * Stored in Firestore history entries: never rename or remove.
    */
-  isConversion: types.maybe(types.boolean),
+  isLoadEntry: types.maybe(types.boolean),
   /**
    * True on entries that the user did not cause directly.
    * Stored in Firestore history entries: never rename or remove.
@@ -114,7 +115,7 @@ export enum HistoryOperation {
  * ordering that goToHistoryEntryPosition uses when batching. Used to
  * reconstruct patches without needing the onPatch-collected inverses.
  *
- * A conversion entry gives no patches. Its patches turn stored JSON into the current format, and
+ * A load entry gives no patches. Its patches turn stored JSON into the current format, and
  * the trees playback applies patches to are already in the current format.
  */
 export function getEntryPatchesForTree(
@@ -122,7 +123,7 @@ export function getEntryPatchesForTree(
   treeId: string,
   opType: HistoryOperation
 ): IJsonPatch[] {
-  if (historyEntry.isConversion) return [];
+  if (historyEntry.isLoadEntry) return [];
   let records = [...historyEntry.records];
   if (opType === HistoryOperation.Undo) {
     records = records.reverse();

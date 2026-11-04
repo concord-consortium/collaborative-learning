@@ -3,7 +3,7 @@ import path from "path";
 import { cloneDeep } from "lodash";
 import { getSnapshot } from "mobx-state-tree";
 import {
-  buildConversionEntry, convertContentJson, convertJsonAtPath, convertModelJsonAtPath, convertOldModelJsonAtPath,
+  buildLoadEntry, convertContentJson, convertJsonAtPath, convertModelJsonAtPath, convertOldModelJsonAtPath,
   getModelPath, isOldModelJsonAtPath
 } from "./schema-conversion";
 import { getEntryPatchesForTree, HistoryEntry, HistoryOperation } from "./history";
@@ -173,12 +173,12 @@ describe("convertJsonAtPath", () => {
   });
 });
 
-describe("buildConversionEntry", () => {
+describe("buildLoadEntry", () => {
   afterEach(() => jest.restoreAllMocks());
 
   it("stamps the entry with the time it is built", () => {
     jest.spyOn(Date, "now").mockReturnValue(1234);
-    const entry = buildConversionEntry("doc1",
+    const entry = buildLoadEntry("doc1",
       [{ path: "/content/tileMap/t1", before: oldTile("t1"), after: newTile("t1") }]);
     jest.spyOn(Date, "now").mockReturnValue(5678);
     expect(entry.created).toBe(1234);
@@ -191,12 +191,12 @@ describe("buildConversionEntry", () => {
     const change = (size: number) =>
       ({ path: "/content/tileMap/t1", before: tile("a".repeat(size)), after: tile("b") });
 
-    buildConversionEntry("doc1", [change(500000)]);
+    buildLoadEntry("doc1", [change(500000)]);
     expect(errorSpy).not.toHaveBeenCalled();
 
-    buildConversionEntry("doc1", [change(1100000)]);
+    buildLoadEntry("doc1", [change(1100000)]);
     expect(errorSpy).toHaveBeenCalledTimes(1);
-    expect(errorSpy.mock.calls[0][0]).toMatch(/conversion entry for document doc1 is \d+ bytes/);
+    expect(errorSpy.mock.calls[0][0]).toMatch(/load entry for document doc1 is \d+ bytes/);
   });
 
   it("stores inverse patches so undo restores an array that the conversion shortened", () => {
@@ -205,19 +205,19 @@ describe("buildConversionEntry", () => {
     const after = { id: "t1", content: { type: "VersionedTestTile", version: "2", label: "x",
       items: [{ id: "i", value: "a" }] } };
     const entry = HistoryEntry.create(
-      buildConversionEntry("doc1", [{ path: "/content/tileMap/t1", before, after }]));
+      buildLoadEntry("doc1", [{ path: "/content/tileMap/t1", before, after }]));
     const doc: any = { content: { tileMap: { t1: cloneDeep(after) } } };
     applyJsonPatches(doc, entry.records[0].getPatches(HistoryOperation.Undo));
     expect(doc.content.tileMap.t1).toEqual(before);
   });
 });
 
-describe("a stored conversion entry", () => {
+describe("a stored load entry", () => {
   const fixture = JSON.parse(
     fs.readFileSync(path.join(__dirname, "fixtures", "conversion-chain.json"), "utf8"));
 
   it("is still recognized when it is loaded back", () => {
-    const stored = fixture.entries.find((e: any) => e.isConversion);
+    const stored = fixture.entries.find((e: any) => e.isLoadEntry);
     const entry = HistoryEntry.create(stored);
     expect(entry.records[0].patches.length).toBeGreaterThan(0);
     expect(getEntryPatchesForTree(entry, stored.tree, HistoryOperation.Undo)).toEqual([]);

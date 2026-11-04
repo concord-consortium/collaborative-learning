@@ -47,11 +47,11 @@ describe("Dataflow schemaVersion", () => {
         return { document, manager, tile };
       };
       const first = load({ tileMap: { t1: newerTile() } });
-      expect(first.manager.pendingConversionEntry).toBeUndefined();
+      expect(first.manager.pendingLoadEntry).toBeUndefined();
       expect(first.tile.program.id).toBe("dataflow@2");
 
       const later = load(toJsonValue(getSnapshot(first.document.content!)));
-      expect(later.manager.pendingConversionEntry).toBeUndefined();
+      expect(later.manager.pendingLoadEntry).toBeUndefined();
       expect(later.tile.program.id).toBe("dataflow@2");
     });
   });
