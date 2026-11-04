@@ -74,7 +74,7 @@ describe("convertContentJson", () => {
     expect("tileMap" in result.content).toBe(false);
   });
 
-  it("returns the same object when nothing is old or there is no tileMap", () => {
+  it("returns the same object when nothing is old, including empty content", () => {
     const content = { tileMap: { t2: newTile("t2") } };
     expect(convertContentJson(content)).toEqual({ content, convertedPaths: [] });
     expect(convertContentJson(content).content).toBe(content);
@@ -134,8 +134,6 @@ describe("convertJsonAtPath", () => {
 describe("buildConversionEntry", () => {
   afterEach(() => jest.restoreAllMocks());
 
-  // An entry that is loaded again, as a viewer's local entry is on every history sync, keeps the
-  // time it was built.
   it("stamps the entry with the time it is built", () => {
     jest.spyOn(Date, "now").mockReturnValue(1234);
     const entry = buildConversionEntry("doc1",

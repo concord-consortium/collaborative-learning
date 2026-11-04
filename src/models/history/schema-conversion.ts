@@ -43,7 +43,7 @@ export function convertModelJsonAtPath(modelPath: string, json: unknown): unknow
   if (!isObject(json)) return json;
   const info = getSchemaVersion(modelPath, json);
   if (!info || info.getVersion(json) === info.currentVersion) return json;
-  // look up convertSnapshot at call time so it can be spied on
+  // read convertSnapshot from the registration on each call, so a replaced or spied-on function is used
   return info.convertSnapshot(json);
 }
 
@@ -81,7 +81,8 @@ function convertSharedModelMap(sharedModelMap: unknown) {
 
 /**
  * Converts the old models inside `value`, which is the JSON at `path`. Handles model paths and
- * their ancestors; any other path returns the value unchanged. The value is not modified.
+ * their ancestors up to /content; any other path returns the value unchanged. The value is not
+ * modified.
  */
 export function convertJsonAtPath(path: string, value: unknown): unknown {
   if (!isObject(value)) return value;
@@ -147,6 +148,7 @@ export function buildConversionEntry(
   const inversePatches = changes.flatMap(({ path, before, after }) => diffJson(after, before, path)).reverse();
   const entry: HistoryEntrySnapshot = {
     id: nanoid(),
+    // Stamped here, not when the entry is added to a history, so every copy of it shows the same time.
     created: Date.now(),
     tree: treeId,
     model: kConversionEntryModel,
