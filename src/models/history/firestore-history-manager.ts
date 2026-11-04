@@ -4,9 +4,14 @@ import firebase from "firebase/app";
 import { getSimpleDocumentPath } from "../../../shared/shared";
 import { Firestore } from "../../lib/firestore";
 import { UserContextProvider } from "../stores/user-context-provider";
-import { getLastHistoryEntry, IFirestoreHistoryEntryDoc, loadHistory } from "./history-firestore";
-import { CDocument, CDocumentType, TreeManagerType } from "./tree-manager";
+import { LogEventName } from "../../lib/logger-types";
+import {
+  getHistoryEntriesAfter, getHistoryEntryIndex, getLastHistoryEntry, IFirestoreHistoryEntryDoc, loadHistory
+} from "./history-firestore";
+import { CDocument, CDocumentType, TreeManagerLogger, TreeManagerType } from "./tree-manager";
 import { HistoryEntry, HistoryEntrySnapshot, HistoryEntryType } from "./history";
+import { planCatchUp, takeContiguousEntries } from "./load-catch-up";
+import { kHistoryStart, NotExactReason } from "./session-exactness";
 import type { ISavedEnvelope } from "../document/document";
 
 const seekIncompleteMessage = (historyId: string) =>
@@ -34,7 +39,8 @@ export interface IFirestoreHistoryManagerArgs {
   uploadLocalHistory: boolean;
   syncRemoteHistory: boolean;
   // History fields recorded alongside the document content at save time (from the RTDB
-  // envelope). When the Firestore history first loads, we verify its lastHistoryEntryId is
+  // envelope). catchUpAtLoad applies the entries after its lastHistoryEntryId. When the
+  // Firestore history first loads, we verify its lastHistoryEntryId is
   // present in the history. If not, the content reflects entries that never
   // made it to the history chain — drift. Undefined skips the check.
   savedEnvelope?: ISavedEnvelope;
@@ -46,6 +52,8 @@ export interface IFirestoreHistoryManagerArgs {
   // Invoked once for each local entry after Firestore has accepted its upload. Not invoked for an entry
   // whose upload fails or that is rolled back before it is uploaded.
   onLocalEntryUploaded?: (entry: HistoryEntryType) => void;
+  // Logs an event about the document, such as a load catch-up that couldn't finish.
+  logEvent?: TreeManagerLogger;
 }
 
 /**
@@ -60,12 +68,14 @@ export class FirestoreHistoryManager {
   userContextProvider: UserContextProvider;
   treeManager: TreeManagerType;
   uploadLocalHistory: boolean;
+  syncRemoteHistory: boolean;
   historyError = undefined as firebase.firestore.FirestoreError | undefined;
   environmentAndMetadataDocReadyPromise: Promise<void> | undefined;
   firestoreHistoryInfoPromise: Promise<IFirestoreHistoryInfo> | undefined;
   savedEnvelope: ISavedEnvelope | undefined;
   onContentDrift: ((message: string) => void) | undefined;
   onLocalEntryUploaded: ((entry: HistoryEntryType) => void) | undefined;
+  logEvent: TreeManagerLogger | undefined;
   driftChecked = false;
   // Why a requested history entry could not be shown, for the playback UI to
   // display. Undefined when no request has failed.
@@ -79,15 +89,18 @@ export class FirestoreHistoryManager {
     syncRemoteHistory,
     savedEnvelope,
     onContentDrift,
-    onLocalEntryUploaded
+    onLocalEntryUploaded,
+    logEvent
   }: IFirestoreHistoryManagerArgs) {
     this.firestore = firestore;
     this.userContextProvider = userContextProvider;
     this.treeManager = treeManager;
     this.uploadLocalHistory = uploadLocalHistory;
+    this.syncRemoteHistory = syncRemoteHistory;
     this.savedEnvelope = savedEnvelope;
     this.onContentDrift = onContentDrift;
     this.onLocalEntryUploaded = onLocalEntryUploaded;
+    this.logEvent = logEvent;
 
     if (syncRemoteHistory) {
       this.subscribeToFirestoreHistory();
@@ -224,6 +237,83 @@ export class FirestoreHistoryManager {
       })();
     }
     return this.firestoreHistoryInfoPromise;
+  }
+
+  /**
+   * Bring an individual document's loaded content up to the last history entry in Firestore,
+   * applying the entries its saved envelope is missing, and decide where the session's exact
+   * saves start. Managers that mirror the remote history or don't upload local history skip it.
+   * Never rejects: anything that keeps the catch-up from finishing leaves the session not exact.
+   */
+  async catchUpAtLoad() {
+    if (this.syncRemoteHistory || !this.uploadLocalHistory) return;
+    const { exactness } = this.treeManager;
+    const envelope = this.savedEnvelope;
+    const savedId = envelope?.lastHistoryEntryId;
+    // Where exact saves start once the content is known to match `contentId`.
+    const startAt = (contentId: string) => {
+      exactness.startAt(envelope?.settled && envelope.exactSince ? envelope.exactSince : contentId);
+    };
+    const incomplete = (reason: NotExactReason, params: Record<string, unknown> = {}) => {
+      exactness.markNotExact(reason);
+      this.logEvent?.(LogEventName.HISTORY_LOAD_CATCH_UP_INCOMPLETE, { reason, savedId, ...params });
+    };
+
+    let applying = false;
+    try {
+      const { documentPath, lastEntryIndex, lastEntryId } = await this.getFirestoreHistoryInfo();
+      const last = { id: lastEntryId, index: lastEntryIndex };
+      const saved = { id: savedId, index: envelope?.lastHistoryEntryIndex };
+      let plan = planCatchUp(saved, last);
+      if (plan.kind === "need-index") {
+        saved.index = await getHistoryEntryIndex(this.firestore, documentPath, savedId!);
+        plan = saved.index === undefined ? { kind: "saved-id-missing" } : planCatchUp(saved, last);
+      }
+
+      switch (plan.kind) {
+        case "none":
+          // With nothing to fetch, a saved id other than the last entry can't be in Firestore: an
+          // entry in Firestore with an index at or after the last entry's would be the last entry.
+          if (savedId && savedId !== lastEntryId) {
+            exactness.markNotExact("saved-id-missing");
+          } else {
+            startAt(savedId ?? lastEntryId ?? kHistoryStart);
+          }
+          return;
+        case "saved-id-missing":
+          exactness.markNotExact("saved-id-missing");
+          return;
+        case "too-large":
+          incomplete("catch-up-gap-too-large", { gap: plan.gap });
+          return;
+        case "fetch": {
+          const gap = lastEntryIndex - plan.afterIndex;
+          const docs = await getHistoryEntriesAfter(this.firestore, documentPath, plan.afterIndex);
+          // Stop at the last entry read, since that is the entry the next local entry chains after.
+          const { entries } = takeContiguousEntries(
+            docs.filter(doc => doc.index <= lastEntryIndex), savedId!, plan.afterIndex);
+          applying = true;
+          const { applied, error } = await this.treeManager.applyEntriesAtLoad(entries.map(doc => doc.entry));
+          if (error !== undefined) {
+            incomplete("catch-up-apply-failed", { gap, applied, error });
+          } else if (entries[entries.length - 1]?.id !== lastEntryId) {
+            incomplete("catch-up-hole", { gap, applied });
+          } else {
+            startAt(lastEntryId);
+          }
+          return;
+        }
+        case "need-index":
+          // Not reached: the index was read above.
+          exactness.markNotExact("history-unavailable");
+      }
+    } catch (error) {
+      if (applying) {
+        incomplete("catch-up-apply-failed", { error: error instanceof Error ? error.message : String(error) });
+      } else {
+        exactness.markNotExact("history-unavailable");
+      }
+    }
   }
 
   async onHistoryEntryCompleted(

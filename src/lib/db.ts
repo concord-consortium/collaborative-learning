@@ -1350,9 +1350,9 @@ export class DB {
               concurrent,
               kind,
             });
-            // Stash the envelope's history fields for the drift check that runs once the
-            // Firestore history loads. Skipped for pre-feature saves and fresh docs with no
-            // prior history.
+            // Stash the envelope's history fields for the history catch-up and drift check that
+            // run once the Firestore history is read. Skipped for pre-feature saves and fresh docs
+            // with no prior history.
             if (typeof document.lastHistoryEntryId === "string") {
               const envelope: ISavedEnvelope = {
                 lastHistoryEntryId: document.lastHistoryEntryId,
@@ -1375,8 +1375,11 @@ export class DB {
             throw e;
           }
         })
-        .then((document) => {
+        .then(async (document) => {
           documents.add(document);
+          // An individual document isn't handed out until it has caught up to its history, so no
+          // edit can be made before the entries it was missing are applied.
+          await documents.historyCatchUp(document);
           resolve(document);
         })
         .catch((msg) => {

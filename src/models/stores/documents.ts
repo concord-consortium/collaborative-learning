@@ -14,7 +14,7 @@ import { UserModelType } from "./user";
 import { DEBUG_DOCUMENT } from "../../lib/debug";
 import { Firestore } from "../../lib/firestore";
 import { logDocumentEvent } from "../document/log-document-event";
-import { TreeManagerType } from "../history/tree-manager";
+import { TreeManagerLogger, TreeManagerType } from "../history/tree-manager";
 import { FirestoreHistoryManager, IFirestoreHistoryManagerArgs } from "../history/firestore-history-manager";
 import { FirestoreHistoryManagerConcurrent } from "../history/firestore-history-manager-concurrent";
 import { UserContextProvider } from "./user-context-provider";
@@ -49,12 +49,18 @@ export const DocumentsModel = types
     firestore: undefined as Firestore | undefined,
     activityRecorder: undefined as ActivityRecorder | undefined,
     requiredDocuments: {} as Record<string, IRequiredDocumentPromise>,
+    historyCatchUps: new WeakMap<DocumentModelType, Promise<void>>(),
     visibleExemplars: observable(new Set<string>()),
     all: observable<DocumentModelType>([])
   }))
   .views(self => ({
     getDocument(documentKey: string) {
       return self.all.find((document) => document.key === documentKey);
+    },
+    // Resolves once the document has caught up to its Firestore history, or right away when it
+    // has no catch-up to do.
+    historyCatchUp(document: DocumentModelType): Promise<void> {
+      return self.historyCatchUps.get(document) ?? Promise.resolve();
     },
     byType(type: DocumentType) {
       return self.all.filter((document) => document.type === type);
@@ -253,7 +259,8 @@ export const DocumentsModel = types
         }
 
         const treeManager = document.treeManagerAPI as TreeManagerType;
-        treeManager.setLogger((event, params) => logDocumentEvent(event, { document, ...params }));
+        const logEvent: TreeManagerLogger = (event, params) => logDocumentEvent(event, { document, ...params });
+        treeManager.setLogger(logEvent);
 
         // Set up the Firestore history manager to save history entries
         // Note: because the FirestoreHistoryManager currently only manages saving history
@@ -276,7 +283,8 @@ export const DocumentsModel = types
             const snapshot = content && getSnapshot(content);
             document.setContentError(snapshot ?? {}, message);
           },
-          onLocalEntryUploaded: (entry) => self.activityRecorder?.onLocalEntryUploaded(document, entry)
+          onLocalEntryUploaded: (entry) => self.activityRecorder?.onLocalEntryUploaded(document, entry),
+          logEvent
         };
         if (document.concurrent) {
           historyManagerArgs.syncRemoteHistory = true;
@@ -285,6 +293,9 @@ export const DocumentsModel = types
         } else {
           const manager = new FirestoreHistoryManager(historyManagerArgs);
           treeManager.setHistoryManager(manager);
+          document.setHistoryCatchUpPending(true);
+          self.historyCatchUps.set(document,
+            manager.catchUpAtLoad().finally(() => document.setHistoryCatchUpPending(false)));
         }
 
         // The history manager is now stored on the treeManager via setHistoryManager.

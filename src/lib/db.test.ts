@@ -24,6 +24,9 @@ import { createSingleTileContent } from "../utilities/test-utils";
 import * as UrlParams from "../utilities/url-params";
 import { Logger } from "./logger";
 import { LogEventName } from "./logger-types";
+import { when } from "mobx";
+import { deferred } from "promise-assist";
+import { FirestoreHistoryManager } from "../models/history/firestore-history-manager";
 
 // This is needed so MST can deserialize snapshots referring to tools
 import { registerTileTypes } from "../register-tile-types";
@@ -985,6 +988,34 @@ describe("db", () => {
       const doc = await db.openDocument({ documentKey: "s2", type: "problem", userId: "u1",
         firestoreMetadata: { uid: "u1", type: "problem", key: "s2" } } as any);
       expect(doc.savedEnvelope).toEqual({ lastHistoryEntryId: "e7", settled: false });
+    });
+
+    it("waits for an individual document's history catch-up before resolving", async () => {
+      stubRtdb({ createdAt: 1, properties: {} }, { changeCount: 0, lastHistoryEntryId: "e7" });
+      stores.documents.setFirestore({
+        doc: () => ({ onSnapshot: (callback: (doc: { exists: boolean }) => void) => {
+          callback({ exists: true });
+          return () => undefined;
+        } })
+      } as any);
+      stores.documents.setUserContextProvider({ userContext: { uid: "u1" } } as any);
+      const catchUp = deferred<void>();
+      jest.spyOn(FirestoreHistoryManager.prototype, "catchUpAtLoad").mockReturnValue(catchUp.promise);
+
+      let opened = false;
+      const openPromise = db.openDocument({ documentKey: "c1", type: "problem", userId: "u1",
+        firestoreMetadata: { uid: "u1", type: "problem", key: "c1" } } as any)
+        .then(openedDoc => { opened = true; return openedDoc; });
+      await when(() => !!stores.documents.getDocument("c1"));
+      const added = stores.documents.getDocument("c1")!;
+      await new Promise(process.nextTick);
+      expect(opened).toBe(false);
+      expect(added.historyCatchUpPending).toBe(true);
+
+      catchUp.resolve();
+      const doc = await openPromise;
+      expect(doc).toBe(added);
+      expect(doc.historyCatchUpPending).toBe(false);
     });
 
     it("fetches Firestore metadata from the store when none is passed", async () => {

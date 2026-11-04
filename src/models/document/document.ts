@@ -116,6 +116,9 @@ export const DocumentModel = Tree.named("Document")
     // history-load time to detect drift between the loaded content and the Firestore history chain.
     // Undefined for pre-feature saves or fresh docs with no prior history.
     savedEnvelope: undefined as ISavedEnvelope | undefined,
+    // True while an individual document is being caught up to its Firestore history at load. The
+    // document can't be edited until then.
+    historyCatchUpPending: false,
     saveState: SaveState.Idle as SaveState,
   }))
   .views(self => ({
@@ -322,6 +325,10 @@ export const DocumentModel = Tree.named("Document")
 
     setSavedEnvelope(envelope: ISavedEnvelope | undefined) {
       self.savedEnvelope = envelope;
+    },
+
+    setHistoryCatchUpPending(pending: boolean) {
+      self.historyCatchUpPending = pending;
     }
   }))
   .actions(self => ({

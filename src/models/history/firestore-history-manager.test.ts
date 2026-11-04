@@ -2,23 +2,30 @@ import { Instance, types } from "mobx-state-tree";
 import firebase from "firebase/app";
 import { deferred } from "promise-assist";
 import { Firestore } from "../../lib/firestore";
-import { createDocumentModel } from "../document/document";
+import { createDocumentModel, ISavedEnvelope } from "../document/document";
 import { DocumentContentModel, DocumentContentSnapshotType } from "../document/document-content";
 import { ProblemDocument } from "../document/document-types";
 import { TileContentModel } from "../tiles/tile-content";
+import { registerTileContentInfo } from "../tiles/tile-content-info";
 import { TreeManager } from "./tree-manager";
-import { getLastHistoryEntry as _getLastHistoryEntry,
+import { getHistoryEntriesAfter as _getHistoryEntriesAfter,
+  getHistoryEntryIndex as _getHistoryEntryIndex,
+  getLastHistoryEntry as _getLastHistoryEntry,
   LastHistoryEntry,
   loadHistory as _loadHistory } from "./history-firestore";
 import { when } from "mobx";
 import { HistoryEntry, HistoryEntrySnapshot } from "./history";
 import { FirestoreHistoryManager, HistoryStatus } from "./firestore-history-manager";
 import { UserContextProvider } from "../stores/user-context-provider";
+import { kHistoryStart } from "./session-exactness";
+import { LogEventName } from "../../lib/logger-types";
 
 jest.mock("./history-firestore");
-// This adds the mock api types to these two functions
+// This adds the mock api types to these functions
 const getLastHistoryEntry = jest.mocked(_getLastHistoryEntry);
 const loadHistory = jest.mocked(_loadHistory);
+const getHistoryEntryIndex = jest.mocked(_getHistoryEntryIndex);
+const getHistoryEntriesAfter = jest.mocked(_getHistoryEntriesAfter);
 
 const TestTile = TileContentModel
   .named("TestTile")
@@ -36,6 +43,13 @@ const TestTile = TileContentModel
     }
   }));
 interface TestTileType extends Instance<typeof TestTile> {}
+registerTileContentInfo({
+  type: "TestTile",
+  modelClass: TestTile,
+  defaultContent() {
+    return TestTile.create();
+  }
+});
 
 function setupDocument(initialContent? : DocumentContentSnapshotType) {
   const docContentSnapshot = initialContent ||  {
@@ -578,5 +592,235 @@ describe("onHistoryEntryCompleted", () => {
     await expect(historyManager.onHistoryEntryCompleted(treeManager.document, entry, 0)).rejects.toThrow();
     expect(set).not.toHaveBeenCalled();
     expect(historyManager.onLocalEntryUploaded).not.toHaveBeenCalled();
+  });
+});
+
+describe("catchUpAtLoad", () => {
+  const documentPath = "documents/test";
+
+  beforeEach(() => {
+    getLastHistoryEntry.mockReset();
+    getHistoryEntryIndex.mockReset();
+    getHistoryEntriesAfter.mockReset();
+  });
+
+  function textEntry(id: string, tree = "test"): HistoryEntrySnapshot {
+    return {
+      id, tree, model: "TestTile", action: "/content/tileMap/t1/content/setText", state: "complete",
+      records: [{
+        tree, action: "/content/tileMap/t1/content/setText",
+        patches: [{ op: "replace", path: "/content/tileMap/t1/content/text", value: id }],
+        inversePatches: [{ op: "replace", path: "/content/tileMap/t1/content/text", value: undefined }]
+      }]
+    } as HistoryEntrySnapshot;
+  }
+
+  function entryDoc(index: number, previousEntryId: string, entry = textEntry(`e${index}`)) {
+    return { id: entry.id!, index, previousEntryId, entry };
+  }
+
+  function setupCatchUp(savedEnvelope: ISavedEnvelope | undefined, lastHistoryEntry: LastHistoryEntry,
+      options: { uploadLocalHistory?: boolean, firestore?: Firestore } = {}) {
+    const { treeManager, tileContent } = setupDocument();
+    const setCalled = deferred<void>();
+    const set = jest.fn(() => {
+      setCalled.resolve();
+      return Promise.resolve();
+    });
+    const firestore = options.firestore ?? {
+      ...makeFirestoreMock(),
+      documentRef: jest.fn(() => ({ set })),
+      timestamp: jest.fn(() => new Date())
+    } as unknown as Firestore;
+    getLastHistoryEntry.mockResolvedValue(lastHistoryEntry);
+    const logEvent = jest.fn();
+    const historyManager = new FirestoreHistoryManager({
+      firestore,
+      userContextProvider: makeUserContextProviderMock(),
+      treeManager,
+      uploadLocalHistory: options.uploadLocalHistory ?? true,
+      syncRemoteHistory: false,
+      savedEnvelope,
+      logEvent
+    });
+    return { treeManager, tileContent, historyManager, firestore, set, setCalled, logEvent };
+  }
+
+  it("reads nothing more when the envelope is at Firestore's last entry", async () => {
+    const { treeManager, historyManager } = setupCatchUp(
+      { lastHistoryEntryId: "e7", lastHistoryEntryIndex: 7, settled: true, exactSince: "e2" },
+      { id: "e7", index: 7 });
+    await historyManager.catchUpAtLoad();
+    expect(getHistoryEntriesAfter).not.toHaveBeenCalled();
+    expect(getHistoryEntryIndex).not.toHaveBeenCalled();
+    expect(treeManager.exactness.exactSince).toBe("e2");
+    expect(treeManager.exactness.isExact).toBe(true);
+  });
+
+  it("starts at the saved id when an unsettled envelope is at Firestore's last entry", async () => {
+    const { treeManager, historyManager } = setupCatchUp(
+      { lastHistoryEntryId: "e7", lastHistoryEntryIndex: 7, settled: false }, { id: "e7", index: 7 });
+    await historyManager.catchUpAtLoad();
+    expect(treeManager.exactness.exactSince).toBe("e7");
+    expect(treeManager.exactness.isExact).toBe(true);
+  });
+
+  it("applies the missing entries and keeps exactSince when the envelope was settled", async () => {
+    const { treeManager, tileContent, historyManager, firestore } = setupCatchUp(
+      { lastHistoryEntryId: "e5", lastHistoryEntryIndex: 5, settled: true, exactSince: "e2" },
+      { id: "e7", index: 7 });
+    getHistoryEntriesAfter.mockResolvedValue([entryDoc(6, "e5"), entryDoc(7, "e6")]);
+    await historyManager.catchUpAtLoad();
+    expect(getHistoryEntriesAfter).toHaveBeenCalledWith(firestore, documentPath, 5);
+    expect(tileContent.text).toBe("e7");
+    expect(treeManager.document.history.length).toBe(0);
+    expect(treeManager.exactness.exactSince).toBe("e2");
+    expect(treeManager.exactness.isExact).toBe(true);
+  });
+
+  it("reads the saved entry's index when the envelope has none", async () => {
+    const { tileContent, historyManager, firestore } = setupCatchUp(
+      { lastHistoryEntryId: "e5", settled: false }, { id: "e7", index: 7 });
+    getHistoryEntryIndex.mockResolvedValue(5);
+    getHistoryEntriesAfter.mockResolvedValue([entryDoc(6, "e5"), entryDoc(7, "e6")]);
+    await historyManager.catchUpAtLoad();
+    expect(getHistoryEntryIndex).toHaveBeenCalledTimes(1);
+    expect(getHistoryEntryIndex).toHaveBeenCalledWith(firestore, documentPath, "e5");
+    expect(getHistoryEntriesAfter).toHaveBeenCalledWith(firestore, documentPath, 5);
+    expect(tileContent.text).toBe("e7");
+  });
+
+  it("starts exactSince at the last applied entry when the envelope wasn't settled", async () => {
+    const { treeManager, historyManager } = setupCatchUp(
+      { lastHistoryEntryId: "e5", lastHistoryEntryIndex: 5, settled: false }, { id: "e7", index: 7 });
+    getHistoryEntriesAfter.mockResolvedValue([entryDoc(6, "e5"), entryDoc(7, "e6")]);
+    await historyManager.catchUpAtLoad();
+    expect(treeManager.exactness.exactSince).toBe("e7");
+    expect(treeManager.exactness.isExact).toBe(true);
+  });
+
+  it("starts at the beginning of history for a document with no history", async () => {
+    const { treeManager, historyManager } = setupCatchUp(undefined, undefined);
+    await historyManager.catchUpAtLoad();
+    expect(getHistoryEntriesAfter).not.toHaveBeenCalled();
+    expect(treeManager.exactness.exactSince).toBe(kHistoryStart);
+    expect(treeManager.exactness.isExact).toBe(true);
+  });
+
+  it("starts at Firestore's last entry when there is no saved envelope", async () => {
+    const { treeManager, historyManager } = setupCatchUp(undefined, { id: "e7", index: 7 });
+    await historyManager.catchUpAtLoad();
+    expect(getHistoryEntriesAfter).not.toHaveBeenCalled();
+    expect(treeManager.exactness.exactSince).toBe("e7");
+  });
+
+  it("doesn't fetch a gap over 200 entries and leaves the session not exact", async () => {
+    const { treeManager, tileContent, historyManager, logEvent } = setupCatchUp(
+      { lastHistoryEntryId: "e5", lastHistoryEntryIndex: 5, settled: true, exactSince: "e2" },
+      { id: "e300", index: 300 });
+    await historyManager.catchUpAtLoad();
+    expect(getHistoryEntriesAfter).not.toHaveBeenCalled();
+    expect(tileContent.text).toBeUndefined();
+    expect(treeManager.exactness.isExact).toBe(false);
+    expect(treeManager.exactness.notExactReason).toBe("catch-up-gap-too-large");
+    expect(logEvent).toHaveBeenCalledWith(LogEventName.HISTORY_LOAD_CATCH_UP_INCOMPLETE,
+      expect.objectContaining({ reason: "catch-up-gap-too-large", gap: 295 }));
+  });
+
+  it("applies entries up to a hole and leaves the session not exact", async () => {
+    const { treeManager, tileContent, historyManager, logEvent } = setupCatchUp(
+      { lastHistoryEntryId: "e5", lastHistoryEntryIndex: 5, settled: true, exactSince: "e2" },
+      { id: "e8", index: 8 });
+    getHistoryEntriesAfter.mockResolvedValue([entryDoc(6, "e5"), entryDoc(8, "e7")]);
+    await historyManager.catchUpAtLoad();
+    expect(tileContent.text).toBe("e6");
+    expect(treeManager.exactness.isExact).toBe(false);
+    expect(treeManager.exactness.notExactReason).toBe("catch-up-hole");
+    expect(logEvent).toHaveBeenCalledWith(LogEventName.HISTORY_LOAD_CATCH_UP_INCOMPLETE,
+      expect.objectContaining({ reason: "catch-up-hole" }));
+  });
+
+  it("treats entries that stop short of Firestore's last entry as a hole", async () => {
+    const { treeManager, tileContent, historyManager } = setupCatchUp(
+      { lastHistoryEntryId: "e5", lastHistoryEntryIndex: 5, settled: true, exactSince: "e2" },
+      { id: "e7", index: 7 });
+    getHistoryEntriesAfter.mockResolvedValue([entryDoc(6, "e5")]);
+    await historyManager.catchUpAtLoad();
+    expect(tileContent.text).toBe("e6");
+    expect(treeManager.exactness.notExactReason).toBe("catch-up-hole");
+  });
+
+  it("leaves the session not exact when the saved id isn't in Firestore", async () => {
+    const { treeManager, tileContent, historyManager } = setupCatchUp(
+      { lastHistoryEntryId: "e5", settled: true, exactSince: "e2" }, { id: "e7", index: 7 });
+    getHistoryEntryIndex.mockResolvedValue(undefined);
+    await historyManager.catchUpAtLoad();
+    expect(getHistoryEntriesAfter).not.toHaveBeenCalled();
+    expect(tileContent.text).toBeUndefined();
+    expect(treeManager.exactness.isExact).toBe(false);
+    expect(treeManager.exactness.notExactReason).toBe("saved-id-missing");
+  });
+
+  it("leaves the session not exact when the envelope names an id Firestore has no entry for", async () => {
+    const { treeManager, historyManager } = setupCatchUp(
+      { lastHistoryEntryId: "e5", lastHistoryEntryIndex: 5, settled: true, exactSince: "e2" }, undefined);
+    await historyManager.catchUpAtLoad();
+    expect(getHistoryEntriesAfter).not.toHaveBeenCalled();
+    expect(treeManager.exactness.notExactReason).toBe("saved-id-missing");
+  });
+
+  it("leaves the session not exact when an entry fails to apply, keeping what applied", async () => {
+    const { treeManager, tileContent, historyManager, logEvent } = setupCatchUp(
+      { lastHistoryEntryId: "e5", lastHistoryEntryIndex: 5, settled: true, exactSince: "e2" },
+      { id: "e7", index: 7 });
+    getHistoryEntriesAfter.mockResolvedValue([
+      entryDoc(6, "e5"), entryDoc(7, "e6", textEntry("e7", "no-such-tree"))
+    ]);
+    await historyManager.catchUpAtLoad();
+    expect(tileContent.text).toBe("e6");
+    expect(treeManager.exactness.isExact).toBe(false);
+    expect(treeManager.exactness.notExactReason).toBe("catch-up-apply-failed");
+    expect(logEvent).toHaveBeenCalledWith(LogEventName.HISTORY_LOAD_CATCH_UP_INCOMPLETE,
+      expect.objectContaining({ reason: "catch-up-apply-failed", error: "Unknown tree 'no-such-tree'" }));
+  });
+
+  it("leaves the session not exact when the history can't be read", async () => {
+    jest.useFakeTimers();
+    jest.spyOn(console, "warn").mockImplementation(() => undefined);
+    const { treeManager, historyManager } = setupCatchUp(
+      { lastHistoryEntryId: "e5", lastHistoryEntryIndex: 5, settled: true, exactSince: "e2" },
+      { id: "e7", index: 7 }, { firestore: makeFirestoreMock(false) });
+    const catchUp = historyManager.catchUpAtLoad();
+    await jest.advanceTimersByTimeAsync(10000);
+    await catchUp;
+    expect(treeManager.exactness.isExact).toBe(false);
+    expect(treeManager.exactness.notExactReason).toBe("history-unavailable");
+    jest.useRealTimers();
+    jest.restoreAllMocks();
+  });
+
+  it("skips the catch-up for a manager that doesn't upload local history", async () => {
+    const { treeManager, historyManager } = setupCatchUp(
+      { lastHistoryEntryId: "e5", lastHistoryEntryIndex: 5, settled: true, exactSince: "e2" },
+      { id: "e7", index: 7 }, { uploadLocalHistory: false });
+    await historyManager.catchUpAtLoad();
+    expect(getLastHistoryEntry).not.toHaveBeenCalled();
+    expect(treeManager.exactness.exactSince).toBeUndefined();
+    expect(treeManager.exactness.notExactReason).toBeUndefined();
+  });
+
+  it("chains the next local entry after Firestore's last entry", async () => {
+    const { treeManager, tileContent, historyManager, set, setCalled } = setupCatchUp(
+      { lastHistoryEntryId: "e5", lastHistoryEntryIndex: 5, settled: true, exactSince: "e2" },
+      { id: "e7", index: 7 });
+    getHistoryEntriesAfter.mockResolvedValue([entryDoc(6, "e5"), entryDoc(7, "e6")]);
+    treeManager.setHistoryManager(historyManager);
+    await historyManager.catchUpAtLoad();
+
+    tileContent.setText("local");
+    await setCalled.promise;
+
+    expect(set).toHaveBeenCalledTimes(1);
+    expect(set).toHaveBeenCalledWith(expect.objectContaining({ index: 8, previousEntryId: "e7" }));
   });
 });
