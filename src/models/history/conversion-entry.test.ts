@@ -6,7 +6,7 @@ import { ProblemDocument } from "../document/document-types";
 import { HistoryEntry, HistoryOperation } from "./history";
 import { applyJsonPatches, toJsonValue } from "./json-patch";
 import * as schemaConversion from "./schema-conversion";
-import { TreeManager } from "./tree-manager";
+import { entryChangesContent, TreeManager } from "./tree-manager";
 import { expectEntryToBeComplete } from "./undo-store-test-utils";
 import { VersionedTestTileType, kVersionedTestTileType } from "./schema-conversion-test-types";
 
@@ -171,6 +171,16 @@ describe("conversion entry", () => {
     expect(historyManager.onHistoryEntryCompleted.mock.calls.map(c => c[2])).toEqual([0, 1]);
     expect(manager.undoStore.undoLevels).toBe(1);
     expect(manager.pendingConversionEntry).toBeUndefined();
+  });
+
+  it("counts a patch at exactly /content as changing the content", () => {
+    const entryAt = (path: string) => ({
+      id: "e1",
+      records: [{ tree: "doc1", action: "/a", patches: [{ op: "replace", path, value: {} }], inversePatches: [] }]
+    } as const);
+    expect(entryChangesContent(entryAt("/content"))).toBe(true);
+    expect(entryChangesContent(entryAt("/content/tileMap/t1"))).toBe(true);
+    expect(entryChangesContent(entryAt("/title"))).toBe(false);
   });
 
   it("keeps the conversion entry pending until an entry changes the content", async () => {

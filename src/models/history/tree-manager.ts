@@ -51,7 +51,7 @@ function findFailedSegment(numApplied: number, segments: PatchSegment[]) {
   return { historyIndex: last.historyIndex, appliedInEntry: last.patchCount };
 }
 
-function entryChangesContent(entry: HistoryEntrySnapshot) {
+export function entryChangesContent(entry: HistoryEntrySnapshot) {
   return !!entry.records?.some(record =>
     record.patches?.some(patch => patch.path === "/content" || patch.path.startsWith("/content/")));
 }
