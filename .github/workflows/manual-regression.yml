@@ -28,6 +28,7 @@ on:
           - functional/document_tests/group_test_spec.js
           - functional/document_tests/header_test_spec.js
           - functional/document_tests/nav_panel_test_spec.js
+          - functional/document_tests/settled_saves_spec.js
           - functional/document_tests/student_test_spec.js
           - functional/document_tests/workspace_test_spec.js
           - functional/teacher_tests/history_playback_spec.js
