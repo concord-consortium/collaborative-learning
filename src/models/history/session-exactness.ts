@@ -5,7 +5,7 @@ export const kHistoryStart = "first";
 
 export type NotExactReason = "unrecorded-change" | "timed-out-entry" | "catch-up-apply-failed"
   | "catch-up-hole" | "catch-up-gap-too-large" | "saved-id-missing" | "initial-apply-failed"
-  | "history-unavailable";
+  | "remote-apply-failed" | "history-unavailable";
 
 /**
  * Tracks whether a document's lastHistoryEntryId is exact for this editing session: the content

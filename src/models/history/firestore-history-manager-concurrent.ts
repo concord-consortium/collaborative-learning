@@ -93,11 +93,13 @@ export class FirestoreHistoryManagerConcurrent extends FirestoreHistoryManager {
     // Start loading the initial last history entry right away.
     // The document content is loaded from the realtime database once, separately from the
     // history entries; after that, all updates come from the history entries. The initial
-    // last history entry is the last entry already in that content, so only the entries
-    // after it are applied.
+    // last history entry is taken to be the last entry already in that content, so only the
+    // entries after it are applied. That is only guaranteed when the envelope is settled; see
+    // getInitialLastHistoryEntry.
     this.getInitialLastHistoryEntry();
 
-    // Make paused observable so UI can react to changes.
+    // Make the upload, download and pause state observable so the UI and the content saver
+    // can react to changes.
     // The <this, "setExpectedRemoteHead"> type parameter widens
     // AnnotationsMap to include the private setter, which otherwise
     // wouldn't be assignable. The method still needs to be wrapped as
@@ -253,17 +255,15 @@ export class FirestoreHistoryManagerConcurrent extends FirestoreHistoryManager {
   }
 
   /**
-   * Apply entries delivered by the listener without waiting for them. A failure is logged. One
-   * before the first apply has finished means the loaded content may not match its history, so
-   * the session is no longer exact.
+   * Apply entries delivered by the listener without waiting for them. A failure is logged, and
+   * leaves the session not exact: the content may hold only part of the entries.
    */
   private applyRemoteHistoryEntries(historyEntryDocs: IFirestoreHistoryEntryDoc[]) {
     this.applyHistoryEntries(historyEntryDocs).then(
       () => { this.firstApplyFinished = true; },
       error => {
-        if (!this.firstApplyFinished) {
-          this.treeManager.exactness.markNotExact("initial-apply-failed");
-        }
+        this.treeManager.exactness.markNotExact(
+          this.firstApplyFinished ? "remote-apply-failed" : "initial-apply-failed");
         console.error("Could not apply remote history entries", error);
       }
     );
@@ -568,36 +568,38 @@ export class FirestoreHistoryManagerConcurrent extends FirestoreHistoryManager {
   private async doApplyHistoryEntries(wrapperDocs: IFirestoreHistoryEntryDoc[]) {
     const { treeManager } = this;
 
-    // The wrappers' index/previousEntryId aren't consulted on the receive
-    // side; only the entry snapshots are needed from here on.
-    const incomingHistory: HistoryEntrySnapshot[] = wrapperDocs.map(doc => doc.entry);
-
     // This should be the last entry that was applied to the document when it was first loaded.
     const lastEntry = await this.getInitialLastHistoryEntry();
 
-    // Skip any entries that are before or equal to lastEntry
-    let unappliedHistory = incomingHistory;
+    // Skip any entries that are before or equal to lastEntry. The wrappers' previousEntryId
+    // isn't consulted on the receive side.
+    let unappliedDocs = wrapperDocs;
     if (lastEntry) {
-      const lastEntryIndex = incomingHistory.findIndex(snapshot => snapshot.id === lastEntry.id);
+      // The entry delivered at lastEntry's index should be lastEntry itself. If it is another
+      // entry, the loaded content was saved at an entry the history doesn't hold, so it can't
+      // be described by the history. Its entries are still skipped by index rather than
+      // applied over content that already holds them.
+      const docAtLastEntryIndex = wrapperDocs.find(doc => doc.index === lastEntry.index);
+      if (docAtLastEntryIndex && docAtLastEntryIndex.entry.id !== lastEntry.id) {
+        treeManager.exactness.markNotExact("saved-id-missing");
+      }
 
       // TODO: we might want to add the already applied history entries to the local treeManager
       // history of the document. This would be so the local history matches the remote history.
       // However everything works without doing this. Also not applying them makes the
       // history viewer less cluttered with previous entries. So for now we just skip doing this.
       // Something like:
-      //   treeManager.addHistoryEntryAfterApplying(incomingHistory.slice(0, lastEntryIndex + 1))
+      //   treeManager.addHistoryEntryAfterApplying(entries with index <= lastEntry.index)
 
-      // Update the list that will be used below to only include entries after lastEntry
-      unappliedHistory = incomingHistory.slice(lastEntryIndex + 1);
+      unappliedDocs = wrapperDocs.filter(doc => doc.index > lastEntry.index);
     }
 
     const existingHistory = treeManager.document.history;
 
     // Skip any entries that are already in our local history
-    // TODO: this could be more efficient by combining it with the incomingHistory.findIndex()
-    // above.
     const existingIds = new Set(existingHistory.map(e => e.id));
-    const entrySnapshots: HistoryEntrySnapshot[] = unappliedHistory
+    const entrySnapshots: HistoryEntrySnapshot[] = unappliedDocs
+      .map(doc => doc.entry)
       .filter(entry => !existingIds.has(entry.id));
 
     // Applying another writer's entries, and any rollback or merge they cause, changes the

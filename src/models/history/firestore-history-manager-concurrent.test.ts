@@ -8,7 +8,6 @@ import { IFirestoreHistoryEntryDoc, getLastHistoryEntry as _getLastHistoryEntry 
 import { FirestoreHistoryManagerConcurrent } from "./firestore-history-manager-concurrent";
 import { IFirestoreHistoryManagerArgs } from "./firestore-history-manager";
 import { ICommittedEntry } from "./history-commits";
-import { kHistoryStart } from "./session-exactness";
 
 jest.mock("./history-firestore");
 const getLastHistoryEntry = jest.mocked(_getLastHistoryEntry);
@@ -1282,6 +1281,25 @@ describe("FirestoreHistoryManagerConcurrent", () => {
       expect(historyManager.expectedRemoteHeadIndex).toBe(6);
     });
 
+    it("skips entries up to a settled envelope's index when its id isn't in the history", async () => {
+      const { manager, tree, historyManager } = await setupManager({}, {
+        savedEnvelope: { lastHistoryEntryId: "e5", lastHistoryEntryIndex: 5, settled: true, exactSince: "e2" },
+      });
+      tree.setItems([Item.create({ id: "a", color: "e5" })]);
+
+      // Another entry sits at e5's index.
+      await historyManager.applyHistoryEntries([
+        makeWrapperDoc(4, "e3", colorEntry("e4", "e4")),
+        makeWrapperDoc(5, "e4", colorEntry("x5", "x5")),
+        makeWrapperDoc(6, "x5", colorEntry("e6", "e6")),
+      ]);
+
+      expect(manager.document.history.map(e => e.id)).toEqual(["e6"]);
+      expect(tree.items[0].color).toBe("e6");
+      expect(manager.exactness.isExact).toBe(false);
+      expect(manager.exactness.notExactReason).toBe("saved-id-missing");
+    });
+
     it("keeps querying Firestore for the last entry when the envelope isn't settled", async () => {
       getLastHistoryEntry.mockResolvedValue({ id: "e7", index: 7 });
       const { manager, historyManager } = await setupManager({}, {
@@ -1305,16 +1323,19 @@ describe("FirestoreHistoryManagerConcurrent", () => {
       expect(manager.exactness.isExact).toBe(false);
       expect(manager.exactness.notExactReason).toBe("initial-apply-failed");
       expect(consoleError).toHaveBeenCalledWith("Could not apply remote history entries", expect.any(Error));
+      expect(historyManager.applying).toBe(false);
+      expect(historyManager.isHistorySettled).toBe(true);
       consoleError.mockRestore();
     });
 
-    it("logs an apply failure after the initial apply without changing exactness", async () => {
+    it("leaves the session not exact when a later apply fails", async () => {
       const consoleError = jest.spyOn(console, "error").mockImplementation(() => undefined);
       const { manager, tree, historyManager } = await setupManager();
       tree.setItems([Item.create({ id: "a" })]);
 
       historyManager.syncRemoteFirestoreHistory([makeWrapperDoc(0, undefined, colorEntry("e0", "red"))]);
       await flushApplies(historyManager);
+      expect(manager.exactness.isExact).toBe(true);
       tree.applyPatchesFromManager = jest.fn(async () => { throw new Error("boom"); }) as any;
       historyManager.syncRemoteFirestoreHistory([
         makeWrapperDoc(0, undefined, colorEntry("e0", "red")),
@@ -1322,8 +1343,8 @@ describe("FirestoreHistoryManagerConcurrent", () => {
       ]);
       await flushApplies(historyManager);
 
-      expect(manager.exactness.isExact).toBe(true);
-      expect(manager.exactness.exactSince).toBe(kHistoryStart);
+      expect(manager.exactness.isExact).toBe(false);
+      expect(manager.exactness.notExactReason).toBe("remote-apply-failed");
       expect(consoleError).toHaveBeenCalledWith("Could not apply remote history entries", expect.any(Error));
       consoleError.mockRestore();
     });
