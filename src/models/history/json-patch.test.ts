@@ -125,4 +125,11 @@ describe("diffJson", () => {
     applyJsonPatches(backward, diffJson(after, before, "/t"));
     expect(backward).toEqual({ t: before });
   });
+
+  it("names the path and the missing side when one side is undefined", () => {
+    expect(() => diffJson(undefined, { a: 1 }, "/content/tileMap/t1"))
+      .toThrow("diffJson at /content/tileMap/t1: before is undefined");
+    expect(() => diffJson({ a: 1 }, undefined, "/content/tileMap/t1"))
+      .toThrow("diffJson at /content/tileMap/t1: after is undefined");
+  });
 });

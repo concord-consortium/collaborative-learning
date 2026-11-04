@@ -94,6 +94,9 @@ export function toJsonValue<T>(value: T): T {
  * Returns patches that turn `before` into `after`, with `basePath` prepended to each path.
  */
 export function diffJson(before: unknown, after: unknown, basePath: string): IJsonPatch[] {
+  if (before === undefined || after === undefined) {
+    throw new Error(`diffJson at ${basePath}: ${before === undefined ? "before" : "after"} is undefined`);
+  }
   const operations = compare(toJsonValue(before) as object, toJsonValue(after) as object);
   return operations.map(operation => ({ ...operation, path: `${basePath}${operation.path}` }) as IJsonPatch);
 }
