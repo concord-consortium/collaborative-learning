@@ -1,4 +1,4 @@
-import { action, computed, makeObservable, observable, when } from "mobx";
+import { action, computed, makeObservable, observable, runInAction, when } from "mobx";
 import { addDisposer, getSnapshot, Instance, applySnapshot } from "mobx-state-tree";
 import firebase from "firebase/app";
 import { getSimpleDocumentPath } from "../../../shared/shared";
@@ -11,6 +11,7 @@ import {
 import { CDocument, CDocumentType, TreeManagerLogger, TreeManagerType } from "./tree-manager";
 import { HistoryEntry, HistoryEntrySnapshot, HistoryEntryType } from "./history";
 import { planCatchUp, takeContiguousEntries } from "./load-catch-up";
+import { ICommitListener, ICommitSource, ICommittedEntry, VoidReason } from "./history-commits";
 import { kHistoryStart, NotExactReason } from "./session-exactness";
 import type { ISavedEnvelope } from "../document/document";
 
@@ -66,7 +67,7 @@ export interface IFirestoreHistoryManagerArgs {
  * In the future there might be a subclass which handles documents being edited by multiple
  * users at the same time.
  */
-export class FirestoreHistoryManager {
+export class FirestoreHistoryManager implements ICommitSource {
   firestore: Firestore;
   userContextProvider: UserContextProvider;
   treeManager: TreeManagerType;
@@ -83,6 +84,11 @@ export class FirestoreHistoryManager {
   // Why a requested history entry could not be shown, for the playback UI to
   // display. Undefined when no request has failed.
   historyEntryRequestError = undefined as string | undefined;
+  // This session's newest committed local entry.
+  lastCommitted: ICommittedEntry | undefined = undefined;
+  private commitListeners = new Set<ICommitListener>();
+  // The local entries recorded for upload that haven't been reported committed, in chain order.
+  private uncommitted: Array<ICommittedEntry & { uploaded: boolean }> = [];
 
   constructor({
     firestore,
@@ -116,10 +122,26 @@ export class FirestoreHistoryManager {
       historyError: observable,
       setHistoryError: action,
       historyEntryRequestError: observable,
+      lastCommitted: observable.ref,
       setHistoryEntryRequestError: action,
       historyStatus: computed,
       historyStatusString: computed
     });
+  }
+
+  addCommitListener(listener: ICommitListener) {
+    this.commitListeners.add(listener);
+    return () => { this.commitListeners.delete(listener); };
+  }
+
+  protected notifyCommitted(entries: ICommittedEntry[]) {
+    if (entries.length === 0) return;
+    runInAction(() => { this.lastCommitted = entries[entries.length - 1]; });
+    this.commitListeners.forEach(listener => listener.onCommitted(entries));
+  }
+
+  protected notifyVoided(reason: VoidReason) {
+    this.commitListeners.forEach(listener => listener.onUncommittedVoided(reason));
   }
 
   setHistoryEntryRequestError(message: string | undefined) {
@@ -358,13 +380,30 @@ export class FirestoreHistoryManager {
     // If there was no last entry in Firestore, prepareFirestoreHistoryInfo sets
     // lastEntryIndex to -1
     const index = lastEntryIndex + 1 + newLocalIndex;
-    await docRef.set({
-      index,
-      created: firestore.timestamp(),
-      previousEntryId,
-      entry: JSON.stringify(snapshot)
-    });
+    const recorded = { id: entry.id, index, uploaded: false };
+    this.uncommitted.push(recorded);
+    try {
+      await docRef.set({
+        index,
+        created: firestore.timestamp(),
+        previousEntryId,
+        entry: JSON.stringify(snapshot)
+      });
+    } catch (error) {
+      // The entry stays unuploaded, so it and every later entry stay uncommitted.
+      console.warn("Could not upload history entry", entry.id, error);
+      return;
+    }
+    recorded.uploaded = true;
     this.onLocalEntryUploaded?.(entry);
+    this.commitUploadedPrefix();
+  }
+
+  // An entry is committed once it and every earlier entry from this session have uploaded.
+  private commitUploadedPrefix() {
+    const count = this.uncommitted.findIndex(recorded => !recorded.uploaded);
+    const committed = this.uncommitted.splice(0, count < 0 ? this.uncommitted.length : count);
+    this.notifyCommitted(committed.map(({ id, index }) => ({ id, index })));
   }
 
   get historyStatus() : HistoryStatus {

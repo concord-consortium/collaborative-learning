@@ -572,9 +572,12 @@ describe("onHistoryEntryCompleted", () => {
 
   it("does not report an entry whose set rejects", async () => {
     const set = jest.fn(() => Promise.reject(new Error("permission-denied")));
+    const warn = jest.spyOn(console, "warn").mockImplementation(() => undefined);
     const { treeManager, historyManager, entry } = setupUploadingManager(set);
-    await expect(historyManager.onHistoryEntryCompleted(treeManager.document, entry, 0)).rejects.toThrow();
+    await historyManager.onHistoryEntryCompleted(treeManager.document, entry, 0);
     expect(historyManager.onLocalEntryUploaded).not.toHaveBeenCalled();
+    expect(warn).toHaveBeenCalled();
+    warn.mockRestore();
   });
 
   it("does not report an entry when uploadLocalHistory is false", async () => {
@@ -592,6 +595,75 @@ describe("onHistoryEntryCompleted", () => {
     await expect(historyManager.onHistoryEntryCompleted(treeManager.document, entry, 0)).rejects.toThrow();
     expect(set).not.toHaveBeenCalled();
     expect(historyManager.onLocalEntryUploaded).not.toHaveBeenCalled();
+  });
+
+  describe("commit signals", () => {
+    function setupCommits(sets: Array<ReturnType<typeof deferred<void>>>) {
+      let call = 0;
+      const set = jest.fn(() => sets[call++].promise);
+      const setup = setupUploadingManager(set);
+      const entries = ["e1", "e2", "e3"].map(id =>
+        HistoryEntry.create({ id, tree: "test", model: "TestTile", action: "/setFlag" }));
+      const onCommitted = jest.fn();
+      const removeListener = setup.historyManager.addCommitListener({ onCommitted, onUncommittedVoided: jest.fn() });
+      const complete = (i: number) =>
+        setup.historyManager.onHistoryEntryCompleted(setup.treeManager.document, entries[i], i);
+      return { ...setup, entries, onCommitted, removeListener, complete };
+    }
+    const flush = () => new Promise(process.nextTick);
+
+    it("reports an entry committed once it and every earlier entry have uploaded", async () => {
+      const sets = [deferred<void>(), deferred<void>(), deferred<void>()];
+      const { historyManager, onCommitted, complete } = setupCommits(sets);
+      const completions = [complete(0), complete(1), complete(2)];
+      await flush();
+      expect(historyManager.lastCommitted).toBeUndefined();
+
+      sets[1].resolve();
+      await flush();
+      expect(onCommitted).not.toHaveBeenCalled();
+
+      sets[0].resolve();
+      await flush();
+      expect(onCommitted).toHaveBeenCalledTimes(1);
+      expect(onCommitted).toHaveBeenLastCalledWith([{ id: "e1", index: 0 }, { id: "e2", index: 1 }]);
+
+      sets[2].resolve();
+      await Promise.all(completions);
+      expect(onCommitted).toHaveBeenCalledTimes(2);
+      expect(onCommitted).toHaveBeenLastCalledWith([{ id: "e3", index: 2 }]);
+      expect(historyManager.lastCommitted).toEqual({ id: "e3", index: 2 });
+    });
+
+    it("never reports entries after an upload that fails", async () => {
+      const warn = jest.spyOn(console, "warn").mockImplementation(() => undefined);
+      const sets = [deferred<void>(), deferred<void>(), deferred<void>()];
+      const { historyManager, onCommitted, complete } = setupCommits(sets);
+      const completions = [complete(0), complete(1), complete(2)];
+      await flush();
+      sets[0].reject(new Error("permission-denied"));
+      sets[1].resolve();
+      sets[2].resolve();
+      await Promise.all(completions);
+      expect(onCommitted).not.toHaveBeenCalled();
+      expect(historyManager.lastCommitted).toBeUndefined();
+      warn.mockRestore();
+    });
+
+    it("stops reporting to a listener once it is removed", async () => {
+      const sets = [deferred<void>(), deferred<void>(), deferred<void>()];
+      const { onCommitted, removeListener, complete } = setupCommits(sets);
+      const first = complete(0);
+      const second = complete(1);
+      await flush();
+      sets[0].resolve();
+      await first;
+      expect(onCommitted).toHaveBeenCalledTimes(1);
+      removeListener();
+      sets[1].resolve();
+      await second;
+      expect(onCommitted).toHaveBeenCalledTimes(1);
+    });
   });
 });
 
