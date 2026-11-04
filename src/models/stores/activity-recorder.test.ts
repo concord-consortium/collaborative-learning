@@ -225,7 +225,7 @@ describe("ActivityRecorder", () => {
     const doc = makeDocument();
     const other = makeDocument();
     const entry = addEntry(doc);
-    doc.setSavedLastHistoryEntryId(entry.id);
+    doc.setSavedEnvelope({ lastHistoryEntryId: entry.id, settled: false });
     recorder.onContentSaved(other, entry.id);
     recorder.onLocalEntryUploaded(doc, entry);
     await flush();

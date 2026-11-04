@@ -712,7 +712,7 @@ describe("useDocumentSyncToFirebase hook", () => {
     it("reports the saved history entry id when a content save succeeds, leaving the loaded id alone", async () => {
       const onContentSaved = jest.fn();
       const { user, fb, firestore, document } = specArgs(ProblemDocument, "xyz");
-      document.setSavedLastHistoryEntryId("loaded");
+      document.setSavedEnvelope({ lastHistoryEntryId: "loaded", settled: false });
       addHistoryEntry(document, "e1");
       renderHook(() => useDocumentSyncToFirebase(user, fb, firestore, document, false, onContentSaved));
       expect(onContentSaved).not.toHaveBeenCalled();

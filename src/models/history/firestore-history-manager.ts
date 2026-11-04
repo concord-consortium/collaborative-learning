@@ -7,6 +7,7 @@ import { UserContextProvider } from "../stores/user-context-provider";
 import { getLastHistoryEntry, IFirestoreHistoryEntryDoc, loadHistory } from "./history-firestore";
 import { CDocument, CDocumentType, TreeManagerType } from "./tree-manager";
 import { HistoryEntry, HistoryEntrySnapshot, HistoryEntryType } from "./history";
+import type { ISavedEnvelope } from "../document/document";
 
 const seekIncompleteMessage = (historyId: string) =>
   `Could not show this document at the requested point in its history (id: ${historyId}): ` +
@@ -32,11 +33,11 @@ export interface IFirestoreHistoryManagerArgs {
   treeManager: TreeManagerType;
   uploadLocalHistory: boolean;
   syncRemoteHistory: boolean;
-  // Id recorded alongside the document content at save time (from the RTDB
-  // envelope). When the Firestore history first loads, we verify this id is
+  // History fields recorded alongside the document content at save time (from the RTDB
+  // envelope). When the Firestore history first loads, we verify its lastHistoryEntryId is
   // present in the history. If not, the content reflects entries that never
   // made it to the history chain — drift. Undefined skips the check.
-  savedLastHistoryEntryId?: string;
+  savedEnvelope?: ISavedEnvelope;
   // Invoked once if the loaded Firestore history doesn't contain
   // savedLastHistoryEntryId. The owner decides how to react — typically by
   // setting the document content into an error state. Keeping this as a
@@ -62,7 +63,7 @@ export class FirestoreHistoryManager {
   historyError = undefined as firebase.firestore.FirestoreError | undefined;
   environmentAndMetadataDocReadyPromise: Promise<void> | undefined;
   firestoreHistoryInfoPromise: Promise<IFirestoreHistoryInfo> | undefined;
-  savedLastHistoryEntryId: string | undefined;
+  savedEnvelope: ISavedEnvelope | undefined;
   onContentDrift: ((message: string) => void) | undefined;
   onLocalEntryUploaded: ((entry: HistoryEntryType) => void) | undefined;
   driftChecked = false;
@@ -76,7 +77,7 @@ export class FirestoreHistoryManager {
     treeManager,
     uploadLocalHistory,
     syncRemoteHistory,
-    savedLastHistoryEntryId,
+    savedEnvelope,
     onContentDrift,
     onLocalEntryUploaded
   }: IFirestoreHistoryManagerArgs) {
@@ -84,7 +85,7 @@ export class FirestoreHistoryManager {
     this.userContextProvider = userContextProvider;
     this.treeManager = treeManager;
     this.uploadLocalHistory = uploadLocalHistory;
-    this.savedLastHistoryEntryId = savedLastHistoryEntryId;
+    this.savedEnvelope = savedEnvelope;
     this.onContentDrift = onContentDrift;
     this.onLocalEntryUploaded = onLocalEntryUploaded;
 
@@ -386,11 +387,11 @@ export class FirestoreHistoryManager {
    * which today is gated by syncRemoteHistory=true in the manager args.
    * In practice that means group documents (see documents.ts) and the
    * playback path (see canvas.tsx). Playback doesn't pass
-   * savedLastHistoryEntryId so the check is a no-op there. Other document
+   * a saved envelope so the check is a no-op there. Other document
    * types never subscribe, so the drift check does not run for them.
    */
   checkContentDriftAgainstHistory(history: IFirestoreHistoryEntryDoc[]) {
-    const savedId = this.savedLastHistoryEntryId;
+    const savedId = this.savedEnvelope?.lastHistoryEntryId;
     if (!savedId) return;
     const found = history.some(doc => doc.entry?.id === savedId);
     if (found) return;

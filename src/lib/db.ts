@@ -11,7 +11,7 @@ import {
   DBGroupUserConnections, DBPublication, DBDocumentType, DBImage, DBTileComment,
   DBUserStar, DBOfferingUserProblemDocument, DBOtherDocument, IDocumentProperties, DBOtherPublication, DBSupport
 } from "./db-types";
-import { DocumentModelType, createDocumentModel, isVisibilityType } from "../models/document/document";
+import { DocumentModelType, ISavedEnvelope, createDocumentModel, isVisibilityType } from "../models/document/document";
 import {
   DocumentType, LearningLogDocument, LearningLogPublication, OtherDocumentType, OtherPublicationType,
   PersonalDocument, PersonalPublication, PlanningDocument, ProblemDocument, ProblemOrPlanningDocumentType,
@@ -1350,11 +1350,21 @@ export class DB {
               concurrent,
               kind,
             });
-            // Stash the envelope's lastHistoryEntryId for the drift check that
-            // runs once the Firestore history loads. Skipped (undefined) for
-            // pre-feature saves and fresh docs with no prior history.
+            // Stash the envelope's history fields for the drift check that runs once the
+            // Firestore history loads. Skipped for pre-feature saves and fresh docs with no
+            // prior history.
             if (typeof document.lastHistoryEntryId === "string") {
-              docModel.setSavedLastHistoryEntryId(document.lastHistoryEntryId);
+              const envelope: ISavedEnvelope = {
+                lastHistoryEntryId: document.lastHistoryEntryId,
+                settled: document.settled === true
+              };
+              if (typeof document.lastHistoryEntryIndex === "number") {
+                envelope.lastHistoryEntryIndex = document.lastHistoryEntryIndex;
+              }
+              if (typeof document.exactSince === "string") {
+                envelope.exactSince = document.exactSince;
+              }
+              docModel.setSavedEnvelope(envelope);
             }
             return docModel;
           } catch (e) {

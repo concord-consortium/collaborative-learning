@@ -969,6 +969,24 @@ describe("db", () => {
       expect(doc.kind).toBe("group");
     });
 
+    it("builds the saved envelope from the envelope's history fields", async () => {
+      stubRtdb({ createdAt: 1, properties: {} }, {
+        changeCount: 0, lastHistoryEntryId: "e7", lastHistoryEntryIndex: 7, settled: true, exactSince: "e2"
+      });
+      const doc = await db.openDocument({ documentKey: "s1", type: "problem", userId: "u1",
+        firestoreMetadata: { uid: "u1", type: "problem", key: "s1" } } as any);
+      expect(doc.savedEnvelope).toEqual(
+        { lastHistoryEntryId: "e7", lastHistoryEntryIndex: 7, settled: true, exactSince: "e2" });
+      expect(doc.savedLastHistoryEntryId).toBe("e7");
+    });
+
+    it("builds an unsettled saved envelope from an envelope with only an entry id", async () => {
+      stubRtdb({ createdAt: 1, properties: {} }, { changeCount: 0, lastHistoryEntryId: "e7" });
+      const doc = await db.openDocument({ documentKey: "s2", type: "problem", userId: "u1",
+        firestoreMetadata: { uid: "u1", type: "problem", key: "s2" } } as any);
+      expect(doc.savedEnvelope).toEqual({ lastHistoryEntryId: "e7", settled: false });
+    });
+
     it("fetches Firestore metadata from the store when none is passed", async () => {
       stubRtdb({ createdAt: 1, properties: {} }, { changeCount: 0 });
       const spy = jest.spyOn(stores.documentMetadata, "fetchMetadata")

@@ -268,7 +268,7 @@ export const DocumentsModel = types
           treeManager,
           uploadLocalHistory: true,
           syncRemoteHistory: false,
-          savedLastHistoryEntryId: document.savedLastHistoryEntryId,
+          savedEnvelope: document.savedEnvelope,
           onContentDrift: (message) => {
             const content = document.content;
             const snapshot = content && getSnapshot(content);

@@ -132,7 +132,23 @@ export interface DBDocument {
   // Firestore (metadata.lastHistoryEntry) because we need it co-located with
   // the content in RTDB — we can't transact across RTDB and Firestore.
   lastHistoryEntryId?: string;
+  // Position of lastHistoryEntryId in the history chain.
+  lastHistoryEntryIndex?: number;
+  // True only when the content is exactly the result of the history up to lastHistoryEntryId.
+  settled?: true;
+  // Id of the history entry from which the saving session guaranteed exactness.
+  exactSince?: string;
+  // Why the content could not be marked settled, written with saves that aren't.
+  unsettled?: IUnsettledEvidence;
   type: DBDocumentType;
+}
+
+export interface IUnsettledEvidence {
+  openEntries: Array<{ id: string; model?: string; action?: string; exchanges: string[]; openedAt: number }>;
+  runningFlows: Array<{ action: string }>;
+  uncommittedEntryIds: string[];
+  notExactReason?: string;
+  unsettledSince: number;
 }
 
 // Note: axes-typed documents do not have any type specific metadata. They have generic metadata,
