@@ -348,9 +348,9 @@ documents, and class-wide collaborative documents such as the driving-question b
 
 Two problems only group documents have. This story designs the answer; building it is two
 follow-ups, and until they ship, group documents don't record load entries (section 2).
-CLUE-792, "Concurrent documents: stop editing when a conversion entry arrives", makes a client that
+CLUE-792, "Concurrent documents: stop editing when a load entry arrives", makes a client that
 receives a load entry stop editing and ask for a reload, without applying the entry. CLUE-793,
-"Concurrent documents: record conversion entries and merge them with concurrent edits", builds the
+"Concurrent documents: record load entries and merge them with concurrent edits", builds the
 rest of this section. CLUE-792 ships at least one release before CLUE-793.
 
 **Concurrent conversions.** Two clients on the new release can open an old group document at about
@@ -578,8 +578,8 @@ A change to this design made in a later PR updates this document in that PR.
     is current, so playback applies its recorded patches to MST rather than loading it from the
     JSON copy. A load entry that carries non-version changes would update the JSON copy without
     MST reloading that model at those positions. CLUE-788's design has to settle that.
-- **CLUE-792** ("Concurrent documents: stop editing when a conversion entry arrives") and
-  **CLUE-793** ("Concurrent documents: record conversion entries and merge them with concurrent
+- **CLUE-792** ("Concurrent documents: stop editing when a load entry arrives") and
+  **CLUE-793** ("Concurrent documents: record load entries and merge them with concurrent
   edits"): section 4. CLUE-792 must ship at least one release before CLUE-793.
 - **Follow-up: storing legacy DataFlow load entries**, so dumb services can cross the legacy
   conversion. Inserting an entry into a stored chain (its index and the next entry's
