@@ -117,24 +117,23 @@ export const normalizeRequestContext = (context: unknown): IEvaluationRequestCon
   return {unit, investigation, problem, offeringId: usableOfferingId ? offeringId : ""};
 };
 
-type LastHistoryEntry = {index: number, id: string} | undefined;
-
 /**
- * The client's getLastHistoryEntry, against the admin SDK. The query is identical; the SDKs are
- * not, which is why this is not shared.
+ * The newest history index for a document. The client reads the same collection the same way, in
+ * `history-firestore.ts`; the query is identical and the SDKs are not, which is why this is here
+ * rather than in `shared/`.
  *
  * @param {admin.firestore.Firestore} firestore the admin Firestore instance
  * @param {string} documentPath the document's Firestore path, whose `history` collection is read
- * @return {Promise<LastHistoryEntry>} the highest-indexed entry, or nothing if there is no usable one
+ * @return {Promise<number | undefined>} the highest index, or nothing if there is no usable entry
  */
-async function getLastHistoryEntry(
+async function getLastHistoryIndex(
   firestore: admin.firestore.Firestore, documentPath: string
-): Promise<LastHistoryEntry> {
+): Promise<number | undefined> {
   const query = await firestore.collection(`${documentPath}/history`)
     .orderBy("index", "desc").limit(1).get();
   if (query.empty) return undefined;
   const index = query.docs[0].get("index");
-  return typeof index === "number" ? {index, id: query.docs[0].id} : undefined;
+  return typeof index === "number" ? index : undefined;
 }
 
 const handleUpdate = async (event: DatabaseEvent<Change<DataSnapshot>>, firebaseRoot: string, firestoreRoot: string) => {
@@ -161,9 +160,9 @@ const handleUpdate = async (event: DatabaseEvent<Change<DataSnapshot>>, firebase
 
   // Fail open: a gate we cannot read must never withhold an evaluation, and this trigger is not
   // retried, so throwing here would drop the evaluation rather than defer it.
-  let lastEntry: LastHistoryEntry;
+  let historyIndex: number | undefined;
   try {
-    lastEntry = await getLastHistoryEntry(firestore, firestoreDocumentPath);
+    historyIndex = await getLastHistoryIndex(firestore, firestoreDocumentPath);
     // Only unrequested (session-end) evaluations are skipped. Skipping a requested one would leave
     // the Ideas client waiting for a comment that never arrives.
     if (!requestId) {
@@ -171,7 +170,7 @@ const handleUpdate = async (event: DatabaseEvent<Change<DataSnapshot>>, firebase
         .ref(`${metadataPath}/${kEvaluationGateKey}/${evaluator}`).once("value");
       const gateValue = gateSnapshot.val();
       const gateIndex = typeof gateValue === "number" ? gateValue : undefined;
-      if (!hasChangedSinceEvaluation(lastEntry?.index, gateIndex)) {
+      if (!hasChangedSinceEvaluation(historyIndex, gateIndex)) {
         logger.info(`Skipping unchanged document ${documentPath} for ${evaluator}`);
         return;
       }
@@ -201,8 +200,8 @@ const handleUpdate = async (event: DatabaseEvent<Change<DataSnapshot>>, firebase
   }
 
   // Assigned only when there is one: Firestore rejects an undefined field value outright.
-  if (lastEntry) {
-    newDocument.historyIndex = lastEntry.index;
+  if (historyIndex !== undefined) {
+    newDocument.historyIndex = historyIndex;
   }
 
   // A transaction: a plain `.set()` would replace an existing document's requestIds outright
