@@ -117,7 +117,8 @@ describe("Ideas button", () => {
     expect(document.commentsManager?.latestIdeasRequestId).toBeNull();
     expect(document.commentsManager?.statusMessage).toMatchObject({ message: IDEAS_EMPTY_MESSAGE });
     expect(document.commentsManager?.canRequestIdeas).toBe(true);
-    // The gate is not raised by an empty click, so the button stays enabled while the nudge shows.
+    // An empty click raises and releases the gate in one synchronous block, so the button is
+    // still enabled by the time the nudge shows.
     expect(screen.getByTestId("ideas-button")).not.toBeDisabled();
   });
 

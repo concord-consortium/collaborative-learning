@@ -380,6 +380,14 @@ git commit -m "CLUE-664: nudge instead of requesting Ideas for unchanged work"
 
 ## Task 5: Gate the AI tile
 
+> **Learn from Task 4 before starting.** Inserting the gate's awaits ahead of the handler's
+> in-progress flag let two rapid clicks both through, double-billing an evaluation — the exact
+> thing this story exists to prevent. A pre-existing test caught it. Check how this surface dedups
+> overlapping refreshes (`requestGenerationRef` / `isCurrent()` in `ai-tile.tsx`) and make sure the
+> new `await` cannot slip past it. Also wrap the gate reads in a try/catch that fails *open*:
+> `getLastHistoryEntry` throws by design on a malformed index, and an unhandled throw here would
+> leave the tile stuck.
+
 **Files:**
 - Modify: `src/plugins/ai/ai-content.ts`
 - Modify: `src/plugins/ai/ai-tile.tsx`
