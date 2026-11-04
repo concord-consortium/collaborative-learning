@@ -218,6 +218,14 @@ hasn't landed yet), since it is produced by code, not by a person.
 **It stays in history for good.** Nothing deletes or rewrites it, so the content's saved
 `lastHistoryEntryId` and links from logged events can point at it safely.
 
+**Known limit: its size.** A conversion entry's size grows with what the conversion touches. Each
+changed value is stored in both directions, and each patch carries its full path. An entry is
+uploaded as one Firestore document, and Firestore allows 1 MiB per document. Legacy DataFlow
+programs are small, so this story's conversions are well under it. A story that adds a conversion
+that could get that large, such as a shared model migration that touches every case of a large
+data set, needs a fallback, such as a whole-model `replace` in each direction. Until then the
+builder logs an error with the entry's size and the document when an entry is over the limit.
+
 **What existing data already has.** In the study's history, no entry records a conversion. The
 version does appear as state, inside whole-tile values: 2,602 of the 5,800 histories add a DataFlow
 tile whose `program.id` is `"dataflow@0.1.0"`, and 290 add one at `"dataflow@1"`. Legacy DataFlow

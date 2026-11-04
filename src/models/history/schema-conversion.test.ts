@@ -145,6 +145,20 @@ describe("buildConversionEntry", () => {
     expect(HistoryEntry.create(entry).created.getTime()).toBe(1234);
   });
 
+  it("logs an error when the entry is too large to upload", () => {
+    const errorSpy = jest.spyOn(console, "error").mockImplementation(() => undefined);
+    const tile = (text: string) => ({ id: "t1", content: { type: "VersionedTestTile", version: "2", label: text } });
+    const change = (size: number) =>
+      ({ path: "/content/tileMap/t1", before: tile("a".repeat(size)), after: tile("b") });
+
+    buildConversionEntry("doc1", [change(500000)]);
+    expect(errorSpy).not.toHaveBeenCalled();
+
+    buildConversionEntry("doc1", [change(1100000)]);
+    expect(errorSpy).toHaveBeenCalledTimes(1);
+    expect(errorSpy.mock.calls[0][0]).toMatch(/conversion entry for document doc1 is \d+ bytes/);
+  });
+
   it("stores inverse patches so undo restores an array that the conversion shortened", () => {
     const before = { id: "t1", content: { type: "VersionedTestTile",
       items: [{ value: "a" }, { value: "b" }, { value: "c" }] } };

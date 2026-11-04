@@ -131,6 +131,9 @@ export function convertContentJson(content: any): { content: any; convertedPaths
 const kConvertSchemasAction = "/convertSchemas";
 const kConversionEntryModel = "DocumentContent";
 
+// An entry is uploaded as one Firestore document, and Firestore limits a document to 1 MiB.
+const kMaxEntryBytes = 1048576;
+
 /**
  * Builds the entry that records the conversion of old models to the current format, as the
  * patches that turn the stored JSON into the converted JSON. It is flagged `isConversion` and
@@ -142,7 +145,7 @@ export function buildConversionEntry(
   const patches = changes.flatMap(({ path, before, after }) => diffJson(before, after, path));
   // TreePatchRecord.getPatches(Undo) reverses inversePatches, so they are stored in reverse
   const inversePatches = changes.flatMap(({ path, before, after }) => diffJson(after, before, path)).reverse();
-  return {
+  const entry: HistoryEntrySnapshot = {
     id: nanoid(),
     created: Date.now(),
     tree: treeId,
@@ -154,4 +157,12 @@ export function buildConversionEntry(
     state: "complete",
     records: [{ tree: treeId, action: kConvertSchemasAction, patches, inversePatches }]
   };
+  // The entry's size grows with what the conversion touches. Nothing splits or shrinks an entry
+  // that is too large, so say so where it can be found.
+  const size = new TextEncoder().encode(JSON.stringify(entry)).length;
+  if (size > kMaxEntryBytes) {
+    console.error(`The conversion entry for document ${treeId} is ${size} bytes, over the ` +
+      `${kMaxEntryBytes}-byte limit on a Firestore document, so it can't be uploaded.`);
+  }
+  return entry;
 }
