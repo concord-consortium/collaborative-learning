@@ -9,7 +9,8 @@ import { TileContentModel } from "../tiles/tile-content";
 import { LogEventName } from "../../lib/logger-types";
 import {
   collectUnsettledEvidence, ContentSaveSender, getContentSaveSender, IContentRef, IContentSaveSenderOptions,
-  kGroupSaveJitterMs, kIntermediateSaveIntervalMs, kMaxEvidenceEntryIds, kMinimumSaveGapMs, kSenderUnmountLimitMs
+  kGroupSaveJitterMs, kIntermediateSaveIntervalMs, kMaxEvidenceEntryIds, kMaxUsableSnapshots, kMinimumSaveGapMs,
+  kSenderUnmountLimitMs
 } from "./content-save-sender";
 import { createDocumentModel, DocumentModelType, SaveState } from "./document";
 import { DocumentContentModel } from "./document-content";
@@ -53,6 +54,7 @@ registerTileComponentInfo({
 // while no completed local entry waits to commit, no upload runs and no remote entries are applied.
 class StubCommitSource implements IHistoryManager, ICommitSource {
   lastCommitted: ICommittedEntry | undefined = undefined;
+  caughtUpTo: ICommittedEntry | undefined = undefined;
   applying = false;
   uploading = false;
   uncommitted: string[] = [];
@@ -310,6 +312,20 @@ describe("ContentSaveSender", () => {
       }
     });
 
+    it("keeps only the newest usable snapshots while entries wait to commit", async () => {
+      const { commits, contentRef, edit } = track(setup());
+      const ids: string[] = [];
+      for (let i = 0; i <= kMaxUsableSnapshots; i++) {
+        ids.push(await edit(`text-${i}`));
+      }
+      commits.commit(ids[0]);
+      expect(contentRef.update).not.toHaveBeenCalled();
+      commits.commit(ids[1]);
+      expect(contentRef.update).toHaveBeenCalledTimes(1);
+      expect(contentRef.writes[0].values).toMatchObject({ lastHistoryEntryId: ids[1], settled: true });
+      expect(textOf(contentRef.writes[0].values)).toBe("text-1");
+    });
+
     it("skips a snapshot taken while another entry was open, and uses the next usable one", async () => {
       const { commits, contentRef, edit, openEntry } = track(setup());
       const closeEntry = openEntry("open");
@@ -523,6 +539,29 @@ describe("ContentSaveSender", () => {
         jest.advanceTimersByTime(10000);
         expect(contentRef.update).toHaveBeenCalledTimes(3);
       });
+    });
+
+    it("keeps the newest saved change when two writes finish out of order", async () => {
+      const onDrained = jest.fn();
+      const { commits, contentRef, document, edit, onContentSaved, sender } = track(setup({ onDrained }));
+      const a = await edit("alpha");
+      commits.commit(a);
+      const b = await edit("bravo");
+      commits.commit(b);
+      sender.handlePageHide();
+      expect(contentRef.update).toHaveBeenCalledTimes(2);
+
+      contentRef.writes[1].resolve();
+      await flush();
+      contentRef.writes[0].resolve();
+      await flush();
+      expect(document.saveState).toBe(SaveState.Saved);
+      expect(onContentSaved).toHaveBeenCalledTimes(1);
+      expect(onContentSaved).toHaveBeenLastCalledWith(document, b);
+      jest.advanceTimersByTime(2 * kIntermediateSaveIntervalMs);
+      expect(contentRef.update).toHaveBeenCalledTimes(2);
+      sender.detach();
+      expect(onDrained).toHaveBeenCalledTimes(1);
     });
 
     it("backs off and shows Retrying from the third consecutive failure", async () => {
@@ -762,6 +801,20 @@ describe("ContentSaveSender", () => {
       contentRef.writes[1].resolve();
       await flush();
       expect(onContentSaved).toHaveBeenLastCalledWith(document, a);
+    });
+
+    it("stamps an intermediate save with the entry the load caught up to before any commit", async () => {
+      const { commits, contentRef, document, edit, treeManager } = track(setup());
+      document.setSavedEnvelope({ lastHistoryEntryId: "loaded", lastHistoryEntryIndex: 7, settled: true });
+      commits.caughtUpTo = { id: "caught-up", index: 9 };
+      treeManager.exactness.markNotExact("catch-up-hole");
+      await edit("alpha");
+
+      jest.advanceTimersByTime(kIntermediateSaveIntervalMs);
+      expect(contentRef.update).toHaveBeenCalledTimes(1);
+      expect(contentRef.writes[0].values).toMatchObject({
+        lastHistoryEntryId: "caught-up", lastHistoryEntryIndex: 9, settled: null
+      });
     });
 
     it("repeats intermediate saves at most every 5 seconds", async () => {
@@ -1308,12 +1361,70 @@ describe("ContentSaveSender", () => {
       expect(contentRef.update).toHaveBeenCalledTimes(1);
     });
 
-    it("makes no intermediate save on page hide", async () => {
+    it("makes no intermediate save on page hide before the document relies on them", async () => {
       const { contentRef, edit, openEntry, sender } = track(setup());
       openEntry("open");
       await edit("alpha");
       sender.handlePageHide();
       expect(contentRef.update).not.toHaveBeenCalled();
+    });
+
+    it("sends a pending exact save that covers the latest change on page hide, without an intermediate one",
+        async () => {
+      const { commits, contentRef, edit, sender } = track(setup());
+      const a = await edit("alpha");
+      commits.commit(a);
+      const b = await edit("bravo");
+      commits.commit(b);
+      sender.handlePageHide();
+      expect(contentRef.update).toHaveBeenCalledTimes(2);
+      expect(contentRef.writes[1].values).toMatchObject({ lastHistoryEntryId: b, settled: true });
+      expect(textOf(contentRef.writes[1].values)).toBe("bravo");
+    });
+
+    it("sends an intermediate save at once on page hide when the session isn't exact", async () => {
+      const { contentRef, edit, sender, treeManager } = track(setup());
+      treeManager.exactness.markNotExact("unrecorded-change");
+      await edit("alpha");
+      jest.advanceTimersByTime(kIntermediateSaveIntervalMs);
+      expect(contentRef.update).toHaveBeenCalledTimes(1);
+
+      // while the earlier intermediate save is still in flight
+      await edit("bravo");
+      sender.handlePageHide();
+      expect(contentRef.update).toHaveBeenCalledTimes(2);
+      expect(contentRef.writes[1].values).toMatchObject({ settled: null });
+      expect(textOf(contentRef.writes[1].values)).toBe("bravo");
+    });
+
+    it("sends an intermediate save at once on page hide while entries aren't committing", async () => {
+      const { contentRef, edit, sender } = track(setup());
+      await edit("alpha");
+      jest.advanceTimersByTime(kIntermediateSaveIntervalMs);
+      contentRef.writes[0].resolve();
+      await flush();
+
+      await edit("bravo");
+      sender.handlePageHide();
+      expect(contentRef.update).toHaveBeenCalledTimes(2);
+      expect(contentRef.writes[1].values).toMatchObject({ settled: null });
+      expect(textOf(contentRef.writes[1].values)).toBe("bravo");
+    });
+
+    it("sends an exact save that covers the latest change on page hide while entries were stalled",
+        async () => {
+      const { commits, contentRef, edit, sender } = track(setup());
+      const a = await edit("alpha");
+      jest.advanceTimersByTime(kIntermediateSaveIntervalMs);
+      contentRef.writes[0].resolve();
+      await flush();
+
+      const b = await edit("bravo");
+      commits.commit(a, b);
+      expect(contentRef.update).toHaveBeenCalledTimes(1);
+      sender.handlePageHide();
+      expect(contentRef.update).toHaveBeenCalledTimes(2);
+      expect(contentRef.writes[1].values).toMatchObject({ lastHistoryEntryId: b, settled: true });
     });
   });
 
@@ -1428,6 +1539,28 @@ describe("ContentSaveSender", () => {
       contentRef.writes.forEach(write => write.resolve());
       await flush();
       commits.commit(a);
+      await edit("charlie");
+      jest.advanceTimersByTime(kSenderUnmountLimitMs);
+      expect(contentRef.update).toHaveBeenCalledTimes(2);
+    });
+
+    it("reports the writes sent before the drain timeout once they finish", async () => {
+      const { contentRef, document, edit, onContentSaved, sender, updateTools } = track(setup());
+      document.setSavedEnvelope({ lastHistoryEntryId: "loaded", lastHistoryEntryIndex: 7, settled: true });
+      await edit("alpha");
+      sender.detach();
+      jest.advanceTimersByTime(kIntermediateSaveIntervalMs);
+      await edit("bravo");
+      jest.advanceTimersByTime(kSenderUnmountLimitMs - kIntermediateSaveIntervalMs);
+      expect(contentRef.update).toHaveBeenCalledTimes(2);
+
+      contentRef.writes.forEach(write => write.resolve());
+      await flush();
+      expect(onContentSaved).toHaveBeenCalledTimes(2);
+      expect(onContentSaved).toHaveBeenLastCalledWith(document, "loaded");
+      expect(updateTools).toHaveBeenCalledWith(["TestTile"]);
+
+      // nothing else starts again
       await edit("charlie");
       jest.advanceTimersByTime(kSenderUnmountLimitMs);
       expect(contentRef.update).toHaveBeenCalledTimes(2);

@@ -17,6 +17,8 @@ export interface ICommitSource {
   addCommitListener(listener: ICommitListener): () => void;
   // This session's newest committed local entry.
   readonly lastCommitted: ICommittedEntry | undefined;
+  // The last Firestore entry the load applied to the content, when it applied any.
+  readonly caughtUpTo?: ICommittedEntry;
 }
 
 export function isCommitSource(manager: unknown): manager is ICommitSource {

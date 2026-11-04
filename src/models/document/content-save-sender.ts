@@ -19,6 +19,8 @@ export const kMaxEvidenceEntryIds = 20;
 export const kGroupSaveJitterMs = 200;
 // The most time a sender keeps saving after it is detached.
 export const kSenderUnmountLimitMs = 30000;
+// The most usable snapshots kept for entries waiting to commit. Older ones are dropped.
+export const kMaxUsableSnapshots = 200;
 
 export interface IValueRef {
   on(event: "value", cb: (snapshot: { val(): unknown }) => void): unknown;
@@ -325,12 +327,7 @@ export class ContentSaveSender {
     this.drainTimer = undefined;
     try {
       if (!this.document.concurrent && !this.isLatestChangeWritten()) {
-        // Sent now, without waiting for the write in flight, the minimum gap or a backoff.
-        this.clearWriteTimer();
-        this.clearIntermediateTimer();
-        const save: IUnbuiltIntermediateSave = { kind: "intermediate", changeSeq: this.dirtySeq };
-        this.pendingSave = save;
-        this.write(save);
+        this.sendIntermediateSaveNow();
       }
     } catch (error) {
       console.error("Failed to send the last content save", error);
@@ -351,18 +348,40 @@ export class ContentSaveSender {
     }
   }
 
+  // Sent now, without waiting for the write in flight, the minimum gap or a backoff.
+  private sendIntermediateSaveNow() {
+    this.clearWriteTimer();
+    this.clearIntermediateTimer();
+    const save: IUnbuiltIntermediateSave = { kind: "intermediate", changeSeq: this.dirtySeq };
+    this.pendingSave = save;
+    this.write(save);
+  }
+
   /**
    * Sends the pending exact save now, without waiting for the minimum gap, a backoff or the write
    * in flight, since the page may be gone before they end. Changes that haven't committed are left
-   * for the next load to catch up from history, so no intermediate save is made. A group document
-   * saves through its usual checks.
+   * for the next load to catch up from history, so no intermediate save is made, unless the
+   * document already relies on intermediate saves and no exact save covers the latest change. Then
+   * an intermediate save is sent instead. A group document saves through its usual checks.
    */
   handlePageHide() {
+    if (!this.running || this.document.concurrent) return;
     const save = this.pendingSave;
-    if (!this.running || this.document.concurrent || save?.kind !== "exact" || this.writesInFlight.has(save)
-        || this.isOlderThanIntermediateContent(save)) return;
+    const exactSaveCoversLatest = save?.kind === "exact" && save.changeSeq >= this.dirtySeq;
+    if (this.isRelyingOnIntermediateSaves() && !exactSaveCoversLatest && !this.isLatestChangeWritten()) {
+      this.sendIntermediateSaveNow();
+      return;
+    }
+    if (save?.kind !== "exact" || this.writesInFlight.has(save) || this.isOlderThanIntermediateContent(save)) {
+      return;
+    }
     this.clearWriteTimer();
     this.write(save);
+  }
+
+  // Whether intermediate saves are already standing in for exact ones on this individual document.
+  private isRelyingOnIntermediateSaves() {
+    return !!this.fallbackEpisode || !getTreeManager(this.document)?.exactness.isExact;
   }
 
   dispose() {
@@ -566,10 +585,21 @@ export class ContentSaveSender {
         ? { usable, snapshot: getSnapshot<DocumentContentSnapshotType>(content), exactSince,
             changeSeq: this.dirtySeq }
         : { usable, changeSeq: this.dirtySeq });
+      if (usable) {
+        this.limitUsableSnapshots();
+      }
     } catch (error) {
       console.error("Failed to keep the content snapshot of a history entry", error);
     }
   };
+
+  // Drops the snapshots of the oldest usable entries past the limit, keeping their content changes.
+  private limitUsableSnapshots() {
+    const usable = Array.from(this.keptSnapshots).filter(([, kept]) => kept.usable);
+    usable.slice(0, Math.max(0, usable.length - kMaxUsableSnapshots)).forEach(([id, kept]) => {
+      this.keptSnapshots.set(id, { usable: false, changeSeq: kept.changeSeq });
+    });
+  }
 
   private commitListener: ICommitListener = {
     onCommitted: (entries: ICommittedEntry[]) => {
@@ -652,11 +682,12 @@ export class ContentSaveSender {
     };
   }
 
-  // This session's last committed entry, or the loaded envelope's entry when none has committed.
+  // This session's last committed entry. When none has committed, the last entry the load caught
+  // the content up to, or else the loaded envelope's entry.
   private getIntermediateStamp(): { id: string; index?: number } | undefined {
     const manager = getTreeManager(this.document)?.historyManager;
-    const committed = isCommitSource(manager) ? manager.lastCommitted : undefined;
-    if (committed) return committed;
+    const entry = isCommitSource(manager) ? manager.lastCommitted ?? manager.caughtUpTo : undefined;
+    if (entry) return entry;
     const { lastHistoryEntryId, lastHistoryEntryIndex } = this.document.savedEnvelope ?? {};
     return lastHistoryEntryId ? { id: lastHistoryEntryId, index: lastHistoryEntryIndex } : undefined;
   }
@@ -821,9 +852,18 @@ export class ContentSaveSender {
 
   private handleWriteSucceeded(save: IQueuedSave) {
     this.writesInFlight.delete(save);
-    if (!this.running) return;
+    // Two writes in flight can finish out of order. One that finishes after a newer one reports
+    // nothing, since the newer content is what the RTDB holds.
+    const isNewest = save.changeSeq >= this.savedSeq;
+    this.savedSeq = Math.max(this.savedSeq, save.changeSeq);
+    if (!this.running) {
+      // A write sent before the sender stopped still reports what it saved.
+      if (isNewest) {
+        this.reportWrite(save);
+      }
+      return;
+    }
     this.consecutiveFailures = 0;
-    this.savedSeq = save.changeSeq;
     if (this.pendingSave === save) {
       this.pendingSave = undefined;
     }
@@ -834,18 +874,12 @@ export class ContentSaveSender {
       }
     } else {
       this.endFallbackEpisode("exact-save");
-      this.unsettledSince = save.changeSeq >= this.dirtySeq ? undefined : Date.now();
-    }
-    this.sendToolsIfChanged(save.snapshot);
-    if (this.document.concurrent && save.lastHistoryEntryId && save.index !== undefined) {
-      this.advanceEnvelopeEntry({ id: save.lastHistoryEntryId, index: save.index });
-      // Another member's save may already have reported a newer entry.
-      if (save.index > this.reportedIndex) {
-        this.reportedIndex = save.index;
-        this.reportContentSaved(save.lastHistoryEntryId);
+      if (isNewest) {
+        this.unsettledSince = save.changeSeq >= this.dirtySeq ? undefined : Date.now();
       }
-    } else if (save.lastHistoryEntryId) {
-      this.reportContentSaved(save.lastHistoryEntryId);
+    }
+    if (isNewest) {
+      this.reportWrite(save);
     }
     if (save.changeSeq >= this.dirtySeq) {
       this.setSaveState(SaveState.Saved);
@@ -869,6 +903,21 @@ export class ContentSaveSender {
       this.setSaveState(SaveState.Retrying);
     }
     this.scheduleWrite();
+  }
+
+  // Sends the saved content's tools and reports the id the save was stamped with.
+  private reportWrite(save: IQueuedSave) {
+    this.sendToolsIfChanged(save.snapshot);
+    if (this.document.concurrent && save.lastHistoryEntryId && save.index !== undefined) {
+      this.advanceEnvelopeEntry({ id: save.lastHistoryEntryId, index: save.index });
+      // Another member's save may already have reported a newer entry.
+      if (save.index > this.reportedIndex) {
+        this.reportedIndex = save.index;
+        this.reportContentSaved(save.lastHistoryEntryId);
+      }
+    } else if (save.lastHistoryEntryId) {
+      this.reportContentSaved(save.lastHistoryEntryId);
+    }
   }
 
   private reportContentSaved(lastHistoryEntryId: string) {
