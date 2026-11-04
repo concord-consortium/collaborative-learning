@@ -67,6 +67,13 @@ describe("AIContent", () => {
     expect(json.refreshCount).toBeUndefined();
   });
 
+  it("exportJson excludes the evaluated history index", () => {
+    const content = AIContentModel.create();
+    content.setEvaluatedHistoryIndex(52);
+    const json = JSON.parse(content.exportJson());
+    expect(json.evaluatedHistoryIndex).toBeUndefined();
+  });
+
   // setText is driven by the AI-response effect on load, not a student, so none of the setters log.
   it("does not log when the content setters mutate state", () => {
     const content = AIContentModel.create();

@@ -43,7 +43,9 @@ export const AIContentModel = TileContentModel
   }))
   .actions(self => ({
     exportJson() {
-      const { refreshCount: _, ...snapshot } = getSnapshot(self);
+      // Both are per-session bookkeeping rather than authored content: a copy of this tile lands
+      // in a document with its own history, where a carried-over index would mean nothing.
+      const { refreshCount: _, evaluatedHistoryIndex: __, ...snapshot } = getSnapshot(self);
       return stringify(snapshot);
     },
     // The setters below are pure mutations wired to controlled inputs (they fire on every keystroke).
