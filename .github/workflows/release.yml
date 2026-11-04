@@ -31,6 +31,15 @@ jobs:
       contents: read
       deployments: write
     steps:
+      # github.sha is the commit the workflow was dispatched from (usually master), not the release's.
+      - name: Find the release's commit
+        id: release-commit
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ inputs.version }}
+        run: |
+          sha=$(gh api "repos/$GITHUB_REPOSITORY/commits/$VERSION" --jq .sha)
+          echo "sha=$sha" >> "$GITHUB_OUTPUT"
       - uses: chrnorm/deployment-action@v2
         name: Create GitHub deployment
         id: deployment
@@ -82,6 +91,6 @@ jobs:
         uses: rollbar/github-deploy-action@2.1.2
         with:
           environment: ${{ inputs.environment }}
-          version: ${{ github.sha }}
+          version: ${{ steps.release-commit.outputs.sha }}
         env:
           ROLLBAR_ACCESS_TOKEN: ${{ secrets.ROLLBAR_ACCESS_TOKEN }}
