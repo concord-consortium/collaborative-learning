@@ -22,12 +22,13 @@ the old paths and values, new entries would use the new ones, and nothing in bet
 format changed. Playback would stop with the failure banner at the first old entry that touches a
 changed part of the tile, and a patch-applying service would fail the same way.
 
-To prevent that, a load that converts old tiles or shared models records a **conversion entry**.
-Its patches take each converted model from its old JSON to its converted JSON, and back. They come
-from a generic diff, so you write nothing for them. The entry is flagged `isConversion` and
-`background`, and it is never undoable. Playback applies it like any other entry to a plain JSON
-copy of the document, so it can cross the change in either direction. It never applies it to a live
-MST tree.
+To prevent that, a load that converts old tiles or shared models records a **load entry**. A load
+entry records the changes CLUE made to the stored content while loading it. Today those are schema
+conversions. Its patches take each converted model from its old JSON to its converted JSON, and
+back. They come from a generic diff, so you write nothing for them. The entry is flagged
+`isLoadEntry` and `background`, and it is never undoable. Playback applies it like any other entry
+to a plain JSON copy of the document, so it can cross the change in either direction. It never
+applies it to a live MST tree.
 
 For this to work you tell the system which version your type's JSON is at, and how to convert an
 older one. Everything else is done for you.
@@ -54,7 +55,8 @@ older one. Everything else is done for you.
        // JSON saved before the type had a version, for example by returning the oldest version
        getVersion: tile => tile?.content?.version ?? "1",
        // takes the whole tile JSON at any older version and returns it at currentVersion;
-       // JSON that is already current is returned unchanged
+       // JSON that is already current is returned unchanged, and JSON it can't handle gives
+       // undefined
        convertSnapshot: convertMyTile
      }
    });
@@ -63,22 +65,42 @@ older one. Everything else is done for you.
    For a shared model, `getVersion` and `convertSnapshot` get the shared model's JSON instead of a
    tile's. A type with no `schemaVersion` is always treated as current. Both functions are plain
    functions on JSON with no MST or store imports.
+
+   A model is **old** when its version isn't `currentVersion` and `convertSnapshot` accepts it.
+   `convertSnapshot` returns `undefined` for JSON it can't handle, such as a tile saved by a newer
+   release that reaches an older client after a rollback, or from a stale tab. A model it declines
+   is treated as current: it loads through MST as it would without a `schemaVersion`, nothing is
+   recorded for it, and playback applies its patches as usual. What `convertSnapshot` returns must
+   be at `currentVersion`; in development, the load warns when it isn't, naming the model's path and
+   both versions.
 3. **Write the migration in `convertSnapshot`, and have the preprocessor call it.** Conversion is
    not an MST snapshot preprocessor, because those only run inside MST, and only on the model that
    defines them. `convertSnapshot` is the one place the migration lives. Document load and
    playback call it on JSON. Your `tileSnapshotPreProcessor` (or the model's `preProcessSnapshot`)
    still runs when old content enters through an action, such as pasting an old tile, so it should
-   call the same function rather than repeat it. DataFlow's registration shows the pattern: one
-   function, [`tileSnapshotPreProcessor`](../src/plugins/dataflow/dataflow-registration.ts), is both
-   the registered preprocessor and `convertSnapshot`.
+   call the same function rather than repeat it, and pass a snapshot it declines through to MST
+   unchanged. DataFlow's registration shows the pattern:
+   [`convertDataflowTileSnapshot`](../src/plugins/dataflow/dataflow-registration.ts) is
+   `convertSnapshot`, and `tileSnapshotPreProcessor` wraps it.
 
    ```ts
    function convertMyTile(tile: any) {
-     if (getMyTileVersion(tile) === kMyTileVersion) return tile;
+     const version = getMyTileVersion(tile);
+     if (version === kMyTileVersion) return tile;
+     // A version this release doesn't know, such as one from a newer release.
+     if (!kOlderVersions.includes(version)) return undefined;
      // Return a new object; don't modify `tile`.
      // Handle every older version, not only the one just before this release.
      return { ...tile, content: { /* converted content, with version: kMyTileVersion */ } };
    }
+
+   registerTileContentInfo({
+     // ...
+     tileSnapshotPreProcessor: tile => convertMyTile(tile) ?? tile,
+     schemaVersion: {
+       currentVersion: kMyTileVersion, getVersion: getMyTileVersion, convertSnapshot: convertMyTile
+     }
+   });
    ```
 
 4. **Add fixtures of old content with old history.** Keep small examples of the old format: a tile
@@ -88,7 +110,7 @@ older one. Everything else is done for you.
    [tree-manager-conversion.test.ts](../src/models/history/tree-manager-conversion.test.ts), which
    uses the test-only tile and shared model types in
    [schema-conversion-test-types.ts](../src/models/history/schema-conversion-test-types.ts). Start
-   from an old-format document with old-format history. Load it so the conversion entry is
+   from an old-format document with old-format history. Load it so the load entry is
    recorded, add new-format entries, then scrub backward to the start and forward to the end.
    Check that there are no playback failures, that the JSON copy equals a plain replay of the stored
    entries at each position, and that each MST tile equals its JSON run through `convertSnapshot`
@@ -98,7 +120,7 @@ older one. Everything else is done for you.
 
 ## How playback crosses the change
 
-Playback only does extra work for a document whose history has a conversion entry, or an entry in
+Playback only does extra work for a document whose history has a load entry, or an entry in
 a legacy format that a registered history bridge recognizes. A bridge
 ([history-bridges.ts](../src/models/history/history-bridges.ts)) finds conversions that history
 never recorded; DataFlow's
@@ -107,8 +129,9 @@ Other documents play back as before, with no JSON copy.
 
 When it does, playback keeps a JSON copy of the document beside the MST trees and applies every
 entry it crosses to that copy as stored. At each move it asks `getVersion` about the tiles the move
-touched, at both ends of the move. A tile that is current at both ends gets its patches applied to
-the MST tile as usual. A tile that is old at either end is **loaded**: playback runs
+touched, at both ends of the move, and `convertSnapshot` where the version differs. A tile that is
+current at both ends gets its patches applied to the MST tile as usual, and so does a tile its
+converter declines. A tile that is old at either end is **loaded**: playback runs
 `convertSnapshot` on its JSON at the target position and replaces the MST tile's state with the
 result, in the same action as the move's other patches.
 
@@ -166,27 +189,29 @@ With the mechanism above, removing it needs only:
 - a version bump in the DataFlow state (a new `STATE_VERSION_CURRENT`), and
 - a `convertSnapshot` step that drops `content.programZoom` from older tiles.
 
-The recorded conversion entry removes the field from the converted tile. Old `/programZoom/...`
+The recorded load entry removes the field from the converted tile. Old `/programZoom/...`
 patches still apply to the JSON copy, which holds the old format at those positions, and playback
 loads the old tile through the conversion, so the MST model never sees a `programZoom` patch. No
 code change is made for this here. This is a description of what the change would take.
 
-## Group documents
+## Concurrent documents
 
-Group documents don't record conversion entries yet, and `convertStoredContent` in `document.ts`
-skips them on purpose. The concurrent history manager applies every incoming entry's patches
-straight to each client's live document, not to a playback copy. A conversion entry recorded there
-would therefore be applied to every other client's live document, and then saved. A client released
-before group documents learn to handle conversion entries has no way to refuse one.
+Concurrent documents are the ones with the `concurrent` flag: group documents, and class-wide
+collaborative documents such as the driving-question board. They don't record load entries yet,
+and `convertStoredContent` in `document.ts` skips them on purpose. The concurrent history manager
+applies every incoming entry's patches straight to each client's live document, not to a playback
+copy. A load entry recorded there would therefore be applied to every other client's live document,
+and then saved. A client released before concurrent documents learn to handle load entries has no
+way to refuse one.
 
 Their playback works like any other document's: the history bridges and the JSON copy apply to it,
-so legacy DataFlow history in a group document plays back across the conversion. Two problems are
-unsolved for them. Clients converting the same old document at the same time each make their own
-conversion entry. A tab still running an older release can't apply a newer conversion's entries and
+so legacy DataFlow history in a concurrent document plays back across the conversion. Two problems
+are unsolved for them. Clients converting the same old document at the same time each make their
+own load entry. A tab still running an older release can't apply a newer conversion's entries and
 would keep writing old-format ones.
 
-The plan has two steps. First, a group-document client that receives a conversion entry doesn't
-apply it, stops editing, and asks for a reload. Then group documents record conversion entries and
+The plan has two steps. First, a client of a concurrent document that receives a load entry doesn't
+apply it, stops editing, and asks for a reload. Then concurrent documents record load entries and
 merge them with concurrent edits, and the stop narrows to conversions whose version the client
 doesn't know. The check can only stop clients that already have it, so the first step has to ship
 at least one release before the second, so that tabs old enough to lack it are unlikely to still be
@@ -196,6 +221,6 @@ open.
 
 Playback starts from the document's saved content. If that content was saved before its last few
 entries reached history, the starting state is wrong, and this affects playback across a conversion
-the same way it affects playback without one. The history that reaches the conversion entry may
-also be incomplete in that window: if playback is opened after the converted content is saved but
-before the conversion entry is written, the entry isn't there yet.
+the same way it affects playback without one. The history that reaches the load entry may also be
+incomplete in that window: if playback is opened after the converted content is saved but before
+the load entry is written, the entry isn't there yet.

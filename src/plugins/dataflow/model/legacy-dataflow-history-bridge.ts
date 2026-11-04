@@ -6,7 +6,7 @@ import { getDataflowProgramVersion, STATE_VERSION_RETE_V1 } from "./dataflow-sta
 
 /**
  * Legacy DataFlow tiles (program `dataflow@0.1.0`, or a program with no id and a `values` map)
- * were converted to the current format before history recorded conversion entries, so their
+ * were converted to the current format before history recorded load entries, so their
  * history goes straight from legacy entries to current ones. This bridge finds that boundary for
  * each tile and rebuilds the legacy tile there, so playback can cross it.
  */
@@ -105,7 +105,7 @@ export const legacyDataflowHistoryBridge: IHistoryBridge = {
     const conversions: IVirtualConversion[] = [];
     lastLegacyIndex.forEach((lastLegacy, tileId) => {
       const tilePath = `/content/tileMap/${tileId}`;
-      // A stored conversion entry after the legacy entries already covers the tile.
+      // A stored load entry after the legacy entries already covers the tile.
       const isCovered = history.some((entry, index) => index > lastLegacy && entry.isLoadEntry &&
         patchesByEntry[index].some(patch => isAtOrUnder(patch.path, tilePath)));
       if (isCovered) return;

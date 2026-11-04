@@ -2,7 +2,7 @@ import { HistoryEntryType } from "./history";
 
 /**
  * A conversion that a document's history never recorded, because the model was converted
- * before conversion entries existed. Playback's JSON copy crosses it like a conversion entry.
+ * before load entries existed. Playback's JSON copy crosses it like a load entry.
  */
 export interface IVirtualConversion {
   // a model path, such as `/content/tileMap/<tileId>`
