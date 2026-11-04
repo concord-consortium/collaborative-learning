@@ -105,10 +105,7 @@ export function convertJsonAtPath(path: string, value: unknown): unknown {
     return { ...value, sharedModel: convertModelJsonAtPath(sharedPath, value.sharedModel) };
   }
   if (path === "/content") {
-    const tiles = convertTileMap(value.tileMap);
-    const shared = convertSharedModelMap(value.sharedModelMap);
-    if (!tiles.convertedPaths.length && !shared.convertedPaths.length) return value;
-    return { ...value, tileMap: tiles.map, sharedModelMap: shared.map };
+    return convertContentJson(value).content;
   }
   return value;
 }

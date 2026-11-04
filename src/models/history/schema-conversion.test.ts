@@ -114,6 +114,15 @@ describe("convertJsonAtPath", () => {
     expect((convertJsonAtPath("/content/tileMap/t1", oldTile("t1")) as any).content.version).toBe("2");
   });
 
+  it("converts /content without adding a map it doesn't have", () => {
+    const result: any = convertJsonAtPath("/content", { sharedModelMap: { sm1: { sharedModel: oldShared("sm1") } } });
+    expect(result.sharedModelMap.sm1.sharedModel.version).toBe("2");
+    expect("tileMap" in result).toBe(false);
+    const tilesOnly: any = convertJsonAtPath("/content", { tileMap: { t1: oldTile("t1") } });
+    expect(tilesOnly.tileMap.t1.content.version).toBe("2");
+    expect("sharedModelMap" in tilesOnly).toBe(false);
+  });
+
   it("leaves other paths and non-object values alone", () => {
     const value = { a: 1 };
     expect(convertJsonAtPath("/content/rowMap", value)).toBe(value);
