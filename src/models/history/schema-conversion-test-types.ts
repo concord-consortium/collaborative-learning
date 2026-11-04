@@ -16,8 +16,8 @@ export const kVersionedTestSharedModelType = "VersionedTestSharedModel";
 
 const kCurrentVersion = "2";
 
-// v1 content is `{ type, text, items: [{ value }] }`.
-// v2 content is `{ type, version: "2", label, items: [{ id, value }] }`.
+// v1 content is `{ type, text, items: [{ value, deleted }] }`.
+// v2 content is `{ type, version: "2", label, items: [{ id, value }] }`, without the deleted items.
 function convertSnapshot(tile: any) {
   const content = tile?.content;
   if (!content || (content.version ?? "1") === kCurrentVersion) return tile;
@@ -29,7 +29,8 @@ function convertSnapshot(tile: any) {
       ...others,
       version: kCurrentVersion,
       label: text,
-      items: (items ?? []).map((item: any) => ({ id: uniqueId(), value: item.value }))
+      items: (items ?? []).filter((item: any) => !item.deleted)
+        .map((item: any) => ({ id: uniqueId(), value: item.value }))
     }
   };
 }

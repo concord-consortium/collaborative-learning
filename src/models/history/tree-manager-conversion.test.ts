@@ -5,6 +5,7 @@ import { createDocumentModel, DocumentModelType } from "../document/document";
 import { ProblemDocument } from "../document/document-types";
 import { HistoryEntrySnapshot, TreePatchRecordSnapshot } from "./history";
 import { toJsonValue } from "./json-patch";
+import { IStoredEntry, rebuildBackAndForth } from "./dumb-rebuild-test-utils";
 import { CDocument, TreeManager } from "./tree-manager";
 import { expectEntryToBeComplete } from "./undo-store-test-utils";
 import { kVersionedTestTileType, VersionedTestTileType } from "./schema-conversion-test-types";
@@ -80,5 +81,38 @@ describe("playback across a conversion entry", () => {
       entries: toJsonValue(getSnapshot(manager.document.history))
     };
     fs.writeFileSync(kFixturePath, `${JSON.stringify(fixture, null, 2)}\n`);
+  });
+});
+
+describe("dumb rebuild of a chain recorded by the current code", () => {
+  // t1 gains four items, three of them deleted, which the conversion drops. Without validation,
+  // fast-json-patch appends an add past the end of an array, so it takes three dropped items for
+  // inverse patches in the wrong order to give a different array.
+  const deletedItemRecord = (index: number, value: string) => makeRecord(
+    [{ op: "add", path: `${t1Path}/content/items/${index}`, value: { value, deleted: true } }],
+    [{ op: "remove", path: `${t1Path}/content/items/${index}` }]);
+  const oldEntries = () => [
+    makeEntry([replaceRecord(`${t1Path}/content/text`, "a", "c")]),
+    makeEntry([addItemRecord(t1Path, 0, "a")]),
+    makeEntry([deletedItemRecord(1, "b"), deletedItemRecord(2, "c"), deletedItemRecord(3, "d")])
+  ];
+  const storedTile = () => ({
+    id: "t1", content: { type: kVersionedTestTileType, text: "c",
+      items: [{ value: "a" }, ...["b", "c", "d"].map(value => ({ value, deleted: true }))] }
+  });
+
+  it("rebuilds every position with a plain JSON patch library, across a conversion that shortens an array",
+      async () => {
+    const { manager, endJson } = await setupConvertedDocument({ tileMap: { t1: storedTile() } }, oldEntries());
+    const entries: IStoredEntry[] = JSON.parse(JSON.stringify(getSnapshot(manager.document.history)));
+    const conversionIndex = entries.findIndex(entry => entry.isConversion);
+    expect(conversionIndex).toBe(3);
+    expect(endJson.content.tileMap.t1.content.items).toHaveLength(1);
+
+    const { positions, end } = rebuildBackAndForth(endJson, entries);
+    expect(positions[0].content.tileMap.t1).toEqual(oldTile("t1", "a"));
+    expect(positions[conversionIndex].content.tileMap.t1).toEqual(storedTile());
+    expect(positions[conversionIndex + 1].content.tileMap.t1.content.version).toBe("2");
+    expect(end).toEqual(endJson);
   });
 });
