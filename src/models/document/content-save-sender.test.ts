@@ -1,4 +1,4 @@
-import { action, makeObservable, observable } from "mobx";
+import { action, computed, makeObservable, observable, runInAction } from "mobx";
 import { flow, Instance, types } from "mobx-state-tree";
 import { deferred } from "promise-assist";
 import { ICommitListener, ICommitSource, ICommittedEntry } from "../history/history-commits";
@@ -8,8 +8,8 @@ import { registerTileContentInfo } from "../tiles/tile-content-info";
 import { TileContentModel } from "../tiles/tile-content";
 import { LogEventName } from "../../lib/logger-types";
 import {
-  collectUnsettledEvidence, ContentSaveSender, IContentRef, IContentSaveSenderOptions, kIntermediateSaveIntervalMs,
-  kMaxEvidenceEntryIds, kMinimumSaveGapMs
+  collectUnsettledEvidence, ContentSaveSender, IContentRef, IContentSaveSenderOptions, kGroupSaveJitterMs,
+  kIntermediateSaveIntervalMs, kMaxEvidenceEntryIds, kMinimumSaveGapMs
 } from "./content-save-sender";
 import { createDocumentModel, DocumentModelType, SaveState } from "./document";
 import { DocumentContentModel } from "./document-content";
@@ -49,19 +49,32 @@ registerTileComponentInfo({
   tileEltClass: "test-tile"
 });
 
-// Reports commits only when a test says so.
+// Reports commits only when a test says so. Like a group document's history manager, it is settled
+// while no completed local entry waits to commit, no upload runs and no remote entries are applied.
 class StubCommitSource implements IHistoryManager, ICommitSource {
   lastCommitted: ICommittedEntry | undefined = undefined;
   applying = false;
+  uploading = false;
+  uncommitted: string[] = [];
+  expectedRemoteHead: string | null = null;
+  expectedRemoteHeadIndex: number | undefined = undefined;
   private listeners = new Set<ICommitListener>();
   private nextIndex = 1;
 
   constructor() {
-    makeObservable(this, { applying: observable, setApplying: action });
+    makeObservable(this, {
+      applying: observable, uploading: observable, uncommitted: observable.ref,
+      expectedRemoteHead: observable, expectedRemoteHeadIndex: observable, isHistorySettled: computed,
+      setApplying: action, setUploading: action, setRemoteHead: action, onHistoryEntryCompleted: action
+    });
   }
 
-  onHistoryEntryCompleted() {
-    // commits are reported by commit()
+  get isHistorySettled() {
+    return this.uncommitted.length === 0 && !this.uploading && !this.applying;
+  }
+
+  onHistoryEntryCompleted(_document: unknown, entry: { id: string }) {
+    this.uncommitted = [...this.uncommitted, entry.id];
   }
 
   addCommitListener(listener: ICommitListener) {
@@ -71,7 +84,12 @@ class StubCommitSource implements IHistoryManager, ICommitSource {
 
   commit(...ids: string[]) {
     const entries = ids.map(id => ({ id, index: this.nextIndex++ }));
-    this.lastCommitted = entries[entries.length - 1];
+    const last = entries[entries.length - 1];
+    this.lastCommitted = last;
+    runInAction(() => {
+      this.uncommitted = this.uncommitted.filter(id => !ids.includes(id));
+      this.setRemoteHead(last.id, last.index);
+    });
     this.listeners.forEach(listener => listener.onCommitted(entries));
   }
 
@@ -82,7 +100,24 @@ class StubCommitSource implements IHistoryManager, ICommitSource {
   setApplying(applying: boolean) {
     this.applying = applying;
   }
+
+  setUploading(uploading: boolean) {
+    this.uploading = uploading;
+  }
+
+  setRemoteHead(id: string, index: number) {
+    this.expectedRemoteHead = id;
+    this.expectedRemoteHeadIndex = index;
+    this.nextIndex = Math.max(this.nextIndex, index + 1);
+  }
+
+  // The head moves to another writer's entry, which takes the next index.
+  advanceRemoteHead(id: string) {
+    this.setRemoteHead(id, this.nextIndex);
+  }
 }
+
+type ValueCallback = (snapshot: { val(): unknown }) => void;
 
 interface IFakeWrite {
   values: Record<string, any>;
@@ -97,8 +132,20 @@ class FakeContentRef implements IContentRef {
     this.writes.push({ values, resolve: () => resolve(), reject });
     return promise;
   });
-  child() {
-    return { on: jest.fn(), off: jest.fn() };
+  private listeners = new Map<string, Set<ValueCallback>>();
+  child(path: string) {
+    return {
+      on: (_event: "value", cb: ValueCallback) => {
+        if (!this.listeners.has(path)) this.listeners.set(path, new Set());
+        this.listeners.get(path)!.add(cb);
+      },
+      off: (_event: "value", cb: ValueCallback) => { this.listeners.get(path)?.delete(cb); }
+    };
+  }
+  // Fires the value listeners of the envelope children given, as the RTDB does for one update.
+  fireEnvelope(values: Record<string, unknown>) {
+    Object.entries(values).forEach(([path, value]) =>
+      this.listeners.get(path)?.forEach(cb => cb({ val: () => value })));
   }
   get lastWrite() {
     return this.writes[this.writes.length - 1];
@@ -138,8 +185,9 @@ function setup(overrides?: Partial<IContentSaveSenderOptions>, concurrent = fals
   const updateTools = jest.fn((tools: string[]) => Promise.resolve());
   const onContentSaved = jest.fn();
   const beforeWrite = jest.fn();
+  // A group save waits no jitter unless a test sets random.
   const sender = new ContentSaveSender(document,
-    { contentRef, updateTools, onContentSaved, beforeWrite, ...overrides });
+    { contentRef, updateTools, onContentSaved, beforeWrite, random: () => 0, ...overrides });
 
   // Makes an edit and returns the id of the entry that recorded it.
   async function edit(text: string) {
@@ -161,8 +209,22 @@ function setup(overrides?: Partial<IContentSaveSenderOptions>, concurrent = fals
       { tree: document.key, action: "/stuck", patches: [], inversePatches: [] });
   }
 
+  // Another writer's entry is applied: the uncommitted local entries are voided, the content
+  // changes, and the head moves to the new entry.
+  async function applyRemote(id: string, text: string) {
+    commits.setApplying(true);
+    commits.voidUncommitted();
+    document.applyPatchesFromManager(FAKE_HISTORY_ENTRY_ID, "exchange", [
+      { op: "replace", path: "/content/tileMap/t1/content/text", value: text }
+    ]);
+    await flush();
+    commits.advanceRemoteHead(id);
+    commits.setApplying(false);
+    await flush();
+  }
+
   return { document, treeManager, commits, tile, contentRef, updateTools, onContentSaved, beforeWrite,
-    sender, edit, openEntry };
+    sender, edit, openEntry, applyRemote };
 }
 
 // A gate a flow waits on twice: the first wait ends at `first`, the second at `second`.
@@ -931,6 +993,235 @@ describe("ContentSaveSender", () => {
     });
   });
 
+  describe("group documents", () => {
+    it("saves the current state, stamped with the remote head, when an idle member settles", async () => {
+      const { applyRemote, contentRef, document, onContentSaved } = track(setup({}, true));
+      await applyRemote("r9", "remote");
+      expect(contentRef.update).toHaveBeenCalledTimes(1);
+      const { values } = contentRef.writes[0];
+      expect(values).toMatchObject({
+        lastHistoryEntryId: "r9",
+        lastHistoryEntryIndex: 1,
+        settled: true,
+        exactSince: "e0",
+        unsettled: null
+      });
+      expect(textOf(values)).toBe("remote");
+
+      contentRef.writes[0].resolve();
+      await flush();
+      expect(onContentSaved).toHaveBeenCalledWith(document, "r9");
+      // nothing newer to save
+      jest.advanceTimersByTime(10000);
+      await flush();
+      expect(contentRef.update).toHaveBeenCalledTimes(1);
+    });
+
+    it("doesn't save while the queue has entries, an upload or apply runs, or an entry is open", async () => {
+      const { commits, contentRef, edit, openEntry, tile, treeManager } = track(setup({}, true));
+      commits.setUploading(true);
+      commits.setRemoteHead("r1", 1);
+      await flush();
+      commits.setUploading(false);
+      commits.setApplying(true);
+      await flush();
+      const closeEntry = openEntry("open");
+      commits.setApplying(false);
+      await flush();
+      const a = await edit("alpha");
+      closeEntry();
+      await flush();
+      expect(commits.uncommitted).toEqual([a]);
+      expect(contentRef.update).not.toHaveBeenCalled();
+
+      // The snapshot of a isn't usable, so the settled state is saved once a commits.
+      commits.commit(a);
+      await flush();
+      expect(contentRef.update).toHaveBeenCalledTimes(1);
+      expect(contentRef.writes[0].values).toMatchObject({ lastHistoryEntryId: a, lastHistoryEntryIndex: 2 });
+      expect(textOf(contentRef.writes[0].values)).toBe("alpha");
+      contentRef.writes[0].resolve();
+      await flush();
+      jest.advanceTimersByTime(kMinimumSaveGapMs);
+
+      // A running flow that has changed state, and then its call, which stops being tracked
+      // just before its entry opens.
+      const { gate, first, second } = twoStepGate();
+      const promise = tile.setTextLater("flow", gate);
+      first.resolve();
+      await flush();
+      commits.setRemoteHead("r3", 3);
+      await flush();
+      second.resolve();
+      await promise;
+      await flush();
+      expect(commits.uncommitted).toHaveLength(1);
+      jest.advanceTimersByTime(10000);
+      await flush();
+      expect(contentRef.update).toHaveBeenCalledTimes(1);
+
+      // The flow's own snapshot is saved once it commits, and nothing once the session isn't exact.
+      commits.commit(...commits.uncommitted);
+      expect(contentRef.update).toHaveBeenCalledTimes(2);
+      contentRef.writes[1].resolve();
+      await flush();
+      treeManager.exactness.markNotExact("unrecorded-change");
+      commits.advanceRemoteHead("r9");
+      jest.advanceTimersByTime(10000);
+      await flush();
+      expect(contentRef.update).toHaveBeenCalledTimes(2);
+    });
+
+    it("skips a save when the envelope is already at or past its index", async () => {
+      const { commits, contentRef } = track(setup({}, true));
+      // An envelope without an index counts as behind.
+      contentRef.fireEnvelope({ lastHistoryEntryId: "old", lastHistoryEntryIndex: null, settled: null });
+      await flush();
+      commits.setRemoteHead("r4", 4);
+      await flush();
+      expect(contentRef.update).toHaveBeenCalledTimes(1);
+      contentRef.writes[0].resolve();
+      await flush();
+
+      contentRef.fireEnvelope({ lastHistoryEntryId: "r9", lastHistoryEntryIndex: 9, settled: true });
+      await flush();
+      commits.setRemoteHead("r9", 9);
+      await flush();
+      contentRef.fireEnvelope({ lastHistoryEntryId: "r12", lastHistoryEntryIndex: 12, settled: true });
+      await flush();
+      commits.setRemoteHead("r10", 10);
+      jest.advanceTimersByTime(10000);
+      await flush();
+      expect(contentRef.update).toHaveBeenCalledTimes(1);
+    });
+
+    it("re-checks the envelope after the jitter and skips if another member saved meanwhile", async () => {
+      const { commits, contentRef } = track(setup({ random: () => 0.5 }, true));
+      commits.setRemoteHead("r8", 8);
+      await flush();
+      jest.advanceTimersByTime(kGroupSaveJitterMs / 2 - 1);
+      expect(contentRef.update).not.toHaveBeenCalled();
+      jest.advanceTimersByTime(1);
+      expect(contentRef.update).toHaveBeenCalledTimes(1);
+      expect(contentRef.writes[0].values.lastHistoryEntryId).toBe("r8");
+      contentRef.writes[0].resolve();
+      await flush();
+      jest.advanceTimersByTime(kMinimumSaveGapMs);
+
+      commits.setRemoteHead("r9", 9);
+      await flush();
+      jest.advanceTimersByTime(50);
+      contentRef.fireEnvelope({ lastHistoryEntryId: "r9", lastHistoryEntryIndex: 9, settled: true });
+      await flush();
+      jest.advanceTimersByTime(10000);
+      await flush();
+      expect(contentRef.update).toHaveBeenCalledTimes(1);
+    });
+
+    it("stamps a snapshot save with the committed entry and stale-checks it too", async () => {
+      const { commits, contentRef, edit } = track(setup({ random: () => 0.5 }, true));
+      const a = await edit("alpha");
+      commits.commit(a);
+      jest.advanceTimersByTime(kGroupSaveJitterMs / 2 - 1);
+      expect(contentRef.update).not.toHaveBeenCalled();
+      jest.advanceTimersByTime(1);
+      expect(contentRef.update).toHaveBeenCalledTimes(1);
+      expect(contentRef.writes[0].values).toMatchObject({
+        lastHistoryEntryId: a, lastHistoryEntryIndex: 1, settled: true, exactSince: "e0"
+      });
+      expect(textOf(contentRef.writes[0].values)).toBe("alpha");
+      contentRef.writes[0].resolve();
+      await flush();
+      jest.advanceTimersByTime(kMinimumSaveGapMs);
+
+      const b = await edit("bravo");
+      commits.commit(b);
+      jest.advanceTimersByTime(50);
+      contentRef.fireEnvelope({ lastHistoryEntryId: b, lastHistoryEntryIndex: 2, settled: true });
+      await flush();
+      jest.advanceTimersByTime(10000);
+      await flush();
+      expect(contentRef.update).toHaveBeenCalledTimes(1);
+    });
+
+    it("never saves a snapshot voided by a remote entry, and resumes after the next commit", async () => {
+      const { applyRemote, commits, contentRef, edit } = track(setup({}, true));
+      const ids: string[] = [];
+      for (let i = 1; i <= 5; i++) {
+        ids.push(await edit(`tick-${i}`));
+      }
+      commits.commit(ids[0]);
+      expect(contentRef.update).toHaveBeenCalledTimes(1);
+      expect(textOf(contentRef.writes[0].values)).toBe("tick-1");
+      contentRef.writes[0].resolve();
+      await flush();
+
+      await applyRemote("r", "remote");
+      const e6 = await edit("tick-6");
+      commits.commit(...ids.slice(1));
+      jest.advanceTimersByTime(10000);
+      await flush();
+      expect(contentRef.update).toHaveBeenCalledTimes(1);
+
+      commits.commit(e6);
+      jest.advanceTimersByTime(kMinimumSaveGapMs);
+      await flush();
+      expect(contentRef.update).toHaveBeenCalledTimes(2);
+      expect(contentRef.writes[1].values).toMatchObject({
+        lastHistoryEntryId: e6, lastHistoryEntryIndex: 7, settled: true
+      });
+      expect(textOf(contentRef.writes[1].values)).toBe("tick-6");
+      contentRef.writes[1].resolve();
+      await flush();
+      jest.advanceTimersByTime(10000);
+      await flush();
+      expect(contentRef.update).toHaveBeenCalledTimes(2);
+    });
+
+    it("shows Saved and reports the id when another member's save covers this client's change", async () => {
+      const { commits, contentRef, document, edit, onContentSaved } =
+        track(setup({ random: () => 0.5 }, true));
+      const a = await edit("alpha");
+      commits.commit(a);
+      expect(document.saveState).toBe(SaveState.Saving);
+      contentRef.fireEnvelope({ lastHistoryEntryId: "r3", lastHistoryEntryIndex: 3, settled: true });
+      await flush();
+      expect(document.saveState).toBe(SaveState.Saved);
+      expect(onContentSaved).toHaveBeenCalledWith(document, "r3");
+      jest.advanceTimersByTime(kGroupSaveJitterMs);
+      await flush();
+      expect(contentRef.update).not.toHaveBeenCalled();
+
+      // A newer change keeps it Saving, while the committed change is still reported.
+      const b = await edit("bravo");
+      commits.commit(b);
+      await edit("charlie");
+      contentRef.fireEnvelope({ lastHistoryEntryId: "r6", lastHistoryEntryIndex: 6, settled: true });
+      await flush();
+      expect(document.saveState).toBe(SaveState.Saving);
+      expect(onContentSaved.mock.calls).toEqual([[document, "r3"], [document, "r6"]]);
+    });
+
+    it("ignores the envelope of its own write while that write is in flight", async () => {
+      const { commits, contentRef, document, edit } = track(setup({}, true));
+      const a = await edit("alpha");
+      commits.commit(a);
+      expect(contentRef.update).toHaveBeenCalledTimes(1);
+      // The RTDB raises local events for a write before the server accepts it.
+      contentRef.fireEnvelope({ lastHistoryEntryId: a, lastHistoryEntryIndex: 1, settled: true });
+      await flush();
+      expect(document.saveState).toBe(SaveState.Saving);
+
+      await jestSpyConsole("warn", async () => {
+        contentRef.writes[0].reject(new Error("denied"));
+        await flush();
+      });
+      jest.advanceTimersByTime(1000);
+      expect(contentRef.update).toHaveBeenCalledTimes(2);
+      expect(contentRef.writes[1].values.lastHistoryEntryId).toBe(a);
+    });
+  });
+
   describe("page hide", () => {
     it("sends the newest committed snapshot at once on page hide", async () => {
       const { commits, contentRef, edit, sender } = track(setup());
@@ -1016,6 +1307,22 @@ describe("ContentSaveSender", () => {
       contentRef.writes[0].resolve();
       await flush();
       expect(document.saveState).toBe(SaveState.Saved);
+    });
+
+    it("listens to the envelope of the content ref it was last attached to", async () => {
+      const { commits, contentRef, sender: attached } = track(setup({}, true));
+      const newRef = new FakeContentRef();
+      attached.attach({ contentRef: newRef, updateTools: () => Promise.resolve(), random: () => 0 });
+      contentRef.fireEnvelope({ lastHistoryEntryId: "r9", lastHistoryEntryIndex: 9, settled: true });
+      newRef.fireEnvelope({ lastHistoryEntryId: "r5", lastHistoryEntryIndex: 5, settled: true });
+      await flush();
+      commits.setRemoteHead("r5", 5);
+      await flush();
+      expect(newRef.update).not.toHaveBeenCalled();
+      commits.setRemoteHead("r6", 6);
+      await flush();
+      expect(newRef.update).toHaveBeenCalledTimes(1);
+      expect(contentRef.update).not.toHaveBeenCalled();
     });
 
     it("uses the newest options after attach", async () => {

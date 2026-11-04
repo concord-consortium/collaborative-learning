@@ -1,4 +1,4 @@
-import { reaction } from "mobx";
+import { comparer, reaction } from "mobx";
 import { getPath, getSnapshot, onSnapshot } from "mobx-state-tree";
 import { IUnsettledEvidence } from "../../lib/db-types";
 import { LogEventName } from "../../lib/logger-types";
@@ -15,6 +15,8 @@ export const kRetryingAfterFailures = 3;
 export const kIntermediateSaveIntervalMs = 5000;
 // The most uncommitted entry ids an intermediate save's evidence lists, keeping the newest.
 export const kMaxEvidenceEntryIds = 20;
+// The most time a group document's save waits, at random, before checking the envelope again.
+export const kGroupSaveJitterMs = 200;
 
 export interface IValueRef {
   on(event: "value", cb: (snapshot: { val(): unknown }) => void): unknown;
@@ -45,19 +47,30 @@ export interface IContentSaveSenderOptions {
   logEvent?: (event: LogEventName, params: Record<string, unknown>) => void;
   // The least time between the start of the previous write and the start of this save's write.
   getMinimumGapMs?: (save: IPendingSave) => number;
+  // Picks a group document save's wait, between 0 and 1. Math.random when unset.
   random?: () => number;
 }
 
 interface IQueuedSave extends IPendingSave {
   snapshot: DocumentContentSnapshotType;
   lastHistoryEntryId?: string;
+  // The Firestore index of the entry the save is stamped with, when it is known.
+  index?: number;
+  // A group document's save isn't sent before this time.
+  notBefore?: number;
   buildValues(changeCount: number): Record<string, unknown>;
   // Set on an intermediate save.
   evidence?: IUnsettledEvidence;
 }
 
 // An intermediate save is built from the content as it is when it is sent, so it waits unbuilt.
-type IWaitingSave = IQueuedSave | IPendingSave;
+interface IUnbuiltIntermediateSave extends IPendingSave {
+  kind: "intermediate";
+}
+
+type IWaitingSave = IQueuedSave | IUnbuiltIntermediateSave;
+
+const getSaveIndex = (save: IWaitingSave) => "buildValues" in save ? save.index : undefined;
 
 // What was kept when a local entry completed, until that entry commits. The content snapshot is
 // kept only when it is usable: exactly the history through its entry, once the entry commits.
@@ -68,7 +81,15 @@ type IKeptSnapshot =
 // The state of a group document's history manager that the sender reads.
 interface IGroupHistoryState {
   readonly applying: boolean;
+  readonly isHistorySettled: boolean;
+  // The last entry on the shared chain, and its Firestore index when it is known.
+  readonly expectedRemoteHead: string | null;
+  readonly expectedRemoteHeadIndex: number | undefined;
 }
+
+// The envelope children a group document listens to.
+const kEnvelopeFields = ["lastHistoryEntryId", "lastHistoryEntryIndex", "settled"] as const;
+type EnvelopeValues = Partial<Record<typeof kEnvelopeFields[number], unknown>>;
 
 // Document actions the sender calls itself. Like any action each one briefly opens a history
 // entry, but they never change the content, so those entries don't block a snapshot.
@@ -77,10 +98,13 @@ const kContentFreeDocumentActions = ["setSaveState", "incChangeCount"];
 const getTreeManager = (document: DocumentModelType) =>
   document.treeManagerAPI as TreeManagerType | undefined;
 
+function getGroupHistoryState(document: DocumentModelType) {
+  if (!document.concurrent) return undefined;
+  return getTreeManager(document)?.historyManager as Partial<IGroupHistoryState> | undefined;
+}
+
 function isApplyingRemoteEntries(document: DocumentModelType) {
-  if (!document.concurrent) return false;
-  const manager = getTreeManager(document)?.historyManager as Partial<IGroupHistoryState> | undefined;
-  return !!manager?.applying;
+  return !!getGroupHistoryState(document)?.applying;
 }
 
 /**
@@ -178,6 +202,12 @@ interface IFallbackEpisode {
  * An individual document that has had unsaved changes and no exact save for 5 seconds falls back
  * to intermediate saves of its current content, which aren't marked settled and record why. Each
  * such stretch is logged once when its first intermediate save is sent, and once when it ends.
+ *
+ * A group document also saves its current content, stamped with the head of the shared chain,
+ * whenever its history settles past what the envelope holds, since an idle member has no entries
+ * of its own to save. Other members save the same envelope, so a group save waits a random time
+ * and is dropped if the envelope already reaches its entry, before and after that wait. A save by
+ * another member that covers this client's committed changes shows them as saved.
  */
 export class ContentSaveSender {
   private options: IContentSaveSenderOptions;
@@ -206,6 +236,16 @@ export class ContentSaveSender {
   private lastIntermediateWriteAt: number | undefined;
   private fallbackEpisode: IFallbackEpisode | undefined;
   private sentTools: string[] | undefined;
+  // This client's newest committed local entry, with the content change its snapshot was taken at.
+  private lastCommittedLocal: { index: number; changeSeq: number } | undefined;
+  // The newest entry a group document's envelope has been seen to hold.
+  private envelopeEntry: ICommittedEntry | undefined;
+  private envelopeValues: EnvelopeValues = {};
+  private envelopeCheckScheduled = false;
+  private stopEnvelopeListener: (() => void) | undefined;
+  // The index of the newest entry reported to onContentSaved on a group document.
+  private reportedIndex = -1;
+  private settledCheckScheduled = false;
 
   constructor(private document: DocumentModelType, options: IContentSaveSenderOptions) {
     this.options = options;
@@ -213,9 +253,12 @@ export class ContentSaveSender {
   }
 
   attach(options: IContentSaveSenderOptions) {
+    const contentRefChanged = options.contentRef !== this.options.contentRef;
     this.options = options;
     if (!this.running) {
       this.start();
+    } else if (contentRefChanged && this.document.concurrent) {
+      this.listenToEnvelope();
     }
   }
 
@@ -259,6 +302,145 @@ export class ContentSaveSender {
     }
     this.disposers.push(subscribeToCurrent(() => this.document.content,
       content => content ? onSnapshot(content, this.handleContentChanged) : undefined));
+    if (this.document.concurrent && treeManager) {
+      this.startGroupSaves(treeManager);
+    }
+  }
+
+  private startGroupSaves(treeManager: TreeManagerType) {
+    const { lastHistoryEntryId, lastHistoryEntryIndex, settled } = this.document.savedEnvelope ?? {};
+    if (settled && lastHistoryEntryId && typeof lastHistoryEntryIndex === "number") {
+      this.advanceEnvelopeEntry({ id: lastHistoryEntryId, index: lastHistoryEntryIndex });
+    }
+    this.listenToEnvelope();
+    this.disposers.push(() => this.stopEnvelopeListener?.());
+    this.disposers.push(reaction(() => {
+      const manager = getGroupHistoryState(this.document);
+      return [manager?.isHistorySettled, manager?.applying, manager?.expectedRemoteHead,
+        manager?.expectedRemoteHeadIndex, getOpenEntries(this.document).length,
+        this.document.treeMonitor?.runningCallCount, treeManager.exactness.isExact];
+    }, this.scheduleSettledCheck, { fireImmediately: true, equals: comparer.structural }));
+  }
+
+  // Listens only to the envelope's id, index and settled mark, not its content.
+  private listenToEnvelope() {
+    this.stopEnvelopeListener?.();
+    this.envelopeValues = {};
+    const { contentRef } = this.options;
+    const removers = kEnvelopeFields.map(field => {
+      const ref = contentRef.child(field);
+      const callback = (snapshot: { val(): unknown }) => {
+        this.envelopeValues[field] = snapshot.val();
+        // The fields of one update are reported one at a time, so they are read together.
+        if (!this.envelopeCheckScheduled) {
+          this.envelopeCheckScheduled = true;
+          queueMicrotask(this.handleEnvelopeChanged);
+        }
+      };
+      ref.on("value", callback);
+      return () => ref.off("value", callback);
+    });
+    this.stopEnvelopeListener = () => {
+      removers.forEach(remove => remove());
+      this.stopEnvelopeListener = undefined;
+    };
+  }
+
+  private handleEnvelopeChanged = () => {
+    this.envelopeCheckScheduled = false;
+    if (!this.running) return;
+    try {
+      const { lastHistoryEntryId: id, lastHistoryEntryIndex: index, settled } = this.envelopeValues;
+      // An envelope without an index, or not marked settled, can't be ordered against a save.
+      if (typeof id !== "string" || typeof index !== "number" || settled !== true) return;
+      // The RTDB reports this client's own write before the server accepts it, and reverts it if
+      // the write fails, so a write in flight isn't counted as saved.
+      if (Array.from(this.writesInFlight).some(save => getSaveIndex(save) === index)) return;
+      if (!this.advanceEnvelopeEntry({ id, index })) return;
+      // A waiting save the envelope reaches is dropped.
+      this.scheduleWrite();
+      this.checkSavedByAnotherMember();
+    } catch (error) {
+      console.error("Failed to handle a change to the content envelope", error);
+    }
+  };
+
+  // Keeps the newest entry seen. Returns whether the entry is newer.
+  private advanceEnvelopeEntry(entry: ICommittedEntry) {
+    if (this.envelopeEntry && this.envelopeEntry.index >= entry.index) return false;
+    this.envelopeEntry = entry;
+    return true;
+  }
+
+  private isReachedByEnvelope(index: number | undefined) {
+    return index !== undefined && !!this.envelopeEntry && this.envelopeEntry.index >= index;
+  }
+
+  /**
+   * Shows this client's committed changes as saved when the envelope reaches its newest committed
+   * entry, and reports the envelope's id, so the activity recorder counts the changes even when
+   * another member saved them.
+   */
+  private checkSavedByAnotherMember() {
+    const envelope = this.envelopeEntry;
+    const committed = this.lastCommittedLocal;
+    if (!envelope || !committed || envelope.index < committed.index) return;
+    if (committed.changeSeq >= this.dirtySeq) {
+      this.setSaveState(SaveState.Saved);
+    }
+    if (envelope.index > this.reportedIndex) {
+      this.reportedIndex = envelope.index;
+      this.reportContentSaved(envelope.id);
+    }
+  }
+
+  // Runs in a microtask: a call stops being tracked just before the entry that records it opens.
+  private scheduleSettledCheck = () => {
+    if (this.settledCheckScheduled) return;
+    this.settledCheckScheduled = true;
+    queueMicrotask(() => {
+      this.settledCheckScheduled = false;
+      try {
+        const save = this.createSettledSave();
+        if (save) {
+          this.queueSave(save);
+        }
+      } catch (error) {
+        console.error("Failed to queue the settled content save", error);
+      }
+    });
+  };
+
+  /**
+   * A save of the current content, stamped with the head of the shared chain, when nothing on this
+   * client can make the content differ from the state at the head, and the envelope and this
+   * client's own saves don't already reach it.
+   */
+  private createSettledSave(): IQueuedSave | undefined {
+    const manager = getGroupHistoryState(this.document);
+    const exactness = getTreeManager(this.document)?.exactness;
+    const { content } = this.document;
+    const id = manager?.expectedRemoteHead;
+    const index = manager?.expectedRemoteHeadIndex;
+    const exactSince = exactness?.exactSince;
+    if (!this.running || !content || !manager?.isHistorySettled || !id || typeof index !== "number"
+        || !exactness?.isExact || exactSince === undefined || getSnapshotBlockers(this.document).length > 0
+        || this.isReachedByEnvelope(index)) {
+      return undefined;
+    }
+    const waiting = [this.pendingSave, ...this.writesInFlight];
+    if (waiting.some(save => save && (getSaveIndex(save) ?? -1) >= index)) return undefined;
+    const snapshot = getSnapshot<DocumentContentSnapshotType>(content);
+    const entry = { id, index };
+    return {
+      kind: "settled",
+      changeSeq: this.dirtySeq,
+      snapshot,
+      lastHistoryEntryId: id,
+      index,
+      buildValues: changeCount =>
+        buildExactSave({ content: JSON.stringify(snapshot), changeCount, entry, exactSince })
+    };
   }
 
   private handleEntryCompleted = (entry: HistoryEntryType) => {
@@ -283,22 +465,34 @@ export class ContentSaveSender {
     onCommitted: (entries: ICommittedEntry[]) => {
       try {
         let newest: IQueuedSave | undefined;
+        let changeSeq = this.lastCommittedLocal?.changeSeq ?? 0;
         entries.forEach(entry => {
           const kept = this.keptSnapshots.get(entry.id);
+          if (kept) {
+            changeSeq = kept.changeSeq;
+          }
           if (kept?.usable) {
             newest = this.createExactSave(entry, kept.snapshot, kept.exactSince, kept.changeSeq);
           }
           this.keptSnapshots.delete(entry.id);
         });
+        const last = entries[entries.length - 1];
+        if (last) {
+          this.lastCommittedLocal = { index: last.index, changeSeq };
+        }
         if (newest) {
           this.queueSave(newest);
         }
+        this.checkSavedByAnotherMember();
       } catch (error) {
         console.error("Failed to queue the content save of committed history entries", error);
       }
     },
+    // The snapshots are dropped, but the content changes they were taken at are kept.
     onUncommittedVoided: () => {
-      this.keptSnapshots.clear();
+      this.keptSnapshots.forEach((kept, id) => {
+        this.keptSnapshots.set(id, { usable: false, changeSeq: kept.changeSeq });
+      });
     }
   };
 
@@ -321,6 +515,7 @@ export class ContentSaveSender {
       changeSeq,
       snapshot,
       lastHistoryEntryId: entry.id,
+      index: entry.index,
       buildValues: changeCount =>
         buildExactSave({ content: JSON.stringify(snapshot), changeCount, entry, exactSince })
     };
@@ -426,6 +621,9 @@ export class ContentSaveSender {
 
   // Replaces any save that hasn't been sent yet.
   private queueSave(save: IWaitingSave) {
+    if (this.document.concurrent && "buildValues" in save) {
+      save.notBefore = Date.now() + (this.options.random ?? Math.random)() * kGroupSaveJitterMs;
+    }
     this.pendingSave = save;
     this.scheduleWrite();
     this.scheduleIntermediateSave();
@@ -433,8 +631,9 @@ export class ContentSaveSender {
 
   private scheduleWrite() {
     this.clearWriteTimer();
-    if (this.pendingSave && !this.writesInFlight.has(this.pendingSave)
-        && this.isOlderThanIntermediateContent(this.pendingSave)) {
+    const waiting = this.pendingSave;
+    if (waiting && !this.writesInFlight.has(waiting)
+        && (this.isOlderThanIntermediateContent(waiting) || this.isReachedByEnvelope(getSaveIndex(waiting)))) {
       this.pendingSave = undefined;
       this.scheduleIntermediateSave();
     }
@@ -460,6 +659,9 @@ export class ContentSaveSender {
     if (this.consecutiveFailures > 0 && this.lastFailureAt !== undefined) {
       readyAt = Math.max(readyAt, this.lastFailureAt + getRetryDelayMs(this.consecutiveFailures));
     }
+    if ("buildValues" in save && save.notBefore !== undefined) {
+      readyAt = Math.max(readyAt, save.notBefore);
+    }
     return readyAt;
   }
 
@@ -475,7 +677,7 @@ export class ContentSaveSender {
     this.lastWriteStartedAt = Date.now();
     let save: IQueuedSave;
     try {
-      save = queued.kind !== "intermediate" && "buildValues" in queued ? queued : this.createIntermediateSave();
+      save = queued.kind === "intermediate" ? this.createIntermediateSave() : queued;
     } catch (error) {
       // Handled as a failed write, so it is retried.
       Promise.resolve().then(() => this.handleWriteFailed(queued, error));
@@ -525,12 +727,15 @@ export class ContentSaveSender {
       this.unsettledSince = save.changeSeq >= this.dirtySeq ? undefined : Date.now();
     }
     this.sendToolsIfChanged(save.snapshot);
-    if (save.lastHistoryEntryId) {
-      try {
-        this.options.onContentSaved?.(this.document, save.lastHistoryEntryId);
-      } catch (error) {
-        console.error("Failed to report a content save", error);
+    if (this.document.concurrent && save.lastHistoryEntryId && save.index !== undefined) {
+      this.advanceEnvelopeEntry({ id: save.lastHistoryEntryId, index: save.index });
+      // Another member's save may already have reported a newer entry.
+      if (save.index > this.reportedIndex) {
+        this.reportedIndex = save.index;
+        this.reportContentSaved(save.lastHistoryEntryId);
       }
+    } else if (save.lastHistoryEntryId) {
+      this.reportContentSaved(save.lastHistoryEntryId);
     }
     if (save.changeSeq >= this.dirtySeq) {
       this.setSaveState(SaveState.Saved);
@@ -553,6 +758,14 @@ export class ContentSaveSender {
       this.setSaveState(SaveState.Retrying);
     }
     this.scheduleWrite();
+  }
+
+  private reportContentSaved(lastHistoryEntryId: string) {
+    try {
+      this.options.onContentSaved?.(this.document, lastHistoryEntryId);
+    } catch (error) {
+      console.error("Failed to report a content save", error);
+    }
   }
 
   private sendToolsIfChanged(snapshot: DocumentContentSnapshotType) {
