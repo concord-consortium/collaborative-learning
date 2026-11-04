@@ -8,7 +8,8 @@ import {
   registerClassWideDocumentKind, registerDocumentKind, resetDocumentKindRegistryForTests
 } from "../models/document/document-kinds";
 import {
-  AxesDocument, GroupDocument, LearningLogDocument, PersonalDocument, PlanningDocument, ProblemDocument
+  AxesDocument, GroupDocument, LearningLogDocument, PersonalDocument, PlanningDocument, ProblemDocument,
+  ProblemPublication
 } from "../models/document/document-types";
 import {
   CanonicalSlotOwnerChangedError, getCanonicalPointerPath, kDefaultCanonicalDocumentLabel
@@ -1031,6 +1032,20 @@ describe("db", () => {
       const doc = await db.openDocument({ documentKey: "c2", type: "problem", userId: "u1",
         firestoreMetadata: { uid: "u1", type: "problem", key: "c2" } } as any);
 
+      expect(catchUpSpy).not.toHaveBeenCalled();
+      expect(doc.historyCatchUpPending).toBe(false);
+    });
+
+    it("doesn't catch up or wait for the owner's publication", async () => {
+      stubRtdb({ createdAt: 1, properties: {} }, { changeCount: 0, lastHistoryEntryId: "e7" });
+      setUpHistoryManagers("u1");
+      const catchUpSpy = jest.spyOn(FirestoreHistoryManager.prototype, "catchUpAtLoad")
+        .mockReturnValue(new Promise<void>(() => undefined));
+
+      const doc = await db.openDocument({ documentKey: "c3", type: ProblemPublication, userId: "u1",
+        firestoreMetadata: { uid: "u1", type: ProblemPublication, key: "c3" } } as any);
+
+      expect(doc.isPublished).toBe(true);
       expect(catchUpSpy).not.toHaveBeenCalled();
       expect(doc.historyCatchUpPending).toBe(false);
     });

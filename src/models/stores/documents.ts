@@ -293,7 +293,8 @@ export const DocumentsModel = types
         } else {
           const manager = new FirestoreHistoryManager(historyManagerArgs);
           treeManager.setHistoryManager(manager);
-          if (!manager.isOtherUsersDocument) {
+          // A publication's content isn't edited after it is published, so it has nothing to catch up.
+          if (!manager.isOtherUsersDocument && !document.isPublished) {
             document.setHistoryCatchUpPending(true);
             self.historyCatchUps.set(document,
               manager.catchUpAtLoad().finally(() => document.setHistoryCatchUpPending(false)));

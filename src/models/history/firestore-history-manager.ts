@@ -43,13 +43,13 @@ export interface IFirestoreHistoryManagerArgs {
   uploadLocalHistory: boolean;
   syncRemoteHistory: boolean;
   // History fields recorded alongside the document content at save time (from the RTDB
-  // envelope). catchUpAtLoad applies the entries after its lastHistoryEntryId. When the
-  // Firestore history first loads, we verify its lastHistoryEntryId is present in the
-  // history. If not, the content reflects entries that never made it to the history
-  // chain — drift. Undefined skips the check.
+  // envelope). When the envelope is settled, catchUpAtLoad applies the entries after its
+  // lastHistoryEntryId. When the Firestore history first loads, we verify its lastHistoryEntryId
+  // is present in the history. If not, the content reflects entries that never made it to the
+  // history chain — drift. Undefined skips the check.
   savedEnvelope?: ISavedEnvelope;
-  // Invoked once if the loaded Firestore history doesn't contain
-  // savedLastHistoryEntryId. The owner decides how to react — typically by
+  // Invoked once if the loaded Firestore history doesn't contain the saved envelope's
+  // lastHistoryEntryId. The owner decides how to react — typically by
   // setting the document content into an error state. Keeping this as a
   // callback avoids the history layer having to import DocumentModel.
   onContentDrift?: (message: string) => void;
@@ -86,6 +86,8 @@ export class FirestoreHistoryManager implements ICommitSource {
   historyEntryRequestError = undefined as string | undefined;
   // This session's newest committed local entry.
   lastCommitted: ICommittedEntry | undefined = undefined;
+  // The last Firestore entry catchUpAtLoad applied to the loaded content, when it applied any.
+  caughtUpTo: ICommittedEntry | undefined = undefined;
   private commitListeners = new Set<ICommitListener>();
   // The local entries recorded for upload that haven't been reported committed, in chain order.
   private uncommitted: Array<ICommittedEntry & { uploaded: boolean }> = [];
@@ -279,6 +281,8 @@ export class FirestoreHistoryManager implements ICommitSource {
    * applying the entries its saved envelope is missing, and decide where the session's exact
    * saves start. Managers that mirror the remote history or don't upload local history skip it, as
    * does another user's copy of the document, leaving its exactness undecided.
+   * Only a settled envelope is caught up. The id of one that isn't settled can be older than what
+   * its content holds, so applying the entries after it could apply some of them twice.
    * Never rejects: anything that keeps the catch-up from finishing leaves the session not exact.
    */
   async catchUpAtLoad() {
@@ -304,6 +308,11 @@ export class FirestoreHistoryManager implements ICommitSource {
       const last = { id: lastEntryId, index: lastEntryIndex };
       const saved = { id: savedId, index: envelope?.lastHistoryEntryIndex };
       let plan = planCatchUp(saved, last);
+      if (!envelope?.settled && plan.kind !== "none") {
+        const gap = saved.index === undefined ? undefined : lastEntryIndex - saved.index;
+        incomplete("unsettled-envelope-gap", gap === undefined ? {} : { gap });
+        return;
+      }
       if (plan.kind === "need-index") {
         saved.index = await getHistoryEntryIndex(this.firestore, documentPath, savedId!);
         plan = saved.index === undefined ? { kind: "saved-id-missing" } : planCatchUp(saved, last);
@@ -333,6 +342,10 @@ export class FirestoreHistoryManager implements ICommitSource {
             docs.filter(doc => doc.index <= lastEntryIndex), savedId!, plan.afterIndex);
           applying = true;
           const { applied, error } = await this.treeManager.applyEntriesAtLoad(entries.map(doc => doc.entry));
+          const lastApplied = entries[applied - 1];
+          if (lastApplied) {
+            this.caughtUpTo = { id: lastApplied.id, index: lastApplied.index };
+          }
           if (error !== undefined) {
             incomplete("catch-up-apply-failed", { gap, applied, error });
           } else if (entries[entries.length - 1]?.id !== lastEntryId) {

@@ -730,6 +730,7 @@ describe("catchUpAtLoad", () => {
       { id: "e7", index: 7 });
     await historyManager.catchUpAtLoad();
     expect(getHistoryEntriesAfter).not.toHaveBeenCalled();
+    expect(historyManager.caughtUpTo).toBeUndefined();
     expect(getHistoryEntryIndex).not.toHaveBeenCalled();
     expect(treeManager.exactness.exactSince).toBe("e2");
     expect(treeManager.exactness.isExact).toBe(true);
@@ -751,6 +752,7 @@ describe("catchUpAtLoad", () => {
     await historyManager.catchUpAtLoad();
     expect(getHistoryEntriesAfter).toHaveBeenCalledWith(firestore, documentPath, 5);
     expect(tileContent.text).toBe("e7");
+    expect(historyManager.caughtUpTo).toEqual({ id: "e7", index: 7 });
     expect(treeManager.document.history.length).toBe(0);
     expect(treeManager.exactness.exactSince).toBe("e2");
     expect(treeManager.exactness.isExact).toBe(true);
@@ -758,7 +760,7 @@ describe("catchUpAtLoad", () => {
 
   it("reads the saved entry's index when the envelope has none", async () => {
     const { tileContent, historyManager, firestore } = setupCatchUp(
-      { lastHistoryEntryId: "e5", settled: false }, { id: "e7", index: 7 });
+      { lastHistoryEntryId: "e5", settled: true, exactSince: "e2" }, { id: "e7", index: 7 });
     getHistoryEntryIndex.mockResolvedValue(5);
     getHistoryEntriesAfter.mockResolvedValue([entryDoc(6, "e5"), entryDoc(7, "e6")]);
     await historyManager.catchUpAtLoad();
@@ -768,13 +770,27 @@ describe("catchUpAtLoad", () => {
     expect(tileContent.text).toBe("e7");
   });
 
-  it("starts exactSince at the last applied entry when the envelope wasn't settled", async () => {
-    const { treeManager, historyManager } = setupCatchUp(
+  it("doesn't catch up from an envelope that wasn't settled, and leaves the session not exact", async () => {
+    const { treeManager, tileContent, historyManager, logEvent } = setupCatchUp(
       { lastHistoryEntryId: "e5", lastHistoryEntryIndex: 5, settled: false }, { id: "e7", index: 7 });
     getHistoryEntriesAfter.mockResolvedValue([entryDoc(6, "e5"), entryDoc(7, "e6")]);
     await historyManager.catchUpAtLoad();
-    expect(treeManager.exactness.exactSince).toBe("e7");
-    expect(treeManager.exactness.isExact).toBe(true);
+    expect(getHistoryEntriesAfter).not.toHaveBeenCalled();
+    expect(tileContent.text).toBeUndefined();
+    expect(historyManager.caughtUpTo).toBeUndefined();
+    expect(treeManager.exactness.isExact).toBe(false);
+    expect(treeManager.exactness.notExactReason).toBe("unsettled-envelope-gap");
+    expect(logEvent).toHaveBeenCalledWith(LogEventName.HISTORY_LOAD_CATCH_UP_INCOMPLETE,
+      expect.objectContaining({ reason: "unsettled-envelope-gap", savedId: "e5", gap: 2 }));
+  });
+
+  it("doesn't read the saved entry's index for an envelope that wasn't settled", async () => {
+    const { treeManager, historyManager } = setupCatchUp(
+      { lastHistoryEntryId: "e5", settled: false }, { id: "e7", index: 7 });
+    await historyManager.catchUpAtLoad();
+    expect(getHistoryEntryIndex).not.toHaveBeenCalled();
+    expect(getHistoryEntriesAfter).not.toHaveBeenCalled();
+    expect(treeManager.exactness.notExactReason).toBe("unsettled-envelope-gap");
   });
 
   it("starts at the beginning of history for a document with no history", async () => {
@@ -812,6 +828,7 @@ describe("catchUpAtLoad", () => {
     getHistoryEntriesAfter.mockResolvedValue([entryDoc(6, "e5"), entryDoc(8, "e7")]);
     await historyManager.catchUpAtLoad();
     expect(tileContent.text).toBe("e6");
+    expect(historyManager.caughtUpTo).toEqual({ id: "e6", index: 6 });
     expect(treeManager.exactness.isExact).toBe(false);
     expect(treeManager.exactness.notExactReason).toBe("catch-up-hole");
     expect(logEvent).toHaveBeenCalledWith(LogEventName.HISTORY_LOAD_CATCH_UP_INCOMPLETE,
@@ -856,6 +873,7 @@ describe("catchUpAtLoad", () => {
     ]);
     await historyManager.catchUpAtLoad();
     expect(tileContent.text).toBe("e6");
+    expect(historyManager.caughtUpTo).toEqual({ id: "e6", index: 6 });
     expect(treeManager.exactness.isExact).toBe(false);
     expect(treeManager.exactness.notExactReason).toBe("catch-up-apply-failed");
     expect(logEvent).toHaveBeenCalledWith(LogEventName.HISTORY_LOAD_CATCH_UP_INCOMPLETE,
