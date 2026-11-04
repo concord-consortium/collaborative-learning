@@ -1,6 +1,7 @@
 /**
  * Lets a tile or shared model type say which version of its saved JSON is current and how to
- * convert older versions. History playback uses it to cross schema changes.
+ * convert older versions. Old JSON can then be converted outside MST, and the conversion recorded
+ * in history.
  */
 export interface ISchemaVersionInfo {
   currentVersion: string;

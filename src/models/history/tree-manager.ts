@@ -135,8 +135,8 @@ export const TreeManager = types
    */
   historyPlaybackFailures: [] as HistoryPlaybackFailure[],
   /**
-   * The entry that records the conversion of old tiles at load. It waits here, outside the
-   * history, until just before the first local entry that changes the content is completed.
+   * The conversion entry for the content as loaded or last set, kept out of the history until it
+   * is flushed (see completeHistoryEntry).
    */
   pendingConversionEntry: undefined as HistoryEntrySnapshot | undefined
 }))
@@ -180,11 +180,11 @@ export const TreeManager = types
       return;
     }
 
-    // Flush the pending conversion entry so it comes before the first local entry that changes the
-    // content. Content is saved only when it changes, so an entry that changes only the document's
-    // metadata (its title, for example) leaves it pending; otherwise the conversion entry would be
-    // stored next to old content, and the next load would convert it again. It is never undoable,
-    // so it is not added to the undo store and does not change the revisionId.
+    // Flush the pending conversion entry just before the first local entry that changes the content.
+    // Content is saved only when it changes, so flushing before a metadata-only entry (a title change)
+    // would store the entry next to old content. The next load would convert that content again with
+    // new ids, breaking the stored chain. The entry isn't undoable, so it skips the undo store and
+    // leaves revisionId alone.
     if (self.pendingConversionEntry && entryChangesContent(snapshot)) {
       const conversionIndex = self.document.history.length;
       self.document.history.push(self.pendingConversionEntry);
