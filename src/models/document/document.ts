@@ -1,6 +1,6 @@
 import {
   applySnapshot, types, Instance, SnapshotIn, onAction, addDisposer, destroy, typecheck, isStateTreeNode,
-  getSnapshot, resolvePath
+  getSnapshot, resolvePath, IAnyStateTreeNode
 } from "mobx-state-tree";
 import { forEach } from "lodash";
 import { QueryClient, UseQueryResult } from "react-query";
@@ -60,6 +60,35 @@ export const VisibilityTypeEnum = types.enumeration("VisibilityType", Visibility
 export type VisibilityType = Instance<typeof VisibilityTypeEnum>;
 export function isVisibilityType(value: string): value is VisibilityType {
   return VisibilityTypeEnumValues.indexOf(value as VisibilityType) >= 0;
+}
+
+function resolveJsonPath(json: any, path: string) {
+  return path.split("/").slice(1).reduce((value, segment) => value?.[segment], json);
+}
+
+/**
+ * Converts the old tiles and shared models in stored content before MST sees them, so the
+ * conversion can be recorded as JSON patches. Group documents are not converted here; the tile
+ * snapshot preprocessors convert them as MST loads them, and no conversion is recorded. Returns
+ * undefined when the content is not converted here.
+ */
+function convertStoredContent(content: unknown, concurrent?: boolean) {
+  return content && !isStateTreeNode(content) && !concurrent ? convertContentJson(content) : undefined;
+}
+
+/**
+ * Builds the entry that records the conversion of `originalContent`'s old models into the
+ * document's content, or undefined when nothing was converted.
+ */
+function buildDocumentConversionEntry(document: IAnyStateTreeNode, treeId: string, originalContent: unknown,
+    convertedPaths: string[]) {
+  if (!convertedPaths.length) return undefined;
+  const changes = convertedPaths.map(path => ({
+    path,
+    before: toJsonValue(resolveJsonPath({ content: originalContent }, path)),
+    after: toJsonValue(getSnapshot(resolvePath(document, path)))
+  }));
+  return buildConversionEntry(treeId, changes);
 }
 
 export const DocumentModel = Tree.named("Document")
@@ -220,13 +249,23 @@ export const DocumentModel = Tree.named("Document")
     },
 
     setContent(snapshot: DocumentContentSnapshotType) {
+      const conversion = convertStoredContent(snapshot, self.concurrent);
+      const content = conversion ? conversion.content : snapshot;
       if (self.content) {
-        applySnapshot(self.content, snapshot);
+        applySnapshot(self.content, content);
       }
       else {
-        self.content = DocumentContentModel.create(snapshot);
+        self.content = DocumentContentModel.create(content);
         const sharedModelManager = getSharedModelManager(self);
         (sharedModelManager as ISharedModelDocumentManager).setDocument(self.content);
+      }
+      // The pending conversion entry turns the stored content into the live content, so it is
+      // rebuilt from the new content, or cleared when nothing in it is old. An entry that has
+      // already been flushed is in the history and stays there.
+      if (conversion) {
+        const manager = self.treeManagerAPI as Instance<typeof TreeManager> | undefined;
+        manager?.setPendingConversionEntry(
+          buildDocumentConversionEntry(self, self.key, snapshot, conversion.convertedPaths));
       }
     },
 
@@ -380,10 +419,6 @@ export const getDocumentContext = (document: DocumentModelType): IDocumentContex
  * @param snapshot
  * @returns
  */
-function resolveJsonPath(json: any, path: string) {
-  return path.split("/").slice(1).reduce((value, segment) => value?.[segment], json);
-}
-
 export const createDocumentModel = (snapshot?: DocumentModelSnapshotType) => {
   const sharedModelManager = new SharedModelDocumentManager();
   const formulaManager = new FormulaManager();
@@ -396,23 +431,15 @@ export const createDocumentModel = (snapshot?: DocumentModelSnapshotType) => {
   try {
     let document: DocumentModelType;
     try {
-      // Old tiles are converted before MST sees them, so the conversion can be recorded as JSON
-      // patches. Group documents are not converted here; the tile snapshot preprocessors convert
-      // them as MST loads them, and no conversion is recorded.
       const originalContent = snapshot?.content;
-      const conversion = snapshot && originalContent && !isStateTreeNode(originalContent) && !snapshot.concurrent
-        ? convertContentJson(originalContent)
-        : undefined;
+      const conversion = convertStoredContent(originalContent, snapshot?.concurrent);
       document = DocumentModel.create(
         snapshot && conversion ? { ...snapshot, content: conversion.content } : snapshot, fullEnvironment);
-      if (conversion?.convertedPaths.length) {
-        const changes = conversion.convertedPaths.map(path => ({
-          path,
-          before: toJsonValue(resolveJsonPath({ content: originalContent }, path)),
-          after: toJsonValue(getSnapshot(resolvePath(document, path) as any))
-        }));
+      const entry = conversion &&
+        buildDocumentConversionEntry(document, document.key, originalContent, conversion.convertedPaths);
+      if (entry) {
         const manager = document.treeManagerAPI as Instance<typeof TreeManager> | undefined;
-        manager?.setPendingConversionEntry(buildConversionEntry(document.key, changes));
+        manager?.setPendingConversionEntry(entry);
       }
     } catch (e) {
       if (!snapshot?.content ) {

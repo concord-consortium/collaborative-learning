@@ -82,6 +82,76 @@ describe("conversion entry", () => {
     expect(patches.some(p => p.path.startsWith("/content/tileMap/t1/"))).toBe(true);
   });
 
+  describe("when the content is replaced", () => {
+    const liveItemIds = (document: ReturnType<typeof makeDocument>["document"]) =>
+      (document.content!.tileMap.get("t1")!.content as VersionedTestTileType).items.map(item => item.id);
+
+    // The ids the pending entry's forward patches give when applied to the stored JSON.
+    const entryItemIds = (manager: Instance<typeof TreeManager>, storedContent: any) => {
+      const entry = HistoryEntry.create(manager.pendingConversionEntry!);
+      const docJson: any = { content: cloneDeep(storedContent) };
+      applyJsonPatches(docJson, entry.records[0].getPatches(HistoryOperation.Redo));
+      return docJson.content.tileMap.t1.content.items.map((item: any) => item.id);
+    };
+
+    it("rebuilds the pending entry from old content so its patches give the live ids", () => {
+      const { document, manager } = makeDocument(oldContent());
+
+      document.setContent(oldContent() as any);
+
+      expect(liveItemIds(document)).toHaveLength(1);
+      expect(entryItemIds(manager, oldContent())).toEqual(liveItemIds(document));
+      expect(manager.document.history.length).toBe(0);
+    });
+
+    it("builds a pending entry when old content replaces current content", () => {
+      const { document, manager } = makeDocument({
+        tileMap: { t1: { id: "t1", content: { type: "VersionedTestTile", version: "2", label: "x" } } }
+      });
+      expect(manager.pendingConversionEntry).toBeUndefined();
+
+      document.setContent(oldContent() as any);
+
+      expect(entryItemIds(manager, oldContent())).toEqual(liveItemIds(document));
+    });
+
+    it("clears the pending entry when the new content is current", () => {
+      const { document, manager } = makeDocument(oldContent());
+      expect(manager.pendingConversionEntry).toBeDefined();
+
+      document.setContent({
+        tileMap: { t1: { id: "t1", content: { type: "VersionedTestTile", version: "2", label: "y" } } }
+      } as any);
+
+      expect(manager.pendingConversionEntry).toBeUndefined();
+      expect((document.content!.tileMap.get("t1")!.content as VersionedTestTileType).label).toBe("y");
+    });
+
+    it("records nothing for a group document", () => {
+      const { document, manager } = makeDocument(oldContent(), { concurrent: true });
+
+      document.setContent(oldContent() as any);
+
+      const tile = document.content!.tileMap.get("t1")!.content as VersionedTestTileType;
+      expect(tile.version).toBe("2");
+      expect(manager.pendingConversionEntry).toBeUndefined();
+    });
+
+    it("leaves a flushed entry in the history", async () => {
+      const { document, manager } = makeDocument(oldContent());
+      document.treeMonitor!.enableMonitoring();
+      const tile = document.content!.tileMap.get("t1")!.content as VersionedTestTileType;
+      tile.setLabel("x");
+      await expectEntryToBeComplete(manager, 2);
+      const flushed = getSnapshot(manager.document.history[0]);
+      document.treeMonitor!.disableMonitoring();
+
+      document.setContent(oldContent() as any);
+
+      expect(getSnapshot(manager.document.history[0])).toEqual(flushed);
+    });
+  });
+
   it("flushes the conversion entry before the first local entry, outside the undo stack", async () => {
     const { document, manager } = makeDocument(oldContent());
     const historyManager = { onHistoryEntryCompleted: jest.fn() };
