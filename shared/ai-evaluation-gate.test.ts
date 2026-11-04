@@ -18,6 +18,10 @@ describe("hasChangedSinceEvaluation", () => {
   it("is changed when the latest index cannot be read", () => {
     expect(hasChangedSinceEvaluation(undefined, 47)).toBe(true);
   });
+
+  it("is changed when neither index is known", () => {
+    expect(hasChangedSinceEvaluation(undefined, undefined)).toBe(true);
+  });
 });
 
 describe("kEvaluationGateKey", () => {

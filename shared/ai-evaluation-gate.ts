@@ -10,14 +10,13 @@ export const kEvaluationGateKey = "evaluationGate";
 
 /**
  * Whether a document has changed since the evaluation its gate records.
- *
- * Either value being absent reads as changed. A missing gate means nothing has been evaluated yet,
- * and a missing latest index means the history could not be read -- neither is evidence that the
- * document is unchanged, and treating them as such would withhold evaluations entirely.
  */
 export function hasChangedSinceEvaluation(
   latestIndex: number | undefined, gateIndex: number | undefined
 ): boolean {
-  if (latestIndex === undefined || gateIndex === undefined) return true;
+  // A number is never equal to undefined, so an unrecorded gate already reads as changed through
+  // the comparison below. This guard is for the case where neither index is known, which must not
+  // read as unchanged -- that would withhold evaluations from a document we know nothing about.
+  if (latestIndex === undefined) return true;
   return latestIndex !== gateIndex;
 }

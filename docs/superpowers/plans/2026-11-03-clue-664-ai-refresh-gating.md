@@ -87,6 +87,11 @@ describe("hasChangedSinceEvaluation", () => {
   it("is changed when the latest index cannot be read", () => {
     expect(hasChangedSinceEvaluation(undefined, 47)).toBe(true);
   });
+
+  // The only case the explicit guard covers: everything else falls out of the comparison.
+  it("is changed when neither index is known", () => {
+    expect(hasChangedSinceEvaluation(undefined, undefined)).toBe(true);
+  });
 });
 
 describe("kEvaluationGateKey", () => {
@@ -125,12 +130,15 @@ export const kEvaluationGateKey = "evaluationGate";
  *
  * Either value being absent reads as changed. A missing gate means nothing has been evaluated yet,
  * and a missing latest index means the history could not be read -- neither is evidence that the
- * document is unchanged, and treating them as such would withhold evaluations entirely.
+ * document is unchanged.
  */
 export function hasChangedSinceEvaluation(
   latestIndex: number | undefined, gateIndex: number | undefined
 ): boolean {
-  if (latestIndex === undefined || gateIndex === undefined) return true;
+  // A number is never equal to undefined, so an unrecorded gate already reads as changed through
+  // the comparison below. This guard is for the case where neither index is known, which must not
+  // read as unchanged -- that would withhold evaluations from a document we know nothing about.
+  if (latestIndex === undefined) return true;
   return latestIndex !== gateIndex;
 }
 ```
@@ -141,14 +149,14 @@ export function hasChangedSinceEvaluation(
 npx jest shared/ai-evaluation-gate.test.ts
 ```
 
-Expected: PASS, 5 tests.
+Expected: PASS, 6 tests.
 
 - [ ] **Step 5: Mutation-test**
 
-Change `if (latestIndex === undefined || gateIndex === undefined) return true;` to
-`if (latestIndex === undefined) return true;` and rerun. Expected: "is changed when nothing has
-been evaluated yet" FAILS. Restore and confirm all five pass. **Report the verbatim output**; if it
-does not fail, say so rather than claiming a kill.
+Delete the line `if (latestIndex === undefined) return true;` and rerun. Expected: "is changed when
+neither index is known" FAILS — every other case falls out of the comparison, which is why the
+guard is one line rather than two. Restore and confirm all six pass. **Report the verbatim
+output**; if it does not fail, say so rather than claiming a kill.
 
 - [ ] **Step 6: Commit**
 
