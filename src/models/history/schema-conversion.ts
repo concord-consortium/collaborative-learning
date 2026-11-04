@@ -118,12 +118,13 @@ export function convertJsonAtPath(path: string, value: unknown): unknown {
  * modified. When nothing is old, the same object is returned with no converted paths.
  */
 export function convertContentJson(content: any): { content: any; convertedPaths: string[] } {
-  if (!isObject(content) || !content.tileMap) return { content, convertedPaths: [] };
+  if (!isObject(content)) return { content, convertedPaths: [] };
   const tiles = convertTileMap(content.tileMap);
   const shared = convertSharedModelMap(content.sharedModelMap);
   const convertedPaths = [...tiles.convertedPaths, ...shared.convertedPaths];
   if (!convertedPaths.length) return { content, convertedPaths };
-  const newContent: Record<string, any> = { ...content, tileMap: tiles.map };
+  const newContent: Record<string, any> = { ...content };
+  if (content.tileMap) newContent.tileMap = tiles.map;
   if (content.sharedModelMap) newContent.sharedModelMap = shared.map;
   return { content: newContent, convertedPaths };
 }

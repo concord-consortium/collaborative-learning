@@ -63,6 +63,14 @@ describe("convertContentJson", () => {
     expect(result.content.sharedModelMap.sm1.tiles).toEqual(["t1"]);
   });
 
+  it("converts shared models when there is no tileMap, without adding one", () => {
+    const content = { sharedModelMap: { sm1: { sharedModel: oldShared("sm1"), tiles: [] } } };
+    const result = convertContentJson(content);
+    expect(result.convertedPaths).toEqual(["/content/sharedModelMap/sm1/sharedModel"]);
+    expect(result.content.sharedModelMap.sm1.sharedModel.version).toBe("2");
+    expect("tileMap" in result.content).toBe(false);
+  });
+
   it("returns the same object when nothing is old or there is no tileMap", () => {
     const content = { tileMap: { t2: newTile("t2") } };
     expect(convertContentJson(content)).toEqual({ content, convertedPaths: [] });
