@@ -564,6 +564,26 @@ describe("ContentSaveSender", () => {
       expect(onDrained).toHaveBeenCalledTimes(1);
     });
 
+    it("sends no exact save older than the newest intermediate content when intermediate writes finish out of order",
+        async () => {
+      const { commits, contentRef, edit, sender } = track(setup());
+      const a = await edit("alpha");
+      jest.advanceTimersByTime(kIntermediateSaveIntervalMs);
+      expect(contentRef.update).toHaveBeenCalledTimes(1);
+      await edit("bravo");
+      sender.handlePageHide();
+      expect(contentRef.update).toHaveBeenCalledTimes(2);
+
+      contentRef.writes[1].resolve();
+      await flush();
+      contentRef.writes[0].resolve();
+      await flush();
+      // the exact save of the first entry holds only "alpha", which would undo "bravo"
+      commits.commit(a);
+      jest.advanceTimersByTime(kMinimumSaveGapMs);
+      expect(contentRef.update).toHaveBeenCalledTimes(2);
+    });
+
     it("backs off and shows Retrying from the third consecutive failure", async () => {
       const { commits, contentRef, document, edit } = track(setup());
       const a = await edit("alpha");
@@ -1310,8 +1330,12 @@ describe("ContentSaveSender", () => {
   });
 
   describe("page hide", () => {
+    const settledEnvelope = { lastHistoryEntryId: "loaded", lastHistoryEntryIndex: 7, settled: true };
+    const unmarkedEnvelope = { lastHistoryEntryId: "loaded", lastHistoryEntryIndex: 7, settled: false };
+
     it("sends the newest committed snapshot at once on page hide", async () => {
-      const { commits, contentRef, edit, sender } = track(setup());
+      const { commits, contentRef, document, edit, sender } = track(setup());
+      document.setSavedEnvelope(settledEnvelope);
       const a = await edit("alpha");
       commits.commit(a);
       jest.advanceTimersByTime(200);
@@ -1362,11 +1386,70 @@ describe("ContentSaveSender", () => {
     });
 
     it("makes no intermediate save on page hide before the document relies on them", async () => {
-      const { contentRef, edit, openEntry, sender } = track(setup());
+      const { contentRef, document, edit, openEntry, sender } = track(setup());
+      document.setSavedEnvelope(settledEnvelope);
       openEntry("open");
       await edit("alpha");
       sender.handlePageHide();
       expect(contentRef.update).not.toHaveBeenCalled();
+    });
+
+    it("sends an intermediate save at once on page hide when the loaded envelope wasn't settled", async () => {
+      const { commits, contentRef, document, edit, sender } = track(setup());
+      document.setSavedEnvelope(unmarkedEnvelope);
+      const a = await edit("alpha");
+      commits.commit(a);
+      expect(contentRef.update).toHaveBeenCalledTimes(1);
+
+      // while the exact save of the committed entry is still in flight
+      await edit("bravo");
+      sender.handlePageHide();
+      expect(contentRef.update).toHaveBeenCalledTimes(2);
+      expect(contentRef.writes[1].values).toMatchObject({ lastHistoryEntryId: a, settled: null });
+      expect(textOf(contentRef.writes[1].values)).toBe("bravo");
+    });
+
+    it("makes no intermediate save on page hide when the loaded envelope was settled", async () => {
+      const { commits, contentRef, document, edit, sender } = track(setup());
+      document.setSavedEnvelope(settledEnvelope);
+      const a = await edit("alpha");
+      commits.commit(a);
+      expect(contentRef.update).toHaveBeenCalledTimes(1);
+
+      await edit("bravo");
+      sender.handlePageHide();
+      expect(contentRef.update).toHaveBeenCalledTimes(1);
+    });
+
+    it("makes no intermediate save on page hide once an exact save has landed", async () => {
+      const { commits, contentRef, document, edit, sender } = track(setup());
+      document.setSavedEnvelope(unmarkedEnvelope);
+      const a = await edit("alpha");
+      commits.commit(a);
+      contentRef.writes[0].resolve();
+      await flush();
+
+      await edit("bravo");
+      sender.handlePageHide();
+      expect(contentRef.update).toHaveBeenCalledTimes(1);
+    });
+
+    it("keeps the fallback episode open when an older exact save finishes after a newer intermediate one",
+        async () => {
+      const logEvent = jest.fn();
+      const { commits, contentRef, document, edit, sender } = track(setup({ logEvent }));
+      document.setSavedEnvelope(unmarkedEnvelope);
+      const a = await edit("alpha");
+      commits.commit(a);
+      await edit("bravo");
+      sender.handlePageHide();
+      expect(contentRef.writes[1].values).toMatchObject({ settled: null });
+
+      contentRef.writes[1].resolve();
+      await flush();
+      contentRef.writes[0].resolve();
+      await flush();
+      expect(logEvent.mock.calls.map(([event]) => event)).toEqual([LogEventName.CONTENT_SAVE_FALLBACK_START]);
     });
 
     it("sends a pending exact save that covers the latest change on page hide, without an intermediate one",

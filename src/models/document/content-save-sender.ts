@@ -251,6 +251,8 @@ export class ContentSaveSender {
   private intermediateDueAt: number | undefined;
   private lastIntermediateWriteAt: number | undefined;
   private fallbackEpisode: IFallbackEpisode | undefined;
+  // Whether an exact save has landed, so the RTDB no longer holds the loaded envelope.
+  private exactSaveLanded = false;
   private sentTools: string[] | undefined;
   // This client's newest committed local entry, with the content change its snapshot was taken at.
   private lastCommittedLocal: { index: number; changeSeq: number } | undefined;
@@ -379,9 +381,15 @@ export class ContentSaveSender {
     this.write(save);
   }
 
-  // Whether intermediate saves are already standing in for exact ones on this individual document.
+  /**
+   * Whether intermediate saves are already standing in for exact ones on this individual document.
+   * They also are while the RTDB still holds the loaded content and its envelope wasn't settled, or
+   * there was none: the next load catches up only from a settled envelope, so an intermediate save
+   * over it loses nothing.
+   */
   private isRelyingOnIntermediateSaves() {
-    return !!this.fallbackEpisode || !getTreeManager(this.document)?.exactness.isExact;
+    return !!this.fallbackEpisode || !getTreeManager(this.document)?.exactness.isExact
+      || (!this.exactSaveLanded && this.document.savedEnvelope?.settled !== true);
   }
 
   dispose() {
@@ -868,13 +876,14 @@ export class ContentSaveSender {
       this.pendingSave = undefined;
     }
     if (save.kind === "intermediate") {
-      this.intermediateSeq = save.changeSeq;
+      this.intermediateSeq = Math.max(this.intermediateSeq, save.changeSeq);
       if (this.fallbackEpisode) {
         this.fallbackEpisode.intermediateSaves++;
       }
     } else {
-      this.endFallbackEpisode("exact-save");
+      this.exactSaveLanded = true;
       if (isNewest) {
+        this.endFallbackEpisode("exact-save");
         this.unsettledSince = save.changeSeq >= this.dirtySeq ? undefined : Date.now();
       }
     }
