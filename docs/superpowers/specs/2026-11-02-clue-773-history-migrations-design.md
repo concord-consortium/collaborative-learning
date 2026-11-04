@@ -444,6 +444,10 @@ non-schema causes (see Non-goals) or on a legacy shape the PR names as one the b
   call.*
 - **A conversion throws on an old tile** (the legacy conversion throws on an unknown node type, for
   example). The failure banner, at that position.
+- **MST rejects a converted tile's load** (the converted JSON doesn't fit the model). The tree's
+  patches for the move have already applied when the load fails, so the whole move is rolled back
+  and playback stays at the position it started from. The trees, the JSON copy and the position
+  then agree, and the failure banner shows.
 
 The exact wording and how the slider shows an unreachable range are left to the builder. CLUE-760 is
 reworking the same slider, so whichever lands second follows the other.
