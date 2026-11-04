@@ -3,7 +3,8 @@ import {
   buildConversionEntry, convertContentJson, convertJsonAtPath, convertModelJsonAtPath, getModelPath,
   isOldModelJsonAtPath
 } from "./schema-conversion";
-import { HistoryEntry } from "./history";
+import { HistoryEntry, HistoryOperation } from "./history";
+import { applyJsonPatches } from "./json-patch";
 import { registerTileContentInfo } from "../tiles/tile-content-info";
 import { TileContentModel } from "../tiles/tile-content";
 import "./schema-conversion-test-types";
@@ -124,5 +125,17 @@ describe("buildConversionEntry", () => {
     jest.spyOn(Date, "now").mockReturnValue(5678);
     expect(entry.created).toBe(1234);
     expect(HistoryEntry.create(entry).created.getTime()).toBe(1234);
+  });
+
+  it("stores inverse patches so undo restores an array that the conversion shortened", () => {
+    const before = { id: "t1", content: { type: "VersionedTestTile",
+      items: [{ value: "a" }, { value: "b" }, { value: "c" }] } };
+    const after = { id: "t1", content: { type: "VersionedTestTile", version: "2", label: "x",
+      items: [{ id: "i", value: "a" }] } };
+    const entry = HistoryEntry.create(
+      buildConversionEntry("doc1", [{ path: "/content/tileMap/t1", before, after }]));
+    const doc: any = { content: { tileMap: { t1: cloneDeep(after) } } };
+    applyJsonPatches(doc, entry.records[0].getPatches(HistoryOperation.Undo));
+    expect(doc.content.tileMap.t1).toEqual(before);
   });
 });
