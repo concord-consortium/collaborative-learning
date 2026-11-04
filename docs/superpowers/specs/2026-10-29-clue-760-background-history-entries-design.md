@@ -1,7 +1,8 @@
 # CLUE-760: Background history entries for DataFlow
 
-Status: design approved, 2026-11-02. Implementation waits for CLUE-773 and CLUE-751, which remove
-the rough edges noted below.
+Status: design approved, 2026-11-02; updated 2026-11-04 for the CLUE-773 implementation (#3079,
+#3080, #3081). Implementation builds on that stack and merges after it. CLUE-751 is not required
+first; the rough edge it removes is noted in section 4.
 
 ## Why
 
@@ -65,7 +66,9 @@ same flag.
   matter for a time-based slider and are deferred with it.
 - **Fixing playback failures in old histories.** That is CLUE-773. Hiding ticks does not fix them:
   moving between two user stops still applies every tick in between, so a bad tick still stops
-  playback.
+  playback. CLUE-773 bridges the legacy DataFlow format, so most legacy documents play back to
+  their start. Documents where a legacy `setProgram` set the program's id just before the tile's
+  `addTile` entry still stop one entry before the add.
 - **The rest of the Simulator work** (CLUE-761). CLUE-760 only flags the Simulator's `step` so the
   activity recorder doesn't regress (see below).
 
@@ -77,8 +80,9 @@ same flag.
 - **Viewers must not lose live values.** A teacher watching a running program still sees its
   values, at most a few seconds behind.
 - **Playback must not get noticeably worse.** Saving less often can leave the saved content
-  further behind history when a document closes. CLUE-760 narrows that by flushing, and the full fix
-  is in CLUE-751 and CLUE-773 (see "A known risk" in section 4).
+  further behind history when a document closes. CLUE-760 narrows that by flushing. The full fix
+  is CLUE-751 plus a later story that changes where playback starts (see "A known risk" in
+  section 4).
 
 ## Design
 
@@ -97,14 +101,21 @@ action that code, not a person, triggers. It:
 
 The tree monitor passes the flag through `addHistoryEntry` (in `recordAction`,
 [tree-monitor.ts](../../../src/models/history/tree-monitor.ts)). `HistoryEntry`
-([history.ts](../../../src/models/history/history.ts)) gets two optional fields:
+([history.ts](../../../src/models/history/history.ts)) already has
+`background: types.maybe(types.boolean)`, added by CLUE-773. It is absent on user entries and on
+entries written before these changes. CLUE-760 adds one optional field:
 
-- `background: types.maybe(types.boolean)`. It is absent on user entries and on entries written
-  before this change.
 - `producerTileId: types.maybe(types.string)`.
 
 GD-20's other fields (`producerId`, `runnerSessionId`) wait for the runner lock. Old clients ignore
 the new fields: MST drops snapshot properties a model doesn't define.
+
+**Not every background entry comes from `asBackground()`.** CLUE-773's conversion entry, which
+records old tiles being converted to the current format at load, is built directly
+(`buildConversionEntry` in [schema-conversion.ts](../../../src/models/history/schema-conversion.ts))
+with `background: true` and no `producerTileId`, because it belongs to the document rather than one
+tile. So `producerTileId` stays optional, and code that reads the flag (playback, the save hook,
+the activity recorder) reads `background` and never assumes a producer.
 
 Shared-model follow-up records join the same entry, so a tick's changes to linked shared models are
 covered by the entry's flag.
@@ -165,6 +176,12 @@ has to work from the action path and the patches:
   patch (moving, adding or removing a node, changing a setting) makes it a user change.
 - **Simulator:** `step` actions on a Simulator tile.
 
+CLUE-773's legacy DataFlow bridge has `isLegacyDataflowPatch`
+([legacy-dataflow-history-bridge.ts](../../../src/plugins/dataflow/model/legacy-dataflow-history-bridge.ts)).
+It answers a different question, whether a patch is in the legacy format, so it can't be the tick
+rule: a legacy node move is legacy but not a tick. Share its parsing of tile and `program/values`
+paths rather than duplicating it.
+
 Check the rule against the study data before writing it. For each candidate rule, count how many
 entries it flags and look at a sample of entries it flags and doesn't flag, across several years.
 Old DataFlow recordings (`addCanonicalCases` on a DataFlow tile's dataset) may not be
@@ -180,6 +197,9 @@ entries.
 - Old clients keep writing unflagged entries until every open tab has reloaded. Rerun the script
   before the release that removes the read-time call.
 - A developer with the production service-account key runs it against production.
+- It must run before any future script that rewrites legacy DataFlow patches into the current
+  format (a follow-up CLUE-773 mentions). The rule recognizes legacy ticks by their legacy paths,
+  so it can't find them once those paths are rewritten.
 
 ### 3. Playback
 
@@ -214,6 +234,19 @@ In [playback-control-model.ts](../../../src/components/playback/playback-control
 - **Positions between stops.** A seek that stops on a failing entry can leave the document between
   two stops. The thumb shows the stop before that position. A failure marker goes on the stop that
   playback couldn't reach.
+- **An "earliest available" stop.** CLUE-773 adds an oldest position that playback can reach, for
+  a legacy tile whose old state its bridge can't rebuild (`oldestReachablePosition` in
+  [tree-manager.ts](../../../src/models/history/tree-manager.ts)), and says "Earlier history isn't
+  available." there instead of the failure banner. It leaves the slider treatment to whichever
+  story lands second, which is this one. The bridge's boundary is a tile's last legacy entry, often
+  a tick, so that position usually falls between two user stops, and "the stop before" would be a
+  stop playback can't reach. So, mirroring the latest stop:
+  - the oldest reachable position gets its own stop, unless a stop is already there;
+  - the stops before it are shown as unavailable, and the slider can't move onto them.
+
+  The bridges find their conversions from the history alone, so the slider can know the boundary
+  before any seek reaches it, rather than only after `oldestReachablePosition` is set. How
+  "unavailable" looks is left to the builder.
 
 ### 4. Saving
 
@@ -246,7 +279,8 @@ a flush can't be relied on when a tab closes.
 CLUE-760 accepts this risk. Starting playback from the content's `lastHistoryEntryId` doesn't fix it
 yet: that id can be behind the content (the save stamps the latest entry that existed when the
 snapshot was taken, not the snapshot's own entry), and the playback copy doesn't carry it. CLUE-751
-makes the id exact, and CLUE-773 then changes where playback starts.
+makes the id exact, and a later story then changes where playback starts. CLUE-773 doesn't change
+it: its JSON copy starts from the saved content, as playback does.
 
 CLUE-751 (save only when history is settled) reworks the same hook. Whichever lands second builds on
 the other. A tick-only save is still a save of a settled state, because ticks are synchronous.
@@ -260,9 +294,15 @@ sees entries this client just wrote, which always carry the flag, so it doesn't 
 Recorded cases stop counting as activity (see section 1). A student who starts a recording and walks
 away no longer shows as active.
 
+So do CLUE-773's conversion entries. They are uploaded through the same path, and `isTickEntry`
+doesn't match them, so today one counts as activity when it is flushed. With a running DataFlow
+tile, the first tick flushes it, so opening an old document logs activity the student didn't cause.
+
 ## Related work
 
-- **CLUE-773:** playback failures in old histories, and history migrations for tile format changes.
+- **CLUE-773:** playback across tile format changes: conversion entries, the JSON copy that crosses
+  them, and the legacy DataFlow bridge. It adds the `background` field and the oldest reachable
+  position this design builds on.
 - **CLUE-751 / GD-18:** settled-state saves. Same save hook.
 - **GD-19 / GD-20:** the group-document side of background entries. This change is GD-20's tagging
   phase plus a simple version of its scrubber phase, without the lock or the conflict rule.
@@ -286,7 +326,7 @@ away no longer shows as active.
 - The slider hides background entries and keeps stops evenly spaced. Play steps from stop to stop.
 - A user stop shows the document right after the change, with a "latest" stop at the end.
 - Comments and links get their own stops, with markers, at their exact positions.
-- CLUE-760 doesn't change where playback starts. That waits for CLUE-751 and CLUE-773.
+- CLUE-760 doesn't change where playback starts. That waits for CLUE-751 and a later story.
 - The activity recorder uses the flag.
 
 ## My calls (check these)
@@ -297,6 +337,8 @@ away no longer shows as active.
 - A link marker is added here, as a single point; CLUE-635 adds ranges.
 - A failed background-only save still shows `Retrying`.
 - `producerTileId` is stored now. `producerId` and `runnerSessionId` are not.
+- An "earliest available" stop at CLUE-773's oldest reachable position, with the stops before it
+  unavailable.
 
 ## Left to the builder
 
@@ -316,10 +358,15 @@ away no longer shows as active.
   latest stop appears only when background entries follow the last user change. A comment made
   between ticks, and a link to a tick, each get a stop at their exact position, in history order.
   Following the end applies new background entries. Positions between stops map to the right stop,
-  and so do failure markers.
+  and so do failure markers. A conversion entry is never a stop. A legacy document whose bridge
+  can't rebuild the old state gets an earliest available stop, and the stops before it can't be
+  reached.
+- **Performance:** CLUE-773 measured playback one entry at a time. Here one move between user
+  stops applies every tick in between, and in a document with a conversion each of those entries
+  also moves the JSON copy. Time a move across thousands of ticks in a legacy DataFlow document.
 - **Save hook:** background-only snapshots save at most every 3 seconds and leave the indicator
   alone. A user change saves within 1 second and shows the indicator. A pending save is flushed on
   unmount.
-- **Activity recorder:** background entries are skipped.
+- **Activity recorder:** background entries are skipped, including conversion entries.
 - **Cypress:** a document with a running DataFlow tile shows only user stops, and the indicator
   stays still while the program runs with no edits.
