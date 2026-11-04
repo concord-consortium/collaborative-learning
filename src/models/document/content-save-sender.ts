@@ -7,7 +7,7 @@ import { ICommitListener, ICommittedEntry, isCommitSource } from "../history/his
 import { FAKE_HISTORY_ENTRY_ID, TreeManagerType } from "../history/tree-manager";
 import { buildExactSave, buildIntermediateSave, getDocumentTools } from "./content-save-envelope";
 import { DocumentModelType, SaveState } from "./document";
-import { DocumentContentSnapshotType } from "./document-content";
+import { DocumentContentModelType, DocumentContentSnapshotType } from "./document-content";
 
 export const kMinimumSaveGapMs = 1000;
 export const kMaxRetryDelayMs = 30000;
@@ -360,6 +360,7 @@ export class ContentSaveSender {
       // A waiting save the envelope reaches is dropped.
       this.scheduleWrite();
       this.checkSavedByAnotherMember();
+      this.scheduleSettledCheck();
     } catch (error) {
       console.error("Failed to handle a change to the content envelope", error);
     }
@@ -401,10 +402,7 @@ export class ContentSaveSender {
     queueMicrotask(() => {
       this.settledCheckScheduled = false;
       try {
-        const save = this.createSettledSave();
-        if (save) {
-          this.queueSave(save);
-        }
+        this.checkSettledState();
       } catch (error) {
         console.error("Failed to queue the settled content save", error);
       }
@@ -412,26 +410,46 @@ export class ContentSaveSender {
   };
 
   /**
-   * A save of the current content, stamped with the head of the shared chain, when nothing on this
-   * client can make the content differ from the state at the head, and the envelope and this
-   * client's own saves don't already reach it.
+   * When nothing on this client can make the content differ from the state at the head of the
+   * shared chain, saves the content stamped with the head, unless the envelope or a save of this
+   * client's already reaches it. Once the envelope reaches the head, it holds this content.
    */
-  private createSettledSave(): IQueuedSave | undefined {
+  private checkSettledState() {
     const manager = getGroupHistoryState(this.document);
+    if (!this.running || !manager?.isHistorySettled) return;
+    // Every local entry has committed or been rolled back, so no kept snapshot will be saved.
+    this.keptSnapshots.clear();
     const exactness = getTreeManager(this.document)?.exactness;
     const { content } = this.document;
-    const id = manager?.expectedRemoteHead;
-    const index = manager?.expectedRemoteHeadIndex;
+    const id = manager.expectedRemoteHead;
+    const index = manager.expectedRemoteHeadIndex;
     const exactSince = exactness?.exactSince;
-    if (!this.running || !content || !manager?.isHistorySettled || !id || typeof index !== "number"
-        || !exactness?.isExact || exactSince === undefined || getSnapshotBlockers(this.document).length > 0
-        || this.isReachedByEnvelope(index)) {
-      return undefined;
+    if (!content || !id || typeof index !== "number" || !exactness?.isExact || exactSince === undefined
+        || getSnapshotBlockers(this.document).length > 0) {
+      return;
+    }
+    if (this.isReachedByEnvelope(index)) {
+      this.showAllChangesSaved();
+      return;
     }
     const waiting = [this.pendingSave, ...this.writesInFlight];
-    if (waiting.some(save => save && (getSaveIndex(save) ?? -1) >= index)) return undefined;
+    if (waiting.some(save => save && (getSaveIndex(save) ?? -1) >= index)) return;
+    this.queueSave(this.createSettledSave({ id, index }, content, exactSince));
+  }
+
+  // The envelope holds the current content. Local changes a rollback undid never commit, so no
+  // save of this client's covers them.
+  private showAllChangesSaved() {
+    if (this.savedSeq >= this.dirtySeq) return;
+    this.savedSeq = this.dirtySeq;
+    this.unsettledSince = undefined;
+    this.setSaveState(SaveState.Saved);
+  }
+
+  private createSettledSave(entry: ICommittedEntry, content: DocumentContentModelType, exactSince: string)
+      : IQueuedSave {
     const snapshot = getSnapshot<DocumentContentSnapshotType>(content);
-    const entry = { id, index };
+    const { id, index } = entry;
     return {
       kind: "settled",
       changeSeq: this.dirtySeq,

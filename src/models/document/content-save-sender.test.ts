@@ -101,6 +101,11 @@ class StubCommitSource implements IHistoryManager, ICommitSource {
     this.applying = applying;
   }
 
+  // A fork rollback removes local entries that will never commit.
+  rollBack(...ids: string[]) {
+    runInAction(() => { this.uncommitted = this.uncommitted.filter(id => !ids.includes(id)); });
+  }
+
   setUploading(uploading: boolean) {
     this.uploading = uploading;
   }
@@ -1200,6 +1205,35 @@ describe("ContentSaveSender", () => {
       await flush();
       expect(document.saveState).toBe(SaveState.Saving);
       expect(onContentSaved.mock.calls).toEqual([[document, "r3"], [document, "r6"]]);
+    });
+
+    it("shows Saved once the envelope reaches the head after a rollback undid this client's change",
+        async () => {
+      const { commits, contentRef, document, edit, sender } = track(setup({ random: () => 0.5 }, true));
+      const a = await edit("alpha");
+      expect(document.saveState).toBe(SaveState.Saving);
+
+      // Another writer's conflicting entry wins, so a is undone and never commits.
+      commits.setApplying(true);
+      commits.voidUncommitted();
+      document.applyPatchesFromManager(FAKE_HISTORY_ENTRY_ID, "exchange", [
+        { op: "replace", path: "/content/tileMap/t1/content/text", value: "remote" }
+      ]);
+      await flush();
+      commits.rollBack(a);
+      commits.advanceRemoteHead("r1");
+      commits.setApplying(false);
+      await flush();
+
+      // The winner saves the head before this client's settled save is sent.
+      jest.advanceTimersByTime(kGroupSaveJitterMs / 4);
+      contentRef.fireEnvelope({ lastHistoryEntryId: "r1", lastHistoryEntryIndex: 1, settled: true });
+      await flush();
+      jest.advanceTimersByTime(kGroupSaveJitterMs);
+      await flush();
+      expect(contentRef.update).not.toHaveBeenCalled();
+      expect(document.saveState).toBe(SaveState.Saved);
+      expect((sender as unknown as { keptSnapshots: Map<string, unknown> }).keptSnapshots.size).toBe(0);
     });
 
     it("ignores the envelope of its own write while that write is in flight", async () => {
