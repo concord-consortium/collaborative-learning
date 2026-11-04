@@ -209,10 +209,21 @@ covered the envelope's id. None does for group documents. Add one that listens o
 
 ### 3. Loading
 
-**Individual documents catch up at load.** If the loaded envelope's id isn't Firestore's last entry
-for the document, the entries after it are applied at load, as group documents already do. This
-restores edits that reached history but not the content, so the user sees their last few seconds of
-work come back, and it keeps the next entry's `previousEntryId` and the content in agreement.
+**Individual documents catch up at load.** If the loaded envelope has `settled: true` and its id isn't
+Firestore's last entry for the document, the entries after it are applied at load, as group documents
+already do. This restores edits that reached history but not the content, so the user sees their last
+few seconds of work come back, and it keeps the next entry's `previousEntryId` and the content in
+agreement.
+
+Only a `settled` envelope is caught up. An unmarked envelope's id is only a lower bound: an
+intermediate save's content can already hold entries that hadn't committed when it was stamped, and
+older envelopes under-claim the same way. Applying the entries after that id could apply some of them
+twice. So an unmarked envelope whose id isn't the last entry opens with the content as saved, the
+session is not exact, and the gap is logged.
+
+The catch-up runs only for documents the current user owns, and not for publications. Only the owner
+edits and saves an individual document, so other viewers (teachers, other students, exemplars) open
+without waiting.
 
 The catch-up never loads the whole history. DataFlow and Simulator documents can have very large
 histories, and today an individual load reads only the last entry (`getLastHistoryEntry`, a
@@ -240,15 +251,17 @@ way:
    uploaded, gets no catch-up, and the session is not exact.
 
 Opening the document waits for the catch-up: one more query, or two for an envelope without an index.
-Applying entries after the user has started editing would collide with their new entries. A gap over
-the cap doesn't wait.
+Applying entries after the user has started editing would collide with their new entries, so the
+document, its toolbar and its 4-up corner stay read-only until the catch-up finishes. A gap over the
+cap doesn't wait.
 
 If an entry fails to apply, the document opens with what applied, and the session is not exact. The
 failure is logged.
 
 **Whether a load is exact.** A load is exact when the envelope had `settled: true` and any missing
-entries applied cleanly. Then `exactSince` carries forward. Otherwise the session's exact saves start
-`exactSince` at the loaded id, or at the last applied entry when missing entries were applied.
+entries applied cleanly. Then `exactSince` carries forward. An unmarked envelope at Firestore's last
+entry starts the session's exact saves at the loaded id. An unmarked envelope with a gap leaves the
+session not exact.
 
 **The group-document initial load.** The FIXME at `getInitialLastHistoryEntry` in
 `firestore-history-manager-concurrent.ts` describes a race: the content and
@@ -315,8 +328,15 @@ latest change isn't saved, and stops. This gives CLUE-760's flush on the way out
 document its last save after the upload queue drains in the background.
 
 **Page hide.** On `pagehide`, an individual document sends its newest usable committed snapshot right
-away, skipping the minimum gap. It doesn't make an intermediate save: entries still uploading are
-likely lost with the tab, and if they do land, the next load catches up (section 3).
+away, skipping the minimum gap. It doesn't make an intermediate save while its saves are exact:
+entries still uploading are likely lost with the tab, and if they do land, the next load catches up
+from that settled envelope (section 3). When the document already relies on intermediate saves (a
+fallback episode is open, or the session isn't exact) and the latest change isn't covered, it sends
+an intermediate save right away instead, so a tab closed during a Firestore outage loses nothing the
+5-second cadence hadn't sent yet.
+
+When the hook unmounts, the last-edited time (and the session-end evaluation request it triggers)
+is set when the sender finishes, not at unmount, so the evaluation reads the final content.
 
 **The save indicator.**
 
@@ -367,6 +387,17 @@ names are left to the builder.
   across them. Changes after monitoring starts that produce no entry are detected only where the
   builder's check (see "Left to the builder") catches them. CLUE-788 section 2 covers recording all of
   these as drift entries.
+- **Changes made while monitoring is off.** Changes made after the load but before the hook enables
+  history monitoring (mount-time fixups, such as a tile syncing to a shared model), changes made
+  while the sender drains after unmount, and patches made outside an action while a flow is
+  suspended are not detected. Such a change can sit inside a settled save. A detector would also
+  flag load-time fixups and leave those documents never exact, so CLUE-788's drift entries are the
+  fix.
+- **The group initial load from an unmarked envelope.** The content and Firestore's last entry are
+  read separately, so an entry committed between the two reads is skipped, and that session's saves
+  are still marked settled. A load from a `settled` envelope doesn't have this. Marking unmarked
+  group loads not exact instead would stop every existing group document from saving, since group
+  documents make no intermediate saves. GD-22's list in the group-docs plan records it.
 - **Individual uploads that fail for good.** The Firestore SDK retries transient write failures
   itself, so a `set` that hasn't resolved is usually just waiting. A write that fails for good, or a
   session where `waitForMetadataDocument` times out and nothing uploads, stops the committed prefix for
@@ -414,7 +445,8 @@ document) is written up by CLUE-788.
 - Content saves wait for commits (rather than readers waiting for the entry to appear).
 - Intermediate saves are for documents known to have a single writer, which today means individual
   documents only.
-- Individual documents apply missing entries at load; a failure leaves the session not exact.
+- Individual documents apply missing entries at load, only from a `settled` envelope and only for
+  the owner; a failure leaves the session not exact.
 - The catch-up fetches only the missing entries, using `lastHistoryEntryIndex`, which every save
   writes. A gap of more than 200 entries isn't fetched, and the session is not exact.
 - Running flows that have changed state count as open. Only tree-manager exchanges time out, and
@@ -432,8 +464,8 @@ document) is written up by CLUE-788.
   0–200 ms jitter, 30-second limit after unmount.
 - A timed-out entry is marked `timedOut: true`, and makes the rest of the session not exact.
 - The `tools` update goes out only when the list of tile types changes.
-- On `pagehide`, an individual document sends its newest usable committed snapshot and makes no
-  intermediate save.
+- On `pagehide`, an individual document sends its newest usable committed snapshot, and makes an
+  intermediate save only when it already relies on them.
 - The save indicator rules in section 5.
 - The activity recorder keeps its 30-second timeout and `pagehide` recording as a backstop.
 - Group saves are stamped with `expectedRemoteHead` (settled saves) or the committed entry (snapshot
@@ -470,7 +502,8 @@ document) is written up by CLUE-788.
   `exactSince` carries forward across an exact load and restarts after an unmarked one.
 - **Envelope fields:** an exact save clears `unsettled`, an intermediate save clears `settled` and
   `exactSince`, and every save is stamped with an id that is in Firestore.
-- **Load (individual):** content behind Firestore applies the missing entries and keeps `exactSince`;
+- **Load (individual):** a settled envelope behind Firestore applies the missing entries and keeps
+  `exactSince`; an unmarked envelope behind Firestore applies nothing and is not exact;
   a failed apply opens with what applied and is not exact. Only the gap is fetched: no extra read when
   the envelope is at the last entry, and one read by id for an envelope without an index. A gap over
   200 entries isn't fetched, is logged, and leaves the session not exact. A hole in the indexes or a
