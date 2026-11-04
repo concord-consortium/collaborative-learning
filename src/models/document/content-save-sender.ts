@@ -3,7 +3,7 @@ import { getPath, getSnapshot, onSnapshot } from "mobx-state-tree";
 import { LogEventName } from "../../lib/logger-types";
 import { HistoryEntryType } from "../history/history";
 import { ICommitListener, ICommittedEntry, isCommitSource } from "../history/history-commits";
-import { TreeManagerType } from "../history/tree-manager";
+import { FAKE_HISTORY_ENTRY_ID, TreeManagerType } from "../history/tree-manager";
 import { buildExactSave, getDocumentTools } from "./content-save-envelope";
 import { DocumentModelType, SaveState } from "./document";
 import { DocumentContentSnapshotType } from "./document-content";
@@ -50,14 +50,11 @@ interface IQueuedSave extends IPendingSave {
   buildValues(changeCount: number): Record<string, unknown>;
 }
 
-// The content snapshot taken when a local entry completed, kept until that entry commits.
-interface IKeptSnapshot {
-  snapshot: DocumentContentSnapshotType;
-  // Whether the snapshot is exactly the history through its entry, once the entry commits.
-  usable: boolean;
-  exactSince: string | undefined;
-  changeSeq: number;
-}
+// What was kept when a local entry completed, until that entry commits. The content snapshot is
+// kept only when it is usable: exactly the history through its entry, once the entry commits.
+type IKeptSnapshot =
+  { usable: true; snapshot: DocumentContentSnapshotType; exactSince: string; changeSeq: number } |
+  { usable: false; changeSeq: number };
 
 // The state of a group document's history manager that the sender reads.
 interface IGroupHistoryState {
@@ -75,6 +72,17 @@ function isApplyingRemoteEntries(document: DocumentModelType) {
   if (!document.concurrent) return false;
   const manager = getTreeManager(document)?.historyManager as Partial<IGroupHistoryState> | undefined;
   return !!manager?.applying;
+}
+
+/**
+ * Whether the content change being reported was made by this user rather than by a group
+ * document's apply of remote entries. The apply's calls run with the fake history entry id, and a
+ * call is still running when the content reports its change.
+ */
+function isLocalChange(document: DocumentModelType) {
+  if (!isApplyingRemoteEntries(document)) return true;
+  return !!document.treeMonitor?.getRunningCallsWithChanges()
+    .some(call => call.historyEntryId !== FAKE_HISTORY_ENTRY_ID);
 }
 
 /**
@@ -183,13 +191,13 @@ export class ContentSaveSender {
       const { content } = this.document;
       const exactness = getTreeManager(this.document)?.exactness;
       if (!content || !exactness) return;
-      const usable = exactness.isExact && getSnapshotBlockers(this.document).length === 0;
-      this.keptSnapshots.set(entry.id, {
-        snapshot: getSnapshot<DocumentContentSnapshotType>(content),
-        usable,
-        exactSince: exactness.exactSince,
-        changeSeq: this.dirtySeq
-      });
+      const { exactSince } = exactness;
+      const usable = exactness.isExact && exactSince !== undefined
+        && getSnapshotBlockers(this.document).length === 0;
+      this.keptSnapshots.set(entry.id, usable
+        ? { usable, snapshot: getSnapshot<DocumentContentSnapshotType>(content), exactSince,
+            changeSeq: this.dirtySeq }
+        : { usable, changeSeq: this.dirtySeq });
     } catch (error) {
       console.error("Failed to keep the content snapshot of a history entry", error);
     }
@@ -198,16 +206,16 @@ export class ContentSaveSender {
   private commitListener: ICommitListener = {
     onCommitted: (entries: ICommittedEntry[]) => {
       try {
-        let newest: { entry: ICommittedEntry, kept: IKeptSnapshot, exactSince: string } | undefined;
+        let newest: IQueuedSave | undefined;
         entries.forEach(entry => {
           const kept = this.keptSnapshots.get(entry.id);
-          if (kept?.usable && kept.exactSince !== undefined) {
-            newest = { entry, kept, exactSince: kept.exactSince };
+          if (kept?.usable) {
+            newest = this.createExactSave(entry, kept.snapshot, kept.exactSince, kept.changeSeq);
           }
           this.keptSnapshots.delete(entry.id);
         });
         if (newest) {
-          this.queueSave(this.createExactSave(newest.entry, newest.kept, newest.exactSince));
+          this.queueSave(newest);
         }
       } catch (error) {
         console.error("Failed to queue the content save of committed history entries", error);
@@ -219,15 +227,15 @@ export class ContentSaveSender {
   };
 
   private handleContentChanged = () => {
-    if (isApplyingRemoteEntries(this.document)) return;
+    if (!isLocalChange(this.document)) return;
     this.dirtySeq++;
     if (this.consecutiveFailures < kRetryingAfterFailures) {
       this.setSaveState(SaveState.Saving);
     }
   };
 
-  private createExactSave(entry: ICommittedEntry, kept: IKeptSnapshot, exactSince: string): IQueuedSave {
-    const { snapshot, changeSeq } = kept;
+  private createExactSave(entry: ICommittedEntry, snapshot: DocumentContentSnapshotType, exactSince: string,
+      changeSeq: number): IQueuedSave {
     return {
       kind: "exact",
       changeSeq,

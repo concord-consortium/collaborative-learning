@@ -2,7 +2,7 @@ import { action, makeObservable, observable } from "mobx";
 import { flow, Instance, types } from "mobx-state-tree";
 import { deferred } from "promise-assist";
 import { ICommitListener, ICommitSource, ICommittedEntry } from "../history/history-commits";
-import { IHistoryManager, TreeManagerType } from "../history/tree-manager";
+import { FAKE_HISTORY_ENTRY_ID, IHistoryManager, TreeManagerType } from "../history/tree-manager";
 import { registerTileComponentInfo } from "../tiles/tile-component-info";
 import { registerTileContentInfo } from "../tiles/tile-content-info";
 import { TileContentModel } from "../tiles/tile-content";
@@ -175,20 +175,20 @@ function twoStepGate() {
 }
 
 describe("ContentSaveSender", () => {
-  let sender: ContentSaveSender | undefined;
+  let senders: ContentSaveSender[] = [];
 
   beforeEach(() => {
     // MST flows resume through queueMicrotask.
     jest.useFakeTimers({ doNotFake: ["queueMicrotask"] });
   });
   afterEach(() => {
-    sender?.dispose();
-    sender = undefined;
+    senders.forEach(sender => sender.dispose());
+    senders = [];
     jest.useRealTimers();
   });
 
   function track<T extends { sender: ContentSaveSender }>(context: T) {
-    sender = context.sender;
+    senders.push(context.sender);
     return context;
   }
 
@@ -583,12 +583,36 @@ describe("ContentSaveSender", () => {
       expect(document.saveState).toBe(SaveState.Saved);
     });
 
-    it("doesn't show Saving for remote entries a group document applies", async () => {
-      const { commits, document, tile } = track(setup({}, true));
+    it("doesn't show Saving for the changes a group document's apply makes", async () => {
+      const { commits, document } = track(setup({}, true));
       commits.setApplying(true);
-      tile.setText("remote");
+      document.applyPatchesFromManager(FAKE_HISTORY_ENTRY_ID, "exchange", [
+        { op: "replace", path: "/content/tileMap/t1/content/text", value: "remote" }
+      ]);
       await flush();
+      commits.setApplying(false);
+      expect(document.content!.tileMap.get("t1")!.content).toMatchObject({ text: "remote" });
       expect(document.saveState).toBe(SaveState.Idle);
+    });
+
+    it("shows Saving for a local edit made while a group document applies remote entries", async () => {
+      const { commits, contentRef, document, edit } = track(setup({}, true));
+      commits.setApplying(true);
+      document.applyPatchesFromManager(FAKE_HISTORY_ENTRY_ID, "exchange", [
+        { op: "replace", path: "/content/tileMap/t1/content/text", value: "remote" }
+      ]);
+      const a = await edit("local");
+      expect(document.saveState).toBe(SaveState.Saving);
+      commits.setApplying(false);
+
+      // The snapshot taken during the apply isn't saved, so the edit stays unsaved.
+      commits.commit(a);
+      expect(contentRef.update).not.toHaveBeenCalled();
+      const b = await edit("later");
+      commits.commit(b);
+      contentRef.writes[0].resolve();
+      await flush();
+      expect(document.saveState).toBe(SaveState.Saved);
     });
 
     it("reports each saved id to onContentSaved, and calls beforeWrite before each write", async () => {
@@ -631,6 +655,19 @@ describe("ContentSaveSender", () => {
       await edit("bravo");
       jest.advanceTimersByTime(10000);
       expect(contentRef.update).not.toHaveBeenCalled();
+    });
+
+    it("restarts when attached after it was disposed", async () => {
+      const { commits, contentRef, document, edit, sender: restarted } = track(setup());
+      restarted.dispose();
+      restarted.attach({ contentRef, updateTools: () => Promise.resolve() });
+      const a = await edit("alpha");
+      commits.commit(a);
+      expect(contentRef.update).toHaveBeenCalledTimes(1);
+      expect(contentRef.writes[0].values.lastHistoryEntryId).toBe(a);
+      contentRef.writes[0].resolve();
+      await flush();
+      expect(document.saveState).toBe(SaveState.Saved);
     });
 
     it("uses the newest options after attach", async () => {
