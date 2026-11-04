@@ -562,6 +562,26 @@ describe("ContentSaveSender", () => {
       expect(contentRef.update).toHaveBeenCalledTimes(2);
       sender.detach();
       expect(onDrained).toHaveBeenCalledTimes(1);
+      expect(document.savedEnvelope).toEqual(
+        { lastHistoryEntryId: b, lastHistoryEntryIndex: 2, settled: true, exactSince: "e0" });
+    });
+
+    it("records the envelope each newest write leaves in the RTDB", async () => {
+      const { commits, contentRef, document, edit } = track(setup());
+      document.setSavedEnvelope({ lastHistoryEntryId: "loaded", lastHistoryEntryIndex: 7, settled: false });
+      const a = await edit("alpha");
+      commits.commit(a);
+      contentRef.writes[0].resolve();
+      await flush();
+      expect(document.savedEnvelope).toEqual(
+        { lastHistoryEntryId: a, lastHistoryEntryIndex: 1, settled: true, exactSince: "e0" });
+
+      await edit("bravo");
+      jest.advanceTimersByTime(kIntermediateSaveIntervalMs);
+      expect(contentRef.writes[1].values).toMatchObject({ settled: null });
+      contentRef.writes[1].resolve();
+      await flush();
+      expect(document.savedEnvelope).toEqual({ lastHistoryEntryId: a, lastHistoryEntryIndex: 1, settled: false });
     });
 
     it("sends no exact save older than the newest intermediate content when intermediate writes finish out of order",
@@ -1450,6 +1470,27 @@ describe("ContentSaveSender", () => {
       contentRef.writes[0].resolve();
       await flush();
       expect(logEvent.mock.calls.map(([event]) => event)).toEqual([LogEventName.CONTENT_SAVE_FALLBACK_START]);
+    });
+
+    it("sends an intermediate save at once on page hide after a drain ended on an intermediate save",
+        async () => {
+      const { contentRef, document, edit, sender, updateTools } = track(setup());
+      document.setSavedEnvelope(settledEnvelope);
+      await edit("alpha");
+      sender.detach();
+      jest.advanceTimersByTime(kSenderUnmountLimitMs);
+      expect(contentRef.update).toHaveBeenCalledTimes(1);
+      expect(contentRef.writes[0].values).toMatchObject({ settled: null });
+      contentRef.writes[0].resolve();
+      await flush();
+
+      const { sender: remounted } = track({ sender: getContentSaveSender(document, { contentRef, updateTools }) });
+      expect(remounted).not.toBe(sender);
+      await edit("bravo");
+      remounted.handlePageHide();
+      expect(contentRef.update).toHaveBeenCalledTimes(2);
+      expect(contentRef.writes[1].values).toMatchObject({ settled: null });
+      expect(textOf(contentRef.writes[1].values)).toBe("bravo");
     });
 
     it("sends a pending exact save that covers the latest change on page hide, without an intermediate one",

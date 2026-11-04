@@ -112,9 +112,10 @@ export const DocumentModel = Tree.named("Document")
     contentErrorMessage: undefined as string | undefined,
     showPlaybackControls: false,
     commentsManager: undefined as DocumentCommentsManager | undefined,
-    // The history fields of the RTDB envelope the content was loaded from. The id is used once at
-    // history-load time to detect drift between the loaded content and the Firestore history chain.
-    // Undefined for pre-feature saves or fresh docs with no prior history.
+    // The history fields of the RTDB envelope, as far as this client knows: the one the content was
+    // loaded from, until a content save writes a new one. The loaded id is used once at history-load
+    // time to detect drift between the loaded content and the Firestore history chain. Undefined for
+    // pre-feature saves or fresh docs with no prior history, until a save.
     savedEnvelope: undefined as ISavedEnvelope | undefined,
     // True while an individual document is being caught up to its Firestore history at load. The
     // document can't be edited until then.

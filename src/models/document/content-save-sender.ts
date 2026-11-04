@@ -62,6 +62,8 @@ interface IQueuedSave extends IPendingSave {
   lastHistoryEntryId?: string;
   // The Firestore index of the entry the save is stamped with, when it is known.
   index?: number;
+  // Set on an exact or settled save.
+  exactSince?: string;
   // A group document's save isn't sent before this time.
   notBefore?: number;
   buildValues(changeCount: number): Record<string, unknown>;
@@ -99,7 +101,7 @@ type EnvelopeValues = Partial<Record<typeof kEnvelopeFields[number], unknown>>;
 
 // Document actions the sender calls itself. Like any action each one briefly opens a history
 // entry, but they never change the content, so those entries don't block a snapshot.
-const kContentFreeDocumentActions = ["setSaveState", "incChangeCount"];
+const kContentFreeDocumentActions = ["setSaveState", "incChangeCount", "setSavedEnvelope"];
 
 const getTreeManager = (document: DocumentModelType) =>
   document.treeManagerAPI as TreeManagerType | undefined;
@@ -251,8 +253,6 @@ export class ContentSaveSender {
   private intermediateDueAt: number | undefined;
   private lastIntermediateWriteAt: number | undefined;
   private fallbackEpisode: IFallbackEpisode | undefined;
-  // Whether an exact save has landed, so the RTDB no longer holds the loaded envelope.
-  private exactSaveLanded = false;
   private sentTools: string[] | undefined;
   // This client's newest committed local entry, with the content change its snapshot was taken at.
   private lastCommittedLocal: { index: number; changeSeq: number } | undefined;
@@ -383,13 +383,12 @@ export class ContentSaveSender {
 
   /**
    * Whether intermediate saves are already standing in for exact ones on this individual document.
-   * They also are while the RTDB still holds the loaded content and its envelope wasn't settled, or
-   * there was none: the next load catches up only from a settled envelope, so an intermediate save
-   * over it loses nothing.
+   * They also are while the envelope the RTDB holds isn't settled, or there is none: the next load
+   * catches up only from a settled envelope, so an intermediate save over it loses nothing.
    */
   private isRelyingOnIntermediateSaves() {
     return !!this.fallbackEpisode || !getTreeManager(this.document)?.exactness.isExact
-      || (!this.exactSaveLanded && this.document.savedEnvelope?.settled !== true);
+      || this.document.savedEnvelope?.settled !== true;
   }
 
   dispose() {
@@ -575,6 +574,7 @@ export class ContentSaveSender {
       snapshot,
       lastHistoryEntryId: id,
       index,
+      exactSince,
       buildValues: changeCount =>
         buildExactSave({ content: JSON.stringify(snapshot), changeCount, entry, exactSince })
     };
@@ -664,6 +664,7 @@ export class ContentSaveSender {
       snapshot,
       lastHistoryEntryId: entry.id,
       index: entry.index,
+      exactSince,
       buildValues: changeCount =>
         buildExactSave({ content: JSON.stringify(snapshot), changeCount, entry, exactSince })
     };
@@ -684,6 +685,7 @@ export class ContentSaveSender {
       changeSeq: this.dirtySeq,
       snapshot,
       lastHistoryEntryId: entry?.id,
+      index: entry?.index,
       evidence,
       buildValues: changeCount =>
         buildIntermediateSave({ content: JSON.stringify(snapshot), changeCount, entry, evidence })
@@ -864,6 +866,9 @@ export class ContentSaveSender {
     // nothing, since the newer content is what the RTDB holds.
     const isNewest = save.changeSeq >= this.savedSeq;
     this.savedSeq = Math.max(this.savedSeq, save.changeSeq);
+    if (isNewest) {
+      this.recordSavedEnvelope(save);
+    }
     if (!this.running) {
       // A write sent before the sender stopped still reports what it saved.
       if (isNewest) {
@@ -880,12 +885,9 @@ export class ContentSaveSender {
       if (this.fallbackEpisode) {
         this.fallbackEpisode.intermediateSaves++;
       }
-    } else {
-      this.exactSaveLanded = true;
-      if (isNewest) {
-        this.endFallbackEpisode("exact-save");
-        this.unsettledSince = save.changeSeq >= this.dirtySeq ? undefined : Date.now();
-      }
+    } else if (isNewest) {
+      this.endFallbackEpisode("exact-save");
+      this.unsettledSince = save.changeSeq >= this.dirtySeq ? undefined : Date.now();
     }
     if (isNewest) {
       this.reportWrite(save);
@@ -912,6 +914,23 @@ export class ContentSaveSender {
       this.setSaveState(SaveState.Retrying);
     }
     this.scheduleWrite();
+  }
+
+  /**
+   * Records the envelope the save left in the RTDB, which page hide and a later sender for this
+   * document read. An intermediate save without an entry leaves the envelope's id and index as they were.
+   */
+  private recordSavedEnvelope(save: IQueuedSave) {
+    const { lastHistoryEntryId, lastHistoryEntryIndex } = save.lastHistoryEntryId
+      ? { lastHistoryEntryId: save.lastHistoryEntryId, lastHistoryEntryIndex: save.index }
+      : this.document.savedEnvelope ?? {};
+    const settled = save.kind !== "intermediate";
+    this.document.setSavedEnvelope({
+      ...(lastHistoryEntryId !== undefined && { lastHistoryEntryId }),
+      ...(lastHistoryEntryIndex !== undefined && { lastHistoryEntryIndex }),
+      settled,
+      ...(settled && save.exactSince !== undefined && { exactSince: save.exactSince })
+    });
   }
 
   // Sends the saved content's tools and reports the id the save was stamped with.
