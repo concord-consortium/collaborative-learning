@@ -76,9 +76,8 @@ export function buildIntermediateSave({ content, changeCount, entry, evidence }:
   const values: Record<string, unknown> = { content, changeCount };
   if (entry) {
     values.lastHistoryEntryId = entry.id;
-    if (entry.index !== undefined) {
-      values.lastHistoryEntryIndex = entry.index;
-    }
+    // Cleared when unknown, so the merge can't leave an older entry's index next to this id.
+    values.lastHistoryEntryIndex = entry.index ?? null;
   }
   return { ...values, settled: null, exactSince: null, unsettled: evidence };
 }

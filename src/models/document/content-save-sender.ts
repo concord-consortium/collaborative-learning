@@ -13,6 +13,8 @@ export const kMinimumSaveGapMs = 1000;
 export const kMaxRetryDelayMs = 30000;
 export const kRetryingAfterFailures = 3;
 export const kIntermediateSaveIntervalMs = 5000;
+// The most uncommitted entry ids an intermediate save's evidence lists, keeping the newest.
+export const kMaxEvidenceEntryIds = 20;
 
 export interface IValueRef {
   on(event: "value", cb: (snapshot: { val(): unknown }) => void): unknown;
@@ -53,6 +55,9 @@ interface IQueuedSave extends IPendingSave {
   // Set on an intermediate save.
   evidence?: IUnsettledEvidence;
 }
+
+// An intermediate save is built from the content as it is when it is sent, so it waits unbuilt.
+type IWaitingSave = IQueuedSave | IPendingSave;
 
 // What was kept when a local entry completed, until that entry commits. The content snapshot is
 // kept only when it is usable: exactly the history through its entry, once the entry commits.
@@ -134,7 +139,7 @@ export function collectUnsettledEvidence(document: DocumentModelType, uncommitte
   return {
     openEntries,
     runningFlows,
-    uncommittedEntryIds,
+    uncommittedEntryIds: uncommittedEntryIds.slice(-kMaxEvidenceEntryIds),
     ...(notExactReason && { notExactReason }),
     unsettledSince
   };
@@ -179,9 +184,9 @@ export class ContentSaveSender {
   private running = false;
   private disposers: Array<() => void> = [];
   private keptSnapshots = new Map<string, IKeptSnapshot>();
-  private pendingSave: IQueuedSave | undefined;
+  private pendingSave: IWaitingSave | undefined;
   // More than one only after a page hide, which doesn't wait for the write in flight.
-  private writesInFlight = new Set<IQueuedSave>();
+  private writesInFlight = new Set<IWaitingSave>();
   private writeTimer: ReturnType<typeof setTimeout> | undefined;
   private lastWriteStartedAt: number | undefined;
   private lastFailureAt: number | undefined;
@@ -190,6 +195,9 @@ export class ContentSaveSender {
   private dirtySeq = 0;
   // The content change the RTDB content holds: the changeSeq of the last write that succeeded.
   private savedSeq = 0;
+  // The newest content change an intermediate save has written. An exact save of older content
+  // would undo changes the RTDB already holds, so it isn't sent.
+  private intermediateSeq = 0;
   // When the current stretch with unsaved changes and no exact save began: the first change after
   // the content was exactly saved, or the last exact save when it left changes unsaved.
   private unsettledSince: number | undefined;
@@ -218,11 +226,13 @@ export class ContentSaveSender {
   /**
    * Sends the pending exact save now, without waiting for the minimum gap, a backoff or the write
    * in flight, since the page may be gone before they end. Changes that haven't committed are left
-   * for the next load to catch up from history, so no intermediate save is made.
+   * for the next load to catch up from history, so no intermediate save is made. A group document
+   * saves through its usual checks.
    */
   handlePageHide() {
     const save = this.pendingSave;
-    if (!this.running || save?.kind !== "exact" || this.writesInFlight.has(save)) return;
+    if (!this.running || this.document.concurrent || save?.kind !== "exact" || this.writesInFlight.has(save)
+        || this.isOlderThanIntermediateContent(save)) return;
     this.clearWriteTimer();
     this.write(save);
   }
@@ -317,9 +327,11 @@ export class ContentSaveSender {
   }
 
   // Holds the current content, so it is made again each time it is sent.
-  private createIntermediateSave(): IQueuedSave | undefined {
+  private createIntermediateSave(): IQueuedSave {
     const { content } = this.document;
-    if (!content) return undefined;
+    if (!content) {
+      throw new Error("The document has no content to save");
+    }
     const snapshot = getSnapshot<DocumentContentSnapshotType>(content);
     const entry = this.getIntermediateStamp();
     const evidence = collectUnsettledEvidence(this.document, Array.from(this.keptSnapshots.keys()),
@@ -366,15 +378,8 @@ export class ContentSaveSender {
   private handleIntermediateSaveDue = () => {
     this.intermediateTimer = undefined;
     this.intermediateDueAt = undefined;
-    try {
-      if (this.getIntermediateSaveDueAt() === undefined) return;
-      const save = this.createIntermediateSave();
-      if (save) {
-        this.queueSave(save);
-      }
-    } catch (error) {
-      console.error("Failed to queue an intermediate content save", error);
-    }
+    if (this.getIntermediateSaveDueAt() === undefined) return;
+    this.queueSave({ kind: "intermediate", changeSeq: this.dirtySeq });
   };
 
   private clearIntermediateTimer() {
@@ -404,8 +409,23 @@ export class ContentSaveSender {
     }
   }
 
+  // The newest content change written, or being written, by an intermediate save.
+  private getIntermediateContentSeq() {
+    let seq = this.intermediateSeq;
+    this.writesInFlight.forEach(save => {
+      if (save.kind === "intermediate") {
+        seq = Math.max(seq, save.changeSeq);
+      }
+    });
+    return seq;
+  }
+
+  private isOlderThanIntermediateContent(save: IPendingSave) {
+    return save.kind !== "intermediate" && save.changeSeq < this.getIntermediateContentSeq();
+  }
+
   // Replaces any save that hasn't been sent yet.
-  private queueSave(save: IQueuedSave) {
+  private queueSave(save: IWaitingSave) {
     this.pendingSave = save;
     this.scheduleWrite();
     this.scheduleIntermediateSave();
@@ -413,6 +433,11 @@ export class ContentSaveSender {
 
   private scheduleWrite() {
     this.clearWriteTimer();
+    if (this.pendingSave && !this.writesInFlight.has(this.pendingSave)
+        && this.isOlderThanIntermediateContent(this.pendingSave)) {
+      this.pendingSave = undefined;
+      this.scheduleIntermediateSave();
+    }
     const save = this.pendingSave;
     if (!this.running || this.writesInFlight.size > 0 || !save) return;
     const delay = this.getWriteReadyAt(save) - Date.now();
@@ -426,7 +451,7 @@ export class ContentSaveSender {
     }
   }
 
-  private getWriteReadyAt(save: IQueuedSave) {
+  private getWriteReadyAt(save: IWaitingSave) {
     let readyAt = 0;
     if (this.lastWriteStartedAt !== undefined) {
       const gap = this.options.getMinimumGapMs?.(save) ?? kMinimumSaveGapMs;
@@ -445,13 +470,22 @@ export class ContentSaveSender {
     }
   }
 
-  private write(queued: IQueuedSave) {
-    const save = queued.kind === "intermediate" ? this.createIntermediateSave() ?? queued : queued;
+  private write(queued: IWaitingSave) {
+    this.writesInFlight.add(queued);
+    this.lastWriteStartedAt = Date.now();
+    let save: IQueuedSave;
+    try {
+      save = queued.kind !== "intermediate" && "buildValues" in queued ? queued : this.createIntermediateSave();
+    } catch (error) {
+      // Handled as a failed write, so it is retried.
+      Promise.resolve().then(() => this.handleWriteFailed(queued, error));
+      return;
+    }
+    this.writesInFlight.delete(queued);
+    this.writesInFlight.add(save);
     if (this.pendingSave === queued) {
       this.pendingSave = save;
     }
-    this.writesInFlight.add(save);
-    this.lastWriteStartedAt = Date.now();
     if (save.kind === "intermediate") {
       this.lastIntermediateWriteAt = this.lastWriteStartedAt;
       if (!this.fallbackEpisode) {
@@ -482,6 +516,7 @@ export class ContentSaveSender {
       this.pendingSave = undefined;
     }
     if (save.kind === "intermediate") {
+      this.intermediateSeq = save.changeSeq;
       if (this.fallbackEpisode) {
         this.fallbackEpisode.intermediateSaves++;
       }
@@ -507,7 +542,7 @@ export class ContentSaveSender {
   }
 
   // The pending save stays in place, unless a newer one has replaced it, so the retry sends the newest.
-  private handleWriteFailed(save: IQueuedSave, error: unknown) {
+  private handleWriteFailed(save: IWaitingSave, error: unknown) {
     this.writesInFlight.delete(save);
     if (!this.running) return;
     this.consecutiveFailures++;

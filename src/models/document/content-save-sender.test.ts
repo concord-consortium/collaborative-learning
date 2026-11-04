@@ -8,7 +8,8 @@ import { registerTileContentInfo } from "../tiles/tile-content-info";
 import { TileContentModel } from "../tiles/tile-content";
 import { LogEventName } from "../../lib/logger-types";
 import {
-  ContentSaveSender, IContentRef, IContentSaveSenderOptions, kIntermediateSaveIntervalMs, kMinimumSaveGapMs
+  collectUnsettledEvidence, ContentSaveSender, IContentRef, IContentSaveSenderOptions, kIntermediateSaveIntervalMs,
+  kMaxEvidenceEntryIds, kMinimumSaveGapMs
 } from "./content-save-sender";
 import { createDocumentModel, DocumentModelType, SaveState } from "./document";
 import { DocumentContentModel } from "./document-content";
@@ -835,6 +836,53 @@ describe("ContentSaveSender", () => {
       expect(contentRef.writes.map(write => write.values.settled)).toEqual([true, true, true, true]);
     });
 
+    it("never overwrites an intermediate save's content with an older exact save", async () => {
+      const { commits, contentRef, edit } = track(setup());
+      const a = await edit("alpha");
+      const b = await edit("bravo");
+      const c = await edit("charlie");
+      jest.advanceTimersByTime(kIntermediateSaveIntervalMs);
+      expect(contentRef.update).toHaveBeenCalledTimes(1);
+      expect(textOf(contentRef.writes[0].values)).toBe("charlie");
+      contentRef.writes[0].resolve();
+      await flush();
+
+      jest.advanceTimersByTime(1000);
+      commits.commit(a);
+      jest.advanceTimersByTime(3 * kIntermediateSaveIntervalMs);
+      await flush();
+      expect(contentRef.update).toHaveBeenCalledTimes(1);
+
+      commits.commit(b, c);
+      expect(contentRef.update).toHaveBeenCalledTimes(2);
+      expect(contentRef.writes[1].values).toMatchObject({ lastHistoryEntryId: c, settled: true });
+      expect(textOf(contentRef.writes[1].values)).toBe("charlie");
+    });
+
+    it("builds an intermediate save again when building it fails", async () => {
+      const { contentRef, document, edit, openEntry } = track(setup());
+      openEntry("open");
+      await edit("alpha");
+      // The evidence is collected as the save is built.
+      jest.spyOn(document.treeMonitor!, "getRunningCallsWithChanges")
+        .mockImplementationOnce(() => { throw new Error("broken"); });
+      await jestSpyConsole("warn", async spy => {
+        jest.advanceTimersByTime(kIntermediateSaveIntervalMs);
+        await flush();
+        expect(contentRef.update).not.toHaveBeenCalled();
+        expect(spy).toHaveBeenCalledTimes(1);
+      });
+      jest.advanceTimersByTime(1000);
+      expect(contentRef.update).toHaveBeenCalledTimes(1);
+      expect(textOf(contentRef.writes[0].values)).toBe("alpha");
+    });
+
+    it("keeps only the newest uncommitted entry ids in the evidence", () => {
+      const { document } = track(setup());
+      const ids = Array.from({ length: kMaxEvidenceEntryIds + 5 }, (_, i) => `e${i}`);
+      expect(collectUnsettledEvidence(document, ids, 0).uncommittedEntryIds).toEqual(ids.slice(5));
+    });
+
     it("never makes an intermediate save on a group document", async () => {
       const { contentRef, edit, openEntry, treeManager } = track(setup({}, true));
       openEntry("open");
@@ -907,6 +955,32 @@ describe("ContentSaveSender", () => {
       sender.handlePageHide();
       jest.advanceTimersByTime(kMinimumSaveGapMs);
       expect(contentRef.update).toHaveBeenCalledTimes(2);
+    });
+
+    it("sends nothing older than an intermediate save's content on page hide", async () => {
+      const { commits, contentRef, edit, sender } = track(setup());
+      const a = await edit("alpha");
+      await edit("bravo");
+      jest.advanceTimersByTime(kIntermediateSaveIntervalMs);
+      expect(contentRef.update).toHaveBeenCalledTimes(1);
+      commits.commit(a);
+
+      sender.handlePageHide();
+      expect(contentRef.update).toHaveBeenCalledTimes(1);
+      contentRef.writes[0].resolve();
+      await flush();
+      jest.advanceTimersByTime(kMinimumSaveGapMs);
+      expect(contentRef.update).toHaveBeenCalledTimes(1);
+    });
+
+    it("does nothing on page hide for a group document", async () => {
+      const { commits, contentRef, edit, sender } = track(setup({}, true));
+      const a = await edit("alpha");
+      commits.commit(a);
+      const b = await edit("bravo");
+      commits.commit(b);
+      sender.handlePageHide();
+      expect(contentRef.update).toHaveBeenCalledTimes(1);
     });
 
     it("makes no intermediate save on page hide", async () => {

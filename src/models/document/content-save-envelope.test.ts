@@ -69,12 +69,12 @@ describe("buildIntermediateSave", () => {
     });
   });
 
-  it("omits the index when the entry has none", () => {
+  it("clears the index when the entry has none", () => {
     const values = buildIntermediateSave({ content: "{}", changeCount: 4, entry: { id: "e1" }, evidence });
     expect(values).toEqual({
-      content: "{}", changeCount: 4, lastHistoryEntryId: "e1", settled: null, exactSince: null, unsettled: evidence
+      content: "{}", changeCount: 4, lastHistoryEntryId: "e1", lastHistoryEntryIndex: null,
+      settled: null, exactSince: null, unsettled: evidence
     });
-    expect("lastHistoryEntryIndex" in values).toBe(false);
   });
 
   it("omits the id fields when given no entry", () => {
