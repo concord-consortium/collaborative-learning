@@ -3,7 +3,9 @@ import { observer } from "mobx-react";
 import { getParentOfType, getSnapshot, isAlive } from "mobx-state-tree";
 import React, { useEffect, useRef, useState } from "react";
 import { documentHasStudentWork } from "../../../shared/ai-analysis-classify";
+import { hasChangedSinceEvaluation } from "../../../shared/ai-evaluation-gate";
 import { documentSummarizer } from "../../../shared/ai-summarizer/ai-summarizer";
+import { getSimpleDocumentPath } from "../../../shared/shared";
 import { formatUnitSummarySlice, unitSummarySlice } from "../../../shared/unit-summary-slice";
 import { useReadOnlyContext } from "../../components/document/read-only-context";
 import { BasicEditableTileTitle } from "../../components/tiles/basic-editable-tile-title";
@@ -14,8 +16,9 @@ import { useStores } from "../../hooks/use-stores";
 import { useUserContext } from "../../hooks/use-user-context";
 import { DocumentContentModel } from "../../models/document/document-content";
 import { getDocumentIdentifier } from "../../models/document/document-utils";
-import { AI_TILE_EMPTY_MESSAGE } from "../../models/document/ai-evaluation-messages";
+import { AI_TILE_EMPTY_MESSAGE, AI_TILE_UNCHANGED_MESSAGE } from "../../models/document/ai-evaluation-messages";
 import { liveProblemsFromUnit } from "../../models/curriculum/unit-utils";
+import { getLastHistoryEntry } from "../../models/history/history-firestore";
 import { AIContentModelType, logAiEvent } from "./ai-content";
 import { changeSlashesToUnderscores } from "./ai-utils";
 
@@ -93,6 +96,21 @@ export const AIComponent: React.FC<ITileProps> = observer((props) => {
             return;
           }
 
+          let latestIndex: number | undefined;
+          try {
+            const lastEntry = await getLastHistoryEntry(
+              stores.db.firestore, getSimpleDocumentPath(document.key));
+            latestIndex = lastEntry?.index;
+          } catch (error) {
+            // Fail open: a gate we can't read must not withhold a refresh.
+            console.error("AI tile gate check failed:", error);
+          }
+          if (!isCurrent()) return;
+          if (!hasChangedSinceEvaluation(latestIndex, content.evaluatedHistoryIndex)) {
+            content.setText(AI_TILE_UNCHANGED_MESSAGE);
+            return;
+          }
+
           previousTextRef.current = content.text;
           content.setText("");
           const summary = documentSummarizer(document.content, {});
@@ -133,6 +151,7 @@ export const AIComponent: React.FC<ITileProps> = observer((props) => {
             throw new Error(response.data.error);
           }
           content.setText(response.data.text);
+          content.setEvaluatedHistoryIndex(latestIndex);
           previousTextRef.current = undefined;
           if (response.data.lastUpdated) {
             const timestamp = response.data.lastUpdated;
@@ -155,7 +174,7 @@ export const AIComponent: React.FC<ITileProps> = observer((props) => {
     }
   }, [
     content.refreshCount, content, documentId, documents, getAiContent, identifier, model.id, networkDocuments,
-    readOnly, userContext, unit, systemPrompt
+    readOnly, userContext, unit, systemPrompt, stores
   ]);
 
   // Track the prompt's value at focus time so we can log once on blur, and only when it changed —

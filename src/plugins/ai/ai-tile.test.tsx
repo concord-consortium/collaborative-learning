@@ -23,6 +23,7 @@ const mockStores = {
   },
   documents: { getDocument: jest.fn((): any => undefined) },
   networkDocuments: { getDocument: jest.fn((): any => undefined) },
+  db: { firestore: {} },
 };
 jest.mock("../../hooks/use-stores", () => ({
   useStores: () => mockStores,
@@ -39,9 +40,10 @@ import { logTileChangeEvent } from "../../models/tiles/log/log-tile-change-event
 import { LogEventName } from "../../lib/logger-types";
 import { defaultAIContent } from "./ai-content";
 import { AIComponent } from "./ai-tile";
-import { AI_TILE_EMPTY_MESSAGE } from "../../models/document/ai-evaluation-messages";
+import { AI_TILE_EMPTY_MESSAGE, AI_TILE_UNCHANGED_MESSAGE } from "../../models/document/ai-evaluation-messages";
 import { DocumentContentModel } from "../../models/document/document-content";
 import { ReadOnlyContext } from "../../components/document/read-only-context";
+import { getLastHistoryEntry } from "../../models/history/history-firestore";
 
 // The starter tile needs to be registered so the TileModel.create
 // knows it is a supported tile type
@@ -90,6 +92,14 @@ jest.mock("mobx-state-tree", () => ({
 jest.mock("../../models/document/document-utils", () => ({
   getDocumentIdentifier: jest.fn(() => "test-doc-content-id")
 }));
+
+jest.mock("../../models/history/history-firestore", () => ({
+  getLastHistoryEntry: jest.fn()
+}));
+// Resolving undefined means no history index is known, which the gate reads as "changed", so the
+// tests that aren't about the gate reach the request path as they did before it existed.
+const mockGetLastHistoryEntry = getLastHistoryEntry as jest.Mock;
+mockGetLastHistoryEntry.mockResolvedValue(undefined);
 
 // Logger.stores is uninitialized in this component test; mock the change logger so setPrompt/setText
 // don't crash when the AI content logs changes.
@@ -197,6 +207,8 @@ describe("AIComponent", () => {
       mockStores.networkDocuments.getDocument.mockReset();
       mockStores.networkDocuments.getDocument.mockReturnValue(undefined);
       mockGetAiContent.mockClear();
+      mockGetLastHistoryEntry.mockReset();
+      mockGetLastHistoryEntry.mockResolvedValue(undefined);
       mockStores.unit.config = undefined;
     });
 
@@ -329,6 +341,88 @@ describe("AIComponent", () => {
       expect(request.dynamicContentPrompt).toContain("The student's answer.");
       expect(request.dynamicContentPrompt).toContain("What do you think?");
       expect(aiContent.text).toBe("Mocked customized content");
+    });
+
+    describe("the document-changed gate", () => {
+      it("shows a nudge and makes no request when the document has not changed", async () => {
+        mockStores.documents.getDocument.mockReturnValue(documentWith(populatedDocContent()));
+        mockGetLastHistoryEntry.mockResolvedValue({ index: 47, id: "e47" });
+        const aiContent = defaultAIContent();
+        aiContent.setPrompt("What do you think?");
+        aiContent.setEvaluatedHistoryIndex(47);
+        const aiModel = TileModel.create({ content: aiContent });
+
+        await act(async () => render(<AIComponent {...defaultProps} model={aiModel} documentId="test-doc-1" />));
+
+        expect(aiContent.text).toBe(AI_TILE_UNCHANGED_MESSAGE);
+        expect(mockGetAiContent).not.toHaveBeenCalled();
+      });
+
+      it("records the index it evaluated at after a successful refresh", async () => {
+        mockStores.documents.getDocument.mockReturnValue(documentWith(populatedDocContent()));
+        mockGetLastHistoryEntry.mockResolvedValue({ index: 52, id: "e52" });
+        const aiContent = defaultAIContent();
+        aiContent.setPrompt("What do you think?");
+        const aiModel = TileModel.create({ content: aiContent });
+
+        await act(async () => render(<AIComponent {...defaultProps} model={aiModel} documentId="test-doc-1" />));
+
+        expect(aiContent.text).toBe("Mocked customized content");
+        expect(aiContent.evaluatedHistoryIndex).toBe(52);
+      });
+
+      // Fail open: a gate that can't be read must not withhold a refresh.
+      it("refreshes when the gate cannot be read", async () => {
+        mockStores.documents.getDocument.mockReturnValue(documentWith(populatedDocContent()));
+        mockGetLastHistoryEntry.mockRejectedValue(new Error("history unreadable"));
+        const consoleErrorSpy = jest.spyOn(console, "error").mockImplementation(() => {});
+        const aiContent = defaultAIContent();
+        aiContent.setPrompt("What do you think?");
+        aiContent.setEvaluatedHistoryIndex(47);
+        const aiModel = TileModel.create({ content: aiContent });
+
+        try {
+          await act(async () => render(<AIComponent {...defaultProps} model={aiModel} documentId="test-doc-1" />));
+
+          expect(mockGetAiContent).toHaveBeenCalledTimes(1);
+          expect(aiContent.text).toBe("Mocked customized content");
+        } finally {
+          consoleErrorSpy.mockRestore();
+        }
+      });
+
+      // The gate read adds an await ahead of the request. Pins that a run superseded while that
+      // read is in flight still can't reach getAiContent, so no refresh is ever billed twice.
+      it("does not let a run superseded during its gate read reach the request", async () => {
+        mockStores.documents.getDocument.mockReturnValue(documentWith(populatedDocContent()));
+        let resolveOlderGate: (entry: undefined) => void = () => {};
+        mockGetLastHistoryEntry.mockImplementationOnce(
+          () => new Promise(resolve => { resolveOlderGate = resolve; })
+        );
+        const aiContent = defaultAIContent();
+        aiContent.setPrompt("What do you think?");
+        const aiModel = TileModel.create({ content: aiContent });
+
+        // The mount's run stalls on its gate read.
+        await act(async () => render(<AIComponent {...defaultProps} model={aiModel} documentId="test-doc-1" />));
+        expect(mockGetAiContent).not.toHaveBeenCalled();
+
+        // A second refresh supersedes it and completes on its own.
+        await act(async () => {
+          aiContent.requestRefresh();
+          await Promise.resolve();
+          await Promise.resolve();
+        });
+        expect(mockGetAiContent).toHaveBeenCalledTimes(1);
+
+        // The superseded run's gate read finally resolves: it must not make a request of its own.
+        await act(async () => {
+          resolveOlderGate(undefined);
+          await Promise.resolve();
+          await Promise.resolve();
+        });
+        expect(mockGetAiContent).toHaveBeenCalledTimes(1);
+      });
     });
 
     describe("the unit-summary slice", () => {

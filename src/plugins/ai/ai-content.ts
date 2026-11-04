@@ -28,7 +28,13 @@ export const AIContentModel = TileContentModel
     hidePrompt: types.optional(types.boolean, false),
     prompt: "",
     text: "This is where the dynamically generated AI response will appear.",
-    refreshCount: types.optional(types.number, 0)
+    refreshCount: types.optional(types.number, 0),
+    /**
+     * The document history index this tile's text was generated from. Its own property rather than
+     * the shared evaluationGate node: the AI tile does not go through the comments evaluation at
+     * all, and two AI tiles in one document gate independently, as their separate prompts imply.
+     */
+    evaluatedHistoryIndex: types.maybe(types.number)
   })
   .views(self => ({
     get isUserResizable() {
@@ -55,6 +61,9 @@ export const AIContentModel = TileContentModel
     // not emit an answer-change event. The student-triggered requestRefresh below is what gets logged.
     setText(text: string) {
       self.text = text;
+    },
+    setEvaluatedHistoryIndex(index: number | undefined) {
+      self.evaluatedHistoryIndex = index;
     },
     requestRefresh() {
       self.refreshCount++;
