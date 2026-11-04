@@ -6,7 +6,7 @@ import { ProblemDocument } from "../document/document-types";
 import { registerTileComponentInfo } from "../tiles/tile-component-info";
 import { registerTileContentInfo } from "../tiles/tile-content-info";
 import { TileContentModel } from "../tiles/tile-content";
-import { TreeManager } from "./tree-manager";
+import { FAKE_HISTORY_ENTRY_ID, TreeManager } from "./tree-manager";
 
 const TestTile = TileContentModel
   .named("TestTile")
@@ -17,6 +17,10 @@ const TestTile = TileContentModel
   .actions(self => ({
     setText(value: string) {
       self.text = value;
+    },
+    setTextThenThrow(value: string) {
+      self.text = value;
+      throw new Error("failed after changing state");
     },
     setTextLater: flow(function* (value: string, gate: Promise<void>) {
       yield gate;
@@ -145,6 +149,30 @@ describe("TreeMonitor", () => {
       unprotect(docModel);
       (docContent.tileMap.get("t1")!.content as TestTileType).text = "x";
       expect(treeManager.exactness.notExactReason).toBe("unrecorded-change");
+    });
+
+    it("doesn't report the rollback of a failed action", () => {
+      const { tileContent, treeMonitor, treeManager } = setupDocument();
+      const onUnrecordedChange = jest.fn();
+      treeMonitor.onUnrecordedChange = onUnrecordedChange;
+
+      expect(() => tileContent.setTextThenThrow("x")).toThrow("failed after changing state");
+      expect(tileContent.text).toBeUndefined();
+      expect(onUnrecordedChange).not.toHaveBeenCalled();
+      expect(treeManager.exactness.notExactReason).toBeUndefined();
+    });
+
+    it("doesn't report patches from a call with the fake history entry id", () => {
+      const { docModel, tileContent, treeMonitor, treeManager } = setupDocument();
+      const onUnrecordedChange = jest.fn();
+      treeMonitor.onUnrecordedChange = onUnrecordedChange;
+
+      docModel.applyPatchesFromManager(FAKE_HISTORY_ENTRY_ID, "exchange", [
+        { op: "replace", path: "/content/tileMap/t1/content/text", value: "remote" }
+      ]);
+      expect(tileContent.text).toBe("remote");
+      expect(onUnrecordedChange).not.toHaveBeenCalled();
+      expect(treeManager.exactness.notExactReason).toBeUndefined();
     });
   });
 });
