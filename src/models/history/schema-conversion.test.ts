@@ -92,6 +92,13 @@ describe("convertJsonAtPath", () => {
     expect((tileMap.t1.content as any).text).toBe("hello");
   });
 
+  it("returns the same map when nothing in it is old", () => {
+    const tileMap = { t2: newTile("t2") };
+    expect(convertJsonAtPath("/content/tileMap", tileMap)).toBe(tileMap);
+    const sharedModelMap = { sm1: { sharedModel: { id: "sm1", type: "NoSuch" }, tiles: [] } };
+    expect(convertJsonAtPath("/content/sharedModelMap", sharedModelMap)).toBe(sharedModelMap);
+  });
+
   it("converts the shared model in a sharedModelMap entry and keeps its tiles", () => {
     const result: any = convertJsonAtPath("/content/sharedModelMap/sm1",
       { sharedModel: oldShared("sm1"), tiles: ["t1"] });
