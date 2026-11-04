@@ -4,6 +4,7 @@ import * as logger from "firebase-functions/logger";
 import * as admin from "firebase-admin";
 import {getAnalysisQueueFirestorePath} from "./utils";
 import {IEvaluationRequestContext, kPlaceholderUnitCode} from "../../shared/shared";
+import {hasChangedSinceEvaluation, kEvaluationGateKey} from "../../shared/ai-evaluation-gate";
 
 // This is one of three functions for AI analysis of documents:
 // 1. (This function) watch for changes to the evaluation metadata field and write into the queue of docs to process
@@ -60,6 +61,8 @@ export interface AnalysisQueueDocument {
   evaluator: string;
   metadataPath: string;
   firestoreDocumentPath: string;
+  /** The document history index this evaluation was enqueued at; written to the gate on success. */
+  historyIndex?: number;
   /** The unit and problem the student was running when the evaluation was requested. */
   requestContext?: IEvaluationRequestContext;
   /** Ideas click ids that landed on this queue document before it was picked up (keyed by docId,
@@ -114,6 +117,26 @@ export const normalizeRequestContext = (context: unknown): IEvaluationRequestCon
   return {unit, investigation, problem, offeringId: usableOfferingId ? offeringId : ""};
 };
 
+type LastHistoryEntry = {index: number, id: string} | undefined;
+
+/**
+ * The client's getLastHistoryEntry, against the admin SDK. The query is identical; the SDKs are
+ * not, which is why this is not shared.
+ *
+ * @param {admin.firestore.Firestore} firestore the admin Firestore instance
+ * @param {string} documentPath the document's Firestore path, whose `history` collection is read
+ * @return {Promise<LastHistoryEntry>} the highest-indexed entry, or nothing if there is no usable one
+ */
+async function getLastHistoryEntry(
+  firestore: admin.firestore.Firestore, documentPath: string
+): Promise<LastHistoryEntry> {
+  const query = await firestore.collection(`${documentPath}/history`)
+    .orderBy("index", "desc").limit(1).get();
+  if (query.empty) return undefined;
+  const index = query.docs[0].get("index");
+  return typeof index === "number" ? {index, id: query.docs[0].id} : undefined;
+}
+
 const handleUpdate = async (event: DatabaseEvent<Change<DataSnapshot>>, firebaseRoot: string, firestoreRoot: string) => {
   const content = event.data.after.val();
   if (!content) {
@@ -135,6 +158,28 @@ const handleUpdate = async (event: DatabaseEvent<Change<DataSnapshot>>, firebase
   const firestoreDocumentPath = `${firestoreRoot}/documents/${docId}`;
 
   const firestore = admin.firestore();
+
+  // Fail open: a gate we cannot read must never withhold an evaluation, and this trigger is not
+  // retried, so throwing here would drop the evaluation rather than defer it.
+  let lastEntry: LastHistoryEntry;
+  try {
+    lastEntry = await getLastHistoryEntry(firestore, firestoreDocumentPath);
+    // Only unrequested (session-end) evaluations are skipped. Skipping a requested one would leave
+    // the Ideas client waiting for a comment that never arrives.
+    if (!requestId) {
+      const gateSnapshot = await admin.database()
+        .ref(`${metadataPath}/${kEvaluationGateKey}/${evaluator}`).once("value");
+      const gateValue = gateSnapshot.val();
+      const gateIndex = typeof gateValue === "number" ? gateValue : undefined;
+      if (!hasChangedSinceEvaluation(lastEntry?.index, gateIndex)) {
+        logger.info(`Skipping unchanged document ${documentPath} for ${evaluator}`);
+        return;
+      }
+    }
+  } catch (err) {
+    logger.warn(`Could not check the evaluation gate for ${documentPath}`, err);
+  }
+
   const queueDocRef = firestore.doc(getAnalysisQueueFirestorePath("pending", docId));
 
   // Safe for duplicate calls: the second overwrites the first, except requestIds, which accumulates.
@@ -153,6 +198,11 @@ const handleUpdate = async (event: DatabaseEvent<Change<DataSnapshot>>, firebase
 
   if (requestContext) {
     newDocument.requestContext = requestContext;
+  }
+
+  // Assigned only when there is one: Firestore rejects an undefined field value outright.
+  if (lastEntry) {
+    newDocument.historyIndex = lastEntry.index;
   }
 
   // A transaction: a plain `.set()` would replace an existing document's requestIds outright
