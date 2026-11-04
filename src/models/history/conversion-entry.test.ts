@@ -5,6 +5,7 @@ import { DocumentContentModel } from "../document/document-content";
 import { ProblemDocument } from "../document/document-types";
 import { HistoryEntry, HistoryOperation } from "./history";
 import { applyJsonPatches, toJsonValue } from "./json-patch";
+import * as schemaConversion from "./schema-conversion";
 import { TreeManager } from "./tree-manager";
 import { expectEntryToBeComplete } from "./undo-store-test-utils";
 import { VersionedTestTileType, kVersionedTestTileType } from "./schema-conversion-test-types";
@@ -23,6 +24,8 @@ function makeDocument(content: any, extra: Record<string, any> = {}) {
 }
 
 describe("conversion entry", () => {
+  afterEach(() => jest.restoreAllMocks());
+
   it("converts an old tile at load and keeps a pending conversion entry", () => {
     const { document, manager } = makeDocument(oldContent());
     const tile = document.content!.tileMap.get("t1")!.content as VersionedTestTileType;
@@ -65,7 +68,9 @@ describe("conversion entry", () => {
 
   it("records nothing when content is an MST instance", () => {
     const content = DocumentContentModel.create(oldContent() as any);
+    const convertSpy = jest.spyOn(schemaConversion, "convertContentJson");
     const { manager } = makeDocument(content);
+    expect(convertSpy).not.toHaveBeenCalled();
     expect(manager.pendingConversionEntry).toBeUndefined();
   });
 
