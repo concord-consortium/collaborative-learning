@@ -61,9 +61,13 @@ export const HistoryEntry = types.model("HistoryEntry", {
   /**
    * True on the entry that records the conversion of old tiles and shared models to their
    * current format at load. It is never applied to a live document or put on the undo stack.
+   * Stored in Firestore history entries: never rename or remove.
    */
   isConversion: types.maybe(types.boolean),
-  /** True on entries that the user did not cause directly. */
+  /**
+   * True on entries that the user did not cause directly.
+   * Stored in Firestore history entries: never rename or remove.
+   */
   background: types.maybe(types.boolean),
 })
 .volatile(self => ({

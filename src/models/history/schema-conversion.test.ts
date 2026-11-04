@@ -1,9 +1,11 @@
+import fs from "fs";
+import path from "path";
 import { cloneDeep } from "lodash";
 import {
   buildConversionEntry, convertContentJson, convertJsonAtPath, convertModelJsonAtPath, getModelPath,
   isOldModelJsonAtPath
 } from "./schema-conversion";
-import { HistoryEntry, HistoryOperation } from "./history";
+import { getEntryPatchesForTree, HistoryEntry, HistoryOperation } from "./history";
 import { applyJsonPatches } from "./json-patch";
 import { registerTileContentInfo } from "../tiles/tile-content-info";
 import { TileContentModel } from "../tiles/tile-content";
@@ -137,5 +139,18 @@ describe("buildConversionEntry", () => {
     const doc: any = { content: { tileMap: { t1: cloneDeep(after) } } };
     applyJsonPatches(doc, entry.records[0].getPatches(HistoryOperation.Undo));
     expect(doc.content.tileMap.t1).toEqual(before);
+  });
+});
+
+describe("a stored conversion entry", () => {
+  const fixture = JSON.parse(
+    fs.readFileSync(path.join(__dirname, "fixtures", "conversion-chain.json"), "utf8"));
+
+  it("is still recognized when it is loaded back", () => {
+    const stored = fixture.entries.find((e: any) => e.isConversion);
+    const entry = HistoryEntry.create(stored);
+    expect(entry.records[0].patches.length).toBeGreaterThan(0);
+    expect(getEntryPatchesForTree(entry, stored.tree, HistoryOperation.Undo)).toEqual([]);
+    expect(getEntryPatchesForTree(entry, stored.tree, HistoryOperation.Redo)).toEqual([]);
   });
 });

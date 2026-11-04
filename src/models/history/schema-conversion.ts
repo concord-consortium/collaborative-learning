@@ -129,7 +129,10 @@ export function convertContentJson(content: any): { content: any; convertedPaths
   return { content: newContent, convertedPaths };
 }
 
+// The conversion entry's action and model names are stored in Firestore history entries: never
+// rename or remove them.
 const kConvertSchemasAction = "/convertSchemas";
+const kConversionEntryModel = "DocumentContent";
 
 /**
  * Builds the entry that records the conversion of old models to the current format, as the
@@ -146,7 +149,7 @@ export function buildConversionEntry(
     id: nanoid(),
     created: Date.now(),
     tree: treeId,
-    model: "DocumentContent",
+    model: kConversionEntryModel,
     action: kConvertSchemasAction,
     undoable: false,
     isConversion: true,
