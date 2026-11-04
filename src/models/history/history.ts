@@ -112,16 +112,12 @@ export enum HistoryOperation {
  * would receive in a given direction, in the same order and record
  * ordering that goToHistoryEntryPosition uses when batching. Used to
  * reconstruct patches without needing the onPatch-collected inverses.
- *
- * A load entry gives no patches. Its patches turn stored JSON into the current format, and
- * the trees playback applies patches to are already in the current format.
  */
 export function getEntryPatchesForTree(
   historyEntry: Instance<typeof HistoryEntry>,
   treeId: string,
   opType: HistoryOperation
 ): IJsonPatch[] {
-  if (historyEntry.isLoadEntry) return [];
   let records = [...historyEntry.records];
   if (opType === HistoryOperation.Undo) {
     records = records.reverse();

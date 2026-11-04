@@ -6,8 +6,9 @@ import {
   buildLoadEntry, convertContentJson, convertJsonAtPath, convertModelJsonAtPath, convertOldModelJsonAtPath,
   getModelPath, isNonCurrentModelJsonAtPath
 } from "./schema-conversion";
-import { getEntryPatchesForTree, HistoryEntry, HistoryOperation } from "./history";
+import { HistoryEntry, HistoryOperation } from "./history";
 import { applyJsonPatches } from "./json-patch";
+import { defaultPatchSource } from "./playback-patch-source";
 import { getTileContentInfo, registerTileContentInfo } from "../tiles/tile-content-info";
 import { TileContentModel } from "../tiles/tile-content";
 import {
@@ -225,7 +226,7 @@ describe("a stored load entry", () => {
     const stored = fixture.entries.find((e: any) => e.isLoadEntry);
     const entry = HistoryEntry.create(stored);
     expect(entry.records[0].patches.length).toBeGreaterThan(0);
-    expect(getEntryPatchesForTree(entry, stored.tree, HistoryOperation.Undo)).toEqual([]);
-    expect(getEntryPatchesForTree(entry, stored.tree, HistoryOperation.Redo)).toEqual([]);
+    expect(defaultPatchSource.getPatches(entry, stored.tree, HistoryOperation.Undo)).toEqual([]);
+    expect(defaultPatchSource.getPatches(entry, stored.tree, HistoryOperation.Redo)).toEqual([]);
   });
 });

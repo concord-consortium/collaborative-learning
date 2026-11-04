@@ -19,10 +19,11 @@ export interface IPlaybackPatchSource {
 }
 
 /**
- * Applies each entry's recorded patches as they are, with no loads.
+ * Applies each entry's recorded patches as they are, with no loads. A conversion entry is never
+ * applied to an MST tree, so it has no patches here.
  */
 export const defaultPatchSource: IPlaybackPatchSource = {
-  getPatches: (entry, treeId, opType) => getEntryPatchesForTree(entry, treeId, opType),
+  getPatches: (entry, treeId, opType) => entry.isLoadEntry ? [] : getEntryPatchesForTree(entry, treeId, opType),
   getLoads: () => []
 };
 
