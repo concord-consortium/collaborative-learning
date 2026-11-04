@@ -165,7 +165,7 @@ describe("Canvas Component", () => {
   // The live document's content can be replaced after it loads, which converts its old tiles
   // again with new ids. The playback copy is made from the live content, so the entry it is
   // handed must give those ids.
-  it("hands the playback copy the conversion entry rebuilt for replaced content", () => {
+  it("hands the playback copy the load entry rebuilt for replaced content", () => {
     registerTileComponentInfo({
       type: kVersionedTestTileType, Component: () => null, tileEltClass: "versioned-test-tile"
     });
@@ -196,7 +196,7 @@ describe("Canvas Component", () => {
       </Provider>
     );
 
-    const localEntry = copyTreeManager?.localConversionEntry;
+    const localEntry = copyTreeManager?.localLoadEntry;
     expect(localEntry).toBeDefined();
     const docJson: any = { content: oldContent() };
     applyJsonPatches(docJson, HistoryEntry.create(localEntry!).records[0].getPatches(HistoryOperation.Redo));

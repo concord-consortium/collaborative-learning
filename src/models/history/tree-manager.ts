@@ -81,7 +81,7 @@ function getEntriesBetween(history: readonly HistoryEntryType[], from: number, t
 /**
  * Moves the JSON copy toward `target` and builds the patch source for the move. A model is
  * treated as old when it is old in the copy at either end of the move, when a patch in the move
- * carries an old version of it, or when a conversion entry in the move changes it. The copy can
+ * carries an old version of it, or when a load entry in the move changes it. The copy can
  * stop short of `target`; the source covers only the entries up to where it stopped.
  */
 function moveJsonCopy(copy: JsonHistoryCopy, history: readonly HistoryEntryType[], treeId: string,
@@ -93,10 +93,10 @@ function moveJsonCopy(copy: JsonHistoryCopy, history: readonly HistoryEntryType[
   const moved = copy.moveTo(history, target);
 
   const entries = getEntriesBetween(history, start, moved.position);
-  const conversionPaths = collectModelPaths(entries.filter(entry => entry.isLoadEntry), treeId);
+  const loadEntryPaths = collectModelPaths(entries.filter(entry => entry.isLoadEntry), treeId);
   const oldPaths = new Set([...collectModelPaths(entries, treeId)].filter(path =>
     oldAtStart.has(path) || copy.isOldModel(path) ||
-    hasOldValue(entries, treeId, path) || conversionPaths.has(path)));
+    hasOldValue(entries, treeId, path) || loadEntryPaths.has(path)));
   return { moved, source: createOldModelPatchSource({ copy, treeId, oldPaths }) };
 }
 
@@ -174,10 +174,10 @@ export const TreeManager = types
    */
   pendingLoadEntry: undefined as HistoryEntrySnapshot | undefined,
   /**
-   * A conversion entry that the live document has not uploaded yet, handed to a playback copy.
+   * A load entry that the live document has not uploaded yet, handed to a playback copy.
    * The copy appends it after the Firestore entries, so it counts toward the starting position.
    */
-  localConversionEntry: undefined as HistoryEntrySnapshot | undefined,
+  localLoadEntry: undefined as HistoryEntrySnapshot | undefined,
   /**
    * A JSON copy of the main document that playback keeps at the current position when the
    * history crosses a schema conversion. It is built on the first move that needs it.
@@ -188,23 +188,23 @@ export const TreeManager = types
   // The history only grows during playback, so the scan resumes where it stopped.
   let scannedHistory: unknown;
   let scannedLength = 0;
-  let hasConversion = false;
+  let hasLoadEntry = false;
   return {
     /**
      * True when playback needs a JSON copy of the document: when the history holds a
-     * conversion entry.
+     * load entry.
      */
     get needsJsonCopy() {
       const history = self.document.history;
       if (scannedHistory !== history || history.length < scannedLength) {
         scannedHistory = history;
         scannedLength = 0;
-        hasConversion = false;
+        hasLoadEntry = false;
       }
-      for (; scannedLength < history.length && !hasConversion; scannedLength++) {
-        hasConversion = !!history[scannedLength].isLoadEntry;
+      for (; scannedLength < history.length && !hasLoadEntry; scannedLength++) {
+        hasLoadEntry = !!history[scannedLength].isLoadEntry;
       }
-      return hasConversion;
+      return hasLoadEntry;
     }
   };
 })
@@ -305,8 +305,8 @@ export const TreeManager = types
       self.pendingLoadEntry = entry;
     },
 
-    setLocalConversionEntry(entry: HistoryEntrySnapshot | undefined) {
-      self.localConversionEntry = entry;
+    setLocalLoadEntry(entry: HistoryEntrySnapshot | undefined) {
+      self.localLoadEntry = entry;
     },
 
     setChangeDocument(cDoc: CDocumentType) {
@@ -442,8 +442,8 @@ export const TreeManager = types
         self.numHistoryEventsApplied = undefined;
 
         const lastHistoryEntry = yield* toGenerator(getLastHistoryEntry(firestore, docPath));
-        // The local conversion entry is appended after all of the Firestore entries.
-        const localEntryCount = self.localConversionEntry ? 1 : 0;
+        // The local load entry is appended after all of the Firestore entries.
+        const localEntryCount = self.localLoadEntry ? 1 : 0;
         if (lastHistoryEntry) {
           self.numHistoryEventsApplied = lastHistoryEntry.index + 1 + localEntryCount;
         } else {

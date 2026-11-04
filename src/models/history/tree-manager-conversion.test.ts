@@ -127,12 +127,12 @@ const t1OldEntries = () => [
 ];
 const t1Content = () => ({ tileMap: { t1: oldTile("t1", "c", ["a"]) } });
 
-describe("playback across a conversion entry", () => {
+describe("playback across a load entry", () => {
   beforeEach(() => {
     jest.restoreAllMocks();
   });
 
-  it("crosses the conversion entry backward and forward", async () => {
+  it("crosses the load entry backward and forward", async () => {
     const { document, manager, endJson, replay, copyJson } =
       await setupConvertedDocument(t1Content(), t1OldEntries());
     expect(getTile(document, "t1").label).toBe("x");

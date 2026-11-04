@@ -214,13 +214,13 @@ describe("history loading", () => {
     });
   });
 
-  describe("local conversion entry", () => {
-    const conv: HistoryEntrySnapshot = { id: "conv", isLoadEntry: true };
+  describe("local load entry", () => {
+    const loadEntry: HistoryEntrySnapshot = { id: "loadEntry", isLoadEntry: true };
 
     async function subscribeWithLocalEntry(entries: HistoryEntrySnapshot[]) {
       const { treeManager } = setupDocument();
       const { historyManager } = setupFirestoreHistoryManager(treeManager);
-      treeManager.setLocalConversionEntry(conv);
+      treeManager.setLocalLoadEntry(loadEntry);
       getLastHistoryEntry.mockResolvedValue(undefined);
       loadHistory.mockImplementation((firestore, path, historyLoaded) => {
         historyLoaded(entries.map((entry, index) => ({ index, entry })));
@@ -230,21 +230,21 @@ describe("history loading", () => {
       return treeManager;
     }
 
-    it("appends a local conversion entry missing from Firestore", async () => {
+    it("appends a local load entry missing from Firestore", async () => {
       const treeManager = await subscribeWithLocalEntry([{ id: "a1" }, { id: "a2" }]);
       const ids = treeManager.document.history.map(e => e.id);
       expect(ids).toHaveLength(3);
-      expect(ids[2]).toBe("conv");
+      expect(ids[2]).toBe("loadEntry");
     });
 
-    it("does not duplicate a local conversion entry already in Firestore", async () => {
-      const treeManager = await subscribeWithLocalEntry([{ id: "a1" }, { id: "conv" }]);
-      expect(treeManager.document.history.map(e => e.id)).toEqual(["a1", "conv"]);
+    it("does not duplicate a local load entry already in Firestore", async () => {
+      const treeManager = await subscribeWithLocalEntry([{ id: "a1" }, { id: "loadEntry" }]);
+      expect(treeManager.document.history.map(e => e.id)).toEqual(["a1", "loadEntry"]);
     });
 
-    it("counts the local conversion entry in the starting position", async () => {
+    it("counts the local load entry in the starting position", async () => {
       const { treeManager } = setupDocument();
-      treeManager.setLocalConversionEntry(conv);
+      treeManager.setLocalLoadEntry(loadEntry);
 
       getLastHistoryEntry.mockResolvedValue({ index: 10, id: "x" });
       await treeManager.setNumHistoryEntriesAppliedFromFirestore({} as Firestore, "");
@@ -255,7 +255,7 @@ describe("history loading", () => {
       expect(treeManager.numHistoryEventsApplied).toBe(1);
     });
 
-    it("can move back across a local conversion entry with no Firestore history", async () => {
+    it("can move back across a local load entry with no Firestore history", async () => {
       const liveDocument = createDocumentModel({
         uid: "1", type: ProblemDocument, key: "test",
         content: { tileMap: { t1: { id: "t1", content: { type: kVersionedTestTileType, text: "c" } } } } as any
@@ -265,7 +265,7 @@ describe("history loading", () => {
       // The playback copy is made from the live, converted document.
       const playbackDocument = createDocumentModel(getSnapshot(liveDocument));
       const treeManager = playbackDocument.treeManagerAPI as Instance<typeof TreeManager>;
-      treeManager.setLocalConversionEntry(liveManager.pendingLoadEntry);
+      treeManager.setLocalLoadEntry(liveManager.pendingLoadEntry);
       const { historyManager } = setupFirestoreHistoryManager(treeManager);
       getLastHistoryEntry.mockResolvedValue(undefined);
       loadHistory.mockImplementation((firestore, path, historyLoaded) => {

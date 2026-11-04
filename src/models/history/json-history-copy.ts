@@ -10,7 +10,7 @@ export interface IJsonCopyMoveResult {
 
 /**
  * A plain JSON copy of a document that history playback keeps beside the MST trees. Every
- * history entry, conversion entries included, is applied to the copy, so the copy can say
+ * history entry, load entries included, is applied to the copy, so the copy can say
  * where a move has to stop. It never touches an MST tree.
  */
 export class JsonHistoryCopy {

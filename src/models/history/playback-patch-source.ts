@@ -24,7 +24,7 @@ export interface IPlaybackPatchSource {
 }
 
 /**
- * Applies each entry's recorded patches as they are, with no loads. A conversion entry is never
+ * Applies each entry's recorded patches as they are, with no loads. A load entry is never
  * applied to an MST tree, so it has no patches here.
  */
 export const defaultPatchSource: IPlaybackPatchSource = {

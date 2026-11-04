@@ -414,11 +414,11 @@ export class FirestoreHistoryManager {
 
     const history: HistoryEntrySnapshot[] = historyDocs.map(doc => doc.entry);
 
-    // A conversion entry the live document hasn't uploaded yet goes at the end,
+    // A load entry the live document hasn't uploaded yet goes at the end,
     // unless it has been uploaded since the playback copy was made.
-    const { localConversionEntry } = treeManager;
-    if (localConversionEntry && !history.some(entry => entry.id === localConversionEntry.id)) {
-      history.push(localConversionEntry);
+    const { localLoadEntry } = treeManager;
+    if (localLoadEntry && !history.some(entry => entry.id === localLoadEntry.id)) {
+      history.push(localLoadEntry);
     }
 
     if (!treeManager.document) {

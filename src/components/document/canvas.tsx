@@ -386,10 +386,10 @@ class _CanvasComponent extends BaseComponent<IProps, IState> {
       const treeManager = docCopy.treeManagerAPI as TreeManagerType;
       const firestore = this.stores.db.firestore;
 
-      // Only a still-pending conversion entry is handed over. A flushed one is in the
+      // Only a still-pending load entry is handed over. A flushed one is in the
       // Firestore history (or its local cache) already.
       const liveTreeManager = this.props.document.treeManagerAPI as TreeManagerType | undefined;
-      treeManager.setLocalConversionEntry(liveTreeManager?.pendingLoadEntry);
+      treeManager.setLocalLoadEntry(liveTreeManager?.pendingLoadEntry);
 
       // We don't need to dispose the old history manager because the old document copy will be destroyed
       // by updateHistoryDocument. This document disposal will trigger the tree manager disposal. The

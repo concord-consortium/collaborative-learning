@@ -134,7 +134,7 @@ describe("JsonHistoryCopy", () => {
     });
   });
 
-  it("applies conversion entries in both directions", () => {
+  it("applies load entries in both directions", () => {
     const before = { type: "VersionedTestTile", text: "c" };
     const after = { type: "VersionedTestTile", version: "2", label: "c" };
     const entry = HistoryEntry.create(buildLoadEntry(kTreeId, [
