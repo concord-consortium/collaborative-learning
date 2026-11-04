@@ -59,7 +59,7 @@ describe("conversion entry", () => {
     expect(manager.pendingConversionEntry).toBeUndefined();
   });
 
-  it("records nothing for a group document", () => {
+  it("records nothing for a concurrent document", () => {
     const { document, manager } = makeDocument(oldContent(), { concurrent: true });
     const tile = document.content!.tileMap.get("t1")!.content as VersionedTestTileType;
     expect(tile.version).toBe("2");
@@ -132,7 +132,7 @@ describe("conversion entry", () => {
       expect((document.content!.tileMap.get("t1")!.content as VersionedTestTileType).label).toBe("y");
     });
 
-    it("records nothing for a group document", () => {
+    it("records nothing for a concurrent document", () => {
       const { document, manager } = makeDocument(oldContent(), { concurrent: true });
 
       document.setContent(oldContent() as any);
@@ -157,7 +157,8 @@ describe("conversion entry", () => {
     });
   });
 
-  it("flushes the conversion entry before the first local entry, outside the undo stack", async () => {
+  it("flushes the conversion entry before the first local entry that changes the content, outside the undo stack",
+      async () => {
     const { document, manager } = makeDocument(oldContent());
     const historyManager = { onHistoryEntryCompleted: jest.fn() };
     manager.setHistoryManager(historyManager);
@@ -184,8 +185,6 @@ describe("conversion entry", () => {
   });
 
   it("keeps the conversion entry pending until an entry changes the content", async () => {
-    // Content is saved only when it changes, so flushing before a title-only entry would store the
-    // conversion entry next to old content, and the next load would convert it again.
     const { document, manager } = makeDocument(oldContent());
     document.treeMonitor!.enableMonitoring();
 
