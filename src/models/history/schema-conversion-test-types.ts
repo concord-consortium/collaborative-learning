@@ -18,9 +18,13 @@ const kCurrentVersion = "2";
 
 // v1 content is `{ type, text, items: [{ value, deleted }] }`.
 // v2 content is `{ type, version: "2", label, items: [{ id, value }] }`, without the deleted items.
+// Any other version is declined, like a tile saved by a newer release.
 function convertSnapshot(tile: any) {
   const content = tile?.content;
-  if (!content || (content.version ?? "1") === kCurrentVersion) return tile;
+  if (!content) return tile;
+  const version = content.version ?? "1";
+  if (version === kCurrentVersion) return tile;
+  if (version !== "1") return undefined;
   if (content.text === "THROW") throw new Error("cannot convert");
   const { text, items, ...others } = content;
   return {
@@ -74,7 +78,9 @@ registerTileContentInfo({
   defaultContent() {
     return VersionedTestTile.create();
   },
-  tileSnapshotPreProcessor: convertSnapshot,
+  // The preprocessors call the module's converters, not the ones on the schemas, so a spy on a
+  // schema's convertSnapshot counts only the calls made through the registration, not MST's.
+  tileSnapshotPreProcessor: tile => convertSnapshot(tile) ?? tile,
   schemaVersion: versionedTestTileSchema
 });
 registerTileComponentInfo({
@@ -83,9 +89,12 @@ registerTileComponentInfo({
   tileEltClass: "versioned-test-tile"
 });
 
-// v1 is `{ id, type, val }`; v2 is `{ id, type, version: "2", value }`.
+// v1 is `{ id, type, val }`; v2 is `{ id, type, version: "2", value }`. Any other version is declined.
 function convertSharedModelSnapshot(sharedModel: any) {
-  if (!sharedModel || (sharedModel.version ?? "1") === kCurrentVersion) return sharedModel;
+  if (!sharedModel) return sharedModel;
+  const version = sharedModel.version ?? "1";
+  if (version === kCurrentVersion) return sharedModel;
+  if (version !== "1") return undefined;
   const { val, ...others } = sharedModel;
   return { ...others, version: kCurrentVersion, value: val };
 }
@@ -103,7 +112,7 @@ export const VersionedTestSharedModel = SharedModel
     version: kCurrentVersion,
     value: types.maybe(types.string)
   })
-  .preProcessSnapshot(convertSharedModelSnapshot);
+  .preProcessSnapshot(sharedModel => convertSharedModelSnapshot(sharedModel) ?? sharedModel);
 
 registerSharedModelInfo({
   type: kVersionedTestSharedModelType,

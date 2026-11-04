@@ -8,7 +8,9 @@ import { applyJsonPatches, toJsonValue } from "./json-patch";
 import * as schemaConversion from "./schema-conversion";
 import { entryChangesContent, TreeManager } from "./tree-manager";
 import { expectEntryToBeComplete } from "./undo-store-test-utils";
-import { VersionedTestTileType, kVersionedTestTileType } from "./schema-conversion-test-types";
+import {
+  VersionedTestTileType, kVersionedTestTileType, versionedTestTileSchema
+} from "./schema-conversion-test-types";
 
 const oldTileJson = () => ({
   id: "t1", content: { type: kVersionedTestTileType, text: "c", items: [{ value: "a" }] }
@@ -64,6 +66,60 @@ describe("conversion entry", () => {
     const tile = document.content!.tileMap.get("t1")!.content as VersionedTestTileType;
     expect(tile.version).toBe("2");
     expect(manager.pendingConversionEntry).toBeUndefined();
+  });
+
+  describe("a tile its converter declines", () => {
+    // The test tile's converter doesn't know version 3, as an older release doesn't know a tile
+    // saved by a newer one.
+    const newerTileJson = () => ({
+      id: "t3", content: { type: kVersionedTestTileType, version: "3", label: "n", items: [{ id: "i1", value: "a" }] }
+    });
+    const getNewerTile = (document: ReturnType<typeof makeDocument>["document"]) =>
+      document.content!.tileMap.get("t3")!.content as VersionedTestTileType;
+
+    it("records nothing and loads the stored JSON, at load and at every later load", async () => {
+      const { document, manager } = makeDocument({ tileMap: { t3: newerTileJson() } });
+      expect(manager.pendingConversionEntry).toBeUndefined();
+      expect(toJsonValue(getSnapshot(getNewerTile(document)))).toEqual(newerTileJson().content);
+
+      document.setContent({ tileMap: { t3: newerTileJson() } } as any);
+      expect(manager.pendingConversionEntry).toBeUndefined();
+      expect(toJsonValue(getSnapshot(getNewerTile(document)))).toEqual(newerTileJson().content);
+
+      document.treeMonitor!.enableMonitoring();
+      getNewerTile(document).setLabel("m");
+      await expectEntryToBeComplete(manager, 1);
+      expect(manager.document.history.map(e => e.isConversion)).toEqual([undefined]);
+      document.treeMonitor!.disableMonitoring();
+
+      const reloaded = makeDocument(toJsonValue(getSnapshot(document.content!)));
+      expect(reloaded.manager.pendingConversionEntry).toBeUndefined();
+      expect(getNewerTile(reloaded.document).version).toBe("3");
+      expect(getNewerTile(reloaded.document).label).toBe("m");
+    });
+
+    it("leaves it out of the entry for the tiles the converter accepts", () => {
+      const { document, manager } = makeDocument({ tileMap: { ...oldContent().tileMap, t3: newerTileJson() } });
+      const patches = manager.pendingConversionEntry!.records![0].patches!;
+      expect(patches.length).toBeGreaterThan(0);
+      expect(patches.every(p => p.path.startsWith("/content/tileMap/t1/"))).toBe(true);
+      expect(getNewerTile(document).version).toBe("3");
+    });
+  });
+
+  it("warns in development when a converter gives a version that isn't current, and still records it", () => {
+    const warnSpy = jest.spyOn(console, "warn").mockImplementation(() => undefined);
+    const convert = versionedTestTileSchema.convertSnapshot;
+    jest.spyOn(versionedTestTileSchema, "convertSnapshot").mockImplementation((tile: any) => {
+      const converted = convert(tile);
+      return { ...converted, content: { ...converted.content, version: "9" } };
+    });
+
+    const { manager } = makeDocument(oldContent());
+
+    expect(warnSpy).toHaveBeenCalledTimes(1);
+    expect(warnSpy.mock.calls[0][0]).toMatch(/\/content\/tileMap\/t1\b.*"9".*"2"/);
+    expect(manager.pendingConversionEntry).toBeDefined();
   });
 
   it("records nothing when content is an MST instance", () => {

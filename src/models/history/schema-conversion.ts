@@ -33,18 +33,45 @@ function getSchemaVersion(modelPath: string, json: any): ISchemaVersionInfo | un
   return getSharedModelInfoByType(json?.type)?.schemaVersion;
 }
 
+/**
+ * Converts the model JSON at `modelPath` when it is old: its type registers a schema version, its
+ * version isn't current, and its converter accepts it. Returns undefined when the model isn't old,
+ * including when the converter declines it. The version check comes first, so the converter runs
+ * only when the version differs.
+ */
+export function convertOldModelJsonAtPath(modelPath: string, json: unknown): unknown {
+  if (!isObject(json)) return undefined;
+  const info = getSchemaVersion(modelPath, json);
+  if (!info) return undefined;
+  const version = info.getVersion(json);
+  if (version === info.currentVersion) return undefined;
+  // read convertSnapshot from the registration on each call, so a replaced or spied-on function is used
+  const converted = info.convertSnapshot(json);
+  if (converted !== undefined && process.env.NODE_ENV !== "production") {
+    const convertedVersion = info.getVersion(converted);
+    if (convertedVersion !== info.currentVersion) {
+      console.warn(`Converting the model at ${modelPath} from version "${version}" gave version ` +
+        `"${convertedVersion}", not the current version "${info.currentVersion}".`);
+    }
+  }
+  return converted;
+}
+
+/**
+ * True when the model JSON at `modelPath` has a version that isn't current. This doesn't run the
+ * converter, so a model it declines counts too; convertOldModelJsonAtPath leaves those out.
+ */
 export function isOldModelJsonAtPath(modelPath: string, json: unknown): boolean {
   if (!isObject(json)) return false;
   const info = getSchemaVersion(modelPath, json);
   return !!info && info.getVersion(json) !== info.currentVersion;
 }
 
+/**
+ * Returns the model JSON at `modelPath` converted when it is old, and unchanged otherwise.
+ */
 export function convertModelJsonAtPath(modelPath: string, json: unknown): unknown {
-  if (!isObject(json)) return json;
-  const info = getSchemaVersion(modelPath, json);
-  if (!info || info.getVersion(json) === info.currentVersion) return json;
-  // read convertSnapshot from the registration on each call, so a replaced or spied-on function is used
-  return info.convertSnapshot(json);
+  return convertOldModelJsonAtPath(modelPath, json) ?? json;
 }
 
 interface IConvertedMap {
@@ -62,9 +89,10 @@ function convertModelMap(mapPath: string, map: unknown, getModel: (entry: any) =
     const entry = map[id];
     const model = getModel(entry);
     const modelPath = `${mapPath}/${id}${modelSuffix}`;
-    if (!isOldModelJsonAtPath(modelPath, model)) return;
+    const converted = convertOldModelJsonAtPath(modelPath, model);
+    if (converted === undefined) return;
     newMap = newMap ?? { ...map };
-    newMap[id] = setModel(entry, convertModelJsonAtPath(modelPath, model));
+    newMap[id] = setModel(entry, converted);
     convertedPaths.push(modelPath);
   });
   return { map: newMap ?? map, convertedPaths };
@@ -101,9 +129,8 @@ export function convertJsonAtPath(path: string, value: unknown): unknown {
   }
   if (path.startsWith(`${kSharedModelMapPath}/`) && path.split("/").length === 4) {
     const id = path.split("/")[3];
-    const sharedPath = `${kSharedModelMapPath}/${id}/sharedModel`;
-    if (!isOldModelJsonAtPath(sharedPath, value.sharedModel)) return value;
-    return { ...value, sharedModel: convertModelJsonAtPath(sharedPath, value.sharedModel) };
+    const converted = convertOldModelJsonAtPath(`${kSharedModelMapPath}/${id}/sharedModel`, value.sharedModel);
+    return converted === undefined ? value : { ...value, sharedModel: converted };
   }
   if (path === "/content") {
     return convertContentJson(value).content;

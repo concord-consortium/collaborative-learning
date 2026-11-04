@@ -1,15 +1,19 @@
 import fs from "fs";
 import path from "path";
 import { cloneDeep } from "lodash";
+import { getSnapshot } from "mobx-state-tree";
 import {
-  buildConversionEntry, convertContentJson, convertJsonAtPath, convertModelJsonAtPath, getModelPath,
-  isOldModelJsonAtPath
+  buildConversionEntry, convertContentJson, convertJsonAtPath, convertModelJsonAtPath, convertOldModelJsonAtPath,
+  getModelPath, isOldModelJsonAtPath
 } from "./schema-conversion";
 import { getEntryPatchesForTree, HistoryEntry, HistoryOperation } from "./history";
 import { applyJsonPatches } from "./json-patch";
-import { registerTileContentInfo } from "../tiles/tile-content-info";
+import { getTileContentInfo, registerTileContentInfo } from "../tiles/tile-content-info";
 import { TileContentModel } from "../tiles/tile-content";
-import "./schema-conversion-test-types";
+import {
+  kVersionedTestSharedModelType, kVersionedTestTileType, VersionedTestSharedModel, versionedTestSharedModelSchema,
+  versionedTestTileSchema
+} from "./schema-conversion-test-types";
 
 const PlainTile = TileContentModel.named("SchemaPlainTile").props({ type: "SchemaPlainTile" });
 registerTileContentInfo({ type: "SchemaPlainTile", modelClass: PlainTile, defaultContent: () => PlainTile.create() });
@@ -19,6 +23,10 @@ const oldTile = (id: string, text = "hello") =>
 const newTile = (id: string) =>
   ({ id, content: { type: "VersionedTestTile", version: "2", label: "hi", items: [{ id: "i1", value: "a" }] } });
 const oldShared = (id: string) => ({ id, type: "VersionedTestSharedModel", val: "x" });
+// Version 3 is newer than the test types' converters know, so they decline it.
+const newerTile = (id: string) =>
+  ({ id, content: { type: kVersionedTestTileType, version: "3", label: "n", items: [] } });
+const newerShared = (id: string) => ({ id, type: kVersionedTestSharedModelType, version: "3", value: "x" });
 
 describe("getModelPath", () => {
   it("finds the model that a path is at or below", () => {
@@ -47,6 +55,29 @@ describe("isOldModelJsonAtPath", () => {
   });
 });
 
+describe("convertOldModelJsonAtPath", () => {
+  it("leaves a model its converter declines unconverted", () => {
+    const tile = newerTile("t3");
+    const shared = newerShared("sm3");
+    expect(convertOldModelJsonAtPath("/content/tileMap/t3", tile)).toBeUndefined();
+    expect(convertModelJsonAtPath("/content/tileMap/t3", tile)).toBe(tile);
+    expect(convertOldModelJsonAtPath("/content/sharedModelMap/sm3/sharedModel", shared)).toBeUndefined();
+    expect(convertModelJsonAtPath("/content/sharedModelMap/sm3/sharedModel", shared)).toBe(shared);
+  });
+});
+
+describe("the test types' snapshot preprocessors", () => {
+  it("pass a snapshot their converter declines through to MST unchanged", () => {
+    const tile = newerTile("t3");
+    expect(versionedTestTileSchema.convertSnapshot(tile)).toBeUndefined();
+    expect(getTileContentInfo(kVersionedTestTileType)!.tileSnapshotPreProcessor!(tile)).toBe(tile);
+
+    const shared = newerShared("sm3");
+    expect(versionedTestSharedModelSchema.convertSnapshot(shared)).toBeUndefined();
+    expect(getSnapshot(VersionedTestSharedModel.create(shared))).toEqual(shared);
+  });
+});
+
 describe("convertContentJson", () => {
   it("converts old tiles and shared models without changing the input", () => {
     const content = {
@@ -72,6 +103,17 @@ describe("convertContentJson", () => {
     expect(result.convertedPaths).toEqual(["/content/sharedModelMap/sm1/sharedModel"]);
     expect(result.content.sharedModelMap.sm1.sharedModel.version).toBe("2");
     expect("tileMap" in result.content).toBe(false);
+  });
+
+  it("leaves models their converters decline as they are", () => {
+    const content = {
+      tileMap: { t1: oldTile("t1"), t3: newerTile("t3") },
+      sharedModelMap: { sm3: { sharedModel: newerShared("sm3"), tiles: [] } }
+    };
+    const result = convertContentJson(content);
+    expect(result.convertedPaths).toEqual(["/content/tileMap/t1"]);
+    expect(result.content.tileMap.t3).toBe(content.tileMap.t3);
+    expect(result.content.sharedModelMap).toBe(content.sharedModelMap);
   });
 
   it("returns the same object when nothing is old, including empty content", () => {

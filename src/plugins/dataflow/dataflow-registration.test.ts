@@ -1,7 +1,15 @@
 // the tile component is not needed here and warns about missing CSS when imported under jest
 jest.mock("./components/dataflow-tile", () => ({ __esModule: true, default: () => null }));
 
+import { getSnapshot, Instance } from "mobx-state-tree";
+import { createDocumentModel } from "../../models/document/document";
+import { ProblemDocument } from "../../models/document/document-types";
+import { toJsonValue } from "../../models/history/json-patch";
+import { TreeManager } from "../../models/history/tree-manager";
 import { getTileContentInfo } from "../../models/tiles/tile-content-info";
+import { DataflowContentModelType } from "./model/dataflow-content";
+import "../../models/shared/shared-data-set-registration";
+import "../../models/shared/shared-program-data-registration";
 import "./dataflow-registration";
 
 describe("Dataflow schemaVersion", () => {
@@ -20,6 +28,37 @@ describe("Dataflow schemaVersion", () => {
     const converted = schemaVersion.convertSnapshot(legacy);
     expect(schemaVersion.getVersion(converted)).toBe(schemaVersion.currentVersion);
     expect(Object.keys(converted.content.program.nodes)).toEqual(["1@t1"]);
+  });
+
+  describe("a program saved by a newer release", () => {
+    const newerTile = () => ({ id: "t1", content: { type: "Dataflow", program: { id: "dataflow@2", nodes: {} } } });
+
+    it("is declined by convertSnapshot and passed through unchanged by the preprocessor", () => {
+      const tile = newerTile();
+      expect(schemaVersion.convertSnapshot(tile)).toBeUndefined();
+      expect(getTileContentInfo("Dataflow")!.tileSnapshotPreProcessor!(tile)).toBe(tile);
+    });
+
+    it("records nothing and loads as before, at load and at every later load", () => {
+      const load = (content: any) => {
+        const document = createDocumentModel({ uid: "1", type: ProblemDocument, key: "doc1", content });
+        const manager = document.treeManagerAPI as Instance<typeof TreeManager>;
+        const tile = document.content!.tileMap.get("t1")!.content as DataflowContentModelType;
+        return { document, manager, tile };
+      };
+      const first = load({ tileMap: { t1: newerTile() } });
+      expect(first.manager.pendingConversionEntry).toBeUndefined();
+      expect(first.tile.program.id).toBe("dataflow@2");
+
+      const later = load(toJsonValue(getSnapshot(first.document.content!)));
+      expect(later.manager.pendingConversionEntry).toBeUndefined();
+      expect(later.tile.program.id).toBe("dataflow@2");
+    });
+  });
+
+  it("returns a current tile unchanged", () => {
+    const tile = { id: "t1", content: { type: "Dataflow", program: { id: "dataflow@1", nodes: {} } } };
+    expect(schemaVersion.convertSnapshot(tile)).toBe(tile);
   });
 
   it("treats a tile with no program as current", () => {

@@ -123,20 +123,30 @@ registration:
 - **`convertSnapshot(json)`**: takes the whole tile's JSON (the `TileModel` snapshot, not only its
   content, since some conversions move fields between the two) at any older version and returns it
   at `currentVersion`. Current JSON comes back unchanged. For a shared model, it takes the shared
-  model's JSON.
+  model's JSON. It returns `undefined` for JSON it can't handle. For example, a tile saved by a
+  newer release reaches an older client after a rollback, or from a stale tab.
 
-A tile is **old** when `getVersion` of its JSON differs from `currentVersion`. Types that don't
-register a version are always current.
+A tile is **old** when `getVersion` of its JSON differs from `currentVersion` and `convertSnapshot`
+accepts it, returning something other than `undefined`. The version comparison is the cheap first
+filter, so the converter runs only when the version differs. A tile the converter declines is
+treated as current: it loads through MST as it does today, and nothing is recorded for it. Types
+that don't register a version are always current.
+
+A converter that accepts a tile but returns one whose `getVersion` isn't `currentVersion` has a bug,
+such as forgetting to set the version. In development the load logs a warning naming the tile's
+path and both versions, and still records the conversion.
 
 **Conversion is its own function, not an MST snapshot preprocessor.** Preprocessors run only inside
 MST, and only at the level of the model that defines them, so playback and scripts can't call them
 on JSON. `convertSnapshot` is the one place a type's migration lives. Section 2 calls it on load,
 section 3 calls it during playback, and a future rewrite script could call it too. The type's MST
 preprocessor, which still converts old content that enters through an action (pasting an old tile,
-a legacy `setProgram` value), calls `convertSnapshot` rather than repeating it. Legacy DataFlow's
-`convertLegacyDataflowProgram` is already a plain function on JSON, so its `convertSnapshot` wraps
-it. Other tiles' existing preprocessors stay as they are until a tile registers a version under
-this process.
+a legacy `setProgram` value), calls `convertSnapshot` rather than repeating it, and passes a
+snapshot it declines through to MST unchanged: `snapshot => convertSnapshot(snapshot) ?? snapshot`.
+Legacy DataFlow's `convertLegacyDataflowProgram` is already a plain function on JSON, so its
+`convertSnapshot` wraps it, and declines any program format other than the legacy one and the
+current one. Other tiles' existing preprocessors stay as they are until a tile registers a version
+under this process.
 
 `getVersion` and `convertSnapshot` are plain functions on JSON with no MST or store imports, so a
 script can use them. A dumb service needs neither, because the conversion entry carries the change as
@@ -183,8 +193,9 @@ recognize it. The flag is `isConversion`.
 | Dumb services | Can ignore the flag. |
 
 **Detecting the conversion** is new code. Before `DocumentModel.create`, the load compares each
-tile's `getVersion` with its type's `currentVersion` and runs `convertSnapshot` on the old ones. The
-document is created from the converted JSON, so the preprocessors find nothing to do. The entry is
+tile's `getVersion` with its type's `currentVersion` and runs `convertSnapshot` on the ones that
+differ. A tile it declines is left as stored. The document is created from the converted JSON, so
+the preprocessors find nothing to do. The entry is
 the diff between each old tile's stored JSON and its snapshot in the created model. It is built as
 the document is created and kept pending.
 
