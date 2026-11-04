@@ -159,11 +159,11 @@ describe("legacyDataflowHistoryBridge", () => {
       .toEqual([]);
   });
 
-  it("skips tiles a stored conversion entry already covers", () => {
-    const conversionEntry = makeEntry([{ op: "replace", path: `${kProgramPath}/id`, value: "dataflow@1" }],
+  it("skips tiles a stored load entry already covers", () => {
+    const loadEntry = makeEntry([{ op: "replace", path: `${kProgramPath}/id`, value: "dataflow@1" }],
       { isLoadEntry: true, undoable: false });
     const conversions = findConversions([
-      addLegacyTile("t1"), addLegacyTile("t2"), legacyValue("t1"), legacyValue("t2"), conversionEntry, currentMove()
+      addLegacyTile("t1"), addLegacyTile("t2"), legacyValue("t1"), legacyValue("t2"), loadEntry, currentMove()
     ]);
     expect(conversions.map(c => c.path)).toEqual(["/content/tileMap/t2"]);
   });

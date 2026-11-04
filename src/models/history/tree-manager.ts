@@ -266,7 +266,7 @@ export const TreeManager = types
   return {
     /**
      * The conversions the registered history bridges find in the history: ones it never
-     * recorded, because the models were converted before conversion entries existed.
+     * recorded, because the models were converted before load entries existed.
      */
     get virtualConversions(): readonly IVirtualConversion[] {
       return getVirtualConversions();
