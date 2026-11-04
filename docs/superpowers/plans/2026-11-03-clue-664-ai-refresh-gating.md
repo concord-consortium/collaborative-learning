@@ -343,8 +343,8 @@ import { hasChangedSinceEvaluation } from "../../../shared/ai-evaluation-gate";
 import { IDEAS_UNCHANGED_MESSAGE } from "../../models/document/ai-evaluation-messages";
 ```
 
-`getSimpleDocumentPath` is what `history-firestore` itself uses to build a document path; confirm
-its signature before calling it and adapt the argument if it differs.
+`getSimpleDocumentPath(document.key)` is what `history-firestore` itself uses: it returns a path
+relative to the Firestore root, which is what the client wrapper expects.
 
 - [ ] **Step 4: Run the tests**
 
@@ -769,4 +769,7 @@ Tick **run regression** only if the user asks. Request a Copilot review on the f
   already have test files using `firebase-functions-test`, so the harness exists.
 - **Two awaits were added to the Ideas click.** They run before the request id is minted, so a
   double click during them is handled by the existing `canRequestIdeas` gate — verify that holds.
-- **`getSimpleDocumentPath`'s signature** is assumed in Tasks 4 and 5. Confirm it before use.
+- **`getSimpleDocumentPath(documentKey)`** returns a path *relative* to the Firestore root
+  (`documents/<escapedKey>`), which is what the client wrapper expects. The server builds its own
+  absolute `${firestoreRoot}/documents/${docId}` instead. Verified; do not "fix" one to match the
+  other.
