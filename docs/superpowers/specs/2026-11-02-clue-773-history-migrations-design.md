@@ -428,6 +428,11 @@ already covers needs no bridge.
   connection paths, or a `program` value whose `id` is `"dataflow@0.1.0"`. Legacy patches appear in
   many actions, not only `setProgram` (`setSlate` and `addCanonicalCases`, for example), so the check
   is by path, not by action.
+- **A legacy program with no id.** Many legacy tiles were added with a program that has a `values`
+  map but no `id`, because a separate `setProgram` entry set the id. A program with no `id` and a
+  `values` map is legacy. DataFlow's `getVersion`, its converter and the legacy-patch check all use
+  this rule, so the JSON copy treats that tile as old wherever it appears, including after a forward
+  redo of its add.
 - **The old state at the boundary.** The load entry needs the tile's legacy JSON at the
   boundary, and the stored content only has the converted form. The candidates, in order of
   preference:
@@ -453,6 +458,13 @@ data and stays on the developer's machine.
 
 **Pass bar:** each of the 174 documents plays back to its start, unless it stops on one of the
 non-schema causes (see Non-goals) or on a legacy shape the PR names as one the bridge can't handle.
+
+**A named shape the bridge doesn't handle: `program/id` recorded before the tile's add.** In many
+legacy documents, the `setProgram` entry that sets a tile's `program/id` is recorded one entry
+*before* that tile's `addTile` entry. Undoing it finds no tile, in MST as much as in the JSON copy,
+so playback stops one entry before the tile's add, with the failure banner. This is an ordering
+problem in the recorded history, not a schema one. Everything after that entry, including the
+legacy conversion, plays back.
 
 `programZoom` stays.
 
