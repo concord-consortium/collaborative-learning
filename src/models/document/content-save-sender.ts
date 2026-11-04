@@ -17,6 +17,8 @@ export const kIntermediateSaveIntervalMs = 5000;
 export const kMaxEvidenceEntryIds = 20;
 // The most time a group document's save waits, at random, before checking the envelope again.
 export const kGroupSaveJitterMs = 200;
+// The most time a sender keeps saving after it is detached.
+export const kSenderUnmountLimitMs = 30000;
 
 export interface IValueRef {
   on(event: "value", cb: (snapshot: { val(): unknown }) => void): unknown;
@@ -189,6 +191,9 @@ function subscribeToCurrent<T>(expression: () => T, subscribe: (value: T) => (()
 const sameTools = (a: string[], b: string[]) =>
   a.length === b.length && a.every((tool, index) => tool === b[index]);
 
+// One sender for each document, see getContentSaveSender.
+const senders = new WeakMap<DocumentModelType, ContentSaveSender>();
+
 interface IFallbackEpisode {
   startedAt: number;
   intermediateSaves: number;
@@ -208,10 +213,17 @@ interface IFallbackEpisode {
  * of its own to save. Other members save the same envelope, so a group save waits a random time
  * and is dropped if the envelope already reaches its entry, before and after that wait. A save by
  * another member that covers this client's committed changes shows them as saved.
+ *
+ * Once every attachment is detached the sender keeps saving until a save covers the latest change,
+ * which on an individual document has to be an exact save, or 30 seconds pass. Then an individual
+ * document makes one intermediate save if the latest change isn't saved, and the sender is
+ * disposed. Attaching it again before then keeps it going.
  */
 export class ContentSaveSender {
   private options: IContentSaveSenderOptions;
   private running = false;
+  private attachments = 1;
+  private drainTimer: ReturnType<typeof setTimeout> | undefined;
   private disposers: Array<() => void> = [];
   private keptSnapshots = new Map<string, IKeptSnapshot>();
   private pendingSave: IWaitingSave | undefined;
@@ -256,14 +268,76 @@ export class ContentSaveSender {
     const contentRefChanged = options.contentRef !== this.options.contentRef;
     this.options = options;
     if (!this.running) {
+      this.attachments = 1;
       this.start();
-    } else if (contentRefChanged && this.document.concurrent) {
+      return;
+    }
+    this.attachments++;
+    this.clearDrainTimer();
+    if (contentRefChanged && this.document.concurrent) {
       this.listenToEnvelope();
     }
   }
 
+  // Once nothing is attached, the sender keeps saving until it has nothing left to save.
   detach() {
+    if (!this.running || this.attachments === 0) return;
+    this.attachments--;
+    if (this.attachments > 0) return;
+    this.drainTimer = setTimeout(this.handleDrainTimeout, kSenderUnmountLimitMs);
+    this.checkDrained();
+  }
+
+  private get isDraining() {
+    return this.running && this.attachments === 0;
+  }
+
+  private checkDrained() {
+    if (this.isDraining && this.isLatestChangeSaved()) {
+      this.dispose();
+    }
+  }
+
+  /**
+   * Whether a completed save covers the latest change. On an individual document that has to be an
+   * exact save, since an intermediate save leaves the next load to catch up from history.
+   */
+  private isLatestChangeSaved() {
+    if (this.pendingSave || this.writesInFlight.size > 0) return false;
+    if (!this.document.concurrent) return this.unsettledSince === undefined;
+    const committed = this.lastCommittedLocal;
+    return this.savedSeq >= this.dirtySeq
+      || (!!committed && committed.changeSeq >= this.dirtySeq && this.isReachedByEnvelope(committed.index));
+  }
+
+  private handleDrainTimeout = () => {
+    this.drainTimer = undefined;
+    try {
+      if (!this.document.concurrent && !this.isLatestChangeWritten()) {
+        // Sent now, without waiting for the write in flight, the minimum gap or a backoff.
+        this.clearWriteTimer();
+        this.clearIntermediateTimer();
+        const save: IUnbuiltIntermediateSave = { kind: "intermediate", changeSeq: this.dirtySeq };
+        this.pendingSave = save;
+        this.write(save);
+      }
+    } catch (error) {
+      console.error("Failed to send the last content save", error);
+    }
     this.dispose();
+  };
+
+  // Whether a completed write, or one in flight, holds the latest change.
+  private isLatestChangeWritten() {
+    return this.savedSeq >= this.dirtySeq
+      || Array.from(this.writesInFlight).some(save => save.changeSeq >= this.dirtySeq);
+  }
+
+  private clearDrainTimer() {
+    if (this.drainTimer) {
+      clearTimeout(this.drainTimer);
+      this.drainTimer = undefined;
+    }
   }
 
   /**
@@ -283,8 +357,13 @@ export class ContentSaveSender {
   dispose() {
     this.endFallbackEpisode("session-end");
     this.running = false;
+    this.attachments = 0;
+    if (senders.get(this.document) === this) {
+      senders.delete(this.document);
+    }
     this.disposers.forEach(dispose => dispose());
     this.disposers = [];
+    this.clearDrainTimer();
     this.clearWriteTimer();
     this.clearIntermediateTimer();
     this.keptSnapshots.clear();
@@ -393,6 +472,7 @@ export class ContentSaveSender {
       this.reportedIndex = envelope.index;
       this.reportContentSaved(envelope.id);
     }
+    this.checkDrained();
   }
 
   // Runs in a microtask: a call stops being tracked just before the entry that records it opens.
@@ -444,6 +524,7 @@ export class ContentSaveSender {
     this.savedSeq = this.dirtySeq;
     this.unsettledSince = undefined;
     this.setSaveState(SaveState.Saved);
+    this.checkDrained();
   }
 
   private createSettledSave(entry: ICommittedEntry, content: DocumentContentModelType, exactSince: string)
@@ -762,6 +843,7 @@ export class ContentSaveSender {
     }
     this.scheduleWrite();
     this.scheduleIntermediateSave();
+    this.checkDrained();
   }
 
   // The pending save stays in place, unless a newer one has replaced it, so the retry sends the newest.
@@ -808,4 +890,19 @@ export class ContentSaveSender {
       this.document.setSaveState(state);
     }
   }
+}
+
+/**
+ * The document's sender, so a document has one writer however often it is attached. A sender that
+ * is still saving after it was detached is attached again, and a disposed one is replaced.
+ */
+export function getContentSaveSender(document: DocumentModelType, options: IContentSaveSenderOptions) {
+  const existing = senders.get(document);
+  if (existing) {
+    existing.attach(options);
+    return existing;
+  }
+  const sender = new ContentSaveSender(document, options);
+  senders.set(document, sender);
+  return sender;
 }

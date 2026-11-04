@@ -1,24 +1,17 @@
-import { useEffect, useMemo, useRef } from "react";
-import { throttle as _throttle } from "lodash";
-import { onSnapshot, SnapshotOut } from "mobx-state-tree";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 import { OnDisconnect } from "firebase-admin/database";
 import { useSyncMstNodeToFirebase } from "./use-sync-mst-node-to-firebase";
 import { useSyncMstPropToFirebase } from "./use-sync-mst-prop-to-firebase";
 import { DEBUG_DOCUMENT, DEBUG_SAVE } from "../lib/debug";
 import { Firebase } from "../lib/firebase";
-import { ContentStatus, DocumentModelType, SaveState } from "../models/document/document";
+import { ContentStatus, DocumentModelType } from "../models/document/document";
 import { isPublishedType, LearningLogDocument, LearningLogPublication, PersonalDocument,
          PersonalPublication, ProblemDocument, ProblemPublication, SupportPublication
         } from "../models/document/document-types";
 import { UserModelType } from "../models/stores/user";
 import { Firestore } from "src/lib/firestore";
-import { useMutation, UseMutationOptions } from "react-query";
-import { DocumentContentSnapshotType } from "src/models/document/document-content";
-import { TreeManagerType } from "../models/history/tree-manager";
-import { getDocumentTools } from "../models/document/content-save-envelope";
-
-const latestHistoryEntryId = (document: DocumentModelType) =>
-  (document.treeManagerAPI as TreeManagerType | undefined)?.latestDocumentHistoryEntry?.id;
+import { getContentSaveSender } from "../models/document/content-save-sender";
+import { logDocumentEvent } from "../models/document/log-document-event";
 
 function debugLog(...args: any[]) {
   // eslint-disable-next-line no-console
@@ -114,7 +107,7 @@ export function useDocumentSyncToFirebase(
    * @param value
    * @returns
    */
-  const updateFirestoreDocumentProp = (prop: string, value?: string | string[]) => {
+  const updateFirestoreDocumentProp = useCallback((prop: string, value?: string | string[]) => {
     // The context_id is required so the security rules know we aren't trying
     // to get documents we don't have access to.
     // We only update document props like visibility, the title, and tools
@@ -129,7 +122,7 @@ export function useDocumentSyncToFirebase(
         querySnapshot.docs.map((doc) => doc.ref.update({ [prop]: value}))
       );
     });
-  };
+  }, [document, firestore, user]);
 
   // sync visibility (public/private) for problem documents
   useSyncMstPropToFirebase<typeof document.visibility>({
@@ -211,110 +204,36 @@ export function useDocumentSyncToFirebase(
   // sync content for editable document types
   const enabled = commonSyncEnabled && !readOnly && !!document.content && !isPublishedType(type);
 
-  // Track a monotonically increasing sequence number for content changes. dirtySeqRef is bumped
-  // on every onSnapshot; savedSeqRef tracks the highest seq we've confirmed persisted. saveState
-  // only flips to "saved" when a mutation's captured seq catches up to dirtySeqRef — i.e. the
-  // most recent change is on the server. This makes the save indicator (and cy.waitForSave) a
-  // reliable "latest change is persisted" signal rather than "a save recently completed", which
-  // would otherwise race when throttled mutations have a trailing call still in flight.
-  //
-  // This does NOT address the data-integrity risk where a failed-then-retried older mutation
-  // overwrites newer server content; that requires the broader refactor tracked in the
-  // "Simplify useDocumentSyncToFirebase / drop react-query" plan.
-  const dirtySeqRef = useRef(0);
-  const savedSeqRef = useRef(0);
-
-  interface SyncContext { seq: number }
-  type SyncMutationOptions =
-    Omit<UseMutationOptions<string | undefined, unknown, SnapshotOut<DocumentContentSnapshotType>, SyncContext>,
-      'mutationFn'>;
-  const options: SyncMutationOptions = {
-    // default is to retry with linear back-off to a maximum
-    retry: true,
-    retryDelay: (attempt) => Math.min(attempt * 5, 30),
-    // Capture the latest dirty seq at the moment this mutation actually starts (for leading
-    // throttle this is when the change happens; for trailing it's when the throttle fires).
-    onMutate: () => ({ seq: dirtySeqRef.current }),
-    onSuccess: (lastHistoryEntryId, snapshot, context) => {
-      debugLog(`DEBUG: Updated document content for ${type} document ${key}:`, document.changeCount);
-      const seq = context?.seq ?? 0;
-      if (seq > savedSeqRef.current) savedSeqRef.current = seq;
-      if (lastHistoryEntryId) onContentSaved?.(document, lastHistoryEntryId);
-      // Only signal "saved" when no newer changes are pending.
-      if (savedSeqRef.current === dirtySeqRef.current) {
-        document.setSaveState(SaveState.Saved);
-      }
-    },
-    onError: (err, snapshot, context) => {
-      console.warn(`ERROR: Failed to update document content for ${type} document ${key}:`, document.changeCount);
-      document.setSaveState(SaveState.Retrying);
-    }
-  };
-  // The latest entry when each snapshot was taken. Its own entry completes later, so this can only
-  // under-claim what the snapshot holds.
-  const snapshotIdsRef = useRef(new WeakMap<DocumentContentSnapshotType, string | undefined>());
-  const latestSnapshotRef = useRef<DocumentContentSnapshotType | undefined>(undefined);
-  const stampedIdsRef = useRef(new WeakMap<DocumentContentSnapshotType, string | undefined>());
-  const transform = (snapshot: DocumentContentSnapshotType):
-      { changeCount: number, content: string, lastHistoryEntryId?: string } => {
-    // Record the id of the last history entry that had been applied when
-    // this content snapshot was captured. The drift check on document load
-    // compares this to the Firestore history — if the id isn't present in
-    // the history, the content reflects edits that never made it to the
-    // history chain.
-    // The mutation runs a few microtasks after it is queued, so the latest entry may already belong to
-    // a newer snapshot; only the newest snapshot takes it. A retry keeps its first attempt's id.
-    const stampedIds = stampedIdsRef.current;
-    if (!stampedIds.has(snapshot)) {
-      stampedIds.set(snapshot, snapshot === latestSnapshotRef.current
-        ? latestHistoryEntryId(document)
-        : snapshotIdsRef.current.get(snapshot));
-    }
-    const lastHistoryEntryId = stampedIds.get(snapshot);
-    const base = {
-      changeCount: document.incChangeCount(),
-      content: JSON.stringify(snapshot)
-    };
-    return lastHistoryEntryId
-      ? { ...base, lastHistoryEntryId }
-      : base;
-  };
-
-  const mutation = useMutation((snapshot: DocumentContentSnapshotType) => {
-    if (!disconnectHandlers.current && commonSyncEnabled) {
-      disconnectHandlers.current = firebase.setLastEditedOnDisconnect(user, key, uid);
-    }
-
-    const tools = getDocumentTools(snapshot);
-
-    const promises = [];
-
-    // update tiletypes for metadata document in firestore
-    promises.push(updateFirestoreDocumentProp("tools", tools));
-
-    const content = transform(snapshot);
-    promises.push(firebase.ref(contentPath).update(content));
-    return Promise.all(promises).then(() => content.lastHistoryEntryId);
-  }, options);
-
-  const throttledMutate = useMemo(() => _throttle(mutation.mutate, 1000), [mutation.mutate]);
+  // The sender may still be saving after this unmounts, so it calls the newest callback.
+  const onContentSavedRef = useRef(onContentSaved);
+  onContentSavedRef.current = onContentSaved;
 
   useEffect(() => {
-    const cleanup = enabled
-            ? onSnapshot<DocumentContentSnapshotType>(document.content!, snapshot => {
-                snapshotIdsRef.current.set(snapshot, latestHistoryEntryId(document));
-                latestSnapshotRef.current = snapshot;
-                dirtySeqRef.current++;
-                document.setSaveState(SaveState.Saving);
-                // reset (e.g. stop retrying and restart) when value changes
-                mutation.isError && mutation.reset();
-                throttledMutate(snapshot);
-              })
-            : undefined;
+    if (!enabled) return;
+    const sender = getContentSaveSender(document, {
+      contentRef: firebase.ref(contentPath),
+      updateTools: tools => updateFirestoreDocumentProp("tools", tools),
+      beforeWrite: () => {
+        if (!disconnectHandlers.current) {
+          disconnectHandlers.current = firebase.setLastEditedOnDisconnect(user, key, uid);
+        }
+      },
+      onContentSaved: (savedDocument, lastHistoryEntryId) => {
+        debugLog(`DEBUG: Updated document content for ${type} document ${key}:`, savedDocument.changeCount);
+        onContentSavedRef.current?.(savedDocument, lastHistoryEntryId);
+      },
+      logEvent: (event, params) => logDocumentEvent(event, { document, ...params })
+    });
+    // A group document has other writers, so it saves through its usual checks.
+    const handlePageHide = () => sender.handlePageHide();
+    if (!document.concurrent) {
+      window.addEventListener("pagehide", handlePageHide);
+    }
     return () => {
-      cleanup?.();
+      window.removeEventListener("pagehide", handlePageHide);
+      sender.detach();
     };
-  }, [enabled, document, document.content, mutation, throttledMutate]);
+  }, [enabled, document, firebase, contentPath, user, key, uid, type, updateFirestoreDocumentProp]);
 
   useEffect(() => {
     DEBUG_SAVE && !readOnly &&

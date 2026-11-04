@@ -8,8 +8,8 @@ import { registerTileContentInfo } from "../tiles/tile-content-info";
 import { TileContentModel } from "../tiles/tile-content";
 import { LogEventName } from "../../lib/logger-types";
 import {
-  collectUnsettledEvidence, ContentSaveSender, IContentRef, IContentSaveSenderOptions, kGroupSaveJitterMs,
-  kIntermediateSaveIntervalMs, kMaxEvidenceEntryIds, kMinimumSaveGapMs
+  collectUnsettledEvidence, ContentSaveSender, getContentSaveSender, IContentRef, IContentSaveSenderOptions,
+  kGroupSaveJitterMs, kIntermediateSaveIntervalMs, kMaxEvidenceEntryIds, kMinimumSaveGapMs, kSenderUnmountLimitMs
 } from "./content-save-sender";
 import { createDocumentModel, DocumentModelType, SaveState } from "./document";
 import { DocumentContentModel } from "./document-content";
@@ -191,7 +191,7 @@ function setup(overrides?: Partial<IContentSaveSenderOptions>, concurrent = fals
   const onContentSaved = jest.fn();
   const beforeWrite = jest.fn();
   // A group save waits no jitter unless a test sets random.
-  const sender = new ContentSaveSender(document,
+  const sender = getContentSaveSender(document,
     { contentRef, updateTools, onContentSaved, beforeWrite, random: () => 0, ...overrides });
 
   // Makes an edit and returns the id of the entry that recorded it.
@@ -1357,6 +1357,156 @@ describe("ContentSaveSender", () => {
       await flush();
       expect(newRef.update).toHaveBeenCalledTimes(1);
       expect(contentRef.update).not.toHaveBeenCalled();
+    });
+
+    it("keeps saving after detach until a save covers the latest change, then disposes", async () => {
+      const { commits, contentRef, document, edit, onContentSaved, sender } = track(setup());
+      const a = await edit("alpha");
+      const b = await edit("bravo");
+      commits.commit(a);
+      sender.detach();
+
+      commits.commit(b);
+      contentRef.writes[0].resolve();
+      await flush();
+      jest.advanceTimersByTime(kMinimumSaveGapMs);
+      expect(contentRef.update).toHaveBeenCalledTimes(2);
+      expect(contentRef.writes[1].values).toMatchObject({ lastHistoryEntryId: b, settled: true });
+
+      contentRef.writes[1].resolve();
+      await flush();
+      expect(onContentSaved).toHaveBeenLastCalledWith(document, b);
+      expect(document.saveState).toBe(SaveState.Saved);
+
+      // disposed: it stops listening and a new attach gets a new sender
+      const c = await edit("charlie");
+      commits.commit(c);
+      jest.advanceTimersByTime(kSenderUnmountLimitMs);
+      expect(contentRef.update).toHaveBeenCalledTimes(2);
+      const next = track({ sender: getContentSaveSender(document,
+        { contentRef, updateTools: () => Promise.resolve() }) }).sender;
+      expect(next).not.toBe(sender);
+    });
+
+    it("keeps saving after detach until an exact save covers an intermediate save's content", async () => {
+      const { commits, contentRef, edit, sender } = track(setup());
+      const a = await edit("alpha");
+      sender.detach();
+      jest.advanceTimersByTime(kIntermediateSaveIntervalMs);
+      contentRef.writes[0].resolve();
+      await flush();
+
+      commits.commit(a);
+      jest.advanceTimersByTime(kMinimumSaveGapMs);
+      expect(contentRef.update).toHaveBeenCalledTimes(2);
+      expect(contentRef.writes[1].values).toMatchObject({ lastHistoryEntryId: a, settled: true });
+    });
+
+    it("makes one intermediate save and stops 30 seconds after detach on an individual document", async () => {
+      const logEvent = jest.fn();
+      const { commits, contentRef, edit, sender } = track(setup({ logEvent }));
+      const a = await edit("alpha");
+      sender.detach();
+      jest.advanceTimersByTime(kIntermediateSaveIntervalMs);
+      expect(contentRef.update).toHaveBeenCalledTimes(1);
+      expect(textOf(contentRef.writes[0].values)).toBe("alpha");
+
+      // the intermediate save is still in flight when a newer change is made
+      await edit("bravo");
+      jest.advanceTimersByTime(kSenderUnmountLimitMs - kIntermediateSaveIntervalMs - 1);
+      expect(contentRef.update).toHaveBeenCalledTimes(1);
+      jest.advanceTimersByTime(1);
+      expect(contentRef.update).toHaveBeenCalledTimes(2);
+      expect(contentRef.writes[1].values).toMatchObject({ settled: null });
+      expect(textOf(contentRef.writes[1].values)).toBe("bravo");
+      expect(contentRef.writes[1].values.unsettled.uncommittedEntryIds).toContain(a);
+      expect(logEvent.mock.calls.map(([event, params]) => [event, params.endedBy])).toEqual([
+        [LogEventName.CONTENT_SAVE_FALLBACK_START, undefined],
+        [LogEventName.CONTENT_SAVE_FALLBACK_END, "session-end"]
+      ]);
+
+      contentRef.writes.forEach(write => write.resolve());
+      await flush();
+      commits.commit(a);
+      await edit("charlie");
+      jest.advanceTimersByTime(kSenderUnmountLimitMs);
+      expect(contentRef.update).toHaveBeenCalledTimes(2);
+    });
+
+    it("stops 30 seconds after detach on a group document without an intermediate save", async () => {
+      const { commits, contentRef, edit, sender } = track(setup({}, true));
+      const a = await edit("alpha");
+      const b = await edit("bravo");
+      sender.detach();
+      jest.advanceTimersByTime(kSenderUnmountLimitMs / 2);
+      commits.commit(a);
+      expect(contentRef.update).toHaveBeenCalledTimes(1);
+      contentRef.writes[0].resolve();
+      await flush();
+
+      jest.advanceTimersByTime(kSenderUnmountLimitMs / 2);
+      expect(contentRef.update).toHaveBeenCalledTimes(1);
+      commits.commit(b);
+      await flush();
+      jest.advanceTimersByTime(kSenderUnmountLimitMs);
+      expect(contentRef.update).toHaveBeenCalledTimes(1);
+    });
+
+    it("reuses the draining sender when the document is attached again", async () => {
+      const { commits, contentRef, document, edit, onContentSaved, sender } = track(setup());
+      const a = await edit("alpha");
+      const b = await edit("bravo");
+      commits.commit(a);
+      sender.detach();
+
+      const newOnContentSaved = jest.fn();
+      const attached = getContentSaveSender(document,
+        { contentRef, updateTools: () => Promise.resolve(), onContentSaved: newOnContentSaved });
+      expect(attached).toBe(sender);
+      commits.commit(b);
+      expect(contentRef.update).toHaveBeenCalledTimes(1);
+      contentRef.writes[0].resolve();
+      await flush();
+      expect(newOnContentSaved).toHaveBeenCalledWith(document, a);
+      expect(onContentSaved).not.toHaveBeenCalled();
+      jest.advanceTimersByTime(kMinimumSaveGapMs);
+      expect(contentRef.update).toHaveBeenCalledTimes(2);
+      contentRef.writes[1].resolve();
+      await flush();
+
+      // the drain was canceled, so it keeps saving
+      jest.advanceTimersByTime(kSenderUnmountLimitMs);
+      const c = await edit("charlie");
+      commits.commit(c);
+      expect(contentRef.update).toHaveBeenCalledTimes(3);
+      expect(contentRef.writes[2].values).toMatchObject({ lastHistoryEntryId: c });
+    });
+
+    it("keeps a fallback episode open across a detach and attach", async () => {
+      const logEvent = jest.fn();
+      const { contentRef, document, edit, sender } = track(setup({ logEvent }));
+      await edit("alpha");
+      jest.advanceTimersByTime(kIntermediateSaveIntervalMs);
+      expect(logEvent).toHaveBeenCalledWith(LogEventName.CONTENT_SAVE_FALLBACK_START, expect.anything());
+      sender.detach();
+      getContentSaveSender(document, { contentRef, updateTools: () => Promise.resolve(), logEvent });
+      contentRef.writes[0].resolve();
+      await flush();
+      jest.advanceTimersByTime(kSenderUnmountLimitMs);
+      expect(logEvent).toHaveBeenCalledTimes(1);
+    });
+
+    it("keeps running while another attachment remains", async () => {
+      const { commits, contentRef, document, edit, sender } = track(setup());
+      // lets the entry the setup opened complete
+      await flush();
+      getContentSaveSender(document, { contentRef, updateTools: () => Promise.resolve() });
+      sender.detach();
+      jest.advanceTimersByTime(kSenderUnmountLimitMs);
+      const a = await edit("alpha");
+      commits.commit(a);
+      expect(contentRef.update).toHaveBeenCalledTimes(1);
+      expect(contentRef.writes[0].values).toMatchObject({ lastHistoryEntryId: a, settled: true });
     });
 
     it("uses the newest options after attach", async () => {

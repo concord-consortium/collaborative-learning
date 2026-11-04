@@ -5,12 +5,16 @@ import { UseMutationOptions } from "react-query";
 import firebase from "firebase/app";
 import { Firebase } from "../lib/firebase";
 import { Firestore } from "../lib/firestore";
-import { DocumentModel, DocumentModelType, createDocumentModel, SaveState } from "../models/document/document";
+import * as senderModule from "../models/document/content-save-sender";
+import { ContentSaveSender } from "../models/document/content-save-sender";
+import { DocumentModel, createDocumentModel } from "../models/document/document";
 import {
-  LearningLogDocument, PersonalDocument, PlanningDocument, ProblemDocument
+  LearningLogDocument, PersonalDocument, PlanningDocument, ProblemDocument, ProblemPublication
 } from "../models/document/document-types";
-import { HistoryEntry } from "../models/history/history";
-import { TreeManagerType } from "../models/history/tree-manager";
+import * as logDocumentEventModule from "../models/document/log-document-event";
+import { ICommitListener, ICommitSource, ICommittedEntry } from "../models/history/history-commits";
+import { IHistoryManager, TreeManagerType } from "../models/history/tree-manager";
+import { LogEventName } from "../lib/logger-types";
 import { UserModel, UserModelType } from "../models/stores/user";
 import { useDocumentSyncToFirebase } from "./use-document-sync-to-firebase";
 const libDebug = require("../lib/debug");
@@ -47,6 +51,7 @@ jest.mock("react-query", () => ({
   useMutation: (callback: (vars: any) => Promise<any>, options?: any) => mockUseMutation(callback, options)
 }));
 
+const mockFirestoreDocUpdate = jest.fn();
 const mockCreateFirestoreMetadataDocument_v2 = jest.fn();
 const mockPostDocumentComment_v2 = jest.fn();
 const mockHttpsCallable = jest.fn((fn: string) => {
@@ -64,7 +69,7 @@ jest.mock("firebase/app", () => {
   const mockQuery = jest.fn();
   mockQuery.mockReturnValue({
     get: jest.fn().mockResolvedValue({
-      docs: [{ ref: { update: jest.fn().mockResolvedValue(undefined) } }]
+      docs: [{ ref: { update: (value: unknown) => mockFirestoreDocUpdate(value) } }]
     }),
     where: mockQuery
   });
@@ -83,6 +88,7 @@ jest.mock("firebase/app", () => {
 const mockUpdate = jest.fn();
 const mockRef = jest.fn();
 const mockSetLastEditedOnDisconnect = jest.fn();
+const mockSetLastEditedNow = jest.fn();
 const mockOnlineStatusListenerOn = jest.fn();
 const mockOnlineStatusListenerOff = jest.fn();
 const mockOnlineStatusRef = {
@@ -105,9 +111,39 @@ const specFirebase = (type: string, key: string) => {
     },
     ref: (path: string) => mockRef(path),
     setLastEditedOnDisconnect: mockSetLastEditedOnDisconnect,
+    setLastEditedNow: mockSetLastEditedNow,
     onlineStatusRef: mockOnlineStatusRef,
   } as unknown as Firebase;
 };
+
+// Reports commits only when a test says so.
+class StubCommitSource implements IHistoryManager, ICommitSource {
+  lastCommitted: ICommittedEntry | undefined = undefined;
+  private listeners = new Set<ICommitListener>();
+  private nextIndex = 1;
+
+  onHistoryEntryCompleted() {
+    // entries commit only when a test calls commit
+  }
+
+  addCommitListener(listener: ICommitListener) {
+    this.listeners.add(listener);
+    return () => { this.listeners.delete(listener); };
+  }
+
+  commit(...ids: string[]) {
+    const entries = ids.map(id => ({ id, index: this.nextIndex++ }));
+    this.lastCommitted = entries[entries.length - 1];
+    this.listeners.forEach(listener => listener.onCommitted(entries));
+  }
+}
+
+// Lets the promise chains of the tree monitor and the content save sender run.
+async function flush() {
+  for (let i = 0; i < 20; i++) {
+    await Promise.resolve();
+  }
+}
 
 const specFirestore = () => {
   return (firebase.firestore()) as unknown as Firestore;
@@ -138,7 +174,11 @@ describe("useDocumentSyncToFirebase hook", () => {
 
   beforeEach(() => {
     mockUpdate.mockReset();
+    mockFirestoreDocUpdate.mockReset();
+    mockFirestoreDocUpdate.mockResolvedValue(undefined);
     mockSetLastEditedOnDisconnect.mockReset();
+    mockSetLastEditedOnDisconnect.mockReturnValue([]);
+    mockSetLastEditedNow.mockReset();
     mockOnlineStatusListenerOff.mockReset();
     mockOnlineStatusListenerOn.mockReset();
     mockRef.mockReset();
@@ -227,145 +267,118 @@ describe("useDocumentSyncToFirebase hook", () => {
   it("monitors problem documents", async () => {
     const { user, fb, firestore, document } = specArgs(ProblemDocument, "xyz");
     renderHook(() => useDocumentSyncToFirebase(user, fb, firestore, document));
-    expect(mockRef).toHaveBeenCalledTimes(0);
+    // the content save sender's reference
+    expect(mockRef).toHaveBeenCalledTimes(1);
+    expect(mockRef).toHaveBeenCalledWith(`${user.id}/content/${document.key}`);
     expect(mockUpdate).toHaveBeenCalledTimes(0);
     expect(mockSetLastEditedOnDisconnect).toHaveBeenCalledTimes(0);
     expect(mockOnlineStatusListenerOn).toHaveBeenCalledTimes(1);
 
     // updates public/private status on visibility change
     document.setVisibility("public");
-    expect(mockRef).toHaveBeenCalledTimes(1);
+    expect(mockRef).toHaveBeenCalledTimes(2);
     expect(mockRef).toHaveBeenCalledWith(`${user.id}/problem/${document.key}`);
     expect(mockUpdate).toHaveBeenCalledTimes(1);
     expect(mockSetLastEditedOnDisconnect).toHaveBeenCalledTimes(0);
 
-    // saves when content changes
-    document.content?.addTile("text");
-    expect(mockRef).toHaveBeenCalledTimes(2);
-    expect(mockRef).toHaveBeenCalledWith(`${user.id}/content/${document.key}`);
-    expect(mockUpdate).toHaveBeenCalledTimes(2);
-    expect(mockSetLastEditedOnDisconnect).toHaveBeenCalledTimes(1);
-
     // doesn't respond to title change (problem documents don't have user-settable titles)
     document.setTitle("New Title");
     expect(mockRef).toHaveBeenCalledTimes(2);
-    expect(mockUpdate).toHaveBeenCalledTimes(2);
-    expect(mockSetLastEditedOnDisconnect).toHaveBeenCalledTimes(1);
+    expect(mockUpdate).toHaveBeenCalledTimes(1);
 
     // doesn't respond to properties change (problem documents don't have user-settable properties)
     document.setProperty("foo", "bar");
     expect(mockRef).toHaveBeenCalledTimes(3);
-    expect(mockUpdate).toHaveBeenCalledTimes(3);
-    expect(mockSetLastEditedOnDisconnect).toHaveBeenCalledTimes(1);
+    expect(mockUpdate).toHaveBeenCalledTimes(2);
+    expect(mockSetLastEditedOnDisconnect).toHaveBeenCalledTimes(0);
     expect(mockOnlineStatusListenerOn).toHaveBeenCalledTimes(1);
   });
 
   it("monitors planning documents", () => {
     const { user, fb, firestore, document } = specArgs(PlanningDocument, "xyz");
     renderHook(() => useDocumentSyncToFirebase(user, fb, firestore, document));
-    expect(mockRef).toHaveBeenCalledTimes(0);
+    // the content save sender's reference
+    expect(mockRef).toHaveBeenCalledTimes(1);
+    expect(mockRef).toHaveBeenCalledWith(`${user.id}/content/${document.key}`);
     expect(mockUpdate).toHaveBeenCalledTimes(0);
     expect(mockSetLastEditedOnDisconnect).toHaveBeenCalledTimes(0);
     expect(mockOnlineStatusListenerOn).toHaveBeenCalledTimes(1);
 
     // doesn't respond to visibility change (planning documents are always private)
     document.setVisibility("public");
-    expect(mockRef).toHaveBeenCalledTimes(0);
-    expect(mockUpdate).toHaveBeenCalledTimes(0);
-    expect(mockSetLastEditedOnDisconnect).toHaveBeenCalledTimes(0);
-
-    // saves when content changes
-    document.content?.addTile("text");
     expect(mockRef).toHaveBeenCalledTimes(1);
-    expect(mockRef).toHaveBeenCalledWith(`${user.id}/content/${document.key}`);
-    expect(mockUpdate).toHaveBeenCalledTimes(1);
-    expect(mockSetLastEditedOnDisconnect).toHaveBeenCalledTimes(1);
+    expect(mockUpdate).toHaveBeenCalledTimes(0);
 
     // doesn't respond to title change (planning documents don't have user-settable titles)
     document.setTitle("New Title");
     expect(mockRef).toHaveBeenCalledTimes(1);
-    expect(mockUpdate).toHaveBeenCalledTimes(1);
-    expect(mockSetLastEditedOnDisconnect).toHaveBeenCalledTimes(1);
+    expect(mockUpdate).toHaveBeenCalledTimes(0);
 
     // doesn't respond to properties change (planning documents don't have user-settable properties)
     document.setProperty("foo", "bar");
     expect(mockRef).toHaveBeenCalledTimes(1);
-    expect(mockUpdate).toHaveBeenCalledTimes(1);
-    expect(mockSetLastEditedOnDisconnect).toHaveBeenCalledTimes(1);
+    expect(mockUpdate).toHaveBeenCalledTimes(0);
+    expect(mockSetLastEditedOnDisconnect).toHaveBeenCalledTimes(0);
     expect(mockOnlineStatusListenerOn).toHaveBeenCalledTimes(1);
   });
 
   it("monitors personal documents", () => {
     const { user, fb, firestore, document } = specArgs(PersonalDocument, "xyz");
     renderHook(() => useDocumentSyncToFirebase(user, fb, firestore, document));
-    expect(mockRef).toHaveBeenCalledTimes(0);
+    // the content save sender's reference
+    expect(mockRef).toHaveBeenCalledTimes(1);
+    expect(mockRef).toHaveBeenCalledWith(`${user.id}/content/${document.key}`);
     expect(mockUpdate).toHaveBeenCalledTimes(0);
     expect(mockSetLastEditedOnDisconnect).toHaveBeenCalledTimes(0);
     expect(mockOnlineStatusListenerOn).toHaveBeenCalledTimes(1);
 
     // responds to visibility change
     document.setVisibility("public");
-    expect(mockRef).toHaveBeenCalledTimes(1);
-    expect(mockUpdate).toHaveBeenCalledTimes(1);
-    expect(mockSetLastEditedOnDisconnect).toHaveBeenCalledTimes(0);
-
-    // saves when content changes
-    document.content?.addTile("text");
     expect(mockRef).toHaveBeenCalledTimes(2);
-    expect(mockRef).toHaveBeenCalledWith(`${user.id}/content/${document.key}`);
-    expect(mockUpdate).toHaveBeenCalledTimes(2);
-    expect(mockSetLastEditedOnDisconnect).toHaveBeenCalledTimes(1);
+    expect(mockUpdate).toHaveBeenCalledTimes(1);
 
     // updates title when it changes
     document.setTitle("New Title");
     expect(mockRef).toHaveBeenCalledTimes(3);
     expect(mockRef).toHaveBeenCalledWith(`${user.id}/personal/${document.key}`);
-    expect(mockUpdate).toHaveBeenCalledTimes(3);
-    expect(mockSetLastEditedOnDisconnect).toHaveBeenCalledTimes(1);
+    expect(mockUpdate).toHaveBeenCalledTimes(2);
 
     // updates properties when they change
     document.setProperty("foo", "bar");
     expect(mockRef).toHaveBeenCalledTimes(4);
     expect(mockRef).toHaveBeenCalledWith(`${user.id}/personal/${document.key}`);
-    expect(mockUpdate).toHaveBeenCalledTimes(4);
-    expect(mockSetLastEditedOnDisconnect).toHaveBeenCalledTimes(1);
+    expect(mockUpdate).toHaveBeenCalledTimes(3);
+    expect(mockSetLastEditedOnDisconnect).toHaveBeenCalledTimes(0);
     expect(mockOnlineStatusListenerOn).toHaveBeenCalledTimes(1);
   });
 
   it("monitors learning log documents", () => {
     const { user, fb, firestore, document } = specArgs(LearningLogDocument, "xyz");
     renderHook(() => useDocumentSyncToFirebase(user, fb, firestore, document));
-    expect(mockRef).toHaveBeenCalledTimes(0);
+    // the content save sender's reference
+    expect(mockRef).toHaveBeenCalledTimes(1);
+    expect(mockRef).toHaveBeenCalledWith(`${user.id}/content/${document.key}`);
     expect(mockUpdate).toHaveBeenCalledTimes(0);
     expect(mockSetLastEditedOnDisconnect).toHaveBeenCalledTimes(0);
     expect(mockOnlineStatusListenerOn).toHaveBeenCalledTimes(1);
 
     // responds to visibility change
     document.setVisibility("public");
-    expect(mockRef).toHaveBeenCalledTimes(1);
-    expect(mockUpdate).toHaveBeenCalledTimes(1);
-    expect(mockSetLastEditedOnDisconnect).toHaveBeenCalledTimes(0);
-
-    // saves when content changes
-    document.content?.addTile("text");
     expect(mockRef).toHaveBeenCalledTimes(2);
-    expect(mockRef).toHaveBeenCalledWith(`${user.id}/content/${document.key}`);
-    expect(mockUpdate).toHaveBeenCalledTimes(2);
-    expect(mockSetLastEditedOnDisconnect).toHaveBeenCalledTimes(1);
+    expect(mockUpdate).toHaveBeenCalledTimes(1);
 
     // updates title when it changes
     document.setTitle("New Title");
     expect(mockRef).toHaveBeenCalledTimes(3);
     expect(mockRef).toHaveBeenCalledWith(`${user.id}/learningLog/${document.key}`);
-    expect(mockUpdate).toHaveBeenCalledTimes(3);
-    expect(mockSetLastEditedOnDisconnect).toHaveBeenCalledTimes(1);
+    expect(mockUpdate).toHaveBeenCalledTimes(2);
 
     // updates properties when they change
     document.setProperty("foo", "bar");
     expect(mockRef).toHaveBeenCalledTimes(4);
     expect(mockRef).toHaveBeenCalledWith(`${user.id}/learningLog/${document.key}`);
-    expect(mockUpdate).toHaveBeenCalledTimes(4);
-    expect(mockSetLastEditedOnDisconnect).toHaveBeenCalledTimes(1);
+    expect(mockUpdate).toHaveBeenCalledTimes(3);
+    expect(mockSetLastEditedOnDisconnect).toHaveBeenCalledTimes(0);
     expect(mockOnlineStatusListenerOn).toHaveBeenCalledTimes(1);
   });
 
@@ -373,7 +386,7 @@ describe("useDocumentSyncToFirebase hook", () => {
     libDebug.DEBUG_SAVE = true;
     const { user, fb, firestore, document } = specArgs(ProblemDocument, "xyz");
 
-    expect.assertions(18);
+    expect.assertions(14);
 
     // logs monitoring of document
     let unmount: () => void;
@@ -381,7 +394,7 @@ describe("useDocumentSyncToFirebase hook", () => {
       const { unmount: _unmount } = renderHook(() => useDocumentSyncToFirebase(user, fb, firestore, document));
       unmount = _unmount;
       await waitFor(() => expect(spy).toHaveBeenCalledTimes(1));
-      expect(mockRef).toHaveBeenCalledTimes(0);
+      expect(mockRef).toHaveBeenCalledTimes(1);
       expect(mockUpdate).toHaveBeenCalledTimes(0);
     });
 
@@ -416,17 +429,6 @@ describe("useDocumentSyncToFirebase hook", () => {
       expect(spy).not.toHaveBeenCalled();
     });
 
-    // saves when content changes with additional logging
-    mockRef.mockClear();
-    mockUpdate.mockClear();
-    await jestSpyConsole("log", async spy => {
-      document.content?.addTile("text");
-      await waitFor(() => expect(mockRef).toHaveBeenCalledTimes(1));
-      expect(mockRef).toHaveBeenCalledWith(`${user.id}/content/${document.key}`);
-      await waitFor(() => expect(mockUpdate).toHaveBeenCalledTimes(1));
-      await waitFor(() => expect(spy).toHaveBeenCalledTimes(1));
-    });
-
     // logs unmonitoring of document
     await jestSpyConsole("log", async spy => {
       unmount();
@@ -438,7 +440,7 @@ describe("useDocumentSyncToFirebase hook", () => {
     libDebug.DEBUG_SAVE = true;
     const { user, fb, firestore, document } = specArgs(PersonalDocument, "xyz");
 
-    expect.assertions(19);
+    expect.assertions(15);
 
     // logs monitoring of document
     let unmount: () => void;
@@ -446,11 +448,12 @@ describe("useDocumentSyncToFirebase hook", () => {
       const { unmount: _unmount } = renderHook(() => useDocumentSyncToFirebase(user, fb, firestore, document));
       unmount = _unmount;
       await waitFor(() => expect(spy).toHaveBeenCalledTimes(1));
-      expect(mockRef).toHaveBeenCalledTimes(0);
+      expect(mockRef).toHaveBeenCalledTimes(1);
       expect(mockUpdate).toHaveBeenCalledTimes(0);
     });
 
     // responds to visibility change
+    mockRef.mockClear();
     await jestSpyConsole("log", async spy => {
       document.setVisibility("public");
       await waitFor(() => expect(mockRef).toHaveBeenCalledTimes(1));
@@ -480,17 +483,6 @@ describe("useDocumentSyncToFirebase hook", () => {
       await waitFor(() => expect(spy).toHaveBeenCalledTimes(1));
     });
 
-    // saves when content changes with additional logging
-    mockRef.mockClear();
-    mockUpdate.mockClear();
-    await jestSpyConsole("log", async spy => {
-      document.content?.addTile("text");
-      await waitFor(() => expect(mockRef).toHaveBeenCalledTimes(1));
-      expect(mockRef).toHaveBeenCalledWith(`${user.id}/content/${document.key}`);
-      await waitFor(() => expect(mockUpdate).toHaveBeenCalledTimes(1));
-      await waitFor(() => expect(spy).toHaveBeenCalledTimes(1));
-    });
-
     // logs unmonitoring of document
     await jestSpyConsole("log", async spy => {
       unmount();
@@ -506,14 +498,14 @@ describe("useDocumentSyncToFirebase hook", () => {
       renderHook(() => useDocumentSyncToFirebase(user, fb, firestore, document));
       expect(mockConsole).toHaveBeenCalledTimes(1);
     });
-    expect(mockRef).toHaveBeenCalledTimes(0);
+    expect(mockRef).toHaveBeenCalledTimes(1);
     expect(mockUpdate).toHaveBeenCalledTimes(0);
   });
 
   it("fails gracefully on problem document save errors", async () => {
     libDebug.DEBUG_SAVE = false;
 
-    expect.assertions(16);
+    expect.assertions(9);
 
     // alternate failures and success (on retry)
     mockUpdate
@@ -524,7 +516,7 @@ describe("useDocumentSyncToFirebase hook", () => {
 
     const { user, fb, firestore, document } = specArgs(ProblemDocument, "xyz");
     renderHook(() => useDocumentSyncToFirebase(user, fb, firestore, document));
-    expect(mockRef).toHaveBeenCalledTimes(0);
+    expect(mockRef).toHaveBeenCalledTimes(1);
     expect(mockUpdate).toHaveBeenCalledTimes(0);
 
     // This use of waitFor makes debugging a failed test very difficult
@@ -548,29 +540,12 @@ describe("useDocumentSyncToFirebase hook", () => {
       expect(mockRef).toHaveBeenCalledWith(`${user.id}/problem/${document.key}`);
       await waitFor(() => expect(mockUpdate).toHaveBeenCalledTimes(2));
     });
-
-    // handles content change errors
-    mockRef.mockClear();
-    mockUpdate.mockClear();
-    await jestSpyConsole("warn", async spy => {
-      document.content?.addTile("text");
-      // assert initial (failed) attempt
-      await waitFor(() => expect(mockRef).toHaveBeenCalledTimes(1));
-      expect(mockRef).toHaveBeenCalledWith(`${user.id}/content/${document.key}`);
-      await waitFor(() => expect(mockUpdate).toHaveBeenCalledTimes(1));
-      await waitFor(() => expect(spy).toHaveBeenCalledTimes(1));
-      // trigger retry (successful) attempt
-      jest.runAllTimers();
-      await waitFor(() => expect(mockRef).toHaveBeenCalledTimes(2));
-      expect(mockRef).toHaveBeenCalledWith(`${user.id}/content/${document.key}`);
-      await waitFor(() => expect(mockUpdate).toHaveBeenCalledTimes(2));
-    });
   });
 
   it("fails gracefully on personal document save errors", async () => {
     libDebug.DEBUG_SAVE = false;
 
-    expect.assertions(23);
+    expect.assertions(16);
 
     // alternate failures and success (on retry)
     mockUpdate
@@ -583,7 +558,7 @@ describe("useDocumentSyncToFirebase hook", () => {
 
     const { user, fb, firestore, document } = specArgs(PersonalDocument, "xyz");
     renderHook(() => useDocumentSyncToFirebase(user, fb, firestore, document));
-    expect(mockRef).toHaveBeenCalledTimes(0);
+    expect(mockRef).toHaveBeenCalledTimes(1);
     expect(mockUpdate).toHaveBeenCalledTimes(0);
 
     // handles title change errors
@@ -619,76 +594,6 @@ describe("useDocumentSyncToFirebase hook", () => {
       expect(mockRef).toHaveBeenCalledWith(`${user.id}/metadata/${document.key}/properties`);
       await waitFor(() => expect(mockUpdate).toHaveBeenCalledTimes(2));
     });
-
-    // handles content change errors
-    mockRef.mockClear();
-    mockUpdate.mockClear();
-    await jestSpyConsole("warn", async spy => {
-      document.content?.addTile("text");
-      // assert initial (failed) attempt
-      await waitFor(() => expect(mockRef).toHaveBeenCalledTimes(1));
-      expect(mockRef).toHaveBeenCalledWith(`${user.id}/content/${document.key}`);
-      await waitFor(() => expect(mockUpdate).toHaveBeenCalledTimes(1));
-      await waitFor(() => expect(spy).toHaveBeenCalledTimes(1));
-      // trigger retry (successful) attempt
-      jest.runAllTimers();
-      await waitFor(() => expect(mockRef).toHaveBeenCalledTimes(2));
-      expect(mockRef).toHaveBeenCalledWith(`${user.id}/content/${document.key}`);
-      await waitFor(() => expect(mockUpdate).toHaveBeenCalledTimes(2));
-    });
-  });
-
-  it("sets saveState to saving on snapshot, saved on success", async () => {
-    const { user, fb, firestore, document } = specArgs(ProblemDocument, "xyz");
-    expect(document.saveState).toBe(SaveState.Idle);
-
-    renderHook(() => useDocumentSyncToFirebase(user, fb, firestore, document));
-    expect(document.saveState).toBe(SaveState.Idle);
-
-    // Trigger a content change — onSnapshot fires synchronously
-    document.content?.addTile("text");
-    expect(document.saveState).toBe(SaveState.Saving);
-
-    // The mock useMutation calls onSuccess after promise resolves
-    await waitFor(() => {
-      expect(document.saveState).toBe(SaveState.Saved);
-    });
-  });
-
-  it("keeps saveState at saving when a newer change arrives before an in-flight save completes", async () => {
-    // The scenario this exercises: throttledMutate's leading call for change 1 fires and starts
-    // a mutation. Before that mutation's onSuccess runs, change 2 happens; its mutate is
-    // throttled (trailing). When change 1's onSuccess fires, saveState must stay "saving" because
-    // change 2 is still pending. Only when change 2 is eventually saved should it flip to "saved".
-    // Before the seq-tracking fix, the indicator would briefly show "saved" after change 1,
-    // causing cy.waitForSave() to pass prematurely and tests to reload before change 2 persisted.
-    let resolveFirstMutation: (() => void) | undefined;
-    // Hold the first mutation's firebase update until we manually resolve it so we can
-    // interleave a second change before the first mutation succeeds.
-    mockRef.mockImplementationOnce(() => ({
-      update: () => new Promise<void>(resolve => { resolveFirstMutation = resolve; })
-    }));
-    const { user, fb, firestore, document } = specArgs(ProblemDocument, "xyz");
-    renderHook(() => useDocumentSyncToFirebase(user, fb, firestore, document));
-
-    document.content?.addTile("text");
-    expect(document.saveState).toBe(SaveState.Saving);
-    // Second change while the first mutation is still in flight (and before its trailing call
-    // would fire). dirtySeq is now ahead of what the first mutation will report on success.
-    document.content?.addTile("text");
-    expect(document.saveState).toBe(SaveState.Saving);
-
-    // First mutation succeeds. Its captured seq is behind dirtySeq → must NOT flip to "saved".
-    resolveFirstMutation!();
-    await Promise.resolve();
-    expect(document.saveState).toBe(SaveState.Saving);
-
-    // Trailing call fires for the second change → second mutation succeeds (default mockRef
-    // resolves immediately) → dirtySeq now matches savedSeq → saveState flips to "saved".
-    jest.runAllTimers();
-    await waitFor(() => {
-      expect(document.saveState).toBe(SaveState.Saved);
-    });
   });
 
   it("sets window.currentDocument when DOCUMENT_DEBUG is true", () => {
@@ -702,94 +607,117 @@ describe("useDocumentSyncToFirebase hook", () => {
     renderHook(() => useDocumentSyncToFirebase(user, fb, firestore, document));
     expect((window as any).currentDocument).toBeUndefined();
   });
-  describe("the saved history entry id", () => {
-    const addHistoryEntry = (document: DocumentModelType, id: string) => {
-      (document.treeManagerAPI as TreeManagerType).addHistoryEntryAfterApplying(
-        HistoryEntry.create({ id, tree: document.key, model: "TextContent", action: "/setText", state: "complete" }));
-    };
-    const contentUpdates = () => mockUpdate.mock.calls.map(([value]) => value).filter(value => "content" in value);
-
-    it("reports the saved history entry id when a content save succeeds, leaving the loaded id alone", async () => {
-      const onContentSaved = jest.fn();
-      const { user, fb, firestore, document } = specArgs(ProblemDocument, "xyz");
-      document.setSavedEnvelope({ lastHistoryEntryId: "loaded", settled: false });
-      addHistoryEntry(document, "e1");
-      renderHook(() => useDocumentSyncToFirebase(user, fb, firestore, document, false, onContentSaved));
-      expect(onContentSaved).not.toHaveBeenCalled();
-
-      document.content?.addTile("text");
-      jest.runAllTimers();
-      await waitFor(() => expect(onContentSaved).toHaveBeenCalledWith(document, "e1"));
-      expect(contentUpdates().map(value => value.lastHistoryEntryId)).toEqual(["e1"]);
-      expect(document.savedLastHistoryEntryId).toBe("loaded");
-    });
-
-    it("reports nothing when a content save fails", async () => {
-      mockUpdate.mockImplementationOnce(() => Promise.reject("No save for you!"));
-      const onContentSaved = jest.fn();
-      const { user, fb, firestore, document } = specArgs(ProblemDocument, "xyz");
-      addHistoryEntry(document, "e1");
-      renderHook(() => useDocumentSyncToFirebase(user, fb, firestore, document, false, onContentSaved));
-
-      await jestSpyConsole("warn", async spy => {
-        document.content?.addTile("text");
-        await waitFor(() => expect(spy).toHaveBeenCalledTimes(1));
-        expect(contentUpdates().map(value => value.lastHistoryEntryId)).toEqual(["e1"]);
-        expect(onContentSaved).not.toHaveBeenCalled();
-        jest.runAllTimers();
-        await waitFor(() => expect(contentUpdates()).toHaveLength(2));
-      });
-    });
-
-    it("a retried save keeps the history entry id of its first attempt", async () => {
-      mockUpdate.mockImplementationOnce(() => Promise.reject("No save for you!"));
-      const { user, fb, firestore, document } = specArgs(ProblemDocument, "xyz");
-      addHistoryEntry(document, "e1");
-      renderHook(() => useDocumentSyncToFirebase(user, fb, firestore, document));
-
-      await jestSpyConsole("warn", async spy => {
-        document.content?.addTile("text");
-        await waitFor(() => expect(spy).toHaveBeenCalledTimes(1));
-        addHistoryEntry(document, "e2");
-        jest.runAllTimers();
-        await waitFor(() => expect(contentUpdates()).toHaveLength(2));
-      });
-      expect(contentUpdates().map(value => value.lastHistoryEntryId)).toEqual(["e1", "e1"]);
-    });
-
-    it("stamps a snapshot replaced before its save ran with the entry current when it was taken", async () => {
-      const synchronous = mockUseMutation.getMockImplementation()!;
-      // react-query runs the mutation a few microtasks after mutate(), behind onMutate.
-      mockUseMutation.mockImplementation((callback: (vars: any) => Promise<any>, options?: any) => ({
-        mutate: (vars: any) => {
-          const context = options?.onMutate?.(vars) ?? {};
-          Promise.resolve()
-            .then(() => callback(vars))
-            .then(data => options?.onSuccess?.(data, vars, context));
-        }
-      }));
+  describe("content saves", () => {
+    it("attaches a content save sender for an editable document and detaches it on unmount", async () => {
+      const getSender = jest.spyOn(senderModule, "getContentSaveSender");
+      const detach = jest.spyOn(ContentSaveSender.prototype, "detach");
+      const addListener = jest.spyOn(window, "addEventListener");
+      const removeListener = jest.spyOn(window, "removeEventListener");
+      const logDocumentEvent = jest.spyOn(logDocumentEventModule, "logDocumentEvent").mockImplementation(() => null);
       try {
-        const onContentSaved = jest.fn();
+        const first = jest.fn();
+        const second = jest.fn();
         const { user, fb, firestore, document } = specArgs(ProblemDocument, "xyz");
-        addHistoryEntry(document, "e0");
-        renderHook(() => useDocumentSyncToFirebase(user, fb, firestore, document, false, onContentSaved));
+        const { rerender, unmount } = renderHook(({ onContentSaved }) =>
+          useDocumentSyncToFirebase(user, fb, firestore, document, false, onContentSaved),
+          { initialProps: { onContentSaved: first } });
+        expect(getSender).toHaveBeenCalledTimes(1);
+        const [senderDocument, options] = getSender.mock.calls[0];
+        expect(senderDocument).toBe(document);
+        expect(mockRef).toHaveBeenCalledWith(`${user.id}/content/${document.key}`);
+        expect(options.contentRef).toBe(mockRef.mock.results[0].value);
 
-        document.content?.addTile("text");
-        document.content?.addTile("text");
-        addHistoryEntry(document, "e1");
-        addHistoryEntry(document, "e2");
-        await waitFor(() => expect(contentUpdates()).toHaveLength(1));
-        expect(contentUpdates()[0].lastHistoryEntryId).toBe("e0");
-        await waitFor(() => expect(onContentSaved).toHaveBeenLastCalledWith(document, "e0"));
+        // the disconnect handlers are set up before the first write only
+        options.beforeWrite?.();
+        options.beforeWrite?.();
+        expect(mockSetLastEditedOnDisconnect).toHaveBeenCalledTimes(1);
+        expect(mockSetLastEditedOnDisconnect).toHaveBeenCalledWith(user, document.key, user.id);
 
-        jest.runAllTimers();
-        await waitFor(() => expect(contentUpdates()).toHaveLength(2));
-        const latestId = (document.treeManagerAPI as TreeManagerType).latestDocumentHistoryEntry?.id;
-        expect(contentUpdates()[1].lastHistoryEntryId).toBe(latestId);
-        await waitFor(() => expect(onContentSaved).toHaveBeenLastCalledWith(document, latestId));
+        // the newest onContentSaved is called
+        rerender({ onContentSaved: second });
+        expect(getSender).toHaveBeenCalledTimes(1);
+        options.onContentSaved?.(document, "e1");
+        expect(second).toHaveBeenCalledWith(document, "e1");
+        expect(first).not.toHaveBeenCalled();
+
+        // tools go to the Firestore metadata documents
+        await options.updateTools(["Text"]);
+        expect(mockFirestoreDocUpdate).toHaveBeenCalledWith({ tools: ["Text"] });
+
+        options.logEvent?.(LogEventName.CONTENT_SAVE_FALLBACK_START, { unsettledSince: 1 });
+        expect(logDocumentEvent).toHaveBeenCalledWith(LogEventName.CONTENT_SAVE_FALLBACK_START,
+          { document, unsettledSince: 1 });
+
+        const pageHideListener = addListener.mock.calls.find(([type]) => (type as string) === "pagehide")?.[1];
+        expect(pageHideListener).toBeDefined();
+        unmount();
+        expect(detach).toHaveBeenCalledTimes(1);
+        expect(removeListener).toHaveBeenCalledWith("pagehide", pageHideListener);
+        expect(mockSetLastEditedNow).toHaveBeenCalledTimes(1);
       } finally {
-        mockUseMutation.mockImplementation(synchronous);
+        [getSender, detach, addListener, removeListener, logDocumentEvent].forEach(spy => spy.mockRestore());
       }
+    });
+
+    it("doesn't create a sender for read-only or published documents, or when sync is disabled", () => {
+      const getSender = jest.spyOn(senderModule, "getContentSaveSender");
+      try {
+        const readOnly = specArgs(ProblemDocument, "xyz");
+        renderHook(() => useDocumentSyncToFirebase(readOnly.user, readOnly.fb, readOnly.firestore,
+          readOnly.document, true));
+        const published = specArgs(ProblemPublication, "xyz");
+        renderHook(() => useDocumentSyncToFirebase(published.user, published.fb, published.firestore,
+          published.document));
+        (window as any).DISABLE_FIREBASE_SYNC = true;
+        const disabled = specArgs(ProblemDocument, "xyz");
+        renderHook(() => useDocumentSyncToFirebase(disabled.user, disabled.fb, disabled.firestore,
+          disabled.document));
+        expect(getSender).not.toHaveBeenCalled();
+      } finally {
+        delete (window as any).DISABLE_FIREBASE_SYNC;
+        getSender.mockRestore();
+      }
+    });
+
+    it("sends the newest committed snapshot on pagehide for an individual document", async () => {
+      const writes: Array<{ values: Record<string, any>, resolve: () => void }> = [];
+      const contentUpdate = jest.fn((values: Record<string, any>) =>
+        new Promise<void>(resolve => { writes.push({ values, resolve }); }));
+      const { user, fb, firestore, document } = specArgs(ProblemDocument, "xyz");
+      mockRef.mockImplementation((path: string) => path === `${user.id}/content/${document.key}`
+        ? { update: contentUpdate }
+        : { update: (value: any) => Promise.resolve(mockUpdate(value)) });
+      const treeManager = document.treeManagerAPI as TreeManagerType;
+      const commits = new StubCommitSource();
+      treeManager.setHistoryManager(commits);
+      treeManager.exactness.startAt("e0");
+      const { unmount } = renderHook(() => useDocumentSyncToFirebase(user, fb, firestore, document));
+
+      // Adds a tile and returns the id of the last entry that completed.
+      async function addTile() {
+        const ids: string[] = [];
+        const remove = treeManager.addEntryCompletedListener(entry => { ids.push(entry.id); });
+        document.content?.addTile("text");
+        await flush();
+        remove();
+        return ids[ids.length - 1];
+      }
+
+      commits.commit(await addTile());
+      expect(contentUpdate).toHaveBeenCalledTimes(1);
+      const b = await addTile();
+      commits.commit(b);
+      expect(contentUpdate).toHaveBeenCalledTimes(1);
+
+      window.dispatchEvent(new Event("pagehide"));
+      expect(contentUpdate).toHaveBeenCalledTimes(2);
+      expect(writes[1].values).toMatchObject({ lastHistoryEntryId: b, settled: true });
+      expect(Object.keys(JSON.parse(writes[1].values.content).tileMap)).toHaveLength(2);
+      expect(mockSetLastEditedOnDisconnect).toHaveBeenCalledTimes(1);
+
+      writes.forEach(write => write.resolve());
+      await flush();
+      unmount();
     });
   });
 });
