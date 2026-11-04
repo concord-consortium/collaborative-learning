@@ -1,16 +1,18 @@
 import { reaction } from "mobx";
 import { getPath, getSnapshot, onSnapshot } from "mobx-state-tree";
+import { IUnsettledEvidence } from "../../lib/db-types";
 import { LogEventName } from "../../lib/logger-types";
 import { HistoryEntryType } from "../history/history";
 import { ICommitListener, ICommittedEntry, isCommitSource } from "../history/history-commits";
 import { FAKE_HISTORY_ENTRY_ID, TreeManagerType } from "../history/tree-manager";
-import { buildExactSave, getDocumentTools } from "./content-save-envelope";
+import { buildExactSave, buildIntermediateSave, getDocumentTools } from "./content-save-envelope";
 import { DocumentModelType, SaveState } from "./document";
 import { DocumentContentSnapshotType } from "./document-content";
 
 export const kMinimumSaveGapMs = 1000;
 export const kMaxRetryDelayMs = 30000;
 export const kRetryingAfterFailures = 3;
+export const kIntermediateSaveIntervalMs = 5000;
 
 export interface IValueRef {
   on(event: "value", cb: (snapshot: { val(): unknown }) => void): unknown;
@@ -48,6 +50,8 @@ interface IQueuedSave extends IPendingSave {
   snapshot: DocumentContentSnapshotType;
   lastHistoryEntryId?: string;
   buildValues(changeCount: number): Record<string, unknown>;
+  // Set on an intermediate save.
+  evidence?: IUnsettledEvidence;
 }
 
 // What was kept when a local entry completed, until that entry commits. The content snapshot is
@@ -85,17 +89,21 @@ function isLocalChange(document: DocumentModelType) {
     .some(call => call.historyEntryId !== FAKE_HISTORY_ENTRY_ID);
 }
 
+// The tree manager's open entries, leaving out those of the content-free document actions.
+function getOpenEntries(document: DocumentModelType) {
+  const documentPath = getPath(document);
+  const contentFreeActions = kContentFreeDocumentActions.map(name => `${documentPath}/${name}`);
+  return getTreeManager(document)?.activeHistoryEntries
+    .filter(entry => !contentFreeActions.includes(entry.action ?? "")) ?? [];
+}
+
 /**
  * Why a content snapshot taken now might hold changes that no completed history entry describes.
  * Empty when the snapshot is usable.
  */
 export function getSnapshotBlockers(document: DocumentModelType): string[] {
   const blockers: string[] = [];
-  const documentPath = getPath(document);
-  const contentFreeActions = kContentFreeDocumentActions.map(name => `${documentPath}/${name}`);
-  const openEntries = getTreeManager(document)?.activeHistoryEntries
-    .filter(entry => !contentFreeActions.includes(entry.action ?? "")) ?? [];
-  if (openEntries.length > 0) {
+  if (getOpenEntries(document).length > 0) {
     blockers.push("open-entry");
   }
   if (document.treeMonitor?.getRunningCallsWithChanges().length) {
@@ -105,6 +113,31 @@ export function getSnapshotBlockers(document: DocumentModelType): string[] {
     blockers.push("applying-remote-entries");
   }
   return blockers;
+}
+
+/**
+ * What may keep the document's content from being exact, recorded with an intermediate save. The
+ * envelope is written to the RTDB, which rejects undefined values, so unset fields are left out.
+ */
+export function collectUnsettledEvidence(document: DocumentModelType, uncommittedEntryIds: string[],
+    unsettledSince: number): IUnsettledEvidence {
+  const openEntries = getOpenEntries(document).map(entry => ({
+    id: entry.id,
+    ...(entry.model !== undefined && { model: entry.model }),
+    ...(entry.action !== undefined && { action: entry.action }),
+    exchanges: Array.from(entry.activeExchanges.values()),
+    openedAt: entry.created.getTime()
+  }));
+  const runningFlows = (document.treeMonitor?.getRunningCallsWithChanges() ?? [])
+    .map(({ action }) => ({ action }));
+  const notExactReason = getTreeManager(document)?.exactness.notExactReason;
+  return {
+    openEntries,
+    runningFlows,
+    uncommittedEntryIds,
+    ...(notExactReason && { notExactReason }),
+    unsettledSince
+  };
 }
 
 function getRetryDelayMs(failures: number) {
@@ -127,10 +160,19 @@ function subscribeToCurrent<T>(expression: () => T, subscribe: (value: T) => (()
 const sameTools = (a: string[], b: string[]) =>
   a.length === b.length && a.every((tool, index) => tool === b[index]);
 
+interface IFallbackEpisode {
+  startedAt: number;
+  intermediateSaves: number;
+}
+
 /**
  * Saves a document's content to its RTDB envelope. A snapshot is taken when each local history
  * entry completes and is saved, marked settled, once that entry has committed. Only one write is
  * in flight at a time, and each write sends the newest save waiting by then.
+ *
+ * An individual document that has had unsaved changes and no exact save for 5 seconds falls back
+ * to intermediate saves of its current content, which aren't marked settled and record why. Each
+ * such stretch is logged once when its first intermediate save is sent, and once when it ends.
  */
 export class ContentSaveSender {
   private options: IContentSaveSenderOptions;
@@ -138,13 +180,23 @@ export class ContentSaveSender {
   private disposers: Array<() => void> = [];
   private keptSnapshots = new Map<string, IKeptSnapshot>();
   private pendingSave: IQueuedSave | undefined;
-  private writeInFlight = false;
+  // More than one only after a page hide, which doesn't wait for the write in flight.
+  private writesInFlight = new Set<IQueuedSave>();
   private writeTimer: ReturnType<typeof setTimeout> | undefined;
   private lastWriteStartedAt: number | undefined;
   private lastFailureAt: number | undefined;
   private consecutiveFailures = 0;
   // Counts the content changes. A save covers the changes up to its changeSeq.
   private dirtySeq = 0;
+  // The content change the RTDB content holds: the changeSeq of the last write that succeeded.
+  private savedSeq = 0;
+  // When the current stretch with unsaved changes and no exact save began: the first change after
+  // the content was exactly saved, or the last exact save when it left changes unsaved.
+  private unsettledSince: number | undefined;
+  private intermediateTimer: ReturnType<typeof setTimeout> | undefined;
+  private intermediateDueAt: number | undefined;
+  private lastIntermediateWriteAt: number | undefined;
+  private fallbackEpisode: IFallbackEpisode | undefined;
   private sentTools: string[] | undefined;
 
   constructor(private document: DocumentModelType, options: IContentSaveSenderOptions) {
@@ -163,11 +215,25 @@ export class ContentSaveSender {
     this.dispose();
   }
 
+  /**
+   * Sends the pending exact save now, without waiting for the minimum gap, a backoff or the write
+   * in flight, since the page may be gone before they end. Changes that haven't committed are left
+   * for the next load to catch up from history, so no intermediate save is made.
+   */
+  handlePageHide() {
+    const save = this.pendingSave;
+    if (!this.running || save?.kind !== "exact" || this.writesInFlight.has(save)) return;
+    this.clearWriteTimer();
+    this.write(save);
+  }
+
   dispose() {
+    this.endFallbackEpisode("session-end");
     this.running = false;
     this.disposers.forEach(dispose => dispose());
     this.disposers = [];
     this.clearWriteTimer();
+    this.clearIntermediateTimer();
     this.keptSnapshots.clear();
     this.pendingSave = undefined;
     this.consecutiveFailures = 0;
@@ -229,9 +295,13 @@ export class ContentSaveSender {
   private handleContentChanged = () => {
     if (!isLocalChange(this.document)) return;
     this.dirtySeq++;
+    if (this.unsettledSince === undefined) {
+      this.unsettledSince = Date.now();
+    }
     if (this.consecutiveFailures < kRetryingAfterFailures) {
       this.setSaveState(SaveState.Saving);
     }
+    this.scheduleIntermediateSave();
   };
 
   private createExactSave(entry: ICommittedEntry, snapshot: DocumentContentSnapshotType, exactSince: string,
@@ -246,16 +316,105 @@ export class ContentSaveSender {
     };
   }
 
+  // Holds the current content, so it is made again each time it is sent.
+  private createIntermediateSave(): IQueuedSave | undefined {
+    const { content } = this.document;
+    if (!content) return undefined;
+    const snapshot = getSnapshot<DocumentContentSnapshotType>(content);
+    const entry = this.getIntermediateStamp();
+    const evidence = collectUnsettledEvidence(this.document, Array.from(this.keptSnapshots.keys()),
+      this.unsettledSince ?? Date.now());
+    return {
+      kind: "intermediate",
+      changeSeq: this.dirtySeq,
+      snapshot,
+      lastHistoryEntryId: entry?.id,
+      evidence,
+      buildValues: changeCount =>
+        buildIntermediateSave({ content: JSON.stringify(snapshot), changeCount, entry, evidence })
+    };
+  }
+
+  // This session's last committed entry, or the loaded envelope's entry when none has committed.
+  private getIntermediateStamp(): { id: string; index?: number } | undefined {
+    const manager = getTreeManager(this.document)?.historyManager;
+    const committed = isCommitSource(manager) ? manager.lastCommitted : undefined;
+    if (committed) return committed;
+    const { lastHistoryEntryId, lastHistoryEntryIndex } = this.document.savedEnvelope ?? {};
+    return lastHistoryEntryId ? { id: lastHistoryEntryId, index: lastHistoryEntryIndex } : undefined;
+  }
+
+  // Undefined when no intermediate save is needed. Any pending save goes first, so an exact one wins.
+  private getIntermediateSaveDueAt() {
+    if (!this.running || this.document.concurrent || this.pendingSave
+        || this.unsettledSince === undefined || this.savedSeq >= this.dirtySeq) {
+      return undefined;
+    }
+    const since = Math.max(this.unsettledSince, this.lastIntermediateWriteAt ?? this.unsettledSince);
+    return since + kIntermediateSaveIntervalMs;
+  }
+
+  private scheduleIntermediateSave() {
+    const dueAt = this.getIntermediateSaveDueAt();
+    if (dueAt === this.intermediateDueAt) return;
+    this.clearIntermediateTimer();
+    if (dueAt === undefined) return;
+    this.intermediateDueAt = dueAt;
+    this.intermediateTimer = setTimeout(this.handleIntermediateSaveDue, Math.max(0, dueAt - Date.now()));
+  }
+
+  private handleIntermediateSaveDue = () => {
+    this.intermediateTimer = undefined;
+    this.intermediateDueAt = undefined;
+    try {
+      if (this.getIntermediateSaveDueAt() === undefined) return;
+      const save = this.createIntermediateSave();
+      if (save) {
+        this.queueSave(save);
+      }
+    } catch (error) {
+      console.error("Failed to queue an intermediate content save", error);
+    }
+  };
+
+  private clearIntermediateTimer() {
+    if (this.intermediateTimer) {
+      clearTimeout(this.intermediateTimer);
+      this.intermediateTimer = undefined;
+    }
+    this.intermediateDueAt = undefined;
+  }
+
+  private endFallbackEpisode(endedBy: "exact-save" | "session-end") {
+    const episode = this.fallbackEpisode;
+    if (!episode) return;
+    this.fallbackEpisode = undefined;
+    this.logEvent(LogEventName.CONTENT_SAVE_FALLBACK_END, {
+      durationMs: Date.now() - episode.startedAt,
+      intermediateSaves: episode.intermediateSaves,
+      endedBy
+    });
+  }
+
+  private logEvent(event: LogEventName, params: Record<string, unknown>) {
+    try {
+      this.options.logEvent?.(event, params);
+    } catch (error) {
+      console.error("Failed to log a content save event", error);
+    }
+  }
+
   // Replaces any save that hasn't been sent yet.
   private queueSave(save: IQueuedSave) {
     this.pendingSave = save;
     this.scheduleWrite();
+    this.scheduleIntermediateSave();
   }
 
   private scheduleWrite() {
     this.clearWriteTimer();
     const save = this.pendingSave;
-    if (!this.running || this.writeInFlight || !save) return;
+    if (!this.running || this.writesInFlight.size > 0 || !save) return;
     const delay = this.getWriteReadyAt(save) - Date.now();
     if (delay <= 0) {
       this.write(save);
@@ -286,9 +445,20 @@ export class ContentSaveSender {
     }
   }
 
-  private write(save: IQueuedSave) {
-    this.writeInFlight = true;
+  private write(queued: IQueuedSave) {
+    const save = queued.kind === "intermediate" ? this.createIntermediateSave() ?? queued : queued;
+    if (this.pendingSave === queued) {
+      this.pendingSave = save;
+    }
+    this.writesInFlight.add(save);
     this.lastWriteStartedAt = Date.now();
+    if (save.kind === "intermediate") {
+      this.lastIntermediateWriteAt = this.lastWriteStartedAt;
+      if (!this.fallbackEpisode) {
+        this.fallbackEpisode = { startedAt: this.lastWriteStartedAt, intermediateSaves: 0 };
+        this.logEvent(LogEventName.CONTENT_SAVE_FALLBACK_START, { ...save.evidence });
+      }
+    }
     try {
       this.options.beforeWrite?.();
     } catch (error) {
@@ -300,15 +470,24 @@ export class ContentSaveSender {
     } catch (error) {
       result = Promise.reject(error);
     }
-    result.then(() => this.handleWriteSucceeded(save), error => this.handleWriteFailed(error));
+    result.then(() => this.handleWriteSucceeded(save), error => this.handleWriteFailed(save, error));
   }
 
   private handleWriteSucceeded(save: IQueuedSave) {
-    this.writeInFlight = false;
+    this.writesInFlight.delete(save);
     if (!this.running) return;
     this.consecutiveFailures = 0;
+    this.savedSeq = save.changeSeq;
     if (this.pendingSave === save) {
       this.pendingSave = undefined;
+    }
+    if (save.kind === "intermediate") {
+      if (this.fallbackEpisode) {
+        this.fallbackEpisode.intermediateSaves++;
+      }
+    } else {
+      this.endFallbackEpisode("exact-save");
+      this.unsettledSince = save.changeSeq >= this.dirtySeq ? undefined : Date.now();
     }
     this.sendToolsIfChanged(save.snapshot);
     if (save.lastHistoryEntryId) {
@@ -324,11 +503,12 @@ export class ContentSaveSender {
       this.setSaveState(SaveState.Saving);
     }
     this.scheduleWrite();
+    this.scheduleIntermediateSave();
   }
 
   // The pending save stays in place, unless a newer one has replaced it, so the retry sends the newest.
-  private handleWriteFailed(error: unknown) {
-    this.writeInFlight = false;
+  private handleWriteFailed(save: IQueuedSave, error: unknown) {
+    this.writesInFlight.delete(save);
     if (!this.running) return;
     this.consecutiveFailures++;
     this.lastFailureAt = Date.now();

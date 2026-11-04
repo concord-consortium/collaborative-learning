@@ -6,7 +6,10 @@ import { FAKE_HISTORY_ENTRY_ID, IHistoryManager, TreeManagerType } from "../hist
 import { registerTileComponentInfo } from "../tiles/tile-component-info";
 import { registerTileContentInfo } from "../tiles/tile-content-info";
 import { TileContentModel } from "../tiles/tile-content";
-import { ContentSaveSender, IContentRef, IContentSaveSenderOptions, kMinimumSaveGapMs } from "./content-save-sender";
+import { LogEventName } from "../../lib/logger-types";
+import {
+  ContentSaveSender, IContentRef, IContentSaveSenderOptions, kIntermediateSaveIntervalMs, kMinimumSaveGapMs
+} from "./content-save-sender";
 import { createDocumentModel, DocumentModelType, SaveState } from "./document";
 import { DocumentContentModel } from "./document-content";
 import { ProblemDocument } from "./document-types";
@@ -215,7 +218,7 @@ describe("ContentSaveSender", () => {
     it("sends nothing before the entry commits", async () => {
       const { contentRef, edit } = track(setup());
       await edit("alpha");
-      jest.advanceTimersByTime(10000);
+      jest.advanceTimersByTime(kIntermediateSaveIntervalMs - 1);
       await flush();
       expect(contentRef.update).not.toHaveBeenCalled();
     });
@@ -306,7 +309,7 @@ describe("ContentSaveSender", () => {
       commits.commit(b);
       jest.advanceTimersByTime(10000);
       await flush();
-      expect(contentRef.update).toHaveBeenCalledTimes(1);
+      expect(contentRef.writes.map(write => write.values.settled)).toEqual([true, null]);
     });
 
     it("drops uncommitted snapshots when they are voided", async () => {
@@ -316,7 +319,7 @@ describe("ContentSaveSender", () => {
       commits.commit(a);
       jest.advanceTimersByTime(10000);
       await flush();
-      expect(contentRef.update).not.toHaveBeenCalled();
+      expect(contentRef.writes.map(write => write.values.settled)).toEqual([null]);
     });
 
     it("saves the newest usable snapshot among entries committed together", async () => {
@@ -641,6 +644,277 @@ describe("ContentSaveSender", () => {
       contentRef.writes[2].resolve();
       await flush();
       expect(onContentSaved.mock.calls).toEqual([[document, a], [document, b]]);
+    });
+  });
+
+  describe("intermediate saves", () => {
+    it("makes an intermediate save after 5 seconds without an exact save", async () => {
+      const { contentRef, edit, openEntry } = track(setup());
+      const openedAt = Date.now();
+      openEntry("open");
+      await edit("alpha");
+
+      jest.advanceTimersByTime(kIntermediateSaveIntervalMs - 1);
+      await flush();
+      expect(contentRef.update).not.toHaveBeenCalled();
+      jest.advanceTimersByTime(1);
+      expect(contentRef.update).toHaveBeenCalledTimes(1);
+      const { values } = contentRef.writes[0];
+      expect(textOf(values)).toBe("alpha");
+      expect(values).toMatchObject({ settled: null, exactSince: null });
+      expect(values).not.toHaveProperty("lastHistoryEntryId");
+      expect(values.unsettled.openEntries).toEqual([{
+        id: "open", model: "TestTile", action: "/stuck",
+        exchanges: ["TreeManager.createHistoryEntry /stuck"], openedAt
+      }]);
+    });
+
+    it("stamps an intermediate save with the last committed entry, or the loaded id before any commit",
+        async () => {
+      const { commits, contentRef, document, edit, onContentSaved, treeManager } = track(setup());
+      document.setSavedEnvelope({ lastHistoryEntryId: "loaded", lastHistoryEntryIndex: 7, settled: true });
+      treeManager.exactness.markNotExact("unrecorded-change");
+      const a = await edit("alpha");
+
+      jest.advanceTimersByTime(kIntermediateSaveIntervalMs);
+      expect(contentRef.update).toHaveBeenCalledTimes(1);
+      expect(contentRef.writes[0].values).toMatchObject({ lastHistoryEntryId: "loaded", lastHistoryEntryIndex: 7 });
+      contentRef.writes[0].resolve();
+      await flush();
+      expect(onContentSaved).toHaveBeenLastCalledWith(document, "loaded");
+
+      commits.commit(a);
+      await edit("bravo");
+      jest.advanceTimersByTime(kIntermediateSaveIntervalMs);
+      expect(contentRef.update).toHaveBeenCalledTimes(2);
+      expect(contentRef.writes[1].values).toMatchObject({
+        lastHistoryEntryId: a, lastHistoryEntryIndex: 1, settled: null
+      });
+      expect(textOf(contentRef.writes[1].values)).toBe("bravo");
+      contentRef.writes[1].resolve();
+      await flush();
+      expect(onContentSaved).toHaveBeenLastCalledWith(document, a);
+    });
+
+    it("repeats intermediate saves at most every 5 seconds", async () => {
+      const { contentRef, document, edit, openEntry } = track(setup());
+      openEntry("open");
+      await edit("alpha");
+      jest.advanceTimersByTime(kIntermediateSaveIntervalMs);
+      expect(contentRef.update).toHaveBeenCalledTimes(1);
+      contentRef.writes[0].resolve();
+      await flush();
+      expect(document.saveState).toBe(SaveState.Saved);
+
+      await edit("bravo");
+      jest.advanceTimersByTime(kIntermediateSaveIntervalMs - 1);
+      expect(contentRef.update).toHaveBeenCalledTimes(1);
+      jest.advanceTimersByTime(1);
+      expect(contentRef.update).toHaveBeenCalledTimes(2);
+      expect(textOf(contentRef.writes[1].values)).toBe("bravo");
+      contentRef.writes[1].resolve();
+      await flush();
+
+      // nothing is left unsaved
+      jest.advanceTimersByTime(3 * kIntermediateSaveIntervalMs);
+      await flush();
+      expect(contentRef.update).toHaveBeenCalledTimes(2);
+    });
+
+    it("records running flows, uncommitted entries and the not-exact reason as evidence", async () => {
+      const { contentRef, edit, tile, treeManager } = track(setup());
+      const unsettledSince = Date.now();
+      const { gate, first, second } = twoStepGate();
+      const promise = tile.setTextLater("flow", gate);
+      first.resolve();
+      await flush();
+      const a = await edit("alpha");
+      treeManager.exactness.markNotExact("timed-out-entry");
+
+      jest.advanceTimersByTime(kIntermediateSaveIntervalMs);
+      expect(contentRef.update).toHaveBeenCalledTimes(1);
+      expect(contentRef.writes[0].values.unsettled).toEqual({
+        openEntries: [],
+        runningFlows: [{ action: "/content/tileMap/t1/content/setTextLater" }],
+        uncommittedEntryIds: [a],
+        notExactReason: "timed-out-entry",
+        unsettledSince
+      });
+
+      second.resolve();
+      await promise;
+    });
+
+    it("logs an episode once at its start and once when an exact save ends it", async () => {
+      const logEvent = jest.fn();
+      const { commits, contentRef, edit, openEntry } = track(setup({ logEvent }));
+      const unsettledSince = Date.now();
+      const closeEntry = openEntry("open");
+      const a = await edit("alpha");
+      jest.advanceTimersByTime(kIntermediateSaveIntervalMs);
+      contentRef.writes[0].resolve();
+      await flush();
+      const b = await edit("bravo");
+      jest.advanceTimersByTime(kIntermediateSaveIntervalMs);
+      contentRef.writes[1].resolve();
+      await flush();
+      expect(logEvent).toHaveBeenCalledTimes(1);
+
+      closeEntry();
+      const c = await edit("charlie");
+      commits.commit(a, b, c);
+      jest.advanceTimersByTime(kMinimumSaveGapMs);
+      expect(contentRef.writes[2].values).toMatchObject({ lastHistoryEntryId: c, settled: true });
+      contentRef.writes[2].resolve();
+      await flush();
+
+      expect(logEvent.mock.calls).toEqual([
+        [LogEventName.CONTENT_SAVE_FALLBACK_START, expect.objectContaining({
+          openEntries: [expect.objectContaining({ id: "open" })],
+          uncommittedEntryIds: [a],
+          unsettledSince
+        })],
+        [LogEventName.CONTENT_SAVE_FALLBACK_END, {
+          durationMs: kIntermediateSaveIntervalMs + kMinimumSaveGapMs,
+          intermediateSaves: 2,
+          endedBy: "exact-save"
+        }]
+      ]);
+
+      // a new episode starts only with the next intermediate save
+      jest.advanceTimersByTime(4 * kIntermediateSaveIntervalMs);
+      expect(logEvent).toHaveBeenCalledTimes(2);
+    });
+
+    it("ends an episode when the session ends", async () => {
+      const logEvent = jest.fn();
+      const { contentRef, edit, sender, treeManager } = track(setup({ logEvent }));
+      treeManager.exactness.markNotExact("unrecorded-change");
+      await edit("alpha");
+      jest.advanceTimersByTime(kIntermediateSaveIntervalMs);
+      contentRef.writes[0].resolve();
+      await flush();
+
+      jest.advanceTimersByTime(2000);
+      sender.dispose();
+      expect(logEvent).toHaveBeenLastCalledWith(LogEventName.CONTENT_SAVE_FALLBACK_END, {
+        durationMs: 2000, intermediateSaves: 1, endedBy: "session-end"
+      });
+      expect(logEvent).toHaveBeenCalledTimes(2);
+    });
+
+    it("sends a pending exact save instead of a waiting intermediate one", async () => {
+      const { commits, contentRef, edit, openEntry } = track(setup());
+      const closeEntry = openEntry("open");
+      await edit("alpha");
+      await jestSpyConsole("warn", async () => {
+        jest.advanceTimersByTime(kIntermediateSaveIntervalMs);
+        contentRef.writes[0].reject(new Error("offline"));
+        await flush();
+      });
+
+      closeEntry();
+      const b = await edit("bravo");
+      commits.commit(b);
+      jest.advanceTimersByTime(1000);
+      expect(contentRef.update).toHaveBeenCalledTimes(2);
+      expect(contentRef.writes[1].values).toMatchObject({ lastHistoryEntryId: b, settled: true });
+    });
+
+    it("never replaces a pending exact save with an intermediate one", async () => {
+      const { commits, contentRef, edit } = track(setup());
+      const a = await edit("alpha");
+      await jestSpyConsole("warn", async () => {
+        commits.commit(a);
+        for (let i = 0; i < 3; i++) {
+          contentRef.lastWrite.reject(new Error("offline"));
+          await flush();
+          jest.advanceTimersByTime(4000);
+        }
+      });
+      expect(contentRef.writes.map(write => write.values.settled)).toEqual([true, true, true, true]);
+    });
+
+    it("never makes an intermediate save on a group document", async () => {
+      const { contentRef, edit, openEntry, treeManager } = track(setup({}, true));
+      openEntry("open");
+      treeManager.exactness.markNotExact("unrecorded-change");
+      await edit("alpha");
+      jest.advanceTimersByTime(5 * kIntermediateSaveIntervalMs);
+      await flush();
+      expect(contentRef.update).not.toHaveBeenCalled();
+    });
+
+    it("keeps saving through intermediate saves when nothing ever commits", async () => {
+      const unhandledRejections: unknown[] = [];
+      const onUnhandledRejection = (reason: unknown) => unhandledRejections.push(reason);
+      process.on("unhandledRejection", onUnhandledRejection);
+      try {
+        // Firestore is unavailable: no entry commits and the tools update fails.
+        const updateTools = jest.fn(() => Promise.reject(new Error("no firestore")));
+        const { contentRef, document, edit } = track(setup({ updateTools }));
+        const start = Date.now();
+        const savedAt: number[] = [];
+        const edits = new Map([[0, "alpha"], [7000, "bravo"], [12000, "charlie"], [17000, "delta"]]);
+        await jestSpyConsole("warn", async () => {
+          for (let time = 0; time <= 20000; time += 500) {
+            jest.advanceTimersByTime(start + time - Date.now());
+            const text = edits.get(time);
+            if (text) {
+              await edit(text);
+            }
+            while (contentRef.writes.length > savedAt.length) {
+              savedAt.push(Date.now() - start);
+              contentRef.lastWrite.resolve();
+              await flush();
+            }
+          }
+        });
+        expect(savedAt).toEqual([5000, 10000, 15000, 20000]);
+        expect(contentRef.writes.map(write => textOf(write.values)))
+          .toEqual(["alpha", "bravo", "charlie", "delta"]);
+        contentRef.writes.forEach(write => expect(write.values.settled).toBeNull());
+        expect(document.saveState).toBe(SaveState.Saved);
+        await new Promise(resolve => jest.requireActual<typeof import("timers")>("timers").setImmediate(resolve));
+        expect(unhandledRejections).toEqual([]);
+      } finally {
+        process.removeListener("unhandledRejection", onUnhandledRejection);
+      }
+    });
+  });
+
+  describe("page hide", () => {
+    it("sends the newest committed snapshot at once on page hide", async () => {
+      const { commits, contentRef, edit, sender } = track(setup());
+      const a = await edit("alpha");
+      commits.commit(a);
+      jest.advanceTimersByTime(200);
+      const b = await edit("bravo");
+      commits.commit(b);
+      await edit("charlie");
+      expect(contentRef.update).toHaveBeenCalledTimes(1);
+
+      sender.handlePageHide();
+      expect(contentRef.update).toHaveBeenCalledTimes(2);
+      expect(contentRef.writes[1].values).toMatchObject({ lastHistoryEntryId: b, settled: true });
+      expect(textOf(contentRef.writes[1].values)).toBe("bravo");
+
+      // the earlier write finishing doesn't send the same save again
+      contentRef.writes[0].resolve();
+      await flush();
+      contentRef.writes[1].resolve();
+      await flush();
+      sender.handlePageHide();
+      jest.advanceTimersByTime(kMinimumSaveGapMs);
+      expect(contentRef.update).toHaveBeenCalledTimes(2);
+    });
+
+    it("makes no intermediate save on page hide", async () => {
+      const { contentRef, edit, openEntry, sender } = track(setup());
+      openEntry("open");
+      await edit("alpha");
+      sender.handlePageHide();
+      expect(contentRef.update).not.toHaveBeenCalled();
     });
   });
 
