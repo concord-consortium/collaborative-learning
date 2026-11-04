@@ -54,7 +54,7 @@ async function setupConvertedDocument(content: any, oldEntries: HistoryEntrySnap
   const endPosition = manager.document.history.length;
   manager.setNumHistoryEntriesApplied(endPosition);
   const endJson: any = toJsonValue(getSnapshot(document));
-  return { document, manager, endJson, endPosition };
+  return { document, manager, endJson };
 }
 
 function getTile(document: DocumentModelType, id: string) {
@@ -69,11 +69,7 @@ const t1OldEntries = () => [
 ];
 const t1Content = () => ({ tileMap: { t1: oldTile("t1", "c", ["a"]) } });
 
-describe("playback across a conversion entry", () => {
-  beforeEach(() => {
-    jest.restoreAllMocks();
-  });
-
+describe("conversion-chain fixture", () => {
   (process.env.WRITE_CONVERSION_FIXTURE ? it : it.skip)("writes the conversion-chain fixture", async () => {
     const { document, manager } = await setupConvertedDocument(t1Content(), t1OldEntries());
     const fixture = {

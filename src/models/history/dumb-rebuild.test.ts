@@ -2,8 +2,9 @@ import fs from "fs";
 import path from "path";
 import { IStoredEntry, rebuildBackAndForth } from "./dumb-rebuild-test-utils";
 
-// A service that knows nothing about CLUE rebuilds a document from its stored history entries
-// with a plain JSON patch library. The conversion entry is applied like any other entry.
+// Checks the stored format: a chain of stored entries, conversion entry included, rebuilt with no
+// CLUE code. The fixture is written by "writes the conversion-chain fixture" in
+// tree-manager-conversion.test.ts; run it with WRITE_CONVERSION_FIXTURE=1 to regenerate.
 
 interface IFixture {
   endDocument: any;
