@@ -641,6 +641,9 @@ export const TreeManager = types
    * The entries are applied one at a time, and application stops at the first one that
    * fails. They aren't added to `document.history` or reported as completed: they are
    * already in Firestore.
+   *
+   * An entry that fails may be partly applied and isn't counted in `applied`, so a caller
+   * must treat any `error` as leaving the content not exact.
    */
   applyEntriesAtLoad: flow(function* applyEntriesAtLoad(snapshots: HistoryEntrySnapshot[]) {
     const trees = Object.values(self.trees);
@@ -651,27 +654,32 @@ export const TreeManager = types
 
     let applied = 0;
     let error: string | undefined;
-    for (const snapshot of snapshots) {
-      const treePatches: Record<string, IJsonPatch[]> = {};
-      HistoryEntry.create(snapshot).records.forEach(record => {
-        (treePatches[record.tree] ??= []).push(...record.getPatches(HistoryOperation.Redo));
-      });
-      try {
-        yield Promise.all(Object.entries(treePatches).map(([treeId, patches]) => {
-          return patches.length > 0
-            ? self.trees[treeId]?.applyPatchesFromManager(FAKE_HISTORY_ENTRY_ID, FAKE_EXCHANGE_ID, patches)
-            : undefined;
-        }));
-      } catch (e) {
-        error = e instanceof Error ? e.message : String(e);
-        break;
+    try {
+      for (const snapshot of snapshots) {
+        try {
+          const treePatches: Record<string, IJsonPatch[]> = {};
+          HistoryEntry.create(snapshot).records.forEach(record => {
+            (treePatches[record.tree] ??= []).push(...record.getPatches(HistoryOperation.Redo));
+          });
+          const applyPromises = Object.entries(treePatches).map(([treeId, patches]) => {
+            const tree = self.trees[treeId];
+            if (!tree) throw new Error(`Unknown tree '${treeId}'`);
+            return patches.length > 0
+              ? tree.applyPatchesFromManager(FAKE_HISTORY_ENTRY_ID, FAKE_EXCHANGE_ID, patches)
+              : undefined;
+          });
+          yield Promise.all(applyPromises);
+        } catch (e) {
+          error = e instanceof Error ? e.message : String(e);
+          break;
+        }
+        applied++;
       }
-      applied++;
+    } finally {
+      yield Promise.all(trees.map(tree => {
+        return tree.finishApplyingPatchesFromManager(FAKE_HISTORY_ENTRY_ID, FAKE_EXCHANGE_ID);
+      }));
     }
-
-    yield Promise.all(trees.map(tree => {
-      return tree.finishApplyingPatchesFromManager(FAKE_HISTORY_ENTRY_ID, FAKE_EXCHANGE_ID);
-    }));
     return error === undefined ? { applied } : { applied, error };
   }),
 

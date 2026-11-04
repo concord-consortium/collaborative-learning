@@ -854,4 +854,30 @@ describe("applying entries at load", () => {
     expect(result.error).toEqual(expect.any(String));
     expect(tileContent.actionText).toBe("action 1");
   });
+
+  it("reports an entry that can't be created and leaves the trees able to apply", async () => {
+    const { tileContent, manager } = setupDocument();
+    const entries = [makeRealHistoryEntry(action1), undefined as any];
+
+    const result = await manager.applyEntriesAtLoad(entries);
+    expect(result.applied).toBe(1);
+    expect(result.error).toEqual(expect.any(String));
+
+    const next = await manager.applyEntriesAtLoad([makeRealHistoryEntry(action2)]);
+    expect(next).toEqual({ applied: 1 });
+    expect(tileContent.actionText).toBe("action 2");
+    tileContent.setActionText("edited");
+    expect(tileContent.actionText).toBe("edited");
+  });
+
+  it("treats a record for an unknown tree as a failure", async () => {
+    const { tileContent, manager } = setupDocument();
+    const unknownTree = makeRealHistoryEntry(action2);
+    unknownTree.records![0].tree = "no-such-tree";
+
+    const result = await manager.applyEntriesAtLoad([makeRealHistoryEntry(action1), unknownTree]);
+
+    expect(result).toEqual({ applied: 1, error: "Unknown tree 'no-such-tree'" });
+    expect(tileContent.actionText).toBe("action 1");
+  });
 });
