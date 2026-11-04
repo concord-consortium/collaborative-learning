@@ -990,15 +990,19 @@ describe("db", () => {
       expect(doc.savedEnvelope).toEqual({ lastHistoryEntryId: "e7", settled: false });
     });
 
-    it("waits for an individual document's history catch-up before resolving", async () => {
-      stubRtdb({ createdAt: 1, properties: {} }, { changeCount: 0, lastHistoryEntryId: "e7" });
+    function setUpHistoryManagers(currentUid: string) {
       stores.documents.setFirestore({
         doc: () => ({ onSnapshot: (callback: (doc: { exists: boolean }) => void) => {
           callback({ exists: true });
           return () => undefined;
         } })
       } as any);
-      stores.documents.setUserContextProvider({ userContext: { uid: "u1" } } as any);
+      stores.documents.setUserContextProvider({ userContext: { uid: currentUid } } as any);
+    }
+
+    it("waits for the owner's history catch-up of an individual document before resolving", async () => {
+      stubRtdb({ createdAt: 1, properties: {} }, { changeCount: 0, lastHistoryEntryId: "e7" });
+      setUpHistoryManagers("u1");
       const catchUp = deferred<void>();
       jest.spyOn(FirestoreHistoryManager.prototype, "catchUpAtLoad").mockReturnValue(catchUp.promise);
 
@@ -1015,6 +1019,19 @@ describe("db", () => {
       catchUp.resolve();
       const doc = await openPromise;
       expect(doc).toBe(added);
+      expect(doc.historyCatchUpPending).toBe(false);
+    });
+
+    it("doesn't catch up or wait for another user's individual document", async () => {
+      stubRtdb({ createdAt: 1, properties: {} }, { changeCount: 0, lastHistoryEntryId: "e7" });
+      setUpHistoryManagers("u2");
+      const catchUpSpy = jest.spyOn(FirestoreHistoryManager.prototype, "catchUpAtLoad")
+        .mockReturnValue(new Promise<void>(() => undefined));
+
+      const doc = await db.openDocument({ documentKey: "c2", type: "problem", userId: "u1",
+        firestoreMetadata: { uid: "u1", type: "problem", key: "c2" } } as any);
+
+      expect(catchUpSpy).not.toHaveBeenCalled();
       expect(doc.historyCatchUpPending).toBe(false);
     });
 

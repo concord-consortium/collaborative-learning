@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { act, fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { Provider } from "mobx-react";
 import { getSnapshot } from "mobx-state-tree";
@@ -165,6 +165,27 @@ describe("ToolbarComponent", () => {
     });
   });
 
+  // Edits made before the document has caught up to its history would be recorded nowhere.
+  it("disables its tools while the document is catching up to its history", () => {
+    const pendingDocument = createDocumentModel({
+      uid: "1", type: "problem", key: "pending", createdAt: 0, content: {}
+    });
+    pendingDocument.setHistoryCatchUpPending(true);
+    render(
+      <ModalProvider>
+        <Provider stores={stores}>
+          <ToolbarComponent toolbarModel={ToolbarModel.create(config)} document={pendingDocument}/>
+        </Provider>
+      </ModalProvider>
+    );
+    expect(screen.getByTestId("tool-text")).toHaveAttribute("aria-disabled", "true");
+    expect(screen.getByTestId("tool-select")).toHaveAttribute("aria-disabled", "true");
+
+    act(() => pendingDocument.setHistoryCatchUpPending(false));
+    expect(screen.getByTestId("tool-text")).not.toHaveAttribute("aria-disabled");
+    expect(screen.getByTestId("tool-select")).not.toHaveAttribute("aria-disabled");
+  });
+
   // A section toolbar has no document of its own, and the primary workspace document it copies
   // into is not available for a window after load. Buttons must report that accurately: a click
   // on a button whose action cannot run is discarded without feedback.
@@ -188,7 +209,8 @@ describe("ToolbarComponent", () => {
     // "none": no primary document key at all, as on first load.
     // "keyOnly": a key has been chosen but the document has not finished loading into the store.
     // "loaded": the document is available and can actually be copied into.
-    type PrimaryState = "none" | "keyOnly" | "loaded";
+    // "pending": the document is loaded but still catching up to its history.
+    type PrimaryState = "none" | "keyOnly" | "loaded" | "pending";
 
     const renderSectionToolbar = (primary: PrimaryState) => {
       const testStores = specStores();
@@ -205,8 +227,11 @@ describe("ToolbarComponent", () => {
         const primaryDocument = createDocumentModel({
           type: ProblemDocument, uid: "1", key: "primary-doc", createdAt: 1, content: {}
         });
-        if (primary === "loaded") {
+        if (primary === "loaded" || primary === "pending") {
           testStores.documents.add(primaryDocument);
+        }
+        if (primary === "pending") {
+          primaryDocument.setHistoryCatchUpPending(true);
         }
         // setPrimaryDocument logs a document event, which needs logger context to resolve the user
         Logger.initializeLogger(testStores);
@@ -235,6 +260,11 @@ describe("ToolbarComponent", () => {
     it("enables Copy to Workspace once the primary document is loaded", () => {
       renderSectionToolbar("loaded");
       expect(screen.getByTestId("tool-copytoworkspace")).not.toHaveAttribute("aria-disabled");
+    });
+
+    it("disables Copy to Workspace while the primary document is catching up to its history", () => {
+      renderSectionToolbar("pending");
+      expect(screen.getByTestId("tool-copytoworkspace")).toHaveAttribute("aria-disabled", "true");
     });
 
     it("leaves Copy to Document enabled, since it does not copy to the primary document", () => {

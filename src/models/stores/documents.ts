@@ -293,9 +293,11 @@ export const DocumentsModel = types
         } else {
           const manager = new FirestoreHistoryManager(historyManagerArgs);
           treeManager.setHistoryManager(manager);
-          document.setHistoryCatchUpPending(true);
-          self.historyCatchUps.set(document,
-            manager.catchUpAtLoad().finally(() => document.setHistoryCatchUpPending(false)));
+          if (!manager.isOtherUsersDocument) {
+            document.setHistoryCatchUpPending(true);
+            self.historyCatchUps.set(document,
+              manager.catchUpAtLoad().finally(() => document.setHistoryCatchUpPending(false)));
+          }
         }
 
         // The history manager is now stored on the treeManager via setHistoryManager.

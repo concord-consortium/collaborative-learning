@@ -29,8 +29,8 @@ export function planCatchUp(saved: { id?: string; index?: number },
 
 /**
  * Take the leading entries that form an unbroken chain after the saved entry: each has
- * the next index and a previousEntryId naming the entry before it. `complete` is false
- * when the chain broke before the end of `docs`.
+ * the next index, a previousEntryId naming the entry before it, and an entry to apply.
+ * `complete` is false when the chain broke before the end of `docs`.
  */
 export function takeContiguousEntries(docs: IFirestoreHistoryEntryDoc[], savedId: string, savedIndex: number)
     : { entries: IFirestoreHistoryEntryDoc[]; complete: boolean } {
@@ -38,7 +38,7 @@ export function takeContiguousEntries(docs: IFirestoreHistoryEntryDoc[], savedId
   let previousId = savedId;
   let expectedIndex = savedIndex + 1;
   for (const doc of docs) {
-    if (doc.index !== expectedIndex || doc.previousEntryId !== previousId) {
+    if (doc.index !== expectedIndex || doc.previousEntryId !== previousId || !doc.entry) {
       return { entries, complete: false };
     }
     entries.push(doc);

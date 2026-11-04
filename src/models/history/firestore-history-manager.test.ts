@@ -99,10 +99,10 @@ const makeFirestoreMock = (docExists = true) => {
   } as unknown as Firestore;
 };
 
-const makeUserContextProviderMock = () => {
+const makeUserContextProviderMock = (uid = "1234") => {
   return {
     userContext: {
-      uid: "1234"
+      uid
     }
   } as unknown as UserContextProvider;
 };
@@ -604,6 +604,11 @@ describe("catchUpAtLoad", () => {
     getHistoryEntriesAfter.mockReset();
   });
 
+  afterEach(() => {
+    jest.useRealTimers();
+    jest.restoreAllMocks();
+  });
+
   function textEntry(id: string, tree = "test"): HistoryEntrySnapshot {
     return {
       id, tree, model: "TestTile", action: "/content/tileMap/t1/content/setText", state: "complete",
@@ -620,7 +625,7 @@ describe("catchUpAtLoad", () => {
   }
 
   function setupCatchUp(savedEnvelope: ISavedEnvelope | undefined, lastHistoryEntry: LastHistoryEntry,
-      options: { uploadLocalHistory?: boolean, firestore?: Firestore } = {}) {
+      options: { uploadLocalHistory?: boolean, firestore?: Firestore, uid?: string } = {}) {
     const { treeManager, tileContent } = setupDocument();
     const setCalled = deferred<void>();
     const set = jest.fn(() => {
@@ -636,7 +641,8 @@ describe("catchUpAtLoad", () => {
     const logEvent = jest.fn();
     const historyManager = new FirestoreHistoryManager({
       firestore,
-      userContextProvider: makeUserContextProviderMock(),
+      // setupDocument's document belongs to user "1"
+      userContextProvider: makeUserContextProviderMock(options.uid ?? "1"),
       treeManager,
       uploadLocalHistory: options.uploadLocalHistory ?? true,
       syncRemoteHistory: false,
@@ -795,8 +801,41 @@ describe("catchUpAtLoad", () => {
     await catchUp;
     expect(treeManager.exactness.isExact).toBe(false);
     expect(treeManager.exactness.notExactReason).toBe("history-unavailable");
-    jest.useRealTimers();
-    jest.restoreAllMocks();
+  });
+
+  it("skips another user's document without reading its history", async () => {
+    const { treeManager, historyManager } = setupCatchUp(
+      { lastHistoryEntryId: "e5", lastHistoryEntryIndex: 5, settled: true, exactSince: "e2" },
+      { id: "e7", index: 7 }, { uid: "2" });
+    expect(historyManager.isOtherUsersDocument).toBe(true);
+    await historyManager.catchUpAtLoad();
+    expect(getLastHistoryEntry).not.toHaveBeenCalled();
+    expect(getHistoryEntriesAfter).not.toHaveBeenCalled();
+    expect(treeManager.exactness.exactSince).toBeUndefined();
+    expect(treeManager.exactness.notExactReason).toBeUndefined();
+  });
+
+  it("catches up while the current user isn't known yet", async () => {
+    const { treeManager, tileContent, historyManager } = setupCatchUp(
+      { lastHistoryEntryId: "e5", lastHistoryEntryIndex: 5, settled: true, exactSince: "e2" },
+      { id: "e7", index: 7 }, { uid: "0" });
+    getHistoryEntriesAfter.mockResolvedValue([entryDoc(6, "e5"), entryDoc(7, "e6")]);
+    expect(historyManager.isOtherUsersDocument).toBe(false);
+    await historyManager.catchUpAtLoad();
+    expect(tileContent.text).toBe("e7");
+    expect(treeManager.exactness.exactSince).toBe("e2");
+  });
+
+  it("treats a fetched entry doc without an entry as a hole", async () => {
+    const { treeManager, tileContent, historyManager } = setupCatchUp(
+      { lastHistoryEntryId: "e5", lastHistoryEntryIndex: 5, settled: true, exactSince: "e2" },
+      { id: "e7", index: 7 });
+    getHistoryEntriesAfter.mockResolvedValue([
+      entryDoc(6, "e5"), { ...entryDoc(7, "e6"), entry: undefined as unknown as HistoryEntrySnapshot }
+    ]);
+    await historyManager.catchUpAtLoad();
+    expect(tileContent.text).toBe("e6");
+    expect(treeManager.exactness.notExactReason).toBe("catch-up-hole");
   });
 
   it("skips the catch-up for a manager that doesn't upload local history", async () => {

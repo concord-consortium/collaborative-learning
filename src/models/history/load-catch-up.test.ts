@@ -35,6 +35,10 @@ describe("takeContiguousEntries", () => {
     const docs = [doc(6, "e5"), doc(7, "e6"), doc(9, "e8")];
     expect(takeContiguousEntries(docs, "e5", 5)).toEqual({ entries: docs.slice(0, 2), complete: false });
   });
+  it("stops at an entry doc without an entry", () => {
+    const docs = [doc(6, "e5"), { ...doc(7, "e6"), entry: undefined as any }, doc(8, "e7")];
+    expect(takeContiguousEntries(docs, "e5", 5)).toEqual({ entries: docs.slice(0, 1), complete: false });
+  });
   it("stops where previousEntryId breaks the chain", () => {
     const docs = [doc(6, "e5"), doc(7, "other"), doc(8, "e7")];
     expect(takeContiguousEntries(docs, "e5", 5)).toEqual({ entries: docs.slice(0, 1), complete: false });

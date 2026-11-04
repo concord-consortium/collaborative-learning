@@ -14,6 +14,9 @@ import { planCatchUp, takeContiguousEntries } from "./load-catch-up";
 import { kHistoryStart, NotExactReason } from "./session-exactness";
 import type { ISavedEnvelope } from "../document/document";
 
+// The user id before the user is known.
+const kUnknownUserId = "0";
+
 const seekIncompleteMessage = (historyId: string) =>
   `Could not show this document at the requested point in its history (id: ${historyId}): ` +
   "some of its history could not be replayed.";
@@ -40,9 +43,9 @@ export interface IFirestoreHistoryManagerArgs {
   syncRemoteHistory: boolean;
   // History fields recorded alongside the document content at save time (from the RTDB
   // envelope). catchUpAtLoad applies the entries after its lastHistoryEntryId. When the
-  // Firestore history first loads, we verify its lastHistoryEntryId is
-  // present in the history. If not, the content reflects entries that never
-  // made it to the history chain — drift. Undefined skips the check.
+  // Firestore history first loads, we verify its lastHistoryEntryId is present in the
+  // history. If not, the content reflects entries that never made it to the history
+  // chain — drift. Undefined skips the check.
   savedEnvelope?: ISavedEnvelope;
   // Invoked once if the loaded Firestore history doesn't contain
   // savedLastHistoryEntryId. The owner decides how to react — typically by
@@ -240,13 +243,24 @@ export class FirestoreHistoryManager {
   }
 
   /**
+   * True when the current user is known and isn't the document's owner. Only the owner writes an
+   * individual document's history and content, so another user's copy has nothing to catch up.
+   */
+  get isOtherUsersDocument() {
+    const uid = this.userContextProvider?.userContext?.uid;
+    const ownerUid = this.treeManager.mainDocument?.uid;
+    return !!uid && uid !== kUnknownUserId && uid !== ownerUid;
+  }
+
+  /**
    * Bring an individual document's loaded content up to the last history entry in Firestore,
    * applying the entries its saved envelope is missing, and decide where the session's exact
-   * saves start. Managers that mirror the remote history or don't upload local history skip it.
+   * saves start. Managers that mirror the remote history or don't upload local history skip it, as
+   * does another user's copy of the document, leaving its exactness undecided.
    * Never rejects: anything that keeps the catch-up from finishing leaves the session not exact.
    */
   async catchUpAtLoad() {
-    if (this.syncRemoteHistory || !this.uploadLocalHistory) return;
+    if (this.syncRemoteHistory || !this.uploadLocalHistory || this.isOtherUsersDocument) return;
     const { exactness } = this.treeManager;
     const envelope = this.savedEnvelope;
     const savedId = envelope?.lastHistoryEntryId;
@@ -261,6 +275,9 @@ export class FirestoreHistoryManager {
 
     let applying = false;
     try {
+      // The user may only become known during this wait.
+      await this.environmentAndMetadataDocReadyPromise;
+      if (this.isOtherUsersDocument) return;
       const { documentPath, lastEntryIndex, lastEntryId } = await this.getFirestoreHistoryInfo();
       const last = { id: lastEntryId, index: lastEntryIndex };
       const saved = { id: savedId, index: envelope?.lastHistoryEntryIndex };
@@ -301,11 +318,8 @@ export class FirestoreHistoryManager {
           } else {
             startAt(lastEntryId);
           }
-          return;
+          break;
         }
-        case "need-index":
-          // Not reached: the index was read above.
-          exactness.markNotExact("history-unavailable");
       }
     } catch (error) {
       if (applying) {
