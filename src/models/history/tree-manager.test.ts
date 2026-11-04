@@ -1,6 +1,6 @@
 import { nanoid } from "nanoid";
 import { cloneDeep } from "lodash";
-import { getSnapshot, getType, Instance, types } from "mobx-state-tree";
+import { destroy, getSnapshot, getType, Instance, types } from "mobx-state-tree";
 import { ITileProps } from "src/components/tiles/tile-component";
 import { SharedModel, SharedModelType } from "../shared/shared-model";
 import { registerSharedModelInfo } from "../shared/shared-model-registry";
@@ -10,8 +10,9 @@ import { registerTileContentInfo } from "../tiles/tile-content-info";
 import { DocumentContentModel, DocumentContentSnapshotType } from "../document/document-content";
 import { createDocumentModel } from "../document/document";
 import { ProblemDocument } from "../document/document-types";
-import { CDocument, TreeManager } from "./tree-manager";
-import { HistoryEntrySnapshot } from "./history";
+import { CDocument, kOpenEntryTimeoutMs, TreeManager } from "./tree-manager";
+import { HistoryEntry, HistoryEntrySnapshot } from "./history";
+import { LogEventName } from "../../lib/logger-types";
 import { expectEntryToBeComplete } from "./undo-store-test-utils";
 
 const TestSharedModel = SharedModel
@@ -664,4 +665,162 @@ it("records tile model changes in response to shared model changes", async () =>
 
   const changeDocument: Instance<typeof CDocument> = manager.document;
   expect(getSnapshot(changeDocument.history)).toEqual([sharedModelChange]);
+});
+
+describe("entry completion, open-entry timeout and late records", () => {
+  const treeId = "tree1";
+  const patchRecord = (action = "/doIt") => ({
+    tree: treeId,
+    action,
+    patches: [{ op: "replace" as const, path: "/a", value: 2 }],
+    inversePatches: [{ op: "replace" as const, path: "/a", value: 1 }]
+  });
+  const emptyRecord = (action = "/doIt") => ({ tree: treeId, action, patches: [], inversePatches: [] });
+
+  function setup() {
+    const manager = TreeManager.create({ document: {}, undoStore: {} });
+    const start = (id: string, exchangeId = `${id}-x1`) => manager.createHistoryEntry({
+      id, exchangeId, tree: treeId, model: "TestModel", action: "/doIt", undoable: true
+    });
+    return { manager, start };
+  }
+
+  beforeEach(() => {
+    jest.useFakeTimers();
+  });
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
+  it("calls entry-completed listeners with the completed entry, before the history manager", () => {
+    const { manager, start } = setup();
+    const order: string[] = [];
+    manager.setHistoryManager({ onHistoryEntryCompleted: (_c, entry) => { order.push(`manager:${entry.id}`); } });
+    manager.addEntryCompletedListener(entry => {
+      order.push(`listener:${entry.id}`);
+      expect(manager.activeHistoryEntries.length).toBe(0);
+      expect(manager.latestDocumentHistoryEntry).toBe(entry);
+    });
+    start("e1");
+    manager.addTreePatchRecord("e1", "e1-x1", patchRecord());
+    expect(order).toEqual(["listener:e1", "manager:e1"]);
+  });
+
+  it("stops calling a listener after it is removed", () => {
+    const { manager, start } = setup();
+    const listener = jest.fn();
+    const remove = manager.addEntryCompletedListener(listener);
+    remove();
+    start("e1");
+    manager.addTreePatchRecord("e1", "e1-x1", patchRecord());
+    expect(listener).not.toHaveBeenCalled();
+  });
+
+  it("doesn't call entry-completed listeners for empty entries or entries added after applying", () => {
+    const { manager, start } = setup();
+    const listener = jest.fn();
+    manager.addEntryCompletedListener(listener);
+    start("empty");
+    manager.addTreePatchRecord("empty", "empty-x1", emptyRecord());
+    manager.addHistoryEntryAfterApplying(HistoryEntry.create({ id: "remote", state: "complete" }));
+    expect(listener).not.toHaveBeenCalled();
+  });
+
+  describe("open-entry timeout", () => {
+    function openStuckEntry() {
+      const { manager, start } = setup();
+      const logger = jest.fn();
+      manager.setLogger(logger);
+      start("e1");
+      manager.startExchange("e1", "x2", "stuck-exchange");
+      manager.addTreePatchRecord("e1", "e1-x1", patchRecord());
+      return { manager, logger };
+    }
+
+    it("force-completes an entry whose exchanges stay open for 30 seconds", () => {
+      const { manager, logger } = openStuckEntry();
+      jest.advanceTimersByTime(kOpenEntryTimeoutMs - 1);
+      expect(manager.activeHistoryEntries.length).toBe(1);
+
+      jest.spyOn(console, "error").mockImplementation(() => null);
+      jest.advanceTimersByTime(1);
+      expect(manager.activeHistoryEntries.length).toBe(0);
+      const entry = manager.latestDocumentHistoryEntry!;
+      expect(entry.id).toBe("e1");
+      expect(entry.timedOut).toBe(true);
+      expect(entry.records.length).toBe(1);
+      expect(manager.exactness.notExactReason).toBe("timed-out-entry");
+      expect(logger).toHaveBeenCalledWith(LogEventName.HISTORY_ENTRY_TIMED_OUT, {
+        entryId: "e1", model: "TestModel", action: "/doIt", openExchanges: ["stuck-exchange"]
+      });
+      expect(console.error).toHaveBeenCalledTimes(1);
+      (console.error as jest.Mock).mockRestore();
+    });
+
+    it("doesn't time out an entry that completes in time", () => {
+      const { manager, start } = setup();
+      start("e1");
+      jest.advanceTimersByTime(1000);
+      manager.addTreePatchRecord("e1", "e1-x1", patchRecord());
+      jest.advanceTimersByTime(60000);
+      expect(manager.document.history.length).toBe(1);
+      expect(manager.latestDocumentHistoryEntry!.timedOut).toBeUndefined();
+      expect(manager.exactness.notExactReason).toBeUndefined();
+      expect(jest.getTimerCount()).toBe(0);
+    });
+
+    it("turns a late record for a timed-out entry into a new entry", () => {
+      const { manager } = openStuckEntry();
+      jest.spyOn(console, "error").mockImplementation(() => null);
+      jest.advanceTimersByTime(kOpenEntryTimeoutMs);
+      (console.error as jest.Mock).mockRestore();
+
+      expect(() => manager.addTreePatchRecord("e1", "x2", patchRecord("/lateAction"))).not.toThrow();
+      expect(manager.document.history.length).toBe(2);
+      const late = manager.latestDocumentHistoryEntry!;
+      expect(late.id).not.toBe("e1");
+      expect(late.lateRecordForEntryId).toBe("e1");
+      expect(late.undoable).toBe(false);
+      expect(late.model).toBe("TestModel");
+      expect(late.action).toBe("/lateAction");
+      expect(late.records.length).toBe(1);
+      expect(manager.activeHistoryEntries.length).toBe(0);
+    });
+
+    it("drops a late record with no patches, and ignores late startExchange/endExchange calls", () => {
+      const { manager } = openStuckEntry();
+      jest.spyOn(console, "error").mockImplementation(() => null);
+      jest.advanceTimersByTime(kOpenEntryTimeoutMs);
+      (console.error as jest.Mock).mockRestore();
+
+      expect(() => manager.addTreePatchRecord("e1", "x2", emptyRecord())).not.toThrow();
+      expect(() => manager.startExchange("e1", "x3", "late")).not.toThrow();
+      expect(() => manager.endExchange("e1", "x3")).not.toThrow();
+      expect(manager.document.history.length).toBe(1);
+    });
+
+    it("accepts a late record whose patches target a tile that was deleted", () => {
+      const { manager } = openStuckEntry();
+      jest.spyOn(console, "error").mockImplementation(() => null);
+      jest.advanceTimersByTime(kOpenEntryTimeoutMs);
+      (console.error as jest.Mock).mockRestore();
+
+      const record = {
+        tree: treeId,
+        action: "/lateAction",
+        patches: [{ op: "replace" as const, path: "/content/tileMap/DELETED/content/value", value: 2 }],
+        inversePatches: [{ op: "replace" as const, path: "/content/tileMap/DELETED/content/value", value: 1 }]
+      };
+      expect(() => manager.addTreePatchRecord("e1", "x2", record)).not.toThrow();
+      expect(manager.document.history.length).toBe(2);
+    });
+
+    it("clears pending timeouts when the tree manager is destroyed", () => {
+      const { manager, start } = setup();
+      start("e1");
+      expect(jest.getTimerCount()).toBe(1);
+      destroy(manager);
+      expect(jest.getTimerCount()).toBe(0);
+    });
+  });
 });

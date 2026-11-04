@@ -1,5 +1,5 @@
 import {
-  types, Instance, flow, IJsonPatch, destroy, getSnapshot, toGenerator
+  types, Instance, flow, IJsonPatch, destroy, getSnapshot, toGenerator, addDisposer
 } from "mobx-state-tree";
 import { nanoid } from "nanoid";
 import { TreeAPI } from "./tree-api";
@@ -13,6 +13,8 @@ import { IDocumentMetadata } from "../../../shared/shared";
 import { Firestore } from "../../lib/firestore";
 import { UserContextProvider } from "../stores/user-context-provider";
 import { getLastHistoryEntry } from "./history-firestore";
+import { SessionExactness } from "./session-exactness";
+import { LogEventName } from "../../lib/logger-types";
 
 export interface HistoryPlaybackFailure {
   historyEntry: Instance<typeof HistoryEntry>;
@@ -88,6 +90,11 @@ const json = (value: any) => JSON.stringify(value);
 export const FAKE_HISTORY_ENTRY_ID = "FAKE_HISTORY_ENTRY_ID";
 export const FAKE_EXCHANGE_ID = "FAKE_EXCHANGE_ID";
 
+// An entry whose exchanges are still open after this long is force-completed.
+export const kOpenEntryTimeoutMs = 30000;
+
+export type TreeManagerLogger = (event: LogEventName, params: Record<string, unknown>) => void;
+
 export const CDocument = types
 .model("CDocument", {
   // TODO: switch to a map, so we get faster lookups in the map and MST can
@@ -116,6 +123,8 @@ export interface IHistoryManager {
     newLocalIndex: number
   ): void;
 }
+
+type HistoryEntryType = Instance<typeof HistoryEntry>;
 
 export const TreeManager = types
 .model("TreeManager", {
@@ -152,7 +161,18 @@ export const TreeManager = types
    * History entries whose patches could not be applied. A patch may fail
    * in one direction but not the other, so entries include the direction.
    */
-  historyPlaybackFailures: [] as HistoryPlaybackFailure[]
+  historyPlaybackFailures: [] as HistoryPlaybackFailure[],
+  /**
+   * Whether the document's lastHistoryEntryId is exact for this session. Broken when an entry
+   * is force-completed after its open-entry timeout.
+   */
+  exactness: new SessionExactness(),
+  entryCompletedListeners: new Set<(entry: HistoryEntryType) => void>(),
+  logger: undefined as TreeManagerLogger | undefined,
+  // One timer per entry that still has open exchanges.
+  openEntryTimers: new Map<string, ReturnType<typeof setTimeout>>(),
+  // Entries that were force-completed, so records that arrive for them later can be recognized.
+  timedOutEntries: new Map<string, { model?: string }>()
 }))
 .views((self) => ({
   get undoManager() : IUndoManager {
@@ -173,8 +193,17 @@ export const TreeManager = types
   },
 }))
 .actions((self) => {
-  function completeHistoryEntry(activeEntry: Instance<typeof HistoryEntry>) {
+  function clearOpenEntryTimer(entryId: string) {
+    const timer = self.openEntryTimers.get(entryId);
+    if (timer !== undefined) {
+      clearTimeout(timer);
+      self.openEntryTimers.delete(entryId);
+    }
+  }
+
+  function completeHistoryEntry(activeEntry: HistoryEntryType) {
     activeEntry.state = "complete";
+    clearOpenEntryTimer(activeEntry.id);
 
     // Copied rather than detached: detach walks every identifier in the tree, and the history
     // grows to thousands of entries. The active entry is destroyed, so code refers to active
@@ -216,9 +245,41 @@ export const TreeManager = types
       self.revisionId = entry.id;
     }
 
+    self.entryCompletedListeners.forEach(listener => listener(entry));
+
     self.historyManager?.onHistoryEntryCompleted(self.document, entry, newLocalIndex);
   }
 
+  return {
+    completeHistoryEntry,
+
+    /**
+     * Complete an entry whose exchanges never closed. Records that arrive for it afterwards are
+     * kept as new entries, see addTreePatchRecord.
+     */
+    timeOutEntry(entryId: string) {
+      self.openEntryTimers.delete(entryId);
+      const entry = self.findActiveHistoryEntry(entryId);
+      if (!entry) return;
+
+      const openExchanges = Array.from(entry.activeExchanges.values());
+      self.logger?.(LogEventName.HISTORY_ENTRY_TIMED_OUT, {
+        entryId, model: entry.model, action: entry.action, openExchanges
+      });
+      // eslint-disable-next-line no-console
+      console.error(`History entry timed out with open exchanges ${json({
+        entryId, model: entry.model, action: entry.action, openExchanges
+      })}`);
+
+      self.exactness.markNotExact("timed-out-entry");
+      self.timedOutEntries.set(entryId, { model: entry.model });
+      entry.activeExchanges.clear();
+      entry.timedOut = true;
+      completeHistoryEntry(entry);
+    }
+  };
+})
+.actions((self) => {
   return {
     /**
      * Append a history entry whose patches have already been applied by
@@ -310,6 +371,8 @@ export const TreeManager = types
       // Find if there is already an entry with this historyEntryId
       const entry = self.findActiveHistoryEntry(historyEntryId);
       if (!entry) {
+        // A tree can still be working on an entry that was force-completed.
+        if (self.timedOutEntries.has(historyEntryId)) return Promise.resolve();
         throw new Error(`History Entry doesn't exist ${ json({historyEntryId})} `);
       }
 
@@ -331,6 +394,7 @@ export const TreeManager = types
     endExchange(historyEntryId: string, exchangeId: string) {
       const entry = self.findActiveHistoryEntry(historyEntryId);
       if (!entry) {
+        if (self.timedOutEntries.has(historyEntryId)) return;
         throw new Error(`There isn't an active entry for ${ json({historyEntryId, exchangeId})}`);
       }
 
@@ -344,7 +408,7 @@ export const TreeManager = types
       // TODO: We could use autorun for watching this observable map instead of
       // changing the entry state here.
       if (entry.activeExchanges.size === 0) {
-        completeHistoryEntry(entry);
+        self.completeHistoryEntry(entry);
       }
     },
 
@@ -361,6 +425,30 @@ export const TreeManager = types
       self.activeHistoryEntries.push(entry);
 
       entry.activeExchanges.set(exchangeId, `TreeManager.createHistoryEntry ${action}`);
+
+      self.openEntryTimers.set(historyEntryId,
+        setTimeout(() => self.timeOutEntry(historyEntryId), kOpenEntryTimeoutMs));
+    },
+
+    /**
+     * Listeners are called synchronously when a local entry with records has been added to the
+     * history, before the history manager is told about it. Returns a function that removes the
+     * listener.
+     */
+    addEntryCompletedListener(listener: (entry: HistoryEntryType) => void) {
+      self.entryCompletedListeners.add(listener);
+      return () => { self.entryCompletedListeners.delete(listener); };
+    },
+
+    setLogger(logger: TreeManagerLogger | undefined) {
+      self.logger = logger;
+    },
+
+    afterCreate() {
+      addDisposer(self, () => {
+        self.openEntryTimers.forEach(timer => clearTimeout(timer));
+        self.openEntryTimers.clear();
+      });
     },
 
     setNumHistoryEntriesAppliedFromFirestore: flow(
@@ -436,6 +524,25 @@ export const TreeManager = types
 
     // Find if there is already an entry with this historyEntryId
     const entry = self.findActiveHistoryEntry(historyEntryId);
+    const timedOutEntry = self.timedOutEntries.get(historyEntryId);
+    if (!entry && timedOutEntry) {
+      // The entry this record belongs to was force-completed. The record is only stored, never
+      // applied, so it is kept as an entry of its own in case it has changes worth recording.
+      if (treePatchRecord.patches.length > 0) {
+        const lateEntry = HistoryEntry.create({
+          id: nanoid(),
+          tree: record.tree,
+          model: timedOutEntry.model,
+          action: record.action,
+          undoable: false,
+          lateRecordForEntryId: historyEntryId,
+          records: [record]
+        });
+        self.activeHistoryEntries.push(lateEntry);
+        self.completeHistoryEntry(lateEntry);
+      }
+      return;
+    }
     if (!entry) {
       throw new Error(`There isn't an active entry for ${ json({historyEntryId, exchangeId})}`);
     }

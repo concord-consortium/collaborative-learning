@@ -13,6 +13,7 @@ import { ClassModelType } from "./class";
 import { UserModelType } from "./user";
 import { DEBUG_DOCUMENT } from "../../lib/debug";
 import { Firestore } from "../../lib/firestore";
+import { logDocumentEvent } from "../document/log-document-event";
 import { TreeManagerType } from "../history/tree-manager";
 import { FirestoreHistoryManager, IFirestoreHistoryManagerArgs } from "../history/firestore-history-manager";
 import { FirestoreHistoryManagerConcurrent } from "../history/firestore-history-manager-concurrent";
@@ -252,6 +253,7 @@ export const DocumentsModel = types
         }
 
         const treeManager = document.treeManagerAPI as TreeManagerType;
+        treeManager.setLogger((event, params) => logDocumentEvent(event, { document, ...params }));
 
         // Set up the Firestore history manager to save history entries
         // Note: because the FirestoreHistoryManager currently only manages saving history
