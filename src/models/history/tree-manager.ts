@@ -51,6 +51,11 @@ function findFailedSegment(numApplied: number, segments: PatchSegment[]) {
   return { historyIndex: last.historyIndex, appliedInEntry: last.patchCount };
 }
 
+function entryChangesContent(entry: HistoryEntrySnapshot) {
+  return !!entry.records?.some(record =>
+    record.patches?.some(patch => patch.path === "/content" || patch.path.startsWith("/content/")));
+}
+
 /**
  * Helper method to print objects in template strings
  * In console statements they can be "printed", just by adding them as extra
@@ -131,7 +136,7 @@ export const TreeManager = types
   historyPlaybackFailures: [] as HistoryPlaybackFailure[],
   /**
    * The entry that records the conversion of old tiles at load. It waits here, outside the
-   * history, until just before the first local entry is completed.
+   * history, until just before the first local entry that changes the content is completed.
    */
   pendingConversionEntry: undefined as HistoryEntrySnapshot | undefined
 }))
@@ -175,9 +180,12 @@ export const TreeManager = types
       return;
     }
 
-    // Flush the pending conversion entry so it comes before the first local entry. It is never
-    // undoable, so it is not added to the undo store and does not change the revisionId.
-    if (self.pendingConversionEntry) {
+    // Flush the pending conversion entry so it comes before the first local entry that changes the
+    // content. Content is saved only when it changes, so an entry that changes only the document's
+    // metadata (its title, for example) leaves it pending; otherwise the conversion entry would be
+    // stored next to old content, and the next load would convert it again. It is never undoable,
+    // so it is not added to the undo store and does not change the revisionId.
+    if (self.pendingConversionEntry && entryChangesContent(snapshot)) {
       const conversionIndex = self.document.history.length;
       self.document.history.push(self.pendingConversionEntry);
       self.pendingConversionEntry = undefined;

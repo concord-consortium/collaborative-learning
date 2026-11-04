@@ -189,7 +189,10 @@ the diff between each old tile's JSON and its converted JSON, built once history
 **Who records it.**
 
 - **The client that saves the document** (the owner's) records it after history has loaded, and
-  saves it with the converted content.
+  saves it with the converted content. The entry goes into history just before the first local
+  entry that changes the content. Content is saved only when it changes, so an entry that changes
+  only the document's title or other metadata leaves the conversion entry pending. Flushing it then
+  would store it next to old content, and the next load would convert again with new ids.
 - **A read-only viewer** (a teacher or researcher) adds it to its in-memory history only and never
   uploads it.
 - **The playback copy needs it too.** Playback builds its document from a snapshot of the live,

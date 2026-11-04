@@ -168,6 +168,26 @@ describe("conversion entry", () => {
     expect(manager.pendingConversionEntry).toBeUndefined();
   });
 
+  it("keeps the conversion entry pending until an entry changes the content", async () => {
+    // Content is saved only when it changes, so flushing before a title-only entry would store the
+    // conversion entry next to old content, and the next load would convert it again.
+    const { document, manager } = makeDocument(oldContent());
+    document.treeMonitor!.enableMonitoring();
+
+    document.setTitle("Renamed");
+    await expectEntryToBeComplete(manager, 1);
+
+    expect(manager.document.history.map(e => e.isConversion)).toEqual([undefined]);
+    expect(manager.pendingConversionEntry).toBeDefined();
+
+    const tile = document.content!.tileMap.get("t1")!.content as VersionedTestTileType;
+    tile.setLabel("x");
+    await expectEntryToBeComplete(manager, 3);
+
+    expect(manager.document.history.map(e => e.isConversion)).toEqual([undefined, true, undefined]);
+    expect(manager.pendingConversionEntry).toBeUndefined();
+  });
+
   it("plays back across a conversion entry without applying it", async () => {
     const { document, manager } = makeDocument(oldContent());
     document.treeMonitor!.enableMonitoring();
