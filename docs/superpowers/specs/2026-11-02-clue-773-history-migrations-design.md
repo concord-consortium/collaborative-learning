@@ -514,9 +514,10 @@ The story ships as three stacked PRs, merged in order. Each one is useful on its
 
 1. **Record conversion entries.** The `schemaVersion` registration, the JSON patch applier and diff,
    detecting old tiles at load and in `setContent`, building the conversion entry and flushing it
-   into history, and DataFlow's `schemaVersion`. Today's playback skips conversion entries in this
-   PR, so recording one never changes what playback shows. A test checks that a plain JSON patch
-   library rebuilds the end state across a conversion entry.
+   into history, and DataFlow's `schemaVersion`. Today's playback skips conversion entries'
+   patches in this PR, so a conversion entry shows as one more stop with no change. It carries
+   `background: true`, and CLUE-760 hides background entries on the slider. A test checks that a
+   plain JSON patch library rebuilds the end state across a conversion entry.
 2. **Play back across conversion entries.** The tree API for loads, the JSON copy, the playback
    patch source, crossing a conversion in both directions, rollback, and handing a pending entry to
    the playback copy (sections 3 and 7).
