@@ -173,17 +173,24 @@ code change is made for this here. This is a description of what the change woul
 
 ## Group documents
 
-Group documents don't record conversion entries yet. Their playback works like any other
-document's: the history bridges and the JSON copy apply to it, so legacy DataFlow history in a
-group document plays back across the conversion. Two problems are unsolved for them. Clients
-converting the same old document at the same time each make their own conversion entry. A tab
-still running an older release can't apply a newer conversion's entries and would keep writing
-old-format ones.
+Group documents don't record conversion entries yet, and `convertStoredContent` in `document.ts`
+skips them on purpose. The concurrent history manager applies every incoming entry's patches
+straight to each client's live document, not to a playback copy. A conversion entry recorded there
+would therefore be applied to every other client's live document, and then saved. A client released
+before group documents learn to handle conversion entries has no way to refuse one.
 
-The planned answer is that a client that receives a conversion entry whose version it doesn't know
-stops editing and asks for a reload. That check can only stop clients that already have it. So a
-schema change that has to cover group documents needs the out-of-date check to ship at least one
-release earlier, so that tabs old enough to lack it are unlikely to still be open.
+Their playback works like any other document's: the history bridges and the JSON copy apply to it,
+so legacy DataFlow history in a group document plays back across the conversion. Two problems are
+unsolved for them. Clients converting the same old document at the same time each make their own
+conversion entry. A tab still running an older release can't apply a newer conversion's entries and
+would keep writing old-format ones.
+
+The plan has two steps. First, a group-document client that receives a conversion entry doesn't
+apply it, stops editing, and asks for a reload. Then group documents record conversion entries and
+merge them with concurrent edits, and the stop narrows to conversions whose version the client
+doesn't know. The check can only stop clients that already have it, so the first step has to ship
+at least one release before the second, so that tabs old enough to lack it are unlikely to still be
+open.
 
 ## Known limit
 
