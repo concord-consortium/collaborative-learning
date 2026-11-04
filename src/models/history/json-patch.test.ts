@@ -68,10 +68,28 @@ describe("applyJsonPatches", () => {
     expect(() => applyJsonPatches({ l: [1] }, [{ op: "remove", path: "/l/1" }])).toThrow(JsonPatchError);
   });
 
+  it("add accepts the length as an index and rejects anything past it or non-numeric", () => {
+    const doc: any = { l: [1] };
+    applyJsonPatches(doc, [{ op: "add", path: "/l/1", value: 2 }]);
+    expect(doc.l).toEqual([1, 2]);
+    expect(() => applyJsonPatches({ l: [1] }, [{ op: "add", path: "/l/2", value: 1 }])).toThrow(JsonPatchError);
+    expect(() => applyJsonPatches({ l: [1] }, [{ op: "add", path: "/l/x", value: 1 }])).toThrow(JsonPatchError);
+  });
+
+  it("throws when the parent is a primitive", () => {
+    expect(() => applyJsonPatches({ a: 1 }, [{ op: "remove", path: "/a/b" }])).toThrow(JsonPatchError);
+  });
+
   it("unescapes ~1 and ~0 in path segments", () => {
     const doc: any = { m: {} };
     applyJsonPatches(doc, [{ op: "add", path: "/m/a~1b~0c", value: 1 }]);
     expect(doc.m["a/b~c"]).toBe(1);
+  });
+
+  it("unescapes ~1 before ~0, so ~01 is ~1", () => {
+    const doc: any = { m: {} };
+    applyJsonPatches(doc, [{ op: "add", path: "/m/a~01", value: 1 }]);
+    expect(doc.m).toEqual({ "a~1": 1 });
   });
 
   it("never reaches objects outside the document through inherited properties", () => {
