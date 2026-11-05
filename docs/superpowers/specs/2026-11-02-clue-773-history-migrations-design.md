@@ -486,6 +486,21 @@ candidates:
   may no longer resolve.
 - **Drawing**: the `changes`-array format, and 1.0.0 → 1.1.0 (group dimensions became relative).
 - **Diagram**: any old version is dropped to empty content.
+- **Snapshot post-processors.** History records the patches MST emits, whose paths follow the MST
+  tree, while the stored content is the post-processed snapshot. A recorded patch under a prop that
+  a post-processor drops has no parent in the stored JSON, so a JSON rebuild of the history stops
+  there.
+  - **Geometry** drops `links`, the legacy table links. When a tile that still has them loads,
+    a reaction calls `replaceLinks`, which records patches under `links`. This only affects content
+    from before tables used shared data sets. How many documents have these entries hasn't been
+    counted.
+  - **Attribute** drops `formula.id`. The id is an MST identifier, so no patch reaches it. A whole
+    formula's patch value still includes it, so the JSON copy can hold an id that MST's snapshot
+    leaves out, but nothing fails.
+  - **UnknownSharedModel** replaces its snapshot with the original JSON. Nothing edits a shared
+    model of an unknown type, so no patches are recorded under it.
+  - A lint rule forbids new snapshot post-processors in `src/`. The existing ones disable it with a
+    comment saying why.
 
 Start by reading the code and building small test cases with old-format patches. Then check the
 conclusions against real documents pulled with cc-data: for each candidate, find documents whose
