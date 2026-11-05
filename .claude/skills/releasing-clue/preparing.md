@@ -37,7 +37,12 @@ Agree on these with the developer first and put them at the top of the release r
   5. Confirm the Jira token first with `GET /rest/api/3/myself` (see "Jira REST" below), then run
      the triage report. Atlassian tokens expire, so an existing setup may need a new token. An
      expired token makes other endpoints, such as the versions list, return 404 rather than 401,
-     which looks like a missing project.
+     which looks like a missing project. A token can also expire partway through a release. Until
+     the developer makes a new one, anything that runs the dev-templates scripts or Jira REST
+     stops: the triage report, the versions list, blurb edits, the release notes and the version
+     release. Triage can go on with the Atlassian connection (the fix version's stories) and `gh`
+     (the PRs), and the deploy report can take the PR numbers with `--prs <n,n,...>` in place of
+     `--unlinked-prs`.
 - **Release scripts:** `npm --prefix scripts ci` in each checkout that runs `scripts/` (this one,
   and later the release worktree). The scripts import packages from `scripts/node_modules`.
 - **Release story and next version:** check that Jira has the release story for this version, and
@@ -45,7 +50,8 @@ Agree on these with the developer first and put them at the top of the release r
   tools, and a JQL `fixVersion` query can't tell a missing version from one with no issues yet,
   so list versions with REST (`GET /rest/api/3/project/CLUE/versions`, see "Jira REST" below).
   The developer creates a missing version in the Jira UI; propose creating a missing release
-  story **[approve]**.
+  story **[approve]**. Jira automation may create both (in 7.8.0 it made the 7.9.0 version and
+  release story partway through), so list them again just before proposing either.
 - **Previous version:** check it's marked released in Jira; if not, include it in the wrap-up.
 - **Deployed versions:** `npx --prefix scripts tsx scripts/deployed-version.ts` after
   `git fetch --tags`. It checks every page a release deploys, on production and staging.
@@ -104,6 +110,12 @@ since the last post, then each open item with what it's waiting on and who. Show
 let the developer edit it. Updates between rounds, replies and nudges go in the latest status
 post's thread.
 
+When the release needs other people's time soon (a same-day release that waits on reviews and a
+smoke test), a full list buries the question. Make the first post ask only whether the people
+whose time it needs can give it today, naming each and what's asked of them. A merge freeze can
+go in it too. Once they've answered, the rest goes in the thread as its own post, previewed and
+approved like any other **[approve]**.
+
 Mention whoever has the next move:
 - A PR whose author answered a review but hasn't re-requested it waits on the author, not the
   reviewer. The PR timeline (`gh api repos/{owner}/{repo}/issues/<n>/timeline`: `reviewed`,
@@ -115,12 +127,12 @@ Mention whoever has the next move:
   developer whom to tag.
 
 Things change between drafting and posting, sometimes within minutes. Before drafting, read the
-replies in the previous status thread and re-run the triage report, or at least list the fix
-version's stories: people add stories to the version between rounds. Right before posting, read
-the thread again, and re-read in Jira the status of every story the post lists. If a post waits on
-an event (a merge, a branch), agree with the developer beforehand what to do with stories that
-have moved on (for example, drop ones now Done without another preview); any other change means
-a new preview.
+replies in the previous status thread, re-run the triage report, or at least list the fix
+version's stories (people add stories to the version between rounds), and re-read the deployed
+Firebase state ("Firebase deployables"). Right before posting, read the thread again, and re-read
+in Jira the status of every story the post lists. If a post waits on an event (a merge, a branch), agree with the developer beforehand what to do
+with stories that have moved on (for example, drop ones now Done without another preview); any
+other change means a new preview.
 
 **Merge freeze [approve]:** once the remaining work is known, propose to the developer a freeze in
 the status post: no merges to master without checking with them until the release branch exists.
@@ -146,6 +158,12 @@ disagree, and gives a "to ask" list of PR authors missing a usable callout. When
 read each PR's reason before planning. Ask the authors **[approve]** for Slack or PR comments;
 never fill in a timing yourself.
 
+A timing can change after the PR merges, when the developer or the author decides the callout was
+wrong. Edit the PR's callout **[approve]** so the deploy report picks up the new timing, record why
+in the release record, and mention the change in the next status post. If someone other than the
+developer wrote the PR, tell them too (a PR comment or a Slack reply), as part of the same
+approval.
+
 ## Firebase deployables
 
 What changed (after `git fetch`): `git diff --name-status <previous tag> origin/master -- firestore.rules database.rules.json
@@ -162,6 +180,13 @@ What's deployed (read-only; projects are `staging` = collaborative-learning-stag
   Compare deploy times with `git log --first-parent <range> -- functions-v2 shared` to see which
   merges each project is missing. This compares times, not code, so a function deployed from an
   unmerged branch looks current; ask whoever deployed it when one is newer than you expect.
+  A function that's deployed but isn't in the code being released, such as a new one deployed
+  from an unmerged PR, stops a whole-codebase deploy from the release. With `--non-interactive`
+  the deploy aborts before updating anything, and its error suggests `firebase functions:delete`
+  commands; running one is a Google Cloud delete **[approve]**. Ask the function's author, and let
+  the developer choose: wait for the PR to merge, or deploy the release's changed functions by
+  name (cutting.md). Don't ask the author to deploy their whole branch instead: it may lack
+  functions changes the release has (in 7.8.0, #3052's branch lacked #3060).
   Production's 1st-gen functions are in codebase `default` on nodejs16, while staging's are in
   `functions-v1`; a `functions-v1` deploy to production needs a decision about that first.
 - **Indexes:** `npx firebase firestore:indexes --project <project>`. Strip the implicit `__name__`
@@ -175,10 +200,15 @@ What's deployed (read-only; projects are `staging` = collaborative-learning-stag
   `database.rules.json`, so deploying from the repo would silently delete them. Compare first, and don't deploy RTDB rules unless the developer decides to.
 - **Secrets:** `npx firebase functions:secrets:get <NAME> --project <project>` shows metadata only.
 
+Read the deployed state again every triage round, even when no Firebase files have changed:
+other developers deploy too, for their own PRs. They don't always report it in #clue-dev, so also
+search Slack, including DMs the developer is in, for deploy reports from the authors of PRs that
+touch these parts.
+
 Per part, work out: must it deploy, has it already, and when relative to the client. Check both
 directions: the new client against the deployed part, and the *released* client against the new
-part. Decisions come from the PR authors and the developer. An index deploy prompts before deleting
-extra indexes, so never pass `--force`.
+part. Decisions come from the PR authors and the developer. An index deploy offers to delete
+indexes that aren't in the file, and `--force` deletes them without asking, so never pass it.
 
 A part whose strictest timing is `before` doesn't need to wait for release day, and has often gone
 out already. Unless the deployed state above shows it is already live, deploy it while the release
@@ -226,7 +256,8 @@ stories not yet Done. Propose fixes:
 - **A blurb:** a `Blurb: …` paragraph at the end of the description replaces the title in the
   notes. A bug's blurb describes the fix; a story's describes the new capability. The script
   takes the first top-level paragraph that starts with `Blurb:`, wherever it is, so check the
-  description doesn't already have one.
+  description doesn't already have one. Don't name a Jira key in a blurb: it isn't linked in the
+  Slack notes, so the Jira bot posts a preview card for it. Describe the other story instead.
 - **The `under-the-hood` label.**
 - **The issue type:** the section comes from the type, so moving an item between Features and Bug
   Fixes means changing its type in Jira (a story logged as a bug, or the reverse).
