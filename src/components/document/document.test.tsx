@@ -9,6 +9,8 @@ import { specStores } from "../../models/stores/spec-stores";
 import { specAppConfig } from "../../models/stores/spec-app-config";
 import { createSingleTileContent } from "../../utilities/test-utils";
 import { kAnalyzerUserParams } from "../../../shared/shared";
+import { HistoryEntry } from "../../models/history/history";
+import { TreeManagerType } from "../../models/history/tree-manager";
 import { IDEAS_EMPTY_MESSAGE, IDEAS_REQUEST_FAILED_MESSAGE, IDEAS_UNCHANGED_MESSAGE }
   from "../../models/document/ai-evaluation-messages";
 import { getLastHistoryEntry } from "../../models/history/history-firestore";
@@ -196,6 +198,12 @@ describe("Ideas button", () => {
     jest.spyOn(stores.db.firebase, "getEvaluationGateIndex").mockResolvedValue(47);
     (getLastHistoryEntry as jest.Mock).mockResolvedValue({ index: 47, id: "entry-47" });
     const document = populatedDocument();
+    // The student edited earlier in this session and that entry has since uploaded, so the newest
+    // entry this client knows of is the one Firestore reports. Without an entry here the local
+    // check would pass trivially and this would stop pinning the gate.
+    (document.treeManagerAPI as TreeManagerType).addHistoryEntryAfterApplying(
+      HistoryEntry.create({ id: "entry-47", tree: document.key, state: "complete" })
+    );
     renderDocument(document, stores);
 
     clickIdeas();
@@ -206,6 +214,28 @@ describe("Ideas button", () => {
     // The gate is raised before the reads above, so this early return has to release it or the
     // button stays disabled for the rest of the session.
     expect(document.commentsManager?.canRequestIdeas).toBe(true);
+  });
+
+  // The Firestore read can trail the student by a whole edit: a completed entry uploads
+  // fire-and-forget, and waitForSaveSettled does not cover that upload. Nudging here would tell a
+  // student who just did real work that they had not.
+  it("on an edit Firestore has not caught up with: requests rather than nudging", async () => {
+    const stores = makeStores("categorize-design");
+    jest.spyOn(stores.db.firebase, "getEvaluationGateIndex").mockResolvedValue(47);
+    // The index and id Firestore still reports -- the state at the last evaluation.
+    (getLastHistoryEntry as jest.Mock).mockResolvedValue({ index: 47, id: "entry-47" });
+    const document = populatedDocument();
+    // The entry the student's edit just created, not yet uploaded.
+    (document.treeManagerAPI as TreeManagerType).addHistoryEntryAfterApplying(
+      HistoryEntry.create({ id: "entry-48", tree: document.key, state: "complete" })
+    );
+    renderDocument(document, stores);
+
+    clickIdeas();
+    await flushMicrotasks();
+
+    expect(document.commentsManager?.statusMessage?.message).not.toBe(IDEAS_UNCHANGED_MESSAGE);
+    expect(stores.db.firebase.setLastEditedNow).toHaveBeenCalled();
   });
 
   it("when the gate reads fail: requests anyway rather than withholding or throwing", async () => {

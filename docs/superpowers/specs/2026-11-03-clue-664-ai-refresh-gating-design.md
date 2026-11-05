@@ -200,8 +200,12 @@ and a test that a changed prompt against an unchanged document still sends.
 
 The Ideas gate must also consult local history: entries upload to Firestore fire-and-forget, and
 `waitForSaveSettled` does not track that upload, so a click straight after an edit can read a stale
-index that still matches the gate and wrongly nudge a student who did real work. The AI tile additionally records its gate only after a successful
-refresh.
+index that still matches the gate and wrongly nudge a student who did real work. The client
+therefore compares the newest entry it knows of (`treeManagerAPI.latestDocumentHistoryEntry`)
+against the one Firestore returned; a mismatch means a change the index cannot yet reflect, and
+the request goes through. This errs toward spending a call, which is the right direction: a false
+nudge tells a student their work does not count. The AI tile additionally records its gate only
+after a successful refresh.
 
 **Server** — the handler skips when unchanged and evaluates when changed; the gate advances only on
 success; and the gate write does not re-trigger the handler.

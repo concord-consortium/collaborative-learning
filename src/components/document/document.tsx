@@ -22,6 +22,7 @@ import { IDEAS_EMPTY_MESSAGE, IDEAS_REQUEST_FAILED_MESSAGE, IDEAS_UNCHANGED_MESS
 import { logDocumentEvent, logDocumentViewEvent } from "../../models/document/log-document-event";
 import { waitForSaveSettled } from "../../models/document/wait-for-save-settled";
 import { getLastHistoryEntry } from "../../models/history/history-firestore";
+import { TreeManagerType } from "../../models/history/tree-manager";
 import { IToolbarModel } from "../../models/stores/problem-configuration";
 import { SupportType, TeacherSupportModelType, AudienceEnum } from "../../models/stores/supports";
 import { WorkspaceModelType } from "../../models/stores/workspace";
@@ -586,7 +587,16 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
           firebase.getEvaluationGateIndex(user, document.key, document.uid),
           getLastHistoryEntry(this.stores.db.firestore, getSimpleDocumentPath(document.key))
         ]);
-        isUnchanged = !hasChangedSinceEvaluation(lastEntry?.index, gateIndex);
+        // A completed history entry uploads to Firestore fire-and-forget, and waitForSaveSettled
+        // does not cover that upload, so the read above can miss an edit the student just made --
+        // exactly the student this nudge would be most wrong about. When the newest entry this
+        // client knows of is not the one Firestore returned, there is a change the index cannot
+        // yet reflect. Errs toward spending a request: the cost of a false nudge is a student
+        // told their work does not count.
+        const treeManager = document.treeManagerAPI as TreeManagerType | undefined;
+        const newestLocalEntryId = treeManager?.latestDocumentHistoryEntry?.id;
+        const hasUnseenLocalEntry = !!newestLocalEntryId && newestLocalEntryId !== lastEntry?.id;
+        isUnchanged = !hasUnseenLocalEntry && !hasChangedSinceEvaluation(lastEntry?.index, gateIndex);
       } catch (error) {
         // Fail open: a gate we can't read must not withhold an evaluation, and must not leave the
         // button disabled by throwing out of the handler.
