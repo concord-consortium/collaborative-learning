@@ -44,7 +44,7 @@ export const AIContentModel = TileContentModel
   .actions(self => ({
     exportJson() {
       // Both are per-session bookkeeping rather than authored content: a copy of this tile lands
-      // in a document with its own history, where a carried-over index would mean nothing.
+      // in a document whose summary differs, where a carried-over hash would mean nothing.
       const { refreshCount: _, evaluatedSummaryHash: __, ...snapshot } = getSnapshot(self);
       return stringify(snapshot);
     },
