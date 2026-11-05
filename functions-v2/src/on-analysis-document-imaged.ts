@@ -10,6 +10,7 @@ import {
 import {Summary} from "./summary-types";
 import {defineSecret} from "firebase-functions/params";
 import {kAnalyzerUserParams} from "../../shared/shared";
+import {kEvaluationGateKey} from "../../shared/ai-evaluation-gate";
 import {writeEvaluationStatusForRequests} from "./evaluation-status";
 import {claimRequestIds} from "./claim-request-ids";
 
@@ -266,6 +267,20 @@ export const onAnalysisDocumentImaged =
         name: kAnalyzerUserParams.fullName,
         uid: kAnalyzerUserParams.id,
       });
+
+      // Only now: the gate must advance on success alone, so a failed evaluation leaves it where
+      // it was and the next attempt is not skipped.
+      if (typeof queueDoc.historyIndex === "number" && queueDoc.metadataPath && queueDoc.evaluator) {
+        try {
+          await admin.database()
+            .ref(`${queueDoc.metadataPath}/${kEvaluationGateKey}/${queueDoc.evaluator}`)
+            .set(queueDoc.historyIndex);
+        } catch (err) {
+          // An unwritten gate costs one redundant evaluation; throwing here would cost the done
+          // record, the queue removal and the "commented" status the Ideas client waits for.
+          logger.warn("Could not advance the evaluation gate", event.document, err);
+        }
+      }
 
       // Add to "done" queue
       await firestore.collection(getAnalysisQueueFirestorePath("done")).add({
