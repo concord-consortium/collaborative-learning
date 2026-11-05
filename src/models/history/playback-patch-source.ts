@@ -1,5 +1,8 @@
 import { IJsonPatch } from "mobx-state-tree";
 import { cloneDeep } from "lodash";
+import {
+  kContentPath, kSharedModelEntryRegex, kSharedModelMapPath, kTileMapPath
+} from "../document/document-paths";
 import { getEntryPatchesForTree, HistoryEntryType, HistoryOperation } from "./history";
 import { JsonHistoryCopy } from "./json-history-copy";
 import {
@@ -47,9 +50,6 @@ export class LoadApplicationError extends Error {
   }
 }
 
-const kTileMapPath = "/content/tileMap";
-const kSharedModelMapPath = "/content/sharedModelMap";
-
 function isObject(value: unknown): value is Record<string, any> {
   return !!value && typeof value === "object" && !Array.isArray(value);
 }
@@ -68,11 +68,12 @@ function getContainedModelPaths(path: string, value: unknown): string[] {
       ? Object.keys(sharedModelMap).filter(id => isObject(sharedModelMap[id]?.sharedModel)).map(sharedModelPathOf)
       : [];
 
-  if (path === "/content") return [...tilePaths(value.tileMap), ...sharedPaths(value.sharedModelMap)];
+  if (path === kContentPath) return [...tilePaths(value.tileMap), ...sharedPaths(value.sharedModelMap)];
   if (path === kTileMapPath) return tilePaths(value);
   if (path === kSharedModelMapPath) return sharedPaths(value);
-  if (path.startsWith(`${kSharedModelMapPath}/`) && path.split("/").length === 4) {
-    return isObject(value.sharedModel) ? [sharedModelPathOf(path.split("/")[3])] : [];
+  const entryMatch = kSharedModelEntryRegex.exec(path);
+  if (entryMatch) {
+    return isObject(value.sharedModel) ? [sharedModelPathOf(entryMatch[1])] : [];
   }
   return [];
 }
