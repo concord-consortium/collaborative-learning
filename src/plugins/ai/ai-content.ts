@@ -30,11 +30,11 @@ export const AIContentModel = TileContentModel
     text: "This is where the dynamically generated AI response will appear.",
     refreshCount: types.optional(types.number, 0),
     /**
-     * A hash of the document summary this tile's text was generated from. Not the document's
-     * history index: the tile's own setText writes advance that, so an index gate would
-     * invalidate itself on every refresh and could never fire.
+     * A hash of the request (document summary, unit context and prompt) this tile's text was
+     * generated from. Not the document's history index: the tile's own setText writes advance
+     * that, so an index gate would invalidate itself on every refresh and could never fire.
      */
-    evaluatedSummaryHash: types.maybe(types.string)
+    evaluatedRequestHash: types.maybe(types.string)
   })
   .views(self => ({
     get isUserResizable() {
@@ -45,7 +45,7 @@ export const AIContentModel = TileContentModel
     exportJson() {
       // Both are per-session bookkeeping rather than authored content: a copy of this tile lands
       // in a document whose summary differs, where a carried-over hash would mean nothing.
-      const { refreshCount: _, evaluatedSummaryHash: __, ...snapshot } = getSnapshot(self);
+      const { refreshCount: _, evaluatedRequestHash: __, ...snapshot } = getSnapshot(self);
       return stringify(snapshot);
     },
     // The setters below are pure mutations wired to controlled inputs (they fire on every keystroke).
@@ -64,8 +64,8 @@ export const AIContentModel = TileContentModel
     setText(text: string) {
       self.text = text;
     },
-    setEvaluatedSummaryHash(hash: string | undefined) {
-      self.evaluatedSummaryHash = hash;
+    setEvaluatedRequestHash(hash: string | undefined) {
+      self.evaluatedRequestHash = hash;
     },
     requestRefresh() {
       self.refreshCount++;

@@ -105,21 +105,7 @@ export const AIComponent: React.FC<ITileProps> = observer((props) => {
             return;
           }
 
-          // Computed before anything is written, so a gated run leaves the student's saved answer
-          // alone. The summary is what the model actually sees, and it has no AI-tile handler, so
-          // this tile's own setText writes cannot move it -- unlike the document history index,
-          // which they advance on every refresh.
           const summary = documentSummarizer(document.content, {});
-          const summaryHash = hashString(summary);
-          if (summaryHash === content.evaluatedSummaryHash) {
-            // Only a student who asked gets told why nothing happened; this message is document
-            // content, so saying it on every mount would replace their saved tips for good.
-            if (userRequested) content.setText(AI_TILE_UNCHANGED_MESSAGE);
-            return;
-          }
-
-          previousTextRef.current = content.text;
-          content.setText("");
           // document's own curriculum stamp, not stores.problemOrdinal (the displayed problem,
           // which can diverge from the document's -- four-up view, a teacher inspecting a
           // student's document, history scrubbing). Proceeds only when the document belongs to
@@ -141,6 +127,25 @@ export const AIComponent: React.FC<ITileProps> = observer((props) => {
             : `No information about the current document could be found.\n\n\n`;
           dynamicContentPrompt += `Using this information, respond to the following prompt:\n\n${content.prompt}`;
 
+          // The gate hashes the whole request, built above but not yet sent, and runs before
+          // anything is written, so a gated run leaves the saved answer alone. Hashing the request
+          // rather than the document history index is what makes the gate able to fire at all:
+          // this tile's own setText advances that index on every refresh, while the summarizer has
+          // no AI-tile handler, so nothing the tile writes can move this hash. The prompt is in it
+          // because an author editing the prompt has changed the request without touching the
+          // document, and must not be told nothing has changed.
+          const requestHash = hashString(dynamicContentPrompt);
+          if (requestHash === content.evaluatedRequestHash) {
+            // Only someone who pressed Update is told why nothing happened. That is the authoring
+            // view only -- a tile copied into a student workspace has hidePrompt set, so it has no
+            // Update button and a gated run there is silent.
+            if (userRequested) content.setText(AI_TILE_UNCHANGED_MESSAGE);
+            return;
+          }
+
+          previousTextRef.current = content.text;
+          content.setText("");
+
           const response = await getAiContent({
             context: userContext,
             dynamicContentPrompt,
@@ -157,7 +162,7 @@ export const AIComponent: React.FC<ITileProps> = observer((props) => {
             throw new Error(response.data.error);
           }
           content.setText(response.data.text);
-          content.setEvaluatedSummaryHash(summaryHash);
+          content.setEvaluatedRequestHash(requestHash);
           previousTextRef.current = undefined;
           if (response.data.lastUpdated) {
             const timestamp = response.data.lastUpdated;

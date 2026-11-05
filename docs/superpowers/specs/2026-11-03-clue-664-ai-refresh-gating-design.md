@@ -107,7 +107,7 @@ queue document, then written to the gate when the comment lands. Capturing at en
 at success matters: the student may have edited in between, and the gate must record the content
 that was actually evaluated.
 
-### The AI tile gates on the summary, not the history index
+### The AI tile gates on the request, not the history index
 
 Found in review, after implementation. **The AI tile cannot gate on the history index, because it
 writes to the document as part of refreshing.** `content.setText(...)` is an MST action on the
@@ -116,14 +116,24 @@ history entries. The tile records index N, its own writes take the document to N
 refresh reads "changed". The gate could never fire. `ai-tile.tsx` already carried a TODO saying as
 much: "This triggers multiple undoable actions, but shouldn't really trigger any."
 
-So the tile gates on a hash of the summary it already builds -- `documentSummarizer` output, hashed
-with `shared/hash-string.ts`, the same shape the chat tutor uses to gate a resend. Two reasons this
+So the tile gates on a hash of the request it is about to send -- the unit-context slice, the
+document summary and the authored prompt, already assembled as `dynamicContentPrompt`, hashed with
+`shared/hash-string.ts`, the same shape the chat tutor uses to gate a resend. Three reasons this
 works where the index does not:
 
 - The summarizer has no AI-tile handler, so the tile's own text is not in the summary and its
   writes cannot move the hash.
-- The tile runs the summarizer anyway, so the hash is free here. That cost is what ruled hashing
+- The tile builds that string anyway, so the hash is free here. That cost is what ruled hashing
   out for the Ideas button, which does no summarizing of its own.
+- The prompt is part of the request but not part of the document. Hashing the summary alone would
+  gate an author who revised the prompt and pressed Update, telling them nothing had changed and
+  never sending the new prompt.
+
+**Who can see the nudge.** The Update button renders only when the prompt form does, and
+`updateContentForCopy` sets `hidePrompt` on any tile copied into a student workspace. So Update is
+an authoring-view control: a student's gated refresh is silent and leaves their saved answer
+untouched, and the only reader of `AI_TILE_UNCHANGED_MESSAGE` is an author who pressed Update twice
+without changing anything.
 
 **Knock-on, accepted:** an AI tile writes history entries on every mount, so a document containing
 one usually reads as changed at session end. Requirement 1 saves little for those documents. Fixing
@@ -185,7 +195,8 @@ evaluation must proceed).
 
 **Client** — each surface shows its message and makes no request when its signal is unchanged, and
 does request when it moved. For the AI tile that must include a test that a *second mount after a
-successful refresh* makes no request, which is the case the index-based version silently failed.
+successful refresh* makes no request, which is the case the index-based version silently failed,
+and a test that a changed prompt against an unchanged document still sends.
 
 The Ideas gate must also consult local history: entries upload to Firestore fire-and-forget, and
 `waitForSaveSettled` does not track that upload, so a click straight after an edit can read a stale

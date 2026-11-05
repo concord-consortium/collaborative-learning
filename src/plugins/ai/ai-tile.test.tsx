@@ -34,7 +34,7 @@ import { act, fireEvent, render } from "@testing-library/react";
 import { destroy, getLivelinessChecking, setLivelinessChecking, unprotect } from "mobx-state-tree";
 import React from "react";
 import { ITileApi } from "../../components/tiles/tile-api";
-import { TileModel } from "../../models/tiles/tile-model";
+import { ITileModel, TileModel } from "../../models/tiles/tile-model";
 import { logTileChangeEvent } from "../../models/tiles/log/log-tile-change-event";
 import { LogEventName } from "../../lib/logger-types";
 import { Logger } from "../../lib/logger";
@@ -45,7 +45,6 @@ import {
 } from "../../models/document/ai-evaluation-messages";
 import { DocumentContentModel } from "../../models/document/document-content";
 import { ReadOnlyContext } from "../../components/document/read-only-context";
-import { documentSummarizer } from "../../../shared/ai-summarizer/ai-summarizer";
 import { hashString } from "../../../shared/hash-string";
 
 // The starter tile needs to be registered so the TileModel.create
@@ -347,79 +346,99 @@ describe("AIComponent", () => {
     });
 
     describe("the document-changed gate", () => {
-      // The real summarizer and hash, so these pin the value the tile actually computes.
-      const summaryHashOf = (docContent: unknown) => hashString(documentSummarizer(docContent, {}));
+      // Hashing the request the tile actually sent, rather than rebuilding it here, keeps these
+      // from passing against a request the production code no longer makes.
+      const hashOfLastRequest = () =>
+        hashString(mockGetAiContent.mock.calls[mockGetAiContent.mock.calls.length - 1][0].dynamicContentPrompt);
 
-      it("records the summary hash it evaluated at after a successful refresh", async () => {
-        const docContent = populatedDocContent();
-        mockStores.documents.getDocument.mockReturnValue(documentWith(docContent));
+      // A content model can only ever belong to one TileModel, so remount tests reuse the model
+      // rather than wrapping the same content twice.
+      const tileWithPrompt = () => {
         const aiContent = defaultAIContent();
         aiContent.setPrompt("What do you think?");
-        const aiModel = TileModel.create({ content: aiContent });
+        return { aiContent, aiModel: TileModel.create({ content: aiContent }) };
+      };
 
-        await act(async () => render(<AIComponent {...defaultProps} model={aiModel} documentId="test-doc-1" />));
-
-        expect(aiContent.text).toBe("Mocked customized content");
-        expect(aiContent.evaluatedSummaryHash).toBe(summaryHashOf(docContent));
+      const renderTile = (aiModel: ITileModel) => act(async () => {
+        render(<AIComponent {...defaultProps} model={aiModel} documentId="test-doc-1" />);
       });
 
-      // The whole point of hashing the summary rather than the document history index: the tile's
+      const pressUpdate = (aiContent: ReturnType<typeof defaultAIContent>) => act(async () => {
+        aiContent.requestRefresh();
+        await Promise.resolve();
+        await Promise.resolve();
+      });
+
+      it("records the hash of the request it evaluated after a successful refresh", async () => {
+        mockStores.documents.getDocument.mockReturnValue(documentWith(populatedDocContent()));
+        const { aiContent, aiModel } = tileWithPrompt();
+
+        await renderTile(aiModel);
+
+        expect(aiContent.text).toBe("Mocked customized content");
+        expect(aiContent.evaluatedRequestHash).toBe(hashOfLastRequest());
+      });
+
+      // The whole point of hashing the request rather than the document history index: the tile's
       // own setText writes advance that index, so an index gate would be stale the moment it was
       // recorded and a second run would always bill another request.
       it("after a real refresh, a second run against the same document makes no request", async () => {
         mockStores.documents.getDocument.mockReturnValue(documentWith(populatedDocContent()));
-        const aiContent = defaultAIContent();
-        aiContent.setPrompt("What do you think?");
-        const aiModel = TileModel.create({ content: aiContent });
+        const { aiContent, aiModel } = tileWithPrompt();
 
-        await act(async () => render(<AIComponent {...defaultProps} model={aiModel} documentId="test-doc-1" />));
+        await renderTile(aiModel);
         expect(mockGetAiContent).toHaveBeenCalledTimes(1);
 
-        await act(async () => {
-          aiContent.requestRefresh();
-          await Promise.resolve();
-          await Promise.resolve();
-        });
+        await pressUpdate(aiContent);
 
         expect(mockGetAiContent).toHaveBeenCalledTimes(1);
+      });
+
+      // The prompt is part of the request even though it is not part of the document. An author
+      // revising the prompt and pressing Update has changed what is being asked, and a gate on the
+      // document summary alone would tell them nothing had changed and never send the new prompt.
+      it("sends the request when the prompt changed but the document did not", async () => {
+        mockStores.documents.getDocument.mockReturnValue(documentWith(populatedDocContent()));
+        const { aiContent, aiModel } = tileWithPrompt();
+
+        await renderTile(aiModel);
+        expect(mockGetAiContent).toHaveBeenCalledTimes(1);
+
+        await act(async () => { aiContent.setPrompt("Now ask something else entirely"); });
+        await pressUpdate(aiContent);
+
+        expect(mockGetAiContent).toHaveBeenCalledTimes(2);
+        expect(mockGetAiContent.mock.calls[1][0].dynamicContentPrompt)
+          .toContain("Now ask something else entirely");
       });
 
       // A mount is nobody asking, and the nudge is document content: writing it would replace the
-      // saved tips permanently, for a student who never pressed anything.
+      // saved answer permanently, for a student who never pressed anything. This is the student
+      // case -- a copied tile has hidePrompt set, so there is no Update button in a workspace.
       it("on mount with nothing changed, makes no request and leaves the saved answer alone", async () => {
-        const docContent = populatedDocContent();
-        mockStores.documents.getDocument.mockReturnValue(documentWith(docContent));
-        const aiContent = defaultAIContent();
-        aiContent.setPrompt("What do you think?");
-        aiContent.setText("saved tips");
-        aiContent.setEvaluatedSummaryHash(summaryHashOf(docContent));
-        const aiModel = TileModel.create({ content: aiContent });
+        mockStores.documents.getDocument.mockReturnValue(documentWith(populatedDocContent()));
+        const { aiContent, aiModel } = tileWithPrompt();
 
-        await act(async () => render(<AIComponent {...defaultProps} model={aiModel} documentId="test-doc-1" />));
+        await renderTile(aiModel);
+        mockGetAiContent.mockClear();
+        aiContent.setText("the saved answer");
 
-        expect(aiContent.text).toBe("saved tips");
+        await renderTile(aiModel);
+
+        expect(aiContent.text).toBe("the saved answer");
         expect(mockGetAiContent).not.toHaveBeenCalled();
       });
 
-      // The student pressed Update: leaving the old tips there would look like a refresh that
-      // silently did nothing.
-      it("on a student-requested refresh with nothing changed, shows the nudge and makes no request",
-         async () => {
-        const docContent = populatedDocContent();
-        mockStores.documents.getDocument.mockReturnValue(documentWith(docContent));
-        const aiContent = defaultAIContent();
-        aiContent.setPrompt("What do you think?");
-        aiContent.setText("saved tips");
-        aiContent.setEvaluatedSummaryHash(summaryHashOf(docContent));
-        const aiModel = TileModel.create({ content: aiContent });
+      // Update exists only in the authoring view. Leaving the old text there would look like a
+      // refresh that silently did nothing.
+      it("on an Update with nothing changed, shows the nudge and makes no request", async () => {
+        mockStores.documents.getDocument.mockReturnValue(documentWith(populatedDocContent()));
+        const { aiContent, aiModel } = tileWithPrompt();
 
-        await act(async () => render(<AIComponent {...defaultProps} model={aiModel} documentId="test-doc-1" />));
+        await renderTile(aiModel);
+        mockGetAiContent.mockClear();
 
-        await act(async () => {
-          aiContent.requestRefresh();
-          await Promise.resolve();
-          await Promise.resolve();
-        });
+        await pressUpdate(aiContent);
 
         expect(aiContent.text).toBe(AI_TILE_UNCHANGED_MESSAGE);
         expect(mockGetAiContent).not.toHaveBeenCalled();

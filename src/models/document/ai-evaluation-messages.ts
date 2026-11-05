@@ -11,4 +11,7 @@ export const IDEAS_SLOW_MESSAGE = "Ada is taking longer than usual...";
 export const AI_TILE_EMPTY_MESSAGE = "Add some work to your document to get additional tips on proceeding";
 export const AI_TILE_REQUEST_FAILED_MESSAGE = "Something went wrong getting tips. Please try again";
 export const IDEAS_UNCHANGED_MESSAGE = "Try adding or changing something, then ask again";
-export const AI_TILE_UNCHANGED_MESSAGE = "Try adding or changing something to get new tips";
+// Reachable only from the Update button, which the authoring view has and a copied tile does
+// not, so it names the prompt as well as the document.
+export const AI_TILE_UNCHANGED_MESSAGE =
+  "Nothing has changed since the last response. Try editing the prompt or the document";
