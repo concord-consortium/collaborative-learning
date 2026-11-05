@@ -1,7 +1,7 @@
 import { isObservable, runInAction } from "mobx";
 import { kAnalyzerUserParams } from "../../../shared/shared";
 import { DocumentModel, DocumentModelType } from "./document";
-import { CommentWithId, DocumentCommentsManager } from "./document-comments-manager";
+import { CommentWithId, DocumentCommentsManager, kSlowRemoteCommentMs } from "./document-comments-manager";
 import { ProblemDocument } from "./document-types";
 import { IDEAS_EMPTY_MESSAGE, IDEAS_REQUEST_FAILED_MESSAGE } from "./ai-evaluation-messages";
 
@@ -708,6 +708,165 @@ describe("DocumentCommentsManager", () => {
 
       expect(manager.pendingComments).toHaveLength(0);
       expect(manager.statusMessage).toBeNull();
+    });
+  });
+
+  // The interim line exists because the hard expiry is pinned to the evaluation function's own
+  // 120s budget and cannot be lowered — so the only way to signal a stuck request earlier is to
+  // say the wait has become unusual while still waiting it out.
+  describe("slow requests", () => {
+    beforeEach(() => {
+      jest.useFakeTimers();
+    });
+    afterEach(() => {
+      jest.useRealTimers();
+    });
+
+    const queueAi = (checkCompleted = () => false) =>
+      manager.queueRemoteComment({ triggeredAt: Date.now(), source: "ai", checkCompleted });
+
+    it("is not slow before the threshold, and is slow after it", async () => {
+      queueAi();
+
+      await jest.advanceTimersByTimeAsync(kSlowRemoteCommentMs - 1);
+      expect(manager.hasSlowRemoteComment).toBe(false);
+
+      await jest.advanceTimersByTimeAsync(1);
+      expect(manager.hasSlowRemoteComment).toBe(true);
+    });
+
+    it("never becomes slow when its comment arrives first", async () => {
+      let arrived = false;
+      queueAi(() => arrived);
+
+      await jest.advanceTimersByTimeAsync(10_000);
+      arrived = true;
+      manager.setComments([]);
+      expect(manager.pendingComments).toHaveLength(0);
+
+      await jest.advanceTimersByTimeAsync(kSlowRemoteCommentMs);
+      expect(manager.hasSlowRemoteComment).toBe(false);
+    });
+
+    it("stops being slow once it resolves", async () => {
+      let arrived = false;
+      queueAi(() => arrived);
+
+      await jest.advanceTimersByTimeAsync(kSlowRemoteCommentMs);
+      expect(manager.hasSlowRemoteComment).toBe(true);
+
+      arrived = true;
+      manager.setComments([]);
+      expect(manager.hasSlowRemoteComment).toBe(false);
+    });
+
+    // The new timer must not disturb the give-up it precedes.
+    it("still expires and reports failure at 120s", async () => {
+      manager.setLatestIdeasRequestId("req-a");
+      manager.queueRemoteComment({
+        triggeredAt: Date.now(), source: "ai", checkCompleted: () => false, requestId: "req-a"
+      });
+
+      await jest.advanceTimersByTimeAsync(kSlowRemoteCommentMs);
+      expect(manager.hasSlowRemoteComment).toBe(true);
+
+      await jest.advanceTimersByTimeAsync(120_000 - kSlowRemoteCommentMs);
+      expect(manager.pendingComments).toHaveLength(0);
+      expect(manager.hasSlowRemoteComment).toBe(false);
+      expect(manager.statusMessage).toMatchObject({ message: IDEAS_REQUEST_FAILED_MESSAGE });
+    });
+
+    it("leaves nothing behind when disposed while slow", async () => {
+      queueAi();
+      await jest.advanceTimersByTimeAsync(kSlowRemoteCommentMs);
+      expect(manager.hasSlowRemoteComment).toBe(true);
+
+      manager.dispose();
+
+      expect(manager.hasSlowRemoteComment).toBe(false);
+      expect(manager.pendingComments).toHaveLength(0);
+    });
+  });
+
+  // The manager holds no document or store reference and should keep none, so it reports that a
+  // failure happened and the caller decides what to log.
+  describe("failure reporting", () => {
+    afterEach(() => {
+      jest.useRealTimers();
+    });
+
+    it("reports an expiry for the latest click", async () => {
+      jest.useFakeTimers();
+      const onFailure = jest.fn();
+      manager.setLatestIdeasRequestId("req-a");
+      manager.queueRemoteComment({
+        triggeredAt: Date.now(), source: "ai", checkCompleted: () => false,
+        requestId: "req-a", onFailure
+      });
+
+      await jest.advanceTimersByTimeAsync(120_000);
+
+      expect(onFailure).toHaveBeenCalledTimes(1);
+      expect(onFailure).toHaveBeenCalledWith("expired");
+    });
+
+    // An older request giving up is not a failure the student is experiencing — they have already
+    // clicked again — so it must not be reported either.
+    it("reports nothing when an older request expires after a newer click", async () => {
+      jest.useFakeTimers();
+      const onFailure = jest.fn();
+      manager.queueRemoteComment({
+        triggeredAt: Date.now(), source: "ai", checkCompleted: () => false,
+        requestId: "req-a", onFailure
+      });
+      manager.setLatestIdeasRequestId("req-b");
+
+      await jest.advanceTimersByTimeAsync(120_000);
+
+      expect(onFailure).not.toHaveBeenCalled();
+    });
+
+    it("reports a server-side failure", () => {
+      const onFailure = jest.fn();
+      manager.setLatestIdeasRequestId("req-a");
+      manager.queueRemoteComment({
+        triggeredAt: Date.now(), source: "ai", checkCompleted: () => false,
+        requestId: "req-a", onFailure
+      });
+
+      manager.applyEvaluationStatus({
+        outcome: "failed", requestId: "req-a", docUpdated: 1, completedAt: 1
+      });
+
+      expect(onFailure).toHaveBeenCalledWith("server-failed");
+    });
+
+    it("reports nothing for an empty document, which is a nudge and not a failure", () => {
+      const onFailure = jest.fn();
+      manager.setLatestIdeasRequestId("req-a");
+      manager.queueRemoteComment({
+        triggeredAt: Date.now(), source: "ai", checkCompleted: () => false,
+        requestId: "req-a", onFailure
+      });
+
+      manager.applyEvaluationStatus({
+        outcome: "skipped-empty", requestId: "req-a", docUpdated: 1, completedAt: 1
+      });
+
+      expect(onFailure).not.toHaveBeenCalled();
+    });
+
+    it("reports nothing when the comment arrives normally", () => {
+      const onFailure = jest.fn();
+      manager.queueRemoteComment({
+        triggeredAt: Date.now(), source: "ai", checkCompleted: () => true,
+        requestId: "req-a", onFailure
+      });
+
+      manager.setComments([]);
+
+      expect(manager.pendingComments).toHaveLength(0);
+      expect(onFailure).not.toHaveBeenCalled();
     });
   });
 });

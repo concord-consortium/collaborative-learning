@@ -104,6 +104,10 @@ class DataflowToolTile {
   getGrabberImage() {
     cy.get('.demo-output-image.grabber-image').should("exist");
   }
+  getServoImages() {
+    cy.get('.servo-assembly .servo-part.body').should("exist");
+    cy.get('.servo-assembly .servo-part.arm').should("exist");
+  }
   getLightBulbImage() {
     cy.get('.demo-output-image.lightbulb-image').should("exist");
   }

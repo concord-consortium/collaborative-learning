@@ -4,6 +4,7 @@ import { Provider } from "mobx-react";
 import { ModalProvider } from "react-modal-hook";
 
 import { specStores } from "../../../../models/stores/spec-stores";
+import { specAppConfig } from "../../../../models/stores/spec-app-config";
 import { ReadOnlyContext } from "../../../../components/document/read-only-context";
 import { DataflowContentModel } from "../../model/dataflow-content";
 import { ProgramDataRates } from "../../model/utilities/node";
@@ -13,8 +14,10 @@ import { DataflowProgramTopbar } from "./dataflow-program-topbar";
 
 import "../../dataflow-registration";
 
-function renderTopbar(readOnly: boolean) {
-  const stores = specStores();
+function renderTopbar(readOnly: boolean, tools?: string[]) {
+  const stores = specStores(
+    tools ? { appConfig: specAppConfig({ config: { settings: { dataflow: { tools } } } }) } : undefined
+  );
   return render(
     <ModalProvider>
       <Provider stores={stores}>
@@ -58,5 +61,17 @@ describe("DataflowProgramTopbar read-only state", () => {
     expect(screen.getByTestId("record-data-button")).toBeEnabled();
     expect(screen.getByTestId("rate-select")).toBeEnabled();
     expect(screen.getByTitle("Connect a device")).toBeEnabled();
+  });
+});
+
+describe("DataflowProgramTopbar connect button", () => {
+  it("is hidden when the tile toolbar has the connect button", () => {
+    renderTopbar(false, ["pan", "|", "connect", "reset"]);
+    expect(screen.queryByTitle("Connect a device")).toBeNull();
+  });
+
+  it("stays when the unit's tools list leaves out connect", () => {
+    renderTopbar(false, ["pan"]);
+    expect(screen.getByTitle("Connect a device")).toBeInTheDocument();
   });
 });

@@ -1,5 +1,8 @@
 import { NodeChannelInfo } from "../../plugins/dataflow/model/utilities/channel";
-import { parseKeyValueData, detectSpikerbitVersion } from "./serial-protocol";
+import {
+  parseKeyValueData, detectSpikerbitVersion, detectFirmwareReply, shouldFlash, FirmwareReply
+} from "./serial-protocol";
+import { withChecksum } from "./cc-device-protocol";
 
 function emgChannel(): NodeChannelInfo {
   return {
@@ -66,8 +69,8 @@ describe("parseKeyValueData", () => {
   });
 
   it("leaves lastMessageReceivedAt stale on a channel the stream never sends", () => {
-    // A Spiker:bit satisfies fsr by protocol but never emits it; the seeded-stale timestamp
-    // must not be refreshed, so the freshness check flips fsr to `missing`.
+    // A device that never sends fsr: its seeded-stale timestamp must not be refreshed, so the
+    // freshness check flips fsr to `missing`.
     const emg = emgChannel();
     const fsr: NodeChannelInfo = { ...emgChannel(), name: "fsr", channelId: "fsr", lastMessageReceivedAt: 1000 };
     parseKeyValueData("emg:512\r\n", [emg, fsr]);
@@ -97,5 +100,60 @@ describe("detectSpikerbitVersion", () => {
     const { version, remaining } = detectSpikerbitVersion("CLUE-SPIKERBIT v1              \r\nemg:5\r\n");
     expect(version).toBe(1);
     expect(remaining).toBe("emg:5\r\n");
+  });
+});
+
+describe("detectFirmwareReply", () => {
+  const hello = "hello protocol:CCDeviceProtocol version:1 device:spikerbit firmware:4";
+  it("finds a hello line after stale readings", () => {
+    const { reply, remaining } = detectFirmwareReply(`emg:5\r\n${withChecksum(hello)}\r\nemg:6`);
+    expect(reply).toEqual({
+      kind: "ccDevice",
+      hello: { protocol: "CCDeviceProtocol", version: 1, device: "spikerbit", firmware: 4 }
+    });
+    expect(remaining).toBe("emg:6");
+  });
+  it("waits for a hello split across chunks", () => {
+    expect(detectFirmwareReply("hello protocol:CCDevice").reply).toBeNull();
+  });
+  it("recognizes the padded legacy banner", () => {
+    expect(detectFirmwareReply("CLUE-SPIKERBIT v2      \r\n").reply).toEqual({ kind: "legacy", firmware: 2 });
+  });
+  it("ignores a hello with a bad checksum", () => {
+    expect(detectFirmwareReply(`${hello}*00\r\n`).reply).toBeNull();
+  });
+  it("ignores a hello whose checksum is right but which has no firmware field", () => {
+    const noFirmware = withChecksum("hello protocol:CCDeviceProtocol version:1 device:spikerbit");
+    expect(detectFirmwareReply(`${noFirmware}\r\n`).reply).toBeNull();
+  });
+  it("finds a hello after a cut-off backlog line, the empty line that ends it and an ok", () => {
+    // A backlog ending in "em", then the board's reply to "!! #1000" and "?".
+    const buffer = `${withChecksum("emg:512")}\r\nem\r\n${withChecksum("ok #1000")}\r\n${withChecksum(hello)}\r\n`;
+    expect(detectFirmwareReply(buffer).reply).toEqual({
+      kind: "ccDevice",
+      hello: { protocol: "CCDeviceProtocol", version: 1, device: "spikerbit", firmware: 4 }
+    });
+  });
+  it("misses a hello glued onto a cut-off backlog line", () => {
+    // What a lone "?" gets from a board whose backlog ends in a fragment, and what "!!" prevents.
+    expect(detectFirmwareReply(`${withChecksum("emg:512")}\r\nem${withChecksum(hello)}\r\n`).reply).toBeNull();
+  });
+});
+
+describe("shouldFlash", () => {
+  const cc = (version: number, firmware: number, protocol = "CCDeviceProtocol", device = "spikerbit"): FirmwareReply =>
+    ({ kind: "ccDevice", hello: { protocol, version, device, firmware } });
+  it.each([
+    ["no reply", null, true],
+    ["a legacy banner", { kind: "legacy", firmware: 3 } as FirmwareReply, true],
+    ["a legacy banner claiming newer firmware", { kind: "legacy", firmware: 9 } as FirmwareReply, true],
+    ["another protocol", cc(1, 4, "Other"), true],
+    ["a newer protocol version, even with newer firmware", cc(2, 9), true],
+    ["another device on the same protocol, even with newer firmware", cc(1, 9, "CCDeviceProtocol", "other"), true],
+    ["older firmware", cc(1, 3), true],
+    ["the same firmware", cc(1, 4), false],
+    ["newer firmware", cc(1, 5), false],
+  ])("%s", (_label, reply, expected) => {
+    expect(shouldFlash(reply, "spikerbit", 4)).toBe(expected);
   });
 });

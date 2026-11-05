@@ -80,6 +80,11 @@ export enum LogEventName {
   CHAT_PANEL_HIDE,
   CHAT_PANEL_SHOW,
 
+  // Ada chat tutor. MESSAGE_SENT is the denominator the two failure events are a rate of.
+  AI_CHAT_MESSAGE_SENT,
+  AI_CHAT_TIMEOUT,
+  AI_CHAT_UNAVAILABLE,
+
   // the following are for potential debugging purposes and are all marked "internal"
   INTERNAL_AUTHENTICATED,
   INTERNAL_ERROR_ENCOUNTERED,
@@ -122,6 +127,8 @@ export enum LogEventName {
   TOOLBAR_READ_ALOUD_COMMENT_TRANSITION,
 
   REQUEST_IDEA,
+  IDEAS_REQUEST_FAILED,
+  AI_TILE_REQUEST_FAILED,
 
   STANDALONE_SWITCH_PREVIEW_PROBLEM,
 

@@ -65,6 +65,17 @@ describe("ConfigurationManager", () => {
     expect(appConfig.aiEvaluation).toBeUndefined();
   });
 
+  it("should return aiEvaluateOnSessionEnd from configuration when defined", () => {
+    const appConfig = AppConfigModel.create({ config: unitConfigDefaults });
+    appConfig.setConfigs([{ ...unitConfigOverrides, aiEvaluateOnSessionEnd: true }]);
+    expect(appConfig.aiEvaluateOnSessionEnd).toBe(true);
+  });
+
+  it("should return undefined aiEvaluateOnSessionEnd when not configured", () => {
+    const appConfig = AppConfigModel.create({ config: unitConfigDefaults });
+    expect(appConfig.aiEvaluateOnSessionEnd).toBeUndefined();
+  });
+
   it("should return true for enabled comment roles", () => {
     const appConfig = AppConfigModel.create({
       config: { ...unitConfigDefaults, enableCommentRoles: ["student", "teacher"] }

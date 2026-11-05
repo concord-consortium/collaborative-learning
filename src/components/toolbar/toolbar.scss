@@ -4,7 +4,10 @@
   display: flex;
   flex-direction: column;
   text-align: center;
-  z-index: 1;
+  // The toolbar is portaled into the canvas's stacking context, so this ranks it, and the palettes
+  // inside it, against the rows: it has to beat a row's resize handle (tile-row.scss), or a palette
+  // over a row boundary loses its clicks to the handle.
+  z-index: $toolbar-z-index;
 
   &.disabled {
     display: none;
@@ -71,6 +74,19 @@
 
     &.selected {
       background-color: $workspace-teal-light-4;
+    }
+
+    // The small triangle in the corner of a button that opens a palette. Render it as a direct child
+    // of the button, as TileToolbarButton renders its children.
+    &:has(> .corner-triangle) {
+      position: relative;
+    }
+
+    > .corner-triangle {
+      position: absolute;
+      bottom: 2px;
+      right: 2px;
+      fill: $workspace-teal;
     }
 
     // Inputs inside a button (eg, for image upload)

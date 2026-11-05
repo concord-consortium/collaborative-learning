@@ -1,18 +1,21 @@
-# Spiker:bit DataFlow firmware
+# Spiker:bit Dataflow firmware
 
-`spikerbit-clue.hex` is a universal micro:bit hex (V1+V2) authored in MakeCode.
-It streams the Spiker:bit EMG envelope over serial as `emg:<value>\r\n`, drives a
-servo from bare-integer angle lines, and replies to a `?` query with
-`CLUE-SPIKERBIT v<N>`. The DataFlow tile flashes it automatically over WebUSB
-(via `@microbit/microbit-connection`) when a connected micro:bit is not already
-running it.
+What the firmware does, its commands, its LED displays and how to try it on a board are in the
+[user guide](user-guide.md). This page is for developers changing the firmware.
 
-As of v3 the firmware computes the EMG envelope itself — it tracks the DC baseline
+`spikerbit-clue.hex` is a universal micro:bit hex (V1+V2) authored in MakeCode. The Dataflow
+tile flashes it automatically over WebUSB (via `@microbit/microbit-connection`) when a
+connected micro:bit is not already running it.
+
+The firmware computes the EMG envelope itself — it tracks the DC baseline
 and full-wave rectifies (`envelope = EMA(|raw - baseline|)`) instead of using the
-`pxt-spikerbit` extension's `musclePowerSignal()`, whose fixed 580 noise floor sits
-above the board's ~511 resting baseline and misses moderate contractions. It reads the
-raw signal on P1 and only needs `P8=0/P9=0` to select EMG mode, so the extension is no
-longer required. See the header of `spikerbit-clue.ts` for the full rationale.
+`pxt-spikerbit` extension's `musclePowerSignal()`. That function subtracts a fixed noise
+floor of 580 and half-wave rectifies, but the board's resting baseline is ~511, so moderate
+contractions, which oscillate around 511 and rarely reach 580, come out near 0 and only
+hard flexes register. The extension's `startMuscleRecording()` only drives `P8=0/P9=0` to
+put the analog front end in EMG mode, so the firmware does that itself, reads the raw
+signal on P1, and the MakeCode project doesn't need the extension. The smoothing time
+constants are in `spikerbit-clue.ts`, next to the sampler.
 
 - **Source of record:** [`spikerbit-clue.ts`](./spikerbit-clue.ts) — the MakeCode
   program. This directory is excluded from the CLUE tsconfig/eslint because the
@@ -31,8 +34,8 @@ exact versions in [`scripts/spikerbit-firmware/`](../../../../scripts/spikerbit-
 the same source always produces the same hex.
 
 1. Edit `spikerbit-clue.ts`.
-2. If behavior changed, bump `VERSION` there and `kSpikerbitFirmwareVersion` in
-   `src/models/stores/spikerbit-device.ts`.
+2. If behavior changed, bump the `firmware:` number in its `HELLO` line and
+   `kSpikerbitFirmwareVersion` in `src/models/stores/spikerbit-device.ts`.
 3. Run `npm run build:firmware`. It reinstalls the pinned toolchain into
    `scripts/spikerbit-firmware/node_modules` (about 550 MB) with `npm ci`, compiles, and
    overwrites `spikerbit-clue.hex`. A compile error is printed and leaves the hex untouched.
@@ -47,8 +50,19 @@ Two checks keep them in sync:
   build tooling, and on master when a merge changes them. Like `npm run check:firmware`, it
   rebuilds the hex and fails if it differs from the committed one.
 
-Behavior changes still need a bench test on real hardware; the checks only prove the hex
-was built from the source.
+Behavior changes also need a bench test on real hardware; the checks only prove the hex
+was built from the source. `npm run bench:spikerbit -- --flash` flashes a plugged-in board
+and checks its protocol replies (see
+[`scripts/spikerbit-bench/`](../../../../scripts/spikerbit-bench/)).
+
+### The user guide
+
+`npm run build:firmware` also regenerates the marked sections of
+[`user-guide.md`](user-guide.md) (the LED displays and the timing and limits) and the board
+pictures in `guide-images/`. They come from the `@display` and `@guide` comments in
+`spikerbit-clue.ts`, so edit those comments, not the sections. `npm run check:firmware` and the
+`CI Firmware` workflow fail when the committed sections or pictures are stale. Everything
+outside the `<!-- generated: ... -->` markers is written by hand.
 
 ### Prototyping in the MakeCode editor
 
@@ -64,6 +78,26 @@ Change `pxt-core` and `pxt-microbit` in `scripts/spikerbit-firmware/package.json
 (exact versions; the micro:bit target's `package.json` names the `pxt-core` it was built
 with), run `npm --prefix scripts/spikerbit-firmware install`, rebuild, and bench test. The
 build records the versions in the hex itself.
+
+## Testing the firmware in Jest
+
+The MakeCode simulator can't receive serial input, and no emulator runs a micro:bit V2 hex,
+so Jest runs `spikerbit-clue.ts` itself on a simulated MakeCode runtime,
+[`MakeCodeSim`](../../../models/stores/spikerbit-sim/makecode-sim.ts). It transpiles the
+source with `typescript`, runs it against fake MakeCode globals on a simulated clock, and
+lets a test send serial input, read serial output, click or long-press a button, set the
+analog input on a pin, stall the board, and check the servo angle, the icon shown and the
+sounds played. It acts as a micro:bit V2 unless it is loaded with `hardwareVersion: "1"`;
+then, like a V1, it panics if the program turns the speaker on or plays a sound expression.
+
+- **Little beyond what the firmware uses is faked.** Calling anything else throws
+  `not simulated: <name>`; add a fake to `makecode-sim.ts` when the firmware starts using
+  something new.
+- **The loop rule:** a loop pauses only as its last statement, and event handlers don't pause.
+- The comments in `makecode-sim.ts` give the details: why the loop rule holds, how long a
+  pause and a `forever` pass take, and how the serial receive buffer fills and overflows.
+
+These tests check the program's logic, not its timing on the board or the compiled hex.
 
 ## Bench-test firmware
 

@@ -1,5 +1,4 @@
 import { useCallback, useRef } from "react";
-import { kMinColumnWidth } from "./table-types";
 import { IAttribute } from "../../../models/data/attribute";
 import { TableContentModelType } from "../../../models/tiles/table/table-content";
 
@@ -17,7 +16,7 @@ export const useMeasureColumnWidth = ({ content }: IUseMeasureColumnWidth) => {
     if (resizeColumn.current === attr.id && resizeColumnWidth.current !== undefined) {
       return resizeColumnWidth.current;
     } else {
-      return content.columnWidth(attr.id) || kMinColumnWidth;
+      return content.columnWidth(attr.id);
     }
   }, [content]);
 

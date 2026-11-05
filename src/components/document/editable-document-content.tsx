@@ -86,7 +86,7 @@ export function EditableDocumentContent({
   className, contained, mode, isPrimary, document, toolbar, pane, readOnly, showPlayback, fullHeight, sectionClass
 }: IProps) {
   const documentContext = useDocumentContext(document);
-  const { db: { firebase, firestore }, ui, persistentUI, user, appConfig } = useStores();
+  const { db: { firebase, firestore }, ui, persistentUI, user, appConfig, activityRecorder } = useStores();
   // set by the canvas and used by the toolbar
   const editableTileApiInterfaceRef: EditableTileApiInterfaceRef = useRef(null);
   const isReadOnly = !isPrimary || readOnly || document.isPublished;
@@ -115,7 +115,8 @@ export function EditableDocumentContent({
     contained ? "contained-editable-document-content" : "full-screen-editable-document-content",
     {"comment-select" : documentSelectedForComment, "full-height": fullHeight}, className);
 
-  useDocumentSyncToFirebase(user, firebase, firestore, document, readOnly);
+  useDocumentSyncToFirebase(user, firebase, firestore, document, readOnly,
+    (doc, lastHistoryEntryId) => activityRecorder?.onContentSaved(doc, lastHistoryEntryId));
   // Skip the save indicator for non-editable documents and when Firebase sync is disabled
   // (doc-editor, iframe, authoring); those contexts have their own storage mechanisms.
   const showSaveIndicator = !isReadOnly && !(window as any).DISABLE_FIREBASE_SYNC;

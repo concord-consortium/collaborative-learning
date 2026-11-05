@@ -478,7 +478,7 @@ describe("Firestore security rules", () => {
       await expectUpdateToFail(db, kDocumentDocPath, { title: "new-title" });
     });
 
-    it("a class member cannot set concurrent:true on a classmate's non-group document", async () => {
+    it("a class member cannot set concurrent:true on a document a classmate owns", async () => {
       // `concurrent` is an authorization input for the history rule (isConcurrentClassDocument), so
       // granting it here would let a class member hand themselves and every classmate history access
       // to someone else's document.
@@ -487,26 +487,15 @@ describe("Firestore security rules", () => {
       await expectUpdateToFail(db, kDocumentDocPath, { concurrent: true });
     });
 
-    it("a class member can set concurrent:true on a classmate's group-typed document", async () => {
-      // Older app bundles backfill `concurrent` onto group documents when opening them, so this must keep
-      // working until the field is made creation-only (docs/document-axes/planned-rules-tightening.md).
+    it("a class member cannot set concurrent:true on a classmate's axes-typed document", async () => {
+      // An axes-typed document its owner created without `concurrent` must stay that way: setting it later
+      // would grant the whole class read and write on that document's history.
       db = initFirestore(studentAuth);
-      await adminWriteDoc(kDocumentDocPath, specDocumentDoc({ add: { uid: student2Id, type: "group" }}));
-      await expectUpdateToSucceed(db, kDocumentDocPath, { concurrent: true });
+      await adminWriteDoc(kDocumentDocPath, specDocumentDoc({ add: { uid: student2Id, type: "axes" }}));
+      await expectUpdateToFail(db, kDocumentDocPath, { concurrent: true });
     });
 
-    it("a class member cannot clear concurrent on a group document", async () => {
-      // Older app bundles' open-time backfill is the only client write to this field, and it writes only
-      // `true`, so clearing it is nobody's legitimate operation. Allowing it would let any class member strip a group document's shared
-      // history access and its members' Edit button.
-      db = initFirestore(studentAuth);
-      await adminWriteDoc(kDocumentDocPath, specDocumentDoc({
-        add: { uid: student2Id, type: "group", concurrent: true }
-      }));
-      await expectUpdateToFail(db, kDocumentDocPath, { concurrent: false });
-    });
-
-    it("lets a class member set concurrent on an axes-typed document", async () => {
+    it("a class member cannot set concurrent on a class-wide document after creation", async () => {
       db = initFirestore(studentAuth);
       // createdAt is read-only (preservesReadOnlyDocumentFields), so the write under test must carry the
       // same value the document was created with — a real update always does, since it starts from a read
@@ -515,12 +504,23 @@ describe("Firestore security rules", () => {
       await adminWriteDoc(kDocumentDocPath, specDocumentDoc({
         add: { uid: `class_${thisClass}`, type: "axes", unit: cUnit, createdAt }
       }));
-      await expectWriteToSucceed(db, kDocumentDocPath, specDocumentDoc({
+      await expectWriteToFail(db, kDocumentDocPath, specDocumentDoc({
         add: { uid: `class_${thisClass}`, type: "axes", unit: cUnit, concurrent: true, createdAt }
       }));
     });
 
-    it("still refuses to clear concurrent on an axes-typed document", async () => {
+    it("a write that repeats a document's concurrent value unchanged is allowed", async () => {
+      db = initFirestore(studentAuth);
+      const createdAt = mockTimestamp() as any;
+      await adminWriteDoc(kDocumentDocPath, specDocumentDoc({
+        add: { uid: `class_${thisClass}`, type: "axes", unit: cUnit, concurrent: true, createdAt }
+      }));
+      await expectWriteToSucceed(db, kDocumentDocPath, specDocumentDoc({
+        add: { uid: `class_${thisClass}`, type: "axes", unit: cUnit, concurrent: true, createdAt, title: "new" }
+      }));
+    });
+
+    it("a class member cannot clear concurrent on an axes-typed document", async () => {
       db = initFirestore(studentAuth);
       const createdAt = mockTimestamp() as any;
       await adminWriteDoc(kDocumentDocPath, specDocumentDoc({

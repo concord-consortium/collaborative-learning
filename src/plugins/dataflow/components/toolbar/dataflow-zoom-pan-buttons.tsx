@@ -1,5 +1,6 @@
 import React, { useContext, useEffect, useRef } from "react";
 import { observer } from "mobx-react";
+import { isAlive } from "mobx-state-tree";
 import classNames from "classnames";
 import { TileToolbarButton } from "../../../../components/toolbar/tile-toolbar-button";
 import { IToolbarButtonComponentProps } from "../../../../components/toolbar/toolbar-button-manager";
@@ -160,8 +161,11 @@ export const PanButton = observer(function PanButton({ name }: IToolbarButtonCom
   const isOpen = !!content?.panPaletteOpen;
   const lastDirection = content?.lastPanDirection ?? "right";
 
-  // Deselecting the tile unmounts the toolbar; the model volatile would otherwise stay open.
-  useEffect(() => () => content?.setPanPaletteOpen(false), [content]);
+  // Deselecting the tile unmounts the toolbar; the model volatile would otherwise stay open. Deleting
+  // the tile destroys the content before this runs.
+  useEffect(() => () => {
+    if (content && isAlive(content)) content.setPanPaletteOpen(false);
+  }, [content]);
 
   // Clicking anywhere outside the trigger or the palette closes the flyout (capture phase, so a
   // click that something else swallows still closes it).

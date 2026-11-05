@@ -352,15 +352,22 @@ context('Dataflow Tool Tile', function () {
 
     cy.log("can change output type");
     const demoOutputType = "outputType";
-    const demoOutputTypes = ["Light Bulb", "Gripper", "Advanced Gripper", "Fan", "Humidifier"];
+    const demoOutputTypes = ["Light Bulb", "Gripper", "Advanced Gripper", "Fan", "Humidifier", "Servo"];
     dataflowToolTile.getDropdown(demoOutputNode, demoOutputType).click();
-    dataflowToolTile.getDropdownOptions(demoOutputNode, demoOutputType).should("have.length", 5);
+    dataflowToolTile.getDropdownOptions(demoOutputNode, demoOutputType)
+      .should("have.length", demoOutputTypes.length);
     dataflowToolTile.getDropdownOptions(demoOutputNode, demoOutputType).each(($tab, index, $typeList) => {
       expect($tab.text()).to.contain(demoOutputTypes[index]);
     });
     dataflowToolTile.getDropdownOptions(demoOutputNode, demoOutputType).last().click();
     dataflowToolTile.getDropdownOptions(demoOutputNode, demoOutputType).should("have.length", 0);
-    dataflowToolTile.getDropdown(demoOutputNode, demoOutputType).contains("Humidifier").should("exist");
+    dataflowToolTile.getDropdown(demoOutputNode, demoOutputType)
+      .contains(demoOutputTypes[demoOutputTypes.length - 1]).should("exist");
+
+    cy.log("verify servo demo output");
+    // The Servo is driven in degrees, unlike the gripper's 0-1, so its readout is degrees too.
+    dataflowToolTile.getServoImages();
+    dataflowToolTile.getOutputNodeValueText().should("contain", "0°");
 
     cy.log("verify demo output images, node inputs outputs & toggle minigraph");
     //verify advanced grabber
@@ -457,7 +464,7 @@ context('Dataflow Tool Tile', function () {
     dataflowToolTile.getDropdown(liveOutputNode, liveOutputType).click();
     dataflowToolTile.getDropdownOptions(liveOutputNode, liveOutputType).eq(0).click();
 
-    cy.log("wiring a block to a Live Output asks for a device without an alert");
+    cy.log("wiring a block to a Live Output asks for a device without showing the connect tutorial");
     dataflowToolTile.getCreateNodeButton("number").click();
     dataflowToolTile.getNode("number").should("exist");
     dataflowToolTile.getNumberField().type("1{enter}");
@@ -465,9 +472,11 @@ context('Dataflow Tool Tile', function () {
     dataflowToolTile.getNumberNodeOutput().click();
     dataflowToolTile.getLiveOutputNodeInput().click();
 
-    // The alert shows only when a program opens; the tile records the need on the button's class.
-    cy.get(".dialog-contents").should("not.exist");
-    cy.get(".primary-workspace [data-testid='serial-icon']").should("have.class", "nodes-in-need");
+    // The connect tutorial shows only when a program opens, never after an edit; the connect button
+    // turns to its yellow attention state instead.
+    cy.get(".primary-workspace .dataflow-connect-tutorial").should("not.exist");
+    cy.get(".primary-workspace [data-testid='connect-device-button']")
+      .should("have.class", "connect-attention");
 
     cy.log("should show needs connection message when fan is selected and there are no outputs");
     dataflowToolTile.getDropdown(liveOutputNode, liveOutputType).click();
@@ -491,6 +500,49 @@ context('Dataflow Tool Tile', function () {
     cy.log("can delete live output node");
     dataflowToolTile.getDeleteNodeButton(liveOutputNode).click();
     dataflowToolTile.getNode(liveOutputNode).should("not.exist");
+
+    cy.log("reopening a program that needs a device shows the connect tutorial");
+    // Rebuild a wired Live Output, dragging it aside first as above so the Number block lands clear.
+    dataflowToolTile.getCreateNodeButton(liveOutputNode).click();
+    dataflowToolTile.getNode(liveOutputNode).click(50, 10)
+      .trigger("pointerdown", 50, 10)
+      .trigger("pointermove", dragXDestination, dragYDestination, { force: true })
+      .trigger("pointerup", dragXDestination, dragYDestination, { force: true });
+    dataflowToolTile.getCreateNodeButton("number").click();
+    dataflowToolTile.getNumberNodeOutput().click();
+    dataflowToolTile.getLiveOutputNodeInput().click();
+    // Deleting the tile and undoing that mounts the program again, as opening its document does.
+    clueCanvas.deleteTile("dataflow");
+    dataflowToolTile.getDataflowTile().should("not.exist");
+    clueCanvas.getUndoTool().click();
+    cy.get(".primary-workspace .dataflow-connect-tutorial [role='dialog']").should("be.visible");
+    // The read-only copy of the document never shows it.
+    cy.get(".read-only-local-workspace .dataflow-connect-tutorial").should("not.exist");
+
+    cy.log("keyboard focus reaches the tutorial's OK and skips the controls it covers");
+    dataflowToolTile.getDataflowTile().click(20, 20);
+    cy.realPress("Enter");
+    cy.focused().should("have.class", "dataflow-connect-tutorial-ok");
+    // One Tab cycle visits the toolbar and the handles, then wraps to OK without the title or topbar.
+    // The resize handle is there only when the tile's row can be resized.
+    cy.realPress("Tab");
+    cy.focused().closest("[data-testid='tile-toolbar']").should("exist");
+    cy.realPress("Tab");
+    cy.focused().should("have.class", "tool-tile-drag-handle-wrapper");
+    cy.realPress("Tab");
+    cy.focused().then($el => {
+      if ($el.hasClass("tool-tile-resize-handle-wrapper")) cy.realPress("Tab");
+    });
+    cy.focused().should("have.class", "dataflow-connect-tutorial-ok");
+
+    cy.log("OK closes the connect tutorial and selects the tile, whose connect button needs attention");
+    cy.get(".primary-workspace .spacer").click();
+    dataflowToolTile.getDataflowTile().should("not.have.class", "selected");
+    cy.get(".primary-workspace .dataflow-connect-tutorial-ok").click();
+    cy.get(".primary-workspace .dataflow-connect-tutorial").should("not.exist");
+    dataflowToolTile.getDataflowTile().should("have.class", "selected");
+    cy.get(".primary-workspace [data-testid='connect-device-button']")
+      .should("have.class", "connect-attention");
   });
   it("Sensor Node and Record Data", () => {
     const sensorNode = "sensor";
@@ -712,5 +764,41 @@ context('Dataflow Tool Tile', function () {
         });
       });
     });
+  });
+
+  it("shows why a connection failed in the palette", () => {
+    const fakePort = {
+      getInfo: () => ({}),
+      open: () => Promise.reject(new DOMException("Failed to open serial port.", "NetworkError")),
+      addEventListener: () => undefined,
+      removeEventListener: () => undefined
+    };
+    const url = "/editor/?appMode=qa&unit=./curriculum/example-curriculum/example-curriculum.json&mouseSensor&noStorage";
+    cy.visit(url, {
+      onBeforeLoad(win) {
+        const serial = win.navigator.serial;
+        if (serial) {
+          cy.stub(serial, "requestPort").resolves(fakePort);
+        } else {
+          Object.defineProperty(win.navigator, "serial", {
+            configurable: true,
+            value: {
+              requestPort: () => Promise.resolve(fakePort),
+              addEventListener: () => undefined,
+              removeEventListener: () => undefined,
+              getPorts: () => Promise.resolve([])
+            }
+          });
+        }
+      }
+    });
+    clueCanvas.addTile("dataflow");
+    dataflowToolTile.getDataflowTile().click();
+
+    cy.get("[data-testid='connect-device-button']").first().click();
+    cy.get(".connect-status-line").should("be.visible");
+    cy.get("[aria-label='Connect Arduino']").first().click();
+
+    cy.get(".connect-detail.problem").should("contain", "Couldn't open it.");
   });
 });

@@ -1,9 +1,21 @@
 import { createDocumentModel, DocumentModelType } from "../document/document";
 import {
-  DocumentType, LearningLogDocument, PersonalDocument, PlanningDocument, ProblemDocument
+  AxesDocument, DocumentType, LearningLogDocument, PersonalDocument, PlanningDocument, ProblemDocument
 } from "../document/document-types";
+import { Firestore } from "../../lib/firestore";
+import { HistoryEntry } from "../history/history";
+import { FirestoreHistoryManager } from "../history/firestore-history-manager";
+import { FirestoreHistoryManagerConcurrent } from "../history/firestore-history-manager-concurrent";
+import { TreeManagerType } from "../history/tree-manager";
 import { DocumentsModelType, DocumentsModel } from "./documents";
 import { ClassModelType, ClassModel, ClassUserModel } from "./class";
+import { ActivityRecorder } from "./activity-recorder";
+import { UserContextProvider } from "./user-context-provider";
+
+jest.mock("../history/history-firestore", () => ({
+  getLastHistoryEntry: jest.fn().mockResolvedValue(undefined),
+  loadHistory: jest.fn(() => jest.fn())
+}));
 
 const kUserId = "1";
 
@@ -277,5 +289,37 @@ describe("documents model", () => {
       expect(latestPubs[0]).toBe(pub1);
       expect(latestPubs[1]).toBe(pub3);
     });
+  });
+
+  it("passes uploaded entries of each document to the activity recorder", () => {
+    const firestore = {
+      doc: jest.fn(() => ({
+        get: jest.fn(async () => ({ exists: true })),
+        onSnapshot: jest.fn((callback: (doc: { exists: boolean }) => void) => {
+          callback({ exists: true });
+          return jest.fn();
+        })
+      })),
+      getFullPath: jest.fn((path: string) => path)
+    } as unknown as Firestore;
+    const recorder = { onLocalEntryUploaded: jest.fn() };
+    const docs = DocumentsModel.create({});
+    docs.setFirestore(firestore);
+    docs.setUserContextProvider({ userContext: { uid: "1" } } as unknown as UserContextProvider);
+    docs.setActivityRecorder(recorder as unknown as ActivityRecorder);
+    const groupDocument = createDocumentModel({
+      type: AxesDocument, uid: "group_2000_3", key: "test-group", createdAt: 1, content: {}, concurrent: true
+    });
+    docs.add(document);
+    docs.add(groupDocument);
+
+    [document, groupDocument].forEach((doc, i) => {
+      const historyManager = (doc.treeManagerAPI as TreeManagerType).historyManager as FirestoreHistoryManager;
+      expect(historyManager instanceof FirestoreHistoryManagerConcurrent).toBe(doc === groupDocument);
+      const entry = HistoryEntry.create({ id: `e${i}`, tree: doc.key });
+      historyManager.onLocalEntryUploaded?.(entry);
+      expect(recorder.onLocalEntryUploaded).toHaveBeenLastCalledWith(doc, entry);
+    });
+    expect(recorder.onLocalEntryUploaded).toHaveBeenCalledTimes(2);
   });
 });

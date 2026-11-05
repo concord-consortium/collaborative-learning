@@ -3,13 +3,15 @@ import { DocumentContentModel } from "../../../models/document/document-content"
 import { createDocumentModel } from "../../../models/document/document";
 import { ProblemDocument } from "../../../models/document/document-types";
 import "../../../models/shared/shared-data-set-registration";
-import { kSharedDataSetType } from "../../../models/shared/shared-data-set";
+import { kSharedDataSetType, SharedDataSet } from "../../../models/shared/shared-data-set";
+import { addAttributeToDataSet, addCasesToDataSet, DataSet } from "../../../models/data/data-set";
+import { getSharedModelManager } from "../../../models/tiles/tile-environment";
 import "../../shared-seismogram/shared-seismogram-registration";
 import { registerTileContentInfo } from "../../../models/tiles/tile-content-info";
 import { kEventNumberAttrName } from "../../shared-seismogram/event-number-column";
 import { kWaveRunnerTileType } from "../wave-runner-types";
 import { ModelListEntry, PLACEHOLDER_MODEL_URL } from "../../../../shared/seismic/models/model-metadata";
-import { WaveRunnerContentModel, defaultWaveRunnerContent } from "./wave-runner-content";
+import { WaveRunnerContentModel, WaveRunnerContentModelType, defaultWaveRunnerContent } from "./wave-runner-content";
 import appConfig from "../../../clue/app-config.json";
 import { SeismicDownloadService, DONE } from "../../../models/stores/seismic/seismic-download-service";
 import {
@@ -105,7 +107,7 @@ function setupTileInDocument() {
   });
   docModel.treeMonitor!.enableMonitoring();
 
-  return docContent.tileMap.get("tile1")!.content as any;
+  return docContent.tileMap.get("tile1")!.content as WaveRunnerContentModelType;
 }
 
 describe("WaveRunnerContent", () => {
@@ -143,13 +145,13 @@ describe("WaveRunnerContent", () => {
     const shared = content.sharedSeismogram;
     expect(shared).toBeDefined();
     expect(content.hasStationData).toBe(true);
-    expect(shared.station.station).toBe("K204");
-    expect(shared.station.network).toBe("AK");
+    expect(shared?.station?.station).toBe("K204");
+    expect(shared?.station?.network).toBe("AK");
     // Compared as instants: the shared model normalizes to millisecond precision.
-    expect(new Date(shared.startTime).toISOString())
+    expect(new Date(shared?.startTime as any).toISOString())
       .toBe(new Date(`${content.startDate}T00:00:00Z`).toISOString());
     // endDate is inclusive, so the shared range ends at the close of that day.
-    expect(new Date(shared.endTime).getTime())
+    expect(new Date(shared?.endTime as any).getTime())
       .toBe(Date.parse(`${content.endDate}T00:00:00Z`) + SECONDS_PER_DAY * 1000);
   });
 
@@ -269,6 +271,110 @@ describe("WaveRunnerContent", () => {
     expect(dataSet.attributes[0].name).toBe(kEventNumberAttrName);
     expect(dataSet.attrFromName(kEventNumberAttrName)!.formula.display)
       .toBe(`rank(windowStart, isDate(windowStart) and isDate(windowEnd) and eventType != "")`);
+  });
+
+  describe("eventsFound and eventTypesFound", () => {
+    const makeEvent = (hour: number, eventType: string) => ({
+      windowStart: Date.UTC(2026, 1, 1, hour), windowEnd: Date.UTC(2026, 1, 1, hour) + 60000,
+      eventType, confidence: 0.9
+    });
+
+    // isRunning and isPaused are volatile state normally set by runModel and pauseModel.
+    function setRunState(content: any, state: { isRunning?: boolean, isPaused?: boolean }) {
+      unprotect(getRoot(content));
+      Object.assign(content, state);
+    }
+
+    it("reports nothing found before any run", () => {
+      const content = setupTileInDocument();
+      expect(content.eventsFound).toBeUndefined();
+      expect(content.eventTypesFound).toEqual(new Set());
+    });
+
+    it("reads the events dataset when no run is in progress", () => {
+      const content = setupTileInDocument();
+      content.addDetectedEvents([
+        makeEvent(1, "earthquake"), makeEvent(2, "traffic"), makeEvent(3, "earthquake")
+      ]);
+      content.recordDetectedEvents();
+
+      expect(content.eventsFound).toBe(3);
+      expect(content.eventTypesFound).toEqual(new Set(["earthquake", "traffic"]));
+    });
+
+    it("does not include blank types", () => {
+      const content = setupTileInDocument();
+      content.addDetectedEvents([
+        makeEvent(1, "earthquake"), makeEvent(2, ""), makeEvent(3, "earthquake")
+      ]);
+      content.recordDetectedEvents();
+
+      expect(content.eventsFound).toBe(3);
+      expect(content.eventTypesFound).toEqual(new Set(["earthquake"]));
+    });
+
+    it("ignores detected events that haven't been recorded when no run is in progress", () => {
+      const content = setupTileInDocument();
+      content.addDetectedEvents([makeEvent(1, "earthquake")]);
+      content.recordDetectedEvents();
+      content.addDetectedEvents([makeEvent(2, "traffic"), makeEvent(3, "avalanche")]);
+
+      expect(content.eventsFound).toBe(1);
+      expect(content.eventTypesFound).toEqual(new Set(["earthquake"]));
+
+      content.recordDetectedEvents();
+      expect(content.eventsFound).toBe(3);
+      expect(content.eventTypesFound).toEqual(new Set(["avalanche", "earthquake", "traffic"]));
+    });
+
+    it.each([
+      ["running", { isRunning: true }],
+      ["paused", { isPaused: true }],
+    ])("reads the run's detected events, not the dataset, while %s", (_label, state) => {
+      const content = setupTileInDocument();
+      content.addDetectedEvents([makeEvent(1, "earthquake")]);
+      content.recordDetectedEvents();
+      expect(content.eventsFound).toBe(1);
+      expect(content.eventTypesFound).toEqual(new Set(["earthquake"]));
+
+      setRunState(content, state);
+      content.addDetectedEvents([
+        makeEvent(2, "traffic"), makeEvent(3, "avalanche"), makeEvent(4, "traffic")
+      ]);
+
+      expect(content.eventsFound).toBe(3);
+      expect(content.eventTypesFound).toEqual(new Set(["traffic", "avalanche"]));
+    });
+
+    it("does not include blank events while running", () => {
+      const content = setupTileInDocument();
+      setRunState(content, { isRunning: true });
+      content.addDetectedEvents([makeEvent(1, "earthquake"), makeEvent(2, "")]);
+
+      expect(content.eventsFound).toBe(2);
+      expect(content.eventTypesFound).toEqual(new Set(["earthquake"]));
+    });
+
+    it("reports zero events and no categories while a run has found nothing yet", () => {
+      const content = setupTileInDocument();
+      content.addDetectedEvents([makeEvent(1, "earthquake")]);
+      content.recordDetectedEvents();
+      setRunState(content, { isRunning: true });
+
+      expect(content.eventsFound).toBe(0);
+      expect(content.eventTypesFound).toEqual(new Set());
+    });
+
+    it("finds no categories in a linked dataset without an eventType attribute", () => {
+      const content = setupTileInDocument();
+      const dataSet = DataSet.create();
+      addAttributeToDataSet(dataSet, { name: "other" });
+      addCasesToDataSet(dataSet, [{ other: "a" }, { other: "b" }]);
+      getSharedModelManager(content)!.addTileSharedModel(content, SharedDataSet.create({ dataSet }));
+
+      expect(content.eventsFound).toBe(2);
+      expect(content.eventTypesFound).toEqual(new Set());
+    });
   });
 
   it("configures the compact model in the wave-runner settings", () => {

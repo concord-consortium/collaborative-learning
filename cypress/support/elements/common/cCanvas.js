@@ -472,6 +472,22 @@ class ClueCanvas {
       });
     }
 
+    /**
+     * Clicks the one button of `buttonName` whose accessible name is `label`, for a toolbar
+     * carrying more than one button of the same kind -- Dataflow's Table It! and Graph It!, say.
+     * Finds it the way a student or a screen reader would.
+     */
+    clickToolbarButtonLabelled(tileType, buttonName, label, options = {}) {
+      cy.document().within(() => {
+        cy.get(`[data-test=canvas] .tile-toolbar.${tileType}-toolbar ` +
+               `.toolbar-button.${buttonName}[aria-label="${label}"]`).as('theButton');
+        cy.get('@theButton')
+          .should('have.length', 1)
+          .should('not.have.attr', 'aria-disabled');
+        cy.get('@theButton').click(options);
+      });
+    }
+
     longClickToolbarButton(tileType, buttonName, options = {}) {
       cy.document().within(() => {
         cy.get(`[data-test=canvas] .tile-toolbar.${tileType}-toolbar .toolbar-button.${buttonName}`).as('theButton');

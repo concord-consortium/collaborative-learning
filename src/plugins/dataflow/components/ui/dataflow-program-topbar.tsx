@@ -14,6 +14,8 @@ import { DataflowContentModelType } from "../../model/dataflow-content";
 import { ProgramMode } from "../types/dataflow-tile-types";
 import { useCautionAlert } from "../../../../components/utilities/use-caution-alert";
 import { useReadOnlyContext } from "../../../../components/document/read-only-context";
+import { useSettingFromStores } from "../../../../hooks/use-stores";
+import { toolbarShowsConnect } from "../../utilities/connect-button-state";
 
 import "./dataflow-program-topbar.scss";
 
@@ -41,17 +43,20 @@ export const DataflowProgramTopbar = observer(function DataflowProgramTopbar(pro
           programDataRates, dataRate, onRateSelectClick, handleChangeOfProgramMode,
           programMode, playBackIndex, isPlaying, handleChangeIsPlaying, tileContent} = props;
   const readOnly = useReadOnlyContext();
+  // The toolbar's connect button replaces this one. A unit whose own tools list leaves it out keeps
+  // this one, so students there can still connect.
+  const showConnectButton = !toolbarShowsConnect(useSettingFromStores("tools", "dataflow"));
 
   return (
     <div className="program-editor-topbar">
-        <DataflowSerialConnectButton
+        {showConnectButton && <DataflowSerialConnectButton
           onConnectDevice={onConnectDevice}
           onReconnectDevice={onReconnectDevice}
           onDisconnectDevice={onDisconnectDevice}
           serialDevice={serialDevice}
           connection={connection}
           needsDevice={tileContent.needsDevice}
-        />
+        />}
         <div className="topbar-center-container">
           <div className="topbar-blank-or-play">
             {

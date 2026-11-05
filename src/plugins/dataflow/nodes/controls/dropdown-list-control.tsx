@@ -219,11 +219,11 @@ export const DropdownList: React.FC<{
   const { control, listClass } = props;
   const title = control.tooltip;
   const { options, placeholder } = control;
-  const divRef = useRef<HTMLDivElement>(null);
+  const [divEl, setDivEl] = useState<HTMLDivElement | null>(null);
   const listRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
-  useStopEventPropagation(divRef, "pointerdown");
-  useStopEventPropagation(divRef, "wheel");
+  useStopEventPropagation(divEl, "pointerdown");
+  useStopEventPropagation(divEl, "wheel");
 
   const [showList, setShowList] = useState(false);
   const [highlightedIndex, setHighlightedIndex] = useState(0);
@@ -328,7 +328,7 @@ export const DropdownList: React.FC<{
   };
 
   return (
-    <div className={`node-select ${listClass}`} ref={divRef} title={title}>
+    <div className={`node-select ${listClass}`} ref={setDivEl} title={title}>
       <button
         ref={triggerRef}
         type="button"

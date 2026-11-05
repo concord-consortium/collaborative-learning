@@ -1,0 +1,160 @@
+@import "../../../../components/vars";
+@import "../../../../components/mixins";
+
+// The height of each of the palette's two status lines.
+$connect-line-height: 18px;
+
+@keyframes connect-slowpulse {
+  0% { background-color: $star-yellow; }
+  50% { background-color: #eee; }
+  100% { background-color: $star-yellow; }
+}
+
+.dataflow-toolbar {
+  // Specificity has to beat the toolbar's own `.toolbar-row button` background and hover rules.
+  .toolbar-row button.toolbar-button.connect {
+    // Pulses three times when the button first needs attention, to catch the eye, then stays
+    // yellow. The animation replays whenever the class is newly applied, including each time the
+    // toolbar mounts.
+    &.connect-attention,
+    &.connect-attention:hover:not(:disabled):not([aria-disabled="true"]):not(.selected) {
+      background-color: $star-yellow;
+    }
+
+    &.connect-attention {
+      animation: connect-slowpulse 1.5s linear 3;
+
+      @media (prefers-reduced-motion: reduce) {
+        animation: none;
+      }
+    }
+
+    // Pulses three times when a device goes away, then shows whatever the button's state calls for.
+    &.connect-loss-pulse {
+      animation: connect-slowpulse 1.5s linear 3;
+
+      @media (prefers-reduced-motion: reduce) {
+        animation: none;
+      }
+    }
+
+    &.connect-connected,
+    &.connect-connected:hover:not(:disabled):not([aria-disabled="true"]):not(.selected) {
+      background-color: #82f982;
+    }
+
+    // The toolbar's teal triangle is under 3:1 against the green; this darker teal is 3.4:1.
+    &.connect-connected > .corner-triangle {
+      fill: $workspace-teal-dark-1;
+    }
+  }
+
+  .toolbar-palette.dataflow-connect-palette {
+    @include tile-toolbar;
+    box-sizing: border-box;
+    padding: 8px;
+    text-align: left;
+    width: 270px;
+
+    // The corners that meet the toolbar stay square. The mixin rounds the bottom ones, which is right
+    // below the toolbar; above it, the top ones are rounded instead.
+    &.top-start {
+      border-radius: $toolbar-border-radius $toolbar-border-radius 0 0;
+    }
+
+    .connect-heading {
+      font-weight: bold;
+      margin-bottom: 6px;
+    }
+
+    // Two lines tall whatever they hold, so the rows below never move.
+    .connect-status {
+      height: 2 * $connect-line-height;
+      margin-bottom: 8px;
+
+      .connect-status-line, .connect-detail {
+        box-sizing: border-box;
+        height: $connect-line-height;
+        line-height: $connect-line-height;
+        overflow: hidden;
+        white-space: nowrap;
+      }
+
+      .connect-status-line {
+        text-overflow: ellipsis;
+      }
+
+      .connect-detail {
+        align-items: center;
+        display: flex;
+        gap: 6px;
+
+        &.hint {
+          color: #555;
+        }
+
+        &.problem {
+          color: #b00020;
+        }
+
+        .connect-detail-text {
+          min-width: 0;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+
+        .connect-progress {
+          background: #fff;
+          border: solid 1px $workspace-teal;
+          border-radius: 4px;
+          box-sizing: border-box;
+          flex: 1 1 auto;
+          height: 10px;
+          overflow: hidden;
+
+          .connect-progress-fill {
+            background: $workspace-teal;
+            height: 100%;
+          }
+        }
+      }
+    }
+
+    .connect-devices, .connect-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .connect-device-row {
+      align-items: center;
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .connect-control {
+      background: $workspace-teal-light-9;
+      border: solid 1px $workspace-teal;
+      border-radius: 4px;
+      box-sizing: border-box;
+      cursor: pointer;
+      padding: 3px 8px;
+      text-align: center;
+
+      @include focus-ring;
+
+      &:hover:not(.disabled) {
+        background: $workspace-teal-light-4;
+      }
+
+      // Fades the text and border rather than the whole element, so the focus ring on the control
+      // the user just activated keeps its contrast while the attempt runs.
+      &.disabled {
+        cursor: default;
+        color: rgba(0, 0, 0, 0.35);
+        border-color: rgba($workspace-teal, 0.35);
+      }
+    }
+  }
+}

@@ -13,7 +13,7 @@ const turn: ChatTurn = {
 };
 
 const chatResult = (turns: ChatTurn[]): UseChatResult => ({
-  turns, status: "idle", error: null, pending: false,
+  turns, status: "idle", error: null, pending: false, timedOut: false,
   sendMessage: jest.fn(async () => undefined), header: "Doc · 1.1"
 });
 

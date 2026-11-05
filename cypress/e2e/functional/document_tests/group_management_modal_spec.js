@@ -1,5 +1,6 @@
 import Header from '../../../support/elements/common/Header';
 import ClueHeader from '../../../support/elements/common/cHeader';
+import { kNewGroupUserGraceMs } from '../../../../src/models/stores/group-user-constants';
 
 /**
  * Group Management Modal Tests
@@ -53,6 +54,26 @@ function setup(student, opts = {}) {
     // used by waitForLoad and gives the app extra time to load
     cy.get('[data-testid="group-management-modal-title"]', { timeout: 60000 });
   }
+}
+
+// Both windows estimate the server clock (Date.now() + serverTimeOffset); allow for them to disagree.
+const kServerClockMarginMs = 500;
+
+// Waits until server time is far enough past the student's latest connectedTimestamp (rewritten
+// on join and every reconnect) that the next window loaded counts them as removed.
+function waitUntilCountedAsRemoved(student) {
+  cy.window()
+    .then(win => win.stores.db.firebase.getServerTimeOffset())
+    .then(serverTimeOffset => {
+      cy.window({ timeout: 10000 }).should(win => {
+        const group = win.stores.groups.groupForUser(student);
+        const groupUser = group?.users.find(user => user.id === student);
+        expect(groupUser, `student ${student} in a group`).to.exist;
+        const serverNow = win.Date.now() + serverTimeOffset;
+        expect(serverNow - groupUser.connectedTimestamp)
+          .to.be.greaterThan(kNewGroupUserGraceMs + kServerClockMarginMs);
+      });
+    });
 }
 
 function setupTeacher(teacher, opts = {}) {
@@ -260,8 +281,7 @@ context('Test student join a group', function () {
                                 .and('contain', 'S' + student4)
                                 .and('contain', 'S' + studentNotInClass);
 
-    // Need to wait more than 1s so the student not in the class is considered removed
-    cy.wait(1500);
+    waitUntilCountedAsRemoved(studentNotInClass);
     // switch back to student 1
     setup(student1, { alreadyInGroup: true });
     clueHeader.getGroupName().should('contain', 'Group 1');

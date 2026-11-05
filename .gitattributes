@@ -4,3 +4,5 @@
 src/plugins/dataflow/firmware/spikerbit-clue.ts text eol=lf
 src/plugins/dataflow/firmware/spikerbit-clue.hex text eol=lf
 scripts/spikerbit-firmware/project/pxt.json text eol=lf
+src/plugins/dataflow/firmware/user-guide.md text eol=lf
+src/plugins/dataflow/firmware/guide-images/*.svg text eol=lf
