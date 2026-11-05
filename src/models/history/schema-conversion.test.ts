@@ -4,7 +4,7 @@ import { cloneDeep } from "lodash";
 import { getSnapshot } from "mobx-state-tree";
 import {
   buildLoadEntry, convertContentJson, convertJsonAtPath, convertModelJsonAtPath, convertOldModelJsonAtPath,
-  getModelPath, isOldModelJsonAtPath
+  getModelPath, isNonCurrentModelJsonAtPath
 } from "./schema-conversion";
 import { getEntryPatchesForTree, HistoryEntry, HistoryOperation } from "./history";
 import { applyJsonPatches } from "./json-patch";
@@ -39,19 +39,24 @@ describe("getModelPath", () => {
   });
 });
 
-describe("isOldModelJsonAtPath", () => {
+describe("isNonCurrentModelJsonAtPath", () => {
   it("detects old versions", () => {
-    expect(isOldModelJsonAtPath("/content/tileMap/t1", oldTile("t1"))).toBe(true);
-    expect(isOldModelJsonAtPath("/content/tileMap/t1", newTile("t1"))).toBe(false);
-    expect(isOldModelJsonAtPath("/content/sharedModelMap/sm1/sharedModel", oldShared("sm1"))).toBe(true);
+    expect(isNonCurrentModelJsonAtPath("/content/tileMap/t1", oldTile("t1"))).toBe(true);
+    expect(isNonCurrentModelJsonAtPath("/content/tileMap/t1", newTile("t1"))).toBe(false);
+    expect(isNonCurrentModelJsonAtPath("/content/sharedModelMap/sm1/sharedModel", oldShared("sm1"))).toBe(true);
+  });
+  it("detects newer versions, which the converter declines", () => {
+    expect(isNonCurrentModelJsonAtPath("/content/tileMap/t3", newerTile("t3"))).toBe(true);
+    expect(isNonCurrentModelJsonAtPath("/content/sharedModelMap/s3/sharedModel", newerShared("s3"))).toBe(true);
   });
   it("treats unregistered types and types without a schemaVersion as current", () => {
     const unregistered = { id: "t1", content: { type: "NoSuchTile" } };
     const noSchema = { id: "t1", content: { type: "SchemaPlainTile" } };
-    expect(isOldModelJsonAtPath("/content/tileMap/t1", unregistered)).toBe(false);
-    expect(isOldModelJsonAtPath("/content/tileMap/t1", noSchema)).toBe(false);
+    expect(isNonCurrentModelJsonAtPath("/content/tileMap/t1", unregistered)).toBe(false);
+    expect(isNonCurrentModelJsonAtPath("/content/tileMap/t1", noSchema)).toBe(false);
     expect(convertModelJsonAtPath("/content/tileMap/t1", unregistered)).toBe(unregistered);
-    expect(isOldModelJsonAtPath("/content/sharedModelMap/s/sharedModel", { id: "s", type: "NoSuch" })).toBe(false);
+    expect(isNonCurrentModelJsonAtPath("/content/sharedModelMap/s/sharedModel", { id: "s", type: "NoSuch" }))
+      .toBe(false);
   });
 });
 
