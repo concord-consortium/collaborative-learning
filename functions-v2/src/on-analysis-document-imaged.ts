@@ -3,6 +3,7 @@ import * as logger from "firebase-functions/logger";
 import * as admin from "firebase-admin";
 // Modular import: admin.firestore.FieldValue is undefined in the functions emulator.
 import {FieldValue} from "firebase-admin/firestore";
+import {getDatabase} from "firebase-admin/database";
 import {getAnalysisQueueFirestorePath, getSummaryPath} from "./utils";
 import {
   type DocumentMetadata, type DocumentRepresentations, type MetadataGap, categorizeRepresentations,
@@ -277,7 +278,7 @@ export const onAnalysisDocumentImaged =
       // it was and the next attempt is not skipped.
       if (typeof queueDoc.historyIndex === "number" && queueDoc.metadataPath && queueDoc.evaluator) {
         try {
-          await admin.database()
+          await getDatabase()
             .ref(`${queueDoc.metadataPath}/${kEvaluationGateKey}/${queueDoc.evaluator}`)
             .set(queueDoc.historyIndex);
         } catch (err) {

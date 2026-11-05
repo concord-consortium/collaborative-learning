@@ -2,6 +2,7 @@ import {DatabaseEvent, DataSnapshot, onValueWritten} from "firebase-functions/v2
 import {Change} from "firebase-functions/v2";
 import * as logger from "firebase-functions/logger";
 import * as admin from "firebase-admin";
+import {getDatabase} from "firebase-admin/database";
 import {getAnalysisQueueFirestorePath} from "./utils";
 import {IEvaluationRequestContext, kPlaceholderUnitCode} from "../../shared/shared";
 import {hasChangedSinceEvaluation, kEvaluationGateKey} from "../../shared/ai-evaluation-gate";
@@ -166,7 +167,7 @@ const handleUpdate = async (event: DatabaseEvent<Change<DataSnapshot>>, firebase
     // Only unrequested (session-end) evaluations are skipped. Skipping a requested one would leave
     // the Ideas client waiting for a comment that never arrives.
     if (!requestId) {
-      const gateSnapshot = await admin.database()
+      const gateSnapshot = await getDatabase()
         .ref(`${metadataPath}/${kEvaluationGateKey}/${evaluator}`).once("value");
       const gateValue = gateSnapshot.val();
       const gateIndex = typeof gateValue === "number" ? gateValue : undefined;

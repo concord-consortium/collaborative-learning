@@ -126,7 +126,7 @@ describe("Ideas button", () => {
     jest.useRealTimers();
   });
 
-  it("on an empty document: no evaluation write, no log, nudge shown, gate not raised", async () => {
+  it("on an empty document: no evaluation write, no log, nudge shown, gate released", async () => {
     const stores = makeStores("categorize-design");
     const document = emptyDocument();
     renderDocument(document, stores);
@@ -203,6 +203,9 @@ describe("Ideas button", () => {
 
     expect(document.commentsManager?.statusMessage).toMatchObject({ message: IDEAS_UNCHANGED_MESSAGE });
     expect(stores.db.firebase.setLastEditedNow).not.toHaveBeenCalled();
+    // The gate is raised before the reads above, so this early return has to release it or the
+    // button stays disabled for the rest of the session.
+    expect(document.commentsManager?.canRequestIdeas).toBe(true);
   });
 
   it("when the gate reads fail: requests anyway rather than withholding or throwing", async () => {

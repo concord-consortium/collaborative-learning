@@ -627,7 +627,6 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
         requestId, reason
       });
 
-
     // setLastEditedNow/getLastEditedTimestamp have no timeout of their own, so a stalled
     // connection could leave ideasClickInProgress (and the Ideas button) disabled forever.
     // `attempt` races against a deadline below; on timeout we release the gate and show a failure
