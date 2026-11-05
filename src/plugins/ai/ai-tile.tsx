@@ -129,7 +129,10 @@ export const AIComponent: React.FC<ITileProps> = observer((props) => {
           // AI tiles out of the summary, so nothing the tile writes can move this hash. The prompt
           // is in it because an author editing the prompt has changed the request without touching
           // the document, and must not be told nothing has changed.
-          const requestHash = hashString(dynamicContentPrompt);
+          // systemPrompt is sent alongside dynamicContentPrompt, so an authored change to it
+          // changes the request even when the document and the tile's prompt are identical. NUL
+          // separates them because neither can contain it, so no pair of prompts can collide.
+          const requestHash = hashString(`${systemPrompt ?? ""}\u0000${dynamicContentPrompt}`);
           if (requestHash === content.evaluatedRequestHash) {
             // Only someone who pressed Refresh is told why nothing happened; a rerun from any
             // other dependency is nobody asking, and a message there would appear unprompted.
@@ -152,8 +155,23 @@ export const AIComponent: React.FC<ITileProps> = observer((props) => {
           if (response.data.error) {
             throw new Error(response.data.error);
           }
+          // An OpenAI failure is cached server-side as empty text, and a retry returns that
+          // cached entry with no error at all. Treating it as a real answer would blank the
+          // analysis and -- far worse, now that there is a gate -- record the hash, so the
+          // student could never retry. Routed through the catch, which leaves both alone.
+          if (!response.data.text?.trim()) {
+            throw new Error("The AI returned an empty response");
+          }
           content.setText(response.data.text);
-          content.setEvaluatedRequestHash(requestHash);
+          // The server returns the prompt its answer was actually built from. Under lock
+          // contention it can hand back an answer generated for a different revision of this
+          // tile, and recording our hash against it would gate away the request we really made.
+          // Older deployments omit the field; an unverifiable answer is gated as before rather
+          // than costing every student a second request.
+          const answeredPrompt = response.data.prompt;
+          if (typeof answeredPrompt !== "string" || answeredPrompt === dynamicContentPrompt) {
+            content.setEvaluatedRequestHash(requestHash);
+          }
           if (response.data.lastUpdated) {
             const timestamp = response.data.lastUpdated;
             setLastUpdated(new Date(timestamp._seconds*1000));
@@ -263,8 +281,12 @@ export const AIComponent: React.FC<ITileProps> = observer((props) => {
           <div className="last-updated">
             {lastUpdated ? lastUpdated.toLocaleString("en-US", {dateStyle: "long", timeStyle: "short"}) : "..."}
           </div>
-          {isUpdating && <p className="ai-status">Loading...</p>}
-          {!isUpdating && statusMessage && <p className="ai-status">{statusMessage}</p>}
+          {/* Mounted even when empty: a region added at the moment it gains text is not
+              reliably announced. role="status" is polite, which is right for these -- none of
+              them should interrupt a student mid-sentence. */}
+          <p className="ai-status" role="status">
+            {isUpdating ? "Loading..." : statusMessage}
+          </p>
           <Markdown>{content.text}</Markdown>
         </div>
       </div>

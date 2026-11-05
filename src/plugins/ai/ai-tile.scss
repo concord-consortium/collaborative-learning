@@ -78,6 +78,11 @@
   }
 
   // Sits above the analysis, which stays on screen underneath it while the student works.
+  // Always mounted so screen readers announce it reliably, so it must take no room when empty.
+  .ai-status:empty {
+    display: none;
+  }
+
   .ai-status {
     margin: 0 0 8px;
     padding: 5px 8px;

@@ -583,9 +583,20 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
     let isUnchanged = false;
     if (aiEnabled && !isEmpty) {
       try {
-        const [gateIndex, lastEntry] = await Promise.all([
-          firebase.getEvaluationGateIndex(user, document.key, document.uid),
-          getLastHistoryEntry(this.stores.db.firestore, getSimpleDocumentPath(document.key))
+        // These reads have no timeout of their own and run before the request deadline below is
+        // even created, so a stalled connection here would leave ideasClickInProgress -- and the
+        // Ideas button -- disabled for the rest of the session, with no message and nothing to
+        // retry. Bounded by the same deadline the request itself uses. A read that lands late
+        // resolves into nothing: `gate` has already settled, so its value is dropped.
+        const [gateIndex, lastEntry] = await Promise.race([
+          Promise.all([
+            firebase.getEvaluationGateIndex(user, document.key, document.uid),
+            getLastHistoryEntry(this.stores.db.firestore, getSimpleDocumentPath(document.key))
+          ]),
+          // Fails open on expiry: undefined reads as "no gate recorded", which permits the
+          // evaluation. Spending a request beats stranding the student.
+          new Promise<[undefined, undefined]>(resolve =>
+            setTimeout(() => resolve([undefined, undefined]), kIdeasRequestDeadlineMs))
         ]);
         // A completed history entry uploads to Firestore fire-and-forget, and waitForSaveSettled
         // does not cover that upload, so the read above can miss an edit the student just made --

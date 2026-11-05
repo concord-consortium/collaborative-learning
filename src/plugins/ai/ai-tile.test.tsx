@@ -10,7 +10,7 @@ const mockStores = {
     config: undefined as { aiUnitSummary?: unknown } | undefined,
   },
   appConfig: {
-    getSetting: jest.fn((key: string, category: string) => {
+    getSetting: jest.fn((key: string, category: string): string | undefined => {
       if (key === "systemPrompt" && category === "ai") {
         return "You are a helpful AI assistant.";
       }
@@ -354,8 +354,12 @@ describe("AIComponent", () => {
     describe("the document-changed gate", () => {
       // Hashing the request the tile actually sent, rather than rebuilding it here, keeps these
       // from passing against a request the production code no longer makes.
-      const hashOfLastRequest = () =>
-        hashString(mockGetAiContent.mock.calls[mockGetAiContent.mock.calls.length - 1][0].dynamicContentPrompt);
+      // Built from the request the tile actually sent, including the system prompt, which is
+      // part of what the model is given and so part of what the gate must notice changing.
+      const hashOfLastRequest = () => {
+        const sent = mockGetAiContent.mock.calls[mockGetAiContent.mock.calls.length - 1][0];
+        return hashString(`${sent.systemPrompt ?? ""}\u0000${sent.dynamicContentPrompt}`);
+      };
 
       // A content model can only ever belong to one TileModel, so remount tests reuse the model
       // rather than wrapping the same content twice.
@@ -416,6 +420,65 @@ describe("AIComponent", () => {
         expect(mockGetAiContent).toHaveBeenCalledTimes(2);
         expect(mockGetAiContent.mock.calls[1][0].dynamicContentPrompt)
           .toContain("Now ask something else entirely");
+      });
+
+      // systemPrompt is authored, and is sent with every request. A change to it changes what
+      // the model is told to do, even though the document and the tile's prompt are untouched.
+      it("sends the request when the system prompt changed but the document did not", async () => {
+        mockStores.documents.getDocument.mockReturnValue(documentWith(populatedDocContent()));
+        const { aiContent, aiModel } = tileWithPrompt();
+
+        await renderTile(aiModel);
+        expect(mockGetAiContent).toHaveBeenCalledTimes(1);
+
+        mockStores.appConfig.getSetting.mockImplementation((key: string, category: string) =>
+          key === "systemPrompt" && category === "ai" ? "You are a terse AI assistant." : undefined);
+
+        await pressUpdate(aiContent);
+
+        expect(mockGetAiContent).toHaveBeenCalledTimes(2);
+      });
+
+      // An OpenAI failure is cached server-side as empty text, and the retry that reads that
+      // cache entry reports no error at all. Taken at face value it would blank the analysis and
+      // record the hash, leaving the student unable to retry.
+      it("on an empty response, keeps the analysis, reports failure, and does not record the gate",
+         async () => {
+        mockStores.documents.getDocument.mockReturnValue(documentWith(populatedDocContent()));
+        const { aiContent, aiModel } = tileWithPrompt();
+
+        await renderTile(aiModel);
+        expect(aiContent.text).toBe("Mocked customized content");
+        const goodHash = aiContent.evaluatedRequestHash;
+
+        editDocument();
+        mockGetAiContent.mockResolvedValueOnce({ data: { text: "", error: null } });
+        await pressUpdate(aiContent);
+
+        expect(aiContent.text).toBe("Mocked customized content");
+        expect(screen.queryByText(AI_TILE_REQUEST_FAILED_MESSAGE)).toBeInTheDocument();
+        // Still the hash of the request that really produced this analysis, so the next refresh
+        // of the edited document goes through rather than being told nothing has changed.
+        expect(aiContent.evaluatedRequestHash).toBe(goodHash);
+      });
+
+      // Under lock contention the server hands back whatever the lock holder generated, which can
+      // be an answer for a different revision of this tile. Recording our hash against it would
+      // gate away the request we actually made.
+      it("does not record the gate when the server answered a different prompt", async () => {
+        mockStores.documents.getDocument.mockReturnValue(documentWith(populatedDocContent()));
+        const { aiContent, aiModel } = tileWithPrompt();
+
+        await renderTile(aiModel);
+        const goodHash = aiContent.evaluatedRequestHash;
+
+        editDocument();
+        mockGetAiContent.mockResolvedValueOnce(
+          { data: { text: "an answer to someone else's prompt", prompt: "a different prompt" } });
+        await pressUpdate(aiContent);
+
+        expect(aiContent.text).toBe("an answer to someone else's prompt");
+        expect(aiContent.evaluatedRequestHash).toBe(goodHash);
       });
 
       // A mount is nobody asking, and the nudge is document content: writing it would replace the

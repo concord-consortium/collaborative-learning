@@ -468,6 +468,43 @@ describe("Ideas button", () => {
     consoleErrorSpy.mockRestore();
   });
 
+  // The gate reads run after ideasClickInProgress is raised but before the request deadline below
+  // is created, so without a bound of their own a stalled connection here would disable the Ideas
+  // button for the rest of the session, with no message and nothing to retry.
+  it("when a gate read never settles: fails open, requests anyway, and releases the gate", async () => {
+    jest.useFakeTimers();
+    const stores = makeStores("categorize-design");
+    jest.spyOn(stores.db.firebase, "getEvaluationGateIndex")
+      .mockReturnValue(new Promise<number | undefined>(() => { /* never settles */ }));
+    (getLastHistoryEntry as jest.Mock).mockResolvedValue({ index: 47, id: "entry-47" });
+    const document = populatedDocument();
+    renderDocument(document, stores);
+
+    clickIdeas();
+    await flushMicrotasks();
+    expect(document.commentsManager?.canRequestIdeas).toBe(false);
+
+    await act(async () => {
+      await jest.advanceTimersByTimeAsync(kIdeasRequestDeadlineMs);
+    });
+
+    // Failed open: the unreadable gate did not withhold the evaluation, and the click carried on
+    // into the request rather than stopping here.
+    expect(document.commentsManager?.statusMessage?.message).not.toBe(IDEAS_UNCHANGED_MESSAGE);
+    expect(stores.db.firebase.setLastEditedNow).toHaveBeenCalled();
+
+    // The click's own gate is released rather than held open by the stalled read. Asserted on
+    // ideasClickInProgress and not canRequestIdeas, because the request this click started has
+    // queued a pending AI comment, which legitimately keeps the button disabled until the
+    // evaluation lands -- exactly as it would after any successful click.
+    await act(async () => {
+      await jest.advanceTimersByTimeAsync(kIdeasRequestDeadlineMs);
+    });
+    expect(document.commentsManager?.ideasClickInProgress).toBe(false);
+
+    jest.useRealTimers();
+  });
+
   it("releases the gate and shows a failure message if the request exceeds its deadline, and " +
      "does not queue a pending entry once the stalled call eventually resolves", async () => {
     jest.useFakeTimers();
