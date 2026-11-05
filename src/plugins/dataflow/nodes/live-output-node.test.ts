@@ -95,16 +95,36 @@ describe("Servo input mode scaling in data() (settings.dataflow.servoInputMode)"
 });
 
 // CLUE-789: the minigraph used to stay in degrees (0-180) while the field read % rotation.
-describe("LiveOutputNode.getPlotValue", () => {
-  it("plots a Servo as % rotation in proportion mode", () => {
-    const node = stubbedNode({ liveOutputType: "Servo" }, { servoInputMode: "proportion" });
-    expect(node.getPlotValue("nodeValue", 90)).toBe(50);
-    expect(node.getPlotValue("nodeValue", 180)).toBe(100);
+describe("LiveOutputNode.getPlotScale", () => {
+  const scaleOf = (node: LiveOutputNode) => node.getPlotScale("nodeValue");
+
+  it("graphs a Servo in % rotation over a 0-100 axis in proportion mode", () => {
+    const scale = scaleOf(stubbedNode({ liveOutputType: "Servo" }, { servoInputMode: "proportion" }));
+    expect(scale?.toPlot?.(90)).toBe(50);
+    expect(scale?.toPlot?.(180)).toBe(100);
+    expect({ min: scale?.min, max: scale?.max }).toEqual({ min: 0, max: 100 });
   });
-  it("plots a Servo in degrees by default, and other outputs as stored", () => {
-    expect(stubbedNode({ liveOutputType: "Servo" }).getPlotValue("nodeValue", 90)).toBe(90);
-    expect(stubbedNode({ liveOutputType: "Gripper 2.0" }, { servoInputMode: "proportion" })
-      .getPlotValue("nodeValue", 90)).toBe(90);
+
+  it("graphs a Servo over its full travel in degrees mode, converting nothing", () => {
+    const scale = scaleOf(stubbedNode({ liveOutputType: "Servo" }));
+    expect(scale?.toPlot).toBeUndefined();
+    expect({ min: scale?.min, max: scale?.max }).toEqual({ min: 0, max: 180 });
+  });
+
+  // writeToOutForBBGripper divides by 100 to drive the hardware, so the stored value is already
+  // the percentage the field shows and nothing needs converting.
+  it("graphs a Gripper over 0-100 with no conversion", () => {
+    const scale = scaleOf(stubbedNode({ liveOutputType: "Gripper 2.0" }, { servoInputMode: "proportion" }));
+    expect(scale?.toPlot).toBeUndefined();
+    expect({ min: scale?.min, max: scale?.max }).toEqual({ min: 0, max: 100 });
+  });
+
+  it("graphs a relay output over 0-1", () => {
+    expect(scaleOf(stubbedNode({ liveOutputType: "Fan" }))).toMatchObject({ min: 0, max: 1 });
+  });
+
+  it("declares nothing for a series it does not know", () => {
+    expect(stubbedNode({ liveOutputType: "Servo" }).getPlotScale("tilt")).toBeUndefined();
   });
 });
 

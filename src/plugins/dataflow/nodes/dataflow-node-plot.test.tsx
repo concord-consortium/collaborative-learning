@@ -11,17 +11,22 @@ jest.mock("react-chartjs-2", () => ({
   Line: (props: any) => { mockLine(props); return <div data-testid="line-chart" />; }
 }));
 
-// Fresh spies per test: every case asserts on setTickMax/setTickMin.
+// Fresh spies per test: every case asserts on setTickMax/setTickMin. The ds setters write
+// through as the real model's do, because the axis is read from dsMin/dsMax in the same render
+// that lineData updates them -- a spy that only records would make every auto-scaled axis read
+// as the empty -Infinity/Infinity defaults.
 function makeModel(bounds: Partial<IBaseNodeModel> = {}) {
-  return {
+  const model = {
     type: "Generator",
     watchedValues: {},
     getTickEntries: () => [],
     dsMax: 1, dsMin: 0, tickMax: 1, tickMin: 0,
-    setDsMax: jest.fn(), setDsMin: jest.fn(),
+    setDsMax: jest.fn((max: number) => { model.dsMax = max; }),
+    setDsMin: jest.fn((min: number) => { model.dsMin = min; }),
     setTickMax: jest.fn(), setTickMin: jest.fn(),
     ...bounds
-  } as unknown as IBaseNodeModel;
+  };
+  return model as unknown as IBaseNodeModel;
 }
 
 function OpenablePlot({ model, onNodePointerDown }:
@@ -78,16 +83,62 @@ describe("DataflowNodePlot", () => {
     expect(empty.setTickMin).toHaveBeenCalledWith(-0.4);
   });
 
-  it("graphs the values through plotValue, so the extent follows the node's display units", () => {
-    const model = makeModel({
-      watchedValues: { nodeValue: {} },
-      getTickEntries: () => [{ nodeValue: 90 }, { nodeValue: 180 }],
-      dsMax: -Infinity, dsMin: Infinity, tickMax: undefined, tickMin: undefined
-    } as any);
-    const toPercent = (key: string, value: number) => value / 180 * 100;
-    render(<DataflowNodePlot model={model} recordedTicks={["a", "b"]} plotValue={toPercent} />);
+  const servoModel = (entries: any[]) => makeModel({
+    watchedValues: { nodeValue: {} },
+    getTickEntries: () => entries,
+    dsMax: -Infinity, dsMin: Infinity, tickMax: undefined, tickMin: undefined
+  } as any);
+  const percentScale = { toPlot: (v: number) => v / 180 * 100, min: 0, max: 100 };
+  const axisOfLastChart = () => {
+    const y = mockLine.mock.lastCall[0].options.scales.y;
+    return { min: y.min, max: y.max };
+  };
+
+  it("plots through the declared scale, so the trace is in the node's display units", () => {
+    const model = servoModel([{ nodeValue: 90 }, { nodeValue: 180 }]);
+    render(<DataflowNodePlot model={model} recordedTicks={["a", "b"]} plotScale={() => percentScale} />);
 
     expect(mockLine.mock.lastCall[0].data.datasets[0].data).toEqual([50, 100]);
-    expect(model.setDsMax).toHaveBeenCalledWith(100);
+  });
+
+  // The point of CLUE-789: the axis is the range the unit configured, not the range the student
+  // happened to drive the block through.
+  it("uses the declared range as the axis even when the values never reach it", () => {
+    const model = servoModel([{ nodeValue: 18 }, { nodeValue: 36 }]);
+    render(<DataflowNodePlot model={model} recordedTicks={["a", "b"]} plotScale={() => percentScale} />);
+
+    expect(axisOfLastChart()).toEqual({ min: 0, max: 100 });
+  });
+
+  it("scales to the data when the node declares no range", () => {
+    const model = servoModel([{ nodeValue: 18 }, { nodeValue: 36 }]);
+    render(<DataflowNodePlot model={model} recordedTicks={["a", "b"]} />);
+
+    expect(axisOfLastChart()).toEqual({ min: 18, max: 36 });
+  });
+
+  // A declared range that covered only some series would push the others off the axis -- the
+  // Advanced Gripper's tilt beside its position is exactly that.
+  it("scales to the data when only some watched values declare a range", () => {
+    const model = makeModel({
+      watchedValues: { nodeValue: {}, tilt: {} },
+      getTickEntries: () => [{ nodeValue: 18, tilt: -1 }, { nodeValue: 36, tilt: 1 }],
+      dsMax: -Infinity, dsMin: Infinity, tickMax: undefined, tickMin: undefined
+    } as any);
+    render(<DataflowNodePlot model={model} recordedTicks={["a", "b"]}
+      plotScale={key => key === "nodeValue" ? percentScale : undefined} />);
+
+    // The conversion is per series and still applies -- nodeValue 18 and 36 plot as 10 and 20 --
+    // but the axis falls back to the data rather than pinning to the one declared range.
+    expect(axisOfLastChart()).toEqual({ min: -1, max: 20 });
+  });
+
+  it("lets a zoom override the declared range", () => {
+    const model = servoModel([{ nodeValue: 90 }]);
+    model.tickMax = 60;
+    model.tickMin = 20;
+    render(<DataflowNodePlot model={model} recordedTicks={["a"]} plotScale={() => percentScale} />);
+
+    expect(axisOfLastChart()).toEqual({ min: 20, max: 60 });
   });
 });

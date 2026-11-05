@@ -328,8 +328,15 @@ Additional Live Output / sampling keys (all optional; each defaults to today's b
 
 - `servoInputMode`: `"degrees"` (default) or `"proportion"`. In `"proportion"` mode the Servo Live
   Output and the Servo Demo Output accept an input from 0–1 instead of 0–180 degrees (mapping 0→0°,
-  1→180°), their fields read `"<n>% rotation"` and their minigraphs plot 0–100 (%). The stored/hardware
-  value stays in degrees, so the serial path is unchanged.
+  1→180°), their fields read `"<n>% rotation"` and their minigraphs plot and scale 0–100 (%)
+  instead of 0–180. The stored/hardware value stays in degrees, so the serial path is unchanged.
+
+Output blocks graph over the range their field reads, not over the range the student happened to
+drive them through, so two programs are comparable at a glance. A Servo spans its full travel
+(0–180° or 0–100%), a Gripper 0–100% closed, and a Light Bulb or relay 0–1. The zoom buttons still
+override that, and the graph's own reset returns to it. Blocks with no fixed range — sensors,
+Number, Generator, Timer — scale to their data as before, and so does the Advanced Gripper, whose
+tilt series runs −1 to 1 alongside its position and would be flattened by a 0–100 axis.
 - `liveOutputTypes`: an array of Live Output type names to offer in the block's dropdown, e.g.
   `["Servo", "Gripper 2.0"]`. Absent, empty, unknown-only, or listing *every* type all mean the full
   list (no restriction, standard order). For a genuine subset the author's order is preserved and the

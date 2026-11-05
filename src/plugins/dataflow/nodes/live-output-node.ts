@@ -12,11 +12,12 @@ import { NodeLiveOutputTypes, NodeMicroBitHubs, baseLiveOutputOptions,
   kGripperOutputTypes, kMicroBitHubRelaysIndexed, resolveAllowedOutputTypes,
   kServoOutputTypes, outputGateState, unsupportedOutputOption } from "../model/utilities/node";
 import { InputValueControl } from "./controls/input-value-control";
+import { IPlotScale } from "./dataflow-node-plot-types";
 import { SerialDevice } from "../../../models/stores/serial";
 import { deviceProtocol, deviceDisplayName, deviceSupportsOutput } from "../model/utilities/device-capabilities";
 import { simulatedHub, simulatedHubName } from "../model/utilities/simulated-output";
 import { getValueOrZero } from "./utilities/view-utilities";
-import { servoAngleForValue, servoDisplayMessage, servoPlotValue } from "./utilities/servo";
+import { servoAngleForValue, servoDisplayMessage, servoPlotScale } from "./utilities/servo";
 
 export const LiveOutputTickEntry = BaseTickEntry.named("LiveOutputTickEntry")
 .props({
@@ -411,11 +412,20 @@ export class LiveOutputNode extends BaseNode<
     return this.services.stores.appConfig.getSetting("servoInputMode", "dataflow") === "proportion";
   }
 
-  getPlotValue(valueKey: string, value: number) {
-    if (valueKey === "nodeValue" && kServoOutputTypes.includes(this.model.liveOutputType)) {
-      return servoPlotValue(value, this.servoProportionMode);
+  getPlotScale(valueKey: string): IPlotScale | undefined {
+    if (valueKey !== "nodeValue") return undefined;
+    const { liveOutputType } = this.model;
+    if (kServoOutputTypes.includes(liveOutputType)) {
+      return servoPlotScale(this.servoProportionMode);
     }
-    return value;
+    if (kGripperOutputTypes.includes(liveOutputType)) {
+      // Already a percentage: writeToOutForBBGripper divides by 100 to drive the hardware.
+      return { min: 0, max: 100 };
+    }
+    if (kBinaryOutputTypes.includes(liveOutputType) || kMicroBitHubRelaysIndexed.includes(liveOutputType)) {
+      return { min: 0, max: 1 };
+    }
+    return undefined;
   }
 
   private get allowedLiveOutputTypes() {

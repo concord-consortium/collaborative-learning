@@ -8,15 +8,16 @@ import "./dataflow-node.scss";
 import { IBaseNodeModel } from "./base-node";
 import { observer } from "mobx-react";
 import { useStopEventPropagation } from "./controls/custom-hooks";
+import { IPlotScale } from "./dataflow-node-plot-types";
 
 interface INodePlotProps {
   model: IBaseNodeModel;
   recordedTicks: string[];
-  plotValue?: PlotValueFn;
+  plotScale?: PlotScaleFn;
 }
 
-type PlotValueFn = (valueKey: string, value: number) => number;
-const identityPlotValue: PlotValueFn = (valueKey, value) => value;
+type PlotScaleFn = (valueKey: string) => IPlotScale | undefined;
+const noPlotScale: PlotScaleFn = () => undefined;
 
 let stepY = 5;
 
@@ -24,13 +25,35 @@ let stepY = 5;
 // scale. One unit of total span suits the 0-1 devices that hit this most often.
 const kMinZoomHalfSpan = 0.5;
 
+/**
+ * The axis a node declares for everything it plots, or undefined to scale to the data as before.
+ *
+ * Every watched value has to declare one. A node that declares a range for some of its series and
+ * not others would pin the axis around the ones it knows and push the rest off it -- the Advanced
+ * Gripper's tilt, which runs -1 to 1 beside a 0-100 position, is exactly that case.
+ */
+function declaredExtent(model: IBaseNodeModel, plotScale: PlotScaleFn) {
+  const keys = Object.keys(model.watchedValues);
+  if (!keys.length) return undefined;
+  let min = Infinity;
+  let max = -Infinity;
+  for (const key of keys) {
+    const scale = plotScale(key);
+    if (scale?.min == null || scale?.max == null) return undefined;
+    min = Math.min(min, scale.min);
+    max = Math.max(max, scale.max);
+  }
+  return { min, max };
+}
+
+// A zoom still wins over the declared range, and resetGraph clears it to return there.
 // CHECKME: dsMax defaults to -Infinity this might cause a problem
-function maxY(model: IBaseNodeModel) {
-  return model.tickMax ?? model.dsMax;
+function maxY(model: IBaseNodeModel, declared?: { max: number }) {
+  return model.tickMax ?? declared?.max ?? model.dsMax;
 }
 // CHECKME: dsMin defaults to Infinity this might cause a problem
-function minY(model: IBaseNodeModel) {
-  return model.tickMin ?? model.dsMin;
+function minY(model: IBaseNodeModel, declared?: { min: number }) {
+  return model.tickMin ?? declared?.min ?? model.dsMin;
 }
 
 enum Zoom {
@@ -39,15 +62,16 @@ enum Zoom {
 }
 
 export const DataflowNodePlot: React.FC<INodePlotProps> = observer(
-  function DataflowNodePlot({model, recordedTicks, plotValue = identityPlotValue})
+  function DataflowNodePlot({model, recordedTicks, plotScale = noPlotScale})
 {
+  const declared = declaredExtent(model, plotScale);
   const [plotEl, setPlotEl] = useState<HTMLDivElement | null>(null);
   useStopEventPropagation(plotEl, "pointerdown");
   useStopEventPropagation(plotEl, "dblclick");
 
   const handleClickOffset = (zoomDir: Zoom) => {
-    const max = maxY(model);
-    const min = minY(model);
+    const max = maxY(model, declared);
+    const min = minY(model, declared);
     const haveRange = isFinite(max) && isFinite(min);
     const halfRange = haveRange ? Math.abs(max - min) / 2 : 0;
     const midpoint = haveRange ? (max + min) / 2 : 0;
@@ -77,8 +101,8 @@ export const DataflowNodePlot: React.FC<INodePlotProps> = observer(
       </div>
       <div className="node-graph">
         <Line
-          data={lineData(model, recordedTicks, plotValue)}
-          options={lineOptions(model)}
+          data={lineData(model, recordedTicks, plotScale, declared)}
+          options={lineOptions(model, declared)}
         />
       </div>
     </div>
@@ -86,7 +110,8 @@ export const DataflowNodePlot: React.FC<INodePlotProps> = observer(
 });
 
 function lineData(
-  model: IBaseNodeModel, recordedTicks: string[], plotValue: PlotValueFn
+  model: IBaseNodeModel, recordedTicks: string[], plotScale: PlotScaleFn,
+  declared?: { min: number, max: number }
 ): ChartData<"line", number[], number> {
   const chartDataSets: ChartDataset<"line", number[]>[] = [];
   const recordedEntries = model.getTickEntries(recordedTicks);
@@ -115,10 +140,13 @@ function lineData(
         ...customOptions
       };
 
+      // Plotted in the units the node's own field shows, so the trace and the declared axis
+      // below are in the same units -- they come from the one declaration, so they cannot drift.
+      const toPlot = plotScale(valueKey)?.toPlot;
       const chData: number[] = [];
       recentValues.forEach((val) => {
         if (val != null && isFinite(val)) {
-          chData.push(plotValue(valueKey, val));
+          chData.push(toPlot ? toPlot(val) : val);
         }
       });
 
@@ -131,7 +159,7 @@ function lineData(
     }
   });
 
-  stepY = (maxY(model) - minY(model)) / 2;
+  stepY = (maxY(model, declared) - minY(model, declared)) / 2;
 
   return {
     labels: new Array(kMaxNodeValues).fill(undefined).map((val, idx) => idx),
@@ -139,9 +167,9 @@ function lineData(
   };
 }
 
-function lineOptions(model: IBaseNodeModel): ChartOptions<"line"> {
-  const max = maxY(model);
-  const min = minY(model);
+function lineOptions(model: IBaseNodeModel, declared?: { min: number, max: number }): ChartOptions<"line"> {
+  const max = maxY(model, declared);
+  const min = minY(model, declared);
 
   return {
     animation: {

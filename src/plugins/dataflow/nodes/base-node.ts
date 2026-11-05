@@ -4,7 +4,7 @@ import { Socket } from "rete/_types/presets/classic";
 import { DataflowProgramChange } from "../dataflow-logger";
 import { INodeServices } from "./service-types";
 import { Schemes } from "./rete-scheme";
-import { MinigraphOptions, defaultMinigraphOptions } from "./dataflow-node-plot-types";
+import { IPlotScale, MinigraphOptions, defaultMinigraphOptions } from "./dataflow-node-plot-types";
 import { getParentWithTypeName } from "../../../utilities/mst-utils";
 import { DEBUG_DATAFLOW } from "../../../lib/debug";
 
@@ -216,7 +216,7 @@ export type IBaseNode = Schemes['Node'] & {
   ): void;
   readOnly?: boolean;
   getSharedProgramNodeValue(): string;
-  getPlotValue(valueKey: string, value: number): number;
+  getPlotScale(valueKey: string): IPlotScale | undefined;
 }
 
 export class BaseNode<
@@ -349,9 +349,13 @@ export class BaseNode<
     return recordedTicks.map(tick => this.model.tickEntries.get(tick)?.nodeValue);
   }
 
-  /** What the minigraph plots for a watched value, so a node can graph in the units its field shows. */
-  getPlotValue(valueKey: string, value: number) {
-    return value;
+  /**
+   * How the minigraph should plot a watched value: the conversion into the units the node's own
+   * field shows, and the axis those units span. Undefined scales the axis to the data, which is
+   * right for anything without a fixed range -- sensors, Number, Generator, Timer.
+   */
+  getPlotScale(valueKey: string): IPlotScale | undefined {
+    return undefined;
   }
 
   getSharedProgramNodeValue() {

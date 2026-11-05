@@ -10,9 +10,9 @@ import { typeField } from "../../../utilities/mst-utils";
 import { INodeServices } from "./service-types";
 import { DemoOutputControl } from "./controls/demo-output-control";
 import { InputValueControl } from "./controls/input-value-control";
-import { MinigraphOptions } from "./dataflow-node-plot-types";
+import { IPlotScale, MinigraphOptions } from "./dataflow-node-plot-types";
 import { getValueOrZero } from "./utilities/view-utilities";
-import { servoAngleForValue, servoDisplayMessage, servoPlotValue } from "./utilities/servo";
+import { servoAngleForValue, servoDisplayMessage, servoPlotScale } from "./utilities/servo";
 
 const tiltMinigraphOptions: MinigraphOptions = {
   backgroundColor: "#fff",
@@ -132,11 +132,26 @@ export class DemoOutputNode extends BaseNode<
     return this.services.stores.appConfig.getSetting("servoInputMode", "dataflow") === "proportion";
   }
 
-  getPlotValue(valueKey: string, value: number) {
-    if (valueKey === "nodeValue" && kServoOutputTypes.includes(this.model.outputType)) {
-      return servoPlotValue(value, this.servoProportionMode);
+  /**
+   * The Advanced Gripper is deliberately not here. It graphs tilt (-1 to 1) beside its position,
+   * so pinning the axis to the position's 0-100 would flatten the tilt trace into the baseline.
+   * It keeps scaling to its data, where both series stay readable.
+   */
+  getPlotScale(valueKey: string): IPlotScale | undefined {
+    if (valueKey !== "nodeValue") return undefined;
+    const { outputType } = this.model;
+    if (kServoOutputTypes.includes(outputType)) {
+      return servoPlotScale(this.servoProportionMode);
     }
-    return value;
+    if (outputType === "Grabber") {
+      // Stored as the 0-1 fraction GrabberAnimation's playToPercent takes; the field reads a
+      // percentage, so the graph does too.
+      return { toPlot: value => value * 100, min: 0, max: 100 };
+    }
+    if (kBinaryOutputTypes.includes(outputType)) {
+      return { min: 0, max: 1 };
+    }
+    return undefined;
   }
 
   getNodeValueDisplayMessage = () => {

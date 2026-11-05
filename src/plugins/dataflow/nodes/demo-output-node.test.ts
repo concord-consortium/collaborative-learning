@@ -97,14 +97,37 @@ describe("DemoOutputNode.getNodeValueDisplayMessage", () => {
   });
 });
 
-describe("DemoOutputNode.getPlotValue", () => {
-  it("plots a Servo as % rotation in proportion mode, matching the field", () => {
-    const node = stubbedNode("Servo", { servoInputMode: "proportion" });
-    expect(node.getPlotValue("nodeValue", 90)).toBe(50);
+describe("DemoOutputNode.getPlotScale", () => {
+  const scaleOf = (type: string, settings?: Record<string, unknown>) =>
+    stubbedNode(type as any, settings as any).getPlotScale("nodeValue");
+
+  it("graphs a Servo in % rotation over a 0-100 axis in proportion mode", () => {
+    const scale = scaleOf("Servo", { servoInputMode: "proportion" });
+    expect(scale?.toPlot?.(90)).toBe(50);
+    expect({ min: scale?.min, max: scale?.max }).toEqual({ min: 0, max: 100 });
   });
-  it("leaves degrees mode, other outputs and the tilt series as stored", () => {
-    expect(stubbedNode("Servo").getPlotValue("nodeValue", 90)).toBe(90);
-    expect(stubbedNode("Grabber", { servoInputMode: "proportion" }).getPlotValue("nodeValue", 0.5)).toBe(0.5);
-    expect(stubbedNode("Servo", { servoInputMode: "proportion" }).getPlotValue("tilt", 1)).toBe(1);
+
+  it("graphs a Servo over its full travel in degrees mode", () => {
+    expect(scaleOf("Servo")).toMatchObject({ min: 0, max: 180 });
+    expect(scaleOf("Servo")?.toPlot).toBeUndefined();
+  });
+
+  // The demo Gripper stores the 0-1 fraction GrabberAnimation takes, unlike the live Gripper,
+  // which stores a percentage. Both graph as a percentage, as both fields read.
+  it("graphs a Gripper as a percentage of the 0-1 fraction it stores", () => {
+    const scale = scaleOf("Grabber");
+    expect(scale?.toPlot?.(0.5)).toBe(50);
+    expect({ min: scale?.min, max: scale?.max }).toEqual({ min: 0, max: 100 });
+  });
+
+  it("graphs a binary output over 0-1", () => {
+    expect(scaleOf("Light Bulb")).toMatchObject({ min: 0, max: 1 });
+  });
+
+  // Left to scale to its data: pinning the axis to the position's 0-100 would flatten tilt,
+  // which runs -1 to 1, into the baseline.
+  it("declares nothing for the Advanced Gripper, or for the tilt series", () => {
+    expect(scaleOf("Advanced Grabber")).toBeUndefined();
+    expect(stubbedNode("Servo" as any).getPlotScale("tilt")).toBeUndefined();
   });
 });
