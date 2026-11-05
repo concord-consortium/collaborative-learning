@@ -16,6 +16,20 @@ export function handlePlaceholderTile({ tile }: TileHandlerParams): string|undef
   return "";
 }
 
+/**
+ * An AI tile holds the model's own output, not the student's work -- `kNeverStudentWorkTypes` in
+ * ai-analysis-classify.ts already says so. Without this handler it falls through to
+ * generateTileDescription, which writes the tile's text, prompt and description into the summary,
+ * so the model is shown its own last answer as part of the document it is being asked about.
+ *
+ * That also moves the summary every time the tile refreshes, which is what any gate comparing
+ * one summary to the next relies on not happening.
+ */
+export function handleAiTile({ tile }: TileHandlerParams): string|undefined {
+  if (tile.model.content.type !== "AI") { return undefined; }
+  return "";
+}
+
 // The prompt is summarized directly rather than through tilesSummary, so it needs its id line
 // added here. Emitted even though the prompt is summarized minimally: a drawing used as a prompt
 // gives every object an id, and those are unusable without the tile's id to go with them.
@@ -154,6 +168,7 @@ export function handleQuestionTile(params: TileHandlerParams): string|undefined 
 }
 
 export const defaultTileHandlers: TileHandler[] = [
+  handleAiTile,
   handleDataflowTile,
   handleDrawingTile,
   handleGraphTile,

@@ -121,8 +121,14 @@ document summary and the authored prompt, already assembled as `dynamicContentPr
 `shared/hash-string.ts`, the same shape the chat tutor uses to gate a resend. Three reasons this
 works where the index does not:
 
-- The summarizer has no AI-tile handler, so the tile's own text is not in the summary and its
-  writes cannot move the hash.
+- AI tiles are excluded from the summary, so the tile's own text is not in it and its writes
+  cannot move the hash. This was not true when the design was written: the summarizer had no
+  AI-tile handler, so an AI tile fell through to `generateTileDescription`, which wrote its text,
+  prompt and description into the summary. That made the gate unable to fire -- every refresh
+  changed the summary it was about to compare against -- and, worse, showed the model its own
+  previous answer as part of the student's document. `handleAiTile` now returns the empty string
+  for them, matching `kNeverStudentWorkTypes` in `ai-analysis-classify.ts`, which already said an
+  AI tile is never student work.
 - The tile builds that string anyway, so the hash is free here. That cost is what ruled hashing
   out for the Ideas button, which does no summarizing of its own.
 - The prompt is part of the request but not part of the document. Hashing the summary alone would

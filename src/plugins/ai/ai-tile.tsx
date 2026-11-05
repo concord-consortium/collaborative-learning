@@ -130,10 +130,10 @@ export const AIComponent: React.FC<ITileProps> = observer((props) => {
           // The gate hashes the whole request, built above but not yet sent, and runs before
           // anything is written, so a gated run leaves the saved answer alone. Hashing the request
           // rather than the document history index is what makes the gate able to fire at all:
-          // this tile's own setText advances that index on every refresh, while the summarizer has
-          // no AI-tile handler, so nothing the tile writes can move this hash. The prompt is in it
-          // because an author editing the prompt has changed the request without touching the
-          // document, and must not be told nothing has changed.
+          // this tile's own setText advances that index on every refresh, while handleAiTile keeps
+          // AI tiles out of the summary, so nothing the tile writes can move this hash. The prompt
+          // is in it because an author editing the prompt has changed the request without touching
+          // the document, and must not be told nothing has changed.
           const requestHash = hashString(dynamicContentPrompt);
           if (requestHash === content.evaluatedRequestHash) {
             // Only someone who pressed Update is told why nothing happened. That is the authoring
