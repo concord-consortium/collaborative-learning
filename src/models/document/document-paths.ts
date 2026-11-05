@@ -11,6 +11,12 @@ export const kSharedModelMapPath = `${kContentPath}/sharedModelMap`;
 /** A tile or anything inside it. Group 1 is the tile id. */
 export const kTileSubtreeRegex = new RegExp(`^${kTileMapPath}/([^/]+)(/|$)`);
 
+/**
+ * A tile or anything inside it, split in two. Group 1 is the tile id, and group 2 is the rest of
+ * the path below the tile: empty for the tile itself, otherwise starting with `/`.
+ */
+export const kTileSubtreePartsRegex = new RegExp(`^${kTileMapPath}/([^/]+)(.*)$`);
+
 /** A shared model map entry, exactly. Group 1 is the shared model id. */
 export const kSharedModelEntryRegex = new RegExp(`^${kSharedModelMapPath}/([^/]+)$`);
 
