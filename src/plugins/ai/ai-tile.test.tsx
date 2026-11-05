@@ -30,7 +30,7 @@ jest.mock("../../hooks/use-stores", () => ({
   useSettingFromStores: (key: string, group?: string) => mockStores.appConfig.getSetting(key, group ?? ""),
 }));
 
-import { act, fireEvent, render } from "@testing-library/react";
+import { act, fireEvent, render, screen } from "@testing-library/react";
 import { destroy, getLivelinessChecking, setLivelinessChecking, unprotect } from "mobx-state-tree";
 import React from "react";
 import { ITileApi } from "../../components/tiles/tile-api";
@@ -304,7 +304,9 @@ describe("AIComponent", () => {
         <AIComponent {...defaultProps} model={aiModel} documentId="test-doc-1" />
       ));
 
-      expect(aiContent.text).toBe(AI_TILE_EMPTY_MESSAGE);
+      expect(queryByText(AI_TILE_EMPTY_MESSAGE)).toBeInTheDocument();
+      // The message is shown, not stored: nothing transient is written into the document.
+      expect(aiContent.text).toBe(defaultAIContent().text);
       expect(mockGetAiContent).not.toHaveBeenCalled();
       // isUpdating ended false: the loading state is not still showing.
       expect(queryByText("Loading...")).not.toBeInTheDocument();
@@ -316,9 +318,11 @@ describe("AIComponent", () => {
       aiContent.setPrompt("What do you think?");
       const aiModel = TileModel.create({ content: aiContent });
 
-      await act(async () => render(<AIComponent {...defaultProps} model={aiModel} documentId="test-doc-1" />));
+      const { queryByText } = await act(async () =>
+        render(<AIComponent {...defaultProps} model={aiModel} documentId="test-doc-1" />)
+      );
       mockGetAiContent.mockClear();
-      act(() => aiContent.setText("something left over from before"));
+      act(() => aiContent.setText("an earlier analysis"));
 
       await act(async () => {
         aiContent.requestRefresh();
@@ -326,7 +330,9 @@ describe("AIComponent", () => {
         await Promise.resolve();
       });
 
-      expect(aiContent.text).toBe(AI_TILE_EMPTY_MESSAGE);
+      expect(queryByText(AI_TILE_EMPTY_MESSAGE)).toBeInTheDocument();
+      // The earlier analysis is still there to read while they add work.
+      expect(aiContent.text).toBe("an earlier analysis");
       expect(mockGetAiContent).not.toHaveBeenCalled();
     });
 
@@ -440,7 +446,9 @@ describe("AIComponent", () => {
 
         await pressUpdate(aiContent);
 
-        expect(aiContent.text).toBe(AI_TILE_UNCHANGED_MESSAGE);
+        expect(screen.queryByText(AI_TILE_UNCHANGED_MESSAGE)).toBeInTheDocument();
+        // The nudge is shown beside the analysis, never written over it.
+        expect(aiContent.text).toBe("Mocked customized content");
         expect(mockGetAiContent).not.toHaveBeenCalled();
       });
     });
@@ -658,13 +666,15 @@ describe("AIComponent", () => {
     // The student clicked Update, so restoring the old text would look exactly like a refresh
     // that did nothing. This is the case the durable message exists for.
     it("on a populated document, when a student-requested refresh rejects: the failure message " +
-       "is shown", async () => {
+       "is shown and the last analysis is left in place", async () => {
       mockStores.documents.getDocument.mockReturnValue(documentWith(populatedDocContent()));
       const aiContent = defaultAIContent();
       aiContent.setPrompt("What do you think?");
       const aiModel = TileModel.create({ content: aiContent });
 
-      await act(async () => render(<AIComponent {...defaultProps} model={aiModel} documentId="test-doc-1" />));
+      const { queryByText } = await act(async () =>
+        render(<AIComponent {...defaultProps} model={aiModel} documentId="test-doc-1" />)
+      );
       expect(aiContent.text).toBe("Mocked customized content");
 
       editDocument();
@@ -675,7 +685,9 @@ describe("AIComponent", () => {
         await Promise.resolve();
       });
 
-      expect(aiContent.text).toBe(AI_TILE_REQUEST_FAILED_MESSAGE);
+      expect(queryByText(AI_TILE_REQUEST_FAILED_MESSAGE)).toBeInTheDocument();
+      // A failed request must not cost the student the analysis they already had.
+      expect(aiContent.text).toBe("Mocked customized content");
     });
 
     // The tile can be deleted while a request is in flight. Pins that the catch block's isAlive
@@ -780,28 +792,6 @@ describe("AIComponent", () => {
         ([event]) => event === LogEventName.AI_TILE_REQUEST_FAILED)).toHaveLength(0);
     });
 
-    it("on a populated document, when a later refresh's getAiContent rejects: the failure message " +
-       "replaces the prior response rather than leaving it to look untouched", async () => {
-      mockStores.documents.getDocument.mockReturnValue(documentWith(populatedDocContent()));
-      const aiContent = defaultAIContent();
-      aiContent.setPrompt("What do you think?");
-      const aiModel = TileModel.create({ content: aiContent });
-
-      // First render succeeds and leaves a real AI response in place.
-      await act(async () => render(<AIComponent {...defaultProps} model={aiModel} documentId="test-doc-1" />));
-      expect(aiContent.text).toBe("Mocked customized content");
-
-      editDocument();
-      mockGetAiContent.mockRejectedValueOnce(new Error("network error"));
-      await act(async () => {
-        aiContent.requestRefresh();
-        await Promise.resolve();
-        await Promise.resolve();
-      });
-
-      expect(aiContent.text).toBe(AI_TILE_REQUEST_FAILED_MESSAGE);
-    });
-
     // getAiContent resolves (not rejects) on a server-side failure, a distinct path from the
     // rejection tests above.
     it("on a populated document, when a later refresh's response carries a server-side error: " +
@@ -812,7 +802,9 @@ describe("AIComponent", () => {
       const aiModel = TileModel.create({ content: aiContent });
 
       // First render succeeds and leaves a real AI response in place.
-      await act(async () => render(<AIComponent {...defaultProps} model={aiModel} documentId="test-doc-1" />));
+      const { queryByText } = await act(async () =>
+        render(<AIComponent {...defaultProps} model={aiModel} documentId="test-doc-1" />)
+      );
       expect(aiContent.text).toBe("Mocked customized content");
 
       editDocument();
@@ -824,7 +816,8 @@ describe("AIComponent", () => {
         await Promise.resolve();
       });
 
-      expect(aiContent.text).toBe(AI_TILE_REQUEST_FAILED_MESSAGE);
+      expect(queryByText(AI_TILE_REQUEST_FAILED_MESSAGE)).toBeInTheDocument();
+      expect(aiContent.text).toBe("Mocked customized content");
       expect(consoleErrorSpy).toHaveBeenCalledWith("Failed to query AI", expect.any(Error));
       consoleErrorSpy.mockRestore();
     });
@@ -946,8 +939,8 @@ describe("AIComponent", () => {
       });
       expect(queryByText("Loading...")).toBeInTheDocument();
 
-      // classHash clears; the refresh makes no request of its own, but must restore the in-flight
-      // request's text and clear loading, since nothing else is left running to do either.
+      // classHash clears; the refresh makes no request of its own, but must clear loading, since
+      // nothing else is left running to do it -- the in-flight run's own finally is now a no-op.
       mockUserContext = mockUserContextWithoutClassHash;
       await act(async () => {
         aiContent.requestRefresh();
@@ -996,11 +989,10 @@ describe("AIComponent", () => {
       expect(aiContent.text).toBe("Newer response");
     });
 
-    // The restore point is read only by the top-of-effect undo, since a requested failure reports
-    // instead. This pins that B captured the real text and not A's blank, by letting the class
-    // context disappear — the remaining path that restores from the captured point.
-    it("a run started while an earlier one is still in flight captures the real text, not that " +
-       "run's own blank, as its restore point", async () => {
+    // The analysis is the student's to read while they work, so a refresh must not clear it to
+    // make room for the next one. This is what makes the loading state additive rather than a
+    // replacement, and it is why nothing restores a saved copy any more: nothing blanks it.
+    it("leaves the previous analysis on screen while a refresh is in flight", async () => {
       mockStores.documents.getDocument.mockReturnValue(documentWith(populatedDocContent()));
       const aiContent = defaultAIContent();
       aiContent.setPrompt("What do you think?");
@@ -1012,40 +1004,20 @@ describe("AIComponent", () => {
       expect(aiContent.text).toBe("Mocked customized content");
 
       editDocument();
-      const promiseA = new Promise<{ data: { text: string } }>((_resolve) => { /* A never settles */ });
-      const promiseB = new Promise<{ data: { text: string } }>((_resolve) => { /* B never settles */ });
-      mockGetAiContent.mockImplementationOnce(() => promiseA);
-      mockGetAiContent.mockImplementationOnce(() => promiseB);
+      mockGetAiContent.mockImplementationOnce(() => new Promise(() => { /* never settles */ }));
 
-      // A starts and blanks the text while its request is in flight.
       await act(async () => {
         aiContent.requestRefresh();
         await Promise.resolve();
       });
-      expect(aiContent.text).toBe("");
 
-      // B starts before A settles. It must restore the real text — not A's blank — before
-      // capturing its own restore point and blanking again.
-      await act(async () => {
-        aiContent.requestRefresh();
-        await Promise.resolve();
-      });
       expect(queryByText("Loading...")).toBeInTheDocument();
-
-      // The class context disappearing makes the next run take the restore branch, which writes
-      // back whatever B captured. A blank here would mean B had captured A's blank.
-      mockUserContext = mockUserContextWithoutClassHash;
-      await act(async () => {
-        aiContent.requestRefresh();
-        await Promise.resolve();
-      });
-
       expect(aiContent.text).toBe("Mocked customized content");
-      expect(queryByText("Loading...")).not.toBeInTheDocument();
+      expect(queryByText("Mocked customized content")).toBeInTheDocument();
     });
 
-    it("a run started while an earlier one is still in flight restores the real text, then " +
-       "succeeds with its own response and clears its restore point", async () => {
+    it("a refresh started while an earlier one is still in flight ends with its own response, " +
+       "and the analysis is never blank in between", async () => {
       mockStores.documents.getDocument.mockReturnValue(documentWith(populatedDocContent()));
       const aiContent = defaultAIContent();
       aiContent.setPrompt("What do you think?");
@@ -1055,18 +1027,17 @@ describe("AIComponent", () => {
       expect(aiContent.text).toBe("Mocked customized content");
 
       editDocument();
-      const promiseA = new Promise<{ data: { text: string } }>((_resolve) => { /* A never settles */ });
-      mockGetAiContent.mockImplementationOnce(() => promiseA);
+      mockGetAiContent.mockImplementationOnce(() => new Promise(() => { /* A never settles */ }));
       mockGetAiContent.mockResolvedValueOnce({ data: { text: "B's response" } });
 
-      // A starts and blanks the text while its request is in flight.
+      // A starts.
       await act(async () => {
         aiContent.requestRefresh();
         await Promise.resolve();
       });
-      expect(aiContent.text).toBe("");
+      expect(aiContent.text).toBe("Mocked customized content");
 
-      // B starts before A settles, restoring the real text, then succeeds with its own response.
+      // B starts before A settles, and succeeds with its own response.
       await act(async () => {
         aiContent.requestRefresh();
         await Promise.resolve();
@@ -1074,8 +1045,7 @@ describe("AIComponent", () => {
       });
       expect(aiContent.text).toBe("B's response");
 
-      // classHash clearing afterward must not restore anything — B's success already cleared the
-      // restore point.
+      // classHash clearing afterward has nothing to undo.
       mockUserContext = mockUserContextWithoutClassHash;
       await act(async () => {
         aiContent.requestRefresh();

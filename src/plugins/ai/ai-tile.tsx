@@ -35,13 +35,14 @@ export const AIComponent: React.FC<ITileProps> = observer((props) => {
   const getAiContent = userContext.classHash ? useFirebaseFunction("getAiContent_v2") : null;
   const [isUpdating, setIsUpdating] = useState(false);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+  // Why these are component state and not content.text: the analysis is the student's to keep
+  // while they work, so nothing transient may overwrite it. A message written into content.text
+  // would be saved into the document and replace the last analysis for good.
+  const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const identifier = getDocumentIdentifier(getParentOfType(model, DocumentContentModel));
   // Guards against overlapping refresh requests: each run's generation, checked after its await,
   // tells a superseded request not to touch text or isUpdating.
   const requestGenerationRef = useRef(0);
-  // Text to restore when a request is invalidated with no successor to finish the job (e.g. the
-  // class context disappears mid-request). Shared across runs, and cleared once no longer needed.
-  const previousTextRef = useRef<string | undefined>(undefined);
   // The refreshCount this effect last ran against. The effect also reruns when userContext, the
   // document or unit config changes, so "has ever been refreshed" would misread those as the
   // student asking — see userRequested below.
@@ -70,16 +71,10 @@ export const AIComponent: React.FC<ITileProps> = observer((props) => {
     // many times they clicked before. Decides whether a failure is theirs to see — see the catch.
     const userRequested = content.refreshCount > lastRefreshCountRef.current;
     lastRefreshCountRef.current = content.refreshCount;
-    // Undo a superseded run's own blanking before anything else runs, so this run starts from real
-    // text — otherwise this run's own capture below would save the blank, not the good text.
-    if (previousTextRef.current !== undefined) {
-      content.setText(previousTextRef.current);
-      previousTextRef.current = undefined;
-      if (!getAiContent) setIsUpdating(false);
-    }
     if (getAiContent) {
       const queryAI = async () => {
         setIsUpdating(true);
+        setStatusMessage(null);
         try {
           if (!identifier || !model.id) {
             console.error("No document identifier or tileId found");
@@ -101,7 +96,7 @@ export const AIComponent: React.FC<ITileProps> = observer((props) => {
           }
           // A student document with no work in it: nudge, and make no request.
           if (!documentHasStudentWork(getSnapshot(document.content))) {
-            content.setText(AI_TILE_EMPTY_MESSAGE);
+            setStatusMessage(AI_TILE_EMPTY_MESSAGE);
             return;
           }
 
@@ -136,15 +131,11 @@ export const AIComponent: React.FC<ITileProps> = observer((props) => {
           // the document, and must not be told nothing has changed.
           const requestHash = hashString(dynamicContentPrompt);
           if (requestHash === content.evaluatedRequestHash) {
-            // Only someone who pressed Update is told why nothing happened. That is the authoring
-            // view only -- a tile copied into a student workspace has hidePrompt set, so it has no
-            // Update button and a gated run there is silent.
-            if (userRequested) content.setText(AI_TILE_UNCHANGED_MESSAGE);
+            // Only someone who pressed Refresh is told why nothing happened; a rerun from any
+            // other dependency is nobody asking, and a message there would appear unprompted.
+            if (userRequested) setStatusMessage(AI_TILE_UNCHANGED_MESSAGE);
             return;
           }
-
-          previousTextRef.current = content.text;
-          content.setText("");
 
           const response = await getAiContent({
             context: userContext,
@@ -163,24 +154,16 @@ export const AIComponent: React.FC<ITileProps> = observer((props) => {
           }
           content.setText(response.data.text);
           content.setEvaluatedRequestHash(requestHash);
-          previousTextRef.current = undefined;
           if (response.data.lastUpdated) {
             const timestamp = response.data.lastUpdated;
             setLastUpdated(new Date(timestamp._seconds*1000));
           }
         } catch (error) {
-          // A requested refresh reports: restoring would look like a refresh that did nothing, and
-          // this message is document content, the same tradeoff AI_TILE_EMPTY_MESSAGE makes above.
-          // An automatic one restores instead, so a transient failure cannot replace a good saved
-          // answer. A superseded run is neither, and isAlive guards a tile deleted mid-request.
+          // Only a requested refresh reports: an automatic one failing is not something the
+          // student asked about, and the last analysis is still on screen either way. A superseded
+          // run is neither, and isAlive guards a tile deleted mid-request.
           if (isCurrent() && isAlive(content)) {
-            if (userRequested) {
-              content.setText(AI_TILE_REQUEST_FAILED_MESSAGE);
-              previousTextRef.current = undefined;
-            } else if (previousTextRef.current !== undefined) {
-              content.setText(previousTextRef.current);
-              previousTextRef.current = undefined;
-            }
+            if (userRequested) setStatusMessage(AI_TILE_REQUEST_FAILED_MESSAGE);
             // Logged either way; console.error reaches nobody, as Rollbar captures only uncaught
             // errors. Its own event, not logAiEvent: that cascades into QUESTION_ANSWERS_CHANGE
             // for a tile inside a Question tile, carrying the prompt and sibling answers.
@@ -194,6 +177,11 @@ export const AIComponent: React.FC<ITileProps> = observer((props) => {
         }
       };
       queryAI();
+    } else {
+      // No class context, so no request will run. Bumping the generation above already made any
+      // in-flight request's own `finally` a no-op, so this is the only thing left that can clear
+      // the loading state -- without it the tile shows "Loading..." forever.
+      setIsUpdating(false);
     }
   }, [
     content.refreshCount, content, documentId, documents, getAiContent, identifier, model.id, networkDocuments,
@@ -275,11 +263,9 @@ export const AIComponent: React.FC<ITileProps> = observer((props) => {
           <div className="last-updated">
             {lastUpdated ? lastUpdated.toLocaleString("en-US", {dateStyle: "long", timeStyle: "short"}) : "..."}
           </div>
-          {isUpdating ? (
-            <p>Loading...</p>
-          ) : (
-            <Markdown>{content.text}</Markdown>
-          )}
+          {isUpdating && <p className="ai-status">Loading...</p>}
+          {!isUpdating && statusMessage && <p className="ai-status">{statusMessage}</p>}
+          <Markdown>{content.text}</Markdown>
         </div>
       </div>
     </div>
