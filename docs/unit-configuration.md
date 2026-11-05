@@ -335,8 +335,11 @@ Output blocks graph over the range their field reads, not over the range the stu
 drive them through, so two programs are comparable at a glance. A Servo spans its full travel
 (0–180° or 0–100%), a Gripper 0–100% closed, and a Light Bulb or relay 0–1. The zoom buttons still
 override that, and the graph's own reset returns to it. Blocks with no fixed range — sensors,
-Number, Generator, Timer — scale to their data as before, and so does the Advanced Gripper, whose
-tilt series runs −1 to 1 alongside its position and would be flattened by a 0–100 axis.
+Number, Generator, Timer — scale to their data as before.
+
+A block that graphs more than one series takes its axis from the first, which is the value its
+field reads out. The Advanced Gripper graphs 0–100 % closed, like the plain Gripper, and its tilt
+series is drawn on that axis rather than setting it.
 - `liveOutputTypes`: an array of Live Output type names to offer in the block's dropdown, e.g.
   `["Servo", "Gripper 2.0"]`. Absent, empty, unknown-only, or listing *every* type all mean the full
   list (no restriction, standard order). For a genuine subset the author's order is preserved and the

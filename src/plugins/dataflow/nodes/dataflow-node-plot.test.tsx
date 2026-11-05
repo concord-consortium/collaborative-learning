@@ -117,20 +117,41 @@ describe("DataflowNodePlot", () => {
     expect(axisOfLastChart()).toEqual({ min: 18, max: 36 });
   });
 
-  // A declared range that covered only some series would push the others off the axis -- the
-  // Advanced Gripper's tilt beside its position is exactly that.
-  it("scales to the data when only some watched values declare a range", () => {
-    const model = makeModel({
-      watchedValues: { nodeValue: {}, tilt: {} },
-      getTickEntries: () => [{ nodeValue: 18, tilt: -1 }, { nodeValue: 36, tilt: 1 }],
-      dsMax: -Infinity, dsMin: Infinity, tickMax: undefined, tickMin: undefined
-    } as any);
+  // The Advanced Gripper's shape: a position the field reads out, and a tilt series beside it.
+  // The axis belongs to the first series, so the block is readable in its own units.
+  const twoSeriesModel = () => makeModel({
+    watchedValues: { nodeValue: {}, tilt: {} },
+    getTickEntries: () => [{ nodeValue: 18, tilt: -1 }, { nodeValue: 36, tilt: 1 }],
+    dsMax: -Infinity, dsMin: Infinity, tickMax: undefined, tickMin: undefined
+  } as any);
+
+  it("takes the axis from the first series that declares one, not from the others", () => {
+    const model = twoSeriesModel();
     render(<DataflowNodePlot model={model} recordedTicks={["a", "b"]}
       plotScale={key => key === "nodeValue" ? percentScale : undefined} />);
 
-    // The conversion is per series and still applies -- nodeValue 18 and 36 plot as 10 and 20 --
-    // but the axis falls back to the data rather than pinning to the one declared range.
-    expect(axisOfLastChart()).toEqual({ min: -1, max: 20 });
+    expect(axisOfLastChart()).toEqual({ min: 0, max: 100 });
+  });
+
+  // With only one series declaring a range, first and last are the same thing: this is the case
+  // that actually pins the order.
+  it("prefers the first series' axis when more than one declares one", () => {
+    const model = twoSeriesModel();
+    const tiltScale = { min: -1, max: 1 };
+    render(<DataflowNodePlot model={model} recordedTicks={["a", "b"]}
+      plotScale={key => key === "nodeValue" ? percentScale : tiltScale} />);
+
+    expect(axisOfLastChart()).toEqual({ min: 0, max: 100 });
+  });
+
+  it("still plots the undeclared series, unconverted, on that axis", () => {
+    const model = twoSeriesModel();
+    render(<DataflowNodePlot model={model} recordedTicks={["a", "b"]}
+      plotScale={key => key === "nodeValue" ? percentScale : undefined} />);
+
+    const [position, tilt] = mockLine.mock.lastCall[0].data.datasets;
+    expect(position.data).toEqual([10, 20]);
+    expect(tilt.data).toEqual([-1, 1]);
   });
 
   it("lets a zoom override the declared range", () => {

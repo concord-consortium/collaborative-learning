@@ -132,18 +132,16 @@ export class DemoOutputNode extends BaseNode<
     return this.services.stores.appConfig.getSetting("servoInputMode", "dataflow") === "proportion";
   }
 
-  /**
-   * The Advanced Gripper is deliberately not here. It graphs tilt (-1 to 1) beside its position,
-   * so pinning the axis to the position's 0-100 would flatten the tilt trace into the baseline.
-   * It keeps scaling to its data, where both series stay readable.
-   */
   getPlotScale(valueKey: string): IPlotScale | undefined {
+    // The Advanced Gripper's tilt is deliberately left undeclared, so the axis belongs to the
+    // position below -- the value the block's field reads out. Tilt is still plotted, but it
+    // runs -1 to 1 against a 0-100 axis and so sits along the bottom.
     if (valueKey !== "nodeValue") return undefined;
     const { outputType } = this.model;
     if (kServoOutputTypes.includes(outputType)) {
       return servoPlotScale(this.servoProportionMode);
     }
-    if (outputType === "Grabber") {
+    if (outputType === "Grabber" || outputType === "Advanced Grabber") {
       // Stored as the 0-1 fraction GrabberAnimation's playToPercent takes; the field reads a
       // percentage, so the graph does too.
       return { toPlot: value => value * 100, min: 0, max: 100 };

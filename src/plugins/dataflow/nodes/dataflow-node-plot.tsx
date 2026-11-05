@@ -26,24 +26,20 @@ let stepY = 5;
 const kMinZoomHalfSpan = 0.5;
 
 /**
- * The axis a node declares for everything it plots, or undefined to scale to the data as before.
+ * The axis a node declares, taken from the first watched value that declares one, or undefined to
+ * scale to the data as before.
  *
- * Every watched value has to declare one. A node that declares a range for some of its series and
- * not others would pin the axis around the ones it knows and push the rest off it -- the Advanced
- * Gripper's tilt, which runs -1 to 1 beside a 0-100 position, is exactly that case.
+ * First, not the union of all of them: a node's first series is the one its field reads out and
+ * the one the block is about, so that is the scale the axis should be readable in. The Advanced
+ * Gripper is why -- it plots tilt beside its position, and a union would put the axis in neither
+ * block's units. A later series is still drawn, on that axis, wherever its values fall.
  */
 function declaredExtent(model: IBaseNodeModel, plotScale: PlotScaleFn) {
-  const keys = Object.keys(model.watchedValues);
-  if (!keys.length) return undefined;
-  let min = Infinity;
-  let max = -Infinity;
-  for (const key of keys) {
+  for (const key of Object.keys(model.watchedValues)) {
     const scale = plotScale(key);
-    if (scale?.min == null || scale?.max == null) return undefined;
-    min = Math.min(min, scale.min);
-    max = Math.max(max, scale.max);
+    if (scale?.min != null && scale?.max != null) return { min: scale.min, max: scale.max };
   }
-  return { min, max };
+  return undefined;
 }
 
 // A zoom still wins over the declared range, and resetGraph clears it to return there.

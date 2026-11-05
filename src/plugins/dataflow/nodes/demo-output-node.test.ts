@@ -124,10 +124,15 @@ describe("DemoOutputNode.getPlotScale", () => {
     expect(scaleOf("Light Bulb")).toMatchObject({ min: 0, max: 1 });
   });
 
-  // Left to scale to its data: pinning the axis to the position's 0-100 would flatten tilt,
-  // which runs -1 to 1, into the baseline.
-  it("declares nothing for the Advanced Gripper, or for the tilt series", () => {
-    expect(scaleOf("Advanced Grabber")).toBeUndefined();
-    expect(stubbedNode("Servo" as any).getPlotScale("tilt")).toBeUndefined();
+  // The axis belongs to the position, which is what the block's field reads out. Tilt declares
+  // nothing, so it is drawn on that axis rather than claiming it.
+  it("graphs the Advanced Gripper's position as a percentage, like the plain Gripper", () => {
+    const scale = scaleOf("Advanced Grabber");
+    expect(scale?.toPlot?.(0.5)).toBe(50);
+    expect({ min: scale?.min, max: scale?.max }).toEqual({ min: 0, max: 100 });
+  });
+
+  it("declares nothing for the tilt series", () => {
+    expect(stubbedNode("Advanced Grabber" as any).getPlotScale("tilt")).toBeUndefined();
   });
 });
