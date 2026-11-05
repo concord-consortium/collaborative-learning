@@ -1,4 +1,5 @@
-// The detach-on-structural-change behavior, tested through a real document with history enabled.
+// The detach-on-structural-change behavior and the node/column rename, tested through a real
+// document with history enabled.
 //
 // It lives in its own file because it needs the undo harness — createDocumentModel, an enabled
 // tree monitor and a TreeManager — plus the firebase mock that pulls in, none of which the rest of
@@ -124,7 +125,7 @@ describe("detaching a linked table on a structural change", () => {
   it("does not detach when a node is renamed", () => {
     const { content } = setupDocumentWithLinkedTable();
     captureOnePoint(content);
-    content.program.nodes.get("node-0")?.data.setOrderedDisplayName?.("Renamed");
+    content.renameNode("node-0", "Renamed");
     expect(content.linkedTableTileId).toBe("table1");
   });
 
@@ -133,6 +134,62 @@ describe("detaching a linked table on a structural change", () => {
     captureOnePoint(content);
     content.program.nodes.get("node-0")?.data.setNodeValue(999);
     expect(content.linkedTableTileId).toBe("table1");
+  });
+});
+
+// A node and its column share one name, so renaming either is one change: one history entry, and
+// one undo that puts both names back.
+describe("renaming a node or its column with history", () => {
+  const nodeName = (content: DataflowContentModelType, id: string) =>
+    content.program.nodes.get(id)!.data.orderedDisplayName;
+
+  /** The action of each history entry that renamed a node or a column.
+   *
+   * Picked out by patch rather than by counting entries: an entry from setting up the link can
+   * arrive after the ones that follow it (see settleOn). */
+  const renameEntryActions = (manager: Instance<typeof TreeManager>) =>
+    manager.document.history
+      .filter(entry => entry.modelActionKey !== "UndoStore.undo")
+      .filter(entry => entry.records.some(record => record.patches.some(patch =>
+        /\/orderedDisplayName$|\/attributes\/\d+\/name$/.test(patch.path))))
+      .map(entry => entry.modelActionKey);
+
+  it("records a column rename and the node rename it causes as one entry", async () => {
+    const { content, tableContent, manager, undoStore } = setupDocumentWithLinkedTable();
+    captureOnePoint(content);
+    await settleOn(manager, "DataSet.addCanonicalCasesWithIDs");
+    const servoAttr = tableContent.dataSet.attributes[2];
+
+    tableContent.dataSet.setAttributeName(servoAttr.id, "Gripper");
+    await settleOn(manager, "DataSet.setAttributeName");
+
+    expect(nodeName(content, "node-1")).toBe("Gripper");
+    expect(renameEntryActions(manager)).toEqual(["DataSet.setAttributeName"]);
+
+    undoStore.undo();
+    await settleOn(manager, "UndoStore.undo");
+
+    expect(servoAttr.name).toBe("Servo");
+    expect(nodeName(content, "node-1")).toBe("Servo");
+  });
+
+  it("records a node rename and the column rename it causes as one entry", async () => {
+    const { content, tableContent, manager, undoStore } = setupDocumentWithLinkedTable();
+    captureOnePoint(content);
+    await settleOn(manager, "DataSet.addCanonicalCasesWithIDs");
+    const columnNames = () => tableContent.dataSet.attributes.map((a: any) => a.name);
+
+    content.renameNode("node-0", "Thermometer");
+    await settleOn(manager, "DataflowTool.renameNode");
+
+    expect(columnNames()).toEqual(["Point", "Thermometer", "Servo"]);
+    expect(renameEntryActions(manager)).toEqual(["DataflowTool.renameNode"]);
+
+    undoStore.undo();
+    await settleOn(manager, "UndoStore.undo");
+
+    expect(columnNames()).toEqual(["Point", "Sensor", "Servo"]);
+    expect(nodeName(content, "node-0")).toBe("Sensor");
   });
 });
 

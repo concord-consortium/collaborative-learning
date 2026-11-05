@@ -1,4 +1,4 @@
-import { applyPatch, getSnapshot, unprotect } from "mobx-state-tree";
+import { applyPatch, getSnapshot, IJsonPatch, onPatch, unprotect } from "mobx-state-tree";
 import {
   defaultDataflowContent, DEFAULT_PROGRAM_ZOOM, DataflowContentModel, DataflowContentModelSnapshotIn,
   DataflowContentModelType
@@ -467,6 +467,9 @@ describe("hasRecordedRun", () => {
 
 // One name shared by a node and its column, in both directions. A rename deliberately does not
 // detach -- the columns still describe the program -- so without this the headers go stale.
+//
+// These tests have no history framework, which is what calls updateAfterSharedModelChanges after a
+// dataset change, so they call it themselves. dataflow-detach-undo.test.ts covers the real wiring.
 describe("node and column name sync", () => {
   const columnNames = (content: DataflowContentModelType) =>
     content.dataSet.attributes.map(a => a.name);
@@ -475,9 +478,10 @@ describe("node and column name sync", () => {
     const content = setupContentWithTwoNamedNodes("Sensor", "Servo");
     content.prepareCapture();
 
-    content.program.nodes.get("node-0")!.data.setOrderedDisplayName("Thermometer");
+    content.renameNode("node-0", "Thermometer");
 
     expect(columnNames(content)).toEqual(["Point", "Thermometer", "Servo"]);
+    expect(content.program.nodes.get("node-0")!.data.orderedDisplayName).toBe("Thermometer");
   });
 
   it("renames the node when the column is renamed", () => {
@@ -486,19 +490,24 @@ describe("node and column name sync", () => {
     const servoAttr = content.dataSet.attributes[2];
 
     content.dataSet.setAttributeName(servoAttr.id, "Gripper");
+    content.updateAfterSharedModelChanges(content.sharedModel);
 
     expect(content.program.nodes.get("node-1")!.data.orderedDisplayName).toBe("Gripper");
   });
 
-  // Each direction writes only when the two differ, so the pair settles rather than ping-ponging.
-  it("settles instead of looping when a name changes", () => {
+  // renameNode's column rename is itself a dataset change, so the framework calls
+  // updateAfterSharedModelChanges next. That call must find the names equal and write nothing.
+  it("writes nothing on the update that follows a node rename", () => {
     const content = setupContentWithTwoNamedNodes("Sensor", "Servo");
     content.prepareCapture();
+    content.renameNode("node-0", "Thermometer");
 
-    content.program.nodes.get("node-0")!.data.setOrderedDisplayName("Thermometer");
+    const patches: IJsonPatch[] = [];
+    const dispose = onPatch(content, patch => patches.push(patch));
+    content.updateAfterSharedModelChanges(content.sharedModel);
+    dispose();
 
-    expect(columnNames(content)).toEqual(["Point", "Thermometer", "Servo"]);
-    expect(content.program.nodes.get("node-0")!.data.orderedDisplayName).toBe("Thermometer");
+    expect(patches).toEqual([]);
   });
 
   // The point column carries no node id, and nothing should try to trace it to one.
@@ -506,23 +515,23 @@ describe("node and column name sync", () => {
     const content = setupContentWithTwoNamedNodes("Sensor", "Servo");
     content.prepareCapture();
 
-    content.program.nodes.get("node-0")!.data.setOrderedDisplayName("Thermometer");
+    content.renameNode("node-0", "Thermometer");
 
     expect(content.dataSet.attributes[0].name).toBe("Point");
   });
 
-  // A capture the program no longer holds describes the old program, so renames must not reach it.
   // Between captures the dataset holds the default x | y placeholder. Those columns describe no
   // node, so syncing from them renamed the program's first block to "y".
   it("does not rename a node after the recording is cleared", () => {
     const content = setupContentWithTwoNamedNodes("Sensor", "Servo");
     content.prepareCapture();
     content.resetRecording();
-    content.syncNodeNamesFromColumns();
+    content.updateAfterSharedModelChanges(content.sharedModel);
     expect([...content.program.nodes.values()].map(n => n.data.orderedDisplayName))
       .toEqual(["Sensor", "Servo"]);
   });
 
+  // A capture the program no longer holds describes the old program, so renames must not reach it.
   it("does not touch a dataset the program has detached", () => {
     const { content, doc, sharedModelManager } = setupContentWithLinkedTable();
     const tableContent = doc.getTile("table1")!.content as any;
@@ -542,7 +551,7 @@ describe("node and column name sync", () => {
     expect(tableContent.dataSet.attributes.map((a: any) => a.name)).toEqual(["Point", "Sensor", "Servo"]);
 
     content.detachLinkedTables();
-    content.program.nodes.get("node-0")!.data.setOrderedDisplayName("Thermometer");
+    content.renameNode("node-0", "Thermometer");
 
     expect(tableContent.dataSet.attributes.map((a: any) => a.name)).toEqual(["Point", "Sensor", "Servo"]);
   });
@@ -593,7 +602,7 @@ describe("name sync after a copy has remapped the attribute ids", () => {
     originals.forEach(({ name }) => addAttributeToDataSet(content.dataSet, { name }));
     expect(content.dataSet.attributes.every(a => !a.id.includes("*"))).toBe(true);
 
-    content.program.nodes.get("node-0")!.data.setOrderedDisplayName("Thermometer");
+    content.renameNode("node-0", "Thermometer");
 
     expect(content.dataSet.attributes.map(a => a.name)).toEqual(["Point", "Thermometer", "Servo"]);
   });

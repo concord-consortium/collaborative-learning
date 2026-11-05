@@ -16,9 +16,10 @@ export const EditableNodeName: React.FC<EditableNodeNameProps> = observer(
     const editingRef = useRef(false);
 
     // The model name can change under this input -- renaming the node's column in a linked table
-    // writes it (see syncNodeNamesFromColumns). Without this the input keeps its stale draft, and
-    // the next blur saves that draft back over the rename, silently undoing it. Not while editing,
-    // so a student's half-typed name is never yanked out from under them.
+    // writes it (see DataflowContentModel.updateAfterSharedModelChanges). Without this the input
+    // keeps its stale draft, and the next blur saves that draft back over the rename, silently
+    // undoing it. Not while editing, so a student's half-typed name is never yanked out from under
+    // them.
     useEffect(() => {
       if (!editingRef.current) setNodeName(node.model.orderedDisplayName);
     }, [node.model.orderedDisplayName]);
@@ -51,7 +52,7 @@ export const EditableNodeName: React.FC<EditableNodeNameProps> = observer(
     function saveNodeName() {
       editingRef.current = false;
       if (discardingRef.current || node.readOnly) return;
-      nodeName && node.model.setOrderedDisplayName(nodeName);
+      nodeName && node.rename(nodeName);
     }
 
     const valueString = node.readOnly ? node.model.orderedDisplayName : nodeName;

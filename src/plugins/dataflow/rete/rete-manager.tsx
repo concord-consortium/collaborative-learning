@@ -546,6 +546,10 @@ export class ReteManager implements INodeServices {
     this.area.emit({ type: "nodepicked", data: { id: nodeId } });
   };
 
+  public renameNode = (nodeId: string, name: string) => {
+    this.mstContent.renameNode(nodeId, name);
+  };
+
   // Disable the area's background drag (it panned on left-drag) and wire marquee selection so a
   // left-drag on the empty canvas rubber-band-selects nodes instead.
   private setupMarqueeSelection() {

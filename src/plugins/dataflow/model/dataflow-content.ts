@@ -386,32 +386,23 @@ export const DataflowContentModel = TileContentModel
   }))
   .actions(self => ({
     /**
-     * Keeps a capture's column headers and its nodes' names the same, in both directions: renaming
-     * a node renames its column, and renaming a column renames its node. One name, so there is no
-     * conflict to arbitrate and no stale header after a rename -- which matters because a rename
-     * deliberately does not detach, the columns still describing the program.
+     * Renames a node and, while the dataset holds a capture of this program, the node's column.
      *
-     * Both directions are idempotent, writing only when the two differ, so the pair converges
-     * after one round trip rather than looping.
+     * A node and its column share one name, so there is no conflict to arbitrate and no stale
+     * header after a rename -- which matters because a rename deliberately does not detach, the
+     * columns still describing the program. Renaming a column renames its node in the other
+     * direction; see updateAfterSharedModelChanges.
      *
-     * withoutUndo because this is derived, not an edit of its own: undoing a rename puts the
-     * original name back and the other side simply follows, instead of needing a second undo and
-     * leaving the two out of step in between.
+     * Both renames happen in this one action so they make one history entry, and one undo puts
+     * both names back.
      */
-    syncColumnNamesFromNodes() {
-      withoutUndo();
-      captureColumnsWithNodes(self.dataSet, self.program).forEach(({ attr, node }) => {
-        const nodeName = node.data.orderedDisplayName;
-        if (nodeName && attr.name !== nodeName) self.dataSet.setAttributeName(attr.id, nodeName);
-      });
-    },
-    syncNodeNamesFromColumns() {
-      withoutUndo();
-      captureColumnsWithNodes(self.dataSet, self.program).forEach(({ attr, node }) => {
-        if (attr.name && node.data.orderedDisplayName !== attr.name) {
-          node.data.setOrderedDisplayName(attr.name);
-        }
-      });
+    renameNode(nodeId: string, name: string) {
+      const node = self.program.nodes.get(nodeId);
+      if (!node) return;
+      const column = captureColumnsWithNodes(self.dataSet, self.program)
+        .find(pair => pair.node === node)?.attr;
+      node.data.setOrderedDisplayName(name);
+      if (column && column.name !== name) self.dataSet.setAttributeName(column.id, name);
     },
     detachLinkedTables() {
       // Never reattached by undo, deliberately. A recorded capture describes the program as it
@@ -508,19 +499,6 @@ export const DataflowContentModel = TileContentModel
       },
       {name: "sharedModelSetup", fireImmediately: true}));
 
-      // A rename on either side moves the other. Only this program's current dataset is watched,
-      // so a table that has been detached keeps the headers it was captured with.
-      addDisposer(self, reaction(
-        () => Array.from(self.program.nodes.values())
-          .map(node => `${node.id}:${node.data.orderedDisplayName ?? ""}`).join("|"),
-        () => self.syncColumnNamesFromNodes(),
-        {name: "syncColumnNamesFromNodes"}));
-
-      addDisposer(self, reaction(
-        () => self.dataSet.attributes.map(attr => `${attr.id}:${attr.name}`).join("|"),
-        () => self.syncNodeNamesFromColumns(),
-        {name: "syncNodeNamesFromColumns"}));
-
       // Structure only -- node and connection ids. A rename or a value change leaves the capture's
       // columns describing the program, so neither detaches. A reaction rather than a call inside
       // each structural action, so that withoutUndo applies; see detachLinkedTables.
@@ -582,8 +560,27 @@ export const DataflowContentModel = TileContentModel
     setLastPanDirection(direction: PanDirection) {
       self.lastPanDirection = direction;
     },
+    /**
+     * Renaming a capture column, in a linked table, renames its node; renameNode covers the other
+     * direction.
+     *
+     * Done here rather than in a reaction because the history framework records what this changes
+     * in the same entry as the change to the dataset, so the column and node renames undo
+     * together. During an undo the framework holds this call until both names have been restored,
+     * when it finds nothing to change.
+     *
+     * Runs on every change to the dataset, including each row a recording adds, so it only writes
+     * a name that differs. A table that has been detached holds a dataset this program no longer
+     * shares, so its renames never reach here.
+     */
     updateAfterSharedModelChanges(sharedModel?: SharedModelType){
-      //do nothing
+      // Undefined after an undo or a replay, when any shared model may have changed.
+      if (sharedModel && sharedModel !== self.sharedModel) return;
+      captureColumnsWithNodes(self.dataSet, self.program).forEach(({ attr, node }) => {
+        if (attr.name && node.data.orderedDisplayName !== attr.name) {
+          node.data.setOrderedDisplayName(attr.name);
+        }
+      });
     },
     addNewAttrFromNode(nodeId: string, nodeName: string){
       const newAttributeId = uniqueId() + "*" + nodeId;
