@@ -58,6 +58,10 @@ export const SupportModel = types
 
     return snapshot;
   })
+  // Post-processors can break document history (see the post-processor rule in .eslintrc.js).
+  // This one is allowed because supports are curriculum and class data, not document content, so
+  // no history records them.
+  // eslint-disable-next-line no-restricted-syntax
   .postProcessSnapshot(snapshot => {
     if (snapshot.linkedDocumentKey) return snapshot;
     // Firebase doesn't handle undefined values, so delete the linkedDocumentKey if it is empty.
