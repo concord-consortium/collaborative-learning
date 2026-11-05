@@ -1,15 +1,13 @@
 import { nanoid } from "nanoid";
+import {
+  kContentPath, kSharedModelEntryRegex, kSharedModelMapPath, kSharedModelSubtreeRegex, kTileMapPath,
+  kTileSubtreeRegex
+} from "../document/document-paths";
 import { getSharedModelInfoByType } from "../shared/shared-model-registry";
 import { getTileContentInfo } from "../tiles/tile-content-info";
 import { ISchemaVersionInfo } from "../tiles/schema-version-info";
 import { HistoryEntrySnapshot } from "./history";
 import { diffJson } from "./json-patch";
-
-const kTileMapPath = "/content/tileMap";
-const kSharedModelMapPath = "/content/sharedModelMap";
-
-const tilePathRegex = /^\/content\/tileMap\/([^/]+)(\/|$)/;
-const sharedModelPathRegex = /^\/content\/sharedModelMap\/([^/]+)\/sharedModel(\/|$)/;
 
 function isObject(value: unknown): value is Record<string, any> {
   return !!value && typeof value === "object" && !Array.isArray(value);
@@ -19,9 +17,9 @@ function isObject(value: unknown): value is Record<string, any> {
  * Returns the path of the tile or shared model that `patchPath` is at or below, or undefined.
  */
 export function getModelPath(patchPath: string): string | undefined {
-  const tileMatch = tilePathRegex.exec(patchPath);
+  const tileMatch = kTileSubtreeRegex.exec(patchPath);
   if (tileMatch) return `${kTileMapPath}/${tileMatch[1]}`;
-  const sharedMatch = sharedModelPathRegex.exec(patchPath);
+  const sharedMatch = kSharedModelSubtreeRegex.exec(patchPath);
   if (sharedMatch) return `${kSharedModelMapPath}/${sharedMatch[1]}/sharedModel`;
   return undefined;
 }
@@ -127,12 +125,12 @@ export function convertJsonAtPath(path: string, value: unknown): unknown {
   if (path === kSharedModelMapPath) {
     return convertSharedModelMap(value).map;
   }
-  if (path.startsWith(`${kSharedModelMapPath}/`) && path.split("/").length === 4) {
-    const id = path.split("/")[3];
-    const converted = convertOldModelJsonAtPath(`${kSharedModelMapPath}/${id}/sharedModel`, value.sharedModel);
+  const entryMatch = kSharedModelEntryRegex.exec(path);
+  if (entryMatch) {
+    const converted = convertOldModelJsonAtPath(`${path}/sharedModel`, value.sharedModel);
     return converted === undefined ? value : { ...value, sharedModel: converted };
   }
-  if (path === "/content") {
+  if (path === kContentPath) {
     return convertContentJson(value).content;
   }
   return value;

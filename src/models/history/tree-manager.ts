@@ -8,6 +8,7 @@ import { TreePatchRecord, HistoryEntry, TreePatchRecordSnapshot,
   HistoryOperation,
   ICreateHistoryEntry, HistoryEntrySnapshot, getEntryPatchesForTree} from "./history";
 import { DEBUG_HISTORY } from "../../lib/debug";
+import { kContentPath, kTileMapPath } from "../document/document-paths";
 import { PatchApplicationError } from "./tree";
 import { IDocumentMetadata } from "../../../shared/shared";
 import { Firestore } from "../../lib/firestore";
@@ -53,7 +54,7 @@ function findFailedSegment(numApplied: number, segments: PatchSegment[]) {
 
 export function entryChangesContent(entry: HistoryEntrySnapshot) {
   return !!entry.records?.some(record =>
-    record.patches?.some(patch => patch.path === "/content" || patch.path.startsWith("/content/")));
+    record.patches?.some(patch => patch.path === kContentPath || patch.path.startsWith(`${kContentPath}/`)));
 }
 
 /**
@@ -281,12 +282,12 @@ export const TreeManager = types
           action: "/injectFailingHistoryEntry",
           patches: [{
             op: "replace",
-            path: "/content/tileMap/NONEXISTENT_TILE/content/value",
+            path: `${kTileMapPath}/NONEXISTENT_TILE/content/value`,
             value: "this patch will fail"
           }],
           inversePatches: [{
             op: "replace",
-            path: "/content/tileMap/NONEXISTENT_TILE/content/value",
+            path: `${kTileMapPath}/NONEXISTENT_TILE/content/value`,
             value: "original"
           }]
         }]

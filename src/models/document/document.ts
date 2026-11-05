@@ -38,6 +38,7 @@ import { DocumentTypeEnum, IDocumentContext, ISetProperties, isPublishedType,
   PlanningDocument, ProblemDocument, ProblemPublication, SupportPublication
 } from "./document-types";
 import { DocumentCommentsManager } from "./document-comments-manager";
+import { kTileSubtreeRegex } from "./document-paths";
 
 export enum ContentStatus {
   Valid,
@@ -473,14 +474,12 @@ export const createDocumentModel = (snapshot?: DocumentModelSnapshotType) => {
     setTimeout(() => formulaManager.addAdapters(createFormulaAdapters(adapterApi)));
 
     addDisposer(document, onAction(document, (call) => {
-      if (!document.content || !call.path?.match(/\/content\/tileMap\//)) {
+      const tileId = call.path ? kTileSubtreeRegex.exec(call.path)?.[1] : undefined;
+      if (!document.content || !tileId) {
         return;
       }
-      const tileTypeId = call.path?.match(/\/content\/tileMap\/([^/]*)/)?.[1];
-      if (tileTypeId) {
-        const tile = document.content.tileMap.get(tileTypeId);
-        tile?.onTileAction(call);
-      }
+      const tile = document.content.tileMap.get(tileId);
+      tile?.onTileAction(call);
     }));
     if (document.content) {
       sharedModelManager.setDocument(document.content);

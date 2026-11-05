@@ -4,6 +4,7 @@ import {
 } from "mobx-state-tree";
 import { nanoid } from "nanoid";
 import { DocumentContentModelType } from "../document/document-content";
+import { kSharedModelEntrySubtreeRegex, kSharedModelMapPath } from "../document/document-paths";
 import { TreeManagerAPI } from "./tree-manager-api";
 import { TreePatchRecordSnapshot } from "./history";
 import { Tree } from "./tree";
@@ -115,9 +116,9 @@ export class TreeMonitor {
             //   /content/sharedModelMap/${sharedModelId}
             // When a shared model is linked or unlinked to a tile the path will be:
             //   /content/sharedModelMap/${sharedModelId}/tiles/[index]
-            const pathMatch = _patch.path.match(/(.*\/content\/sharedModelMap\/[^/]+)/);
+            const pathMatch = kSharedModelEntrySubtreeRegex.exec(_patch.path);
             if (pathMatch) {
-              const sharedModelPath = pathMatch[1];
+              const sharedModelPath = `${kSharedModelMapPath}/${pathMatch[1]}`;
 
               if (!sharedModelModifications[sharedModelPath]) {
                 sharedModelModifications[sharedModelPath] = 1;
