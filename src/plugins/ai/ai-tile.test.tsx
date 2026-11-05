@@ -23,7 +23,6 @@ const mockStores = {
   },
   documents: { getDocument: jest.fn((): any => undefined) },
   networkDocuments: { getDocument: jest.fn((): any => undefined) },
-  db: { firestore: {} },
 };
 jest.mock("../../hooks/use-stores", () => ({
   useStores: () => mockStores,
@@ -46,7 +45,8 @@ import {
 } from "../../models/document/ai-evaluation-messages";
 import { DocumentContentModel } from "../../models/document/document-content";
 import { ReadOnlyContext } from "../../components/document/read-only-context";
-import { getLastHistoryEntry } from "../../models/history/history-firestore";
+import { documentSummarizer } from "../../../shared/ai-summarizer/ai-summarizer";
+import { hashString } from "../../../shared/hash-string";
 
 // The starter tile needs to be registered so the TileModel.create
 // knows it is a supported tile type
@@ -95,14 +95,6 @@ jest.mock("mobx-state-tree", () => ({
 jest.mock("../../models/document/document-utils", () => ({
   getDocumentIdentifier: jest.fn(() => "test-doc-content-id")
 }));
-
-jest.mock("../../models/history/history-firestore", () => ({
-  getLastHistoryEntry: jest.fn()
-}));
-// Resolving undefined means no history index is known, which the gate reads as "changed", so the
-// tests that aren't about the gate reach the request path as they did before it existed.
-const mockGetLastHistoryEntry = getLastHistoryEntry as jest.Mock;
-mockGetLastHistoryEntry.mockResolvedValue(undefined);
 
 // Logger.stores is uninitialized in this component test; mock the change logger so setPrompt/setText
 // don't crash when the AI content logs changes.
@@ -188,11 +180,11 @@ describe("AIComponent", () => {
     // Genuinely empty per documentHasStudentWork: no tiles at all.
     const emptyDocContent = () => DocumentContentModel.create({});
     // A Text tile with real content, so documentHasStudentWork is true.
-    const populatedDocContent = () => DocumentContentModel.create({
+    const populatedDocContent = (text = "The student's answer.") => DocumentContentModel.create({
       rowMap: { row1: { id: "row1", tiles: [{ tileId: "tile1" }] } },
       rowOrder: ["row1"],
       tileMap: {
-        tile1: { id: "tile1", content: { type: "Text", format: "markdown", text: "The student's answer." } }
+        tile1: { id: "tile1", content: { type: "Text", format: "markdown", text } }
       }
     } as any);
 
@@ -202,6 +194,12 @@ describe("AIComponent", () => {
     ) {
       return { key: "test-doc-1", content: docContent, ...curriculum };
     }
+
+    // The gate lets a refresh through only when the document's summary changed, so a test that
+    // needs a second request has to edit the document first, as a student would before asking again.
+    let studentEdits = 0;
+    const editDocument = () => mockStores.documents.getDocument.mockReturnValue(
+      documentWith(populatedDocContent(`The student's answer, edit ${++studentEdits}.`)));
 
     beforeEach(() => {
       mockUserContext = mockUserContextWithClassHash;
@@ -214,8 +212,6 @@ describe("AIComponent", () => {
       mockStores.networkDocuments.getDocument.mockReset();
       mockStores.networkDocuments.getDocument.mockReturnValue(undefined);
       mockGetAiContent.mockClear();
-      mockGetLastHistoryEntry.mockReset();
-      mockGetLastHistoryEntry.mockResolvedValue(undefined);
       mockStores.unit.config = undefined;
     });
 
@@ -351,23 +347,12 @@ describe("AIComponent", () => {
     });
 
     describe("the document-changed gate", () => {
-      it("shows a nudge and makes no request when the document has not changed", async () => {
-        mockStores.documents.getDocument.mockReturnValue(documentWith(populatedDocContent()));
-        mockGetLastHistoryEntry.mockResolvedValue({ index: 47, id: "e47" });
-        const aiContent = defaultAIContent();
-        aiContent.setPrompt("What do you think?");
-        aiContent.setEvaluatedHistoryIndex(47);
-        const aiModel = TileModel.create({ content: aiContent });
+      // The real summarizer and hash, so these pin the value the tile actually computes.
+      const summaryHashOf = (docContent: unknown) => hashString(documentSummarizer(docContent, {}));
 
-        await act(async () => render(<AIComponent {...defaultProps} model={aiModel} documentId="test-doc-1" />));
-
-        expect(aiContent.text).toBe(AI_TILE_UNCHANGED_MESSAGE);
-        expect(mockGetAiContent).not.toHaveBeenCalled();
-      });
-
-      it("records the index it evaluated at after a successful refresh", async () => {
-        mockStores.documents.getDocument.mockReturnValue(documentWith(populatedDocContent()));
-        mockGetLastHistoryEntry.mockResolvedValue({ index: 52, id: "e52" });
+      it("records the summary hash it evaluated at after a successful refresh", async () => {
+        const docContent = populatedDocContent();
+        mockStores.documents.getDocument.mockReturnValue(documentWith(docContent));
         const aiContent = defaultAIContent();
         aiContent.setPrompt("What do you think?");
         const aiModel = TileModel.create({ content: aiContent });
@@ -375,60 +360,69 @@ describe("AIComponent", () => {
         await act(async () => render(<AIComponent {...defaultProps} model={aiModel} documentId="test-doc-1" />));
 
         expect(aiContent.text).toBe("Mocked customized content");
-        expect(aiContent.evaluatedHistoryIndex).toBe(52);
+        expect(aiContent.evaluatedSummaryHash).toBe(summaryHashOf(docContent));
       });
 
-      // Fail open: a gate that can't be read must not withhold a refresh.
-      it("refreshes when the gate cannot be read", async () => {
+      // The whole point of hashing the summary rather than the document history index: the tile's
+      // own setText writes advance that index, so an index gate would be stale the moment it was
+      // recorded and a second run would always bill another request.
+      it("after a real refresh, a second run against the same document makes no request", async () => {
         mockStores.documents.getDocument.mockReturnValue(documentWith(populatedDocContent()));
-        mockGetLastHistoryEntry.mockRejectedValue(new Error("history unreadable"));
-        const consoleErrorSpy = jest.spyOn(console, "error").mockImplementation(() => {});
-        const aiContent = defaultAIContent();
-        aiContent.setPrompt("What do you think?");
-        aiContent.setEvaluatedHistoryIndex(47);
-        const aiModel = TileModel.create({ content: aiContent });
-
-        try {
-          await act(async () => render(<AIComponent {...defaultProps} model={aiModel} documentId="test-doc-1" />));
-
-          expect(mockGetAiContent).toHaveBeenCalledTimes(1);
-          expect(aiContent.text).toBe("Mocked customized content");
-        } finally {
-          consoleErrorSpy.mockRestore();
-        }
-      });
-
-      // The gate read adds an await ahead of the request. Pins that a run superseded while that
-      // read is in flight still can't reach getAiContent, so no refresh is ever billed twice.
-      it("does not let a run superseded during its gate read reach the request", async () => {
-        mockStores.documents.getDocument.mockReturnValue(documentWith(populatedDocContent()));
-        let resolveOlderGate: (entry: undefined) => void = () => {};
-        mockGetLastHistoryEntry.mockImplementationOnce(
-          () => new Promise(resolve => { resolveOlderGate = resolve; })
-        );
         const aiContent = defaultAIContent();
         aiContent.setPrompt("What do you think?");
         const aiModel = TileModel.create({ content: aiContent });
 
-        // The mount's run stalls on its gate read.
         await act(async () => render(<AIComponent {...defaultProps} model={aiModel} documentId="test-doc-1" />));
-        expect(mockGetAiContent).not.toHaveBeenCalled();
+        expect(mockGetAiContent).toHaveBeenCalledTimes(1);
 
-        // A second refresh supersedes it and completes on its own.
         await act(async () => {
           aiContent.requestRefresh();
           await Promise.resolve();
           await Promise.resolve();
         });
-        expect(mockGetAiContent).toHaveBeenCalledTimes(1);
 
-        // The superseded run's gate read finally resolves: it must not make a request of its own.
+        expect(mockGetAiContent).toHaveBeenCalledTimes(1);
+      });
+
+      // A mount is nobody asking, and the nudge is document content: writing it would replace the
+      // saved tips permanently, for a student who never pressed anything.
+      it("on mount with nothing changed, makes no request and leaves the saved answer alone", async () => {
+        const docContent = populatedDocContent();
+        mockStores.documents.getDocument.mockReturnValue(documentWith(docContent));
+        const aiContent = defaultAIContent();
+        aiContent.setPrompt("What do you think?");
+        aiContent.setText("saved tips");
+        aiContent.setEvaluatedSummaryHash(summaryHashOf(docContent));
+        const aiModel = TileModel.create({ content: aiContent });
+
+        await act(async () => render(<AIComponent {...defaultProps} model={aiModel} documentId="test-doc-1" />));
+
+        expect(aiContent.text).toBe("saved tips");
+        expect(mockGetAiContent).not.toHaveBeenCalled();
+      });
+
+      // The student pressed Update: leaving the old tips there would look like a refresh that
+      // silently did nothing.
+      it("on a student-requested refresh with nothing changed, shows the nudge and makes no request",
+         async () => {
+        const docContent = populatedDocContent();
+        mockStores.documents.getDocument.mockReturnValue(documentWith(docContent));
+        const aiContent = defaultAIContent();
+        aiContent.setPrompt("What do you think?");
+        aiContent.setText("saved tips");
+        aiContent.setEvaluatedSummaryHash(summaryHashOf(docContent));
+        const aiModel = TileModel.create({ content: aiContent });
+
+        await act(async () => render(<AIComponent {...defaultProps} model={aiModel} documentId="test-doc-1" />));
+
         await act(async () => {
-          resolveOlderGate(undefined);
+          aiContent.requestRefresh();
           await Promise.resolve();
           await Promise.resolve();
         });
-        expect(mockGetAiContent).toHaveBeenCalledTimes(1);
+
+        expect(aiContent.text).toBe(AI_TILE_UNCHANGED_MESSAGE);
+        expect(mockGetAiContent).not.toHaveBeenCalled();
       });
     });
 
@@ -618,6 +612,7 @@ describe("AIComponent", () => {
       const { unmount } = await act(async () =>
         render(<AIComponent {...defaultProps} model={aiModel} documentId="test-doc-1" />));
 
+      editDocument();
       // A real Update that succeeds, leaving refreshCount positive.
       mockGetAiContent.mockResolvedValueOnce({ data: { text: "a good answer" } });
       await act(async () => {
@@ -629,6 +624,7 @@ describe("AIComponent", () => {
 
       unmount();
 
+      editDocument();
       const callsBefore = mockGetAiContent.mock.calls.length;
       mockGetAiContent.mockRejectedValueOnce(new Error("network error"));
       await act(async () => render(
@@ -652,6 +648,7 @@ describe("AIComponent", () => {
       await act(async () => render(<AIComponent {...defaultProps} model={aiModel} documentId="test-doc-1" />));
       expect(aiContent.text).toBe("Mocked customized content");
 
+      editDocument();
       mockGetAiContent.mockRejectedValueOnce(new Error("network error"));
       await act(async () => {
         aiContent.requestRefresh();
@@ -727,6 +724,7 @@ describe("AIComponent", () => {
 
       (Logger.log as jest.Mock).mockClear();
       (logTileChangeEvent as jest.Mock).mockClear();
+      editDocument();
       mockGetAiContent.mockRejectedValueOnce(new Error("network error"));
       await act(async () => {
         aiContent.requestRefresh();
@@ -774,6 +772,7 @@ describe("AIComponent", () => {
       await act(async () => render(<AIComponent {...defaultProps} model={aiModel} documentId="test-doc-1" />));
       expect(aiContent.text).toBe("Mocked customized content");
 
+      editDocument();
       mockGetAiContent.mockRejectedValueOnce(new Error("network error"));
       await act(async () => {
         aiContent.requestRefresh();
@@ -797,6 +796,7 @@ describe("AIComponent", () => {
       await act(async () => render(<AIComponent {...defaultProps} model={aiModel} documentId="test-doc-1" />));
       expect(aiContent.text).toBe("Mocked customized content");
 
+      editDocument();
       const consoleErrorSpy = jest.spyOn(console, "error").mockImplementation(() => {});
       mockGetAiContent.mockResolvedValueOnce({ data: { text: "", error: "Backend exploded" } });
       await act(async () => {
@@ -824,6 +824,7 @@ describe("AIComponent", () => {
       );
       expect(aiContent.text).toBe("Mocked customized content");
 
+      editDocument();
       let rejectOlder: (error: Error) => void;
       let resolveNewer: (value: { data: { text: string } }) => void;
       const olderPromise = new Promise((_resolve, reject) => { rejectOlder = reject; });
@@ -873,6 +874,7 @@ describe("AIComponent", () => {
       await act(async () => render(<AIComponent {...defaultProps} model={aiModel} documentId="test-doc-1" />));
       expect(aiContent.text).toBe("Mocked customized content");
 
+      editDocument();
       let resolveOlder: (value: { data: { text: string } }) => void;
       const olderPromise = new Promise<{ data: { text: string } }>(resolve => { resolveOlder = resolve; });
       mockGetAiContent.mockImplementationOnce(() => olderPromise);
@@ -913,6 +915,7 @@ describe("AIComponent", () => {
       );
       expect(aiContent.text).toBe("Mocked customized content");
 
+      editDocument();
       let resolvePending: (value: { data: { text: string } }) => void;
       const pendingPromise = new Promise<{ data: { text: string } }>(resolve => { resolvePending = resolve; });
       mockGetAiContent.mockImplementationOnce(() => pendingPromise);
@@ -953,6 +956,7 @@ describe("AIComponent", () => {
       await act(async () => render(<AIComponent {...defaultProps} model={aiModel} documentId="test-doc-1" />));
       expect(aiContent.text).toBe("Mocked customized content");
 
+      editDocument();
       // A refresh succeeds with a new response while classHash is still present.
       mockGetAiContent.mockResolvedValueOnce({ data: { text: "Newer response" } });
       await act(async () => {
@@ -988,6 +992,7 @@ describe("AIComponent", () => {
       );
       expect(aiContent.text).toBe("Mocked customized content");
 
+      editDocument();
       const promiseA = new Promise<{ data: { text: string } }>((_resolve) => { /* A never settles */ });
       const promiseB = new Promise<{ data: { text: string } }>((_resolve) => { /* B never settles */ });
       mockGetAiContent.mockImplementationOnce(() => promiseA);
@@ -1030,6 +1035,7 @@ describe("AIComponent", () => {
       await act(async () => render(<AIComponent {...defaultProps} model={aiModel} documentId="test-doc-1" />));
       expect(aiContent.text).toBe("Mocked customized content");
 
+      editDocument();
       const promiseA = new Promise<{ data: { text: string } }>((_resolve) => { /* A never settles */ });
       mockGetAiContent.mockImplementationOnce(() => promiseA);
       mockGetAiContent.mockResolvedValueOnce({ data: { text: "B's response" } });
