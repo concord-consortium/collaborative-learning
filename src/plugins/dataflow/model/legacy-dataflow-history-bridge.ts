@@ -1,4 +1,5 @@
 import { IJsonPatch } from "mobx-state-tree";
+import { kTileMapPath, kTileSubtreePartsRegex } from "../../../models/document/document-paths";
 import { HistoryEntryType } from "../../../models/history/history";
 import { IHistoryBridge, IVirtualConversion } from "../../../models/history/history-bridges";
 import { applyJsonPatches, JsonPatchError, toJsonValue } from "../../../models/history/json-patch";
@@ -11,11 +12,11 @@ import { getDataflowProgramVersion, STATE_VERSION_RETE_V1 } from "./dataflow-sta
  * each tile and rebuilds the legacy tile there, so playback can cross it.
  */
 
-const kTilePathPattern = /^\/content\/tileMap\/([^/]+)(.*)$/;
+// The program's path inside the tile.
 const kProgramPath = "/content/program";
 
 function getTileId(path: string) {
-  return kTilePathPattern.exec(path)?.[1];
+  return kTileSubtreePartsRegex.exec(path)?.[1];
 }
 
 function isLegacyProgram(program: any) {
@@ -30,7 +31,7 @@ function isLegacyProgram(program: any) {
  * or the legacy id set on the program.
  */
 export function isLegacyDataflowPatch(patch: IJsonPatch): boolean {
-  const match = kTilePathPattern.exec(patch.path);
+  const match = kTileSubtreePartsRegex.exec(patch.path);
   if (!match) return false;
   const rest = match[2];
   const value: any = patch.value;
@@ -104,7 +105,7 @@ export const legacyDataflowHistoryBridge: IHistoryBridge = {
 
     const conversions: IVirtualConversion[] = [];
     lastLegacyIndex.forEach((lastLegacy, tileId) => {
-      const tilePath = `/content/tileMap/${tileId}`;
+      const tilePath = `${kTileMapPath}/${tileId}`;
       // A stored load entry after the legacy entries already covers the tile.
       const isCovered = history.some((entry, index) => index > lastLegacy && entry.isLoadEntry &&
         patchesByEntry[index].some(patch => isAtOrUnder(patch.path, tilePath)));
