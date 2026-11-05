@@ -154,8 +154,6 @@ export function convertContentJson(content: any): { content: any; convertedPaths
   return { content: newContent, convertedPaths };
 }
 
-// The load entry's action and model names are stored in Firestore history entries: never
-// rename or remove them.
 const kLoadContentAction = "/loadContent";
 const kLoadEntryModel = "DocumentContent";
 

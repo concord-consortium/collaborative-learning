@@ -63,12 +63,10 @@ export const HistoryEntry = types.model("HistoryEntry", {
    * while loading it, when a document loads or its content is replaced. Today those are the
    * conversions of old tiles and shared models to their current format. It is never applied to
    * a live document or put on the undo stack.
-   * Stored in Firestore history entries: never rename or remove.
    */
   isLoadEntry: types.maybe(types.boolean),
   /**
    * True on entries that the user did not cause directly.
-   * Stored in Firestore history entries: never rename or remove.
    */
   background: types.maybe(types.boolean),
 })
