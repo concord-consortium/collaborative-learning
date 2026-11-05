@@ -16,7 +16,7 @@ import { SerialDevice } from "../../../models/stores/serial";
 import { deviceProtocol, deviceDisplayName, deviceSupportsOutput } from "../model/utilities/device-capabilities";
 import { simulatedHub, simulatedHubName } from "../model/utilities/simulated-output";
 import { getValueOrZero } from "./utilities/view-utilities";
-import { servoAngleForValue, servoDisplayMessage } from "./utilities/servo";
+import { servoAngleForValue, servoDisplayMessage, servoPlotValue } from "./utilities/servo";
 
 export const LiveOutputTickEntry = BaseTickEntry.named("LiveOutputTickEntry")
 .props({
@@ -409,6 +409,13 @@ export class LiveOutputNode extends BaseNode<
 
   private get servoProportionMode() {
     return this.services.stores.appConfig.getSetting("servoInputMode", "dataflow") === "proportion";
+  }
+
+  getPlotValue(valueKey: string, value: number) {
+    if (valueKey === "nodeValue" && kServoOutputTypes.includes(this.model.liveOutputType)) {
+      return servoPlotValue(value, this.servoProportionMode);
+    }
+    return value;
   }
 
   private get allowedLiveOutputTypes() {

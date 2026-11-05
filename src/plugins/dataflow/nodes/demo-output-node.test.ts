@@ -96,3 +96,15 @@ describe("DemoOutputNode.getNodeValueDisplayMessage", () => {
     expect(read(node)).toBe("on");
   });
 });
+
+describe("DemoOutputNode.getPlotValue", () => {
+  it("plots a Servo as % rotation in proportion mode, matching the field", () => {
+    const node = stubbedNode("Servo", { servoInputMode: "proportion" });
+    expect(node.getPlotValue("nodeValue", 90)).toBe(50);
+  });
+  it("leaves degrees mode, other outputs and the tilt series as stored", () => {
+    expect(stubbedNode("Servo").getPlotValue("nodeValue", 90)).toBe(90);
+    expect(stubbedNode("Grabber", { servoInputMode: "proportion" }).getPlotValue("nodeValue", 0.5)).toBe(0.5);
+    expect(stubbedNode("Servo", { servoInputMode: "proportion" }).getPlotValue("tilt", 1)).toBe(1);
+  });
+});

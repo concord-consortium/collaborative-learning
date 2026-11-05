@@ -94,6 +94,20 @@ describe("Servo input mode scaling in data() (settings.dataflow.servoInputMode)"
   });
 });
 
+// CLUE-789: the minigraph used to stay in degrees (0-180) while the field read % rotation.
+describe("LiveOutputNode.getPlotValue", () => {
+  it("plots a Servo as % rotation in proportion mode", () => {
+    const node = stubbedNode({ liveOutputType: "Servo" }, { servoInputMode: "proportion" });
+    expect(node.getPlotValue("nodeValue", 90)).toBe(50);
+    expect(node.getPlotValue("nodeValue", 180)).toBe(100);
+  });
+  it("plots a Servo in degrees by default, and other outputs as stored", () => {
+    expect(stubbedNode({ liveOutputType: "Servo" }).getPlotValue("nodeValue", 90)).toBe(90);
+    expect(stubbedNode({ liveOutputType: "Gripper 2.0" }, { servoInputMode: "proportion" })
+      .getPlotValue("nodeValue", 90)).toBe(90);
+  });
+});
+
 describe("Live Output type restriction (settings.dataflow.liveOutputTypes)", () => {
   const names = (node: LiveOutputNode) => ((node as any).allowedLiveOutputTypes as any[]).map(o => o.name);
   it("returns the full list when unset", () => {

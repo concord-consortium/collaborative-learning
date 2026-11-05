@@ -6,7 +6,10 @@ import { DataflowNodePlot } from "./dataflow-node-plot";
 
 // chart.js needs a real canvas, which jsdom does not provide, and nothing here depends on what the
 // chart draws.
-jest.mock("react-chartjs-2", () => ({ Line: () => <div data-testid="line-chart" /> }));
+const mockLine = jest.fn();
+jest.mock("react-chartjs-2", () => ({
+  Line: (props: any) => { mockLine(props); return <div data-testid="line-chart" />; }
+}));
 
 // Fresh spies per test: every case asserts on setTickMax/setTickMin.
 function makeModel(bounds: Partial<IBaseNodeModel> = {}) {
@@ -73,5 +76,18 @@ describe("DataflowNodePlot", () => {
     fireEvent.mouseDown(screen.getByText("+"));
     expect(empty.setTickMax).toHaveBeenCalledWith(0.4);
     expect(empty.setTickMin).toHaveBeenCalledWith(-0.4);
+  });
+
+  it("graphs the values through plotValue, so the extent follows the node's display units", () => {
+    const model = makeModel({
+      watchedValues: { nodeValue: {} },
+      getTickEntries: () => [{ nodeValue: 90 }, { nodeValue: 180 }],
+      dsMax: -Infinity, dsMin: Infinity, tickMax: undefined, tickMin: undefined
+    } as any);
+    const toPercent = (key: string, value: number) => value / 180 * 100;
+    render(<DataflowNodePlot model={model} recordedTicks={["a", "b"]} plotValue={toPercent} />);
+
+    expect(mockLine.mock.lastCall[0].data.datasets[0].data).toEqual([50, 100]);
+    expect(model.setDsMax).toHaveBeenCalledWith(100);
   });
 });

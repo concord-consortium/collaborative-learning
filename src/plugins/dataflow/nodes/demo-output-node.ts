@@ -12,7 +12,7 @@ import { DemoOutputControl } from "./controls/demo-output-control";
 import { InputValueControl } from "./controls/input-value-control";
 import { MinigraphOptions } from "./dataflow-node-plot-types";
 import { getValueOrZero } from "./utilities/view-utilities";
-import { servoAngleForValue, servoDisplayMessage } from "./utilities/servo";
+import { servoAngleForValue, servoDisplayMessage, servoPlotValue } from "./utilities/servo";
 
 const tiltMinigraphOptions: MinigraphOptions = {
   backgroundColor: "#fff",
@@ -130,6 +130,13 @@ export class DemoOutputNode extends BaseNode<
 
   private get servoProportionMode() {
     return this.services.stores.appConfig.getSetting("servoInputMode", "dataflow") === "proportion";
+  }
+
+  getPlotValue(valueKey: string, value: number) {
+    if (valueKey === "nodeValue" && kServoOutputTypes.includes(this.model.outputType)) {
+      return servoPlotValue(value, this.servoProportionMode);
+    }
+    return value;
   }
 
   getNodeValueDisplayMessage = () => {

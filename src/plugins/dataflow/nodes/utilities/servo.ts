@@ -13,12 +13,17 @@ export function servoAngleForValue(value: number, proportionMode: boolean) {
   return Math.min(Math.max(scaled, kServoMinAngle), kServoMaxAngle);
 }
 
+/** The value the minigraph plots for a servo angle: % of full rotation in proportion mode, as the field reads. */
+export function servoPlotValue(angle: number, proportionMode: boolean) {
+  return proportionMode ? (angle / kServoMaxAngle) * 100 : angle;
+}
+
 /**
  * The Servo output field label. The stored value is always the angle in degrees (0-180). In degrees
  * mode (default) it is shown as degrees; in proportion mode as % of full rotation, mirroring the
  * gripper's "% closed".
  */
 export function servoDisplayMessage(value: number, proportionMode: boolean) {
-  if (proportionMode) return `${Math.round((value / kServoMaxAngle) * 100)}% rotation`;
+  if (proportionMode) return `${Math.round(servoPlotValue(value, true))}% rotation`;
   return `${Math.round(value)}°`;
 }

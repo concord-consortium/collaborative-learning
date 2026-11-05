@@ -216,6 +216,7 @@ export type IBaseNode = Schemes['Node'] & {
   ): void;
   readOnly?: boolean;
   getSharedProgramNodeValue(): string;
+  getPlotValue(valueKey: string, value: number): number;
 }
 
 export class BaseNode<
@@ -346,6 +347,11 @@ export class BaseNode<
   recordedValues() {
     const { recordedTicks } = this.services;
     return recordedTicks.map(tick => this.model.tickEntries.get(tick)?.nodeValue);
+  }
+
+  /** What the minigraph plots for a watched value, so a node can graph in the units its field shows. */
+  getPlotValue(valueKey: string, value: number) {
+    return value;
   }
 
   getSharedProgramNodeValue() {

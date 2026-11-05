@@ -1,4 +1,4 @@
-import { kServoMaxAngle, kServoMinAngle, servoAngleForValue, servoDisplayMessage } from "./servo";
+import { kServoMaxAngle, kServoMinAngle, servoAngleForValue, servoDisplayMessage, servoPlotValue } from "./servo";
 
 describe("servoAngleForValue", () => {
   describe("in degrees mode", () => {
@@ -37,5 +37,16 @@ describe("servoDisplayMessage", () => {
     expect(servoDisplayMessage(0, true)).toBe("0% rotation");
     expect(servoDisplayMessage(90, true)).toBe("50% rotation");
     expect(servoDisplayMessage(180, true)).toBe("100% rotation");
+  });
+});
+
+describe("servoPlotValue", () => {
+  it("plots degrees as-is by default", () => {
+    expect(servoPlotValue(135, false)).toBe(135);
+  });
+  it("plots % of full rotation in proportion mode", () => {
+    expect(servoPlotValue(0, true)).toBe(0);
+    expect(servoPlotValue(90, true)).toBe(50);
+    expect(servoPlotValue(180, true)).toBe(100);
   });
 });

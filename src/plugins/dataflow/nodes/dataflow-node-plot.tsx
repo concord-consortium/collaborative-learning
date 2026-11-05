@@ -12,7 +12,11 @@ import { useStopEventPropagation } from "./controls/custom-hooks";
 interface INodePlotProps {
   model: IBaseNodeModel;
   recordedTicks: string[];
+  plotValue?: PlotValueFn;
 }
+
+type PlotValueFn = (valueKey: string, value: number) => number;
+const identityPlotValue: PlotValueFn = (valueKey, value) => value;
 
 let stepY = 5;
 
@@ -35,7 +39,7 @@ enum Zoom {
 }
 
 export const DataflowNodePlot: React.FC<INodePlotProps> = observer(
-  function DataflowNodePlot({model, recordedTicks})
+  function DataflowNodePlot({model, recordedTicks, plotValue = identityPlotValue})
 {
   const [plotEl, setPlotEl] = useState<HTMLDivElement | null>(null);
   useStopEventPropagation(plotEl, "pointerdown");
@@ -73,7 +77,7 @@ export const DataflowNodePlot: React.FC<INodePlotProps> = observer(
       </div>
       <div className="node-graph">
         <Line
-          data={lineData(model, recordedTicks)}
+          data={lineData(model, recordedTicks, plotValue)}
           options={lineOptions(model)}
         />
       </div>
@@ -81,7 +85,9 @@ export const DataflowNodePlot: React.FC<INodePlotProps> = observer(
   );
 });
 
-function lineData(model: IBaseNodeModel, recordedTicks: string[]): ChartData<"line", number[], number> {
+function lineData(
+  model: IBaseNodeModel, recordedTicks: string[], plotValue: PlotValueFn
+): ChartData<"line", number[], number> {
   const chartDataSets: ChartDataset<"line", number[]>[] = [];
   const recordedEntries = model.getTickEntries(recordedTicks);
   Object.keys(model.watchedValues).forEach((valueKey: string) => {
@@ -112,7 +118,7 @@ function lineData(model: IBaseNodeModel, recordedTicks: string[]): ChartData<"li
       const chData: number[] = [];
       recentValues.forEach((val) => {
         if (val != null && isFinite(val)) {
-          chData.push(val);
+          chData.push(plotValue(valueKey, val));
         }
       });
 
