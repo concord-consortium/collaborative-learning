@@ -117,6 +117,12 @@ older one. Everything else is done for you.
    (ids aside). [dumb-rebuild.test.ts](../src/models/history/dumb-rebuild.test.ts) shows the other
    half: rebuilding every position from the stored entries with only a JSON patch library, which is
    what a service without CLUE's code does.
+6. **Don't use a snapshot post-processor** to change what is saved. History records MST's patches,
+   whose paths follow the MST tree, but the stored JSON is the post-processed snapshot. A patch
+   under a prop that a post-processor drops or renames has no place in the stored JSON, so the
+   history can't be rebuilt from the stored entries. The post-processor rule in
+   [.eslintrc.js](../.eslintrc.js) flags new ones. To change the saved format, change the model and
+   migrate the old JSON in `convertSnapshot`.
 
 ## How playback crosses the change
 
