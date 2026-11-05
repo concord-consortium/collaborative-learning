@@ -107,6 +107,28 @@ queue document, then written to the gate when the comment lands. Capturing at en
 at success matters: the student may have edited in between, and the gate must record the content
 that was actually evaluated.
 
+### The AI tile gates on the summary, not the history index
+
+Found in review, after implementation. **The AI tile cannot gate on the history index, because it
+writes to the document as part of refreshing.** `content.setText(...)` is an MST action on the
+document tree, and `treeMonitor` is enabled exactly when this effect runs, so each refresh creates
+history entries. The tile records index N, its own writes take the document to N+2, and every later
+refresh reads "changed". The gate could never fire. `ai-tile.tsx` already carried a TODO saying as
+much: "This triggers multiple undoable actions, but shouldn't really trigger any."
+
+So the tile gates on a hash of the summary it already builds -- `documentSummarizer` output, hashed
+with `shared/hash-string.ts`, the same shape the chat tutor uses to gate a resend. Two reasons this
+works where the index does not:
+
+- The summarizer has no AI-tile handler, so the tile's own text is not in the summary and its
+  writes cannot move the hash.
+- The tile runs the summarizer anyway, so the hash is free here. That cost is what ruled hashing
+  out for the Ideas button, which does no summarizing of its own.
+
+**Knock-on, accepted:** an AI tile writes history entries on every mount, so a document containing
+one usually reads as changed at session end. Requirement 1 saves little for those documents. Fixing
+that means keeping the tile's writes out of history, which is the TODO's business, not this story's.
+
 ### Who reads and writes what
 
 | Surface | Reads | Writes | Purpose |
@@ -115,12 +137,12 @@ that was actually evaluated.
 | Session end (`use-document-sync-to-firebase`) | — | — | unchanged; the server decides |
 | Enqueue (`on-analyzable-doc-written`) | `evaluationGate`, history | — | skips unrequested evaluations |
 | Success (`on-analysis-document-imaged`) | — | `evaluationGate` | advances the gate |
-| AI tile (`ai-tile.tsx`) | tile model prop | tile model prop | separate flow, own gate |
+| AI tile (`ai-tile.tsx`) | tile model prop (summary hash) | tile model prop | separate flow, own gate |
 
-The AI tile keeps its own gate on its content model, beside `refreshCount`. It does not go through
-the comments evaluation at all, so putting it in `evaluationGate` would couple two unrelated flows.
-Per-tile also means two AI tiles in one document gate independently, which is what their separate
-prompts imply.
+The AI tile keeps its own gate on its content model, beside `refreshCount`, holding the summary
+hash rather than an index. It does not go through the comments evaluation at all, so putting it in
+`evaluationGate` would couple two unrelated flows. Per-tile also means two AI tiles in one document
+gate independently, which is what their separate prompts imply.
 
 **The client gate is for feedback; the server gate is for cost.** They cover different triggers
 rather than one backstopping the other.
@@ -161,8 +183,13 @@ rather than that nothing has changed.
 **Shared** — the comparison itself: unchanged, advanced, and no gate recorded yet (first ever
 evaluation must proceed).
 
-**Client** — each surface shows its message and makes no request when the index is unchanged, and
-does request when it moved. The AI tile additionally records its gate only after a successful
+**Client** — each surface shows its message and makes no request when its signal is unchanged, and
+does request when it moved. For the AI tile that must include a test that a *second mount after a
+successful refresh* makes no request, which is the case the index-based version silently failed.
+
+The Ideas gate must also consult local history: entries upload to Firestore fire-and-forget, and
+`waitForSaveSettled` does not track that upload, so a click straight after an edit can read a stale
+index that still matches the gate and wrongly nudge a student who did real work. The AI tile additionally records its gate only after a successful
 refresh.
 
 **Server** — the handler skips when unchanged and evaluates when changed; the gate advances only on
