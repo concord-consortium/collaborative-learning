@@ -12,6 +12,11 @@ import { IJsonPatch } from "mobx-state-tree";
 // those patches. With validation off, it applies a patch that doesn't fit, such as an out-of-range
 // array index, instead of throwing, so playback couldn't tell where a chain of history entries
 // breaks.
+//
+// Snapshot post-processors also make MST's patches differ from the stored JSON. Recorded patch
+// paths follow the MST tree, but the stored JSON is the post-processed snapshot, so a patch under a
+// prop that a post-processor drops has no parent here, and applying it throws. The post-processor
+// rule in .eslintrc.js forbids new ones.
 
 export class JsonPatchError extends Error {
   readonly numApplied: number;
