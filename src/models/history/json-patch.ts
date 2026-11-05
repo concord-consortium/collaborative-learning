@@ -4,6 +4,14 @@ import { IJsonPatch } from "mobx-state-tree";
 
 // Plain-JSON patch application and diffing for history entries, applied to and computed from plain
 // JSON rather than MST trees.
+//
+// Diffing uses fast-json-patch's `compare`, but applying doesn't use its `applyPatch`. MST keeps
+// every declared model prop, so it records a `replace` for a `types.maybe` prop even when the prop
+// is `undefined`, and setting the prop to `undefined` records a `replace` with no value. In stored
+// JSON, an `undefined` prop is a missing member. With validation on, `applyPatch` rejects both of
+// those patches. With validation off, it applies a patch that doesn't fit, such as an out-of-range
+// array index, instead of throwing, so playback couldn't tell where a chain of history entries
+// breaks.
 
 export class JsonPatchError extends Error {
   readonly numApplied: number;
@@ -67,9 +75,9 @@ function applyJsonPatch(doc: object, patch: IJsonPatch) {
  * - An empty path throws.
  * - Path segments are JSON-pointer unescaped (`~1` is `/`, `~0` is `~`).
  * - The parent must resolve to an object or an array, or the call throws.
- * - On an object parent, `add` and `replace` set the member, even if it is missing (MST does
- *   this for `types.maybe` props). A value of `undefined` deletes the member. `remove` deletes
- *   the member, and removing a missing member is a no-op.
+ * - On an object parent, `add` and `replace` set the member, even if it is missing (a
+ *   `types.maybe` prop that was `undefined` is missing from the JSON). A value of `undefined`
+ *   deletes the member. `remove` deletes the member, and removing a missing member is a no-op.
  * - On an array parent, `add` inserts at an index from 0 to the length, or at `-`. `replace`
  *   and `remove` need an index less than the length. Anything else throws.
  *
