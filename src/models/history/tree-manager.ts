@@ -105,10 +105,18 @@ function moveJsonCopy(copy: JsonHistoryCopy, history: readonly HistoryEntryType[
 }
 
 /**
- * The JSON a playback move's new JSON copy starts from at `position`: the document's JSON, with
- * a handed-over load entry undone unless the history already holds it before `position`. The
- * playback document is a snapshot of the live, converted document, while a history without that
- * entry reaches only the stored content.
+ * Returns the JSON a new playback JSON copy starts from, given the playback document's JSON at
+ * history `position`.
+ *
+ * The playback document is a copy of the live document, which converted its old models when it
+ * loaded. The load entry that records the conversion is uploaded with the next change to the
+ * content, so until then only the live document has it, and it is handed to playback as
+ * `localLoadEntry`. The history from Firestore doesn't hold it, and its entries expect those
+ * models as they are stored, before conversion. So the load entry is undone here, which puts them
+ * back in their stored form.
+ *
+ * Once the history holds the load entry before `position`, the document's JSON already matches
+ * the history there, and it is returned unchanged. `documentJson` is changed in place.
  */
 function getJsonCopyStart(documentJson: object, treeId: string, history: readonly HistoryEntryType[],
     position: number, localLoadEntry: HistoryEntrySnapshot | undefined) {
@@ -772,12 +780,13 @@ export const TreeManager = types
     //    entries rolled back; trees that failed have their own partial
     //    rollback plus any entries they applied past the stop position.
     //
-    // 2. ModelReplacementError — MST rejected a model replacement. The
-    //    tree applied all of its patches before its model replacements, so
-    //    it is rolled back like a tree that succeeded. The move doesn't
-    //    advance (stopPosition = initialPosition), and the rollback's
-    //    model replacements put the old models back as they were at
-    //    initialPosition.
+    // 2. ModelReplacementError — MST rejected a model replacement. A tree
+    //    applies its model replacements after all of its patches, so every
+    //    entry in the move was applied to it, and there is no entry to stop
+    //    at. The move goes back to where it started (stopPosition =
+    //    initialPosition): every entry the tree applied is undone, and the
+    //    rollback's model replacements put the old models back as they were
+    //    at initialPosition.
     //
     // 3. Any other error — a bug, by construction: applyPatchesFromManager
     //    wraps patch-apply failures as PatchApplicationError, and there
@@ -835,7 +844,8 @@ export const TreeManager = types
           results.push(failedResult);
           failedResults.push(failedResult);
         } else if (e instanceof ModelReplacementError) {
-          // Every patch applied, so the tree is rolled back like one that succeeded.
+          // Every entry was applied to the tree, so it is recorded like a tree that succeeded,
+          // and the rollback to initialPosition undoes all of them.
           results.push({ treeId, tree, segments });
           modelReplacementFailures.push({ treeId, error: e });
         } else {
