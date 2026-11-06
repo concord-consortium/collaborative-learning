@@ -177,6 +177,16 @@ Shared models use the same `schemaVersion` registration and the same playback pa
 must keep the ids that tiles refer to, for example a DataSet's attribute and case ids. Otherwise a
 tile replaced at an old position points at objects that no longer exist in the shared model.
 
+An object added to an old shared model during a playback move, such as a new attribute, doesn't
+exist until the end of the move, when the model replacement adds it. Other models' MST references
+to it can be set before then and resolve when read afterward. But MST runs an added object's
+`afterCreate` and `afterAttach` hooks when a later patch in the move goes into it, and a hook that
+runs then sees those references missing. For example, `CategorySet.afterAttach` would skip the
+listener that clears its cached categories. Before giving a shared model a `schemaVersion`, check the hooks of the
+models that refer into it, and make them tolerate a reference that resolves later, for instance by
+reading it in a view or a reaction instead of once in the hook. See "Old models and model
+replacements" in [history-framework.md](history-framework.md).
+
 ## Performance
 
 Each replacement of an old tile runs its conversion. Playback replaces an old tile once per move
