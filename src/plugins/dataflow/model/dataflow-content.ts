@@ -25,7 +25,6 @@ import { SharedProgramData, SharedProgramDataType } from "../../shared-program-d
 
 import { uniqueId } from "../../../utilities/js-utils";
 import { getTileContentById, getTileModelById } from "../../../utilities/mst-utils";
-import { kTableTileType } from "../../../models/tiles/table/table-content";
 import { withoutUndo } from "../../../models/history/without-undo";
 import { IDataflowOutputConfig } from "../../../../shared/ai-summarizer/ai-summarizer-types";
 import { getTileModel } from "../../../models/tiles/tile-model";
@@ -36,6 +35,11 @@ import { simulatedChannelId } from "./utilities/simulated-channel";
 import { simulatedHubName } from "./utilities/simulated-output";
 
 export const kDataflowTileType = "Dataflow";
+
+/** The tile type Table It creates and a capture is shown in. Named here rather than imported from
+ * the Table tile so Dataflow doesn't depend on another tile's code, and so a different table tile
+ * can be swapped in by changing this one value. */
+export const kDataflowTableTileType = "Table";
 
 export function defaultDataflowContent(options?: IDefaultContentOptions): DataflowContentModelType {
   // Unit-config (settings.dataflow.defaultSamplingRate): seed a new tile's sampling rate from the unit.
@@ -319,7 +323,7 @@ export const DataflowContentModel = TileContentModel
       const sharedModel = self.sharedModel;
       if (!sharedModelManager?.isReady || !sharedModel) return undefined;
       return sharedModelManager.getSharedModelTileIds(sharedModel)
-        .find(id => getTileModelById(self, id)?.content.type === kTableTileType);
+        .find(id => getTileModelById(self, id)?.content.type === kDataflowTableTileType);
     },
     /** Elapsed seconds at a recorded row, derived from its position and the data rate rather than
      * read from the table -- the first column holds a point ordinal now. For a recording saved

@@ -1,7 +1,7 @@
 import { applyPatch, applySnapshot, getSnapshot, IJsonPatch, onPatch, unprotect } from "mobx-state-tree";
 import {
   defaultDataflowContent, DEFAULT_PROGRAM_ZOOM, DataflowContentModel, DataflowContentModelSnapshotIn,
-  DataflowContentModelType
+  DataflowContentModelType, kDataflowTableTileType
 } from "./dataflow-content";
 import { newDataRate, newZoom } from "./dataflow-content-test-constants";
 import dataflowThreeNode from "../test-docs/dataflow-1-three-node.json";
@@ -269,7 +269,7 @@ function setupContentWithLinkedTile(otherType: string, otherTileId: string) {
 }
 
 const setupContentWithLinkedTable = () => {
-  const r = setupContentWithLinkedTile("Table", "table1");
+  const r = setupContentWithLinkedTile(kDataflowTableTileType, "table1");
   return { ...r, tableTileId: "table1", tableContent: r.otherContent };
 };
 const setupContentWithLinkedGraph = () => setupContentWithLinkedTile("Graph", "graph1");

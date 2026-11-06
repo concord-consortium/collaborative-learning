@@ -9,7 +9,7 @@ import { IToolbarButtonComponentProps } from "../../../../components/toolbar/too
 import { useUIStore } from "../../../../hooks/use-stores";
 import { getTileComponentInfo } from "../../../../models/tiles/tile-component-info";
 import { getTileCreateActionName } from "../../../../models/tiles/tile-content-info";
-import { DataflowContentModelType } from "../../model/dataflow-content";
+import { DataflowContentModelType, kDataflowTableTileType } from "../../model/dataflow-content";
 
 import ViewBadgeIcon from "../../../../assets/icons/view/view-badge.svg";
 import RecordSampleIcon from "../../assets/icons/record-sample-icon.svg";
@@ -26,7 +26,7 @@ function useTableButton() {
   const addTable = () => {
     const sharedModel = content?.sharedModel;
     if (!tile || !addTilesContext || !sharedModel) return;
-    addTilesContext.addTileAfter("Table", tile, [sharedModel]);
+    addTilesContext.addTileAfter(kDataflowTableTileType, tile, [sharedModel]);
   };
 
   /** Reveals the program's table. Table It does this; Record Single Sample must NOT: a tile toolbar
@@ -49,7 +49,7 @@ export const DataflowTableButton = observer(function DataflowTableButton(
   { name }: IToolbarButtonComponentProps
 ) {
   const { content, readOnly, addTable, selectTable } = useTableButton();
-  const Icon = getTileComponentInfo("Table")?.Icon;
+  const Icon = getTileComponentInfo(kDataflowTableTileType)?.Icon;
 
   function handleClick() {
     if (!content) return;
@@ -63,7 +63,7 @@ export const DataflowTableButton = observer(function DataflowTableButton(
   return (
     <TileToolbarButton
       name={name}
-      title={getTileCreateActionName("Table")}
+      title={getTileCreateActionName(kDataflowTableTileType)}
       onClick={handleClick}
       disabled={!content || readOnly}
     >

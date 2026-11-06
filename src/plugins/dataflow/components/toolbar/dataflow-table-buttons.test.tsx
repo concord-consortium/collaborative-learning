@@ -10,7 +10,7 @@ import { ProblemDocument } from "../../../../models/document/document-types";
 import { specStores } from "../../../../models/stores/spec-stores";
 import { registerTileTypes } from "../../../../register-tile-types";
 import { uniqueId } from "../../../../utilities/js-utils";
-import { DataflowContentModelType } from "../../model/dataflow-content";
+import { DataflowContentModelType, kDataflowTableTileType } from "../../model/dataflow-content";
 import { DataflowTableButton, RecordSingleSampleButton } from "./dataflow-table-buttons";
 
 jest.mock("firebase/app", () => ({
@@ -23,7 +23,7 @@ registerTileTypes(["Dataflow", "Table"]);
  * manager's tile list — a stubbed content model would test the stub. */
 function setupDocument({ withTable }: { withTable: boolean }) {
   const tiles: any[] = [{ id: "df1", content: { type: "Dataflow" } }];
-  if (withTable) tiles.push({ id: "table1", content: { type: "Table" } });
+  if (withTable) tiles.push({ id: "table1", content: { type: kDataflowTableTileType } });
 
   const docModel = createDocumentModel({
     uid: "1", type: ProblemDocument, key: "test", content: { tiles } as any
@@ -75,7 +75,7 @@ describe("DataflowTableButton", () => {
     const { button, addTileAfter, content } = renderButton(DataflowTableButton, { withTable: false });
     fireEvent.click(button);
     expect(addTileAfter).toHaveBeenCalledTimes(1);
-    expect(addTileAfter.mock.calls[0][0]).toBe("Table");
+    expect(addTileAfter.mock.calls[0][0]).toBe(kDataflowTableTileType);
     expect(content.dataSet.attributes.map(a => a.name)).toEqual(["Point", "Sensor", "Servo"]);
   });
 

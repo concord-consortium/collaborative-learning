@@ -17,7 +17,7 @@ import { ProblemDocument } from "../../../models/document/document-types";
 import { TreeManager } from "../../../models/history/tree-manager";
 import { registerTileTypes } from "../../../register-tile-types";
 import { uniqueId } from "../../../utilities/js-utils";
-import { DataflowContentModelType } from "./dataflow-content";
+import { DataflowContentModelType, kDataflowTableTileType } from "./dataflow-content";
 import { recordCase } from "./utilities/recording-utilities";
 
 jest.mock("firebase/app", () => ({
@@ -35,7 +35,7 @@ function setupDocumentWithLinkedTable() {
     content: {
       tiles: [
         { id: "df1", content: { type: "Dataflow" } },
-        { id: "table1", content: { type: "Table" } }
+        { id: "table1", content: { type: kDataflowTableTileType } }
       ]
     } as any
   });
@@ -278,7 +278,7 @@ describe("the first capture into a new table", () => {
     [0, 1].forEach(i => content.program.nodes.get(`node-${i}`)?.data.setNodeValue(400 + i));
     await settleOn(manager, "NumberNodeModel.setNodeValue");
     // What the toolbar buttons pass: AddTilesContext is the document content.
-    const addTable = () => docContent.addTileAfter("Table", tile, [content.sharedModel!]);
+    const addTable = () => docContent.addTileAfter(kDataflowTableTileType, tile, [content.sharedModel!]);
     return { docContent, content, manager, addTable };
   }
 
