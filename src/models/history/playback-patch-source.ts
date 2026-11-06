@@ -6,7 +6,7 @@ import {
 import { getEntryPatchesForTree, HistoryEntryType, HistoryOperation } from "./history";
 import { JsonHistoryCopy } from "./json-history-copy";
 import {
-  convertJsonAtPath, convertModelJsonAtPath, getModelPath, isOldModelJsonAtPath
+  convertJsonAtPath, convertModelJsonAtPath, getModelPath, modelJsonNeedsConversion
 } from "./schema-conversion";
 
 /**
@@ -135,9 +135,9 @@ export function collectModelPaths(entries: readonly HistoryEntryType[], treeId: 
 export function hasOldValue(patches: readonly IJsonPatch[], modelPath: string): boolean {
   return patches.some(patch => {
     if (patch.value === undefined) return false;
-    if (patch.path === modelPath) return isOldModelJsonAtPath(modelPath, patch.value);
+    if (patch.path === modelPath) return modelJsonNeedsConversion(modelPath, patch.value);
     if (modelPath.startsWith(`${patch.path}/`)) {
-      return isOldModelJsonAtPath(modelPath, getJsonWithin(patch.path, patch.value, modelPath));
+      return modelJsonNeedsConversion(modelPath, getJsonWithin(patch.path, patch.value, modelPath));
     }
     return false;
   });

@@ -182,7 +182,7 @@ describe("JsonHistoryCopy", () => {
       const copy = copyOf(tileAt(undefined, "b"));
       const spy = jest.spyOn(versionedTestTileSchema, "convertSnapshot");
 
-      expect(copy.isOldModel(t1Path)).toBe(true);
+      expect(copy.needsConversion(t1Path)).toBe(true);
       const converted: any = copy.getConvertedModel(t1Path);
       expect(converted.content.label).toBe("b");
       expect(spy).toHaveBeenCalledTimes(1);
@@ -197,12 +197,12 @@ describe("JsonHistoryCopy", () => {
       expect(copyOf(tileAt("2", "b")).getConvertedModel(t1Path)).toBeUndefined();
       const declined = copyOf(tileAt("3", "b"));
       expect(declined.getConvertedModel(t1Path)).toBeUndefined();
-      expect(declined.isOldModel(t1Path)).toBe(false);
+      expect(declined.needsConversion(t1Path)).toBe(false);
     });
 
-    it("treats a model whose conversion throws as old, and throws when it is asked for", () => {
+    it("says a model whose conversion throws needs conversion, and throws when it is asked for", () => {
       const copy = copyOf(tileAt(undefined, "THROW"));
-      expect(copy.isOldModel(t1Path)).toBe(true);
+      expect(copy.needsConversion(t1Path)).toBe(true);
       expect(() => copy.getConvertedModel(t1Path)).toThrow("cannot convert");
     });
   });

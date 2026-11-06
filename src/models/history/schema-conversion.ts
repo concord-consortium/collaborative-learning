@@ -58,7 +58,7 @@ export function convertOldModelJsonAtPath(modelPath: string, json: unknown): unk
  * True when the model JSON at `modelPath` has a version that isn't current, whether older or newer.
  * Versions are opaque strings, so only the converter can tell the two apart, and this doesn't run
  * it. A model the converter declines, such as one saved by a newer release, counts too;
- * isOldModelJsonAtPath leaves those out. Use it to skip work, such as cloning, that only an old
+ * modelJsonNeedsConversion leaves those out. Use it to skip work, such as cloning, that only an old
  * model needs.
  */
 export function isNonCurrentModelJsonAtPath(modelPath: string, json: unknown): boolean {
@@ -68,11 +68,12 @@ export function isNonCurrentModelJsonAtPath(modelPath: string, json: unknown): b
 }
 
 /**
- * True when the model JSON at `modelPath` is old (see convertOldModelJsonAtPath), which runs the
- * converter when the version differs. A model whose conversion throws is old: the converter took
- * it and failed, and converting it again throws where the caller can report the failure.
+ * True when the model JSON at `modelPath` needs conversion: its version isn't current and its
+ * converter doesn't decline it. History playback calls such a model old. This runs the converter
+ * when the version differs. A model whose conversion throws needs conversion, since the converter
+ * didn't decline it; converting it again throws where the caller can report the failure.
  */
-export function isOldModelJsonAtPath(modelPath: string, json: unknown): boolean {
+export function modelJsonNeedsConversion(modelPath: string, json: unknown): boolean {
   try {
     return convertOldModelJsonAtPath(modelPath, json) !== undefined;
   } catch {

@@ -4,7 +4,7 @@ import { cloneDeep } from "lodash";
 import { getSnapshot } from "mobx-state-tree";
 import {
   buildLoadEntry, convertContentJson, convertJsonAtPath, convertModelJsonAtPath, convertOldModelJsonAtPath,
-  getModelPath, isNonCurrentModelJsonAtPath, isOldModelJsonAtPath
+  getModelPath, isNonCurrentModelJsonAtPath, modelJsonNeedsConversion
 } from "./schema-conversion";
 import { HistoryEntry, HistoryOperation } from "./history";
 import { applyJsonPatches } from "./json-patch";
@@ -61,16 +61,16 @@ describe("isNonCurrentModelJsonAtPath", () => {
   });
 });
 
-describe("isOldModelJsonAtPath", () => {
+describe("modelJsonNeedsConversion", () => {
   it("detects old versions", () => {
-    expect(isOldModelJsonAtPath("/content/tileMap/t1", oldTile("t1"))).toBe(true);
-    expect(isOldModelJsonAtPath("/content/tileMap/t1", newTile("t1"))).toBe(false);
-    expect(isOldModelJsonAtPath("/content/sharedModelMap/sm1/sharedModel", oldShared("sm1"))).toBe(true);
+    expect(modelJsonNeedsConversion("/content/tileMap/t1", oldTile("t1"))).toBe(true);
+    expect(modelJsonNeedsConversion("/content/tileMap/t1", newTile("t1"))).toBe(false);
+    expect(modelJsonNeedsConversion("/content/sharedModelMap/sm1/sharedModel", oldShared("sm1"))).toBe(true);
   });
-  it("treats a model its converter declines as current, and one whose conversion throws as old", () => {
-    expect(isOldModelJsonAtPath("/content/tileMap/t3", newerTile("t3"))).toBe(false);
-    expect(isOldModelJsonAtPath("/content/sharedModelMap/sm3/sharedModel", newerShared("sm3"))).toBe(false);
-    expect(isOldModelJsonAtPath("/content/tileMap/t1", oldTile("t1", "THROW"))).toBe(true);
+  it("is false for a model its converter declines, and true for one whose conversion throws", () => {
+    expect(modelJsonNeedsConversion("/content/tileMap/t3", newerTile("t3"))).toBe(false);
+    expect(modelJsonNeedsConversion("/content/sharedModelMap/sm3/sharedModel", newerShared("sm3"))).toBe(false);
+    expect(modelJsonNeedsConversion("/content/tileMap/t1", oldTile("t1", "THROW"))).toBe(true);
   });
 });
 

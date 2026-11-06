@@ -91,7 +91,7 @@ function moveJsonCopy(copy: JsonHistoryCopy, history: readonly HistoryEntryType[
     target: number): { moved: IJsonCopyMoveResult; source: IPlaybackPatchSource } {
   const start = copy.position;
   const requestedPaths = collectModelPaths(getEntriesBetween(history, start, target), treeId);
-  const oldAtStart = new Set([...requestedPaths].filter(path => copy.isOldModel(path)));
+  const oldAtStart = new Set([...requestedPaths].filter(path => copy.needsConversion(path)));
 
   const moved = copy.moveTo(history, target);
 
@@ -99,7 +99,7 @@ function moveJsonCopy(copy: JsonHistoryCopy, history: readonly HistoryEntryType[
   const patches = getAllPatches(entries, treeId);
   const loadEntryPaths = collectModelPaths(entries.filter(entry => entry.isLoadEntry), treeId);
   const oldPaths = new Set([...collectModelPaths(entries, treeId)].filter(path =>
-    oldAtStart.has(path) || copy.isOldModel(path) ||
+    oldAtStart.has(path) || copy.needsConversion(path) ||
     hasOldValue(patches, path) || loadEntryPaths.has(path)));
   return { moved, source: createOldModelPatchSource({ copy, treeId, oldPaths }) };
 }

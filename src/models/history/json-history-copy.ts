@@ -74,10 +74,11 @@ export class JsonHistoryCopy {
   }
 
   /**
-   * True when the model at `modelPath` is old at the copy's position. A model whose conversion
-   * throws is old; getConvertedModel throws for it where the caller can report the failure.
+   * True when the model at `modelPath` needs conversion at the copy's position (see
+   * modelJsonNeedsConversion). A model whose conversion throws needs conversion; getConvertedModel
+   * throws for it where the caller can report the failure.
    */
-  isOldModel(modelPath: string): boolean {
+  needsConversion(modelPath: string): boolean {
     try {
       return this.getConvertedModel(modelPath) !== undefined;
     } catch {
