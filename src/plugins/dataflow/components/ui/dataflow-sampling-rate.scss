@@ -1,0 +1,76 @@
+@import "../../../../components/vars";
+@import "../../../../components/mixins";
+@import "../dataflow-vars";
+
+// The rate selector and the elapsed readout are the header's only content now, so they read as
+// plain controls on the toolbar rather than the dark chrome the old three-section header needed.
+// Lightly rounded rather than pill-shaped, per the design in the story.
+$rate-text: #545454;          // the toolbar's icon grey, so label and icons match
+$rate-border: #b7b7b7;
+$rate-corner-radius: 3px;
+$rate-control-height: 22px;
+
+// The header is a flex row inside a tile that can be narrowed to a couple of hundred pixels, so
+// every part of it has to refuse to shrink or the label breaks across two lines.
+.topbar-sampleratetext {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  margin-left: 3px;
+
+  .samplerate-label {
+    // 14px to match the labelling elsewhere in the tile, including the node labels.
+    font-size: 14px;
+    font-weight: 500;
+    color: $rate-text;
+    margin-right: 6px;
+    white-space: nowrap;
+  }
+}
+
+.topbar-datarate {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+
+  select {
+    height: $rate-control-height;
+    padding: 0 4px 0 8px;
+    border: 1px solid $rate-border;
+    border-radius: $rate-corner-radius;
+    background-color: white;
+    color: $rate-text;
+    font-size: 12px;
+    // Suppress the browser's default focus outline (it overlaps the rounded chrome
+    // awkwardly), then layer the canonical focus ring on keyboard focus only.
+    &:focus { outline: none; }
+    @include focus-ring(2px);
+    &:disabled {
+      cursor: default;
+      // Still legible: a student needs to read the rate they are recording at.
+      opacity: 1;
+      color: $rate-text;
+      background-color: $gray-light;
+    }
+  }
+
+  option:disabled {
+    color: $gray-disabled;
+  }
+}
+
+.recording-elapsed {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  white-space: nowrap;
+  height: $rate-control-height;
+  margin-left: 8px;
+  padding: 0 8px;
+  border: 1px solid $rate-border;
+  border-radius: $rate-corner-radius;
+  background-color: white;
+  color: $rate-text;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;   // the readout updates every tick; keep it from jittering
+}

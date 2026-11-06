@@ -14,7 +14,7 @@ import { DataflowContentModelType, kDataflowTableTileType } from "../../model/da
 import ViewBadgeIcon from "../../../../assets/icons/view/view-badge.svg";
 import RecordSampleIcon from "../../assets/icons/record-sample-icon.svg";
 
-function useTableButton() {
+export function useLinkedTable() {
   const tile = useContext(TileModelContext);
   const addTilesContext = useContext(AddTilesContext);
   const ui = useUIStore();
@@ -48,7 +48,7 @@ function useTableButton() {
 export const DataflowTableButton = observer(function DataflowTableButton(
   { name }: IToolbarButtonComponentProps
 ) {
-  const { content, readOnly, addTable, selectTable } = useTableButton();
+  const { content, readOnly, addTable, selectTable } = useLinkedTable();
   const Icon = getTileComponentInfo(kDataflowTableTileType)?.Icon;
 
   function handleClick() {
@@ -76,7 +76,7 @@ export const DataflowTableButton = observer(function DataflowTableButton(
 export const RecordSingleSampleButton = observer(function RecordSingleSampleButton(
   { name }: IToolbarButtonComponentProps
 ) {
-  const { content, readOnly, addTable } = useTableButton();
+  const { content, readOnly, addTable } = useLinkedTable();
 
   function handleClick() {
     content?.recordSingleSample(addTable);

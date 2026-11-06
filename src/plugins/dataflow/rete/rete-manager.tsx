@@ -117,8 +117,7 @@ export class ReteManager implements INodeServices {
     div: HTMLElement,
     public mstContent: DataflowContentModelType,
     public stores: IStores,
-    public readOnly: boolean | undefined,
-    public playback: boolean | undefined
+    public readOnly: boolean | undefined
   ){
     this.editor = new NodeEditorMST(mstProgram, this.createReteNodeFromNodeModel);
     this.area = new AreaPlugin<Schemes, AreaExtra>(div);
@@ -126,7 +125,7 @@ export class ReteManager implements INodeServices {
 
     this.setupComplete = this.setup().then(() => this.recordNeedsDeviceOnOpen());
 
-    if (!this.readOnly && !this.playback) {
+    if (!this.readOnly) {
       // updateNeedsDevice tracks the program's blocks through getNodes(), along with each
       // block's settings and wiring.
       const needsDeviceDisposer = autorun(() => this.updateNeedsDevice());
@@ -590,8 +589,8 @@ export class ReteManager implements INodeServices {
     // The groups overlay is a sibling of the rete container, not a descendant, so a plain
     // container.contains() test deactivated arrow panning as soon as the user touched a group chip
     // or a collapse toggle — the most likely thing to precede a pan. Accept that sibling too,
-    // matched by class rather than by testing the shared parent wholesale, so the hidden editing
-    // canvas doesn't claim pointer presses landing on the playback canvas in Done mode.
+    // matched by class rather than by testing the shared parent wholesale, so pointer handling
+    // stays scoped to this editor's own canvas.
     const editorEl = container.parentElement;
     const inThisCanvas = (target: EventTarget | null) =>
       (target instanceof Node && container.contains(target)) ||
@@ -1342,7 +1341,7 @@ export class ReteManager implements INodeServices {
    * on-open state is recorded by recordNeedsDeviceOnOpen.
    */
   public updateNeedsDevice() {
-    if (this.readOnly || this.playback) return;
+    if (this.readOnly) return;
 
     this.mstContent.setNeedsDevice(programNeedsDevice(this.editor.getNodes()));
   }
@@ -1354,7 +1353,7 @@ export class ReteManager implements INodeServices {
    * reflects the program as it opened.
    */
   private recordNeedsDeviceOnOpen() {
-    if (this.disposed || this.readOnly || this.playback) return;
+    if (this.disposed || this.readOnly) return;
 
     this.mstContent.setShowConnectTutorialOnOpen(
       programNeedsDevice(this.editor.getNodes()) && !this.stores.serialDevice.isConnected()

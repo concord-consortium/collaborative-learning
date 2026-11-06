@@ -17,6 +17,7 @@
           "integration spec need defaultSeriesLegend, which qa-moth-plot turns off."
         ],
         "tools": ["table-it", ["data-set-view", "Graph"], ["data-set-link", "Graph"],
+                  "record", "stop", "clear",
                   "delete", "group", "ungroup", "|", "zoom-in", "zoom-out", "fit-all", "pan"]
       },
       "ai": {

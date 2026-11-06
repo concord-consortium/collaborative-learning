@@ -610,6 +610,7 @@ context('Arrow Annotations (Sparrows)', function () {
     aa.getAnnotationModeButton().click();
 
     cy.log("The annotation arrow should continue showing when recording");
+    dataflowTile.getDataflowTile().click();     // the toolbar renders only for the selected tile
     dataflowTile.getRecordButton().click();
     // This ought to wait until the first tick happens which will update the timer
     dataflowTile.getCountdownTimer({timeout: 3000}).should("contain", "00:01");
@@ -617,22 +618,23 @@ context('Arrow Annotations (Sparrows)', function () {
     dataflowTile.getStopButton().click();
 
     cy.log("The annotation arrow should continue showing when stopped");
-    dataflowTile.getPlayButton().should("be.enabled");
+    dataflowTile.getStopButton().should("have.attr", "aria-disabled", "true");
     // Briefly wait to make sure the recorded program blocks are now showing
     cy.wait(100);
     aa.getAnnotationArrows().should("have.length", 1);
 
     cy.log("New annotations can be made on a recorded program");
     aa.getAnnotationModeButton().click();
-    aa.getAnnotationButtons().should("have.length", 4);
+    // No total asserted here: recording created a linked table, whose cells are annotatable too,
+    // and how many rows it captured depends on how many ticks fit in the wait above. The program's
+    // four blocks are still the first four buttons, because the table sits after the dataflow tile.
     aa.getAnnotationButtons().eq(1).click({ force: true });
     aa.getAnnotationButtons().eq(3).click();
     aa.getAnnotationArrows().should("have.length", 2);
     aa.getAnnotationModeButton().click();
 
     cy.log("Annotations continue showing after clearing the recording");
-    dataflowTile.getRecordingClearButton().click();
-    dataflowTile.getClearDataWarningClear().click();
+    dataflowTile.clearRecordedData();
     dataflowTile.getSamplingRateLabel().should("have.text", "Sampling Rate");
     aa.getAnnotationArrows().should("have.length", 2);
   });

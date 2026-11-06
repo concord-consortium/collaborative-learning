@@ -13,6 +13,7 @@ import { measureText } from "../../../components/tiles/hooks/use-measure-text";
 import { defaultTileTitleFont } from "../../../components/constants";
 import { TileTitleArea } from "../../../components/tiles/tile-title-area";
 import { TileToolbar } from "../../../components/toolbar/tile-toolbar";
+import { ToolbarBusyContext } from "../../../components/toolbar/tile-toolbar-context";
 import { ReteManager } from "../rete/rete-manager";
 import { DataflowReteManagerContext } from "./dataflow-rete-manager-context";
 import { ClueTileAccessibilityBridge } from "../../../hooks/use-clue-accessibility";
@@ -22,6 +23,7 @@ import { getDeviceConnection } from "../model/device-connection";
 import { acknowledgeConnectTutorial, DataflowConnectTutorialGate } from "./ui/dataflow-connect-tutorial";
 import { getDataflowFocusSlots } from "./dataflow-focus-slots";
 import { toolbarShowsConnect } from "../utilities/connect-button-state";
+import { kStopButtonName } from "./toolbar/dataflow-recording-buttons";
 
 import "../dataflow-toolbar-registration";
 import "./dataflow-tile.scss";
@@ -33,10 +35,6 @@ interface IProps extends ITileProps{
 }
 
 interface IDataflowTileState {
-  isRecording: boolean;
-  isPlaying: boolean;
-  playBackIndex: number;
-  recordIndex: number; //# of ticks for record
   isEditingTitle: boolean;
   reteManager: ReteManager | undefined;
 }
@@ -52,10 +50,6 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
   constructor(props: IProps) {
     super(props);
     this.state = {
-      isRecording: false,
-      isPlaying: false,
-      playBackIndex: 0,
-      recordIndex: 0,
       isEditingTitle: false,
       reteManager: undefined
     };
@@ -163,7 +157,11 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
             onProgramContainerRef={el => this.programContainerEl = el}
             onProgramApiRef={api => this.programApi = api}
           />
-          <TileToolbar tileType="dataflow" readOnly={!!readOnly} tileElement={this.props.tileElt} />
+          {/* During a run Stop is the only live control. Context reaches the toolbar through the
+              FloatingPortal it renders into, because a portal preserves the React tree. */}
+          <ToolbarBusyContext.Provider value={{ busy: tileContent.isRecording, exempt: [kStopButtonName] }}>
+            <TileToolbar tileType="dataflow" readOnly={!!readOnly} tileElement={this.props.tileElt} />
+          </ToolbarBusyContext.Provider>
         </div>
         <DataflowConnectTutorialGate
           content={tileContent}

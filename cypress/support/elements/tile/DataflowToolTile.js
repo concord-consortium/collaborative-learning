@@ -52,7 +52,8 @@ class DataflowToolTile {
   getNodeValueContainer(nodeType) {
     return this.getNode(nodeType).find(".value-container");
   }
-  getClearButton() {
+  // QA-only "Clear program" button (class "qa"), distinct from the recording toolbar's Clear.
+  getClearProgramButton() {
     return cy.get('.primary-workspace .qa');
   }
   getFlowtool() {
@@ -136,101 +137,20 @@ class DataflowToolTile {
   selectSamplingRate(rate) {
     return cy.get('.primary-workspace #rate-select').select(rate);
   }
-  verifyRecordButtonText() {
-    cy.get(".primary-workspace .record-data-txt").should("have.text", "Record");
-  }
-  verifyRecordButtonIcon() {
-    cy.get(".primary-workspace .record-data-icon path").invoke("attr", "data-name").should("contain", "record");
-  }
   getRecordButton() {
-    return cy.get(".primary-workspace .record-data-btn").contains("Record").parent();
-  }
-  verifyRecordButton() {
-    this.verifyRecordButtonText();
-    this.verifyRecordButtonIcon();
-  }
-  verifyPlayButtonText() {
-    cy.get(".primary-workspace .playback-data-txt").should("have.text", "Play");
-  }
-  verifyPlayButtonIcon() {
-    cy.get(".primary-workspace .playback-data-icon path").invoke("attr", "data-name").should("contain", "run");
-  }
-  getPlayButton() {
-    return cy.get(".primary-workspace .playback-data-btn").contains("Play").parent();
-  }
-  clickPlayButton() {
-    this.getPlayButton().should("be.enabled");
-    this.getPlayButton().click();
-  }
-  verifyPlayButtonDoesNotExist() {
-    cy.get(".primary-workspace .playback-data-btn").should("not.exist");
-  }
-  verifyPauseButtonText() {
-    cy.get(".primary-workspace .playback-data-txt").should("have.text", "Pause");
-  }
-  verifyPauseButtonIcon() {
-    cy.get(".primary-workspace .playback-data-icon path").invoke("attr", "data-name").should("contain", "pause");
-  }
-  getPauseButton() {
-    return cy.get(".primary-workspace .playback-data-btn").contains("Pause").parent();
-  }
-  clickPauseButton() {
-    this.verifyPauseButtonText();
-    this.verifyPauseButtonIcon();
-    this.getPauseButton().should("be.enabled");
-    this.getPauseButton().click();
-  }
-  verifyPauseButtonDoesNotExist() {
-    cy.get(".primary-workspace .playback-data-btn").should("not.exist");
-  }
-  getTimeSlider() {
-    return cy.get(".primary-workspace .program-editor-topbar .rc-slider.rc-slider-horizontal");
-  }
-  getCountdownTimer(options={}) {
-    return cy.get(".primary-workspace .program-editor-topbar .countdown-timer", options);
-  }
-  verifyStopButtonText() {
-    cy.get(".primary-workspace .record-data-txt").should("have.text", "Stop");
-  }
-  verifyStopButtonIcon() {
-    cy.get(".primary-workspace .record-data-icon path").invoke("attr", "data-name").should("contain", "stop");
+    return cy.get('.primary-workspace .tile-toolbar.dataflow-toolbar .toolbar-button.record');
   }
   getStopButton() {
-    return cy.get(".primary-workspace .record-data-btn").contains("Stop").parent();
+    return cy.get('.primary-workspace .tile-toolbar.dataflow-toolbar .toolbar-button.stop');
   }
-  verifyStopButtonDoesNotExist() {
-    cy.get(".primary-workspace .record-data-btn").should("not.have.text", "Stop");
+  getClearButton() {
+    return cy.get('.primary-workspace .tile-toolbar.dataflow-toolbar .toolbar-button.clear');
   }
-  verifyRecordingClearButtonText() {
-    cy.get(".primary-workspace .record-data-txt").should("have.text", "Clear");
-  }
-  verifyRecordingClearButtonIcon() {
-    cy.get(".primary-workspace .record-data-icon path").invoke("attr", "data-name").should("contain", "clear");
-  }
-  getRecordingClearButton() {
-    return cy.get(".primary-workspace .record-data-btn").contains("Clear").parent();
+  getCountdownTimer(options={}) {
+    return cy.get(".primary-workspace .program-editor-topbar .recording-elapsed", options);
   }
   getLinkTileButton() {
     return cy.get(".primary-workspace .link-table-button");
-  }
-  verifyClearButtonDoesNotExist() {
-    cy.get(".primary-workspace .record-data-btn").should("not.have.text", "Clear");
-  }
-  verifyRecordingClearButton() {
-    this.verifyRecordingClearButtonText();
-    this.verifyRecordingClearButtonIcon();
-  }
-  getClearDataWarningTitle() {
-    return cy.get(".modal-title");
-  }
-  getClearDataWarningContent() {
-    return cy.get(".modal-content");
-  }
-  getClearDataWarningCancel() {
-    return cy.get('.modal-button').contains("Cancel");
-  }
-  getClearDataWarningClear() {
-    return cy.get('.modal-button').contains("Clear");
   }
   createProgram(programNodes) {
     this.getDataflowTile().should("exist");
@@ -243,19 +163,19 @@ class DataflowToolTile {
     this.getNodeInput().eq(0).click({force: true});
   }
   recordData(samplingRate, timer) {
-    this.selectSamplingRate(samplingRate);
-    this.getRecordButton().click();
-    this.getCountdownTimer({timeout: (timer + 2) * 1000}).should("contain", "000:0" + timer.toString());
+    this.recordDataWithoutStop(samplingRate, timer);
     this.getStopButton().click();
   }
   recordDataWithoutStop(samplingRate, timer) {
     this.selectSamplingRate(samplingRate);
+    this.getDataflowTile().click();     // the toolbar renders only for the selected tile
     this.getRecordButton().click();
-    this.getCountdownTimer({timeout: (timer + 2) * 1000}).should("contain", "000:0" + timer.toString());
+    this.getCountdownTimer({timeout: (timer + 2) * 1000}).should("contain", "00:0" + timer.toString());
   }
+  // No confirmation modal: Clear empties the table in place.
   clearRecordedData() {
-    this.getRecordingClearButton().click();
-    this.getClearDataWarningClear().click();
+    this.getDataflowTile().click();
+    this.getClearButton().click();
   }
   // A title may be given as a RegExp: once a capture is prepared the program's name carries the
   // capture's start time (see captureName in dataflow-content), which no test can predict.
@@ -276,20 +196,10 @@ class DataflowToolTile {
     tableTile.checkWorkspaceColumnHeaders(attributes);
     tableTile.checkEmptyTableValues();
   }
-  checkRecordedStateButtons() {
-    this.verifyRecordingClearButton();
-    this.clickPlayButton();
-    this.clickPauseButton();
-    this.verifyRecordingClearButton();
-  }
   checkInitialStateButtons() {
     this.getSamplingRateLabel().should("have.text", "Sampling Rate");
-    this.verifyRecordButtonText();
-    this.verifyRecordButtonIcon();
-    this.verifyPlayButtonDoesNotExist();
-    this.verifyPauseButtonDoesNotExist();
-    this.verifyStopButtonDoesNotExist();
-    this.verifyClearButtonDoesNotExist();
+    this.getRecordButton().should("not.have.attr", "aria-disabled");
+    this.getStopButton().should("have.attr", "aria-disabled", "true");
   }
 }
 

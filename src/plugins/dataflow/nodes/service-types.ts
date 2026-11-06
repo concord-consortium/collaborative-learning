@@ -25,5 +25,4 @@ export interface INodeServices {
    */
   inTick: boolean;
   readOnly?: boolean;
-  playback?: boolean;
 }
