@@ -89,8 +89,9 @@ the branch is tested in cutting.md, as long as they're done before the tag.
 - Read `.env` files that hold keys (`scripts/.env`, `dev-templates/scripts/.env`, `cypress.env.json`).
   Scripts read them; you print key names at most.
 - Decide a deploy timing yourself. Ask the PR's author (see "Deploy timing" in `docs/deploy.md`).
-- Deploy RTDB rules, or run `firebase deploy` with `--force`, without checking what's deployed
-  (see preparing.md).
+- Deploy RTDB rules without checking what's deployed (see preparing.md).
+- Pass `--force` to `firebase deploy`, even when the CLI suggests it. A deploy that deletes
+  indexes or functions is the developer's to run.
 - Write bare Jira keys in Slack. The Jira bot posts a preview card for each one; write
   `[CLUE-123](https://concord-consortium.atlassian.net/browse/CLUE-123)` every time the key
   appears, not just the first, or reword ("can it be marked Done"). The self-DM preview can't show
@@ -106,4 +107,6 @@ the branch is tested in cutting.md, as long as they're done before the tag.
 | Moving a story to the next version because its sprint says so | Surface the sprint, and let the developer decide |
 | Holding a story open for a PR the release doesn't need | Mark it Done, and move the PR to its own story (preparing.md) |
 | Posting straight to a channel | Preview in the developer's self-DM first; Claude can't edit or delete messages |
+| Writing Slack's own formatting (`*bold*`, `_italic_`) in a post | The Slack tool takes standard markdown: `**bold**` and `*italic*`. A `*heading*` renders italic |
+| Checking a thread for new replies with `slack_read_thread`'s `oldest` set to a reply's ts | It has returned none of the replies; read the whole thread and compare times yourself |
 | Waiting for someone's reply with nothing to bring you back | Nothing pushes a Slack reply to the session. Within a session, a background timer or watcher brings you back to check; across sessions, schedule a reminder in the developer's self-DM (`slack_schedule_message`) |
