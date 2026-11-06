@@ -131,6 +131,10 @@ describe("DemoOutputNode.getPlotScale", () => {
     expect(scale).toMatchObject({ min: 0, max: 100 });
   });
 
+  it("declares nothing for an output type it does not recognize, so the graph auto-scales", () => {
+    expect(scaleOf("Mystery Device")).toBeUndefined();
+  });
+
   it("declares nothing for the tilt series", () => {
     expect(stubbedNode("Advanced Grabber" as any).getPlotScale("tilt")).toBeUndefined();
   });

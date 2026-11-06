@@ -121,6 +121,11 @@ describe("LiveOutputNode.getPlotScale", () => {
     expect(scaleOf(stubbedNode({ liveOutputType: "Fan" }))).toMatchObject({ min: 0, max: 1 });
   });
 
+  // A block whose saved type the unit no longer offers keeps that type, so this is reachable.
+  it("declares nothing for an output type it does not recognize, so the graph auto-scales", () => {
+    expect(scaleOf(stubbedNode({ liveOutputType: "Mystery Device" }))).toBeUndefined();
+  });
+
   it("declares nothing for a series it does not know", () => {
     expect(stubbedNode({ liveOutputType: "Servo" }).getPlotScale("tilt")).toBeUndefined();
   });
