@@ -62,6 +62,14 @@ describe("applyJsonPatches", () => {
     expect((error as JsonPatchError).numApplied).toBe(0);
   });
 
+  it("throws on a path that doesn't start with /, and leaves the document alone", () => {
+    const doc: any = { a: { b: 1 }, b: 1 };
+    expect(() => applyJsonPatches(doc, [{ op: "add", path: "foo", value: 1 }])).toThrow(JsonPatchError);
+    expect(() => applyJsonPatches(doc, [{ op: "remove", path: "foo" }])).toThrow(JsonPatchError);
+    expect(() => applyJsonPatches(doc, [{ op: "replace", path: "a/b", value: 2 }])).toThrow(JsonPatchError);
+    expect(doc).toEqual({ a: { b: 1 }, b: 1 });
+  });
+
   it("throws on out of range array indexes", () => {
     expect(() => applyJsonPatches({ l: [1] }, [{ op: "add", path: "/l/5", value: 1 }])).toThrow(JsonPatchError);
     expect(() => applyJsonPatches({ l: [1] }, [{ op: "replace", path: "/l/1", value: 1 }])).toThrow(JsonPatchError);

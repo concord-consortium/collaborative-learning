@@ -13,10 +13,8 @@ import { IJsonPatch } from "mobx-state-tree";
 // array index, instead of throwing, so playback couldn't tell where a chain of history entries
 // breaks.
 //
-// Snapshot post-processors also make MST's patches differ from the stored JSON. Recorded patch
-// paths follow the MST tree, but the stored JSON is the post-processed snapshot, so a patch under a
-// prop that a post-processor drops has no parent here, and applying it throws. The post-processor
-// rule in .eslintrc.js forbids new ones.
+// A patch under a prop that a snapshot post-processor drops has no parent here, so applying it
+// throws. See the post-processor rule in .eslintrc.js.
 
 export class JsonPatchError extends Error {
   readonly numApplied: number;
@@ -35,7 +33,7 @@ function unescapeSegment(segment: string) {
 }
 
 function applyJsonPatch(doc: object, patch: IJsonPatch) {
-  if (!patch.path) throw new Error("patch has an empty path");
+  if (!patch.path?.startsWith("/")) throw new Error(`patch path "${patch.path}" doesn't start with /`);
 
   const segments = patch.path.split("/").slice(1).map(unescapeSegment);
   const key = segments.pop() as string;
@@ -77,7 +75,7 @@ function applyJsonPatch(doc: object, patch: IJsonPatch) {
  * fails; the patches before it stay applied, and `numApplied` counts them.
  *
  * It matches how MST applies recorded patches, which is looser than RFC 6902:
- * - An empty path throws.
+ * - A path that doesn't start with `/` throws, including an empty one.
  * - Path segments are JSON-pointer unescaped (`~1` is `/`, `~0` is `~`).
  * - The parent must resolve to an object or an array, or the call throws.
  * - On an object parent, `add` and `replace` set the member, even if it is missing (a
