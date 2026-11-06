@@ -36,9 +36,9 @@ jest.mock("firebase/app", () => ({
 }));
 
 // A minimal Tree implementation that satisfies the TreeAPI shape the
-// TreeManager calls. It mirrors the batched-applyPatch + onPatch
-// counting pattern from the real Tree model so that PatchApplicationError
-// is thrown with an accurate numApplied count — which is what the
+// TreeManager calls. It mirrors how the real Tree model applies patches one
+// at a time and collects their reverse patches, so PatchApplicationError
+// carries the numApplied count and reverse patches that the
 // goToHistoryEntryPosition rollback logic depends on.
 const TestTree = types.model("TestTree", {
   myId: types.string,
@@ -86,14 +86,24 @@ const TestTree = types.model("TestTree", {
         throw new Error("History patches must have a non-empty path.");
       }
     }
-    let numApplied = 0;
-    const disposer = onPatch(self, () => { numApplied++; });
+    const reversePatches: IJsonPatch[][] = [];
+    let currentReversePatches: IJsonPatch[] = [];
+    let failure: { error: unknown } | undefined;
+    const disposer = onPatch(self, (_patch, reversePatch) => { currentReversePatches.push(reversePatch); });
     try {
-      applyPatch(self, patchesToApply);
-    } catch (e) {
-      throw new PatchApplicationError(numApplied, e);
+      for (const patch of patchesToApply) {
+        applyPatch(self, patch);
+        reversePatches.push(currentReversePatches);
+        currentReversePatches = [];
+      }
+    } catch (error) {
+      failure = { error };
     } finally {
       disposer();
+    }
+    if (failure) {
+      applyPatch(self, [...currentReversePatches].reverse());
+      throw new PatchApplicationError(reversePatches.length, failure.error, reversePatches);
     }
     if (loads && loads.length > 0) {
       try {

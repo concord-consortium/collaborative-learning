@@ -892,13 +892,11 @@ export const TreeManager = types
       // entry's partial was applied last, so it rolls back first; then
       // fully-applied segments roll back in reverse segment order.
       //
-      // Partial slice derivation: in the opposite direction, an
-      // entry's batched patches list is the reverse of the forward
-      // direction's list. The first `appliedInEntry` patches of the
-      // forward list correspond to the last `appliedInEntry` patches
-      // of the opposite list — so .slice(length - appliedInEntry)
-      // gives us the patches we need (already in the correct order
-      // to undo the partial application).
+      // The failing entry's partial is undone with the reverse patches the
+      // tree reported for each patch it applied (PatchApplicationError), not
+      // with the entry's opposite patches: an entry's inverse patches don't
+      // have to pair one-to-one with its patches. A whole entry's opposite
+      // patches do undo it, so fully-applied segments use those.
       //
       // Trees that failed unexpectedly are skipped entirely: we don't
       // have a trustworthy numApplied count and can't safely roll back
@@ -916,16 +914,12 @@ export const TreeManager = types
             const rollbackPatches: IJsonPatch[] = [];
 
             if (r.failure) {
-              const { historyIndex, appliedInEntry } = r.failure;
-              if (appliedInEntry > 0) {
-                const failedEntry = history.at(historyIndex);
-                if (failedEntry) {
-                  const oppositePatches = source.getPatches(failedEntry, r.treeId, oppositeOp);
-                  rollbackPatches.push(
-                    ...oppositePatches.slice(oppositePatches.length - appliedInEntry)
-                  );
-                }
-              }
+              // The failing entry's applied patches are the last appliedInEntry the tree applied.
+              const { appliedInEntry, error } = r.failure;
+              const appliedReversePatches = error.reversePatches.slice(error.numApplied - appliedInEntry);
+              appliedReversePatches.reverse().forEach(patchReversePatches => {
+                rollbackPatches.push(...[...patchReversePatches].reverse());
+              });
             }
 
             // Fully-applied segments (those before the failing segment, or

@@ -673,6 +673,40 @@ describe("history playback failure handling", () => {
     expect(manager.historyPlaybackFailures[0].historyIndex).toBe(0);
     expect(manager.historyPlaybackFailures[0].direction).toBe("redo");
   });
+
+  // An entry whose inverse patches don't pair one-to-one with its patches,
+  // as in a load entry, whose two directions are separate diffs. Its one
+  // inverse patch undoes nothing the forward patches change.
+  const unpairedEntry = {
+    ...mixedPatchesEntry,
+    action: "/unpairedEntry",
+    records: [
+      { action: "/unpairedEntry",
+        inversePatches: [
+          { op: "replace", path: "/content/tileMap/NONEXISTENT/content/flag", value: false}
+        ],
+        patches: [
+          { op: "replace", path: "/content/tileMap/t1/content/actionText", value: "changed"},
+          { op: "replace", path: "/content/tileMap/t1/content/flag", value: true},
+          { op: "replace", path: "/content/tileMap/NONEXISTENT/content/flag", value: true}
+        ],
+        tree: "test"
+      }
+    ]
+  };
+
+  it("rolls back a partly applied entry whose inverse patches don't pair with its patches", async () => {
+    const {tileContent, manager} = setupDocument();
+    seedHistory(manager, [makeRealHistoryEntry(unpairedEntry)], 0,
+      () => tileContent.setActionText("initial"));
+
+    await manager.goToHistoryEntryPosition(1);
+
+    expect(tileContent.actionText).toBe("initial");
+    expect(tileContent.flag).toBeUndefined();
+    expect(manager.numHistoryEventsApplied).toBe(0);
+    expect(manager.historyPlaybackFailures.length).toBe(1);
+  });
 });
 
 it("records tile model changes in response to shared model changes", async () => {
