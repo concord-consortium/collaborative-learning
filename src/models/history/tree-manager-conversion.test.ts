@@ -331,7 +331,7 @@ describe("playback across a load entry", () => {
     expectTileToMatchConvertedJson(getTile(document, "t1"), copyJson(t1Path));
   });
 
-  it("records the failure when the rollback's conversion throws", async () => {
+  it("rolls back to where the move started when the rollback's conversion throws", async () => {
     const oldEntries = [
       makeEntry([replaceRecord(`${t1Path}/content/text`, "a", "THROW")]),
       makeEntry([replaceRecord("/content/tileMap/t2/content/nope/deep", 1, 2)]),
@@ -340,15 +340,22 @@ describe("playback across a load entry", () => {
     const content = {
       tileMap: { ...t1Content().tileMap, t2: { id: "t2", content: { type: "TestTile", nope: { deep: 2 } } } }
     };
-    const { manager } = await setupConvertedDocument(content, oldEntries);
+    const { document, manager, endPosition, copyJson } = await setupConvertedDocument(content, oldEntries);
+    const t2 = document.content!.tileMap.get("t2")!.content as TestTileType;
     const warnSpy = jest.spyOn(console, "warn").mockImplementation(() => undefined);
 
+    // MST stops the move at 2, where t1's text is "THROW", so its rollback can't be built.
     await manager.goToHistoryEntryPosition(0);
 
-    expect(manager.numHistoryEventsApplied).toBe(2);
-    expect(manager.jsonHistoryCopy!.position).toBe(2);
+    expect(manager.numHistoryEventsApplied).toBe(endPosition);
+    expect(manager.jsonHistoryCopy!.position).toBe(endPosition);
     expect(manager.historyPlaybackFailures.map(f => [f.historyIndex, f.direction])).toEqual([[1, "undo"]]);
-    expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining("Rollback of tree 'doc1' failed: cannot convert"));
+    expect(getTile(document, "t1").label).toBe("x");
+    expect(copyJson(t1Path).content.label).toBe("x");
+    expect(t2.nope).toEqual({ deep: 2 });
+    expect(warnSpy).toHaveBeenCalledWith(
+      expect.stringContaining("Rollback of tree 'doc1' to history position 2 could not be built: cannot convert"));
+    expect(warnSpy).not.toHaveBeenCalledWith("Trees may be in an inconsistent state.");
   });
 
   it("rolls back the move when MST rejects an old tile's load", async () => {

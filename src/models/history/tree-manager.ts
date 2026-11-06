@@ -860,10 +860,6 @@ export const TreeManager = types
         ? HistoryOperation.Undo
         : HistoryOperation.Redo;
 
-      // The copy moves to the stop position first, so the rollback's loads hold the old models'
-      // state there.
-      copy?.moveTo(history, stopPosition);
-
       // Build and apply per-tree rollback batches.
       //
       // Rollback ordering: patches need to be applied in reverse of the
@@ -885,48 +881,68 @@ export const TreeManager = types
       // playback-failure + console.error to surface the bug.
       //
       // Every rollback batch and its loads are built before any is applied. Building one can
-      // throw when a conversion of an old model fails.
-      const rollbacks: { r: TreeApplyResult; patches: IJsonPatch[]; loads: IJsonPatch[] }[] = [];
-      for (const r of results) {
-        if (r.unexpected) continue;
-        try {
-          const rollbackPatches: IJsonPatch[] = [];
+      // throw when a conversion of an old model fails, which leaves that tree out.
+      const buildRollbacks = () => {
+        const built: { r: TreeApplyResult; patches: IJsonPatch[]; loads: IJsonPatch[] }[] = [];
+        let failed = false;
+        for (const r of results) {
+          if (r.unexpected) continue;
+          try {
+            const rollbackPatches: IJsonPatch[] = [];
 
-          if (r.failure) {
-            const { historyIndex, appliedInEntry } = r.failure;
-            if (appliedInEntry > 0) {
-              const failedEntry = history.at(historyIndex);
-              if (failedEntry) {
-                const oppositePatches = source.getPatches(failedEntry, r.treeId, oppositeOp);
-                rollbackPatches.push(
-                  ...oppositePatches.slice(oppositePatches.length - appliedInEntry)
-                );
+            if (r.failure) {
+              const { historyIndex, appliedInEntry } = r.failure;
+              if (appliedInEntry > 0) {
+                const failedEntry = history.at(historyIndex);
+                if (failedEntry) {
+                  const oppositePatches = source.getPatches(failedEntry, r.treeId, oppositeOp);
+                  rollbackPatches.push(
+                    ...oppositePatches.slice(oppositePatches.length - appliedInEntry)
+                  );
+                }
               }
             }
-          }
 
-          // Fully-applied segments (those before the failing segment, or
-          // all segments if this tree didn't fail), in reverse application
-          // order. Only those "past" the stop position need rollback.
-          const failingSegIdx = r.failure ? r.failure.failingSegIdx : r.segments.length;
-          for (let i = failingSegIdx - 1; i >= 0; i--) {
-            const seg = r.segments[i];
-            if (needsRollback(seg.historyIndex)) {
-              const entry = history.at(seg.historyIndex);
-              if (entry) {
-                const oppositePatches = source.getPatches(entry, r.treeId, oppositeOp);
-                rollbackPatches.push(...oppositePatches);
+            // Fully-applied segments (those before the failing segment, or
+            // all segments if this tree didn't fail), in reverse application
+            // order. Only those "past" the stop position need rollback.
+            const failingSegIdx = r.failure ? r.failure.failingSegIdx : r.segments.length;
+            for (let i = failingSegIdx - 1; i >= 0; i--) {
+              const seg = r.segments[i];
+              if (needsRollback(seg.historyIndex)) {
+                const entry = history.at(seg.historyIndex);
+                if (entry) {
+                  const oppositePatches = source.getPatches(entry, r.treeId, oppositeOp);
+                  rollbackPatches.push(...oppositePatches);
+                }
               }
             }
-          }
 
-          rollbacks.push({ r, patches: rollbackPatches, loads: source.getLoads(r.treeId) });
-        } catch (buildError) {
-          console.warn(
-            `Rollback of tree '${r.treeId}' failed: ${(buildError as Error).message}. ` +
-            `Trees may be in an inconsistent state.`
-          );
+            built.push({ r, patches: rollbackPatches, loads: source.getLoads(r.treeId) });
+          } catch (buildError) {
+            failed = true;
+            console.warn(
+              `Rollback of tree '${r.treeId}' to history position ${stopPosition} could not be built: ` +
+              `${(buildError as Error).message}.`
+            );
+          }
         }
+        return { built, failed };
+      };
+
+      // The copy moves to the stop position first, so the rollback's loads hold the old models'
+      // state there.
+      copy?.moveTo(history, stopPosition);
+      let { built: rollbacks, failed: rollbackFailed } = buildRollbacks();
+      if (rollbackFailed && stopPosition !== initialPosition) {
+        // Stop where the move started instead, so every tree and the copy end at one position.
+        // The conversions there succeeded when the trees got there.
+        stopPosition = initialPosition;
+        copy?.moveTo(history, stopPosition);
+        ({ built: rollbacks, failed: rollbackFailed } = buildRollbacks());
+      }
+      if (rollbackFailed) {
+        console.warn("Trees may be in an inconsistent state.");
       }
 
       const rollbackPromises = rollbacks.map(async ({ r, patches: rollbackPatches, loads: rollbackLoads }) => {
