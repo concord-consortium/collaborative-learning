@@ -189,7 +189,8 @@ export const TreeManager = types
   jsonHistoryCopy: undefined as JsonHistoryCopy | undefined
 }))
 .views((self) => {
-  // The history only grows during playback, so the scan resumes where it stopped.
+  // The history usually only grows during playback, so the scan resumes where it stopped. A new or
+  // shorter history is scanned again.
   let scannedHistory: unknown;
   let scannedLength = 0;
   let hasLoadEntry = false;

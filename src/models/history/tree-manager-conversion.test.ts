@@ -1,7 +1,7 @@
 import fs from "fs";
 import path from "path";
 import { cloneDeep } from "lodash";
-import { getSnapshot, IJsonPatch, Instance, types } from "mobx-state-tree";
+import { applySnapshot, getSnapshot, IJsonPatch, Instance, types } from "mobx-state-tree";
 import { ITileProps } from "src/components/tiles/tile-component";
 import { SharedModel } from "../shared/shared-model";
 import { registerSharedModelInfo } from "../shared/shared-model-registry";
@@ -439,6 +439,20 @@ describe("playback across a load entry", () => {
     }
     expect(manager.needsJsonCopy).toBe(false);
     expect(manager.jsonHistoryCopy).toBeUndefined();
+  });
+
+  it("scans a shorter or replaced history again for a load entry", () => {
+    const document = createDocumentModel({ uid: "1", type: ProblemDocument, key: kTreeId, content: t1Content() });
+    const manager = document.treeManagerAPI as Instance<typeof TreeManager>;
+    const plainEntry = () => makeEntry([replaceRecord(`${t1Path}/content/text`, "a", "b")]);
+    const loadEntry: HistoryEntrySnapshot = { ...makeEntry([]), isLoadEntry: true };
+
+    manager.setChangeDocument(CDocument.create({ history: [plainEntry(), plainEntry()] }));
+    expect(manager.needsJsonCopy).toBe(false);
+    applySnapshot(manager.document, { history: [loadEntry] });
+    expect(manager.needsJsonCopy).toBe(true);
+    manager.setChangeDocument(CDocument.create({ history: [plainEntry(), plainEntry(), plainEntry()] }));
+    expect(manager.needsJsonCopy).toBe(false);
   });
 });
 
