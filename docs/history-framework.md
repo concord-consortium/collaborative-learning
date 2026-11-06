@@ -180,7 +180,7 @@ sequenceDiagram
 
 ## Load entries
 
-A tile or shared model type can register a schema version and a converter (`ISchemaVersionInfo`). When a document is loaded, `createDocumentModel` converts its old tiles and shared models before MST sees them (`convertContentJson` in `schema-conversion.ts`), and records the conversion as a **load entry**: a history entry with `isLoadEntry: true`. Its patches turn each converted model's stored JSON into its converted JSON, and its inverse patches turn it back. It is not undoable.
+A tile or shared model type can register a schema version and a converter (`ISchemaVersionInfo`). When a document is loaded, `createDocumentModel` converts its old tiles and shared models before MST sees them (`convertContentJson` in `schema-conversion.ts`), and records the conversion as a **load entry**: a history entry with `isLoadEntry: true`. Its patches turn each converted model's stored JSON into its converted JSON, and its inverse patches turn it back. It is not undoable. For how to change a tile's schema, see [tile-schema-changes.md](tile-schema-changes.md).
 
 The load entry is not added to the history when the document loads. The TreeManager holds it as `pendingLoadEntry` and adds it just before the first entry that changes the content (`completeHistoryEntry`), so it is saved along with the converted content it describes. A document that is only viewed never adds one. If the content is replaced before then (`DocumentModel.setContent`), the pending entry is rebuilt from the new content.
 
@@ -199,13 +199,17 @@ A **patch source** (`IPlaybackPatchSource` in `playback-patch-source.ts`) is wha
 - `getPatches(entry, treeId, direction)`: the patches a tree receives for one entry, going forward (redo) or backward (undo). The move and the rollback after a failure both use it, so they agree on what was applied.
 - `getModelReplacements(treeId)`: whole-model `replace` patches the tree applies after all of the move's patches, in the same action.
 
-`defaultPatchSource` returns each entry's recorded patches unchanged, gives load entries no patches, and has no model replacements. Every document that doesn't need a JSON copy uses it.
+`defaultPatchSource` returns each entry's recorded patches unchanged, gives load entries no patches, and has no model replacements. Every document that doesn't need a JSON copy (see below) uses it.
 
 ### The JSON copy
 
-When the history holds a load entry or a pending one was handed over (`needsJsonCopy`, see below), the first move builds a `JsonHistoryCopy` of the main document from its snapshot. The copy is plain JSON. It applies every entry as stored, load entries included, so it can be at any position in any format. Each move moves the copy first, one entry at a time. `applyJsonPatches` applies an entry all or nothing, so if an entry doesn't apply, the copy stops before it and the trees stop at the same position.
+When the history holds a load entry, a pending one was handed over, or a history bridge finds a conversion the history never recorded (`needsJsonCopy`), the first move builds a `JsonHistoryCopy` of the main document from its snapshot. The copy is plain JSON. It applies every entry as stored, load entries included, so it can be at any position in any format. Each move moves the copy first, one entry at a time. `applyJsonPatches` applies an entry all or nothing, so if an entry doesn't apply, the copy stops before it and the trees stop at the same position.
 
 Playback runs on a copy of the document that the canvas makes (`canvas.tsx`), with the history from Firestore. If the live document converted old content and its load entry is still pending, the Firestore history doesn't have that entry, but the copy's content is converted. So the canvas hands the pending entry to the playback copy's TreeManager as `localLoadEntry`. It stays out of the history. The JSON copy starts from the document's JSON with that entry undone (`getJsonCopyStart`), so it holds the stored content the Firestore history reaches.
+
+### History bridges
+
+A document converted before load entries existed has no load entry for that conversion. A plugin can register a **history bridge** (`registerHistoryBridge` in `history-bridges.ts`) that recognizes such a history and reports its **virtual conversions**: for each one, a model path, the position the conversion sits at, and the model's old JSON just before it. The JSON copy crosses a virtual conversion like a load entry. Going backward it sets the model to the old JSON the bridge rebuilt, and going forward it undoes that. When a bridge can't rebuild a model's old JSON, or the model isn't in the copy when the copy reaches the conversion, the copy can't cross that conversion backward, so playback treats its position as the oldest it can reach and says "Earlier history isn't available." It does not show the failure banner. DataFlow's legacy bridge (`legacy-dataflow-history-bridge.ts`) is the example.
 
 ### Old models and model replacements
 
@@ -213,7 +217,7 @@ For each move, `moveJsonCopy` in `tree-manager.ts` decides which models are **ol
 
 - it is old in the copy at the start or at the end of the move;
 - a patch in the move carries a value that holds an old version of it, which finds a model added and removed within the move, absent at both ends; or
-- a load entry in the move changes it.
+- a load entry or a virtual conversion in the move changes it.
 
 The move's patch source (`createOldModelPatchSource`) then keeps every patch of an old model away from MST:
 
