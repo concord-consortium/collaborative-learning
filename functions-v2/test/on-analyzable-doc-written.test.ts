@@ -301,6 +301,72 @@ describe("functions", () => {
     });
   });
 
+  describe("on-analyzable-doc-written with an evaluation gate", () => {
+    const metadataPath = "demo/AI/portals/demo/classes/democlass1/users/1/documentMetadata/testdoc1";
+    const documentPath = "demo/AI/portals/demo/classes/democlass1/users/1/documents/testdoc1";
+
+    const seedHistoryEntry = (index: number) =>
+      admin.firestore().collection("demo/AI/documents/testdoc1/history").doc(`entry-${index}`).set({index});
+
+    // The literal key, not kEvaluationGateKey: the point of the node is that it is a sibling of
+    // `evaluation` rather than a child, so the path the function reads is what is pinned here.
+    const seedGate = (index: number, evaluator = "categorize-design") =>
+      getDatabase().ref(`${metadataPath}/evaluationGate/${evaluator}`).set(index);
+
+    const writeEvaluation = async (value: any, evaluator = "categorize-design") => {
+      const path = `${metadataPath}/evaluation/${evaluator}`;
+      const delta = makeChange(makeDataSnapshot(null, path), makeDataSnapshot(value, path));
+      await fft.wrap(onAnalyzableTestDocWritten)({
+        data: delta,
+        params: {
+          realm: "demo",
+          realmId: "AI",
+          portalId: "demo",
+          classId: "democlass1",
+          userId: "1",
+          docId: "testdoc1",
+          evaluator,
+        }});
+      return admin.firestore().collection("analysis/queue/pending").doc("testdoc1").get()
+        .then((result) => result.data());
+    };
+
+    // The session-end route: nothing is waiting on the comment, so an unchanged document is not
+    // worth paying to evaluate again.
+    test("does not queue an unrequested evaluation of a document unchanged since the last one", async () => {
+      await seedHistoryEntry(7);
+      await seedGate(7);
+
+      expect(await writeEvaluation({timestamp: 1001})).toBeUndefined();
+      expect(logger.info).toHaveBeenCalledWith(`Skipping unchanged document ${documentPath} for categorize-design`);
+    });
+
+    test("queues an unrequested evaluation of a document changed since the last one", async () => {
+      await seedHistoryEntry(7);
+      await seedGate(7);
+      await seedHistoryEntry(8);
+
+      expect(await writeEvaluation({timestamp: 1001})).toMatchObject({historyIndex: 8});
+    });
+
+    // A skipped request would leave the Ideas client waiting for a comment that never arrives.
+    test("queues a requested evaluation even when the document is unchanged", async () => {
+      await seedHistoryEntry(7);
+      await seedGate(7);
+
+      expect(await writeEvaluation({timestamp: 1001, requestId: "req-abc"}))
+        .toMatchObject({requestIds: ["req-abc"], historyIndex: 7});
+    });
+
+    // An absent gate must never read as unchanged: a document nobody has evaluated yet would
+    // then never be evaluated at all.
+    test("queues an unrequested evaluation when no gate has been recorded yet", async () => {
+      await seedHistoryEntry(7);
+
+      expect(await writeEvaluation({timestamp: 1001})).toMatchObject({historyIndex: 7});
+    });
+  });
+
   describe("normalizeRequestContext", () => {
     const context = {unit: "vibe", investigation: "1", problem: "2", offeringId: "2001"};
 

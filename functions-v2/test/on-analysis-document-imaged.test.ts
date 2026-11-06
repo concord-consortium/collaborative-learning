@@ -1386,6 +1386,107 @@ describe("functions", () => {
     });
   });
 
+  describe("the evaluation gate the run advances", () => {
+    const parsed = {category: "category", discussion: "Discussion.", keyIndicators: []};
+    // The literal key, not kEvaluationGateKey: the sibling-of-`evaluation` path is the thing being
+    // pinned, so renaming the constant must not quietly move it.
+    const gatePath = `${sampleDoc.metadataPath}/evaluationGate/${sampleDoc.evaluator}`;
+
+    const readGate = () => getDatabase().ref(gatePath).once("value").then((snapshot) => snapshot.val());
+
+    const doneRecord = () => admin.firestore().collection("analysis/queue/done").get()
+      .then((snapshot) => snapshot.docs[0]?.data());
+
+    async function runImaged(doc: Record<string, unknown>) {
+      await fft.wrap(onAnalysisDocumentImaged)({
+        data: makeDocumentSnapshot(doc, "analysis/queue/imaged/testdoc1"),
+        params: {docId: "testdoc1"},
+      });
+    }
+
+    const evaluated = (fields: Record<string, unknown> = {}) => versionTwoDoc({
+      sendSummary: true, docSummary: "A summary",
+      sendImage: true, docImageUrl: "https://x/y.png",
+      ...fields,
+    });
+
+    test("a successful evaluation records the index the queue entry carried", async () => {
+      mockCategorizeResponse({parsed, messageShape: "mixed"});
+
+      await runImaged(evaluated({historyIndex: 12}));
+
+      expect(await readGate()).toBe(12);
+    });
+
+    test("a queue entry with no history index leaves the gate alone", async () => {
+      // What a document whose history could not be read looks like. Writing anything here would
+      // either withhold the next evaluation or wipe what an earlier run legitimately recorded.
+      await getDatabase().ref(gatePath).set(5);
+      mockCategorizeResponse({parsed, messageShape: "mixed"});
+
+      await runImaged(evaluated({historyIndex: undefined}));
+
+      expect(await readGate()).toBe(5);
+      expect(logger.warn).not.toHaveBeenCalledWith(
+        "Could not advance the evaluation gate", expect.anything(), expect.anything());
+    });
+
+    test("a comment that cannot be written leaves the gate unadvanced", async () => {
+      // The ordering is the whole point: a gate advanced before the comment landed would skip the
+      // next evaluation of work that never got feedback.
+      mockCategorizeResponse({parsed, messageShape: "mixed"});
+      const realSet = DocumentReference.prototype.set;
+      const spy = jest.spyOn(DocumentReference.prototype, "set")
+        .mockImplementation(async function(this: DocumentReference, ...args: any[]) {
+          // eslint-disable-next-line no-invalid-this, @typescript-eslint/no-this-alias
+          const ref = this;
+          if (ref.path.startsWith(sampleDoc.commentsPath)) throw new Error("firestore unavailable");
+          return realSet.apply(ref, args as any);
+        });
+
+      try {
+        await expect(runImaged(evaluated({historyIndex: 12}))).rejects.toThrow("firestore unavailable");
+      } finally {
+        spy.mockRestore();
+      }
+
+      expect(await readGate()).toBeNull();
+    });
+
+    test("a gate that cannot be written does not cost the run its comment or status", async () => {
+      mockCategorizeResponse({parsed, messageShape: "mixed"});
+      const db = getDatabase();
+      const realRef = db.ref.bind(db);
+      const spy = jest.spyOn(db, "ref").mockImplementation((path) => {
+        const ref = realRef(path);
+        if (typeof path === "string" && path.includes("evaluationGate")) {
+          return Object.assign(Object.create(Object.getPrototypeOf(ref)), ref, {
+            set: async () => {
+              throw new Error("rtdb unavailable");
+            },
+          });
+        }
+        return ref;
+      });
+
+      try {
+        await runImaged(evaluated({historyIndex: 12, requestIds: ["req-gate-1"]}));
+      } finally {
+        spy.mockRestore();
+      }
+
+      expect(logger.warn).toHaveBeenCalledWith(
+        "Could not advance the evaluation gate", "analysis/queue/imaged/testdoc1", expect.any(Error));
+      expect(await admin.firestore().collection(sampleDoc.commentsPath).count().get()
+        .then((result) => result.data().count)).toBe(1);
+      expect(await doneRecord()).toMatchObject({historyIndex: 12});
+      const status = await getDatabase()
+        .ref(`${sampleDoc.metadataPath}/evaluationStatus/${sampleDoc.evaluator}/req-gate-1`)
+        .once("value").then((snapshot) => snapshot.val());
+      expect(status).toMatchObject({outcome: "commented", requestId: "req-gate-1"});
+    });
+  });
+
   afterAll(async () => {
     await cleanup();
   });

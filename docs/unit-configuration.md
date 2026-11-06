@@ -128,6 +128,10 @@ A document with no content at all is an exception: it is evaluated anyway, and o
 An `aiPrompt` may still carry a `summarizer` property, written by older versions of the authoring interface to choose between sending text and sending a picture. It is ignored.
 
 `aiEvaluateOnSessionEnd`: (boolean | undefined) When true, `aiEvaluation` also runs without anyone asking: when a document the student edited is closed, and whenever their connection drops. Defaults to false, so a unit with `aiEvaluation` set evaluates only what students request with the ideas button, since unrequested evaluations cost real money. Setting this has no effect without `aiEvaluation`.
+A session-end evaluation is skipped when the document has not changed since the last one was
+evaluated, so a student who opens and closes a document without editing it costs nothing. The
+server never skips an evaluation a student asked for; the Ideas button itself nudges instead of
+asking when the document has not changed since its last evaluation.
 
 Two details are worth knowing before turning it on. Only documents the student actually edited are evaluated — the request is attached to machinery that is set up at the first save, so a document opened and left alone is never evaluated. And a dropped connection is not the same as the end of a session: a brief outage triggers an evaluation and the session then carries on, so one document can be evaluated several times.
 

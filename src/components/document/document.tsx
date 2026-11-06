@@ -5,8 +5,9 @@ import { getSnapshot } from "mobx-state-tree";
 import { nanoid } from "nanoid";
 import React from "react";
 import FileSaver from "file-saver";
-import { kAnalyzerUserParams } from "../../../shared/shared";
+import { getSimpleDocumentPath, kAnalyzerUserParams } from "../../../shared/shared";
 import { documentHasStudentWork } from "../../../shared/ai-analysis-classify";
+import { hasChangedSinceEvaluation } from "../../../shared/ai-evaluation-gate";
 import { DEBUG_HISTORY_VIEW } from "../../lib/debug";
 import { Logger } from "../../lib/logger";
 import { LogEventName } from "../../lib/logger-types";
@@ -16,9 +17,12 @@ import {
 } from "../../models/document/document-comments-manager";
 import { LearningLogDocument, LearningLogPublication, PersonalDocument } from "../../models/document/document-types";
 import { getDocumentDisplayTitle, getDocumentTitleWithTimestamp } from "../../models/document/document-utils";
-import { IDEAS_EMPTY_MESSAGE, IDEAS_REQUEST_FAILED_MESSAGE } from "../../models/document/ai-evaluation-messages";
+import { IDEAS_EMPTY_MESSAGE, IDEAS_REQUEST_FAILED_MESSAGE, IDEAS_UNCHANGED_MESSAGE }
+  from "../../models/document/ai-evaluation-messages";
 import { logDocumentEvent, logDocumentViewEvent } from "../../models/document/log-document-event";
 import { waitForSaveSettled } from "../../models/document/wait-for-save-settled";
+import { getLastHistoryEntry } from "../../models/history/history-firestore";
+import { TreeManagerType } from "../../models/history/tree-manager";
 import { IToolbarModel } from "../../models/stores/problem-configuration";
 import { SupportType, TeacherSupportModelType, AudienceEnum } from "../../models/stores/supports";
 import { WorkspaceModelType } from "../../models/stores/workspace";
@@ -570,7 +574,48 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
     const aiEnabled = !!appConfig.aiEvaluation;
     const isEmpty = !document.content || !documentHasStudentWork(getSnapshot(document.content));
     const skipEmptyDocument = isEmpty && aiEnabled;
-    const requestId = (!isEmpty && aiEnabled) ? nanoid() : null;
+    // Raised before the gate reads below, so a second click during them is turned away by
+    // `canRequestIdeas` instead of starting a second evaluation. Every path below releases it.
+    commentsManager.setIdeasClickInProgress(true);
+
+    // Before any request id is minted: a click that turns out to be gated must not leave an id
+    // registered that a later status could match.
+    let isUnchanged = false;
+    if (aiEnabled && !isEmpty) {
+      try {
+        // These reads have no timeout of their own and run before the request deadline below is
+        // even created, so a stalled connection here would leave ideasClickInProgress -- and the
+        // Ideas button -- disabled for the rest of the session, with no message and nothing to
+        // retry. Bounded by the same deadline the request itself uses. A read that lands late
+        // resolves into nothing: `gate` has already settled, so its value is dropped.
+        const [gateIndex, lastEntry] = await Promise.race([
+          Promise.all([
+            firebase.getEvaluationGateIndex(user, document.key, document.uid),
+            getLastHistoryEntry(this.stores.db.firestore, getSimpleDocumentPath(document.key))
+          ]),
+          // Fails open on expiry: undefined reads as "no gate recorded", which permits the
+          // evaluation. Spending a request beats stranding the student.
+          new Promise<[undefined, undefined]>(resolve =>
+            setTimeout(() => resolve([undefined, undefined]), kIdeasRequestDeadlineMs))
+        ]);
+        // A completed history entry uploads to Firestore fire-and-forget, and waitForSaveSettled
+        // does not cover that upload, so the read above can miss an edit the student just made --
+        // exactly the student this nudge would be most wrong about. When the newest entry this
+        // client knows of is not the one Firestore returned, there is a change the index cannot
+        // yet reflect. Errs toward spending a request: the cost of a false nudge is a student
+        // told their work does not count.
+        const treeManager = document.treeManagerAPI as TreeManagerType | undefined;
+        const newestLocalEntryId = treeManager?.latestDocumentHistoryEntry?.id;
+        const hasUnseenLocalEntry = !!newestLocalEntryId && newestLocalEntryId !== lastEntry?.id;
+        isUnchanged = !hasUnseenLocalEntry && !hasChangedSinceEvaluation(lastEntry?.index, gateIndex);
+      } catch (error) {
+        // Fail open: a gate we can't read must not withhold an evaluation, and must not leave the
+        // button disabled by throwing out of the handler.
+        console.error("Ideas gate check failed:", error);
+      }
+    }
+
+    const requestId = (!isEmpty && !isUnchanged && aiEnabled) ? nanoid() : null;
     // Must be recorded before any await below, so a status for this click can never find a stale id.
     commentsManager.setLatestIdeasRequestId(requestId);
 
@@ -581,6 +626,14 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
 
     if (skipEmptyDocument) {
       commentsManager.showStatusMessage(IDEAS_EMPTY_MESSAGE);
+      commentsManager.setIdeasClickInProgress(false);
+      return;
+    }
+
+    // The empty check runs first, so an empty document is told it is empty rather than unchanged.
+    if (isUnchanged) {
+      commentsManager.showStatusMessage(IDEAS_UNCHANGED_MESSAGE);
+      commentsManager.setIdeasClickInProgress(false);
       return;
     }
 
@@ -594,8 +647,6 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
         documentKey: document.key, documentType: document.type, documentUid: document.uid,
         requestId, reason
       });
-
-    commentsManager.setIdeasClickInProgress(true);
 
     // setLastEditedNow/getLastEditedTimestamp have no timeout of their own, so a stalled
     // connection could leave ideasClickInProgress (and the Ideas button) disabled forever.

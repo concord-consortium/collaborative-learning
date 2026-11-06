@@ -10,6 +10,7 @@ import { urlParams } from "../utilities/url-params";
 import { DocumentModelType } from "src/models/document/document";
 import { getRootId } from "./root-id";
 import { IEvaluationRequestContext, kPlaceholderUnitCode } from "../../shared/shared";
+import { kEvaluationGateKey } from "../../shared/ai-evaluation-gate";
 
 // Set this during database testing in combination with the urlParam testMigration=true to
 // override the top-level Firebase key regardless of mode. For example, setting this to "authed-copy"
@@ -220,6 +221,27 @@ export class Firebase {
     } else {
       return undefined;
     }
+  }
+
+  /**
+   * Where the server records the history index it last evaluated this document at. A sibling of
+   * the `evaluation` node rather than a child, so writing it cannot re-trigger the evaluation
+   * function -- see kEvaluationGateKey.
+   */
+  public getEvaluationGatePath(user: UserModelType, documentKey: string, userId?: string) {
+    const evaluation = this.db.stores.appConfig.aiEvaluation;
+    if (!evaluation) return undefined;
+    const metadataPath = this.getUserDocumentMetadataPath(user, documentKey, userId);
+    return `${metadataPath}/${kEvaluationGateKey}/${evaluation}`;
+  }
+
+  /** The recorded index, or undefined when the document has never been evaluated. */
+  public async getEvaluationGateIndex(user: UserModelType, documentKey: string, userId?: string) {
+    const path = this.getEvaluationGatePath(user, documentKey, userId);
+    if (!path) return undefined;
+    const snapshot = await this.ref(path).once("value");
+    const value = snapshot.val();
+    return typeof value === "number" ? value : undefined;
   }
 
   /**

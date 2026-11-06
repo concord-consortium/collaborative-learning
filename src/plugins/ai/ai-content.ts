@@ -28,7 +28,13 @@ export const AIContentModel = TileContentModel
     hidePrompt: types.optional(types.boolean, false),
     prompt: "",
     text: "This is where the dynamically generated AI response will appear.",
-    refreshCount: types.optional(types.number, 0)
+    refreshCount: types.optional(types.number, 0),
+    /**
+     * A hash of the request (document summary, unit context and prompt) this tile's text was
+     * generated from. Not the document's history index: the tile's own setText writes advance
+     * that, so an index gate would invalidate itself on every refresh and could never fire.
+     */
+    evaluatedRequestHash: types.maybe(types.string)
   })
   .views(self => ({
     get isUserResizable() {
@@ -37,7 +43,9 @@ export const AIContentModel = TileContentModel
   }))
   .actions(self => ({
     exportJson() {
-      const { refreshCount: _, ...snapshot } = getSnapshot(self);
+      // Both are per-session bookkeeping rather than authored content: a copy of this tile lands
+      // in a document whose summary differs, where a carried-over hash would mean nothing.
+      const { refreshCount: _, evaluatedRequestHash: __, ...snapshot } = getSnapshot(self);
       return stringify(snapshot);
     },
     // The setters below are pure mutations wired to controlled inputs (they fire on every keystroke).
@@ -55,6 +63,9 @@ export const AIContentModel = TileContentModel
     // not emit an answer-change event. The student-triggered requestRefresh below is what gets logged.
     setText(text: string) {
       self.text = text;
+    },
+    setEvaluatedRequestHash(hash: string | undefined) {
+      self.evaluatedRequestHash = hash;
     },
     requestRefresh() {
       self.refreshCount++;

@@ -502,6 +502,27 @@ describe('ai-summarizer', () => {
         expect(result).toContain('The CLUE document consists of one or more rows');
       });
 
+      // An AI tile holds the model's own output. Summarizing it shows the model its last answer
+      // as part of the student's document, and moves the summary every time the tile refreshes.
+      it('leaves an AI tile out of the summary, keeping the student work in', () => {
+        const contentWith = (aiText: string) => ({
+          rowOrder: ['row1'],
+          rowMap: { row1: { tiles: [{ tileId: 'tile1' }, { tileId: 'tile2' }], isSectionHeader: false } },
+          tileMap: {
+            tile1: { id: 'tile1', content: { type: 'Text', format: 'markdown', text: 'the student wrote this' } },
+            tile2: { id: 'tile2', content: { type: 'AI', prompt: 'give tips', text: aiText, description: 'd' } }
+          }
+        });
+
+        const result = documentSummarizer(contentWith('the first AI answer'), {});
+
+        expect(result).toContain('the student wrote this');
+        expect(result).not.toContain('the first AI answer');
+        expect(result).not.toContain('give tips');
+        // The refresh the gate depends on: a new answer must not change the summary.
+        expect(result).toBe(documentSummarizer(contentWith('a completely different AI answer'), {}));
+      });
+
       it('should handle unknown tile types with generic description', () => {
         const content = {
           rowOrder: ['row1'],
