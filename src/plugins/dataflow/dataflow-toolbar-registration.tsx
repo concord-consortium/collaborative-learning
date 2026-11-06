@@ -96,8 +96,8 @@ const ResetProgramButton = observer(function ResetProgramButton({ name }: IToolb
 registerTileToolbarButtons('dataflow',
 [
   {
-    // Immediate view, unchanged and still the shared component. The dataflow toolbar uses it for
-    // Graph It; Table It is "table-it" below, so this one is untouched by CLUE-740.
+    // The shared Immediate view button. The dataflow toolbar uses it for Graph It; Table It has a
+    // Dataflow button of its own, "table-it" below.
     name: "data-set-view",
     component: DataSetViewButton
   },

@@ -546,7 +546,7 @@ context('Dataflow Tool Tile', function () {
     cy.get(".primary-workspace [data-testid='connect-device-button']")
       .should("have.class", "connect-attention");
   });
-  // CLUE-740. Covers the two things only a real document shows: the button is actually in the
+  // Covers the two things only a real document shows: the button is actually in the
   // toolbar after Table It and Graph It, and a sample reaches a table that the click created.
   it("records single samples into a table it creates", () => {
     loadEditor(false);
