@@ -126,7 +126,8 @@ older one. Everything else is done for you.
 
 ## How playback crosses the change
 
-Playback only does extra work for a document whose history has a load entry, or an entry in
+Playback only does extra work for a document whose history has a load entry, whose live copy
+converted old content and holds that load entry until it saves, or whose history has an entry in
 a legacy format that a registered history bridge recognizes. A bridge
 ([history-bridges.ts](../src/models/history/history-bridges.ts)) finds conversions that history
 never recorded; DataFlow's
@@ -137,7 +138,7 @@ When it does, playback keeps a JSON copy of the document beside the MST trees an
 entry it crosses to that copy as stored. At each move it asks `getVersion` about the tiles the move
 touched, at both ends of the move, and `convertSnapshot` where the version differs. A tile that is
 current at both ends gets its patches applied to the MST tile as usual, and so does a tile its
-converter declines. A tile that is old at either end is **loaded**: playback runs
+converter declines. A tile that is old at either end gets a **model replacement**: playback runs
 `convertSnapshot` on its JSON at the target position and replaces the MST tile's state with the
 result, in the same action as the move's other patches.
 
@@ -151,38 +152,39 @@ not show the failure banner.
 If your conversion has to make new ids, you choose how.
 
 - **Deterministic ids** (made from the tile id and something stable in the old data) mean every
-  conversion of the same JSON gives the same ids. Playback causes no churn, because loading the tile
-  again updates the same objects. Two clients that convert the same document also agree. Legacy
+  conversion of the same JSON gives the same ids. Playback causes no churn, because replacing the
+  tile again updates the same objects. Two clients that convert the same document also agree. Legacy
   DataFlow node ids are an example: `<n>@<tileId>`, from the old node number and the tile's id.
 - **Random ids** are the right choice when deterministic ids could collide, or when keeping them
-  stable would make the conversion hard to maintain. Playback pays for it: each load of an old tile
-  makes different ids, so MST replaces the objects, their components remount, and highlight and
-  selection refs on them drop. Playback is read-only, so this is acceptable unless the tile writes
-  a lot of history (see Performance).
+  stable would make the conversion hard to maintain. Playback pays for it: each replacement of an
+  old tile makes different ids, so MST replaces the objects, their components remount, and highlight
+  and selection refs on them drop. Playback is read-only, so this is acceptable unless the tile
+  writes a lot of history (see Performance).
 
-## Loads are in place
+## Model replacements are in place
 
-A tile loaded during playback keeps its `TileModel` and content nodes. Their `afterCreate` and
+A tile replaced during playback keeps its `TileModel` and content nodes. Their `afterCreate` and
 `afterAttach` hooks don't run again and their volatile state stays. Children whose ids are
 unchanged are updated, and children with new ids are destroyed and created fresh. Updating in place
 is deliberate: removing and re-adding a tile would drop it from the shared models that refer to it.
 
-So views must not depend on state that is set only in `afterCreate` from properties a load can
-change. Compute it in a view, or update it when the property changes.
+So views must not depend on state that is set only in `afterCreate` from properties a model
+replacement can change. Compute it in a view, or update it when the property changes.
 
 ## Shared models
 
 Shared models use the same `schemaVersion` registration and the same playback path. A migration
 must keep the ids that tiles refer to, for example a DataSet's attribute and case ids. Otherwise a
-tile loaded at an old position points at objects that no longer exist in the shared model.
+tile replaced at an old position points at objects that no longer exist in the shared model.
 
 ## Performance
 
-Each load of an old tile runs its conversion. Playback loads an old tile once per move that touches
-it, not once per entry passed, but a tile that writes many entries (DataFlow's ticks, the
-Simulator's steps) is touched by many moves. For those tiles, use deterministic ids so reloads
-change little. If that isn't enough, a tile may later add a patch-level migration, converting its
-old patches to current-format patches so playback doesn't reload the tile. That is not built yet.
+Each replacement of an old tile runs its conversion. Playback replaces an old tile once per move
+that touches it, not once per entry passed, but a tile that writes many entries (DataFlow's ticks,
+the Simulator's steps) is touched by many moves. For those tiles, use deterministic ids so
+replacements change little. If that isn't enough, a tile may later add a patch-level migration,
+converting its old patches to current-format patches so playback doesn't replace the tile. That is
+not built yet.
 
 ## Worked example: removing DataFlow's `programZoom`
 
@@ -197,7 +199,7 @@ With the mechanism above, removing it needs only:
 
 The recorded load entry removes the field from the converted tile. Old `/programZoom/...`
 patches still apply to the JSON copy, which holds the old format at those positions, and playback
-loads the old tile through the conversion, so the MST model never sees a `programZoom` patch. No
+replaces the old tile through the conversion, so the MST model never sees a `programZoom` patch. No
 code change is made for this here. This is a description of what the change would take.
 
 ## Concurrent documents
