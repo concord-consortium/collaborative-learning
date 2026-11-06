@@ -463,11 +463,11 @@ export const DataflowContentModel = TileContentModel
         self.detachLinkedTables();
       });
 
-      // A check that each action changing the program's nodes or connections calls
-      // notifyStructureChange, since one that doesn't leaves linked tables showing columns for a
-      // program that no longer matches them. It reports rather than detaches: this middleware
-      // runs outside the history middleware on the document, so a detach made here would land in
-      // a history entry of its own.
+      // A development-time check that each action changing the program's nodes or connections
+      // calls notifyStructureChange, since one that doesn't leaves linked tables showing columns
+      // for a program that no longer matches them. It reports rather than detaches: this
+      // middleware runs outside the history middleware on the document, so a detach made here
+      // would land in a history entry of its own.
       //
       // Watches the outermost action that reaches this tile's content, so a content action that
       // changes the structure and then notifies passes. Undo applies patches without calling
