@@ -222,6 +222,39 @@ describe("SerialDevice.receive protocol routing", () => {
   });
 });
 
+describe("SerialDevice.dataReceived", () => {
+  it("dataReceived turns true on the first chunk from the active transport and resets on a new device", () => {
+    const device = new SerialDevice();
+    const transport = fakeTransport([]);
+    const otherTransport = fakeTransport([]);
+    device.setActiveDevice("arduino", transport);
+    expect(device.dataReceived).toBe(false);
+    transport.onData!("emg:5\r\n");
+    expect(device.dataReceived).toBe(true);
+    device.setActiveDevice("arduino", otherTransport);
+    expect(device.dataReceived).toBe(false);
+  });
+
+  it("resets on clearActiveDevice", () => {
+    const device = new SerialDevice();
+    const transport = fakeTransport([]);
+    device.setActiveDevice("arduino", transport);
+    transport.onData!("emg:5\r\n");
+    device.clearActiveDevice();
+    expect(device.dataReceived).toBe(false);
+  });
+
+  it("ignores data from a transport that isn't active", () => {
+    const device = new SerialDevice();
+    const transportA = fakeTransport([]);
+    const transportB = fakeTransport([]);
+    device.setActiveDevice("arduino", transportA);
+    device.setActiveDevice("arduino", transportB);
+    transportA.onData!("emg:5\r\n");
+    expect(device.dataReceived).toBe(false);
+  });
+});
+
 describe("SerialDevice.isConnected observability", () => {
   it("isConnected is observable", () => {
     const device = new SerialDevice();

@@ -30,12 +30,19 @@ function useRecordingContent() {
  * take Stop off screen mid-run.
  */
 export const RecordButton = observer(function RecordButton({ name }: IToolbarButtonComponentProps) {
-  const { content, readOnly, ensure } = useLinkedTable();
+  const { content, readOnly, addTable } = useLinkedTable();
+
+  function handleClick() {
+    if (!content) return;
+    content.showCaptureInTable(addTable);
+    content.startRecording();
+  }
+
   return (
     <TileToolbarButton
       name={name}
       title="Record data"
-      onClick={() => { if (ensure(false)) content?.startRecording(); }}
+      onClick={handleClick}
       disabled={!content || readOnly || content.isRecording}
       disabledMessage="Stop the current recording to start another"
     >

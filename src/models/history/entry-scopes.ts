@@ -1,3 +1,4 @@
+import { kSharedModelEntrySubtreeRegex, kTileSubtreeRegex } from "../document/document-paths";
 import { HistoryEntrySnapshot } from "./history";
 
 export type EntryScope =
@@ -7,13 +8,10 @@ export type EntryScope =
 
 export type EntryScopeKey = string;
 
-const TILE_MAP_RE = /^\/content\/tileMap\/([^/]+)(\/|$)/;
-const SHARED_MAP_RE = /^\/content\/sharedModelMap\/([^/]+)(\/|$)/;
-
 export function scopeKeyForPatchPath(path: string): EntryScopeKey {
-  const tileMatch = TILE_MAP_RE.exec(path);
+  const tileMatch = kTileSubtreeRegex.exec(path);
   if (tileMatch) return `tile:${tileMatch[1]}`;
-  const sharedMatch = SHARED_MAP_RE.exec(path);
+  const sharedMatch = kSharedModelEntrySubtreeRegex.exec(path);
   if (sharedMatch) return `shared:${sharedMatch[1]}`;
   return "doc";
 }

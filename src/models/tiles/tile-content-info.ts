@@ -5,6 +5,7 @@ import { AppConfigModelType } from "../stores/app-config-model";
 import { UpdatedSharedDataSetIds } from "../shared/shared-data-set";
 import { SharedModelEntrySnapshotType } from "../document/shared-model-entry";
 import { ITileModel } from "./tile-model";
+import { ISchemaVersionInfo } from "./schema-version-info";
 
 export interface IDefaultContentOptions {
   // title is only currently used by the Geometry and Table tiles
@@ -73,6 +74,10 @@ export interface ITileContentInfo {
   isVariableProvider?: boolean;
   consumesMultipleDataSets?: (appConfig: AppConfigModelType) => boolean;
   tileSnapshotPreProcessor?: TileModelSnapshotPreProcessor;
+  /**
+   * If supplied, the tile's JSON has versions and older ones can be converted to the current one.
+   */
+  schemaVersion?: ISchemaVersionInfo;
   contentSnapshotPostProcessor?: TileContentSnapshotPostProcessor;
   updateContentWithNewSharedModelIds?: TileContentNewSharedModelIdUpdater;
   updateObjectReferenceWithNewSharedModelIds?: ClueObjectNewSharedModelIdUpdater;

@@ -586,8 +586,8 @@ describe("AIComponent", () => {
       const onUnhandledRejection = (reason: unknown) => unhandledRejections.push(reason);
       process.on("unhandledRejection", onUnhandledRejection);
       const consoleErrorSpy = jest.spyOn(console, "error").mockImplementation(() => {});
-      // The app sets this to "error" at startup (src/initialize-app.tsx); Jest's default ("warn")
-      // would let a write to a destroyed node through silently, hiding the bug this test targets.
+      // Jest doesn't run src/initialize-app.tsx, so liveliness checking is MST's default, "warn",
+      // which only logs use of a destroyed node; this test needs it to throw.
       const previousLivelinessChecking = getLivelinessChecking();
       setLivelinessChecking("error");
 

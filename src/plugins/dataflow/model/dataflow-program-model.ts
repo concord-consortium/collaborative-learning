@@ -170,7 +170,9 @@ export const DataflowProgramModel = types.
   })
   .volatile(self => ({
     processor: undefined as DataflowProcessor | undefined,
-    _connectionWrappers: {} as Record<string, ConnectionModelWrapper>
+    _connectionWrappers: {} as Record<string, ConnectionModelWrapper>,
+    // Set by the tile content; see notifyStructureChange.
+    structureChangeHandler: undefined as (() => void) | undefined
   }))
   .views(self => ({
     get currentTick() {
@@ -262,22 +264,47 @@ export const DataflowProgramModel = types.
     }
   }))
   .actions(self => ({
+    setStructureChangeHandler(handler: (() => void) | undefined) {
+      self.structureChangeHandler = handler;
+    },
+    /**
+     * Every action that adds or removes a node or a connection calls this once it has made the
+     * change. The tile content uses it to detach linked tables, whose columns no longer describe
+     * the program.
+     *
+     * It is called from inside those actions, rather than from a reaction to the change, so that
+     * what the handler does is a child action: it joins the change's history entry, and one undo
+     * reverses both. Undo applies patches without calling actions, so the handler does not run
+     * again then.
+     *
+     * The content model checks, outside production, that an action which changes the structure
+     * calls this.
+     */
+    notifyStructureChange() {
+      self.structureChangeHandler?.();
+    }
+  }))
+  .actions(self => ({
     addNode(node: IDataflowNodeModel) {
       self.nodes.put(node);
+      self.notifyStructureChange();
     },
     addNodeSnapshot(nodeSnapshot: DataflowNodeSnapshotIn) {
       const node = self.nodes.put(nodeSnapshot);
       node.data.createNextTickEntry(undefined, self.currentTick);
+      self.notifyStructureChange();
       return node;
     },
     addConnection(connection: IConnectionModel) {
       self.connections.put(connection);
+      self.notifyStructureChange();
     },
     removeConnection(id: IConnectionModel["id"]) {
       self.connections.delete(id);
       if (self._connectionWrappers[id]) {
         delete self._connectionWrappers[id];
       }
+      self.notifyStructureChange();
     }
   }))
   .actions(self => ({
@@ -323,6 +350,7 @@ export const DataflowProgramModel = types.
         group.removeNodeId(id);
         if (group.nodeIds.size < 2) self.ungroupGroup(group.id);
       }
+      self.notifyStructureChange();
     }
   }))
   .actions(self => ({

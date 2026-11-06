@@ -1,5 +1,8 @@
 import { cloneDeep } from "lodash";
-import { flow, getSnapshot, getType, Instance, types } from "mobx-state-tree";
+import {
+  flow, getLivelinessChecking, getSnapshot, getType, Instance, onPatch, resolveIdentifier, setLivelinessChecking,
+  types
+} from "mobx-state-tree";
 import { nanoid } from "nanoid";
 import { ITileProps } from "src/components/tiles/tile-component";
 import { SharedModel, SharedModelType } from "../shared/shared-model";
@@ -342,6 +345,62 @@ it("can redo a tile change", async () => {
     undoEntry,
     redoEntry
   ]);
+});
+
+// The active entry is destroyed when it completes.
+it("does not use an active entry after it completes", async () => {
+  const unhandledRejections: unknown[] = [];
+  const onUnhandledRejection = (reason: unknown) => unhandledRejections.push(reason);
+  process.on("unhandledRejection", onUnhandledRejection);
+  // Jest doesn't run src/initialize-app.tsx, so liveliness checking is MST's default, "warn", which
+  // only logs use of a destroyed node; this test needs it to throw.
+  const previousLivelinessChecking = getLivelinessChecking();
+  setLivelinessChecking("error");
+
+  try {
+    const {tileContent, manager, undoStore} = setupDocument();
+    tileContent.setFlag(true);
+    await expectEntryToBeComplete(manager, 1);
+
+    undoStore.undo();
+    await expectEntryToBeComplete(manager, 2);
+
+    undoStore.redo();
+    await expectEntryToBeComplete(manager, 3);
+    // Give anything that runs after an entry completes a chance to fail.
+    await wait(1);
+
+    expect(unhandledRejections).toEqual([]);
+    expect(tileContent.flag).toBe(true);
+    expect(manager.activeHistoryEntries.length).toBe(0);
+  } finally {
+    setLivelinessChecking(previousLivelinessChecking);
+    process.removeListener("unhandledRejection", onUnhandledRejection);
+  }
+});
+
+// MST requires identifiers to be unique within a tree, and resolving one that two nodes share
+// throws. So the active entry has to be gone before its copy is added to the history.
+it("never has an active entry and its copy in the tree at once", async () => {
+  const {tileContent, manager} = setupDocument();
+  const resolveErrors: unknown[] = [];
+  const disposer = onPatch(manager, patch => {
+    if (patch.op === "add" && patch.path.startsWith("/document/history/")) {
+      try {
+        resolveIdentifier(HistoryEntry, manager, (patch.value as HistoryEntrySnapshot).id);
+      } catch (e) {
+        resolveErrors.push(e);
+      }
+    }
+  });
+
+  try {
+    tileContent.setFlag(true);
+    await expectEntryToBeComplete(manager, 1);
+    expect(resolveErrors).toEqual([]);
+  } finally {
+    disposer();
+  }
 });
 
 

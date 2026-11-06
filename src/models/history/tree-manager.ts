@@ -1,13 +1,14 @@
 import {
-  types, Instance, flow, IJsonPatch, detach, destroy, toGenerator
+  types, Instance, flow, IJsonPatch, destroy, getSnapshot, toGenerator
 } from "mobx-state-tree";
 import { nanoid } from "nanoid";
 import { TreeAPI } from "./tree-api";
 import { IUndoManager, UndoStore } from "./undo-store";
 import { TreePatchRecord, HistoryEntry, TreePatchRecordSnapshot,
   HistoryOperation,
-  ICreateHistoryEntry} from "./history";
+  ICreateHistoryEntry, HistoryEntrySnapshot, getEntryPatchesForTree} from "./history";
 import { DEBUG_HISTORY } from "../../lib/debug";
+import { kContentPath, kTileMapPath } from "../document/document-paths";
 import { PatchApplicationError } from "./tree";
 import { IDocumentMetadata } from "../../../shared/shared";
 import { Firestore } from "../../lib/firestore";
@@ -32,30 +33,6 @@ interface PatchSegment {
 }
 
 /**
- * Build the list of patches for a single history entry that a tree
- * would receive in a given direction, in the same order and record
- * ordering that goToHistoryEntryPosition uses when batching. Used to
- * reconstruct patches without needing the onPatch-collected inverses.
- */
-function getEntryPatchesForTree(
-  historyEntry: Instance<typeof HistoryEntry>,
-  treeId: string,
-  opType: HistoryOperation
-): IJsonPatch[] {
-  let records = [...historyEntry.records];
-  if (opType === HistoryOperation.Undo) {
-    records = records.reverse();
-  }
-  const result: IJsonPatch[] = [];
-  for (const entryRecord of records) {
-    if (entryRecord.tree === treeId) {
-      result.push(...entryRecord.getPatches(opType));
-    }
-  }
-  return result;
-}
-
-/**
  * Given the number of patches that were successfully applied and the
  * segment mapping, returns the history entry index that contains the
  * patch that failed, and the number of patches from that entry that
@@ -73,6 +50,11 @@ function findFailedSegment(numApplied: number, segments: PatchSegment[]) {
   // if we're in an error path. Return the last segment as a fallback.
   const last = segments[segments.length - 1];
   return { historyIndex: last.historyIndex, appliedInEntry: last.patchCount };
+}
+
+export function entryChangesContent(entry: HistoryEntrySnapshot) {
+  return !!entry.records?.some(record =>
+    record.patches?.some(patch => patch.path === kContentPath || patch.path.startsWith(`${kContentPath}/`)));
 }
 
 /**
@@ -152,15 +134,16 @@ export const TreeManager = types
    * History entries whose patches could not be applied. A patch may fail
    * in one direction but not the other, so entries include the direction.
    */
-  historyPlaybackFailures: [] as HistoryPlaybackFailure[]
+  historyPlaybackFailures: [] as HistoryPlaybackFailure[],
+  /**
+   * The load entry for the content as loaded or last set, kept out of the history until it
+   * is flushed (see completeHistoryEntry).
+   */
+  pendingLoadEntry: undefined as HistoryEntrySnapshot | undefined
 }))
 .views((self) => ({
   get undoManager() : IUndoManager {
     return self.undoStore;
-  },
-
-  findHistoryEntry(historyEntryId: string) {
-    return self.document.history.find(entry => entry.id === historyEntryId);
   },
 
   findHistoryEntryIndex(historyEntryId: string) {
@@ -176,208 +159,229 @@ export const TreeManager = types
     return self.activeHistoryEntries.find(entry => entry.id === historyEntryId);
   },
 }))
-.actions(self => {
-  return {
-    completeHistoryEntry(entry: Instance<typeof HistoryEntry>) {
-      entry.state = "complete";
+.actions((self) => {
+  function completeHistoryEntry(activeEntry: Instance<typeof HistoryEntry>) {
+    activeEntry.state = "complete";
 
-      // Remove the entry from the activeHistoryEntries
-      detach(entry);
+    // Copied rather than detached: detach walks every identifier in the tree, and the history
+    // grows to thousands of entries. The active entry is destroyed, so code refers to active
+    // entries by id only.
+    const snapshot = getSnapshot(activeEntry);
+    destroy(activeEntry);
 
-      // If the history entry resulted in no changes don't add it to the real
-      // history.
-      //
-      // TODO: we might not want to do this, it could be useful for researchers
-      // and teachers to see actions the student took even if they didn't change
-      // state. For example if a button was clicked even if it didn't change the
-      // state we might want to show that somehow. There are lots of entries
-      // that are empty though, so they are removed for the time being.
-      if (entry.records.length === 0) {
-        destroy(entry);
-        return;
-      }
-
-      // Save the index in the local history. This is used to figure out
-      // the index written into the firestore entry document
-      const newLocalIndex = self.document.history.length;
-
-      // Re-attach the entry to the actual history
-      self.document.history.push(entry);
-
-      // Add the entry to the undo stack if it is undoable.
-      //
-      // TODO: Is it best to wait until the entry is complete like this? It
-      // might be better to add it earlier so it has the right position in the
-      // undo stack. For example if a user action caused some async behavior
-      // that takes a while, should its place in the stack be at the beginning
-      // or end of these changes? As a downside, if we add it earlier the undo
-      // stack will have incomplete entries in sometimes.
-      if (entry.undoable) {
-        self.undoStore.addHistoryEntry(entry);
-
-        // Store the most recent undo-able history id.
-        self.revisionId = entry.id;
-      }
-
-      self.historyManager?.onHistoryEntryCompleted(self.document, entry, newLocalIndex);
-    }
-  };
-})
-.actions((self) => ({
-  /**
-   * Append a history entry whose patches have already been applied by
-   * the caller. Two callers today:
-   *   - The Firestore listener side, after applying an incoming remote
-   *     entry's patches.
-   *   - The fork-rollback flow, after applying the aggregate inverse
-   *     patches that revert one or more local entries (the appended
-   *     entry is a revert entry — see `revert-entry.ts`).
-   *
-   * Does not register the entry with the undo store (the caller owns
-   * that decision) and does not enqueue for upload.
-   */
-  addHistoryEntryAfterApplying(entry: Instance<typeof HistoryEntry>) {
-    self.document.history.push(entry);
-  },
-
-  setChangeDocument(cDoc: CDocumentType) {
-    self.document = cDoc;
-  },
-
-  setRevisionId(revisionId: string) {
-    self.revisionId = revisionId;
-  },
-
-  setHistoryManager(manager: IHistoryManager) {
-    self.historyManager = manager;
-  },
-
-  // Undefined means the position is not known yet, which is how it is left while
-  // setNumHistoryEntriesAppliedFromFirestore looks up the document's last entry.
-  setNumHistoryEntriesApplied(value: number | undefined) {
-    self.numHistoryEventsApplied = value;
-  },
-
-  /**
-   * Inject a synthetic history entry with a patch that will always fail
-   * when replayed (references a non-existent tile). Useful for testing
-   * playback failure handling.
-   */
-  injectFailingHistoryEntry() {
-    if (!self.mainDocument) {
-      console.warn("Cannot inject failing entry: no main document");
+    // If the history entry resulted in no changes don't add it to the real
+    // history.
+    //
+    // TODO: we might not want to do this, it could be useful for researchers
+    // and teachers to see actions the student took even if they didn't change
+    // state. For example if a button was clicked even if it didn't change the
+    // state we might want to show that somehow. There are lots of entries
+    // that are empty though, so they are removed for the time being.
+    if (snapshot.records.length === 0) {
       return;
     }
-    const entryId = nanoid();
-    const treeId = self.mainDocument.key;
-    const entry = HistoryEntry.create({
-      id: entryId,
-      tree: treeId,
-      model: "TestFailure",
-      action: "/injectFailingHistoryEntry",
-      undoable: true,
-      state: "complete",
-      records: [{
-        tree: treeId,
-        action: "/injectFailingHistoryEntry",
-        patches: [{
-          op: "replace",
-          path: "/content/tileMap/NONEXISTENT_TILE/content/value",
-          value: "this patch will fail"
-        }],
-        inversePatches: [{
-          op: "replace",
-          path: "/content/tileMap/NONEXISTENT_TILE/content/value",
-          value: "original"
-        }]
-      }]
-    });
+
+    // Content is saved only when it changes, so flushing before a metadata-only entry (a title
+    // change) would pair the load entry with old content, and the next load would convert it again
+    // with new ids. The entry isn't undoable, so it skips the undo store and leaves revisionId alone.
+    if (self.pendingLoadEntry && entryChangesContent(snapshot)) {
+      const loadEntryIndex = self.document.history.length;
+      self.document.history.push(self.pendingLoadEntry);
+      self.pendingLoadEntry = undefined;
+      self.historyManager?.onHistoryEntryCompleted(
+        self.document, self.document.history[loadEntryIndex], loadEntryIndex);
+    }
+
+    // Save the index in the local history. This is used to figure out
+    // the index written into the firestore entry document
     const newLocalIndex = self.document.history.length;
-    self.document.history.push(entry);
-    self.numHistoryEventsApplied = self.document.history.length;
-    self.revisionId = entryId;
-    self.undoStore.addHistoryEntry(entry);
+
+    self.document.history.push(snapshot);
+    const entry = self.document.history[newLocalIndex];
+
+    // Add the entry to the undo stack if it is undoable.
+    //
+    // TODO: Is it best to wait until the entry is complete like this? It
+    // might be better to add it earlier so it has the right position in the
+    // undo stack. For example if a user action caused some async behavior
+    // that takes a while, should its place in the stack be at the beginning
+    // or end of these changes? As a downside, if we add it earlier the undo
+    // stack will have incomplete entries in sometimes.
+    if (entry.undoable) {
+      self.undoStore.addHistoryEntry(entry);
+
+      // Store the most recent undo-able history id.
+      self.revisionId = entry.id;
+    }
+
     self.historyManager?.onHistoryEntryCompleted(self.document, entry, newLocalIndex);
-  },
+  }
 
-  putTree(treeId: string, tree: TreeAPI) {
-    self.trees[treeId] = tree;
-  },
+  return {
+    /**
+     * Append a history entry whose patches have already been applied by
+     * the caller. Two callers today:
+     *   - The Firestore listener side, after applying an incoming remote
+     *     entry's patches.
+     *   - The fork-rollback flow, after applying the aggregate inverse
+     *     patches that revert one or more local entries (the appended
+     *     entry is a revert entry — see `revert-entry.ts`).
+     *
+     * Does not register the entry with the undo store (the caller owns
+     * that decision) and does not enqueue for upload.
+     */
+    addHistoryEntryAfterApplying(entry: Instance<typeof HistoryEntry>) {
+      self.document.history.push(entry);
+    },
 
-  startExchange(historyEntryId: string, exchangeId: string, name: string) {
-    // Ignore fake history entries these are used when replaying history
-    // to the tree
-    if (historyEntryId === FAKE_HISTORY_ENTRY_ID) {
-      return Promise.resolve();
-    }
+    setPendingLoadEntry(entry: HistoryEntrySnapshot | undefined) {
+      self.pendingLoadEntry = entry;
+    },
 
-    // Find if there is already an entry with this historyEntryId
-    const entry = self.findActiveHistoryEntry(historyEntryId);
-    if (!entry) {
-      throw new Error(`History Entry doesn't exist ${ json({historyEntryId})} `);
-    }
+    setChangeDocument(cDoc: CDocumentType) {
+      self.document = cDoc;
+    },
 
-    // Make sure this entry wasn't marked complete before
-    if (entry.state === "complete") {
-      throw new Error(`The entry was already marked complete ${ json({historyEntryId, exchangeId})}`);
-    }
+    setRevisionId(revisionId: string) {
+      self.revisionId = revisionId;
+    },
 
-    // start a new open exchange with this exchangeId
-    // Check if there is a open exchange already with this id:
-    const activeExchangeValue = entry.activeExchanges.get(exchangeId);
-    if (activeExchangeValue) {
-      throw new Error("trying to create or update a history entry that has an existing open call");
-    }
-    entry.activeExchanges.set(exchangeId, name);
-    return Promise.resolve();
-  },
+    setHistoryManager(manager: IHistoryManager) {
+      self.historyManager = manager;
+    },
 
-  endExchange(entry: Instance<typeof HistoryEntry>, exchangeId: string) {
-    const openExchangeValue = entry.activeExchanges.get(exchangeId);
-    if (!openExchangeValue) {
-      throw new Error(`There is no active exchange matching ${ json({historyEntryId: entry.id, exchangeId}) }`);
-    }
+    // Undefined means the position is not known yet, which is how it is left while
+    // setNumHistoryEntriesAppliedFromFirestore looks up the document's last entry.
+    setNumHistoryEntriesApplied(value: number | undefined) {
+      self.numHistoryEventsApplied = value;
+    },
 
-    entry.activeExchanges.delete(exchangeId);
-
-    // TODO: We could use autorun for watching this observable map instead of
-    // changing the entry state here.
-    if (entry.activeExchanges.size === 0) {
-      self.completeHistoryEntry(entry);
-    }
-  },
-
-  createHistoryEntry(entryInfo: ICreateHistoryEntry) {
-    const {id: historyEntryId, exchangeId, action} = entryInfo;
-    if (self.findHistoryEntry(historyEntryId) || self.findActiveHistoryEntry(historyEntryId)) {
-      throw new Error(`The entry already exists ${ json({historyEntryId})}`);
-    }
-    const entry = HistoryEntry.create({
-      ...entryInfo,
-    });
-    self.activeHistoryEntries.push(entry);
-
-    entry.activeExchanges.set(exchangeId, `TreeManager.createHistoryEntry ${action}`);
-
-    return entry;
-  },
-
-  setNumHistoryEntriesAppliedFromFirestore: flow(
-    function *setNumHistoryEntriesAppliedFromFirestore(firestore: Firestore, docPath: string) {
-      // clear the numHistoryEventsApplied so it is obvious when it is filled in
-      self.numHistoryEventsApplied = undefined;
-
-      const lastHistoryEntry = yield* toGenerator(getLastHistoryEntry(firestore, docPath));
-      if (lastHistoryEntry) {
-        self.numHistoryEventsApplied = lastHistoryEntry.index + 1;
-      } else {
-        // If there is no entry then we have an empty document
-        self.numHistoryEventsApplied = 0;
+    /**
+     * Inject a synthetic history entry with a patch that will always fail
+     * when replayed (references a non-existent tile). Useful for testing
+     * playback failure handling.
+     */
+    injectFailingHistoryEntry() {
+      if (!self.mainDocument) {
+        console.warn("Cannot inject failing entry: no main document");
+        return;
       }
-    }
-  ),
+      const entryId = nanoid();
+      const treeId = self.mainDocument.key;
+      const entry = HistoryEntry.create({
+        id: entryId,
+        tree: treeId,
+        model: "TestFailure",
+        action: "/injectFailingHistoryEntry",
+        undoable: true,
+        state: "complete",
+        records: [{
+          tree: treeId,
+          action: "/injectFailingHistoryEntry",
+          patches: [{
+            op: "replace",
+            path: `${kTileMapPath}/NONEXISTENT_TILE/content/value`,
+            value: "this patch will fail"
+          }],
+          inversePatches: [{
+            op: "replace",
+            path: `${kTileMapPath}/NONEXISTENT_TILE/content/value`,
+            value: "original"
+          }]
+        }]
+      });
+      const newLocalIndex = self.document.history.length;
+      self.document.history.push(entry);
+      self.numHistoryEventsApplied = self.document.history.length;
+      self.revisionId = entryId;
+      self.undoStore.addHistoryEntry(entry);
+      self.historyManager?.onHistoryEntryCompleted(self.document, entry, newLocalIndex);
+    },
 
-}))
+    putTree(treeId: string, tree: TreeAPI) {
+      self.trees[treeId] = tree;
+    },
+
+    startExchange(historyEntryId: string, exchangeId: string, name: string) {
+      // Ignore fake history entries these are used when replaying history
+      // to the tree
+      if (historyEntryId === FAKE_HISTORY_ENTRY_ID) {
+        return Promise.resolve();
+      }
+
+      // Find if there is already an entry with this historyEntryId
+      const entry = self.findActiveHistoryEntry(historyEntryId);
+      if (!entry) {
+        throw new Error(`History Entry doesn't exist ${ json({historyEntryId})} `);
+      }
+
+      // Make sure this entry wasn't marked complete before
+      if (entry.state === "complete") {
+        throw new Error(`The entry was already marked complete ${ json({historyEntryId, exchangeId})}`);
+      }
+
+      // start a new open exchange with this exchangeId
+      // Check if there is a open exchange already with this id:
+      const activeExchangeValue = entry.activeExchanges.get(exchangeId);
+      if (activeExchangeValue) {
+        throw new Error("trying to create or update a history entry that has an existing open call");
+      }
+      entry.activeExchanges.set(exchangeId, name);
+      return Promise.resolve();
+    },
+
+    endExchange(historyEntryId: string, exchangeId: string) {
+      const entry = self.findActiveHistoryEntry(historyEntryId);
+      if (!entry) {
+        throw new Error(`There isn't an active entry for ${ json({historyEntryId, exchangeId})}`);
+      }
+
+      const openExchangeValue = entry.activeExchanges.get(exchangeId);
+      if (!openExchangeValue) {
+        throw new Error(`There is no active exchange matching ${ json({historyEntryId, exchangeId}) }`);
+      }
+
+      entry.activeExchanges.delete(exchangeId);
+
+      // TODO: We could use autorun for watching this observable map instead of
+      // changing the entry state here.
+      if (entry.activeExchanges.size === 0) {
+        completeHistoryEntry(entry);
+      }
+    },
+
+    createHistoryEntry(entryInfo: ICreateHistoryEntry) {
+      const {id: historyEntryId, exchangeId, action} = entryInfo;
+      // Ids are unique by contract (TreeManagerAPI.addHistoryEntry), so only active entries are
+      // checked; a history scan would grow with the history.
+      if (self.findActiveHistoryEntry(historyEntryId)) {
+        throw new Error(`The entry already exists ${ json({historyEntryId})}`);
+      }
+      const entry = HistoryEntry.create({
+        ...entryInfo,
+      });
+      self.activeHistoryEntries.push(entry);
+
+      entry.activeExchanges.set(exchangeId, `TreeManager.createHistoryEntry ${action}`);
+    },
+
+    setNumHistoryEntriesAppliedFromFirestore: flow(
+      function *setNumHistoryEntriesAppliedFromFirestore(firestore: Firestore, docPath: string) {
+        // clear the numHistoryEventsApplied so it is obvious when it is filled in
+        self.numHistoryEventsApplied = undefined;
+
+        const lastHistoryEntry = yield* toGenerator(getLastHistoryEntry(firestore, docPath));
+        if (lastHistoryEntry) {
+          self.numHistoryEventsApplied = lastHistoryEntry.index + 1;
+        } else {
+          // If there is no entry then we have an empty document
+          self.numHistoryEventsApplied = 0;
+        }
+      }
+    ),
+
+  };
+})
 .actions((self) => ({
   setMainDocument(document: IMainDocument) {
     self.mainDocument = document;
@@ -456,7 +460,7 @@ export const TreeManager = types
           exchangeName: entry.activeExchanges.get(exchangeId)});
     }
 
-    self.endExchange(entry, exchangeId);
+    self.endExchange(historyEntryId, exchangeId);
   },
 
   /**

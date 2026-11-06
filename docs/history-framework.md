@@ -301,6 +301,16 @@ https://firebase.google.com/docs/firestore/solutions/aggregation
 - [ ] How do we handle the caching of this data? Each time we open the time travel slider we are currently copying the document and all of the history events. We could just load all of these history events from the database each time it is opened. I would guess that Firestore does some caching of these queries so it won't be too slow as long as we share the firestore connection object.
 - [ ] Handle published documents. We either need to copy and modify all of the history entries, or we need to change clue so the copies do not change the tile ids. In either case there are more details to fill out here.
 
+## Known issues
+
+### Adding a history entry gets slower as the history grows
+
+Every entry stays in `TreeManager.document.history`, an MST array, for as long as the document is open. MST keeps a reaction on every root tree that rebuilds the tree's snapshot after each action, and it rebuilds an array's snapshot by reading the snapshot of every element. So each new entry takes time proportional to the whole history. Undoable entries pay the same cost again for the undo stack's array. Nothing reads the TreeManager's snapshot, so this work is wasted.
+
+This matters when a tile adds entries continuously, such as a running Simulation tile or a Dataflow tile with a sampling rate. In a Jest test, adding an entry took about 0.4 ms with a short history and 1.5 ms with 10,000 entries (3.4 ms for undoable entries), and the cost keeps growing in a straight line.
+
+Turning off MST's reaction for the TreeManager would remove the cost, but only by reaching into MST's internals, which would break what later changes can assume about how MST behaves. The fix is to store the history differently: outside MST, or split into chunks so a new entry only touches a small part of it. While a document is being edited, it doesn't need every past entry in memory. Replaying history and working with group documents can need all of them, if the user goes back far enough.
+
 ## General TODO:
 - [ ] UndoStore.redo and UndoStore.undo do not handle async well, they are changing the undo index before all of the patches have been applied to the trees.
 - [ ] review how exchangeId is handled when an undo triggers a call to updateSharedModel, should a new exchangeId be generated here or should it be re-using an existing exchangeId?

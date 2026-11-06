@@ -4,6 +4,7 @@ import {
 } from "mobx-state-tree";
 import { nanoid } from "nanoid";
 import { DocumentContentModelType } from "../document/document-content";
+import { kSharedModelEntrySubtreeRegex, kSharedModelMapPath } from "../document/document-paths";
 import { TreeManagerAPI } from "./tree-manager-api";
 import { TreePatchRecordSnapshot } from "./history";
 import { Tree } from "./tree";
@@ -115,9 +116,9 @@ export class TreeMonitor {
             //   /content/sharedModelMap/${sharedModelId}
             // When a shared model is linked or unlinked to a tile the path will be:
             //   /content/sharedModelMap/${sharedModelId}/tiles/[index]
-            const pathMatch = _patch.path.match(/(.*\/content\/sharedModelMap\/[^/]+)/);
+            const pathMatch = kSharedModelEntrySubtreeRegex.exec(_patch.path);
             if (pathMatch) {
-              const sharedModelPath = pathMatch[1];
+              const sharedModelPath = `${kSharedModelMapPath}/${pathMatch[1]}`;
 
               if (!sharedModelModifications[sharedModelPath]) {
                 sharedModelModifications[sharedModelPath] = 1;
@@ -197,6 +198,10 @@ export class TreeMonitor {
     addDisposer(tree, middlewareDisposer);
   }
 
+  get isEnabled() {
+    return this.enabled;
+  }
+
   enableMonitoring() {
     this.enabled = true;
   }
@@ -249,18 +254,14 @@ export class TreeMonitor {
     const exchangesToProcess: { id: string, path: string }[] = [];
     for (const [sharedModelPath, numModifications] of Object.entries(sharedModelModifications)) {
       if (numModifications > 0) {
-        // If a shared model has been deleted, we can't run these callbacks without errors,
-        // so we bail out now.  May need improvement if tiles need to be notified about
-        // deleted shared models.
         if (!isAlive(this.tree)) {
           // The tree might have been destroyed. This happens during tests.
           return;
         }
-        try {
-          tryResolve(this.tree, `${sharedModelPath}/sharedModel`);
-        } catch {
-          continue;
-        }
+        // Skip a shared model the action deleted, such as an undo removing one it had created:
+        // handleSharedModelChanges needs the model to exist. As a result, tiles that used it are not
+        // notified of the deletion; if a tile ever needs to know, that notification has to be added.
+        if (!tryResolve(this.tree, `${sharedModelPath}/sharedModel`)) continue;
         // Run the callbacks tracking changes to the shared model.
         // We need to wait for these to complete because the manager
         // needs to know when this history entry is complete. If it

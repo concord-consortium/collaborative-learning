@@ -1,4 +1,6 @@
-import { types, Instance, applySnapshot, getSnapshot, addDisposer, SnapshotIn, getType } from "mobx-state-tree";
+import {
+  types, Instance, applySnapshot, getSnapshot, addDisposer, SnapshotIn, getType, addMiddleware
+} from "mobx-state-tree";
 import { observable, reaction } from "mobx";
 import { cloneDeep} from "lodash";
 import stringify from "json-stringify-pretty-compact";
@@ -23,16 +25,22 @@ import { SharedProgramData, SharedProgramDataType } from "../../shared-program-d
 
 import { uniqueId } from "../../../utilities/js-utils";
 import { getTileContentById, getTileModelById } from "../../../utilities/mst-utils";
-import { kTableTileType } from "../../../models/tiles/table/table-content";
 import { withoutUndo } from "../../../models/history/without-undo";
 import { IDataflowOutputConfig } from "../../../../shared/ai-summarizer/ai-summarizer-types";
 import { getTileModel } from "../../../models/tiles/tile-model";
 import { IClueTileObject } from "../../../models/annotations/clue-object";
+import { IConnectFailure } from "./connect-failures";
 import { NodeChannelInfo } from "./utilities/channel";
+import { recordCase } from "./utilities/recording-utilities";
 import { simulatedChannelId } from "./utilities/simulated-channel";
 import { simulatedHubName } from "./utilities/simulated-output";
 
 export const kDataflowTileType = "Dataflow";
+
+/** The tile type Table It creates and a capture is shown in. Named here rather than imported from
+ * the Table tile so Dataflow doesn't depend on another tile's code, and so a different table tile
+ * can be swapped in by changing this one value. */
+export const kDataflowTableTileType = "Table";
 
 export function defaultDataflowContent(options?: IDefaultContentOptions): DataflowContentModelType {
   // Unit-config (settings.dataflow.defaultSamplingRate): seed a new tile's sampling rate from the unit.
@@ -174,7 +182,8 @@ export const DataflowContentModel = TileContentModel
     liveProgramZoom: ProgramZoom.create(DEFAULT_PROGRAM_ZOOM),
     // Whether the toolbar's pan palette is showing (drawing's openPallette pattern).
     panPaletteOpen: false,
-    // The toolbar pan button's face shows and re-performs the last direction chosen from the palette.
+    // The toolbar pan button's face shows and re-performs the last direction chosen from the
+    // palette.
     lastPanDirection: "right" as PanDirection,
     // Whether this tile's program has blocks that only work with a connected device. Kept current
     // by the tile's ReteManager while the tile is editable.
@@ -183,13 +192,12 @@ export const DataflowContentModel = TileContentModel
     // the editable tile's ReteManager, never by later edits or connection changes; the connect
     // tutorial reads it.
     showConnectTutorialOnOpen: false,
-    // Whether the toolbar's connect pane is showing.
-    connectPaneOpen: false,
-    // The message for this tile's most recent connection attempt, if it failed. Cleared when the
-    // tile starts another attempt or disconnects, or when any device connects; the connect pane
-    // shows it while nothing is connected.
-    connectError: undefined as string | undefined,
-    // True when a connection failed while the pane was closed; opening the pane clears it.
+    // Whether the toolbar's connect palette is showing.
+    connectPaletteOpen: false,
+    // This tile's most recent connection failure, if any. Cleared when the tile starts another
+    // attempt or disconnects, or when any device connects. The connect palette shows it.
+    connectFailure: undefined as IConnectFailure | undefined,
+    // True when a connection failed while the palette was closed; opening the palette clears it.
     unseenConnectError: false,
     // Volatile (not persisted): a reload must not resume a run. Lives on the model rather than in
     // DataflowProgram's React state so the tile toolbar's buttons can reach it -- a toolbar button
@@ -302,7 +310,7 @@ export const DataflowContentModel = TileContentModel
       const sharedModel = self.sharedModel;
       if (!sharedModelManager?.isReady || !sharedModel) return undefined;
       return sharedModelManager.getSharedModelTileIds(sharedModel)
-        .find(id => getTileModelById(self, id)?.content.type === kTableTileType);
+        .find(id => getTileModelById(self, id)?.content.type === kDataflowTableTileType);
     },
     /** Elapsed seconds at a recorded row, derived from its position and the data rate rather than
      * read from the table -- the first column holds a point ordinal now. For a recording saved
@@ -372,45 +380,34 @@ export const DataflowContentModel = TileContentModel
   }))
   .actions(self => ({
     /**
-     * Keeps a capture's column headers and its nodes' names the same, in both directions: renaming
-     * a node renames its column, and renaming a column renames its node. One name, so there is no
-     * conflict to arbitrate and no stale header after a rename -- which matters because a rename
-     * deliberately does not detach, the columns still describing the program.
+     * Renames a node and, while the dataset holds a capture of this program, the node's column.
      *
-     * Both directions are idempotent, writing only when the two differ, so the pair converges
-     * after one round trip rather than looping.
+     * A node and its column share one name, so there is no conflict to arbitrate and no stale
+     * header after a rename -- which matters because a rename deliberately does not detach, the
+     * columns still describing the program. Renaming a column renames its node in the other
+     * direction; see updateAfterSharedModelChanges.
      *
-     * withoutUndo because this is derived, not an edit of its own: undoing a rename puts the
-     * original name back and the other side simply follows, instead of needing a second undo and
-     * leaving the two out of step in between.
+     * Both renames happen in this one action so they make one history entry, and one undo puts
+     * both names back.
      */
-    syncColumnNamesFromNodes() {
-      withoutUndo();
-      captureColumnsWithNodes(self.dataSet, self.program).forEach(({ attr, node }) => {
-        const nodeName = node.data.orderedDisplayName;
-        if (nodeName && attr.name !== nodeName) self.dataSet.setAttributeName(attr.id, nodeName);
-      });
+    renameNode(nodeId: string, name: string) {
+      const node = self.program.nodes.get(nodeId);
+      if (!node) return;
+      const column = captureColumnsWithNodes(self.dataSet, self.program)
+        .find(pair => pair.node === node)?.attr;
+      node.data.setOrderedDisplayName(name);
+      if (column && column.name !== name) self.dataSet.setAttributeName(column.id, name);
     },
-    syncNodeNamesFromColumns() {
-      withoutUndo();
-      captureColumnsWithNodes(self.dataSet, self.program).forEach(({ attr, node }) => {
-        if (attr.name && node.data.orderedDisplayName !== attr.name) {
-          node.data.setOrderedDisplayName(attr.name);
-        }
-      });
-    },
+    /**
+     * Hands a capture to the tables showing it once the program's structure no longer matches its
+     * columns. Called through DataflowProgramModel.notifyStructureChange from inside each action
+     * that adds or removes a node or connection, so the detach is part of that change: one undo
+     * puts the node back and re-links the table.
+     *
+     * A compound change calls this more than once. Only the first call does anything: after it the
+     * program holds an empty dataset.
+     */
     detachLinkedTables() {
-      // Never reattached by undo, deliberately. A recorded capture describes the program as it
-      // was, so re-linking it to a program that has moved on would reintroduce exactly the
-      // results/program mismatch this exists to prevent. Keeping it off the undo stack is also
-      // what avoids Tree.handleSharedModelChanges resolving `<sharedModelPath>/sharedModel` for
-      // an entry an undo patch has removed, which throws "Not a child".
-      //
-      // This works only because the call comes from a reaction, not from inside the structural
-      // action: withoutUndo is ignored (with a warning) when called from a child action. Clear
-      // does not come through here -- it empties the capture in place (see clearRecording), so a
-      // student can see it happen.
-      withoutUndo();
       const sharedModelManager = self.tileEnv?.sharedModelManager;
       const sharedModel = self.sharedModel;
       if (!sharedModelManager?.isReady || !sharedModel) return;
@@ -431,18 +428,61 @@ export const DataflowContentModel = TileContentModel
       }
 
       // The program walks away from the capture rather than copying it out: the tables keep the
-      // dataset they already hold, with the student's numbers intact, and afterAttach's
-      // sharedModelSetup reaction gives this program a fresh one.
+      // dataset they already hold, with the student's numbers intact, and the program gets a
+      // fresh one. Created here rather than left to the sharedModelSetup reaction, so that it is
+      // part of this action too.
       //
       // The tables also keep the stamped name as their record of when that capture ran, while the
-      // program drops the stamp -- it has no recording any more. sharedModelSetup names the
-      // replacement dataset from the tile's own title, so handing the base name back that way is
-      // all this takes.
-      getTileModel(self)?.setTitle(stripCaptureTime(self.dataSet.name));
+      // program drops the stamp -- it has no recording any more.
+      const replacement = SharedDataSet.create({
+        providerId: self.metadata.id,
+        dataSet: defaultDataSet(stripCaptureTime(self.dataSet.name))
+      });
       sharedModelManager.removeTileSharedModel(self, sharedModel);
+      sharedModelManager.addTileSharedModel(self, replacement);
     },
   }))
   .actions(self => ({
+    afterCreate() {
+      let structureChangeNotified = false;
+      self.program.setStructureChangeHandler(() => {
+        structureChangeNotified = true;
+        self.detachLinkedTables();
+      });
+
+      // A development-time check that each action changing the program's nodes or connections
+      // calls notifyStructureChange, since one that doesn't leaves linked tables showing columns
+      // for a program that no longer matches them. It reports rather than detaches: this
+      // middleware runs outside the history middleware on the document, so a detach made here
+      // would land in a history entry of its own.
+      //
+      // Watches the outermost action that reaches this tile's content, so a content action that
+      // changes the structure and then notifies passes. Undo applies patches without calling
+      // actions here, so it is not checked.
+      if (process.env.NODE_ENV !== "production") {
+        const structureKey = () =>
+          `${[...self.program.nodes.keys()].join(",")}|${[...self.program.connections.keys()].join(",")}`;
+        let depth = 0;
+        let keyBefore = "";
+        addDisposer(self, addMiddleware(self, (call, next) => {
+          if (call.type !== "action") return next(call);
+          if (depth === 0) {
+            keyBefore = structureKey();
+            structureChangeNotified = false;
+          }
+          depth++;
+          try {
+            return next(call);
+          } finally {
+            depth--;
+            if (depth === 0 && !structureChangeNotified && structureKey() !== keyBefore) {
+              console.error(`Dataflow: ${call.name} changed the program's nodes or connections ` +
+                "without calling notifyStructureChange, so linked tables were not detached.");
+            }
+          }
+        }, false));
+      }
+    },
     afterAttach() { //
       addDisposer(self, reaction(() => {
         const sharedModelManager = self.tileEnv?.sharedModelManager;
@@ -495,35 +535,11 @@ export const DataflowContentModel = TileContentModel
         updateSharedDataSetColors(dataSets);
       },
       {name: "sharedModelSetup", fireImmediately: true}));
-
-      // A rename on either side moves the other. Only this program's current dataset is watched,
-      // so a table that has been detached keeps the headers it was captured with.
-      addDisposer(self, reaction(
-        () => Array.from(self.program.nodes.values())
-          .map(node => `${node.id}:${node.data.orderedDisplayName ?? ""}`).join("|"),
-        () => self.syncColumnNamesFromNodes(),
-        {name: "syncColumnNamesFromNodes"}));
-
-      addDisposer(self, reaction(
-        () => self.dataSet.attributes.map(attr => `${attr.id}:${attr.name}`).join("|"),
-        () => self.syncNodeNamesFromColumns(),
-        {name: "syncNodeNamesFromColumns"}));
-
-      // Structure only -- node and connection ids. A rename or a value change leaves the capture's
-      // columns describing the program, so neither detaches. A reaction rather than a call inside
-      // each structural action, so that withoutUndo applies; see detachLinkedTables.
-      addDisposer(self, reaction(
-        () => {
-          const nodeIds = Array.from(self.program.nodes.keys()).sort().join(",");
-          const connectionIds = Array.from(self.program.connections.keys()).sort().join(",");
-          return `${nodeIds}|${connectionIds}`;
-        },
-        () => self.detachLinkedTables(),
-        {name: "detachOnStructuralChange"}));
     },
     setProgram(program: any) {
       if (program) {
         applySnapshot(self.program, cloneDeep(program));
+        self.program.notifyStructureChange();
       }
     },
     setChannels(channels: NodeChannelInfo[]) {
@@ -553,25 +569,44 @@ export const DataflowContentModel = TileContentModel
     setPanPaletteOpen(open: boolean) {
       self.panPaletteOpen = open;
     },
-    setConnectPaneOpen(open: boolean) {
-      self.connectPaneOpen = open;
+    setConnectPaletteOpen(open: boolean) {
+      self.connectPaletteOpen = open;
       if (open) self.unseenConnectError = false;
     },
-    setConnectError(message?: string) {
-      self.connectError = message;
+    setConnectFailure(failure?: IConnectFailure) {
+      self.connectFailure = failure;
     },
     setUnseenConnectError(value: boolean) {
       self.unseenConnectError = value;
     },
-    clearConnectError() {
-      self.connectError = undefined;
+    clearConnectFailure() {
+      self.connectFailure = undefined;
       self.unseenConnectError = false;
     },
     setLastPanDirection(direction: PanDirection) {
       self.lastPanDirection = direction;
     },
+    /**
+     * Renaming a capture column, in a linked table, renames its node; renameNode covers the other
+     * direction.
+     *
+     * Done here rather than in a reaction because the history framework records what this changes
+     * in the same entry as the change to the dataset, so the column and node renames undo
+     * together. During an undo the framework holds this call until both names have been restored,
+     * when it finds nothing to change.
+     *
+     * Runs on every change to the dataset, including each row a recording adds, so it only writes
+     * a name that differs. A table that has been detached holds a dataset this program no longer
+     * shares, so its renames never reach here.
+     */
     updateAfterSharedModelChanges(sharedModel?: SharedModelType){
-      //do nothing
+      // Undefined after an undo or a replay, when any shared model may have changed.
+      if (sharedModel && sharedModel !== self.sharedModel) return;
+      captureColumnsWithNodes(self.dataSet, self.program).forEach(({ attr, node }) => {
+        if (attr.name && node.data.orderedDisplayName !== attr.name) {
+          node.data.setOrderedDisplayName(attr.name);
+        }
+      });
     },
     addNewAttrFromNode(nodeId: string, nodeName: string){
       const newAttributeId = uniqueId() + "*" + nodeId;
@@ -660,12 +695,41 @@ export const DataflowContentModel = TileContentModel
      *
      * Deliberately not detachLinkedTables: a detach hands the table its rows and stops it
      * following, so the student sees nothing change and Clear looks broken. This is the one path
-     * that destroys recorded data, and unlike the detach it stays on the undo stack -- no
-     * withoutUndo here -- so an accidental Clear is recoverable.
+     * that destroys recorded data. It is an ordinary undoable action, so an accidental Clear is
+     * recoverable.
      */
     clearRecording() {
       self.clearCases();
       self.prepareCapture();
+    },
+  }))
+  .actions(self => ({
+    /**
+     * Table It: points the program at a table, calling `addTable` only when it has none, and sets
+     * the columns up when that table is empty. Record Single Sample does this first too, since it
+     * has to make a table for the same reasons.
+     *
+     * `addTable` adds a table tile linked to this program's dataset. It is passed in so this model
+     * doesn't depend on the document, and called from inside this action so the new table, its
+     * columns and, for a sample, the row are one history entry: one undo removes them all.
+     */
+    showCaptureInTable(addTable: () => void) {
+      if (!self.linkedTableTileId) addTable();
+      // Re-preparing a table that already holds rows would wipe what the student captured.
+      // `isRecording` guards the window between a run starting and its first tick: the columns
+      // are already prepared but no rows exist yet, and re-preparing would restamp the capture's
+      // name.
+      if (self.dataSet.cases.length === 0 && !self.isRecording) {
+        self.prepareCapture();
+      }
+    },
+  }))
+  .actions(self => ({
+    /** Appends the program's current values to the table as the next point, adding and preparing
+     * the table first if needed. See showCaptureInTable for `addTable`. */
+    recordSingleSample(addTable: () => void) {
+      self.showCaptureInTable(addTable);
+      recordCase(self as DataflowContentModelType);
     },
   }));
 

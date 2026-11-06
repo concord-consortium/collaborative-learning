@@ -82,8 +82,7 @@ Check the release list shows it as Latest, with no Pre-release badge.
 ## Follow-ups and the record
 
 - **Follow-up stories:** list anything found during the release that needs one (bugs, script
-  problems, process gaps), and create the ones the developer wants **[approve]**. One known issue:
-  `release.yml` gives Rollbar the commit the workflow ran from (master), not the tag's.
+  problems, process gaps), and create the ones the developer wants **[approve]**.
 - **Finish the record:** add what went differently from this skill, and what the skill should
   change.
 - **Commit the record [approve],** with any skill changes the developer agrees to, on a branch

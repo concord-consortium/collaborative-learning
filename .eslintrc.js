@@ -1,5 +1,9 @@
 /* eslint-env node */
 // default configuration tuned for development
+
+const kPostProcessorMessage = "Snapshot post-processors make recorded history patches stop fitting " +
+  "the stored JSON. Change the model, or migrate the stored data, instead.";
+
 module.exports = {
     parser: "@typescript-eslint/parser",
     parserOptions: {
@@ -149,6 +153,26 @@ module.exports = {
           "no-restricted-syntax": ["error", {
             selector: "Program",
             message: "shared/ is loaded by Cloud Functions, which cannot load React. Put the component in src/ and keep the logic it needs in a .ts file here."
+          }]
+        }
+      },
+      { // History records the patches MST emits. Their paths follow the MST tree, while the stored
+        // document is the snapshot, so a snapshot post-processor that drops, renames or reshapes a
+        // prop leaves recorded patches that don't fit the stored JSON. A document's history then
+        // can't be rebuilt from JSON alone. Models that aren't document content, or whose dropped
+        // props are never patched, disable this with a comment saying so.
+        files: ["src/**/*.{ts,tsx}"],
+        rules: {
+          "no-restricted-syntax": ["error", {
+            // Matches the property name, not the call, so the error and its disable comment sit on
+            // the `.postProcessSnapshot(` line rather than at the start of the model chain.
+            selector: "CallExpression > MemberExpression.callee > " +
+              "Identifier.property[name='postProcessSnapshot']",
+            message: kPostProcessorMessage
+          }, {
+            selector: "CallExpression[callee.property.name='snapshotProcessor'] > ObjectExpression > " +
+              "Property[key.name='postProcessor']",
+            message: kPostProcessorMessage
           }]
         }
       },

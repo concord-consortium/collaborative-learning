@@ -9,40 +9,10 @@ import { IToolbarButtonComponentProps } from "../../../../components/toolbar/too
 import { useUIStore } from "../../../../hooks/use-stores";
 import { getTileComponentInfo } from "../../../../models/tiles/tile-component-info";
 import { getTileCreateActionName } from "../../../../models/tiles/tile-content-info";
-import { DataflowContentModelType } from "../../model/dataflow-content";
-import { recordCase } from "../../model/utilities/recording-utilities";
+import { DataflowContentModelType, kDataflowTableTileType } from "../../model/dataflow-content";
 
 import ViewBadgeIcon from "../../../../assets/icons/view/view-badge.svg";
 import RecordSampleIcon from "../../assets/icons/record-sample-icon.svg";
-
-/**
- * Points the program at a table, creating one only when it has none, and sets the columns up when
- * that table is empty. Shared by both buttons: the sample button has to make a table for the same
- * reasons Table It does.
- *
- * Re-preparing a table that already holds rows would wipe what the student captured, so the column
- * setup is gated on an empty one.
- */
-function ensureLinkedTable(
-  content: DataflowContentModelType,
-  tile: any,
-  addTilesContext: any,
-  selectTile?: (tileId: string) => void
-) {
-  const existingTableId = content.linkedTableTileId;
-  if (existingTableId) {
-    selectTile?.(existingTableId);
-  } else {
-    const sharedModel = content.sharedModel;
-    if (!sharedModel) return;
-    addTilesContext.addTileAfter("Table", tile, [sharedModel]);
-  }
-  // `isRecording` guards the window between a run starting and its first tick: the columns are
-  // already prepared but no rows exist yet, and re-preparing would restamp the capture's name.
-  if (content.dataSet.cases.length === 0 && !content.isRecording) {
-    content.prepareCapture();
-  }
-}
 
 export function useLinkedTable() {
   const tile = useContext(TileModelContext);
@@ -51,16 +21,22 @@ export function useLinkedTable() {
   const readOnly = useReadOnlyContext();
   const content = tile?.content as DataflowContentModelType | undefined;
 
-  /** `selectDestination` reveals the table for Table It. Record Single Sample must NOT do it:
-   * a tile toolbar renders only for the selected tile (tile-toolbar.tsx), so selecting the table
-   * takes the sample button off screen and a second sample becomes unclickable. */
-  const ensure = (selectDestination: boolean) => {
-    if (!content || !tile || !addTilesContext) return false;
-    ensureLinkedTable(content, tile, addTilesContext,
-      selectDestination ? (id: string) => ui.setSelectedTileId(id) : undefined);
-    return true;
+  /** Adds a table linked to the program's dataset. The content calls it from inside its own
+   * action, so the table joins that action's history entry. */
+  const addTable = () => {
+    const sharedModel = content?.sharedModel;
+    if (!tile || !addTilesContext || !sharedModel) return;
+    addTilesContext.addTileAfter(kDataflowTableTileType, tile, [sharedModel]);
   };
-  return { content, readOnly, ensure };
+
+  /** Reveals the program's table. Table It does this; Record Single Sample must NOT: a tile toolbar
+   * renders only for the selected tile (tile-toolbar.tsx), so selecting the table takes the sample
+   * button off screen and a second sample becomes unclickable. */
+  const selectTable = () => {
+    const tableId = content?.linkedTableTileId;
+    if (tableId) ui.setSelectedTileId(tableId);
+  };
+  return { content, readOnly, addTable, selectTable };
 }
 
 /**
@@ -72,14 +48,23 @@ export function useLinkedTable() {
 export const DataflowTableButton = observer(function DataflowTableButton(
   { name }: IToolbarButtonComponentProps
 ) {
-  const { content, readOnly, ensure } = useLinkedTable();
-  const Icon = getTileComponentInfo("Table")?.Icon;
+  const { content, readOnly, addTable, selectTable } = useLinkedTable();
+  const Icon = getTileComponentInfo(kDataflowTableTileType)?.Icon;
+
+  function handleClick() {
+    if (!content) return;
+    const hadTable = !!content.linkedTableTileId;
+    content.showCaptureInTable(addTable);
+    // An existing table may be anywhere in the document, so reveal it. A new one is added right
+    // after this tile.
+    if (hadTable) selectTable();
+  }
 
   return (
     <TileToolbarButton
       name={name}
-      title={getTileCreateActionName("Table")}
-      onClick={() => ensure(true)}
+      title={getTileCreateActionName(kDataflowTableTileType)}
+      onClick={handleClick}
       disabled={!content || readOnly}
     >
       {Icon ? <BadgedIcon Icon={Icon} Badge={ViewBadgeIcon} /> : "??"}
@@ -91,11 +76,10 @@ export const DataflowTableButton = observer(function DataflowTableButton(
 export const RecordSingleSampleButton = observer(function RecordSingleSampleButton(
   { name }: IToolbarButtonComponentProps
 ) {
-  const { content, readOnly, ensure } = useLinkedTable();
+  const { content, readOnly, addTable } = useLinkedTable();
 
   function handleClick() {
-    if (!ensure(false) || !content) return;
-    recordCase(content);
+    content?.recordSingleSample(addTable);
   }
 
   return (

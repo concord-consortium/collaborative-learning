@@ -1,7 +1,7 @@
-import { applyPatch, getSnapshot, unprotect } from "mobx-state-tree";
+import { applyPatch, applySnapshot, getSnapshot, IJsonPatch, onPatch, unprotect } from "mobx-state-tree";
 import {
   defaultDataflowContent, DEFAULT_PROGRAM_ZOOM, DataflowContentModel, DataflowContentModelSnapshotIn,
-  DataflowContentModelType
+  DataflowContentModelType, kDataflowTableTileType
 } from "./dataflow-content";
 import { newDataRate, newZoom } from "./dataflow-content-test-constants";
 import dataflowThreeNode from "../test-docs/dataflow-1-three-node.json";
@@ -269,7 +269,7 @@ function setupContentWithLinkedTile(otherType: string, otherTileId: string) {
 }
 
 const setupContentWithLinkedTable = () => {
-  const r = setupContentWithLinkedTile("Table", "table1");
+  const r = setupContentWithLinkedTile(kDataflowTableTileType, "table1");
   return { ...r, tableTileId: "table1", tableContent: r.otherContent };
 };
 const setupContentWithLinkedGraph = () => setupContentWithLinkedTile("Graph", "graph1");
@@ -307,30 +307,6 @@ function setupContentWithTwoNamedNodes(...names: string[]) {
   });
   return content;
 }
-
-// A fresh tile, and a program whose capture has been detached, both hold the default x | y pair.
-// With a single node the counts match, so the point-column check is the only thing stopping the
-// sync renaming that node to "y".
-describe("syncNodeNamesFromColumns", () => {
-  it("does not rename a node from the default x | y columns", () => {
-    const content = setupContentWithTwoNamedNodes("Sensor");
-    expect(content.dataSet.attributes.map(a => a.name)).toEqual(["x", "y"]);
-
-    content.syncNodeNamesFromColumns();
-
-    expect(content.program.nodes.get("node-0")?.data.orderedDisplayName).toBe("Sensor");
-  });
-
-  it("renames a node when a capture's column is renamed", () => {
-    const content = setupContentWithTwoNamedNodes("Sensor", "Servo");
-    content.prepareCapture();
-    content.dataSet.setAttributeName(content.dataSet.attributes[1].id, "Light");
-
-    content.syncNodeNamesFromColumns();
-
-    expect(content.program.nodes.get("node-0")?.data.orderedDisplayName).toBe("Light");
-  });
-});
 
 describe("prepareCapture", () => {
   it("builds a point column followed by one column per named node", () => {
@@ -485,6 +461,9 @@ describe("getTimeAtRecordedIndex", () => {
 
 // One name shared by a node and its column, in both directions. A rename deliberately does not
 // detach -- the columns still describe the program -- so without this the headers go stale.
+//
+// These tests have no history framework, which is what calls updateAfterSharedModelChanges after a
+// dataset change, so they call it themselves. dataflow-detach-undo.test.ts covers the real wiring.
 describe("node and column name sync", () => {
   const columnNames = (content: DataflowContentModelType) =>
     content.dataSet.attributes.map(a => a.name);
@@ -493,9 +472,10 @@ describe("node and column name sync", () => {
     const content = setupContentWithTwoNamedNodes("Sensor", "Servo");
     content.prepareCapture();
 
-    content.program.nodes.get("node-0")!.data.setOrderedDisplayName("Thermometer");
+    content.renameNode("node-0", "Thermometer");
 
     expect(columnNames(content)).toEqual(["Point", "Thermometer", "Servo"]);
+    expect(content.program.nodes.get("node-0")!.data.orderedDisplayName).toBe("Thermometer");
   });
 
   it("renames the node when the column is renamed", () => {
@@ -504,19 +484,24 @@ describe("node and column name sync", () => {
     const servoAttr = content.dataSet.attributes[2];
 
     content.dataSet.setAttributeName(servoAttr.id, "Gripper");
+    content.updateAfterSharedModelChanges(content.sharedModel);
 
     expect(content.program.nodes.get("node-1")!.data.orderedDisplayName).toBe("Gripper");
   });
 
-  // Each direction writes only when the two differ, so the pair settles rather than ping-ponging.
-  it("settles instead of looping when a name changes", () => {
+  // renameNode's column rename is itself a dataset change, so the framework calls
+  // updateAfterSharedModelChanges next. That call must find the names equal and write nothing.
+  it("writes nothing on the update that follows a node rename", () => {
     const content = setupContentWithTwoNamedNodes("Sensor", "Servo");
     content.prepareCapture();
+    content.renameNode("node-0", "Thermometer");
 
-    content.program.nodes.get("node-0")!.data.setOrderedDisplayName("Thermometer");
+    const patches: IJsonPatch[] = [];
+    const dispose = onPatch(content, patch => patches.push(patch));
+    content.updateAfterSharedModelChanges(content.sharedModel);
+    dispose();
 
-    expect(columnNames(content)).toEqual(["Point", "Thermometer", "Servo"]);
-    expect(content.program.nodes.get("node-0")!.data.orderedDisplayName).toBe("Thermometer");
+    expect(patches).toEqual([]);
   });
 
   // The point column carries no node id, and nothing should try to trace it to one.
@@ -524,11 +509,24 @@ describe("node and column name sync", () => {
     const content = setupContentWithTwoNamedNodes("Sensor", "Servo");
     content.prepareCapture();
 
-    content.program.nodes.get("node-0")!.data.setOrderedDisplayName("Thermometer");
+    content.renameNode("node-0", "Thermometer");
 
     expect(content.dataSet.attributes[0].name).toBe("Point");
   });
 
+  // A fresh tile, and a program whose capture has been detached, both hold the default x | y pair.
+  // With a single node the counts match, so the point-column check is the only thing stopping the
+  // sync renaming that node to "y".
+  it("does not rename a node from the default x | y columns", () => {
+    const content = setupContentWithTwoNamedNodes("Sensor");
+    expect(columnNames(content)).toEqual(["x", "y"]);
+
+    content.updateAfterSharedModelChanges(content.sharedModel);
+
+    expect(content.program.nodes.get("node-0")?.data.orderedDisplayName).toBe("Sensor");
+  });
+
+  // A capture the program no longer holds describes the old program, so renames must not reach it.
   it("does not touch a dataset the program has detached", () => {
     const { content, doc, sharedModelManager } = setupContentWithLinkedTable();
     const tableContent = doc.getTile("table1")!.content as any;
@@ -548,12 +546,47 @@ describe("node and column name sync", () => {
     expect(tableContent.dataSet.attributes.map((a: any) => a.name)).toEqual(["Point", "Sensor", "Servo"]);
 
     content.detachLinkedTables();
-    content.program.nodes.get("node-0")!.data.setOrderedDisplayName("Thermometer");
+    content.renameNode("node-0", "Thermometer");
 
     expect(tableContent.dataSet.attributes.map((a: any) => a.name)).toEqual(["Point", "Sensor", "Servo"]);
   });
 });
 
+
+// Outside production the content model reports an action that changes the program's nodes or
+// connections without calling notifyStructureChange, so a new action that forgets it is noticed.
+describe("the check that structural changes notify", () => {
+  it("reports a change made without notifying", async () => {
+    const content = setupContentWithTwoNamedNodes("Sensor", "Servo");
+    await jestSpyConsole("error", spy => {
+      // applySnapshot is an action on the program that replaces its nodes and never notifies.
+      applySnapshot(content.program, { ...getSnapshot(content.program), nodes: {} });
+      expect(spy).toHaveBeenCalledTimes(1);
+      expect(spy.mock.calls[0][0]).toContain("notifyStructureChange");
+    });
+  });
+
+  it("stays quiet for the program's own structural actions", async () => {
+    const content = setupContentWithTwoNamedNodes("Sensor", "Servo");
+    await jestSpyConsole("error", spy => {
+      content.program.addConnection({
+        id: "c1", source: "node-0", sourceOutput: "value", target: "node-1", targetInput: "nodeValueA"
+      } as any);
+      content.program.removeNodeAndConnections("node-0");
+      content.setProgram({ ...getSnapshot(content.program), nodes: {} });
+      expect(spy).not.toHaveBeenCalled();
+    });
+  });
+
+  it("stays quiet for actions that change no structure", async () => {
+    const content = setupContentWithTwoNamedNodes("Sensor", "Servo");
+    await jestSpyConsole("error", spy => {
+      content.renameNode("node-0", "Thermometer");
+      content.prepareCapture();
+      expect(spy).not.toHaveBeenCalled();
+    });
+  });
+});
 
 describe("a capture whose last table has been deleted", () => {
   // recordCase writes by position, so reusing columns built for the old program silently shifts
@@ -585,7 +618,7 @@ describe("name sync after a copy has remapped the attribute ids", () => {
     originals.forEach(({ name }) => addAttributeToDataSet(content.dataSet, { name }));
     expect(content.dataSet.attributes.every(a => !a.id.includes("*"))).toBe(true);
 
-    content.program.nodes.get("node-0")!.data.setOrderedDisplayName("Thermometer");
+    content.renameNode("node-0", "Thermometer");
 
     expect(content.dataSet.attributes.map(a => a.name)).toEqual(["Point", "Thermometer", "Servo"]);
   });

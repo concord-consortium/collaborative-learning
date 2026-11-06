@@ -1,4 +1,5 @@
-// The detach-on-structural-change behavior, tested through a real document with history enabled.
+// The detach-on-structural-change behavior and the node/column rename, tested through a real
+// document with history enabled.
 //
 // It lives in its own file because it needs the undo harness — createDocumentModel, an enabled
 // tree monitor and a TreeManager — plus the firebase mock that pulls in, none of which the rest of
@@ -16,7 +17,7 @@ import { ProblemDocument } from "../../../models/document/document-types";
 import { TreeManager } from "../../../models/history/tree-manager";
 import { registerTileTypes } from "../../../register-tile-types";
 import { uniqueId } from "../../../utilities/js-utils";
-import { DataflowContentModelType } from "./dataflow-content";
+import { DataflowContentModelType, kDataflowTableTileType } from "./dataflow-content";
 import { recordCase } from "./utilities/recording-utilities";
 
 jest.mock("firebase/app", () => ({
@@ -34,7 +35,7 @@ function setupDocumentWithLinkedTable() {
     content: {
       tiles: [
         { id: "df1", content: { type: "Dataflow" } },
-        { id: "table1", content: { type: "Table" } }
+        { id: "table1", content: { type: kDataflowTableTileType } }
       ]
     } as any
   });
@@ -67,14 +68,20 @@ async function settleOn(manager: Instance<typeof TreeManager>, modelActionKey: s
   expect(history.at(-1)?.activeExchanges.toJSON()).toEqual([]);
 }
 
-/** Gives the program two named nodes with values, then captures one point into the table. */
-function captureOnePoint(content: DataflowContentModelType) {
+/** Gives the program two named nodes with values, then captures one point into the table. With
+ * `connected`, the first node feeds the second through connection "c1". */
+function captureOnePoint(content: DataflowContentModelType, { connected = false } = {}) {
   ["Sensor", "Servo"].forEach((name, i) => {
     content.program.addNodeSnapshot({
       id: `node-${i}`, name: "Number", x: 0, y: 0,
       data: { type: "Number", orderedDisplayName: name }
     } as any);
   });
+  if (connected) {
+    content.program.addConnection({
+      id: "c1", source: "node-0", sourceOutput: "value", target: "node-1", targetInput: "nodeValueA"
+    } as any);
+  }
   content.program.addNewTick(uniqueId());
   [0, 1].forEach(i => content.program.nodes.get(`node-${i}`)?.data.setNodeValue(400 + i));
   content.prepareCapture();
@@ -124,7 +131,7 @@ describe("detaching a linked table on a structural change", () => {
   it("does not detach when a node is renamed", () => {
     const { content } = setupDocumentWithLinkedTable();
     captureOnePoint(content);
-    content.program.nodes.get("node-0")?.data.setOrderedDisplayName?.("Renamed");
+    content.renameNode("node-0", "Renamed");
     expect(content.linkedTableTileId).toBe("table1");
   });
 
@@ -136,44 +143,181 @@ describe("detaching a linked table on a structural change", () => {
   });
 });
 
-// The detach is deliberately one-way. A capture describes the program as it was, so re-linking it
-// to a program that has since changed would reintroduce the results/program mismatch the detach
-// exists to prevent -- which is also why edits are blocked on recorded programs today.
-describe("undoing the change that caused a detach", () => {
-  // SKIPPED: undoing a structural change that caused a detach throws
-  //   [mobx-state-tree] Not a child
-  // from Tree.handleSharedModelChanges (src/models/history/tree.ts), which resolves
-  // `<sharedModelPath>/sharedModel` for an entry that no longer exists.
-  //
-  // It is not this feature's bug, and not shared-model removal in general: undoing addLinkedTile,
-  // existing code that removes a shared model, is fine. It breaks when a shared model is CREATED
-  // in the same window as the undo -- here the sharedModelSetup reaction minting the program a
-  // replacement dataset once the old one is handed to the table. Four shapes were tried (copy and
-  // swap as a child action; the same with a fresh dataset id; walking away as a reaction; copy and
-  // swap as a reaction) and all four throw, because every one of them needs a dataset created.
-  //
-  // The behavior the test asserts is correct and is what the code does -- the detach is one-way by
-  // design (withoutUndo), so undo restores the node and leaves the table detached. Un-skip once
-  // the history code can create a shared model during an undo.
-  it.skip("restores the node but leaves the table detached", async () => {
-    const { content, undoStore, manager } = setupDocumentWithLinkedTable();
+// A node and its column share one name, so renaming either is one change: one history entry, and
+// one undo that puts both names back.
+describe("renaming a node or its column with history", () => {
+  const nodeName = (content: DataflowContentModelType, id: string) =>
+    content.program.nodes.get(id)!.data.orderedDisplayName;
+
+  /** The action of each history entry that renamed a node or a column.
+   *
+   * Picked out by patch rather than by counting entries: an entry from setting up the link can
+   * arrive after the ones that follow it (see settleOn). */
+  const renameEntryActions = (manager: Instance<typeof TreeManager>) =>
+    manager.document.history
+      .filter(entry => entry.modelActionKey !== "UndoStore.undo")
+      .filter(entry => entry.records.some(record => record.patches.some(patch =>
+        /\/orderedDisplayName$|\/attributes\/\d+\/name$/.test(patch.path))))
+      .map(entry => entry.modelActionKey);
+
+  it("records a column rename and the node rename it causes as one entry", async () => {
+    const { content, tableContent, manager, undoStore } = setupDocumentWithLinkedTable();
     captureOnePoint(content);
     await settleOn(manager, "DataSet.addCanonicalCasesWithIDs");
-    const nodeCountBefore = content.program.nodes.size;
+    const servoAttr = tableContent.dataSet.attributes[2];
+
+    tableContent.dataSet.setAttributeName(servoAttr.id, "Gripper");
+    await settleOn(manager, "DataSet.setAttributeName");
+
+    expect(nodeName(content, "node-1")).toBe("Gripper");
+    expect(renameEntryActions(manager)).toEqual(["DataSet.setAttributeName"]);
+
+    undoStore.undo();
+    await settleOn(manager, "UndoStore.undo");
+
+    expect(servoAttr.name).toBe("Servo");
+    expect(nodeName(content, "node-1")).toBe("Servo");
+  });
+
+  it("records a node rename and the column rename it causes as one entry", async () => {
+    const { content, tableContent, manager, undoStore } = setupDocumentWithLinkedTable();
+    captureOnePoint(content);
+    await settleOn(manager, "DataSet.addCanonicalCasesWithIDs");
+    const columnNames = () => tableContent.dataSet.attributes.map((a: any) => a.name);
+
+    content.renameNode("node-0", "Thermometer");
+    await settleOn(manager, "DataflowTool.renameNode");
+
+    expect(columnNames()).toEqual(["Point", "Thermometer", "Servo"]);
+    expect(renameEntryActions(manager)).toEqual(["DataflowTool.renameNode"]);
+
+    undoStore.undo();
+    await settleOn(manager, "UndoStore.undo");
+
+    expect(columnNames()).toEqual(["Point", "Sensor", "Servo"]);
+    expect(nodeName(content, "node-0")).toBe("Sensor");
+  });
+});
+
+// A student who undoes back to the program the data was captured against gets the live link back.
+// Undoing a detach also removes the dataset it made for the program, which is what used to throw
+// "Not a child" from the history code.
+describe("undoing the change that caused a detach", () => {
+  /** The action of each history entry that changed which tiles share which dataset. Picked out by
+   * patch rather than by counting entries; see renameEntryActions. */
+  const linkEntryActions = (manager: Instance<typeof TreeManager>) =>
+    manager.document.history
+      .filter(entry => entry.modelActionKey !== "UndoStore.undo")
+      .filter(entry => entry.records.some(record => record.patches.some(patch =>
+        /\/sharedModelMap\/[^/]+(\/tiles(\/\d+)?)?$/.test(patch.path))))
+      .map(entry => entry.modelActionKey);
+
+  it("records the change and the detach as one entry, and one undo re-links the table", async () => {
+    const { content, tableContent, undoStore, manager } = setupDocumentWithLinkedTable();
+    captureOnePoint(content);
+    await settleOn(manager, "DataSet.addCanonicalCasesWithIDs");
+    const capture = content.dataSet;
 
     content.program.addNodeSnapshot({
       id: "node-2", name: "Number", x: 0, y: 0, data: { type: "Number", orderedDisplayName: "Extra" }
     } as any);
     await settleOn(manager, "DataflowProgram.addNodeSnapshot");
     expect(content.linkedTableTileId).toBeUndefined();
+    expect(linkEntryActions(manager)).toEqual(["DataflowTool.addLinkedTile", "DataflowProgram.addNodeSnapshot"]);
 
     undoStore.undo();
-    // A plain delay, not a MobX `when`: an observer would re-evaluate MST views while undo is
-    // applying patches across trees, walking a node that is momentarily detached.
-    await new Promise(resolve => setTimeout(resolve, 500));
+    await settleOn(manager, "UndoStore.undo");
 
-    expect(content.program.nodes.size).toBe(nodeCountBefore);
-    // withoutUndo keeps the detach off the undo stack, so it is never reversed.
+    expect(content.program.nodes.has("node-2")).toBe(false);
+    expect(content.linkedTableTileId).toBe("table1");
+    expect(content.dataSet).toBe(capture);
+    expect(tableContent.dataSet).toBe(capture);
+    expect(capture.cases).toHaveLength(1);
+  });
+
+  // Removing a node also removes its connections, and each removal reports a structural change.
+  it("re-links after a change that reports more than once", async () => {
+    const { content, undoStore, manager } = setupDocumentWithLinkedTable();
+    captureOnePoint(content, { connected: true });
+    await settleOn(manager, "DataSet.addCanonicalCasesWithIDs");
+    expect(content.linkedTableTileId).toBe("table1");
+
+    content.program.removeNodeAndConnections("node-0");
+    await settleOn(manager, "DataflowProgram.removeNodeAndConnections");
     expect(content.linkedTableTileId).toBeUndefined();
+
+    undoStore.undo();
+    await settleOn(manager, "UndoStore.undo");
+
+    expect(content.program.nodes.has("node-0")).toBe(true);
+    expect(content.program.connections.has("c1")).toBe(true);
+    expect(content.linkedTableTileId).toBe("table1");
+  });
+});
+
+// The first Table It or sample adds a table, sets up its columns and, for a sample, writes a row. All
+// of it is one change to the student, so one history entry and one undo.
+describe("the first capture into a new table", () => {
+  async function setupProgramWithoutTable() {
+    const docModel = createDocumentModel({
+      uid: "1", type: ProblemDocument, key: "test",
+      content: { tiles: [{ id: "df1", content: { type: "Dataflow" } }] } as any
+    });
+    docModel.treeMonitor!.enableMonitoring();
+    const docContent = docModel.content!;
+    const manager = docModel.treeManagerAPI as Instance<typeof TreeManager>;
+    const tile = docContent.tileMap.get("df1")!;
+    const content = tile.content as DataflowContentModelType;
+    ["Sensor", "Servo"].forEach((name, i) => {
+      content.program.addNodeSnapshot({
+        id: `node-${i}`, name: "Number", x: 0, y: 0,
+        data: { type: "Number", orderedDisplayName: name }
+      } as any);
+    });
+    content.program.addNewTick(uniqueId());
+    [0, 1].forEach(i => content.program.nodes.get(`node-${i}`)?.data.setNodeValue(400 + i));
+    await settleOn(manager, "NumberNodeModel.setNodeValue");
+    // What the toolbar buttons pass: AddTilesContext is the document content.
+    const addTable = () => docContent.addTileAfter(kDataflowTableTileType, tile, [content.sharedModel!]);
+    return { docContent, content, manager, addTable };
+  }
+
+  it("records a sample's new table, columns and row as one entry, and one undo removes them", async () => {
+    const { docContent, content, manager, addTable } = await setupProgramWithoutTable();
+    const history = manager.document.history;
+    const entriesBefore = history.length;
+
+    content.recordSingleSample(addTable);
+    await settleOn(manager, "DataflowTool.recordSingleSample");
+
+    expect(history.slice(entriesBefore).map(entry => entry.modelActionKey))
+      .toEqual(["DataflowTool.recordSingleSample"]);
+    const tableId = content.linkedTableTileId!;
+    const tableContent = docContent.tileMap.get(tableId)!.content as any;
+    expect(tableContent.dataSet).toBe(content.dataSet);
+    expect(content.dataSet.attributes.map(a => a.name)).toEqual(["Point", "Sensor", "Servo"]);
+    expect(content.dataSet.cases).toHaveLength(1);
+
+    manager.undoStore.undo();
+    await settleOn(manager, "UndoStore.undo");
+
+    expect(docContent.tileMap.has(tableId)).toBe(false);
+    expect(content.linkedTableTileId).toBeUndefined();
+    expect(content.dataSet.cases).toHaveLength(0);
+    expect(content.dataSet.attributes.map(a => a.name)).toEqual(["x", "y"]);
+  });
+
+  it("records Table It's new table and columns as one entry", async () => {
+    const { content, manager, addTable } = await setupProgramWithoutTable();
+    const history = manager.document.history;
+    const entriesBefore = history.length;
+
+    content.showCaptureInTable(addTable);
+    await settleOn(manager, "DataflowTool.showCaptureInTable");
+
+    expect(history.slice(entriesBefore).map(entry => entry.modelActionKey))
+      .toEqual(["DataflowTool.showCaptureInTable"]);
+    expect(content.linkedTableTileId).toBeDefined();
+    expect(content.dataSet.attributes.map(a => a.name)).toEqual(["Point", "Sensor", "Servo"]);
   });
 });

@@ -42,6 +42,10 @@ export const Attribute = types.model("Attribute", {
   const values = snap.values?.map(value => value != null ? value : undefined);
   return { ...snap, values };
 })
+// Post-processors can break document history (see the post-processor rule in .eslintrc.js).
+// This one is allowed because the formula's id, which it drops, is an MST identifier: it never
+// changes, so no recorded patch reaches it.
+// eslint-disable-next-line no-restricted-syntax
 .postProcessSnapshot(snap => {
   // Strip the id off of the formula. We don't need them.
   // We can't easily change the Formula model itself since it is coming from a library.
