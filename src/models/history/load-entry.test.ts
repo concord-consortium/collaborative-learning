@@ -198,6 +198,26 @@ describe("load entry", () => {
       expect(manager.pendingLoadEntry).toBeUndefined();
     });
 
+    it("logs an error when old content replaces a monitored document's content, and not otherwise", () => {
+      const consoleError = jest.spyOn(console, "error").mockImplementation(() => undefined);
+      const { document } = makeDocument(oldContent());
+
+      document.setContent(oldContent() as any);
+      expect(consoleError).not.toHaveBeenCalled();
+
+      document.treeMonitor!.enableMonitoring();
+      document.setContent({
+        tileMap: { t1: { id: "t1", content: { type: "VersionedTestTile", version: "2", label: "y" } } }
+      } as any);
+      expect(consoleError).not.toHaveBeenCalled();
+
+      document.setContent(oldContent() as any);
+      expect(consoleError).toHaveBeenCalledTimes(1);
+      expect(consoleError.mock.calls[0][0]).toContain("doc1");
+      document.treeMonitor!.disableMonitoring();
+      consoleError.mockRestore();
+    });
+
     it("leaves a flushed entry in the history", async () => {
       const { document, manager } = makeDocument(oldContent());
       document.treeMonitor!.enableMonitoring();

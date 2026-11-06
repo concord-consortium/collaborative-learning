@@ -250,8 +250,14 @@ export const DocumentModel = Tree.named("Document")
       this.setProperty(key, value == null ? value : `${value}`);
     },
 
+    // Normal callers reach this only for documents that aren't being monitored. A monitored call
+    // would also record this replacement as an entry, which doesn't chain from the load entry.
     setContent(snapshot: DocumentContentSnapshotType) {
       const conversion = convertStoredContent(snapshot, self.concurrent);
+      if (conversion?.convertedPaths.length && self.treeMonitor?.isEnabled) {
+        console.error(`setContent converted old content in document ${self.key} while it is being ` +
+          "monitored, so its history won't chain across the conversion.");
+      }
       const content = conversion ? conversion.content : snapshot;
       if (self.content) {
         applySnapshot(self.content, content);

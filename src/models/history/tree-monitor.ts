@@ -198,6 +198,10 @@ export class TreeMonitor {
     addDisposer(tree, middlewareDisposer);
   }
 
+  get isEnabled() {
+    return this.enabled;
+  }
+
   enableMonitoring() {
     this.enabled = true;
   }
