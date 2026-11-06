@@ -1,4 +1,4 @@
-import { getSnapshot, Instance, types } from "mobx-state-tree";
+import { Instance, types } from "mobx-state-tree";
 import firebase from "firebase/app";
 import { deferred } from "promise-assist";
 import { Firestore } from "../../lib/firestore";
@@ -14,7 +14,6 @@ import { when } from "mobx";
 import { HistoryEntry, HistoryEntrySnapshot } from "./history";
 import { FirestoreHistoryManager, HistoryStatus } from "./firestore-history-manager";
 import { UserContextProvider } from "../stores/user-context-provider";
-import { kVersionedTestTileType, VersionedTestTileType } from "./schema-conversion-test-types";
 
 jest.mock("./history-firestore");
 // This adds the mock api types to these two functions
@@ -231,67 +230,13 @@ describe("history loading", () => {
       return { treeManager, historyManager };
     }
 
-    it("appends a local load entry missing from Firestore", async () => {
-      const { treeManager } = await subscribeWithLocalEntry([{ id: "a1" }, { id: "a2" }]);
-      const ids = treeManager.document.history.map(e => e.id);
-      expect(ids).toHaveLength(3);
-      expect(ids[2]).toBe("loadEntry");
-    });
-
-    it("does not duplicate a local load entry already in Firestore", async () => {
-      const { treeManager } = await subscribeWithLocalEntry([{ id: "a1" }, { id: "loadEntry" }]);
-      expect(treeManager.document.history.map(e => e.id)).toEqual(["a1", "loadEntry"]);
-    });
-
-    it("counts the local load entry in the starting position", async () => {
-      const { treeManager } = setupDocument();
-      treeManager.setLocalLoadEntry(loadEntry);
-
-      getLastHistoryEntry.mockResolvedValue({ index: 10, id: "x" });
-      await treeManager.setNumHistoryEntriesAppliedFromFirestore({} as Firestore, "");
-      expect(treeManager.numHistoryEventsApplied).toBe(12);
-
-      getLastHistoryEntry.mockResolvedValue(undefined);
-      await treeManager.setNumHistoryEntriesAppliedFromFirestore({} as Firestore, "");
-      expect(treeManager.numHistoryEventsApplied).toBe(1);
-    });
-
-    it("doesn't count the local load entry when it is Firestore's last entry", async () => {
+    it("keeps a local load entry out of the history and the starting position", async () => {
       const { treeManager, historyManager } = await subscribeWithLocalEntry(
-        [{ id: "a1" }, { id: "loadEntry" }], { index: 1, id: "loadEntry" });
+        [{ id: "a1" }, { id: "a2" }], { index: 1, id: "a2" });
+      expect(treeManager.document.history.map(e => e.id)).toEqual(["a1", "a2"]);
       expect(treeManager.numHistoryEventsApplied).toBe(2);
-      expect(treeManager.document.history).toHaveLength(2);
       expect(historyManager.historyStatus).toBe(HistoryStatus.HISTORY_LOADED);
-    });
-
-    it("can move back across a local load entry with no Firestore history", async () => {
-      const liveDocument = createDocumentModel({
-        uid: "1", type: ProblemDocument, key: "test",
-        content: { tileMap: { t1: { id: "t1", content: { type: kVersionedTestTileType, text: "c" } } } } as any
-      });
-      const liveManager = liveDocument.treeManagerAPI as Instance<typeof TreeManager>;
-
-      // The playback copy is made from the live, converted document.
-      const playbackDocument = createDocumentModel(getSnapshot(liveDocument));
-      const treeManager = playbackDocument.treeManagerAPI as Instance<typeof TreeManager>;
-      treeManager.setLocalLoadEntry(liveManager.pendingLoadEntry);
-      const { historyManager } = setupFirestoreHistoryManager(treeManager);
-      getLastHistoryEntry.mockResolvedValue(undefined);
-      loadHistory.mockImplementation((firestore, path, historyLoaded) => {
-        historyLoaded([]);
-        return () => undefined;
-      });
-      await historyManager.subscribeToFirestoreHistory();
-      await when(() => treeManager.numHistoryEventsApplied !== undefined);
-      expect(treeManager.numHistoryEventsApplied).toBe(1);
-
-      await treeManager.goToHistoryEntryPosition(0);
-
-      expect(treeManager.historyPlaybackFailures).toEqual([]);
-      expect(treeManager.numHistoryEventsApplied).toBe(0);
-      expect(treeManager.jsonHistoryCopy?.getJson("/content/tileMap/t1/content/text")).toBe("c");
-      const tile = playbackDocument.content!.tileMap.get("t1")!.content as VersionedTestTileType;
-      expect(tile.label).toBe("c");
+      expect(treeManager.needsJsonCopy).toBe(true);
     });
   });
 

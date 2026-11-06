@@ -414,13 +414,6 @@ export class FirestoreHistoryManager {
 
     const history: HistoryEntrySnapshot[] = historyDocs.map(doc => doc.entry);
 
-    // Skip the local load entry when the live document has uploaded it since
-    // the playback copy was made.
-    const { localLoadEntry } = treeManager;
-    if (localLoadEntry && !history.some(entry => entry.id === localLoadEntry.id)) {
-      history.push(localLoadEntry);
-    }
-
     if (!treeManager.document) {
       const cDocument = CDocument.create({history});
       treeManager.setChangeDocument(cDocument);

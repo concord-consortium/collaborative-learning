@@ -473,6 +473,83 @@ describe("playback across a load entry", () => {
   });
 });
 
+describe("playback with a local load entry", () => {
+  beforeEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  /**
+   * A playback document made the way the canvas makes one: a snapshot of a live document that
+   * converted old stored content, which hands over its pending load entry. The history is what
+   * Firestore holds, which doesn't include that entry.
+   */
+  function setupPlaybackOfOldContent(content: any, history: HistoryEntrySnapshot[]) {
+    const liveDocument = createDocumentModel({ uid: "1", type: ProblemDocument, key: kTreeId, content });
+    const liveManager = liveDocument.treeManagerAPI as Instance<typeof TreeManager>;
+    expect(liveManager.pendingLoadEntry).toBeDefined();
+    const document = createDocumentModel(getSnapshot(liveDocument));
+    const manager = document.treeManagerAPI as Instance<typeof TreeManager>;
+    manager.setLocalLoadEntry(liveManager.pendingLoadEntry);
+    manager.setChangeDocument(CDocument.create({ history }));
+    manager.setNumHistoryEntriesApplied(history.length);
+    return { document, manager };
+  }
+
+  it("plays back the stored history, with the JSON copy starting at the stored content", async () => {
+    const { document, manager } = setupPlaybackOfOldContent(t1Content(), t1OldEntries());
+
+    for (const [position, label] of [[1, "b"], [0, "a"], [3, "c"]] as const) {
+      await manager.goToHistoryEntryPosition(position);
+      expect(getTile(document, "t1").label).toBe(label);
+    }
+    expect(manager.jsonHistoryCopy!.getJson(`${t1Path}/content/text`)).toBe("c");
+    expect(manager.document.history).toHaveLength(3);
+    expect(manager.historyPlaybackFailures).toEqual([]);
+  });
+
+  it("plays back a student's load entry and edit that arrive after the hand-off", async () => {
+    const oldEntries = t1OldEntries();
+    const { document, manager } = setupPlaybackOfOldContent(t1Content(), oldEntries);
+    const student = await setupConvertedDocument(t1Content(), oldEntries);
+    applySnapshot(manager.document, { history: getSnapshot(student.manager.document.history) });
+
+    for (const [position, label] of [[5, "x"], [0, "a"], [5, "x"]] as const) {
+      await manager.goToHistoryEntryPosition(position);
+      expect(getTile(document, "t1").label).toBe(label);
+    }
+    const studentItemIds = getTile(student.document, "t1").items.map(item => item.id);
+    expect(getTile(document, "t1").items.map(item => item.id)).toEqual(studentItemIds);
+    expect(manager.historyPlaybackFailures).toEqual([]);
+  });
+
+  it("plays back old-format entries that arrive after the hand-off", async () => {
+    const oldEntries = t1OldEntries();
+    const { document, manager } = setupPlaybackOfOldContent(t1Content(), oldEntries);
+    // A student on a release from before the conversion edits the old content.
+    const oldReleaseEdit = makeEntry([replaceRecord(`${t1Path}/content/text`, "c", "d")]);
+    applySnapshot(manager.document, { history: [...oldEntries, oldReleaseEdit] });
+
+    for (const [position, label] of [[4, "d"], [0, "a"], [4, "d"]] as const) {
+      await manager.goToHistoryEntryPosition(position);
+      expect(getTile(document, "t1").label).toBe(label);
+    }
+    expect(manager.historyPlaybackFailures).toEqual([]);
+  });
+
+  it("doesn't undo a local load entry that the history already holds before the start", async () => {
+    const { document, manager, replay, copyJson } = await setupConvertedDocument(t1Content(), t1OldEntries());
+    // The owner's entry was handed over while pending, and uploaded before playback started.
+    manager.setLocalLoadEntry(getSnapshot(manager.document.history[3]));
+
+    for (const [position, label] of [[4, "c"], [0, "a"], [5, "x"]] as const) {
+      await manager.goToHistoryEntryPosition(position);
+      expect(getTile(document, "t1").label).toBe(label);
+      expect(copyJson(t1Path)).toEqual(replay(position).getJson(t1Path));
+    }
+    expect(manager.historyPlaybackFailures).toEqual([]);
+  });
+});
+
 describe("conversion-chain fixture", () => {
   (process.env.WRITE_CONVERSION_FIXTURE ? it : it.skip)("writes the conversion-chain fixture", async () => {
     const { document, manager } = await setupConvertedDocument(t1Content(), t1OldEntries());

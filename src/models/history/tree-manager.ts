@@ -6,7 +6,7 @@ import { TreeAPI } from "./tree-api";
 import { IUndoManager, UndoStore } from "./undo-store";
 import { TreePatchRecord, HistoryEntry, TreePatchRecordSnapshot,
   HistoryOperation, HistoryEntryType,
-  ICreateHistoryEntry, HistoryEntrySnapshot} from "./history";
+  ICreateHistoryEntry, HistoryEntrySnapshot, getEntryPatchesForTree} from "./history";
 import { DEBUG_HISTORY } from "../../lib/debug";
 import { kContentPath, kTileMapPath } from "../document/document-paths";
 import { PatchApplicationError } from "./tree";
@@ -15,7 +15,7 @@ import {
   IPlaybackPatchSource, LoadApplicationError
 } from "./playback-patch-source";
 import { IJsonCopyMoveResult, JsonHistoryCopy } from "./json-history-copy";
-import { toJsonValue } from "./json-patch";
+import { applyJsonPatches, toJsonValue } from "./json-patch";
 import { IDocumentMetadata } from "../../../shared/shared";
 import { Firestore } from "../../lib/firestore";
 import { UserContextProvider } from "../stores/user-context-provider";
@@ -104,6 +104,27 @@ function moveJsonCopy(copy: JsonHistoryCopy, history: readonly HistoryEntryType[
   return { moved, source: createOldModelPatchSource({ copy, treeId, oldPaths }) };
 }
 
+/**
+ * The JSON a playback move's new JSON copy starts from at `position`: the document's JSON, with
+ * a handed-over load entry undone unless the history already holds it before `position`. The
+ * playback document is a snapshot of the live, converted document, while a history without that
+ * entry reaches only the stored content.
+ */
+function getJsonCopyStart(documentJson: object, treeId: string, history: readonly HistoryEntryType[],
+    position: number, localLoadEntry: HistoryEntrySnapshot | undefined) {
+  if (!localLoadEntry) return documentJson;
+  const index = history.findIndex(entry => entry.id === localLoadEntry.id);
+  if (index >= 0 && index < position) return documentJson;
+  try {
+    applyJsonPatches(documentJson,
+      getEntryPatchesForTree(HistoryEntry.create(localLoadEntry), treeId, HistoryOperation.Undo));
+  } catch (e) {
+    // The copy starts converted, so playback stops at the first old entry that doesn't apply to it.
+    console.error("Could not undo the local load entry in the playback JSON copy:", e);
+  }
+  return documentJson;
+}
+
 export const FAKE_HISTORY_ENTRY_ID = "FAKE_HISTORY_ENTRY_ID";
 export const FAKE_EXCHANGE_ID = "FAKE_EXCHANGE_ID";
 
@@ -178,8 +199,9 @@ export const TreeManager = types
    */
   pendingLoadEntry: undefined as HistoryEntrySnapshot | undefined,
   /**
-   * A load entry that the live document has not uploaded yet, handed to a playback copy.
-   * The copy appends it after the Firestore entries, so it counts toward the starting position.
+   * A load entry that the live document has not uploaded yet, handed to a playback copy. It stays
+   * out of the copy's history, which comes from Firestore. The JSON copy starts with it undone (see
+   * getJsonCopyStart), so it holds the stored content that the history reaches.
    */
   localLoadEntry: undefined as HistoryEntrySnapshot | undefined,
   /**
@@ -197,7 +219,7 @@ export const TreeManager = types
   return {
     /**
      * True when playback needs a JSON copy of the document: when the history holds a
-     * load entry.
+     * load entry, or a local load entry was handed over.
      */
     get needsJsonCopy() {
       const history = self.document.history;
@@ -209,7 +231,7 @@ export const TreeManager = types
       for (; scannedLength < history.length && !hasLoadEntry; scannedLength++) {
         hasLoadEntry = !!history[scannedLength].isLoadEntry;
       }
-      return hasLoadEntry;
+      return hasLoadEntry || !!self.localLoadEntry;
     }
   };
 })
@@ -447,13 +469,11 @@ export const TreeManager = types
         self.numHistoryEventsApplied = undefined;
 
         const lastHistoryEntry = yield* toGenerator(getLastHistoryEntry(firestore, docPath));
-        // The live document may have uploaded the local load entry since it was handed over.
-        const localEntryCount = self.localLoadEntry && lastHistoryEntry?.id !== self.localLoadEntry.id ? 1 : 0;
         if (lastHistoryEntry) {
-          self.numHistoryEventsApplied = lastHistoryEntry.index + 1 + localEntryCount;
+          self.numHistoryEventsApplied = lastHistoryEntry.index + 1;
         } else {
           // If there is no entry then we have an empty document
-          self.numHistoryEventsApplied = localEntryCount;
+          self.numHistoryEventsApplied = 0;
         }
       }
     ),
@@ -640,8 +660,10 @@ export const TreeManager = types
     if (self.needsJsonCopy && self.mainDocument) {
       copy = self.jsonHistoryCopy;
       if (!copy) {
+        const { key } = self.mainDocument;
         const documentJson: object = toJsonValue(getSnapshot(self.mainDocument as unknown as IAnyStateTreeNode));
-        copy = self.jsonHistoryCopy = new JsonHistoryCopy(self.mainDocument.key, documentJson, initialPosition);
+        const startJson = getJsonCopyStart(documentJson, key, history, initialPosition, self.localLoadEntry);
+        copy = self.jsonHistoryCopy = new JsonHistoryCopy(key, startJson, initialPosition);
       }
       const { moved, source: oldModelSource } =
         moveJsonCopy(copy, history, self.mainDocument.key, newHistoryPosition);
