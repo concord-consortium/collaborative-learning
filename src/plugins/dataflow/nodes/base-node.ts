@@ -203,6 +203,8 @@ export type IBaseNode = Schemes['Node'] & {
   dispose(): void;
   process(): void;
   select(): void;
+  /** Renames the node and its column in a capture, as one change. */
+  rename(name: string): void;
   isConnected(inputKey: string): boolean;
   logControlEvent(
     operation: string,
@@ -290,6 +292,10 @@ export class BaseNode<
    */
   select() {
     this.services.selectNode(this.id);
+  }
+
+  rename(name: string) {
+    this.services.renameNode(this.id, name);
   }
 
   isConnected(inputKey: string) {

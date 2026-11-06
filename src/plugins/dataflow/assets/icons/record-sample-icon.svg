@@ -1,0 +1,8 @@
+<svg width="18" height="18" viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg">
+  <g id="record-sample" fill="#545454" fill-rule="evenodd">
+    <!-- The record button's ring, so the two read as siblings. -->
+    <path d="m9,0C4.02942,0,0,4.02942,0,9s4.02942,9,9,9,9-4.02948,9-9S13.97058,0,9,0Zm0,14.25c-2.89948,0-5.25-2.35052-5.25-5.25s2.35052-5.25,5.25-5.25,5.25,2.35046,5.25,5.25-2.35052,5.25-5.25,5.25Z"/>
+    <!-- One dot at the centre: this captures a single point, not a run. -->
+    <circle cx="9" cy="9" r="2.25"/>
+  </g>
+</svg>

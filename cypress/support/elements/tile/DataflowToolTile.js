@@ -58,6 +58,12 @@ class DataflowToolTile {
   getFlowtool() {
     return cy.get('.primary-workspace .flow-tool');
   }
+  getTableItButton() {
+    return cy.get(`.primary-workspace .dataflow-toolbar .toolbar-button.table-it`);
+  }
+  getRecordSampleButton() {
+    return cy.get(`.primary-workspace .dataflow-toolbar .toolbar-button.record-sample`);
+  }
   getZoomInButton() {
     return cy.get(`.primary-workspace .dataflow-toolbar .toolbar-button.zoom-in`);
   }
@@ -251,13 +257,22 @@ class DataflowToolTile {
     this.getRecordingClearButton().click();
     this.getClearDataWarningClear().click();
   }
+  // A title may be given as a RegExp: once a capture is prepared the program's name carries the
+  // capture's start time (see captureName in dataflow-content), which no test can predict.
+  checkTableTitle(tableTile, tableTitle) {
+    if (tableTitle instanceof RegExp) {
+      tableTile.getTableTitle().invoke("text").should("match", tableTitle);
+    } else {
+      tableTile.getTableTitle().should("have.text", tableTitle);
+    }
+  }
   checkLinkedTableRecordedData(tableTile, tableTitle, attributes, rows) {
-    tableTile.getTableTitle().should("have.text", tableTitle);
+    this.checkTableTitle(tableTile, tableTitle);
     tableTile.checkWorkspaceColumnHeaders(attributes);
-    tableTile.checkTableColumnValues(2, rows);
+    tableTile.checkTableColumnValues(2, rows, 1);
   }
   checkEmptyLinkedTable(tableTile, tableTitle, attributes) {
-    tableTile.getTableTitle().should("have.text", tableTitle);
+    this.checkTableTitle(tableTile, tableTitle);
     tableTile.checkWorkspaceColumnHeaders(attributes);
     tableTile.checkEmptyTableValues();
   }
