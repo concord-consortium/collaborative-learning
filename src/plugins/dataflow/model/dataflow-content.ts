@@ -31,6 +31,7 @@ import { IDataflowOutputConfig } from "../../../../shared/ai-summarizer/ai-summa
 import { getTileModel } from "../../../models/tiles/tile-model";
 import { IClueTileObject } from "../../../models/annotations/clue-object";
 import { NodeChannelInfo } from "./utilities/channel";
+import { recordCase } from "./utilities/recording-utilities";
 import { simulatedChannelId } from "./utilities/simulated-channel";
 import { simulatedHubName } from "./utilities/simulated-output";
 
@@ -698,6 +699,35 @@ export const DataflowContentModel = TileContentModel
       // create a default dataSet x | y table
       addAttributeToDataSet(self.dataSet, { name: "x" });
       addAttributeToDataSet(self.dataSet, { name: "y" });
+    },
+  }))
+  .actions(self => ({
+    /**
+     * Table It: points the program at a table, calling `addTable` only when it has none, and sets
+     * the columns up when that table is empty. Record Single Sample does this first too, since it
+     * has to make a table for the same reasons.
+     *
+     * `addTable` adds a table tile linked to this program's dataset. It is passed in so this model
+     * doesn't depend on the document, and called from inside this action so the new table, its
+     * columns and, for a sample, the row are one history entry: one undo removes them all.
+     */
+    showCaptureInTable(addTable: () => void) {
+      if (!self.linkedTableTileId) addTable();
+      // Re-preparing a table that already holds rows would wipe what the student captured.
+      // `recordedRun` guards the window between a recording starting and its first tick: the
+      // columns are already prepared but no rows exist yet, and re-preparing would clear the flag
+      // and leave the program in Ready when the recording stops.
+      if (self.dataSet.cases.length === 0 && !self.recordedRun) {
+        self.prepareCapture();
+      }
+    },
+  }))
+  .actions(self => ({
+    /** Appends the program's current values to the table as the next point, adding and preparing
+     * the table first if needed. See showCaptureInTable for `addTable`. */
+    recordSingleSample(addTable: () => void) {
+      self.showCaptureInTable(addTable);
+      recordCase(self as DataflowContentModelType);
     },
   }));
 

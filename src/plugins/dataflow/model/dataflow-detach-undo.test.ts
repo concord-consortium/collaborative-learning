@@ -254,3 +254,70 @@ describe("undoing the change that caused a detach", () => {
     expect(content.linkedTableTileId).toBe("table1");
   });
 });
+
+// The first Table It or sample adds a table, sets up its columns and, for a sample, writes a row. All
+// of it is one change to the student, so one history entry and one undo.
+describe("the first capture into a new table", () => {
+  async function setupProgramWithoutTable() {
+    const docModel = createDocumentModel({
+      uid: "1", type: ProblemDocument, key: "test",
+      content: { tiles: [{ id: "df1", content: { type: "Dataflow" } }] } as any
+    });
+    docModel.treeMonitor!.enableMonitoring();
+    const docContent = docModel.content!;
+    const manager = docModel.treeManagerAPI as Instance<typeof TreeManager>;
+    const tile = docContent.tileMap.get("df1")!;
+    const content = tile.content as DataflowContentModelType;
+    ["Sensor", "Servo"].forEach((name, i) => {
+      content.program.addNodeSnapshot({
+        id: `node-${i}`, name: "Number", x: 0, y: 0,
+        data: { type: "Number", orderedDisplayName: name }
+      } as any);
+    });
+    content.program.addNewTick(uniqueId());
+    [0, 1].forEach(i => content.program.nodes.get(`node-${i}`)?.data.setNodeValue(400 + i));
+    await settleOn(manager, "NumberNodeModel.setNodeValue");
+    // What the toolbar buttons pass: AddTilesContext is the document content.
+    const addTable = () => docContent.addTileAfter("Table", tile, [content.sharedModel!]);
+    return { docContent, content, manager, addTable };
+  }
+
+  it("records a sample's new table, columns and row as one entry, and one undo removes them", async () => {
+    const { docContent, content, manager, addTable } = await setupProgramWithoutTable();
+    const history = manager.document.history;
+    const entriesBefore = history.length;
+
+    content.recordSingleSample(addTable);
+    await settleOn(manager, "DataflowTool.recordSingleSample");
+
+    expect(history.slice(entriesBefore).map(entry => entry.modelActionKey))
+      .toEqual(["DataflowTool.recordSingleSample"]);
+    const tableId = content.linkedTableTileId!;
+    const tableContent = docContent.tileMap.get(tableId)!.content as any;
+    expect(tableContent.dataSet).toBe(content.dataSet);
+    expect(content.dataSet.attributes.map(a => a.name)).toEqual(["Point", "Sensor", "Servo"]);
+    expect(content.dataSet.cases).toHaveLength(1);
+
+    manager.undoStore.undo();
+    await settleOn(manager, "UndoStore.undo");
+
+    expect(docContent.tileMap.has(tableId)).toBe(false);
+    expect(content.linkedTableTileId).toBeUndefined();
+    expect(content.dataSet.cases).toHaveLength(0);
+    expect(content.dataSet.attributes.map(a => a.name)).toEqual(["x", "y"]);
+  });
+
+  it("records Table It's new table and columns as one entry", async () => {
+    const { content, manager, addTable } = await setupProgramWithoutTable();
+    const history = manager.document.history;
+    const entriesBefore = history.length;
+
+    content.showCaptureInTable(addTable);
+    await settleOn(manager, "DataflowTool.showCaptureInTable");
+
+    expect(history.slice(entriesBefore).map(entry => entry.modelActionKey))
+      .toEqual(["DataflowTool.showCaptureInTable"]);
+    expect(content.linkedTableTileId).toBeDefined();
+    expect(content.dataSet.attributes.map(a => a.name)).toEqual(["Point", "Sensor", "Servo"]);
+  });
+});
