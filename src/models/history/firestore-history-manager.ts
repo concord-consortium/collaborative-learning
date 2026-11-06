@@ -414,8 +414,8 @@ export class FirestoreHistoryManager {
 
     const history: HistoryEntrySnapshot[] = historyDocs.map(doc => doc.entry);
 
-    // A load entry the live document hasn't uploaded yet goes at the end,
-    // unless it has been uploaded since the playback copy was made.
+    // Skip the local load entry when the live document has uploaded it since
+    // the playback copy was made.
     const { localLoadEntry } = treeManager;
     if (localLoadEntry && !history.some(entry => entry.id === localLoadEntry.id)) {
       history.push(localLoadEntry);

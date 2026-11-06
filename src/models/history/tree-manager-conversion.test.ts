@@ -99,7 +99,8 @@ async function setupConvertedDocument(content: any, oldEntries: HistoryEntrySnap
   manager.setNumHistoryEntriesApplied(endPosition);
   const endJson: any = toJsonValue(getSnapshot(document));
 
-  // An independent replay of the stored entries from the end state.
+  // A fresh copy moved straight from the end state, to compare with the manager's copy, which got
+  // there step by step.
   const replay = (position: number) => {
     const replayCopy = new JsonHistoryCopy(kTreeId, cloneDeep(endJson), endPosition);
     replayCopy.moveTo(manager.document.history, position);
@@ -434,7 +435,7 @@ describe("playback across a load entry", () => {
     expect(getTile(document, "t1").label).toBe("b");
   });
 
-  it("never builds a JSON copy for a document without conversions", async () => {
+  it("never builds a JSON copy for a history without a load entry", async () => {
     const tilePath = "/content/tileMap/t1/content/text";
     const docContent = DocumentContentModel.create({
       sharedModelMap: { sm1: { sharedModel: { id: "sm1", type: "TestSharedModel" }, tiles: ["t1"] } },

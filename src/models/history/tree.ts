@@ -183,13 +183,11 @@ export const Tree = types.model("Tree", {
     // neither form should appear in recorded history patches, and either
     // would silently corrupt the numApplied counter.
     //
-    // `loads` are applied after the patches, inside the same action, so
-    // observers see the patches and the loads as one change. Loads are
-    // whole-model `replace` patches that update the existing nodes in place.
-    // Each one emits many onPatch events (one per changed field), so they
-    // can't be mapped back to an input index. That is why they are applied
-    // after the counter is disposed and aren't counted. A failure while
-    // applying them is thrown as a LoadApplicationError.
+    // `loads` (see TreeAPI.applyPatchesFromManager) update the existing
+    // nodes in place, and each one emits many onPatch events (one per
+    // changed field), so they can't be mapped back to an input index. That
+    // is why they are applied after the counter is disposed and aren't
+    // counted.
     applyPatchesFromManager(historyEntryId: string, exchangeId: string, patchesToApply: readonly IJsonPatch[],
         loads?: readonly IJsonPatch[]) {
       for (const patch of patchesToApply) {

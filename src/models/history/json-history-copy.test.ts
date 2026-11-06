@@ -116,7 +116,7 @@ describe("JsonHistoryCopy", () => {
       expect(result.position).toBe(2);
       expect(result.failure).toEqual({ historyIndex: 1, direction: "undo", message: expect.any(String) });
       expect(copy.position).toBe(2);
-      // action2 was undone, and the partly applied bad entry was rolled back
+      // The last entry was undone, and the partly applied bad entry was rolled back
       const expected = startJson();
       (expected.content.tileMap.t1.content as any).actionText = "one";
       expect(copy.getJson("")).toEqual(expected);

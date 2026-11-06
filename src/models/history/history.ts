@@ -108,10 +108,10 @@ export enum HistoryOperation {
 }
 
 /**
- * Build the list of patches for a single history entry that a tree
- * would receive in a given direction, in the same order and record
- * ordering that goToHistoryEntryPosition uses when batching. Used to
- * reconstruct patches without needing the onPatch-collected inverses.
+ * The recorded patches of one history entry for one tree in a given
+ * direction, with the records in playback order. Load entries are
+ * included; a playback patch source decides which patches an MST tree
+ * receives.
  */
 export function getEntryPatchesForTree(
   historyEntry: Instance<typeof HistoryEntry>,

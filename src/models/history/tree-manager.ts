@@ -184,7 +184,7 @@ export const TreeManager = types
   localLoadEntry: undefined as HistoryEntrySnapshot | undefined,
   /**
    * A JSON copy of the main document that playback keeps at the current position when the
-   * history crosses a schema conversion. It is built on the first move that needs it.
+   * history holds a load entry. It is built on the first move that needs it.
    */
   jsonHistoryCopy: undefined as JsonHistoryCopy | undefined
 }))
@@ -634,7 +634,7 @@ export const TreeManager = types
     let source: IPlaybackPatchSource = defaultPatchSource;
     // Where this move goes. A JSON copy can stop it short of the requested position.
     let targetPosition = newHistoryPosition;
-    // Only a history that crosses a schema conversion has a JSON copy. The copy moves first:
+    // Only a history that holds a load entry has a JSON copy. The copy moves first:
     // it finds an entry that doesn't apply, and it says which models are old.
     let copy: JsonHistoryCopy | undefined;
     if (self.needsJsonCopy && self.mainDocument) {
@@ -746,8 +746,8 @@ export const TreeManager = types
     //    entries rolled back; trees that failed have their own partial
     //    rollback plus any entries they applied past the stop position.
     //
-    // 2. LoadApplicationError — MST rejected an old model's converted
-    //    state. The tree applied all of its patches before its loads, so
+    // 2. LoadApplicationError — MST rejected a model's load. The tree
+    //    applied all of its patches before its loads, so
     //    it is rolled back like a tree that succeeded. The move doesn't
     //    advance (stopPosition = initialPosition), and the rollback's
     //    loads put the old models back as they were at initialPosition.
@@ -760,9 +760,7 @@ export const TreeManager = types
     //    failing tree alone (we don't know how far it got), record a
     //    playback-failure marker so the user sees the existing UI
     //    banner, and console.error the original stack so a developer
-    //    can find the bug. This replaces the old behavior of letting
-    //    the error escape as an unhandled promise rejection (which was
-    //    invisible in the UI and easy to miss in logs).
+    //    can find the bug.
     interface TreeApplyFailure {
       error: PatchApplicationError;
       historyIndex: number;

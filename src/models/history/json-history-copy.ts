@@ -9,9 +9,9 @@ export interface IJsonCopyMoveResult {
 }
 
 /**
- * A plain JSON copy of a document that history playback keeps beside the MST trees. Every
- * history entry, load entries included, is applied to the copy, so the copy can say
- * where a move has to stop. It never touches an MST tree.
+ * A plain JSON copy of a document that history playback keeps beside the MST trees. Every entry
+ * a move crosses, load entries included, is applied to the copy, so it can say where the move has
+ * to stop and which models are old there. It never touches an MST tree.
  */
 export class JsonHistoryCopy {
   private json: object;
@@ -48,10 +48,11 @@ export class JsonHistoryCopy {
 
   /**
    * The model at `modelPath` converted to the current format when it is old at the copy's
-   * position, or undefined when it isn't: its version is current, its type has none, or its
-   * converter declines it. A clone is converted: converters are shallow, so their result can share
-   * nested objects with their input, and the copy's objects must never reach MST. Each model is
-   * converted at most once per position, and one whose conversion throws throws again each time.
+   * position, or undefined when it isn't: it isn't in the copy, its version is current, its type
+   * has none, or its converter declines it. A clone is converted: a converter may be shallow, so
+   * its result can share nested objects with its input, and the copy's objects must never reach
+   * MST. Each model is converted at most once per position, and one whose conversion throws throws
+   * again each time.
    */
   getConvertedModel(modelPath: string): unknown {
     let result = this.convertedModels.get(modelPath);

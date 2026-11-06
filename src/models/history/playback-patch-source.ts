@@ -27,8 +27,8 @@ export interface IPlaybackPatchSource {
 }
 
 /**
- * Applies each entry's recorded patches as they are, with no loads. A load entry is never
- * applied to an MST tree, so it has no patches here.
+ * Applies each entry's recorded patches as they are, with no loads. Playback never applies a load
+ * entry to an MST tree, so it has no patches here.
  */
 export const defaultPatchSource: IPlaybackPatchSource = {
   getPatches: (entry, treeId, opType) => entry.isLoadEntry ? [] : getEntryPatchesForTree(entry, treeId, opType),
@@ -36,8 +36,7 @@ export const defaultPatchSource: IPlaybackPatchSource = {
 };
 
 /**
- * Thrown by a tree when applying its loads fails. The loads are applied after
- * all of the tree's patches, so playback rolls back the whole move.
+ * Thrown by a tree when applying its loads fails, after all of its patches have applied.
  */
 export class LoadApplicationError extends Error {
   readonly cause: unknown;
@@ -132,10 +131,10 @@ export function hasOldValue(patches: readonly IJsonPatch[], modelPath: string): 
 }
 
 /**
- * A patch source for one tree whose models in `oldPaths` are in an old format at either end of a
- * move. Recorded patches inside those models are dropped. Each such model is instead loaded once,
- * with its state at the copy's position converted to the current format. Other trees use the
- * default source.
+ * A patch source for one tree that loads the models in `oldPaths` instead of patching them.
+ * Patches inside those models are dropped, and patches at or above them carry converted values.
+ * Each one that exists at the copy's position is loaded once with its state there, converted when
+ * it is old. Other trees use the default source.
  */
 export function createOldModelPatchSource(
   args: { copy: JsonHistoryCopy; treeId: string; oldPaths: ReadonlySet<string> }
@@ -145,7 +144,8 @@ export function createOldModelPatchSource(
   let memoPosition: number | undefined;
   let memo = new Map<string, unknown>();
 
-  // Each model's target state is built once per position, so an add and the load share the same object.
+  // Each model's target state is built once per position, so an add and the load share the same
+  // object. getConvertedModel already caches an old model; this saves cloning one that isn't old.
   const convertedTarget = (path: string) => {
     if (memoPosition !== copy.position) {
       memoPosition = copy.position;
