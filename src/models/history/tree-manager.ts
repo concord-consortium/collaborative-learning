@@ -680,30 +680,41 @@ export const TreeManager = types
     // rollback ensures the two paths produce matching orderings.
     // Every tree's loads are computed here too, so nothing is applied when a conversion throws.
     const treeLoads: Record<string, IJsonPatch[]> = {};
-    try {
-      for (let i=startingIndex; i !== endingIndex; i=i+direction) {
-        const historyEntry = history.at(i);
-        if (!historyEntry) continue;
-        for (const treeId of Object.keys(self.trees)) {
-          const patches = treePatches[treeId];
-          if (!patches) {
-            throw new Error(`treePatches missing entry for known tree '${treeId}'`);
-          }
-          const entryPatches = source.getPatches(historyEntry, treeId, opType);
-          if (entryPatches.length > 0) {
-            patches.push(...entryPatches);
-            treePatchSegments[treeId].push({ historyIndex: i, patchCount: entryPatches.length });
-          }
+    // The source converts old models, and a conversion can throw. Only a copy's source converts.
+    let conversionFailure: { error: unknown } | undefined;
+    const fromSource = (build: () => IJsonPatch[]) => {
+      if (conversionFailure) return [];
+      try {
+        return build();
+      } catch (error) {
+        if (!copy) throw error;
+        conversionFailure = { error };
+        return [];
+      }
+    };
+    for (let i=startingIndex; i !== endingIndex; i=i+direction) {
+      const historyEntry = history.at(i);
+      if (!historyEntry) continue;
+      for (const treeId of Object.keys(self.trees)) {
+        const patches = treePatches[treeId];
+        if (!patches) {
+          throw new Error(`treePatches missing entry for known tree '${treeId}'`);
+        }
+        const entryPatches = fromSource(() => source.getPatches(historyEntry, treeId, opType));
+        if (entryPatches.length > 0) {
+          patches.push(...entryPatches);
+          treePatchSegments[treeId].push({ historyIndex: i, patchCount: entryPatches.length });
         }
       }
-      Object.keys(treePatches).forEach(treeId => treeLoads[treeId] = source.getLoads(treeId));
-    } catch (e) {
-      if (!copy) throw e;
+    }
+    Object.keys(treePatches).forEach(treeId => treeLoads[treeId] = fromSource(() => source.getLoads(treeId)));
+    if (copy && conversionFailure) {
       // A conversion of an old model threw. The move doesn't advance.
+      const { error } = conversionFailure;
       copy.moveTo(history, initialPosition);
-      const errMessage = e instanceof Error ? e.message : String(e);
+      const errMessage = error instanceof Error ? error.message : String(error);
       recordFailure(unexpectedIndex, directionStr, `Could not convert an old model: ${errMessage}`);
-      console.error(`Could not convert an old model at history position ${targetPosition}:`, e);
+      console.error(`Could not convert an old model at history position ${targetPosition}:`, error);
       return;
     }
 
