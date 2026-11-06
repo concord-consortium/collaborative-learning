@@ -500,8 +500,8 @@ export const GeometryBaseContentModel = NavigatableTileModel
   // Post-processors can break document history (see the post-processor rule in .eslintrc.js).
   // This one does: when a legacy tile with table links loads, `replaceLinks` records patches under
   // `links`, which the stored JSON never has, so the history can't be rebuilt from JSON past that
-  // entry. It is allowed because it hasn't been fixed yet. Only legacy content is affected: tiles
-  // from before tables used shared data sets.
+  // entry. That is an accepted limit, because it affects only legacy content: tiles from before
+  // tables used shared data sets.
   // eslint-disable-next-line no-restricted-syntax
   .postProcessSnapshot(snapshot => {
     // Remove links from snapshot

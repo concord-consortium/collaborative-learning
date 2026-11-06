@@ -181,11 +181,9 @@ export const TreeManager = types
       return;
     }
 
-    // Flush the pending load entry just before the first local entry that changes the content.
-    // Content is saved only when it changes, so flushing before a metadata-only entry (a title change)
-    // would store the entry next to old content. The next load would convert that content again with
-    // new ids, breaking the stored chain. The entry isn't undoable, so it skips the undo store and
-    // leaves revisionId alone.
+    // Content is saved only when it changes, so flushing before a metadata-only entry (a title
+    // change) would pair the load entry with old content, and the next load would convert it again
+    // with new ids. The entry isn't undoable, so it skips the undo store and leaves revisionId alone.
     if (self.pendingLoadEntry && entryChangesContent(snapshot)) {
       const loadEntryIndex = self.document.history.length;
       self.document.history.push(self.pendingLoadEntry);

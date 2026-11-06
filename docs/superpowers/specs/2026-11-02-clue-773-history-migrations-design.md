@@ -76,7 +76,7 @@ customer.
 
 ## Anti-goals
 
-- **CLUE's runtime never rewrites stored entries.** The only new thing it writes is the conversion
+- **CLUE's runtime never rewrites stored entries.** The only new thing it writes is the load
   entry, from the client that converted the content. (A separate script may, per Non-goals.)
 - **Playback never shows a state it can't vouch for.** When an entry doesn't apply, or an old tile
   can't be loaded, playback stops there and says so (section 7). It doesn't guess.

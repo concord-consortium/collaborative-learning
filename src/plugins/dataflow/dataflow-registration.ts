@@ -31,8 +31,6 @@ export function convertDataflowTileSnapshot(tileSnap: any) {
   };
 }
 
-// Converts the tile before MST loads it. When the converter declines the program format, the tile
-// is passed to MST unchanged.
 export function tileSnapshotPreProcessor(tileSnap: any) {
   return convertDataflowTileSnapshot(tileSnap) ?? tileSnap;
 }

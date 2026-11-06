@@ -43,7 +43,6 @@ export function convertOldModelJsonAtPath(modelPath: string, json: unknown): unk
   if (!info) return undefined;
   const version = info.getVersion(json);
   if (version === info.currentVersion) return undefined;
-  // read convertSnapshot from the registration on each call, so a replaced or spied-on function is used
   const converted = info.convertSnapshot(json);
   if (converted !== undefined && process.env.NODE_ENV !== "production") {
     const convertedVersion = info.getVersion(converted);
@@ -79,7 +78,7 @@ interface IConvertedMap {
   convertedPaths: string[];
 }
 
-// Converts the old models in a map of models. The input map is not modified.
+// The input map is not modified.
 function convertModelMap(mapPath: string, map: unknown, getModel: (entry: any) => any,
     setModel: (entry: any, model: any) => any, modelSuffix: string): IConvertedMap {
   const convertedPaths: string[] = [];
@@ -162,8 +161,8 @@ const kMaxEntryBytes = 1048576;
 
 /**
  * Builds the load entry, which records the changes CLUE made to the stored content while loading
- * it. Today those are the conversions of old models to the current format, as the patches that
- * turn the stored JSON into the converted JSON. It is flagged `isLoadEntry` and is not undoable.
+ * it, as the patches that turn the stored JSON into the loaded JSON. It is flagged `isLoadEntry`
+ * and is not undoable.
  */
 export function buildLoadEntry(
   treeId: string, changes: { path: string; before: unknown; after: unknown }[]
@@ -184,8 +183,7 @@ export function buildLoadEntry(
     state: "complete",
     records: [{ tree: treeId, action: kLoadContentAction, patches, inversePatches }]
   };
-  // The entry's size grows with what the conversion touches. Nothing splits or shrinks an entry
-  // that is too large, so say so where it can be found.
+  // Nothing splits an oversized entry, so log it.
   const size = new TextEncoder().encode(JSON.stringify(entry)).length;
   if (size > kMaxEntryBytes) {
     console.error(`The load entry for document ${treeId} is ${size} bytes, over the ` +

@@ -60,9 +60,9 @@ export const HistoryEntry = types.model("HistoryEntry", {
   uid: types.maybe(types.string),
   /**
    * True on a load entry: the entry that records the changes CLUE made to the stored content
-   * while loading it, when a document loads or its content is replaced. Today those are the
-   * conversions of old tiles and shared models to their current format. It is never applied to
-   * a live document or put on the undo stack.
+   * while loading it, when a document loads or its content is replaced, such as converting old
+   * tiles and shared models to their current format. It is never applied to a live document or
+   * put on the undo stack.
    */
   isLoadEntry: types.maybe(types.boolean),
   /**
