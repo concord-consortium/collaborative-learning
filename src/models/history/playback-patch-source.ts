@@ -13,18 +13,28 @@ import {
  * Where `TreeManager.goToHistoryEntryPosition` gets the patches it applies
  * to each tree during a playback move.
  *
- * `getPatches` returns the patches a tree receives for one history entry in
- * the given direction. It is used both to build the batched move and to
- * build the rollback after a failure, so the two stay in step.
- *
- * `getModelReplacements` returns model replacements: whole-model `replace`
- * patches a tree applies after the move's patches, in the same action. Each
- * one sets a model, in place, to its state at the move's target. A source uses
- * them for models whose recorded patches it left out, such as tiles saved in
- * an older schema. They aren't related to load entries.
+ * History entries record what happened, in whatever format the document had
+ * then. A patch source turns that record into patches the current MST models
+ * accept. The default source passes the record through unchanged, apart
+ * from giving load entries no patches.
  */
 export interface IPlaybackPatchSource {
+  /**
+   * Returns the patches a tree receives for one history entry in the given
+   * direction. It is used both to build the batched move and to build the
+   * rollback after a failure, so the two stay in step.
+   */
   getPatches(entry: HistoryEntryType, treeId: string, opType: HistoryOperation): IJsonPatch[];
+  /**
+   * Returns model replacements: whole-model `replace` patches a tree applies
+   * after the move's patches, in the same action. Each one sets a model, in
+   * place, to its state at the move's target. A source uses them for models
+   * whose recorded patches it left out, such as tiles saved in an older
+   * schema. This is also how playback crosses a load entry: a tree gets no
+   * patches for the entry, so each model it changed is replaced instead. A
+   * model replacement is not itself a history entry; the source builds it for
+   * one move.
+   */
   getModelReplacements(treeId: string): IJsonPatch[];
 }
 
