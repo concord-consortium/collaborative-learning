@@ -11,8 +11,8 @@ import { DEBUG_HISTORY } from "../../lib/debug";
 import { kContentPath, kTileMapPath } from "../document/document-paths";
 import { PatchApplicationError } from "./tree";
 import {
-  collectModelPaths, createOldModelPatchSource, defaultPatchSource, hasOldValue, IPlaybackPatchSource,
-  LoadApplicationError
+  collectModelPaths, createOldModelPatchSource, defaultPatchSource, getAllPatches, hasOldValue,
+  IPlaybackPatchSource, LoadApplicationError
 } from "./playback-patch-source";
 import { IJsonCopyMoveResult, JsonHistoryCopy } from "./json-history-copy";
 import { toJsonValue } from "./json-patch";
@@ -93,10 +93,11 @@ function moveJsonCopy(copy: JsonHistoryCopy, history: readonly HistoryEntryType[
   const moved = copy.moveTo(history, target);
 
   const entries = getEntriesBetween(history, start, moved.position);
+  const patches = getAllPatches(entries, treeId);
   const loadEntryPaths = collectModelPaths(entries.filter(entry => entry.isLoadEntry), treeId);
   const oldPaths = new Set([...collectModelPaths(entries, treeId)].filter(path =>
     oldAtStart.has(path) || copy.isOldModel(path) ||
-    hasOldValue(entries, treeId, path) || loadEntryPaths.has(path)));
+    hasOldValue(patches, path) || loadEntryPaths.has(path)));
   return { moved, source: createOldModelPatchSource({ copy, treeId, oldPaths }) };
 }
 

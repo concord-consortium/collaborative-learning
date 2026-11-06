@@ -8,7 +8,7 @@ import { registerTileContentInfo } from "../tiles/tile-content-info";
 import { HistoryEntry, HistoryOperation } from "./history";
 import { JsonHistoryCopy } from "./json-history-copy";
 import {
-  collectModelPaths, createOldModelPatchSource, defaultPatchSource, hasOldValue
+  collectModelPaths, createOldModelPatchSource, defaultPatchSource, getAllPatches, hasOldValue
 } from "./playback-patch-source";
 import { versionedTestTileSchema } from "./schema-conversion-test-types";
 
@@ -161,7 +161,7 @@ describe("createOldModelPatchSource", () => {
     const entries = [entry];
     const oldPaths = new Set<string>();
     [...collectModelPaths(entries, kTreeId)].forEach(path => {
-      if (hasOldValue(entries, kTreeId, path)) oldPaths.add(path);
+      if (hasOldValue(getAllPatches(entries, kTreeId), path)) oldPaths.add(path);
     });
     expect(oldPaths.size).toBe(0);
     const source = createOldModelPatchSource({ copy, treeId: kTreeId, oldPaths });
@@ -204,9 +204,9 @@ describe("hasOldValue", () => {
     const oldAdd = [makeEntry([{ op: "add", path: t1Path, value: oldTile("t1") }])];
     const currentAdd = [makeEntry([{ op: "add", path: t1Path, value: currentTile("t1") }])];
     const oldInTileMap = [makeEntry([{ path: "/content/tileMap", value: { t1: oldTile("t1") } }])];
-    expect(hasOldValue(oldAdd, kTreeId, t1Path)).toBe(true);
-    expect(hasOldValue(oldInTileMap, kTreeId, t1Path)).toBe(true);
-    expect(hasOldValue(currentAdd, kTreeId, t1Path)).toBe(false);
-    expect(hasOldValue(oldAdd, kTreeId, "/content/tileMap/t9")).toBe(false);
+    expect(hasOldValue(getAllPatches(oldAdd, kTreeId), t1Path)).toBe(true);
+    expect(hasOldValue(getAllPatches(oldInTileMap, kTreeId), t1Path)).toBe(true);
+    expect(hasOldValue(getAllPatches(currentAdd, kTreeId), t1Path)).toBe(false);
+    expect(hasOldValue(getAllPatches(oldAdd, kTreeId), "/content/tileMap/t9")).toBe(false);
   });
 });

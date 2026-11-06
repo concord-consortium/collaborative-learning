@@ -88,8 +88,11 @@ function getJsonWithin(path: string, value: unknown, modelPath: string): unknown
   return result;
 }
 
-// Both directions are read so a model that is added or removed in either one is found.
-function getAllPatches(entries: readonly HistoryEntryType[], treeId: string) {
+/**
+ * The patches of the entries for one tree, in both directions, so a model that is added or removed
+ * in either one is found.
+ */
+export function getAllPatches(entries: readonly HistoryEntryType[], treeId: string) {
   return entries.flatMap(entry => [
     ...getEntryPatchesForTree(entry, treeId, HistoryOperation.Redo),
     ...getEntryPatchesForTree(entry, treeId, HistoryOperation.Undo)
@@ -114,11 +117,11 @@ export function collectModelPaths(entries: readonly HistoryEntryType[], treeId: 
 }
 
 /**
- * True when any patch at or above `modelPath` carries a value holding the model in an old format,
- * one its converter accepts.
+ * True when any of the patches at or above `modelPath` carries a value holding the model in an old
+ * format, one its converter accepts.
  */
-export function hasOldValue(entries: readonly HistoryEntryType[], treeId: string, modelPath: string): boolean {
-  return getAllPatches(entries, treeId).some(patch => {
+export function hasOldValue(patches: readonly IJsonPatch[], modelPath: string): boolean {
+  return patches.some(patch => {
     if (patch.value === undefined) return false;
     if (patch.path === modelPath) return isOldModelJsonAtPath(modelPath, patch.value);
     if (modelPath.startsWith(`${patch.path}/`)) {
