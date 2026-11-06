@@ -192,6 +192,17 @@ export const BaseNodeModel = types.model("BaseNodeModel",
    */
   resetRunningState() {
     self.resetGraph();
+  },
+
+  /**
+   * Clears a graph whose plotted values are about to mean something else, which is what an output
+   * block changing type does. The current tick's entry is re-seeded because `resetGraph` drops it
+   * and nothing creates another until the next tick -- without that, every write in between is
+   * dropped with a "No current tick entry" warning.
+   */
+  resetGraphForNewUnits() {
+    self.resetGraph();
+    if (self.currentTick) self.createNextTickEntry(undefined, self.currentTick);
   }
 }));
 export interface IBaseNodeModel extends Instance<typeof BaseNodeModel> {}

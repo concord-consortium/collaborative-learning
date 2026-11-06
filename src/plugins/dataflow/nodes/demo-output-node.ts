@@ -45,6 +45,8 @@ export const DemoOutputNodeModel = BaseNodeModel.named("DemoOutputNodeModel")
 }))
 .actions(self => ({
   setOutputType(val: string) {
+    // A Servo's 180 degrees read as a Gripper's percentage would graph as 18000 on a 0-100 axis.
+    if (val !== self.outputType) self.resetGraphForNewUnits();
     self.outputType = val;
     // We call process here so the tilt can be added or removed from
     // the watched values. By using the data function to do this we ensure
@@ -133,9 +135,8 @@ export class DemoOutputNode extends BaseNode<
   }
 
   getPlotScale(valueKey: string): IPlotScale | undefined {
-    // The Advanced Gripper's tilt is deliberately left undeclared, so the axis belongs to the
-    // position below -- the value the block's field reads out. Tilt is still plotted, but it
-    // runs -1 to 1 against a 0-100 axis and so sits along the bottom.
+    // Only the block's own value sets the axis. Tilt is watched but never declares a scale, so
+    // it can't be converted by the position's.
     if (valueKey !== "nodeValue") return undefined;
     const { outputType } = this.model;
     if (kServoOutputTypes.includes(outputType)) {

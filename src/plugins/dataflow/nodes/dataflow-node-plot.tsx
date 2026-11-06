@@ -28,20 +28,16 @@ let stepY = 5;
 const kMinZoomHalfSpan = 0.5;
 
 /**
- * The axis a node declares, taken from the first watched value that declares one, or undefined to
- * scale to the data as before.
+ * The axis a node declares, or undefined to scale to the data.
  *
- * First, not the union of all of them: a node's first series is the one its field reads out and
- * the one the block is about, so that is the scale the axis should be readable in. The Advanced
- * Gripper is why -- it plots tilt beside its position, and a union would put the axis in neither
- * block's units. A later series is still drawn, on that axis, wherever its values fall.
+ * The axis belongs to `nodeValue`: that is the block's own value, the one its field reads out, and
+ * the only series any node declares a scale for. Another watched series would be drawn on that
+ * axis, wherever its values fell.
  */
-function declaredExtent(model: IBaseNodeModel, plotScale: PlotScaleFn): IDeclaredExtent | undefined {
-  for (const key of Object.keys(model.watchedValues)) {
-    const scale = plotScale(key);
-    if (scale?.min != null && scale?.max != null) return { min: scale.min, max: scale.max };
-  }
-  return undefined;
+function declaredExtent(plotScale: PlotScaleFn): IDeclaredExtent | undefined {
+  const scale = plotScale("nodeValue");
+  if (scale?.min == null || scale?.max == null) return undefined;
+  return { min: scale.min, max: scale.max };
 }
 
 // resetGraph clears the zoom, which returns the axis to the declared range.
@@ -62,7 +58,7 @@ enum Zoom {
 export const DataflowNodePlot: React.FC<INodePlotProps> = observer(
   function DataflowNodePlot({model, recordedTicks, plotScale = noPlotScale})
 {
-  const declared = declaredExtent(model, plotScale);
+  const declared = declaredExtent(plotScale);
   const [plotEl, setPlotEl] = useState<HTMLDivElement | null>(null);
   useStopEventPropagation(plotEl, "pointerdown");
   useStopEventPropagation(plotEl, "dblclick");

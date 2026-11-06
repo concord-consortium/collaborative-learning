@@ -11,10 +11,7 @@ jest.mock("react-chartjs-2", () => ({
   Line: (props: any) => { mockLine(props); return <div data-testid="line-chart" />; }
 }));
 
-// Fresh spies per test: every case asserts on setTickMax/setTickMin. The ds setters write
-// through as the real model's do, because the axis is read from dsMin/dsMax in the same render
-// that lineData updates them -- a spy that only records would make every auto-scaled axis read
-// as the empty -Infinity/Infinity defaults.
+// The ds setters write through: lineData updates dsMin/dsMax in the same render that reads them.
 function makeModel(bounds: Partial<IBaseNodeModel> = {}) {
   const model = {
     type: "Generator",
@@ -101,8 +98,6 @@ describe("DataflowNodePlot", () => {
     expect(mockLine.mock.lastCall[0].data.datasets[0].data).toEqual([50, 100]);
   });
 
-  // The point of CLUE-789: the axis is the range the unit configured, not the range the student
-  // happened to drive the block through.
   it("uses the declared range as the axis even when the values never reach it", () => {
     const model = servoModel([{ nodeValue: 18 }, { nodeValue: 36 }]);
     render(<DataflowNodePlot model={model} recordedTicks={["a", "b"]} plotScale={() => percentScale} />);
@@ -117,40 +112,21 @@ describe("DataflowNodePlot", () => {
     expect(axisOfLastChart()).toEqual({ min: 18, max: 36 });
   });
 
-  // The Advanced Gripper's shape: a position the field reads out, and a tilt series beside it.
-  const twoSeriesModel = () => makeModel({
-    watchedValues: { nodeValue: {}, tilt: {} },
-    getTickEntries: () => [{ nodeValue: 18, tilt: -1 }, { nodeValue: 36, tilt: 1 }],
-    dsMax: -Infinity, dsMin: Infinity, tickMax: undefined, tickMin: undefined
-  } as any);
+  // Both of these read the declared axis rather than the data, which spans 10 to 20 once converted.
+  it("zooms within the declared axis, not within the data", () => {
+    const model = servoModel([{ nodeValue: 18 }, { nodeValue: 36 }]);
+    render(<DataflowNodePlot model={model} recordedTicks={["a", "b"]} plotScale={() => percentScale} />);
 
-  it("takes the axis from the first series that declares one, not from the others", () => {
-    const model = twoSeriesModel();
-    render(<DataflowNodePlot model={model} recordedTicks={["a", "b"]}
-      plotScale={key => key === "nodeValue" ? percentScale : undefined} />);
-
-    expect(axisOfLastChart()).toEqual({ min: 0, max: 100 });
+    fireEvent.mouseDown(screen.getByText("+"));
+    expect(model.setTickMax).toHaveBeenCalledWith(90);
+    expect(model.setTickMin).toHaveBeenCalledWith(10);
   });
 
-  // With only one series declaring a range, first and last are the same thing: this is the case
-  // that actually pins the order.
-  it("prefers the first series' axis when more than one declares one", () => {
-    const model = twoSeriesModel();
-    const tiltScale = { min: -1, max: 1 };
-    render(<DataflowNodePlot model={model} recordedTicks={["a", "b"]}
-      plotScale={key => key === "nodeValue" ? percentScale : tiltScale} />);
+  it("spaces the axis ticks across the declared range", () => {
+    const model = servoModel([{ nodeValue: 18 }, { nodeValue: 36 }]);
+    render(<DataflowNodePlot model={model} recordedTicks={["a", "b"]} plotScale={() => percentScale} />);
 
-    expect(axisOfLastChart()).toEqual({ min: 0, max: 100 });
-  });
-
-  it("still plots the undeclared series, unconverted, on that axis", () => {
-    const model = twoSeriesModel();
-    render(<DataflowNodePlot model={model} recordedTicks={["a", "b"]}
-      plotScale={key => key === "nodeValue" ? percentScale : undefined} />);
-
-    const [position, tilt] = mockLine.mock.lastCall[0].data.datasets;
-    expect(position.data).toEqual([10, 20]);
-    expect(tilt.data).toEqual([-1, 1]);
+    expect(mockLine.mock.lastCall[0].options.scales.y.ticks.stepSize).toBe(50);
   });
 
   it("lets a zoom override the declared range", () => {

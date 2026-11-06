@@ -62,6 +62,10 @@ export const LiveOutputNodeModel = BaseNodeModel.named("LiveOutputNodeModel")
   {
     if (outputType === self.liveOutputType) return;
 
+    // A Servo's 180 degrees read as a Gripper's percentage would graph as 18000 on a 0-100 axis.
+    // Skipped when the block is only getting its first type, where nothing has been plotted yet.
+    if (self.liveOutputType) self.resetGraphForNewUnits();
+
     self.liveOutputType = outputType;
 
     // Get the shared variable after setting our new outputType since
@@ -422,7 +426,7 @@ export class LiveOutputNode extends BaseNode<
       // Already a percentage: writeToOutForBBGripper divides by 100 to drive the hardware.
       return { min: 0, max: 100 };
     }
-    if (kBinaryOutputTypes.includes(liveOutputType) || kMicroBitHubRelaysIndexed.includes(liveOutputType)) {
+    if (kBinaryOutputTypes.includes(liveOutputType)) {
       return { min: 0, max: 1 };
     }
     return undefined;

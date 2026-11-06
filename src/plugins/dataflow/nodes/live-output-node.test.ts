@@ -1,4 +1,5 @@
-import { LiveOutputNode } from "./live-output-node";
+import { ILiveOutputNodeModel, LiveOutputNode } from "./live-output-node";
+import { DataflowNodeModel, DataflowProgramModel } from "../model/dataflow-program-model";
 import { NodeLiveOutputTypes, resolveAllowedOutputTypes } from "../model/utilities/node";
 
 // Minimal fake SerialDevice that records which output writer the node invoked. The combined
@@ -94,7 +95,6 @@ describe("Servo input mode scaling in data() (settings.dataflow.servoInputMode)"
   });
 });
 
-// CLUE-789: the minigraph used to stay in degrees (0-180) while the field read % rotation.
 describe("LiveOutputNode.getPlotScale", () => {
   const scaleOf = (node: LiveOutputNode) => node.getPlotScale("nodeValue");
 
@@ -180,5 +180,43 @@ describe("resolveAllowedOutputTypes (settings.dataflow.liveOutputTypes)", () => 
     expect(resolveAllowedOutputTypes("Servo")).toBeUndefined();
     expect(resolveAllowedOutputTypes(["Nonexistent"])).toBeUndefined();
     expect(resolveAllowedOutputTypes(NodeLiveOutputTypes.map(t => t.name))).toBeUndefined();
+  });
+});
+
+describe("LiveOutputNode type change clears the graph", () => {
+  function runningBlock(liveOutputType: string) {
+    const program = DataflowProgramModel.create();
+    program.addNode(DataflowNodeModel.create({
+      id: "out", name: "Live Output", x: 0, y: 0, data: { type: "Live Output", liveOutputType }
+    }));
+    program.addNewTick("t0");
+    return program.nodes.get("out")!.data as ILiveOutputNodeModel;
+  }
+  const changeTo = (model: ILiveOutputNodeModel, type: string) =>
+    model.setLiveOutputType(type, undefined, () => undefined);
+
+  it("drops what was recorded under the old type", () => {
+    const model = runningBlock("Servo");
+    model.setNodeValue(180);
+    changeTo(model, "Gripper 2.0");
+    expect(model.nodeValue).toBeUndefined();
+  });
+
+  it("leaves an entry open, so the next write is not lost", () => {
+    const model = runningBlock("Servo");
+    model.setNodeValue(180);
+    changeTo(model, "Gripper 2.0");
+
+    model.setNodeValue(50);
+    expect(model.nodeValue).toBe(50);
+  });
+
+  // The constructor calls this to seed a block whose saved type isn't offered, where there is no
+  // earlier type and nothing has been plotted in one.
+  it("keeps the graph when the block is only getting its first type", () => {
+    const model = runningBlock("");
+    model.setNodeValue(50);
+    changeTo(model, "Servo");
+    expect(model.nodeValue).toBe(50);
   });
 });
