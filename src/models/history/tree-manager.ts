@@ -230,6 +230,7 @@ export const TreeManager = types
      * load entry, or a local load entry was handed over.
      */
     get needsJsonCopy() {
+      if (self.localLoadEntry) return true;
       const history = self.document.history;
       if (scannedHistory !== history || history.length < scannedLength) {
         scannedHistory = history;
@@ -239,7 +240,7 @@ export const TreeManager = types
       for (; scannedLength < history.length && !hasLoadEntry; scannedLength++) {
         hasLoadEntry = !!history[scannedLength].isLoadEntry;
       }
-      return hasLoadEntry || !!self.localLoadEntry;
+      return hasLoadEntry;
     }
   };
 })
