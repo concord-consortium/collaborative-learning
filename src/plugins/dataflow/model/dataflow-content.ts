@@ -1,4 +1,6 @@
-import { types, Instance, applySnapshot, getSnapshot, addDisposer, SnapshotIn, getType } from "mobx-state-tree";
+import {
+  types, Instance, applySnapshot, getSnapshot, addDisposer, SnapshotIn, getType, addMiddleware
+} from "mobx-state-tree";
 import { observable, reaction } from "mobx";
 import { cloneDeep} from "lodash";
 import stringify from "json-stringify-pretty-compact";
@@ -404,16 +406,16 @@ export const DataflowContentModel = TileContentModel
       node.data.setOrderedDisplayName(name);
       if (column && column.name !== name) self.dataSet.setAttributeName(column.id, name);
     },
+    /**
+     * Hands a capture to the tables showing it once the program's structure no longer matches its
+     * columns. Called through DataflowProgramModel.notifyStructureChange from inside each action
+     * that adds or removes a node or connection, so the detach is part of that change: one undo
+     * puts the node back and re-links the table.
+     *
+     * A compound change calls this more than once. Only the first call does anything: after it the
+     * program holds an empty dataset.
+     */
     detachLinkedTables() {
-      // Never reattached by undo, deliberately. A recorded capture describes the program as it
-      // was, so re-linking it to a program that has moved on would reintroduce exactly the
-      // results/program mismatch this exists to prevent. Keeping it off the undo stack is also
-      // what avoids Tree.handleSharedModelChanges resolving `<sharedModelPath>/sharedModel` for
-      // an entry an undo patch has removed, which throws "Not a child".
-      //
-      // This works only because the call comes from a reaction, not from inside the structural
-      // action: withoutUndo is ignored (with a warning) when called from a child action.
-      withoutUndo();
       const sharedModelManager = self.tileEnv?.sharedModelManager;
       const sharedModel = self.sharedModel;
       if (!sharedModelManager?.isReady || !sharedModel) return;
@@ -434,18 +436,61 @@ export const DataflowContentModel = TileContentModel
       }
 
       // The program walks away from the capture rather than copying it out: the tables keep the
-      // dataset they already hold, with the student's numbers intact, and afterAttach's
-      // sharedModelSetup reaction gives this program a fresh one.
+      // dataset they already hold, with the student's numbers intact, and the program gets a
+      // fresh one. Created here rather than left to the sharedModelSetup reaction, so that it is
+      // part of this action too.
       //
       // The tables also keep the stamped name as their record of when that capture ran, while the
-      // program drops the stamp -- it has no recording any more. sharedModelSetup names the
-      // replacement dataset from the tile's own title, so handing the base name back that way is
-      // all this takes.
-      getTileModel(self)?.setTitle(stripCaptureTime(self.dataSet.name));
+      // program drops the stamp -- it has no recording any more.
+      const replacement = SharedDataSet.create({
+        providerId: self.metadata.id,
+        dataSet: defaultDataSet(stripCaptureTime(self.dataSet.name))
+      });
       sharedModelManager.removeTileSharedModel(self, sharedModel);
+      sharedModelManager.addTileSharedModel(self, replacement);
     },
   }))
   .actions(self => ({
+    afterCreate() {
+      let structureChangeNotified = false;
+      self.program.setStructureChangeHandler(() => {
+        structureChangeNotified = true;
+        self.detachLinkedTables();
+      });
+
+      // A check that each action changing the program's nodes or connections calls
+      // notifyStructureChange, since one that doesn't leaves linked tables showing columns for a
+      // program that no longer matches them. It reports rather than detaches: this middleware
+      // runs outside the history middleware on the document, so a detach made here would land in
+      // a history entry of its own.
+      //
+      // Watches the outermost action that reaches this tile's content, so a content action that
+      // changes the structure and then notifies passes. Undo applies patches without calling
+      // actions here, so it is not checked.
+      if (process.env.NODE_ENV !== "production") {
+        const structureKey = () =>
+          `${[...self.program.nodes.keys()].join(",")}|${[...self.program.connections.keys()].join(",")}`;
+        let depth = 0;
+        let keyBefore = "";
+        addDisposer(self, addMiddleware(self, (call, next) => {
+          if (call.type !== "action") return next(call);
+          if (depth === 0) {
+            keyBefore = structureKey();
+            structureChangeNotified = false;
+          }
+          depth++;
+          try {
+            return next(call);
+          } finally {
+            depth--;
+            if (depth === 0 && !structureChangeNotified && structureKey() !== keyBefore) {
+              console.error(`Dataflow: ${call.name} changed the program's nodes or connections ` +
+                "without calling notifyStructureChange, so linked tables were not detached.");
+            }
+          }
+        }, false));
+      }
+    },
     afterAttach() { //
       addDisposer(self, reaction(() => {
         const sharedModelManager = self.tileEnv?.sharedModelManager;
@@ -498,22 +543,11 @@ export const DataflowContentModel = TileContentModel
         updateSharedDataSetColors(dataSets);
       },
       {name: "sharedModelSetup", fireImmediately: true}));
-
-      // Structure only -- node and connection ids. A rename or a value change leaves the capture's
-      // columns describing the program, so neither detaches. A reaction rather than a call inside
-      // each structural action, so that withoutUndo applies; see detachLinkedTables.
-      addDisposer(self, reaction(
-        () => {
-          const nodeIds = Array.from(self.program.nodes.keys()).sort().join(",");
-          const connectionIds = Array.from(self.program.connections.keys()).sort().join(",");
-          return `${nodeIds}|${connectionIds}`;
-        },
-        () => self.detachLinkedTables(),
-        {name: "detachOnStructuralChange"}));
     },
     setProgram(program: any) {
       if (program) {
         applySnapshot(self.program, cloneDeep(program));
+        self.program.notifyStructureChange();
       }
     },
     setChannels(channels: NodeChannelInfo[]) {

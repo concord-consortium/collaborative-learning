@@ -68,14 +68,20 @@ async function settleOn(manager: Instance<typeof TreeManager>, modelActionKey: s
   expect(history.at(-1)?.activeExchanges.toJSON()).toEqual([]);
 }
 
-/** Gives the program two named nodes with values, then captures one point into the table. */
-function captureOnePoint(content: DataflowContentModelType) {
+/** Gives the program two named nodes with values, then captures one point into the table. With
+ * `connected`, the first node feeds the second through connection "c1". */
+function captureOnePoint(content: DataflowContentModelType, { connected = false } = {}) {
   ["Sensor", "Servo"].forEach((name, i) => {
     content.program.addNodeSnapshot({
       id: `node-${i}`, name: "Number", x: 0, y: 0,
       data: { type: "Number", orderedDisplayName: name }
     } as any);
   });
+  if (connected) {
+    content.program.addConnection({
+      id: "c1", source: "node-0", sourceOutput: "value", target: "node-1", targetInput: "nodeValueA"
+    } as any);
+  }
   content.program.addNewTick(uniqueId());
   [0, 1].forEach(i => content.program.nodes.get(`node-${i}`)?.data.setNodeValue(400 + i));
   content.prepareCapture();
@@ -193,44 +199,58 @@ describe("renaming a node or its column with history", () => {
   });
 });
 
-// The detach is deliberately one-way. A capture describes the program as it was, so re-linking it
-// to a program that has since changed would reintroduce the results/program mismatch the detach
-// exists to prevent -- which is also why edits are blocked on recorded programs today.
+// A student who undoes back to the program the data was captured against gets the live link back.
+// Undoing a detach also removes the dataset it made for the program, which is what used to throw
+// "Not a child" from the history code.
 describe("undoing the change that caused a detach", () => {
-  // SKIPPED: undoing a structural change that caused a detach throws
-  //   [mobx-state-tree] Not a child
-  // from Tree.handleSharedModelChanges (src/models/history/tree.ts), which resolves
-  // `<sharedModelPath>/sharedModel` for an entry that no longer exists.
-  //
-  // It is not this feature's bug, and not shared-model removal in general: undoing addLinkedTile,
-  // existing code that removes a shared model, is fine. It breaks when a shared model is CREATED
-  // in the same window as the undo -- here the sharedModelSetup reaction minting the program a
-  // replacement dataset once the old one is handed to the table. Four shapes were tried (copy and
-  // swap as a child action; the same with a fresh dataset id; walking away as a reaction; copy and
-  // swap as a reaction) and all four throw, because every one of them needs a dataset created.
-  //
-  // The behavior the test asserts is correct and is what the code does -- the detach is one-way by
-  // design (withoutUndo), so undo restores the node and leaves the table detached. Un-skip once
-  // the history code can create a shared model during an undo.
-  it.skip("restores the node but leaves the table detached", async () => {
-    const { content, undoStore, manager } = setupDocumentWithLinkedTable();
+  /** The action of each history entry that changed which tiles share which dataset. Picked out by
+   * patch rather than by counting entries; see renameEntryActions. */
+  const linkEntryActions = (manager: Instance<typeof TreeManager>) =>
+    manager.document.history
+      .filter(entry => entry.modelActionKey !== "UndoStore.undo")
+      .filter(entry => entry.records.some(record => record.patches.some(patch =>
+        /\/sharedModelMap\/[^/]+(\/tiles(\/\d+)?)?$/.test(patch.path))))
+      .map(entry => entry.modelActionKey);
+
+  it("records the change and the detach as one entry, and one undo re-links the table", async () => {
+    const { content, tableContent, undoStore, manager } = setupDocumentWithLinkedTable();
     captureOnePoint(content);
     await settleOn(manager, "DataSet.addCanonicalCasesWithIDs");
-    const nodeCountBefore = content.program.nodes.size;
+    const capture = content.dataSet;
 
     content.program.addNodeSnapshot({
       id: "node-2", name: "Number", x: 0, y: 0, data: { type: "Number", orderedDisplayName: "Extra" }
     } as any);
     await settleOn(manager, "DataflowProgram.addNodeSnapshot");
     expect(content.linkedTableTileId).toBeUndefined();
+    expect(linkEntryActions(manager)).toEqual(["DataflowTool.addLinkedTile", "DataflowProgram.addNodeSnapshot"]);
 
     undoStore.undo();
-    // A plain delay, not a MobX `when`: an observer would re-evaluate MST views while undo is
-    // applying patches across trees, walking a node that is momentarily detached.
-    await new Promise(resolve => setTimeout(resolve, 500));
+    await settleOn(manager, "UndoStore.undo");
 
-    expect(content.program.nodes.size).toBe(nodeCountBefore);
-    // withoutUndo keeps the detach off the undo stack, so it is never reversed.
+    expect(content.program.nodes.has("node-2")).toBe(false);
+    expect(content.linkedTableTileId).toBe("table1");
+    expect(content.dataSet).toBe(capture);
+    expect(tableContent.dataSet).toBe(capture);
+    expect(capture.cases).toHaveLength(1);
+  });
+
+  // Removing a node also removes its connections, and each removal reports a structural change.
+  it("re-links after a change that reports more than once", async () => {
+    const { content, undoStore, manager } = setupDocumentWithLinkedTable();
+    captureOnePoint(content, { connected: true });
+    await settleOn(manager, "DataSet.addCanonicalCasesWithIDs");
+    expect(content.linkedTableTileId).toBe("table1");
+
+    content.program.removeNodeAndConnections("node-0");
+    await settleOn(manager, "DataflowProgram.removeNodeAndConnections");
     expect(content.linkedTableTileId).toBeUndefined();
+
+    undoStore.undo();
+    await settleOn(manager, "UndoStore.undo");
+
+    expect(content.program.nodes.has("node-0")).toBe(true);
+    expect(content.program.connections.has("c1")).toBe(true);
+    expect(content.linkedTableTileId).toBe("table1");
   });
 });

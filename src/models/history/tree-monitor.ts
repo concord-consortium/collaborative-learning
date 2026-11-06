@@ -249,18 +249,14 @@ export class TreeMonitor {
     const exchangesToProcess: { id: string, path: string }[] = [];
     for (const [sharedModelPath, numModifications] of Object.entries(sharedModelModifications)) {
       if (numModifications > 0) {
-        // If a shared model has been deleted, we can't run these callbacks without errors,
-        // so we bail out now.  May need improvement if tiles need to be notified about
-        // deleted shared models.
         if (!isAlive(this.tree)) {
           // The tree might have been destroyed. This happens during tests.
           return;
         }
-        try {
-          tryResolve(this.tree, `${sharedModelPath}/sharedModel`);
-        } catch {
-          continue;
-        }
+        // Skip a shared model the action deleted, such as an undo removing one it had created:
+        // handleSharedModelChanges needs the model to exist. As a result, tiles that used it are not
+        // notified of the deletion; if a tile ever needs to know, that notification has to be added.
+        if (!tryResolve(this.tree, `${sharedModelPath}/sharedModel`)) continue;
         // Run the callbacks tracking changes to the shared model.
         // We need to wait for these to complete because the manager
         // needs to know when this history entry is complete. If it

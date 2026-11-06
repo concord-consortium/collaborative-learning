@@ -1,4 +1,4 @@
-import { applyPatch, getSnapshot, IJsonPatch, onPatch, unprotect } from "mobx-state-tree";
+import { applyPatch, applySnapshot, getSnapshot, IJsonPatch, onPatch, unprotect } from "mobx-state-tree";
 import {
   defaultDataflowContent, DEFAULT_PROGRAM_ZOOM, DataflowContentModel, DataflowContentModelSnapshotIn,
   DataflowContentModelType
@@ -557,6 +557,41 @@ describe("node and column name sync", () => {
   });
 });
 
+
+// Outside production the content model reports an action that changes the program's nodes or
+// connections without calling notifyStructureChange, so a new action that forgets it is noticed.
+describe("the check that structural changes notify", () => {
+  it("reports a change made without notifying", async () => {
+    const content = setupContentWithTwoNamedNodes("Sensor", "Servo");
+    await jestSpyConsole("error", spy => {
+      // applySnapshot is an action on the program that replaces its nodes and never notifies.
+      applySnapshot(content.program, { ...getSnapshot(content.program), nodes: {} });
+      expect(spy).toHaveBeenCalledTimes(1);
+      expect(spy.mock.calls[0][0]).toContain("notifyStructureChange");
+    });
+  });
+
+  it("stays quiet for the program's own structural actions", async () => {
+    const content = setupContentWithTwoNamedNodes("Sensor", "Servo");
+    await jestSpyConsole("error", spy => {
+      content.program.addConnection({
+        id: "c1", source: "node-0", sourceOutput: "value", target: "node-1", targetInput: "nodeValueA"
+      } as any);
+      content.program.removeNodeAndConnections("node-0");
+      content.setProgram({ ...getSnapshot(content.program), nodes: {} });
+      expect(spy).not.toHaveBeenCalled();
+    });
+  });
+
+  it("stays quiet for actions that change no structure", async () => {
+    const content = setupContentWithTwoNamedNodes("Sensor", "Servo");
+    await jestSpyConsole("error", spy => {
+      content.renameNode("node-0", "Thermometer");
+      content.prepareCapture();
+      expect(spy).not.toHaveBeenCalled();
+    });
+  });
+});
 
 describe("a capture whose last table has been deleted", () => {
   // recordCase writes by position, so reusing columns built for the old program silently shifts
