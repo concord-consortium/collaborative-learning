@@ -8,11 +8,18 @@ import "./dataflow-node.scss";
 import { IBaseNodeModel } from "./base-node";
 import { observer } from "mobx-react";
 import { useStopEventPropagation } from "./controls/custom-hooks";
+import { IPlotScale } from "./dataflow-node-plot-types";
 
 interface INodePlotProps {
   model: IBaseNodeModel;
   recordedTicks: string[];
+  plotScale?: PlotScaleFn;
 }
+
+type PlotScaleFn = (valueKey: string) => IPlotScale | undefined;
+const noPlotScale: PlotScaleFn = () => undefined;
+
+interface IDeclaredExtent { min: number; max: number }
 
 let stepY = 5;
 
@@ -20,13 +27,27 @@ let stepY = 5;
 // scale. One unit of total span suits the 0-1 devices that hit this most often.
 const kMinZoomHalfSpan = 0.5;
 
+/**
+ * The axis a node declares, or undefined to scale to the data.
+ *
+ * The axis belongs to `nodeValue`: that is the block's own value, the one its field reads out, and
+ * the only series any node declares a scale for. Another watched series would be drawn on that
+ * axis, wherever its values fell.
+ */
+function declaredExtent(plotScale: PlotScaleFn): IDeclaredExtent | undefined {
+  const scale = plotScale("nodeValue");
+  if (scale?.min == null || scale?.max == null) return undefined;
+  return { min: scale.min, max: scale.max };
+}
+
+// resetGraph clears the zoom, which returns the axis to the declared range.
 // CHECKME: dsMax defaults to -Infinity this might cause a problem
-function maxY(model: IBaseNodeModel) {
-  return model.tickMax ?? model.dsMax;
+function maxY(model: IBaseNodeModel, declared?: IDeclaredExtent) {
+  return model.tickMax ?? declared?.max ?? model.dsMax;
 }
 // CHECKME: dsMin defaults to Infinity this might cause a problem
-function minY(model: IBaseNodeModel) {
-  return model.tickMin ?? model.dsMin;
+function minY(model: IBaseNodeModel, declared?: IDeclaredExtent) {
+  return model.tickMin ?? declared?.min ?? model.dsMin;
 }
 
 enum Zoom {
@@ -35,15 +56,16 @@ enum Zoom {
 }
 
 export const DataflowNodePlot: React.FC<INodePlotProps> = observer(
-  function DataflowNodePlot({model, recordedTicks})
+  function DataflowNodePlot({model, recordedTicks, plotScale = noPlotScale})
 {
+  const declared = declaredExtent(plotScale);
   const [plotEl, setPlotEl] = useState<HTMLDivElement | null>(null);
   useStopEventPropagation(plotEl, "pointerdown");
   useStopEventPropagation(plotEl, "dblclick");
 
   const handleClickOffset = (zoomDir: Zoom) => {
-    const max = maxY(model);
-    const min = minY(model);
+    const max = maxY(model, declared);
+    const min = minY(model, declared);
     const haveRange = isFinite(max) && isFinite(min);
     const halfRange = haveRange ? Math.abs(max - min) / 2 : 0;
     const midpoint = haveRange ? (max + min) / 2 : 0;
@@ -73,15 +95,18 @@ export const DataflowNodePlot: React.FC<INodePlotProps> = observer(
       </div>
       <div className="node-graph">
         <Line
-          data={lineData(model, recordedTicks)}
-          options={lineOptions(model)}
+          data={lineData(model, recordedTicks, plotScale, declared)}
+          options={lineOptions(model, declared)}
         />
       </div>
     </div>
   );
 });
 
-function lineData(model: IBaseNodeModel, recordedTicks: string[]): ChartData<"line", number[], number> {
+function lineData(
+  model: IBaseNodeModel, recordedTicks: string[], plotScale: PlotScaleFn,
+  declared?: IDeclaredExtent
+): ChartData<"line", number[], number> {
   const chartDataSets: ChartDataset<"line", number[]>[] = [];
   const recordedEntries = model.getTickEntries(recordedTicks);
   Object.keys(model.watchedValues).forEach((valueKey: string) => {
@@ -109,10 +134,13 @@ function lineData(model: IBaseNodeModel, recordedTicks: string[]): ChartData<"li
         ...customOptions
       };
 
+      // Per series, and applied even when nothing declares an axis: the trace is in the node's
+      // display units whether the axis came from a declaration or from the data.
+      const toPlot = plotScale(valueKey)?.toPlot;
       const chData: number[] = [];
       recentValues.forEach((val) => {
         if (val != null && isFinite(val)) {
-          chData.push(val);
+          chData.push(toPlot ? toPlot(val) : val);
         }
       });
 
@@ -125,7 +153,7 @@ function lineData(model: IBaseNodeModel, recordedTicks: string[]): ChartData<"li
     }
   });
 
-  stepY = (maxY(model) - minY(model)) / 2;
+  stepY = (maxY(model, declared) - minY(model, declared)) / 2;
 
   return {
     labels: new Array(kMaxNodeValues).fill(undefined).map((val, idx) => idx),
@@ -133,9 +161,9 @@ function lineData(model: IBaseNodeModel, recordedTicks: string[]): ChartData<"li
   };
 }
 
-function lineOptions(model: IBaseNodeModel): ChartOptions<"line"> {
-  const max = maxY(model);
-  const min = minY(model);
+function lineOptions(model: IBaseNodeModel, declared?: IDeclaredExtent): ChartOptions<"line"> {
+  const max = maxY(model, declared);
+  const min = minY(model, declared);
 
   return {
     animation: {

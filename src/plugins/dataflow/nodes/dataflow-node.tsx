@@ -307,6 +307,7 @@ export const CustomDataflowNode = observer(
         <DataflowNodePlot
           model={model}
           recordedTicks={reteManager.recordedTicks}
+          plotScale={valueKey => node.getPlotScale(valueKey)}
         />}
 
     </div>

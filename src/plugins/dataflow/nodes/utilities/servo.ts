@@ -1,3 +1,5 @@
+import { IPlotScale } from "../dataflow-node-plot-types";
+
 export const kServoMinAngle = 0;
 export const kServoMaxAngle = 180;
 
@@ -13,12 +15,21 @@ export function servoAngleForValue(value: number, proportionMode: boolean) {
   return Math.min(Math.max(scaled, kServoMinAngle), kServoMaxAngle);
 }
 
+const servoPercent = (angle: number) => (angle / kServoMaxAngle) * 100;
+
+/** How a servo minigraph is drawn: the units its field reads, and the full travel as the axis. */
+export function servoPlotScale(proportionMode: boolean): IPlotScale {
+  return proportionMode
+    ? { toPlot: servoPercent, min: 0, max: 100 }
+    : { min: kServoMinAngle, max: kServoMaxAngle };
+}
+
 /**
  * The Servo output field label. The stored value is always the angle in degrees (0-180). In degrees
  * mode (default) it is shown as degrees; in proportion mode as % of full rotation, mirroring the
  * gripper's "% closed".
  */
 export function servoDisplayMessage(value: number, proportionMode: boolean) {
-  if (proportionMode) return `${Math.round((value / kServoMaxAngle) * 100)}% rotation`;
+  if (proportionMode) return `${Math.round(servoPercent(value))}% rotation`;
   return `${Math.round(value)}°`;
 }
