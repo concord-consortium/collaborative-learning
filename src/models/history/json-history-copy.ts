@@ -1,5 +1,5 @@
 import { cloneDeep } from "lodash";
-import { applyJsonPatches, JsonPatchError } from "./json-patch";
+import { applyJsonPatches } from "./json-patch";
 import { convertOldModelJsonAtPath, isNonCurrentModelJsonAtPath } from "./schema-conversion";
 import { getEntryPatchesForTree, HistoryEntryType, HistoryOperation } from "./history";
 
@@ -87,14 +87,13 @@ export class JsonHistoryCopy {
 
   /**
    * Applies entries one at a time, in the same direction and record order as
-   * `goToHistoryEntryPosition`. An entry that fails is undone and left unapplied, and the
-   * move stops there.
+   * `goToHistoryEntryPosition`. An entry that fails is left unapplied (applyJsonPatches applies
+   * all of an entry's patches or none), and the move stops there.
    */
   moveTo(history: readonly HistoryEntryType[], target: number): IJsonCopyMoveResult {
     this.convertedModels.clear();
     const forward = target > this._position;
     const opType = forward ? HistoryOperation.Redo : HistoryOperation.Undo;
-    const oppositeOp = forward ? HistoryOperation.Undo : HistoryOperation.Redo;
     const direction = forward ? 1 : -1;
     const start = forward ? this._position : this._position - 1;
     const end = forward ? target : target - 1;
@@ -109,12 +108,6 @@ export class JsonHistoryCopy {
       try {
         applyJsonPatches(this.json, patches);
       } catch (error) {
-        const numApplied = error instanceof JsonPatchError ? error.numApplied : 0;
-        if (numApplied > 0) {
-          // A rollback failure means the copy is corrupt, so it propagates.
-          const opposite = getEntryPatchesForTree(entry, this.treeId, oppositeOp);
-          applyJsonPatches(this.json, opposite.slice(-numApplied));
-        }
         this._position = forward ? i : i + 1;
         return {
           position: this._position,

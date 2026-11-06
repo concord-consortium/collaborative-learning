@@ -1,4 +1,5 @@
 import { IJsonPatch } from "mobx-state-tree";
+import { cloneDeep } from "lodash";
 import { applyJsonPatches, diffJson, JsonPatchError } from "./json-patch";
 
 function deepFreeze<T>(value: T): T {
@@ -35,7 +36,7 @@ describe("applyJsonPatches", () => {
     expect(doc).toEqual({ a: { b: 1 } });
   });
 
-  it("throws JsonPatchError with the applied count when a parent does not resolve", () => {
+  it("throws JsonPatchError with the failed index when a parent does not resolve", () => {
     const doc = { a: { b: 1 } };
     let error: unknown;
     try {
@@ -47,8 +48,29 @@ describe("applyJsonPatches", () => {
       error = e;
     }
     expect(error).toBeInstanceOf(JsonPatchError);
-    expect((error as JsonPatchError).numApplied).toBe(1);
-    expect(doc.a.b).toBe(5);
+    expect((error as JsonPatchError).failedIndex).toBe(1);
+    expect(doc).toEqual({ a: { b: 1 } });
+  });
+
+  it("undoes the patches before a failing one, from the values they replaced", () => {
+    const item = { v: 1 };
+    const doc: any = { a: { b: 1 }, l: [item, { v: 2 }], m: { gone: 1 } };
+    const before = cloneDeep(doc);
+    // The patches don't come with inverses, and these are ones that a forward list's opposite
+    // wouldn't undo in reverse order.
+    expect(() => applyJsonPatches(doc, [
+      { op: "replace", path: "/a/b", value: 5 },
+      { op: "add", path: "/a/c", value: 6 },
+      { op: "remove", path: "/m/gone" },
+      { op: "add", path: "/l/0", value: { v: 0 } },
+      { op: "replace", path: "/l/1/v", value: 9 },
+      { op: "replace", path: "/l/2", value: { v: 3 } },
+      { op: "remove", path: "/l/0" },
+      { op: "replace", path: "/a", value: { replaced: true } },
+      { op: "replace", path: "/missing/x", value: 1 }
+    ])).toThrow(JsonPatchError);
+    expect(doc).toEqual(before);
+    expect(doc.l[0]).toBe(item);
   });
 
   it("throws on an empty path", () => {
@@ -59,7 +81,7 @@ describe("applyJsonPatches", () => {
       error = e;
     }
     expect(error).toBeInstanceOf(JsonPatchError);
-    expect((error as JsonPatchError).numApplied).toBe(0);
+    expect((error as JsonPatchError).failedIndex).toBe(0);
   });
 
   it("throws on a path that doesn't start with /, and leaves the document alone", () => {

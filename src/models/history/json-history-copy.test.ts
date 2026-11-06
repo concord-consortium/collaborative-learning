@@ -132,6 +132,19 @@ describe("JsonHistoryCopy", () => {
       expect(result.failure).toEqual({ historyIndex: 1, direction: "redo", message: expect.any(String) });
       expect(copy.getJson("")).toEqual(start);
     });
+
+    it("leaves a partly applied entry unapplied even when its inverse patches don't pair with its patches", () => {
+      // The entry's one inverse patch undoes nothing it changed, as in a load entry, whose two
+      // directions are separate diffs.
+      const unpairedEntry = HistoryEntry.create(makeEntry(
+        [{ path: `${kPrefix}/actionText`, value: "changed" }, { path: "/content/tileMap/NOPE/x", value: 1 }],
+        [{ path: "/content/tileMap/NOPE/x", value: 0 }]
+      ));
+      const copy = new JsonHistoryCopy(kTreeId, startJson(), 0);
+      const result = copy.moveTo([unpairedEntry], 1);
+      expect(result.position).toBe(0);
+      expect(copy.getJson("")).toEqual(startJson());
+    });
   });
 
   it("applies load entries in both directions", () => {
