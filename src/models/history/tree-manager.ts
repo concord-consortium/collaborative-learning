@@ -442,8 +442,8 @@ export const TreeManager = types
         self.numHistoryEventsApplied = undefined;
 
         const lastHistoryEntry = yield* toGenerator(getLastHistoryEntry(firestore, docPath));
-        // The local load entry is appended after all of the Firestore entries.
-        const localEntryCount = self.localLoadEntry ? 1 : 0;
+        // The live document may have uploaded the local load entry since it was handed over.
+        const localEntryCount = self.localLoadEntry && lastHistoryEntry?.id !== self.localLoadEntry.id ? 1 : 0;
         if (lastHistoryEntry) {
           self.numHistoryEventsApplied = lastHistoryEntry.index + 1 + localEntryCount;
         } else {

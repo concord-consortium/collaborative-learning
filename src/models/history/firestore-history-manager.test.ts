@@ -217,28 +217,29 @@ describe("history loading", () => {
   describe("local load entry", () => {
     const loadEntry: HistoryEntrySnapshot = { id: "loadEntry", isLoadEntry: true };
 
-    async function subscribeWithLocalEntry(entries: HistoryEntrySnapshot[]) {
+    async function subscribeWithLocalEntry(entries: HistoryEntrySnapshot[], lastHistoryEntry?: LastHistoryEntry) {
       const { treeManager } = setupDocument();
       const { historyManager } = setupFirestoreHistoryManager(treeManager);
       treeManager.setLocalLoadEntry(loadEntry);
-      getLastHistoryEntry.mockResolvedValue(undefined);
+      getLastHistoryEntry.mockResolvedValue(lastHistoryEntry);
       loadHistory.mockImplementation((firestore, path, historyLoaded) => {
         historyLoaded(entries.map((entry, index) => ({ index, entry })));
         return () => undefined;
       });
       await historyManager.subscribeToFirestoreHistory();
-      return treeManager;
+      await when(() => treeManager.numHistoryEventsApplied !== undefined);
+      return { treeManager, historyManager };
     }
 
     it("appends a local load entry missing from Firestore", async () => {
-      const treeManager = await subscribeWithLocalEntry([{ id: "a1" }, { id: "a2" }]);
+      const { treeManager } = await subscribeWithLocalEntry([{ id: "a1" }, { id: "a2" }]);
       const ids = treeManager.document.history.map(e => e.id);
       expect(ids).toHaveLength(3);
       expect(ids[2]).toBe("loadEntry");
     });
 
     it("does not duplicate a local load entry already in Firestore", async () => {
-      const treeManager = await subscribeWithLocalEntry([{ id: "a1" }, { id: "loadEntry" }]);
+      const { treeManager } = await subscribeWithLocalEntry([{ id: "a1" }, { id: "loadEntry" }]);
       expect(treeManager.document.history.map(e => e.id)).toEqual(["a1", "loadEntry"]);
     });
 
@@ -253,6 +254,14 @@ describe("history loading", () => {
       getLastHistoryEntry.mockResolvedValue(undefined);
       await treeManager.setNumHistoryEntriesAppliedFromFirestore({} as Firestore, "");
       expect(treeManager.numHistoryEventsApplied).toBe(1);
+    });
+
+    it("doesn't count the local load entry when it is Firestore's last entry", async () => {
+      const { treeManager, historyManager } = await subscribeWithLocalEntry(
+        [{ id: "a1" }, { id: "loadEntry" }], { index: 1, id: "loadEntry" });
+      expect(treeManager.numHistoryEventsApplied).toBe(2);
+      expect(treeManager.document.history).toHaveLength(2);
+      expect(historyManager.historyStatus).toBe(HistoryStatus.HISTORY_LOADED);
     });
 
     it("can move back across a local load entry with no Firestore history", async () => {
