@@ -61,9 +61,6 @@ export const VersionedTestTile = TileContentModel
   .actions(self => ({
     setLabel(label: string) {
       self.label = label;
-    },
-    addItem(value: string) {
-      self.items.push({ id: uniqueId(), value });
     }
   }));
 export interface VersionedTestTileType extends Instance<typeof VersionedTestTile> {}
