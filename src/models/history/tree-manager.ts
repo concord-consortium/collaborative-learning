@@ -614,9 +614,10 @@ export const TreeManager = types
     const initialPosition = self.numHistoryEventsApplied;
     const history = self.document.history;
 
-    // Records one failure per (historyIndex, direction) pair.
+    // Records one failure per (historyIndex, direction) pair. An index outside the history
+    // records nothing.
     const recordFailure = (historyIndex: number, failureDirection: "undo" | "redo", errorMessage: string) => {
-      const historyEntry = history.at(historyIndex);
+      const historyEntry = historyIndex >= 0 ? history.at(historyIndex) : undefined;
       if (!historyEntry) return;
       if (self.historyPlaybackFailures.some(f =>
           f.historyIndex === historyIndex && f.direction === failureDirection)) return;
@@ -947,69 +948,28 @@ export const TreeManager = types
       });
       yield Promise.all(rollbackPromises);
 
-      // Track which (historyIndex, direction) pairs have been recorded so
-      // we can dedupe in O(1) instead of scanning historyPlaybackFailures
-      // on every push. directionStr is constant for this call, so keying
-      // on historyIndex alone is sufficient.
-      const recordedIndices = new Set<number>(
-        self.historyPlaybackFailures
-          .filter(f => f.direction === directionStr)
-          .map(f => f.historyIndex)
-      );
-
-      // Record one failure per (historyIndex, direction) pair, deduped.
       for (const r of failedResults) {
         const { historyIndex, error } = r.failure;
-        const historyEntry = self.document.history.at(historyIndex);
-        if (!historyEntry) continue;
-        if (!recordedIndices.has(historyIndex)) {
-          recordedIndices.add(historyIndex);
-          self.historyPlaybackFailures.push({
-            historyEntry,
-            historyIndex,
-            direction: directionStr,
-            errorMessage: error.message
-          });
-        }
+        if (!history.at(historyIndex)) continue;
+        recordFailure(historyIndex, directionStr, error.message);
         console.warn(
           `History entry ${historyIndex} failed to ${directionStr}: ${error.message}`
         );
       }
 
-      // Record load failures and unexpected-error failures. We anchor the
-      // failure marker to unexpectedIndex, since we don't know where within
-      // the batch the error originated. If that index isn't a valid history
-      // position, skip the marker but still log the error so it is visible
-      // to developers.
-      const unexpectedEntry =
-        unexpectedIndex >= 0 && unexpectedIndex < self.document.history.length
-          ? self.document.history.at(unexpectedIndex)
-          : undefined;
+      // Load failures and unexpected errors are recorded at unexpectedIndex: a load failure has no
+      // history index, and an unexpected error's place in the batch is unknown. If that index isn't
+      // a valid history position, recordFailure skips the marker, but the error is still logged so
+      // it is visible to developers.
       for (const { treeId, error } of loadFailures) {
-        if (unexpectedEntry && !recordedIndices.has(unexpectedIndex)) {
-          recordedIndices.add(unexpectedIndex);
-          self.historyPlaybackFailures.push({
-            historyEntry: unexpectedEntry,
-            historyIndex: unexpectedIndex,
-            direction: directionStr,
-            errorMessage: error.message
-          });
-        }
+        recordFailure(unexpectedIndex, directionStr, error.message);
         console.warn(`Tree '${treeId}' failed to ${directionStr} to history position ${targetPosition}: ` +
           error.message);
       }
       for (const r of unexpectedResults) {
         const err = r.unexpected.error;
         const errMessage = err instanceof Error ? err.message : String(err);
-        if (unexpectedEntry && !recordedIndices.has(unexpectedIndex)) {
-          recordedIndices.add(unexpectedIndex);
-          self.historyPlaybackFailures.push({
-            historyEntry: unexpectedEntry,
-            historyIndex: unexpectedIndex,
-            direction: directionStr,
-            errorMessage: `Unexpected error during playback: ${errMessage}`
-          });
-        }
+        recordFailure(unexpectedIndex, directionStr, `Unexpected error during playback: ${errMessage}`);
         console.error(
           `Unexpected error playing back tree '${r.treeId}' ` +
           `at history position ${unexpectedIndex}:`,
