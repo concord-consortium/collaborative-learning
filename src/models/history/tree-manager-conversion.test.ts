@@ -308,6 +308,22 @@ describe("playback across a load entry", () => {
     expect(manager.jsonHistoryCopy!.position).toBe(2);
     expect(getTile(document, "t1").label).toBe("b");
     expect(manager.historyPlaybackFailures.map(f => [f.historyIndex, f.direction])).toEqual([[1, "undo"]]);
+
+    // Trying again, the copy doesn't move at all, so no tree is touched.
+    const tree = manager.trees[kTreeId];
+    const startApplying = jest.fn();
+    manager.trees[kTreeId] = new Proxy(tree, {
+      get(target, prop) {
+        if (prop !== "startApplyingPatchesFromManager") return (target as any)[prop];
+        return (entryId: string, exchangeId: string) => {
+          startApplying();
+          return target.startApplyingPatchesFromManager(entryId, exchangeId);
+        };
+      }
+    });
+    await manager.goToHistoryEntryPosition(0);
+    expect(manager.numHistoryEventsApplied).toBe(2);
+    expect(startApplying).not.toHaveBeenCalled();
   });
 
   it("stops with the failure banner when a conversion throws", async () => {
