@@ -53,10 +53,10 @@ describe("createOldModelPatchSource", () => {
     const source = createOldModelPatchSource({ copy, treeId: kTreeId, oldPaths: new Set([t1Path]) });
 
     expect(source.getPatches(entry, kTreeId, HistoryOperation.Redo)).toEqual([{ op: "replace", ...t2Flag }]);
-    const loads = source.getLoads(kTreeId);
-    expect(loads).toHaveLength(1);
-    expect(loads[0]).toMatchObject({ op: "replace", path: t1Path });
-    expect((loads[0].value as any).content.version).toBe("2");
+    const replacements = source.getModelReplacements(kTreeId);
+    expect(replacements).toHaveLength(1);
+    expect(replacements[0]).toMatchObject({ op: "replace", path: t1Path });
+    expect((replacements[0].value as any).content.version).toBe("2");
   });
 
   it("delegates other trees and gives load entries no patches", () => {
@@ -66,7 +66,7 @@ describe("createOldModelPatchSource", () => {
     const source = createOldModelPatchSource({ copy, treeId: "other", oldPaths: new Set([t1Path]) });
     expect(source.getPatches(entry, kTreeId, HistoryOperation.Redo))
       .toEqual(defaultPatchSource.getPatches(entry, kTreeId, HistoryOperation.Redo));
-    expect(source.getLoads(kTreeId)).toEqual([]);
+    expect(source.getModelReplacements(kTreeId)).toEqual([]);
     // With no old paths, only the load-entry check keeps the load entry's patches out.
     const ownSource = createOldModelPatchSource({ copy, treeId: kTreeId, oldPaths: new Set() });
     expect(ownSource.getPatches(loadEntry, kTreeId, HistoryOperation.Redo)).toEqual([]);
@@ -79,10 +79,10 @@ describe("createOldModelPatchSource", () => {
     const source = createOldModelPatchSource({ copy, treeId: kTreeId, oldPaths: new Set([t1Path]) });
 
     const [add] = source.getPatches(entry, kTreeId, HistoryOperation.Redo);
-    const [load] = source.getLoads(kTreeId);
+    const [replacement] = source.getModelReplacements(kTreeId);
     expect((add.value as any).content.label).toBe("at target");
-    expect(add.value).toEqual(load.value);
-    expect(add.value).toBe(load.value);
+    expect(add.value).toEqual(replacement.value);
+    expect(add.value).toBe(replacement.value);
   });
 
   it("never shares nested objects with the JSON copy", () => {
@@ -92,11 +92,11 @@ describe("createOldModelPatchSource", () => {
     const source = createOldModelPatchSource({
       copy, treeId: kTreeId, oldPaths: new Set([t1Path, "/content/tileMap/t2"])
     });
-    const loads = source.getLoads(kTreeId);
-    loads.forEach(load => {
-      const copyValue: any = copy.getJson(load.path);
-      expect((load.value as any).extra.nested).toEqual(copyValue.extra.nested);
-      expect((load.value as any).extra.nested).not.toBe(copyValue.extra.nested);
+    const replacements = source.getModelReplacements(kTreeId);
+    replacements.forEach(replacement => {
+      const copyValue: any = copy.getJson(replacement.path);
+      expect((replacement.value as any).extra.nested).toEqual(copyValue.extra.nested);
+      expect((replacement.value as any).extra.nested).not.toBe(copyValue.extra.nested);
     });
   });
 
@@ -105,7 +105,7 @@ describe("createOldModelPatchSource", () => {
     const entry = makeEntry([{ op: "remove", path: t1Path }]);
     const source = createOldModelPatchSource({ copy, treeId: kTreeId, oldPaths: new Set([t1Path]) });
     expect(source.getPatches(entry, kTreeId, HistoryOperation.Redo)).toEqual([{ op: "remove", path: t1Path }]);
-    expect(source.getLoads(kTreeId)).toEqual([]);
+    expect(source.getModelReplacements(kTreeId)).toEqual([]);
   });
 
   it("converts each old tile once per position", () => {
@@ -115,7 +115,7 @@ describe("createOldModelPatchSource", () => {
     const spy = jest.spyOn(versionedTestTileSchema, "convertSnapshot");
     try {
       source.getPatches(entry, kTreeId, HistoryOperation.Redo);
-      source.getLoads(kTreeId);
+      source.getModelReplacements(kTreeId);
       expect(spy).toHaveBeenCalledTimes(1);
     } finally {
       spy.mockRestore();
@@ -153,7 +153,7 @@ describe("createOldModelPatchSource", () => {
     const [add] = source.getPatches(entries[0], kTreeId, HistoryOperation.Redo);
     expect((add.value as any).content.version).toBe("2");
     expect(source.getPatches(entries[1], kTreeId, HistoryOperation.Redo)).toEqual([{ op: "remove", path: t3Path }]);
-    expect(source.getLoads(kTreeId)).toEqual([]);
+    expect(source.getModelReplacements(kTreeId)).toEqual([]);
   });
 
   it("treats an unregistered tile type as current", () => {
@@ -168,7 +168,7 @@ describe("createOldModelPatchSource", () => {
     expect(oldPaths.size).toBe(0);
     const source = createOldModelPatchSource({ copy, treeId: kTreeId, oldPaths });
     expect(source.getPatches(entry, kTreeId, HistoryOperation.Redo)).toHaveLength(1);
-    expect(source.getLoads(kTreeId)).toEqual([]);
+    expect(source.getModelReplacements(kTreeId)).toEqual([]);
   });
 });
 

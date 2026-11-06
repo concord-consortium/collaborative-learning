@@ -67,12 +67,13 @@ export interface TreeAPI {
    * The patches should be applied in order starting from the first in the
    * array.
    *
-   * @param loads optional whole-model `replace` patches applied after
-   * `patchesToApply` in the same action, so the two appear as one change.
-   * A failure while applying them is thrown as a `LoadApplicationError`.
+   * @param modelReplacements optional whole-model `replace` patches applied
+   * after `patchesToApply` in the same action, so the two appear as one
+   * change. A failure while applying them is thrown as a
+   * `ModelReplacementError`.
    */
   applyPatchesFromManager(historyEntryId: string, exchangeId: string,
-    patchesToApply: readonly IJsonPatch[], loads?: readonly IJsonPatch[]): Promise<void>;
+    patchesToApply: readonly IJsonPatch[], modelReplacements?: readonly IJsonPatch[]): Promise<void>;
 
   /**
    * This is called after the manager has applied all of the patches. Before

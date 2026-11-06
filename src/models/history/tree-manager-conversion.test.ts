@@ -163,7 +163,7 @@ describe("playback across a load entry", () => {
     expect(manager.historyPlaybackFailures).toEqual([]);
   });
 
-  it("loads an old tile once per move even when its patches are interleaved", async () => {
+  it("replaces an old tile once per move even when its patches are interleaved", async () => {
     const t2TextPath = "/content/tileMap/t2/content/text";
     const oldEntries = [
       // One record mixes t1, t2 and t1 patches.
@@ -193,7 +193,7 @@ describe("playback across a load entry", () => {
     expect(manager.historyPlaybackFailures).toEqual([]);
   });
 
-  it("keeps shared model references to loaded tiles", async () => {
+  it("keeps shared model references to replaced tiles", async () => {
     const t3Path = "/content/tileMap/t3";
     const tilesPath = "/content/sharedModelMap/sm1/tiles";
     const oldEntries = [
@@ -258,7 +258,7 @@ describe("playback across a load entry", () => {
     expect(manager.historyPlaybackFailures).toEqual([]);
   });
 
-  it("applies the patches of a tile its converter declines to MST, without loading it", async () => {
+  it("applies the patches of a tile its converter declines to MST, without replacing it", async () => {
     const t3Path = "/content/tileMap/t3";
     // The test tile's converter doesn't know version 3, so it declines this tile.
     const newerTile = { id: "t3", content: { type: kVersionedTestTileType, version: "3", label: "q", items: [] } };
@@ -271,13 +271,14 @@ describe("playback across a load entry", () => {
 
     // Record what each move hands the document's tree.
     const tree = manager.trees[kTreeId];
-    const applied: { patches: readonly IJsonPatch[]; loads: readonly IJsonPatch[] }[] = [];
+    const applied: { patches: readonly IJsonPatch[]; modelReplacements: readonly IJsonPatch[] }[] = [];
     manager.trees[kTreeId] = new Proxy(tree, {
       get(target, prop) {
         if (prop !== "applyPatchesFromManager") return (target as any)[prop];
-        return (entryId: string, exchangeId: string, patches: readonly IJsonPatch[], loads?: readonly IJsonPatch[]) => {
-          applied.push({ patches, loads: loads ?? [] });
-          return target.applyPatchesFromManager(entryId, exchangeId, patches, loads);
+        return (entryId: string, exchangeId: string, patches: readonly IJsonPatch[],
+            modelReplacements?: readonly IJsonPatch[]) => {
+          applied.push({ patches, modelReplacements: modelReplacements ?? [] });
+          return target.applyPatchesFromManager(entryId, exchangeId, patches, modelReplacements);
         };
       }
     });
@@ -288,7 +289,7 @@ describe("playback across a load entry", () => {
       expect(getTile(document, "t3").label).toBe(label);
       expect(getTile(document, "t3").version).toBe("3");
       expect(applied.flatMap(a => a.patches)).toContainEqual(replace(`${t3Path}/content/label`, label));
-      expect(applied.flatMap(a => a.loads).map(load => load.path)).toEqual([t1Path]);
+      expect(applied.flatMap(a => a.modelReplacements).map(replacement => replacement.path)).toEqual([t1Path]);
     }
     expect(manager.historyPlaybackFailures).toEqual([]);
   });
@@ -348,7 +349,7 @@ describe("playback across a load entry", () => {
     expect(getTile(document, "t1").label).toBe("b");
   });
 
-  it("rolls back a current tile's MST failure and loads old tiles at the stop", async () => {
+  it("rolls back a current tile's MST failure and replaces old tiles at the stop", async () => {
     const oldEntries = [
       makeEntry([replaceRecord(`${t1Path}/content/text`, "a", "b")]),
       // `nope` is frozen, so MST can't apply a patch inside it, while the JSON copy can.
@@ -397,7 +398,7 @@ describe("playback across a load entry", () => {
     expect(warnSpy).not.toHaveBeenCalledWith("Trees may be in an inconsistent state.");
   });
 
-  it("rolls back the move when MST rejects an old tile's load", async () => {
+  it("rolls back the move when MST rejects an old tile's model replacement", async () => {
     const t2TextPath = "/content/tileMap/t2/content/text";
     const oldEntries = [
       makeEntry([replaceRecord(`${t1Path}/content/text`, "a", "b")]),
@@ -426,7 +427,7 @@ describe("playback across a load entry", () => {
     expect(t2.text).toBe("q");
     expect(getTile(document, "t1").label).toBe("x");
     expectTileToMatchConvertedJson(getTile(document, "t1"), copyJson(t1Path));
-    expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining("Load application failed"));
+    expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining("Replacing a model failed"));
 
     // A move that doesn't reach the rejected position still works.
     await manager.goToHistoryEntryPosition(1);

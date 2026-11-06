@@ -17,34 +17,37 @@ import {
  * the given direction. It is used both to build the batched move and to
  * build the rollback after a failure, so the two stay in step.
  *
- * `getLoads` returns whole-model `replace` patches a tree applies after the
- * move's patches, in the same action. A source uses them to set models whose
- * recorded patches it left out, such as tiles saved in an older schema.
+ * `getModelReplacements` returns model replacements: whole-model `replace`
+ * patches a tree applies after the move's patches, in the same action. Each
+ * one sets a model, in place, to its state at the move's target. A source uses
+ * them for models whose recorded patches it left out, such as tiles saved in
+ * an older schema. They aren't related to load entries.
  */
 export interface IPlaybackPatchSource {
   getPatches(entry: HistoryEntryType, treeId: string, opType: HistoryOperation): IJsonPatch[];
-  getLoads(treeId: string): IJsonPatch[];
+  getModelReplacements(treeId: string): IJsonPatch[];
 }
 
 /**
- * Applies each entry's recorded patches as they are, with no loads. Playback never applies a load
- * entry to an MST tree, so it has no patches here.
+ * Applies each entry's recorded patches as they are, with no model replacements. Playback never
+ * applies a load entry to an MST tree, so it has no patches here.
  */
 export const defaultPatchSource: IPlaybackPatchSource = {
   getPatches: (entry, treeId, opType) => entry.isLoadEntry ? [] : getEntryPatchesForTree(entry, treeId, opType),
-  getLoads: () => []
+  getModelReplacements: () => []
 };
 
 /**
- * Thrown by a tree when applying its loads fails, after all of its patches have applied.
+ * Thrown by a tree when applying its model replacements fails, after all of its patches have
+ * applied.
  */
-export class LoadApplicationError extends Error {
+export class ModelReplacementError extends Error {
   readonly cause: unknown;
 
   constructor(cause: unknown) {
     const message = cause instanceof Error ? cause.message : String(cause);
-    super(`Load application failed: ${message}`);
-    this.name = "LoadApplicationError";
+    super(`Replacing a model failed: ${message}`);
+    this.name = "ModelReplacementError";
     this.cause = cause;
   }
 }
@@ -131,10 +134,10 @@ export function hasOldValue(patches: readonly IJsonPatch[], modelPath: string): 
 }
 
 /**
- * A patch source for one tree that loads the models in `oldPaths` instead of patching them.
+ * A patch source for one tree that replaces the models in `oldPaths` instead of patching them.
  * Patches inside those models are dropped, and patches at or above them carry converted values.
- * Each one that exists at the copy's position is loaded once with its state there, converted when
- * it is old. Other trees use the default source.
+ * Each one that exists at the copy's position gets one model replacement with its state there,
+ * converted when it is old. Other trees use the default source.
  */
 export function createOldModelPatchSource(
   args: { copy: JsonHistoryCopy; treeId: string; oldPaths: ReadonlySet<string> }
@@ -144,16 +147,17 @@ export function createOldModelPatchSource(
   let memoPosition: number | undefined;
   let memo = new Map<string, unknown>();
 
-  // Each model's target state is built once per position, so an add and the load share the same
-  // object. getConvertedModel already caches an old model; this saves cloning one that isn't old.
+  // Each model's target state is built once per position, so an add and the replacement share the
+  // same object. getConvertedModel already caches an old model; this saves cloning one that isn't
+  // old.
   const convertedTarget = (path: string) => {
     if (memoPosition !== copy.position) {
       memoPosition = copy.position;
       memo = new Map();
     }
     if (!memo.has(path)) {
-      // A model that isn't old at the target, such as one its converter declines, is loaded as
-      // the copy has it, cloned so the copy's objects never reach MST.
+      // A model that isn't old at the target, such as one its converter declines, is replaced
+      // with its state as the copy has it, cloned so the copy's objects never reach MST.
       memo.set(path, copy.getConvertedModel(path) ?? cloneDeep(copy.getJson(path)));
     }
     return memo.get(path);
@@ -188,8 +192,8 @@ export function createOldModelPatchSource(
       return result;
     },
 
-    getLoads(loadTreeId) {
-      if (loadTreeId !== treeId) return defaultPatchSource.getLoads(loadTreeId);
+    getModelReplacements(replacementTreeId) {
+      if (replacementTreeId !== treeId) return defaultPatchSource.getModelReplacements(replacementTreeId);
       return oldPathList
         .filter(path => copy.getJson(path) !== undefined)
         .map(path => ({ op: "replace", path, value: convertedTarget(path) }));

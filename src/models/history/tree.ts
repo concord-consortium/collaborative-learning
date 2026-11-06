@@ -6,7 +6,7 @@ import { DocumentContentModelType } from "../document/document-content";
 import { SharedModelMapSnapshotOutType } from "../document/shared-model-entry";
 import { SharedModelType } from "../shared/shared-model";
 import { ITileModel, TileModel } from "../tiles/tile-model";
-import { LoadApplicationError } from "./playback-patch-source";
+import { ModelReplacementError } from "./playback-patch-source";
 import { TreeManagerAPI } from "./tree-manager-api";
 
 /**
@@ -180,10 +180,11 @@ export const Tree = types.model("Tree", {
     // the empty-string case upfront because neither form should appear in
     // recorded history patches.
     //
-    // `loads` (see TreeAPI.applyPatchesFromManager) are applied after the
-    // listener is disposed, since a load failure rolls back the whole move.
+    // `modelReplacements` (see TreeAPI.applyPatchesFromManager) are applied
+    // after the listener is disposed, since their failure rolls back the
+    // whole move.
     applyPatchesFromManager(historyEntryId: string, exchangeId: string, patchesToApply: readonly IJsonPatch[],
-        loads?: readonly IJsonPatch[]) {
+        modelReplacements?: readonly IJsonPatch[]) {
       for (const patch of patchesToApply) {
         if (!patch.path) {
           // Throw PatchApplicationError (with numApplied=0) so this
@@ -225,11 +226,11 @@ export const Tree = types.model("Tree", {
         throw new PatchApplicationError(reversePatches.length, failure.error, reversePatches);
       }
 
-      if (loads && loads.length > 0) {
+      if (modelReplacements && modelReplacements.length > 0) {
         try {
-          applyPatch(self, loads);
+          applyPatch(self, modelReplacements);
         } catch (e) {
-          throw new LoadApplicationError(e);
+          throw new ModelReplacementError(e);
         }
       }
 

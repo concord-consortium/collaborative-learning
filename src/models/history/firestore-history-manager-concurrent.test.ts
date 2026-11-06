@@ -51,9 +51,9 @@ const ArrayTestTree = types.model("ArrayTestTree", {
     return Promise.resolve();
   },
   applyPatchesFromManager(_h: string, _e: string, patchesToApply: readonly IJsonPatch[],
-      loads?: readonly IJsonPatch[]) {
+      modelReplacements?: readonly IJsonPatch[]) {
     applyPatch(self, patchesToApply as IJsonPatch[]);
-    if (loads && loads.length > 0) applyPatch(self, loads as IJsonPatch[]);
+    if (modelReplacements && modelReplacements.length > 0) applyPatch(self, modelReplacements as IJsonPatch[]);
     return Promise.resolve();
   },
   finishApplyingPatchesFromManager(_h: string, _e: string) {
@@ -102,9 +102,9 @@ const DocMergeTestTree = types.model("DocMergeTestTree", {
     return Promise.resolve();
   },
   applyPatchesFromManager(_h: string, _e: string, patchesToApply: readonly IJsonPatch[],
-      loads?: readonly IJsonPatch[]) {
+      modelReplacements?: readonly IJsonPatch[]) {
     applyPatch(self, patchesToApply as IJsonPatch[]);
-    if (loads && loads.length > 0) applyPatch(self, loads as IJsonPatch[]);
+    if (modelReplacements && modelReplacements.length > 0) applyPatch(self, modelReplacements as IJsonPatch[]);
     return Promise.resolve();
   },
   finishApplyingPatchesFromManager(_h: string, _e: string) {

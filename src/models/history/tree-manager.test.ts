@@ -368,22 +368,22 @@ it("can replay the history entries", async () => {
   expect(getSnapshot(manager.document.history)).toEqual(history);
 });
 
-it("applies loads after the patches, in the same action", async () => {
+it("applies model replacements after the patches, in the same action", async () => {
   const {docModel, docContent, tileContent} = setupDocument();
   const tile = docContent.tileMap.get("t1")!;
   const spy = jest.fn();
   const dispose = reaction(() => [tileContent.flag, tileContent.actionText], spy);
 
-  // The load replaces the patched actionText, so it is applied last.
+  // The model replacement sets the patched actionText again, so it is applied last.
   await docModel.applyPatchesFromManager(FAKE_HISTORY_ENTRY_ID, FAKE_EXCHANGE_ID,
     [{op: "replace", path: "/content/tileMap/t1/content/flag", value: true},
       {op: "replace", path: "/content/tileMap/t1/content/actionText", value: "patched"}],
     [{op: "replace", path: "/content/tileMap/t1",
-      value: {...getSnapshot(tile), content: {...getSnapshot(tile.content), flag: true, actionText: "loaded"}}}]);
+      value: {...getSnapshot(tile), content: {...getSnapshot(tile.content), flag: true, actionText: "replaced"}}}]);
   dispose();
 
   expect(spy).toHaveBeenCalledTimes(1);
-  expect(spy.mock.calls[0][0]).toEqual([true, "loaded"]);
+  expect(spy.mock.calls[0][0]).toEqual([true, "replaced"]);
   expect(docContent.tileMap.get("t1")).toBe(tile);
 });
 
