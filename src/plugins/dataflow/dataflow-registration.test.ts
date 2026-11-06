@@ -1,16 +1,19 @@
 // the tile component is not needed here and warns about missing CSS when imported under jest
 jest.mock("./components/dataflow-tile", () => ({ __esModule: true, default: () => null }));
 
+import { cloneDeep } from "lodash";
 import { getSnapshot, Instance } from "mobx-state-tree";
 import { createDocumentModel } from "../../models/document/document";
 import { ProblemDocument } from "../../models/document/document-types";
-import { toJsonValue } from "../../models/history/json-patch";
+import { HistoryEntry, HistoryOperation } from "../../models/history/history";
+import { applyJsonPatches, toJsonValue } from "../../models/history/json-patch";
 import { TreeManager } from "../../models/history/tree-manager";
 import { getTileContentInfo } from "../../models/tiles/tile-content-info";
 import { DataflowContentModelType } from "./model/dataflow-content";
 import "../../models/shared/shared-data-set-registration";
 import "../../models/shared/shared-program-data-registration";
 import "./dataflow-registration";
+import legacyDataflowDocument from "./test-docs/dataflow-0.1.0.json";
 
 describe("Dataflow schemaVersion", () => {
   const schemaVersion = getTileContentInfo("Dataflow")!.schemaVersion!;
@@ -54,6 +57,26 @@ describe("Dataflow schemaVersion", () => {
       expect(later.manager.pendingLoadEntry).toBeUndefined();
       expect(later.tile.program.id).toBe("dataflow@2");
     });
+  });
+
+  it("records a load entry for a legacy document whose patches turn the stored tile into the live one", () => {
+    const tileId = "CIUYXl4cwYYrfP5t";
+    const stored = cloneDeep(legacyDataflowDocument);
+    const document = createDocumentModel({ uid: "1", type: ProblemDocument, key: "doc1", content: stored });
+    const manager = document.treeManagerAPI as Instance<typeof TreeManager>;
+    expect(manager.pendingLoadEntry).toBeDefined();
+    const record = HistoryEntry.create(manager.pendingLoadEntry!).records[0];
+    const liveTile = toJsonValue(getSnapshot(document.content!.tileMap.get(tileId)!));
+    const storedTile = toJsonValue(legacyDataflowDocument.tileMap[tileId]);
+    expect(liveTile).not.toEqual(storedTile);
+
+    // The rest of the document differs between stored and live (the live one has shared models),
+    // so only the tile is compared.
+    const json: any = { content: cloneDeep(legacyDataflowDocument) };
+    applyJsonPatches(json, record.getPatches(HistoryOperation.Redo));
+    expect(json.content.tileMap[tileId]).toEqual(liveTile);
+    applyJsonPatches(json, record.getPatches(HistoryOperation.Undo));
+    expect(json.content.tileMap[tileId]).toEqual(storedTile);
   });
 
   it("returns a current tile unchanged", () => {
