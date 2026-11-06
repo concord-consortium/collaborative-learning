@@ -31,14 +31,21 @@ turned out not to be a problem at all.
 ### Recording state lives in React — and is now CLUE-771's problem
 
 `ProgramMode` (Ready → Recording → Done) is derived in `DataflowProgram` from
-`this.state.isRecording` plus `isDataSetEmptyCases`, and the record button sits in the program
-topbar inside that component. A tile-toolbar button renders from a different tree and cannot reach
-that state, so the record button cannot move until `isRecording` is lifted into the model.
+`this.state.isRecording`, and the record button sits in the program topbar inside that component.
+A tile-toolbar button renders from a different tree and cannot reach that state, so the record
+button cannot move until `isRecording` is lifted into the model.
 
 That work, and the rest of the control rework around it, moved to CLUE-771. **Nothing in this
-story depends on it:** the single-sample button writes a row directly and does not need
-`ProgramMode`, beyond being disabled while a continuous recording is running — which it can read
-from the same `isDataSetEmptyCases`/topbar state the existing UI already uses.
+story depends on it:** the single-sample button records through the content model and does not
+need `ProgramMode`.
+
+**Done keys on a recorded run, not on rows.** `ProgramMode` used to treat any rows in the dataset
+as Done, so one single sample made the program read-only, showed playback and turned the record
+button into Clear. Done now depends on the content model's `recordedRun` flag, which a recording
+sets when it starts and `prepareCapture` and `resetRecording` clear. A tile holding only samples
+stays in Ready, and a recording started there appends to the samples. `recordedRun` is
+`types.maybe`, so a document saved before it existed reads `undefined` and falls back to "has
+rows", and a saved recording still opens in Done.
 
 ### Table It's behavior is per-tile, not shared
 
@@ -138,8 +145,10 @@ A toolbar button that appends exactly one row: the next point number, then each 
 `nodeValue`, through the existing `recordCase` path. If no table exists it does what Table It
 does first, then writes the sample.
 
-It is available in `Ready` and in `Done` — the point is to compare separate captures — and
-disabled during a continuous `Recording`, where rows are already arriving.
+It is available in `Ready` and in `Done` — the point is to compare separate captures. It is also
+still clickable during a continuous `Recording`, where rows are already arriving: the button can't
+read `isRecording` while it lives in `DataflowProgram`'s React state, so disabling it then waits
+for CLUE-771 to move that state into the model. It is disabled in a read-only view.
 
 **Appending requires the columns to still match.** If the program's nodes no longer line up with
 the table's columns, the sample would land in the wrong columns; `recordCase` already tolerates
@@ -151,17 +160,27 @@ sample taken against a structurally changed program must rebuild the columns rat
 Detaching has to be **undoable with the change that caused it**: a student who undoes back to the
 program the data was captured against should get the live link back, not an orphaned table.
 
-**This rules out a reaction.** `docs/undo-and-time-travel.md` says changes group into one history
-entry only via a parent action or a `flow`. A MobX reaction runs *after* the triggering action has
-committed, so a reaction-based detach would land in its own entry — and worse, undo applies
-patches, which re-run reactions. Undoing the node that caused the detach would re-trigger the
-reaction and detach again, which is precisely the behavior being asked for and its opposite.
+**This rules out a reaction.** A MobX reaction to the structure does land in the change's entry,
+but only because MobX runs it before the MST action finishes, which nothing documents. The real
+problem is undo: it applies patches, which re-run reactions, so undoing the node that caused the
+detach re-triggers the reaction and detaches again — precisely the behavior being asked for and its
+opposite. A middleware on the program doesn't work either. MST runs a node's own middleware outside
+its parents', so a detach made there lands after the document's history middleware has closed the
+entry.
 
-**So the detach is a child action of the structural change.** The actions that alter structure all
-live on `DataflowProgramModel`: `addNode`, `addNodeSnapshot`, `addConnection`, `removeConnection`,
-`removeNode` and `removeNodeAndConnections`. Each calls the content model's `detachLinkedTables()`,
-which makes the detach part of the same history entry as the change that justified it, by the
-parent-action rule.
+**So the detach is a child action of the structural change.** The actions that write the program's
+`nodes` or `connections` all live on `DataflowProgramModel`: `addNode`, `addNodeSnapshot`,
+`addConnection`, `removeConnection` and `removeNode`. Each ends by calling the program's
+`notifyStructureChange()`, which runs a handler the content model sets; that handler is
+`detachLinkedTables()`. The program can't call the content model directly without a circular
+import. This makes the detach part of the same history entry as the change that justified it, by
+the parent-action rule. `removeNodeAndConnections` and `NodeEditorMST.clear()` reach it through
+those five.
+
+**A check catches an action that forgets.** Outside production, a middleware on the content model
+compares the program's node and connection ids before and after each outermost action. If they
+changed and `notifyStructureChange()` wasn't called, it logs an error naming the action. It
+reports rather than detaches, for the middleware reason above.
 
 Two things follow, and both are why this is the right shape rather than a workaround:
 
@@ -171,8 +190,8 @@ Two things follow, and both are why this is the right shape rather than a workar
   not re-entered while history is being replayed. The reaction had the opposite property.
 
 Calling it from every structural action means it runs more than once for a compound change such as
-`removeNodeAndConnections`. That is harmless — after the first call there are no linked tables
-left — and it matches the convention already stated in `dataflow-program-model.ts`, where removal
+`removeNodeAndConnections`. That is harmless — after the first call the program holds an empty
+replacement dataset, which `detachLinkedTables()` creates itself — and it matches the convention already stated in `dataflow-program-model.ts`, where removal
 is funnelled through one path "so that every removal path is consistent by construction".
 
 **Dataflow's undo stack is not clean today, and that does not change this design.** Each tick
@@ -193,13 +212,16 @@ inherits whatever undo treatment that action ends up with, so when ticks leave t
 behavior becomes correct with no change here. `withoutUndo()` is already used in this tile
 (`resetRunningState`, `setOutputConfig`) if a narrower fix is ever wanted sooner.
 
-**The one thing to verify before building this.** The detach manipulates shared models, which live
-in the document tree rather than the tile's. CLUE's history is multi-tree, and whether a
-shared-model change made inside a tile action is attributed to that action's history entry decides
-whether undo restores the link atomically. `Tree.handleSharedModelChanges` is the path to read.
-If it turns out shared-model changes land in a separate entry, the detach needs to move up to a
-document-level action instead, and that is a larger change — so this is Task 5's first step, not a
-detail to discover during it.
+**Shared-model changes join the tile action's entry.** The detach manipulates shared models, which
+live in the document tree rather than the tile's, and CLUE's history is multi-tree. This was
+checked before building: a shared-model change made inside a tile action is recorded in that
+action's history entry, so undo restores the structure and the link together.
+
+**Undoing it needed a fix in the history code.** Undoing a detach removes the replacement dataset
+it created. `TreeMonitor.recordAction` is meant to skip a shared model that no longer exists, but
+it tested with `tryResolve` inside `try`/`catch`, and `tryResolve` returns `undefined` rather than
+throwing. The removed model wasn't skipped, and `Tree.handleSharedModelChanges` threw
+`[mobx-state-tree] Not a child`. The check now tests the result.
 
 ### 4. Toolbar order
 
