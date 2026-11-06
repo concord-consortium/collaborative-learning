@@ -28,8 +28,10 @@ const makeDocument = (type = "problem", uid = "7") =>
   createDocumentModel({ type: type as any, key: nanoid(), uid, content: {} });
 
 const addEntry = (document: DocumentModelType, model = "TextContent",
-                  action = "/content/tileMap/t/content/setText") => {
-  const entry = HistoryEntry.create({ id: nanoid(), tree: document.key, model, action, state: "complete" });
+                  action = "/content/tileMap/t/content/setText", isLoadEntry?: boolean) => {
+  const entry = HistoryEntry.create({
+    id: nanoid(), tree: document.key, model, action, isLoadEntry, state: "complete"
+  });
   (document.treeManagerAPI as TreeManagerType).addHistoryEntryAfterApplying(entry);
   return entry;
 };
@@ -74,6 +76,17 @@ describe("ActivityRecorder", () => {
     recorder.onLocalEntryUploaded(doc, tick);
     recorder.onLocalEntryUploaded(doc, df);
     recorder.onContentSaved(doc, df.id);
+    jest.advanceTimersByTime(kActivitySaveTimeoutMs * 2);
+    await flush();
+    expect(mockSet).not.toHaveBeenCalled();
+  });
+
+  it("writes nothing for a load entry", async () => {
+    recorder = new ActivityRecorder(makeStores());
+    const doc = makeDocument();
+    const load = addEntry(doc, "DocumentContent", "/loadContent", true);
+    recorder.onLocalEntryUploaded(doc, load);
+    recorder.onContentSaved(doc, load.id);
     jest.advanceTimersByTime(kActivitySaveTimeoutMs * 2);
     await flush();
     expect(mockSet).not.toHaveBeenCalled();

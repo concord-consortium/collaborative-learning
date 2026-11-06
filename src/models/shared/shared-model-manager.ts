@@ -40,6 +40,10 @@ export const UnknownSharedModel = types.snapshotProcessor(_UnknownSharedModel, {
             : snapshot;
   },
 
+  // Post-processors can break document history (see the post-processor rule in .eslintrc.js).
+  // This one is allowed because nothing edits a shared model of an unknown type, so no patches are
+  // recorded under it.
+  // eslint-disable-next-line no-restricted-syntax
   postProcessor(snapshot: any) {
     return JSON.parse(snapshot.original);
   }

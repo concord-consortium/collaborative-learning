@@ -1,0 +1,33 @@
+import fs from "fs";
+import path from "path";
+import { IStoredEntry, rebuildBackAndForth } from "./dumb-rebuild-test-utils";
+
+// Checks the stored format: a chain of stored entries, load entry included, rebuilt with no
+// CLUE code. The fixture is written by "writes the conversion-chain fixture" in
+// tree-manager-conversion.test.ts; run it with WRITE_CONVERSION_FIXTURE=1 to regenerate.
+
+interface IFixture {
+  endDocument: any;
+  entries: IStoredEntry[];
+}
+
+const fixture: IFixture = JSON.parse(
+  fs.readFileSync(path.join(__dirname, "fixtures", "conversion-chain.json"), "utf8"));
+
+const t1Version = (doc: any) => doc.content.tileMap.t1.content.version;
+
+describe("dumb rebuild", () => {
+  it("rebuilds every position with a plain JSON patch library", () => {
+    const { endDocument, entries } = fixture;
+    const loadEntryIndex = entries.findIndex(entry => entry.isLoadEntry);
+    expect(loadEntryIndex).toBeGreaterThanOrEqual(0);
+
+    const { positions, end } = rebuildBackAndForth(endDocument, entries);
+    expect(t1Version(positions[0])).toBeUndefined();
+    expect(positions[0].content.tileMap.t1.content.text).toBe("a");
+    expect(end).toEqual(endDocument);
+
+    expect(t1Version(positions[loadEntryIndex])).toBeUndefined();
+    expect(t1Version(positions[loadEntryIndex + 1])).toBe("2");
+  });
+});

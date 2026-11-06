@@ -8,20 +8,31 @@ import DataflowToolComponent from "./components/dataflow-tile";
 
 import Icon from "./assets/program.svg";
 import HeaderIcon from "./assets/program-tile-id.svg";
-import { STATE_VERSION_CURRENT } from "./model/dataflow-state-versions";
+import { STATE_VERSION_CURRENT, STATE_VERSION_RETE_V1 } from "./model/dataflow-state-versions";
 import { convertLegacyDataflowProgram } from "./model/convert-legacy-dataflow";
 
-export function tileSnapshotPreProcessor(tileSnap: any) {
+function getDataflowTileVersion(tileSnap: any): string {
+  return tileSnap?.content?.program?.id ?? STATE_VERSION_CURRENT;
+}
 
-  const program = tileSnap?.content?.program;
-  if (program && program.id !== STATE_VERSION_CURRENT) {
-    return {...tileSnap,
-      content: { ...tileSnap.content,
-        program: convertLegacyDataflowProgram(tileSnap.id, program)
-      }
-    };
-  }
-  return tileSnap;
+/**
+ * Converts a DataFlow tile's JSON to the current program format. A current tile, or one with no
+ * program, is returned as it is. Returns undefined for a program format this release doesn't
+ * convert, such as one saved by a newer release.
+ */
+export function convertDataflowTileSnapshot(tileSnap: any) {
+  const version = getDataflowTileVersion(tileSnap);
+  if (version === STATE_VERSION_CURRENT) return tileSnap;
+  if (version !== STATE_VERSION_RETE_V1) return undefined;
+  return {...tileSnap,
+    content: { ...tileSnap.content,
+      program: convertLegacyDataflowProgram(tileSnap.id, tileSnap.content.program)
+    }
+  };
+}
+
+export function tileSnapshotPreProcessor(tileSnap: any) {
+  return convertDataflowTileSnapshot(tileSnap) ?? tileSnap;
 }
 
 registerTileContentInfo({
@@ -33,7 +44,12 @@ registerTileContentInfo({
   defaultHeight: kDataflowDefaultHeight,
   defaultContent: defaultDataflowContent,
   isDataProvider: true,
-  tileSnapshotPreProcessor
+  tileSnapshotPreProcessor,
+  schemaVersion: {
+    currentVersion: STATE_VERSION_CURRENT,
+    getVersion: getDataflowTileVersion,
+    convertSnapshot: convertDataflowTileSnapshot
+  }
 });
 
 registerTileComponentInfo({
