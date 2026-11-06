@@ -15,15 +15,12 @@ export function servoAngleForValue(value: number, proportionMode: boolean) {
   return Math.min(Math.max(scaled, kServoMinAngle), kServoMaxAngle);
 }
 
-/** The value the minigraph plots for a servo angle: % of full rotation in proportion mode, as the field reads. */
-export function servoPlotValue(angle: number, proportionMode: boolean) {
-  return proportionMode ? (angle / kServoMaxAngle) * 100 : angle;
-}
+const servoPercent = (angle: number) => (angle / kServoMaxAngle) * 100;
 
 /** How a servo minigraph is drawn: the units its field reads, and the full travel as the axis. */
 export function servoPlotScale(proportionMode: boolean): IPlotScale {
   return proportionMode
-    ? { toPlot: angle => servoPlotValue(angle, true), min: 0, max: 100 }
+    ? { toPlot: servoPercent, min: 0, max: 100 }
     : { min: kServoMinAngle, max: kServoMaxAngle };
 }
 
@@ -33,6 +30,6 @@ export function servoPlotScale(proportionMode: boolean): IPlotScale {
  * gripper's "% closed".
  */
 export function servoDisplayMessage(value: number, proportionMode: boolean) {
-  if (proportionMode) return `${Math.round(servoPlotValue(value, true))}% rotation`;
+  if (proportionMode) return `${Math.round(servoPercent(value))}% rotation`;
   return `${Math.round(value)}°`;
 }

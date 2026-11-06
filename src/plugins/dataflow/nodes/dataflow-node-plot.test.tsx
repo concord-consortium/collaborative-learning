@@ -118,7 +118,6 @@ describe("DataflowNodePlot", () => {
   });
 
   // The Advanced Gripper's shape: a position the field reads out, and a tilt series beside it.
-  // The axis belongs to the first series, so the block is readable in its own units.
   const twoSeriesModel = () => makeModel({
     watchedValues: { nodeValue: {}, tilt: {} },
     getTickEntries: () => [{ nodeValue: 18, tilt: -1 }, { nodeValue: 36, tilt: 1 }],

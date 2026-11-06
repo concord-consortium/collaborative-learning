@@ -102,21 +102,19 @@ describe("LiveOutputNode.getPlotScale", () => {
     const scale = scaleOf(stubbedNode({ liveOutputType: "Servo" }, { servoInputMode: "proportion" }));
     expect(scale?.toPlot?.(90)).toBe(50);
     expect(scale?.toPlot?.(180)).toBe(100);
-    expect({ min: scale?.min, max: scale?.max }).toEqual({ min: 0, max: 100 });
+    expect(scale).toMatchObject({ min: 0, max: 100 });
   });
 
   it("graphs a Servo over its full travel in degrees mode, converting nothing", () => {
     const scale = scaleOf(stubbedNode({ liveOutputType: "Servo" }));
     expect(scale?.toPlot).toBeUndefined();
-    expect({ min: scale?.min, max: scale?.max }).toEqual({ min: 0, max: 180 });
+    expect(scale).toMatchObject({ min: 0, max: 180 });
   });
 
-  // writeToOutForBBGripper divides by 100 to drive the hardware, so the stored value is already
-  // the percentage the field shows and nothing needs converting.
   it("graphs a Gripper over 0-100 with no conversion", () => {
     const scale = scaleOf(stubbedNode({ liveOutputType: "Gripper 2.0" }, { servoInputMode: "proportion" }));
     expect(scale?.toPlot).toBeUndefined();
-    expect({ min: scale?.min, max: scale?.max }).toEqual({ min: 0, max: 100 });
+    expect(scale).toMatchObject({ min: 0, max: 100 });
   });
 
   it("graphs a relay output over 0-1", () => {

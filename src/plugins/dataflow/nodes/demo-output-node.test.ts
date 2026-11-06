@@ -104,7 +104,7 @@ describe("DemoOutputNode.getPlotScale", () => {
   it("graphs a Servo in % rotation over a 0-100 axis in proportion mode", () => {
     const scale = scaleOf("Servo", { servoInputMode: "proportion" });
     expect(scale?.toPlot?.(90)).toBe(50);
-    expect({ min: scale?.min, max: scale?.max }).toEqual({ min: 0, max: 100 });
+    expect(scale).toMatchObject({ min: 0, max: 100 });
   });
 
   it("graphs a Servo over its full travel in degrees mode", () => {
@@ -117,7 +117,7 @@ describe("DemoOutputNode.getPlotScale", () => {
   it("graphs a Gripper as a percentage of the 0-1 fraction it stores", () => {
     const scale = scaleOf("Grabber");
     expect(scale?.toPlot?.(0.5)).toBe(50);
-    expect({ min: scale?.min, max: scale?.max }).toEqual({ min: 0, max: 100 });
+    expect(scale).toMatchObject({ min: 0, max: 100 });
   });
 
   it("graphs a binary output over 0-1", () => {
@@ -129,7 +129,7 @@ describe("DemoOutputNode.getPlotScale", () => {
   it("graphs the Advanced Gripper's position as a percentage, like the plain Gripper", () => {
     const scale = scaleOf("Advanced Grabber");
     expect(scale?.toPlot?.(0.5)).toBe(50);
-    expect({ min: scale?.min, max: scale?.max }).toEqual({ min: 0, max: 100 });
+    expect(scale).toMatchObject({ min: 0, max: 100 });
   });
 
   it("declares nothing for the tilt series", () => {

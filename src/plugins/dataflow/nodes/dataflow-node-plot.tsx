@@ -19,6 +19,8 @@ interface INodePlotProps {
 type PlotScaleFn = (valueKey: string) => IPlotScale | undefined;
 const noPlotScale: PlotScaleFn = () => undefined;
 
+interface IDeclaredExtent { min: number; max: number }
+
 let stepY = 5;
 
 // Half-height of the axis a zoom falls back to when the plotted values give it nothing to
@@ -34,7 +36,7 @@ const kMinZoomHalfSpan = 0.5;
  * Gripper is why -- it plots tilt beside its position, and a union would put the axis in neither
  * block's units. A later series is still drawn, on that axis, wherever its values fall.
  */
-function declaredExtent(model: IBaseNodeModel, plotScale: PlotScaleFn) {
+function declaredExtent(model: IBaseNodeModel, plotScale: PlotScaleFn): IDeclaredExtent | undefined {
   for (const key of Object.keys(model.watchedValues)) {
     const scale = plotScale(key);
     if (scale?.min != null && scale?.max != null) return { min: scale.min, max: scale.max };
@@ -42,13 +44,13 @@ function declaredExtent(model: IBaseNodeModel, plotScale: PlotScaleFn) {
   return undefined;
 }
 
-// A zoom still wins over the declared range, and resetGraph clears it to return there.
+// resetGraph clears the zoom, which returns the axis to the declared range.
 // CHECKME: dsMax defaults to -Infinity this might cause a problem
-function maxY(model: IBaseNodeModel, declared?: { max: number }) {
+function maxY(model: IBaseNodeModel, declared?: IDeclaredExtent) {
   return model.tickMax ?? declared?.max ?? model.dsMax;
 }
 // CHECKME: dsMin defaults to Infinity this might cause a problem
-function minY(model: IBaseNodeModel, declared?: { min: number }) {
+function minY(model: IBaseNodeModel, declared?: IDeclaredExtent) {
   return model.tickMin ?? declared?.min ?? model.dsMin;
 }
 
@@ -107,7 +109,7 @@ export const DataflowNodePlot: React.FC<INodePlotProps> = observer(
 
 function lineData(
   model: IBaseNodeModel, recordedTicks: string[], plotScale: PlotScaleFn,
-  declared?: { min: number, max: number }
+  declared?: IDeclaredExtent
 ): ChartData<"line", number[], number> {
   const chartDataSets: ChartDataset<"line", number[]>[] = [];
   const recordedEntries = model.getTickEntries(recordedTicks);
@@ -136,8 +138,8 @@ function lineData(
         ...customOptions
       };
 
-      // Plotted in the units the node's own field shows, so the trace and the declared axis
-      // below are in the same units -- they come from the one declaration, so they cannot drift.
+      // Per series, and applied even when nothing declares an axis: the trace is in the node's
+      // display units whether the axis came from a declaration or from the data.
       const toPlot = plotScale(valueKey)?.toPlot;
       const chData: number[] = [];
       recentValues.forEach((val) => {
@@ -163,7 +165,7 @@ function lineData(
   };
 }
 
-function lineOptions(model: IBaseNodeModel, declared?: { min: number, max: number }): ChartOptions<"line"> {
+function lineOptions(model: IBaseNodeModel, declared?: IDeclaredExtent): ChartOptions<"line"> {
   const max = maxY(model, declared);
   const min = minY(model, declared);
 
