@@ -59,16 +59,18 @@ describe("createOldModelPatchSource", () => {
     expect((loads[0].value as any).content.version).toBe("2");
   });
 
-  it("delegates other trees and load entries", () => {
+  it("delegates other trees and gives load entries no patches", () => {
     const copy = makeCopy({ tileMap: { t1: oldTile("t1") } });
     const entry = makeEntry([t1Text("a")]);
-    const loadEntry = makeEntry([t1Text("a")], [], true);
+    const loadEntry = makeEntry([t1Text("a")], [t1Text("b")], true);
     const source = createOldModelPatchSource({ copy, treeId: "other", oldPaths: new Set([t1Path]) });
     expect(source.getPatches(entry, kTreeId, HistoryOperation.Redo))
       .toEqual(defaultPatchSource.getPatches(entry, kTreeId, HistoryOperation.Redo));
     expect(source.getLoads(kTreeId)).toEqual([]);
-    const ownSource = createOldModelPatchSource({ copy, treeId: kTreeId, oldPaths: new Set([t1Path]) });
+    // With no old paths, only the load-entry check keeps the load entry's patches out.
+    const ownSource = createOldModelPatchSource({ copy, treeId: kTreeId, oldPaths: new Set() });
     expect(ownSource.getPatches(loadEntry, kTreeId, HistoryOperation.Redo)).toEqual([]);
+    expect(ownSource.getPatches(loadEntry, kTreeId, HistoryOperation.Undo)).toEqual([]);
   });
 
   it("converts an add of a whole old tile using its state at the target", () => {
