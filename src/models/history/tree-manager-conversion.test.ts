@@ -235,6 +235,28 @@ describe("playback across a load entry", () => {
     expect(manager.historyPlaybackFailures).toEqual([]);
   });
 
+  it("finds an old tile that is absent at both ends of a move from the move's patches", async () => {
+    const t3Path = "/content/tileMap/t3";
+    const oldEntries = [
+      makeEntry([makeRecord([{ op: "add", path: t3Path, value: oldTile("t3", "m") }],
+        [{ op: "remove", path: t3Path }])]),
+      // MST rejects an old item, which has no id.
+      makeEntry([addItemRecord(t3Path, 0, "a")]),
+      makeEntry([makeRecord([{ op: "remove", path: t3Path }],
+        [{ op: "add", path: t3Path, value: oldTile("t3", "m", ["a"]) }])])
+    ];
+    const { document, manager } = await setupConvertedDocument(t1Content(), oldEntries);
+
+    // t3 is added, edited and removed inside each move, and no move after the first crosses the load
+    // entry, so only the patches' values show that t3 is old.
+    for (const position of [3, 0, 3]) {
+      await manager.goToHistoryEntryPosition(position);
+      expect(manager.numHistoryEventsApplied).toBe(position);
+      expect(document.content!.tileMap.has("t3")).toBe(false);
+    }
+    expect(manager.historyPlaybackFailures).toEqual([]);
+  });
+
   it("applies the patches of a tile its converter declines to MST, without loading it", async () => {
     const t3Path = "/content/tileMap/t3";
     // The test tile's converter doesn't know version 3, so it declines this tile.

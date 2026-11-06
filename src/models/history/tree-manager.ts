@@ -81,8 +81,11 @@ function getEntriesBetween(history: readonly HistoryEntryType[], from: number, t
 /**
  * Moves the JSON copy toward `target` and builds the patch source for the move. A model is
  * treated as old when it is old in the copy at either end of the move, when a patch in the move
- * carries an old version of it, or when a load entry in the move changes it. The copy can
- * stop short of `target`; the source covers only the entries up to where it stopped.
+ * carries an old version of it, or when a load entry in the move changes it. The patches catch an
+ * old model that is absent at both ends. The load-entry check is a backstop: a model a load entry
+ * converts is old at the end of the move before that entry, or was added in the move with an old
+ * value. The copy can stop short of `target`; the source covers only the entries up to where it
+ * stopped.
  */
 function moveJsonCopy(copy: JsonHistoryCopy, history: readonly HistoryEntryType[], treeId: string,
     target: number): { moved: IJsonCopyMoveResult; source: IPlaybackPatchSource } {
