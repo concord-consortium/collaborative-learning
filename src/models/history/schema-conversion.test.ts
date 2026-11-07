@@ -4,10 +4,11 @@ import { cloneDeep } from "lodash";
 import { getSnapshot } from "mobx-state-tree";
 import {
   buildLoadEntry, convertContentJson, convertJsonAtPath, convertModelJsonAtPath, convertOldModelJsonAtPath,
-  getModelPath, isNonCurrentModelJsonAtPath
+  getModelPath, isNonCurrentModelJsonAtPath, modelJsonNeedsConversion
 } from "./schema-conversion";
-import { getEntryPatchesForTree, HistoryEntry, HistoryOperation } from "./history";
+import { HistoryEntry, HistoryOperation } from "./history";
 import { applyJsonPatches } from "./json-patch";
+import { defaultPatchSource } from "./playback-patch-source";
 import { getTileContentInfo, registerTileContentInfo } from "../tiles/tile-content-info";
 import { TileContentModel } from "../tiles/tile-content";
 import {
@@ -57,6 +58,19 @@ describe("isNonCurrentModelJsonAtPath", () => {
     expect(convertModelJsonAtPath("/content/tileMap/t1", unregistered)).toBe(unregistered);
     expect(isNonCurrentModelJsonAtPath("/content/sharedModelMap/s/sharedModel", { id: "s", type: "NoSuch" }))
       .toBe(false);
+  });
+});
+
+describe("modelJsonNeedsConversion", () => {
+  it("detects old versions", () => {
+    expect(modelJsonNeedsConversion("/content/tileMap/t1", oldTile("t1"))).toBe(true);
+    expect(modelJsonNeedsConversion("/content/tileMap/t1", newTile("t1"))).toBe(false);
+    expect(modelJsonNeedsConversion("/content/sharedModelMap/sm1/sharedModel", oldShared("sm1"))).toBe(true);
+  });
+  it("is false for a model its converter declines, and true for one whose conversion throws", () => {
+    expect(modelJsonNeedsConversion("/content/tileMap/t3", newerTile("t3"))).toBe(false);
+    expect(modelJsonNeedsConversion("/content/sharedModelMap/sm3/sharedModel", newerShared("sm3"))).toBe(false);
+    expect(modelJsonNeedsConversion("/content/tileMap/t1", oldTile("t1", "THROW"))).toBe(true);
   });
 });
 
@@ -225,7 +239,7 @@ describe("a stored load entry", () => {
     const stored = fixture.entries.find((e: any) => e.isLoadEntry);
     const entry = HistoryEntry.create(stored);
     expect(entry.records[0].patches.length).toBeGreaterThan(0);
-    expect(getEntryPatchesForTree(entry, stored.tree, HistoryOperation.Undo)).toEqual([]);
-    expect(getEntryPatchesForTree(entry, stored.tree, HistoryOperation.Redo)).toEqual([]);
+    expect(defaultPatchSource.getPatches(entry, stored.tree, HistoryOperation.Undo)).toEqual([]);
+    expect(defaultPatchSource.getPatches(entry, stored.tree, HistoryOperation.Redo)).toEqual([]);
   });
 });

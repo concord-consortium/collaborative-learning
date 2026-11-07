@@ -12,6 +12,8 @@ import { HistoryPlaybackFailure, TreeManager } from "../../models/history/tree-m
 export const kPlaybackStepMs = 500;
 
 const kPlaybackFailureWarning = "History playback could not apply some changes and was stopped.";
+const kPlaybackStoppedWarning =
+  "History playback stopped because of an error. Close and reopen the history to try again.";
 
 // The document before any of its history was applied. It describes no change, so it has no date.
 interface IInitialSliderStop {
@@ -345,7 +347,11 @@ export class PlaybackControlModel {
         // is not where the reader clicked.
         const actual = this.treeManager.numHistoryEventsApplied;
         const blocked = threw || (actual !== undefined && actual !== position);
-        this.playbackFailureWarning = blocked ? kPlaybackFailureWarning : null;
+        // Once the playback copy is out of step, no move can succeed until the history is
+        // reopened, which makes a new copy.
+        this.playbackFailureWarning = this.treeManager.jsonCopyOutOfStep
+          ? kPlaybackStoppedWarning
+          : blocked ? kPlaybackFailureWarning : null;
         // The stop that was asked for was never reached, so there is nothing left to prefer
         // over wherever the document actually stopped.
         if (blocked) this.requestedStop = undefined;

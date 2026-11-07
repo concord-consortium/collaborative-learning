@@ -3,7 +3,7 @@ import { addDisposer, applySnapshot, getType, isAlive, types, getRoot,
   isStateTreeNode, SnapshotOut, Instance, getParent, destroy, hasParent,
   getSnapshot, addMiddleware, getEnv,
   createActionTrackingMiddleware2, resolvePath, flow, onSnapshot,
-  hasEnv, typecheck
+  hasEnv, typecheck, applyPatch, IJsonPatch, isValidReference
 } from "mobx-state-tree";
 import { uniqueId } from "../utilities/js-utils";
 
@@ -1125,5 +1125,109 @@ describe("mst", () => {
     valueReturnedByPreProcess = {prop: "value"};
     const container3 = TestContainer.create({});
     expect(container3.child?.prop).toBe("value");
+  });
+
+  /**
+   * History playback applies a move's patches one at a time and then its model replacements, all in
+   * one action (Tree.applyPatchesFromManager). The patches inside a replaced model are dropped, so a
+   * patch outside it can refer to a node in it that only the replacement adds.
+   */
+  describe("references to a node added later in the same action", () => {
+    const Item = types.model("Item", { id: types.identifier, name: "" });
+    const Shared = types.model("Shared", { items: types.map(Item) });
+    const Holder = types.model("Holder", {
+      ref: types.maybe(types.reference(Item)),
+      safeRef: types.safeReference(Item),
+      safeRefs: types.array(types.safeReference(Item, { acceptsUndefined: false })),
+      note: ""
+    })
+    .volatile(() => ({
+      refValidInAfterAttach: undefined as boolean | undefined
+    }))
+    .actions(self => ({
+      afterAttach() {
+        self.refValidInAfterAttach = isValidReference(() => self.ref);
+      }
+    }));
+    const Root = types.model("Root", { shared: Shared, holders: types.map(Holder) })
+    .actions(self => ({
+      applyPatchesThenReplacements(patches: IJsonPatch[], replacements: IJsonPatch[], betweenThem?: () => void) {
+        patches.forEach(patch => applyPatch(self, patch));
+        betweenThem?.();
+        applyPatch(self, replacements);
+      }
+    }));
+    const replaceShared = (items: Record<string, { id: string, name?: string }>): IJsonPatch =>
+      ({ op: "replace", path: "/shared", value: { items } });
+
+    test("a patch can set a reference to a node that isn't there yet", () => {
+      const root = Root.create({ shared: { items: {} }, holders: { h: {} } });
+      root.applyPatchesThenReplacements([
+        { op: "replace", path: "/holders/h/ref", value: "b" },
+        { op: "replace", path: "/holders/h/safeRef", value: "b" },
+        { op: "add", path: "/holders/h/safeRefs/-", value: "b" },
+        { op: "add", path: "/holders/h2", value: { ref: "b", safeRef: "b", safeRefs: ["b"] } }
+      ], [replaceShared({ b: { id: "b", name: "B" } })]);
+
+      for (const holder of [root.holders.get("h")!, root.holders.get("h2")!]) {
+        expect(holder.ref?.name).toBe("B");
+        expect(holder.safeRef?.name).toBe("B");
+        expect(holder.safeRefs.map(item => item.name)).toEqual(["B"]);
+      }
+    });
+
+    test("reading a reference before its node is added throws, and the reference still resolves later", () => {
+      const root = Root.create({ shared: { items: {} }, holders: { h: {} } });
+      const reads: unknown[] = [];
+      root.applyPatchesThenReplacements([
+        { op: "replace", path: "/holders/h/ref", value: "b" },
+        { op: "replace", path: "/holders/h/safeRef", value: "b" }
+      ], [replaceShared({ b: { id: "b", name: "B" } })], () => {
+        const midHolder = root.holders.get("h")!;
+        expect(() => midHolder.ref).toThrow("Failed to resolve reference 'b'");
+        expect(() => midHolder.safeRef).toThrow("Failed to resolve reference 'b'");
+        reads.push(isValidReference(() => midHolder.ref));
+      });
+
+      expect(reads).toEqual([false]);
+      const holder = root.holders.get("h")!;
+      expect(holder.ref?.name).toBe("B");
+      expect(holder.safeRef?.name).toBe("B");
+    });
+
+    test("a later patch into an added node runs its afterAttach before the node it refers to is added", () => {
+      const root = Root.create({ shared: { items: {} }, holders: {} });
+      root.applyPatchesThenReplacements([
+        { op: "add", path: "/holders/h", value: { ref: "b" } },
+        // Navigating into the new node creates it, so its afterAttach runs now.
+        { op: "replace", path: "/holders/h/note", value: "changed" }
+      ], [replaceShared({ b: { id: "b" } })]);
+
+      const holder = root.holders.get("h")!;
+      expect(holder.refValidInAfterAttach).toBe(false);
+      expect(isValidReference(() => holder.ref)).toBe(true);
+    });
+
+    test("a node added and not reached by a later patch runs its afterAttach when it is first read", () => {
+      const root = Root.create({ shared: { items: {} }, holders: {} });
+      root.applyPatchesThenReplacements([{ op: "add", path: "/holders/h", value: { ref: "b" } }],
+        [replaceShared({ b: { id: "b" } })]);
+
+      expect(root.holders.get("h")!.refValidInAfterAttach).toBe(true);
+    });
+
+    test("replacing a model keeps safe references to the nodes whose ids it keeps, and removes the others", () => {
+      const root = Root.create({
+        shared: { items: { a: { id: "a", name: "A" }, c: { id: "c" } } },
+        holders: { h: { safeRef: "a", safeRefs: ["a", "c"] } }
+      });
+      const itemA = root.shared.items.get("a");
+      root.applyPatchesThenReplacements([], [replaceShared({ a: { id: "a", name: "A2" }, d: { id: "d" } })]);
+
+      const holder = root.holders.get("h")!;
+      expect(holder.safeRef).toBe(itemA);
+      expect(holder.safeRef?.name).toBe("A2");
+      expect(getSnapshot(holder).safeRefs).toEqual(["a"]);
+    });
   });
 });

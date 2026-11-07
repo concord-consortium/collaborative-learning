@@ -17,22 +17,27 @@ import { IJsonPatch } from "mobx-state-tree";
 // throws. See the post-processor rule in .eslintrc.js.
 
 export class JsonPatchError extends Error {
-  readonly numApplied: number;
+  // The index of the patch that failed.
+  readonly failedIndex: number;
   readonly cause: unknown;
 
-  constructor(message: string, numApplied: number, cause?: unknown) {
+  constructor(message: string, failedIndex: number, cause?: unknown) {
     super(message);
     this.name = "JsonPatchError";
-    this.numApplied = numApplied;
+    this.failedIndex = failedIndex;
     this.cause = cause;
   }
 }
+
+// Puts back what one applied patch changed.
+type UndoPatch = () => void;
 
 function unescapeSegment(segment: string) {
   return segment.replace(/~1/g, "/").replace(/~0/g, "~");
 }
 
-function applyJsonPatch(doc: object, patch: IJsonPatch) {
+// Applies one patch and returns how to undo it, from the values it actually replaced or removed.
+function applyJsonPatch(doc: object, patch: IJsonPatch): UndoPatch {
   if (!patch.path?.startsWith("/")) throw new Error(`patch path "${patch.path}" doesn't start with /`);
 
   const segments = patch.path.split("/").slice(1).map(unescapeSegment);
@@ -58,21 +63,35 @@ function applyJsonPatch(doc: object, patch: IJsonPatch) {
     if (patch.op === "add") {
       if (index > parent.length) throw new Error(`array index out of range in ${patch.path}`);
       parent.splice(index, 0, value);
-    } else {
-      if (index >= parent.length) throw new Error(`array index out of range in ${patch.path}`);
-      if (patch.op === "replace") parent[index] = value;
-      else parent.splice(index, 1);
+      return () => parent.splice(index, 1);
     }
-  } else if (patch.op === "remove" || value === undefined) {
+    if (index >= parent.length) throw new Error(`array index out of range in ${patch.path}`);
+    const oldItem = parent[index];
+    if (patch.op === "replace") {
+      parent[index] = value;
+      return () => { parent[index] = oldItem; };
+    }
+    parent.splice(index, 1);
+    return () => parent.splice(index, 0, oldItem);
+  }
+
+  const hadMember = Object.hasOwn(parent, key);
+  const oldMember = parent[key];
+  if (patch.op === "remove" || value === undefined) {
     delete parent[key];
   } else {
     parent[key] = value;
   }
+  return () => {
+    if (hadMember) parent[key] = oldMember;
+    else delete parent[key];
+  };
 }
 
 /**
- * Applies `patches` to `doc` in place. Throws a `JsonPatchError` at the first patch that
- * fails; the patches before it stay applied, and `numApplied` counts them.
+ * Applies `patches` to `doc` in place, all or none. When a patch fails, the patches before it are
+ * undone and a `JsonPatchError` is thrown, leaving `doc` as it was. They are undone from the
+ * values they replaced, not from any recorded inverse patches.
  *
  * It matches how MST applies recorded patches, which is looser than RFC 6902:
  * - A path that doesn't start with `/` throws, including an empty one.
@@ -88,10 +107,12 @@ function applyJsonPatch(doc: object, patch: IJsonPatch) {
  * patch can't reach `Object.prototype`.
  */
 export function applyJsonPatches(doc: object, patches: readonly IJsonPatch[]) {
+  const undoPatches: UndoPatch[] = [];
   patches.forEach((patch, i) => {
     try {
-      applyJsonPatch(doc, patch);
+      undoPatches.push(applyJsonPatch(doc, patch));
     } catch (e) {
+      undoPatches.reverse().forEach(undoPatch => undoPatch());
       throw new JsonPatchError(`Failed to apply patch ${i}: ${(e as Error).message}`, i, e);
     }
   });
