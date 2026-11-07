@@ -236,6 +236,10 @@ Playback stops with the failure banner, keeping the trees and the JSON copy at t
 - MST rejects a patch. The move stops before the failing entry, the entries applied past that point are rolled back, and the copy moves back to the same position. If a rollback can't be built there, because a conversion throws, the move rolls back to where it started.
 - MST rejects a model replacement. The whole move rolls back to where it started.
 
+Moving the copy back after one of these failures uses the entries' recorded patches in the other direction, and an entry that applied one way doesn't always apply the other way. If the copy can't get back to where the trees are, the two no longer agree, and playback stops for good: the error is logged with `console.error`, the entry that blocked the copy gets a failure marker, `TreeManager.jsonCopyOutOfStep` is set so later moves do nothing, and the playback control says "History playback stopped because of an error. Close and reopen the history to try again." Reopening the history makes a new playback copy.
+
+Errors in the MST trees don't stop playback this way. A rollback that can't be built or applied, or an error that isn't a patch or model replacement failure, is logged, and playback carries on from wherever the trees are.
+
 ## How a tree applies a batch of patches
 
 `Tree.applyPatchesFromManager` applies a batch's patches one at a time, inside one MST action, so a failure is tied to the patch that caused it. While each patch applies, an `onPatch` listener collects the reverse patches MST reports for it: one for each change MST makes, which can be several for one patch (replacing an existing model changes each of its fields).

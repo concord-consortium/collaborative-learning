@@ -202,6 +202,11 @@ export const TreeManager = types
    */
   historyPlaybackFailures: [] as HistoryPlaybackFailure[],
   /**
+   * Set when the JSON copy can't get back to the trees' position after a failed move. The copy
+   * and the trees then disagree, so playback makes no more moves.
+   */
+  jsonCopyOutOfStep: false,
+  /**
    * The load entry for the content as loaded or last set, kept out of the history until it
    * is flushed (see completeHistoryEntry).
    */
@@ -643,6 +648,7 @@ export const TreeManager = types
 
     if (newHistoryPosition === self.numHistoryEventsApplied) return;
     if (self.numHistoryEventsApplied === undefined) return;
+    if (self.jsonCopyOutOfStep) return;
     // Capture the starting position so unexpected-error handling can
     // anchor its failure recording and rollback to a known-safe point.
     const initialPosition = self.numHistoryEventsApplied;
@@ -686,6 +692,20 @@ export const TreeManager = types
       }
       if (targetPosition === initialPosition) return;
     }
+
+    // Moves the copy back to where the trees are after a failure. An entry that applied one way
+    // doesn't always apply the other way, so the copy can stop short. Then the copy and the trees
+    // disagree, and playback stops.
+    const moveCopyBack = (position: number) => {
+      if (!copy) return;
+      const moved = copy.moveTo(history, position);
+      if (moved.position === position) return;
+      self.jsonCopyOutOfStep = true;
+      const message = `The playback JSON copy stopped at history position ${moved.position} instead of ` +
+        `going back to ${position}, so playback has stopped: ${moved.failure?.message}`;
+      if (moved.failure) recordFailure(moved.failure.historyIndex, moved.failure.direction, message);
+      console.error(message);
+    };
 
     const treePatches: Record<string, IJsonPatch[] | undefined> = {};
     // Track which history entry each patch came from, per tree.
@@ -752,7 +772,7 @@ export const TreeManager = types
     if (copy && conversionFailure) {
       // A conversion of an old model threw. The move doesn't advance.
       const { error } = conversionFailure;
-      copy.moveTo(history, initialPosition);
+      moveCopyBack(initialPosition);
       const errMessage = error instanceof Error ? error.message : String(error);
       recordFailure(unexpectedIndex, directionStr, `Could not convert an old model: ${errMessage}`);
       console.error(`Could not convert an old model at history position ${targetPosition}:`, error);
@@ -971,13 +991,13 @@ export const TreeManager = types
 
       // The copy moves to the stop position first, so the rollback's model replacements hold the
       // old models' state there.
-      copy?.moveTo(history, stopPosition);
+      moveCopyBack(stopPosition);
       let { built: rollbacks, failed: rollbackFailed } = buildRollbacks();
       if (rollbackFailed && stopPosition !== initialPosition) {
         // Stop where the move started instead, so every tree and the copy end at one position.
         // The conversions there succeeded when the trees got there.
         stopPosition = initialPosition;
-        copy?.moveTo(history, stopPosition);
+        moveCopyBack(stopPosition);
         ({ built: rollbacks, failed: rollbackFailed } = buildRollbacks());
       }
       if (rollbackFailed) {

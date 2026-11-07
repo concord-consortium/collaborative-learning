@@ -349,6 +349,40 @@ describe("playback across a load entry", () => {
     expect(getTile(document, "t1").label).toBe("b");
   });
 
+  it("stops playback when the JSON copy can't get back to where the trees are", async () => {
+    const oldEntries = [
+      makeEntry([replaceRecord(`${t1Path}/content/text`, "THROW", "b")]),
+      // Undoing this entry applies, but redoing it doesn't: its patch's parent doesn't exist.
+      makeEntry([makeRecord([replace("/content/tileMap/t2/content/missing/x", 1)],
+        [replace("/content/tileMap/t2/content/text", "p")])]),
+      makeEntry([replaceRecord(`${t1Path}/content/text`, "b", "c")])
+    ];
+    const content = {
+      tileMap: { ...t1Content().tileMap, t2: { id: "t2", content: { type: "TestTile", text: "q" } } }
+    };
+    const { document, manager, endPosition } = await setupConvertedDocument(content, oldEntries);
+    const errorSpy = jest.spyOn(console, "error").mockImplementation(() => undefined);
+
+    // The conversion of t1 at position 0 throws, so the copy goes back to the end, and stops
+    // before redoing entry 1.
+    await manager.goToHistoryEntryPosition(0);
+
+    expect(manager.numHistoryEventsApplied).toBe(endPosition);
+    expect(manager.jsonHistoryCopy!.position).toBe(1);
+    expect(manager.jsonCopyOutOfStep).toBe(true);
+    expect(manager.historyPlaybackFailures.map(f => [f.historyIndex, f.direction]))
+      .toEqual([[1, "redo"], [endPosition - 1, "undo"]]);
+    expect(errorSpy).toHaveBeenCalledWith(expect.stringContaining(
+      "The playback JSON copy stopped at history position 1 instead of going back to " +
+      `${endPosition}, so playback has stopped`));
+
+    // No later move happens.
+    await manager.goToHistoryEntryPosition(endPosition - 1);
+    expect(manager.numHistoryEventsApplied).toBe(endPosition);
+    expect(manager.jsonHistoryCopy!.position).toBe(1);
+    expect(getTile(document, "t1").label).toBe("x");
+  });
+
   it("rolls back a current tile's MST failure and replaces old tiles at the stop", async () => {
     const oldEntries = [
       makeEntry([replaceRecord(`${t1Path}/content/text`, "a", "b")]),
