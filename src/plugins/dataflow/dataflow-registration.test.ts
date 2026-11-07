@@ -87,4 +87,16 @@ describe("Dataflow schemaVersion", () => {
   it("treats a tile with no program as current", () => {
     expect(schemaVersion.getVersion({ content: {} })).toBe("dataflow@1");
   });
+
+  it("treats a program with no id as legacy only when it has the legacy values map", () => {
+    expect(schemaVersion.getVersion({ content: { program: { nodes: {}, values: {} } } })).toBe("dataflow@0.1.0");
+    expect(schemaVersion.getVersion({ content: { program: { nodes: {} } } })).toBe("dataflow@1");
+  });
+
+  it("converts a program with no id and a values map, and returns one with neither unchanged", () => {
+    const noIdLegacy = { id: "t1", content: { type: "Dataflow", program: { nodes: {}, values: {} } } };
+    expect(schemaVersion.convertSnapshot(noIdLegacy).content.program.id).toBe("dataflow@1");
+    const noIdCurrent = { id: "t1", content: { type: "Dataflow", program: { nodes: {} } } };
+    expect(schemaVersion.convertSnapshot(noIdCurrent)).toBe(noIdCurrent);
+  });
 });

@@ -1,0 +1,407 @@
+{
+  "description": "From the study, cut down to one DataFlow tile. The tile is added with a legacy program that has no id but has the legacy values map, legacy setProgram entries follow, and then entries that don't depend on the program format. The stored content is still legacy.",
+  "content": {
+    "rowMap": {
+      "r1": {
+        "id": "r1",
+        "isSectionHeader": false,
+        "tiles": [
+          {
+            "tileId": "t1"
+          }
+        ]
+      }
+    },
+    "rowOrder": [
+      "r1"
+    ],
+    "tileMap": {
+      "t1": {
+        "id": "t1",
+        "content": {
+          "type": "Dataflow",
+          "program": {
+            "id": "dataflow@0.1.0",
+            "nodes": {
+              "2": {
+                "id": 2,
+                "name": "Sensor",
+                "x": 40,
+                "y": 5,
+                "inputs": {},
+                "outputs": {
+                  "num": {
+                    "connections": {}
+                  }
+                },
+                "data": {
+                  "plot": false,
+                  "orderedDisplayName": "Sensor 1",
+                  "type": "emg-reading",
+                  "sensor": "emg",
+                  "virtual": false
+                }
+              }
+            },
+            "values": {
+              "2": {
+                "currentValues": {},
+                "recentValues": {
+                  "nodeValue": "[]"
+                }
+              }
+            }
+          },
+          "programDataRate": 100,
+          "programZoom": {
+            "dx": -3.103759765625,
+            "dy": 92.46951293945312,
+            "scale": 1
+          }
+        }
+      }
+    }
+  },
+  "history": [
+    {
+      "id": "e1",
+      "tree": "doc1",
+      "action": "/addTile",
+      "undoable": true,
+      "created": 1700000000000,
+      "records": [
+        {
+          "tree": "doc1",
+          "action": "/addTile",
+          "patches": [
+            {
+              "op": "add",
+              "path": "/content/tileMap/t1",
+              "value": {
+                "id": "t1",
+                "title": "Program 1",
+                "content": {
+                  "type": "Dataflow",
+                  "program": {
+                    "nodes": {},
+                    "values": {}
+                  },
+                  "programDataRate": 1000,
+                  "programZoom": {
+                    "dx": 0,
+                    "dy": 0,
+                    "scale": 1
+                  }
+                }
+              }
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/title"
+            }
+          ],
+          "inversePatches": [
+            {
+              "op": "remove",
+              "path": "/content/tileMap/t1"
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/title",
+              "value": "Program 1"
+            }
+          ]
+        }
+      ],
+      "state": "complete"
+    },
+    {
+      "id": "e2",
+      "tree": "doc1",
+      "action": "/content/tileMap/t1/content/setProgram",
+      "undoable": true,
+      "created": 1700000001000,
+      "records": [
+        {
+          "tree": "doc1",
+          "action": "/content/tileMap/t1/content/setProgram",
+          "patches": [
+            {
+              "op": "add",
+              "path": "/content/tileMap/t1/content/program/nodes/2",
+              "value": {
+                "id": 2,
+                "name": "Sensor",
+                "x": 40,
+                "y": 5,
+                "inputs": {},
+                "outputs": {
+                  "num": {
+                    "connections": {}
+                  }
+                },
+                "data": {
+                  "plot": false,
+                  "orderedDisplayName": "Sensor 1",
+                  "type": "none",
+                  "sensor": "none",
+                  "virtual": false
+                }
+              }
+            },
+            {
+              "op": "add",
+              "path": "/content/tileMap/t1/content/program/values/2",
+              "value": {
+                "currentValues": {},
+                "recentValues": {}
+              }
+            }
+          ],
+          "inversePatches": [
+            {
+              "op": "remove",
+              "path": "/content/tileMap/t1/content/program/nodes/2"
+            },
+            {
+              "op": "remove",
+              "path": "/content/tileMap/t1/content/program/values/2"
+            }
+          ]
+        }
+      ],
+      "state": "complete"
+    },
+    {
+      "id": "e3",
+      "tree": "doc1",
+      "action": "/content/tileMap/t1/content/setProgram",
+      "undoable": true,
+      "created": 1700000002000,
+      "records": [
+        {
+          "tree": "doc1",
+          "action": "/content/tileMap/t1/content/setProgram",
+          "patches": [
+            {
+              "op": "add",
+              "path": "/content/tileMap/t1/content/program/values/2/currentValues/nodeValue"
+            },
+            {
+              "op": "add",
+              "path": "/content/tileMap/t1/content/program/values/2/recentValues/nodeValue",
+              "value": "[]"
+            }
+          ],
+          "inversePatches": [
+            {
+              "op": "remove",
+              "path": "/content/tileMap/t1/content/program/values/2/currentValues/nodeValue"
+            },
+            {
+              "op": "remove",
+              "path": "/content/tileMap/t1/content/program/values/2/recentValues/nodeValue"
+            }
+          ]
+        }
+      ],
+      "state": "complete"
+    },
+    {
+      "id": "e4",
+      "tree": "doc1",
+      "action": "/content/tileMap/t1/content/setProgram",
+      "undoable": true,
+      "created": 1700000003000,
+      "records": [
+        {
+          "tree": "doc1",
+          "action": "/content/tileMap/t1/content/setProgram",
+          "patches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/nodes/2/data/type",
+              "value": "emg-reading"
+            }
+          ],
+          "inversePatches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/nodes/2/data/type",
+              "value": "none"
+            }
+          ]
+        }
+      ],
+      "state": "complete"
+    },
+    {
+      "id": "e5",
+      "tree": "doc1",
+      "action": "/content/tileMap/t1/content/setProgram",
+      "undoable": true,
+      "created": 1700000004000,
+      "records": [
+        {
+          "tree": "doc1",
+          "action": "/content/tileMap/t1/content/setProgram",
+          "patches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/nodes/2/data/sensor",
+              "value": "emg"
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/values/2/currentValues/nodeValue",
+              "value": 0
+            }
+          ],
+          "inversePatches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/nodes/2/data/sensor",
+              "value": "none"
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/values/2/currentValues/nodeValue"
+            }
+          ]
+        }
+      ],
+      "state": "complete"
+    },
+    {
+      "id": "e6",
+      "tree": "doc1",
+      "action": "/content/tileMap/t1/content/setProgram",
+      "undoable": true,
+      "created": 1700000005000,
+      "records": [
+        {
+          "tree": "doc1",
+          "action": "/content/tileMap/t1/content/setProgram",
+          "patches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/values/2/currentValues/nodeValue"
+            }
+          ],
+          "inversePatches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/values/2/currentValues/nodeValue",
+              "value": 0
+            }
+          ]
+        }
+      ],
+      "state": "complete"
+    },
+    {
+      "id": "e7",
+      "tree": "doc1",
+      "action": "/content/tileMap/t1/content/setProgramDataRate",
+      "undoable": true,
+      "created": 1700000006000,
+      "records": [
+        {
+          "tree": "doc1",
+          "action": "/content/tileMap/t1/content/setProgramDataRate",
+          "patches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/programDataRate",
+              "value": 100
+            }
+          ],
+          "inversePatches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/programDataRate",
+              "value": 1000
+            }
+          ]
+        }
+      ],
+      "state": "complete"
+    },
+    {
+      "id": "e8",
+      "tree": "doc1",
+      "action": "/content/tileMap/t1/content/setProgramZoom",
+      "undoable": true,
+      "created": 1700000007000,
+      "records": [
+        {
+          "tree": "doc1",
+          "action": "/content/tileMap/t1/content/setProgramZoom",
+          "patches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/programZoom/dx",
+              "value": -1.9398193359375
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/programZoom/dy",
+              "value": 90.92190551757812
+            }
+          ],
+          "inversePatches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/programZoom/dx",
+              "value": 0
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/programZoom/dy",
+              "value": 0
+            }
+          ]
+        }
+      ],
+      "state": "complete"
+    },
+    {
+      "id": "e9",
+      "tree": "doc1",
+      "action": "/content/tileMap/t1/content/setProgramZoom",
+      "undoable": true,
+      "created": 1700000008000,
+      "records": [
+        {
+          "tree": "doc1",
+          "action": "/content/tileMap/t1/content/setProgramZoom",
+          "patches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/programZoom/dx",
+              "value": -3.103759765625
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/programZoom/dy",
+              "value": 92.46951293945312
+            }
+          ],
+          "inversePatches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/programZoom/dx",
+              "value": -1.9398193359375
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/programZoom/dy",
+              "value": 90.92190551757812
+            }
+          ]
+        }
+      ],
+      "state": "complete"
+    }
+  ]
+}
