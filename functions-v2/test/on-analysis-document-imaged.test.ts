@@ -6,6 +6,10 @@ import * as logger from "firebase-functions/logger";
 import {getDatabase} from "firebase-admin/database";
 import * as admin from "firebase-admin";
 import {DocumentReference, FieldValue} from "@google-cloud/firestore";
+import {makeChange} from "firebase-functions-test/lib/v1";
+import {makeDataSnapshot} from "firebase-functions-test/lib/providers/database";
+import {hashDocumentContent} from "../../shared/ai-evaluation-gate";
+import {onAnalyzableTestDocWritten} from "../src/on-analyzable-doc-written";
 import * as dotenv from "dotenv";
 import * as path from "path";
 import {initialize, projectConfig} from "./initialize";
@@ -1410,25 +1414,54 @@ describe("functions", () => {
       ...fields,
     });
 
-    test("a successful evaluation records the index the queue entry carried", async () => {
+    const hashes = {contentHash: "c1", requestHash: "r1"};
+
+    test("a successful evaluation records both hashes the queue entry carried", async () => {
       mockCategorizeResponse({parsed, messageShape: "mixed"});
 
-      await runImaged(evaluated({historyIndex: 12}));
+      await runImaged(evaluated(hashes));
 
-      expect(await readGate()).toBe(12);
+      expect(await readGate()).toEqual(hashes);
     });
 
-    test("a queue entry with no history index leaves the gate alone", async () => {
-      // What a document whose history could not be read looks like. Writing anything here would
-      // either withhold the next evaluation or wipe what an earlier run legitimately recorded.
-      await getDatabase().ref(gatePath).set(5);
+    test.each([
+      ["content", {requestHash: "r1"}],
+      ["request", {contentHash: "c1"}],
+    ])("a queue entry with no %s hash leaves the gate alone", async (_missing, fields) => {
+      // Writing a half gate would wipe what an earlier run legitimately recorded.
+      const earlier = {contentHash: "c0", requestHash: "r0"};
+      await getDatabase().ref(gatePath).set(earlier);
       mockCategorizeResponse({parsed, messageShape: "mixed"});
 
-      await runImaged(evaluated({historyIndex: undefined}));
+      await runImaged(evaluated(fields));
 
-      expect(await readGate()).toBe(5);
+      expect(await readGate()).toEqual(earlier);
       expect(logger.warn).not.toHaveBeenCalledWith(
         "Could not advance the evaluation gate", expect.anything(), expect.anything());
+    });
+
+    // The content was saved again while the evaluation ran. The gate must record what was
+    // evaluated, so the next session end evaluates the newer content rather than skipping it.
+    test("content saved during the run is not recorded as evaluated", async () => {
+      const contentA = JSON.stringify({tiles: ["A"]});
+      const contentB = JSON.stringify({tiles: ["B"]});
+      const ranOn = {contentHash: hashDocumentContent(contentA), requestHash: "r1"};
+      await getDatabase().ref(`${sampleDoc.documentPath}/content`).set(contentB);
+      mockCategorizeResponse({parsed, messageShape: "mixed"});
+
+      await runImaged(evaluated(ranOn));
+
+      expect(await readGate()).toEqual(ranOn);
+
+      const evaluationPath = `${sampleDoc.metadataPath}/evaluation/${sampleDoc.evaluator}`;
+      await fft.wrap(onAnalyzableTestDocWritten)({
+        data: makeChange(makeDataSnapshot(null, evaluationPath),
+          makeDataSnapshot({timestamp: 2002, requestHash: "r1"}, evaluationPath)),
+        params: {realm: "demo", realmId: "AI", portalId: "demo", classId: "democlass1", userId: "1",
+          docId: "testdoc1", evaluator: sampleDoc.evaluator},
+      });
+      expect(await admin.firestore().doc("analysis/queue/pending/testdoc1").get().then((doc) => doc.data()))
+        .toMatchObject({docUpdated: 2002});
     });
 
     test("a comment that cannot be written leaves the gate unadvanced", async () => {
@@ -1445,7 +1478,7 @@ describe("functions", () => {
         });
 
       try {
-        await expect(runImaged(evaluated({historyIndex: 12}))).rejects.toThrow("firestore unavailable");
+        await expect(runImaged(evaluated(hashes))).rejects.toThrow("firestore unavailable");
       } finally {
         spy.mockRestore();
       }
@@ -1470,7 +1503,7 @@ describe("functions", () => {
       });
 
       try {
-        await runImaged(evaluated({historyIndex: 12, requestIds: ["req-gate-1"]}));
+        await runImaged(evaluated({...hashes, requestIds: ["req-gate-1"]}));
       } finally {
         spy.mockRestore();
       }
@@ -1479,7 +1512,7 @@ describe("functions", () => {
         "Could not advance the evaluation gate", "analysis/queue/imaged/testdoc1", expect.any(Error));
       expect(await admin.firestore().collection(sampleDoc.commentsPath).count().get()
         .then((result) => result.data().count)).toBe(1);
-      expect(await doneRecord()).toMatchObject({historyIndex: 12});
+      expect(await doneRecord()).toMatchObject(hashes);
       const status = await getDatabase()
         .ref(`${sampleDoc.metadataPath}/evaluationStatus/${sampleDoc.evaluator}/req-gate-1`)
         .once("value").then((snapshot) => snapshot.val());

@@ -15,6 +15,7 @@ import * as classifier from "../../shared/ai-analysis-classify";
 import * as summarizer from "../../shared/ai-summarizer/ai-summarizer";
 import * as claimRequestIdsModule from "../src/claim-request-ids";
 import {kMaxFrameHeightPx} from "../../shared/render-page";
+import {hashDocumentContent} from "../../shared/ai-evaluation-gate";
 import {pngHeaderBytes} from "../../shared/png-header-test-helpers";
 // fetch/Response are ambient globals here, but ReadableStream needs an explicit import.
 import {ReadableStream} from "node:stream/web";
@@ -486,6 +487,17 @@ describe("functions", () => {
           .toEqual({content: expect.any(String), height: 500, fullPage: true});
         // The page itself is what bounds a fullPage capture; the viewport above does not.
         expect(shutterbug.postedPage()).toContain(`Math.min(height, ${kMaxFrameHeightPx})`);
+      });
+
+      // The gate records this, so it must be what was read, not what the request was made against.
+      test("the imaged record carries the hash of the content this run read", async () => {
+        await givenDocument("mixedHash", mixedDoc);
+        stubShutterbug(shutterbugOk());
+
+        await runPending("mixedHash", {requestHash: "r1"});
+
+        expect(await imagedRecord("mixedHash"))
+          .toMatchObject({contentHash: hashDocumentContent(mixedDoc), requestHash: "r1"});
       });
 
       test("a populated document's requestId rides through to the imaged record", async () => {

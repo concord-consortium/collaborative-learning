@@ -15,6 +15,7 @@ import {readPngDimensions} from "../../shared/png-header";
 import {isPublicHttpsUrl, isShutterbugImageHost} from "../../shared/urls";
 import {kPlaceholderUnitCode} from "../../shared/shared";
 import {classifyDocument, documentHasStudentWork} from "../../shared/ai-analysis-classify";
+import {hashDocumentContent} from "../../shared/ai-evaluation-gate";
 import {writeEvaluationStatusForRequests} from "./evaluation-status";
 import {claimRequestIds} from "./claim-request-ids";
 
@@ -464,6 +465,9 @@ export const onAnalysisDocumentPending =
         await error(`Could not retrieve document content ${documentPath}`, event, accumulated);
         return;
       }
+      // What was actually read, not what the request was made against: content saved after this
+      // read must not be recorded as evaluated.
+      accumulated.contentHash = hashDocumentContent(content);
 
       // The document's unit, from its Firestore metadata. It picks the unit the screenshot is
       // rendered with.

@@ -5,9 +5,9 @@ import { getSnapshot } from "mobx-state-tree";
 import { nanoid } from "nanoid";
 import React from "react";
 import FileSaver from "file-saver";
-import { getSimpleDocumentPath, kAnalyzerUserParams } from "../../../shared/shared";
+import { kAnalyzerUserParams } from "../../../shared/shared";
 import { documentHasStudentWork } from "../../../shared/ai-analysis-classify";
-import { hasChangedSinceEvaluation } from "../../../shared/ai-evaluation-gate";
+import { hashDocumentContent, isUnchangedSinceEvaluation } from "../../../shared/ai-evaluation-gate";
 import { DEBUG_HISTORY_VIEW } from "../../lib/debug";
 import { Logger } from "../../lib/logger";
 import { LogEventName } from "../../lib/logger-types";
@@ -21,8 +21,6 @@ import { IDEAS_EMPTY_MESSAGE, IDEAS_REQUEST_FAILED_MESSAGE, IDEAS_UNCHANGED_MESS
   from "../../models/document/ai-evaluation-messages";
 import { logDocumentEvent, logDocumentViewEvent } from "../../models/document/log-document-event";
 import { waitForSaveSettled } from "../../models/document/wait-for-save-settled";
-import { getLastHistoryEntry } from "../../models/history/history-firestore";
-import { TreeManagerType } from "../../models/history/tree-manager";
 import { IToolbarModel } from "../../models/stores/problem-configuration";
 import { SupportType, TeacherSupportModelType, AudienceEnum } from "../../models/stores/supports";
 import { WorkspaceModelType } from "../../models/stores/workspace";
@@ -582,36 +580,29 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
     // registered that a later status could match.
     let isUnchanged = false;
     if (aiEnabled && !isEmpty) {
+      let gateTimer: ReturnType<typeof setTimeout> | undefined;
       try {
-        // These reads have no timeout of their own and run before the request deadline below is
-        // even created, so a stalled connection here would leave ideasClickInProgress -- and the
-        // Ideas button -- disabled for the rest of the session, with no message and nothing to
-        // retry. Bounded by the same deadline the request itself uses. A read that lands late
-        // resolves into nothing: `gate` has already settled, so its value is dropped.
-        const [gateIndex, lastEntry] = await Promise.race([
-          Promise.all([
-            firebase.getEvaluationGateIndex(user, document.key, document.uid),
-            getLastHistoryEntry(this.stores.db.firestore, getSimpleDocumentPath(document.key))
-          ]),
-          // Fails open on expiry: undefined reads as "no gate recorded", which permits the
-          // evaluation. Spending a request beats stranding the student.
-          new Promise<[undefined, undefined]>(resolve =>
-            setTimeout(() => resolve([undefined, undefined]), kIdeasRequestDeadlineMs))
+        // This read has no timeout of its own and runs before the request deadline below is even
+        // created, so a stalled connection would leave ideasClickInProgress -- and the Ideas
+        // button -- disabled for the rest of the session. Bounded by the request's own deadline.
+        const gate = await Promise.race([
+          firebase.getEvaluationGate(user, document.key, document.uid),
+          // Fails open on expiry: no gate permits the evaluation.
+          new Promise<undefined>(resolve => {
+            gateTimer = setTimeout(() => resolve(undefined), kIdeasRequestDeadlineMs);
+          })
         ]);
-        // A completed history entry uploads to Firestore fire-and-forget, and waitForSaveSettled
-        // does not cover that upload, so the read above can miss an edit the student just made --
-        // exactly the student this nudge would be most wrong about. When the newest entry this
-        // client knows of is not the one Firestore returned, there is a change the index cannot
-        // yet reflect. Errs toward spending a request: the cost of a false nudge is a student
-        // told their work does not count.
-        const treeManager = document.treeManagerAPI as TreeManagerType | undefined;
-        const newestLocalEntryId = treeManager?.latestDocumentHistoryEntry?.id;
-        const hasUnseenLocalEntry = !!newestLocalEntryId && newestLocalEntryId !== lastEntry?.id;
-        isUnchanged = !hasUnseenLocalEntry && !hasChangedSinceEvaluation(lastEntry?.index, gateIndex);
+        // The local content, not the saved copy: an edit not yet saved hashes differently from
+        // the gate, so the request goes ahead. The save writes this same string.
+        const contentHash = hashDocumentContent(JSON.stringify(getSnapshot(document.content!)));
+        const { requestHash } = firebase.getEvaluationRequest();
+        isUnchanged = isUnchangedSinceEvaluation(gate, contentHash, requestHash);
       } catch (error) {
         // Fail open: a gate we can't read must not withhold an evaluation, and must not leave the
         // button disabled by throwing out of the handler.
         console.error("Ideas gate check failed:", error);
+      } finally {
+        clearTimeout(gateTimer);
       }
     }
 

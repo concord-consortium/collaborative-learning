@@ -11,7 +11,7 @@ import {
 import {Summary} from "./summary-types";
 import {defineSecret} from "firebase-functions/params";
 import {kAnalyzerUserParams} from "../../shared/shared";
-import {kEvaluationGateKey} from "../../shared/ai-evaluation-gate";
+import {IEvaluationGate, kEvaluationGateKey} from "../../shared/ai-evaluation-gate";
 import {writeEvaluationStatusForRequests} from "./evaluation-status";
 import {claimRequestIds} from "./claim-request-ids";
 
@@ -276,11 +276,13 @@ export const onAnalysisDocumentImaged =
 
       // Only now: the gate must advance on success alone, so a failed evaluation leaves it where
       // it was and the next attempt is not skipped.
-      if (typeof queueDoc.historyIndex === "number" && queueDoc.metadataPath && queueDoc.evaluator) {
+      if (typeof queueDoc.contentHash === "string" && typeof queueDoc.requestHash === "string" &&
+          queueDoc.metadataPath && queueDoc.evaluator) {
         try {
+          const gate: IEvaluationGate = {contentHash: queueDoc.contentHash, requestHash: queueDoc.requestHash};
           await getDatabase()
             .ref(`${queueDoc.metadataPath}/${kEvaluationGateKey}/${queueDoc.evaluator}`)
-            .set(queueDoc.historyIndex);
+            .set(gate);
         } catch (err) {
           // An unwritten gate costs one redundant evaluation; throwing here would cost the done
           // record, the queue removal and the "commented" status the Ideas client waits for.

@@ -1,5 +1,6 @@
 import { act, configure, fireEvent, render, screen } from "@testing-library/react";
 import React from "react";
+import { getSnapshot } from "mobx-state-tree";
 import { Provider } from "mobx-react";
 import { DocumentComponent } from "./document";
 import { createDocumentModel, DocumentModelType, SaveState } from "../../models/document/document";
@@ -9,11 +10,9 @@ import { specStores } from "../../models/stores/spec-stores";
 import { specAppConfig } from "../../models/stores/spec-app-config";
 import { createSingleTileContent } from "../../utilities/test-utils";
 import { kAnalyzerUserParams } from "../../../shared/shared";
-import { HistoryEntry } from "../../models/history/history";
-import { TreeManagerType } from "../../models/history/tree-manager";
+import { hashDocumentContent } from "../../../shared/ai-evaluation-gate";
 import { IDEAS_EMPTY_MESSAGE, IDEAS_REQUEST_FAILED_MESSAGE, IDEAS_UNCHANGED_MESSAGE }
   from "../../models/document/ai-evaluation-messages";
-import { getLastHistoryEntry } from "../../models/history/history-firestore";
 import { Logger } from "../../lib/logger";
 import { kIdeasRequestDeadlineMs } from "../../models/document/document-comments-manager";
 import { logDocumentEvent } from "../../models/document/log-document-event";
@@ -34,10 +33,6 @@ jest.mock("./document-file-menu", () => ({
 }));
 jest.mock("./mywork-document-or-browser", () => ({
   MyWorkDocumentOrBrowser: () => null
-}));
-
-jest.mock("../../models/history/history-firestore", () => ({
-  getLastHistoryEntry: jest.fn()
 }));
 
 jest.mock("../../models/document/log-document-event", () => ({
@@ -95,8 +90,9 @@ function makeStores(aiEvaluation?: "categorize-design" | "custom") {
   jest.spyOn(stores.db.firebase, "getEvaluationStatusPath").mockReturnValue("status/path");
   jest.spyOn(stores.db.firebase, "ref").mockReturnValue({ on: jest.fn(), off: jest.fn() } as any);
   // Defaults that read as "changed": these scenarios are about documents never yet evaluated.
-  jest.spyOn(stores.db.firebase, "getEvaluationGateIndex").mockResolvedValue(undefined);
-  (getLastHistoryEntry as jest.Mock).mockResolvedValue(undefined);
+  jest.spyOn(stores.db.firebase, "getEvaluationGate").mockResolvedValue(undefined);
+  jest.spyOn(stores.db.firebase, "getEvaluationRequest")
+    .mockReturnValue({ aiPrompt: undefined, context: undefined, requestHash: "request-hash" });
   return stores;
 }
 
@@ -111,6 +107,14 @@ function populatedDocument() {
     type: ProblemDocument, uid: "u1", key: "doc1", createdAt: 1,
     content: createSingleTileContent({ type: "Text", format: "markdown", text: "hello" })
   });
+}
+
+// The gate the server would have recorded after evaluating this document as it is now.
+function gateMatching(document: DocumentModelType, stores: ReturnType<typeof specStores>) {
+  return {
+    contentHash: hashDocumentContent(JSON.stringify(getSnapshot(document.content!))),
+    requestHash: stores.db.firebase.getEvaluationRequest().requestHash
+  };
 }
 
 function clickIdeas() {
@@ -171,7 +175,7 @@ describe("Ideas button", () => {
     renderDocument(document, stores);
 
     clickIdeas();
-    // Only the gate reads have settled. The id is minted as soon as they do and before
+    // Only the gate read has settled. The id is minted as soon as it does and before
     // waitForSaveSettled resolves, so no status for this click can ever find a stale id.
     await flushMicrotasks();
     expect(document.commentsManager?.latestIdeasRequestId).toEqual(expect.any(String));
@@ -193,17 +197,10 @@ describe("Ideas button", () => {
     expect(stores.db.firebase.ref).toHaveBeenCalledWith("status/path");
   });
 
-  it("on an unchanged document: nudges and makes no request", async () => {
+  it("on an unchanged document and request: nudges and makes no request", async () => {
     const stores = makeStores("categorize-design");
-    jest.spyOn(stores.db.firebase, "getEvaluationGateIndex").mockResolvedValue(47);
-    (getLastHistoryEntry as jest.Mock).mockResolvedValue({ index: 47, id: "entry-47" });
     const document = populatedDocument();
-    // The student edited earlier in this session and that entry has since uploaded, so the newest
-    // entry this client knows of is the one Firestore reports. Without an entry here the local
-    // check would pass trivially and this would stop pinning the gate.
-    (document.treeManagerAPI as TreeManagerType).addHistoryEntryAfterApplying(
-      HistoryEntry.create({ id: "entry-47", tree: document.key, state: "complete" })
-    );
+    jest.spyOn(stores.db.firebase, "getEvaluationGate").mockResolvedValue(gateMatching(document, stores));
     renderDocument(document, stores);
 
     clickIdeas();
@@ -211,24 +208,19 @@ describe("Ideas button", () => {
 
     expect(document.commentsManager?.statusMessage).toMatchObject({ message: IDEAS_UNCHANGED_MESSAGE });
     expect(stores.db.firebase.setLastEditedNow).not.toHaveBeenCalled();
-    // The gate is raised before the reads above, so this early return has to release it or the
+    expect(document.commentsManager?.latestIdeasRequestId).toBeNull();
+    // The gate is raised before the read above, so this early return has to release it or the
     // button stays disabled for the rest of the session.
     expect(document.commentsManager?.canRequestIdeas).toBe(true);
   });
 
-  // The Firestore read can trail the student by a whole edit: a completed entry uploads
-  // fire-and-forget, and waitForSaveSettled does not cover that upload. Nudging here would tell a
-  // student who just did real work that they had not.
-  it("on an edit Firestore has not caught up with: requests rather than nudging", async () => {
+  // Covers an edit not yet saved, too: the local content is what is hashed.
+  it("on content that differs from the gate: requests rather than nudging", async () => {
     const stores = makeStores("categorize-design");
-    jest.spyOn(stores.db.firebase, "getEvaluationGateIndex").mockResolvedValue(47);
-    // The index and id Firestore still reports -- the state at the last evaluation.
-    (getLastHistoryEntry as jest.Mock).mockResolvedValue({ index: 47, id: "entry-47" });
     const document = populatedDocument();
-    // The entry the student's edit just created, not yet uploaded.
-    (document.treeManagerAPI as TreeManagerType).addHistoryEntryAfterApplying(
-      HistoryEntry.create({ id: "entry-48", tree: document.key, state: "complete" })
-    );
+    const gate = gateMatching(document, stores);
+    jest.spyOn(stores.db.firebase, "getEvaluationGate")
+      .mockResolvedValue({ ...gate, contentHash: `${gate.contentHash}-earlier` });
     renderDocument(document, stores);
 
     clickIdeas();
@@ -238,9 +230,25 @@ describe("Ideas button", () => {
     expect(stores.db.firebase.setLastEditedNow).toHaveBeenCalled();
   });
 
-  it("when the gate reads fail: requests anyway rather than withholding or throwing", async () => {
+  // The same document asked about from a different problem, or under a revised prompt.
+  it("on a request that differs from the gate: requests rather than nudging", async () => {
     const stores = makeStores("categorize-design");
-    (getLastHistoryEntry as jest.Mock).mockRejectedValue(new Error("firestore unavailable"));
+    const document = populatedDocument();
+    const gate = gateMatching(document, stores);
+    jest.spyOn(stores.db.firebase, "getEvaluationGate")
+      .mockResolvedValue({ ...gate, requestHash: `${gate.requestHash}-other-problem` });
+    renderDocument(document, stores);
+
+    clickIdeas();
+    await flushMicrotasks();
+
+    expect(document.commentsManager?.statusMessage?.message).not.toBe(IDEAS_UNCHANGED_MESSAGE);
+    expect(stores.db.firebase.setLastEditedNow).toHaveBeenCalled();
+  });
+
+  it("when the gate read fails: requests anyway rather than withholding or throwing", async () => {
+    const stores = makeStores("categorize-design");
+    jest.spyOn(stores.db.firebase, "getEvaluationGate").mockRejectedValue(new Error("rtdb unavailable"));
     const document = populatedDocument();
     const consoleErrorSpy = jest.spyOn(console, "error").mockImplementation(() => {});
     renderDocument(document, stores);
@@ -255,19 +263,6 @@ describe("Ideas button", () => {
     expect(consoleErrorSpy).toHaveBeenCalledWith("Ideas gate check failed:", expect.any(Error));
 
     consoleErrorSpy.mockRestore();
-  });
-
-  it("on a changed document: requests as usual", async () => {
-    const stores = makeStores("categorize-design");
-    jest.spyOn(stores.db.firebase, "getEvaluationGateIndex").mockResolvedValue(47);
-    (getLastHistoryEntry as jest.Mock).mockResolvedValue({ index: 52, id: "entry-52" });
-    const document = populatedDocument();
-    renderDocument(document, stores);
-
-    clickIdeas();
-    await flushMicrotasks();
-
-    expect(stores.db.firebase.setLastEditedNow).toHaveBeenCalled();
   });
 
   it("a status already present at the path when the listener attaches (a previous request's) " +
@@ -468,15 +463,14 @@ describe("Ideas button", () => {
     consoleErrorSpy.mockRestore();
   });
 
-  // The gate reads run after ideasClickInProgress is raised but before the request deadline below
+  // The gate read runs after ideasClickInProgress is raised but before the request deadline below
   // is created, so without a bound of their own a stalled connection here would disable the Ideas
   // button for the rest of the session, with no message and nothing to retry.
   it("when a gate read never settles: fails open, requests anyway, and releases the gate", async () => {
     jest.useFakeTimers();
     const stores = makeStores("categorize-design");
-    jest.spyOn(stores.db.firebase, "getEvaluationGateIndex")
-      .mockReturnValue(new Promise<number | undefined>(() => { /* never settles */ }));
-    (getLastHistoryEntry as jest.Mock).mockResolvedValue({ index: 47, id: "entry-47" });
+    jest.spyOn(stores.db.firebase, "getEvaluationGate")
+      .mockReturnValue(new Promise<unknown>(() => { /* never settles */ }));
     const document = populatedDocument();
     renderDocument(document, stores);
 

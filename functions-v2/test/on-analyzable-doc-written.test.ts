@@ -8,6 +8,7 @@ import {getDatabase} from "firebase-admin/database";
 import * as admin from "firebase-admin";
 
 import {initialize, projectConfig} from "./initialize";
+import {hashDocumentContent} from "../../shared/ai-evaluation-gate";
 import {
   normalizeRequestContext, onAnalyzableProdDocWritten, onAnalyzableTestDocWritten,
 } from "../src/on-analyzable-doc-written";
@@ -304,14 +305,18 @@ describe("functions", () => {
   describe("on-analyzable-doc-written with an evaluation gate", () => {
     const metadataPath = "demo/AI/portals/demo/classes/democlass1/users/1/documentMetadata/testdoc1";
     const documentPath = "demo/AI/portals/demo/classes/democlass1/users/1/documents/testdoc1";
+    const contentA = JSON.stringify({tiles: ["A"]});
+    const contentB = JSON.stringify({tiles: ["B"]});
 
-    const seedHistoryEntry = (index: number) =>
-      admin.firestore().collection("demo/AI/documents/testdoc1/history").doc(`entry-${index}`).set({index});
+    const saveContent = (content: string) => getDatabase().ref(`${documentPath}/content`).set(content);
 
     // The literal key, not kEvaluationGateKey: the point of the node is that it is a sibling of
     // `evaluation` rather than a child, so the path the function reads is what is pinned here.
-    const seedGate = (index: number, evaluator = "categorize-design") =>
-      getDatabase().ref(`${metadataPath}/evaluationGate/${evaluator}`).set(index);
+    const seedGate = (gate: unknown, evaluator = "categorize-design") =>
+      getDatabase().ref(`${metadataPath}/evaluationGate/${evaluator}`).set(gate);
+
+    const gateFor = (content: string, requestHash = "r1") =>
+      ({contentHash: hashDocumentContent(content), requestHash});
 
     const writeEvaluation = async (value: any, evaluator = "categorize-design") => {
       const path = `${metadataPath}/evaluation/${evaluator}`;
@@ -333,37 +338,53 @@ describe("functions", () => {
 
     // The session-end route: nothing is waiting on the comment, so an unchanged document is not
     // worth paying to evaluate again.
-    test("does not queue an unrequested evaluation of a document unchanged since the last one", async () => {
-      await seedHistoryEntry(7);
-      await seedGate(7);
+    test("does not queue an unrequested evaluation whose content and request match the gate", async () => {
+      await saveContent(contentA);
+      await seedGate(gateFor(contentA));
 
-      expect(await writeEvaluation({timestamp: 1001})).toBeUndefined();
+      expect(await writeEvaluation({timestamp: 1001, requestHash: "r1"})).toBeUndefined();
       expect(logger.info).toHaveBeenCalledWith(`Skipping unchanged document ${documentPath} for categorize-design`);
     });
 
-    test("queues an unrequested evaluation of a document changed since the last one", async () => {
-      await seedHistoryEntry(7);
-      await seedGate(7);
-      await seedHistoryEntry(8);
+    // No history entry is involved: an edit whose history has not uploaded is still a change.
+    test("queues an unrequested evaluation when the saved content has changed", async () => {
+      await saveContent(contentB);
+      await seedGate(gateFor(contentA));
 
-      expect(await writeEvaluation({timestamp: 1001})).toMatchObject({historyIndex: 8});
+      expect(await writeEvaluation({timestamp: 1001, requestHash: "r1"})).toMatchObject({requestHash: "r1"});
     });
 
-    // A skipped request would leave the Ideas client waiting for a comment that never arrives.
-    test("queues a requested evaluation even when the document is unchanged", async () => {
-      await seedHistoryEntry(7);
-      await seedGate(7);
+    // A revised prompt, or the same document asked about from another problem.
+    test("queues an unrequested evaluation when the request has changed", async () => {
+      await saveContent(contentA);
+      await seedGate(gateFor(contentA));
 
-      expect(await writeEvaluation({timestamp: 1001, requestId: "req-abc"}))
-        .toMatchObject({requestIds: ["req-abc"], historyIndex: 7});
+      expect(await writeEvaluation({timestamp: 1001, requestHash: "r2"})).toMatchObject({requestHash: "r2"});
+    });
+
+    // A client from before the gate cannot be compared, so it is evaluated as it always was.
+    test("queues an unrequested evaluation that carries no requestHash", async () => {
+      await saveContent(contentA);
+      await seedGate(gateFor(contentA));
+
+      expect(await writeEvaluation({timestamp: 1001})).toMatchObject({docUpdated: 1001});
     });
 
     // An absent gate must never read as unchanged: a document nobody has evaluated yet would
     // then never be evaluated at all.
     test("queues an unrequested evaluation when no gate has been recorded yet", async () => {
-      await seedHistoryEntry(7);
+      await saveContent(contentA);
 
-      expect(await writeEvaluation({timestamp: 1001})).toMatchObject({historyIndex: 7});
+      expect(await writeEvaluation({timestamp: 1001, requestHash: "r1"})).toMatchObject({requestHash: "r1"});
+    });
+
+    // A skipped request would leave the Ideas client waiting for a comment that never arrives.
+    test("queues a requested evaluation even when nothing has changed", async () => {
+      await saveContent(contentA);
+      await seedGate(gateFor(contentA));
+
+      expect(await writeEvaluation({timestamp: 1001, requestHash: "r1", requestId: "req-abc"}))
+        .toMatchObject({requestIds: ["req-abc"], requestHash: "r1"});
     });
   });
 
