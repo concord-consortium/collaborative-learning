@@ -1,7 +1,7 @@
 import { nanoid } from "nanoid";
 import { cloneDeep } from "lodash";
 import { reaction } from "mobx";
-import { getSnapshot, getType, Instance, types } from "mobx-state-tree";
+import { getSnapshot, getType, IJsonPatch, Instance, types } from "mobx-state-tree";
 import { ITileProps } from "src/components/tiles/tile-component";
 import { SharedModel, SharedModelType } from "../shared/shared-model";
 import { registerSharedModelInfo } from "../shared/shared-model-registry";
@@ -13,6 +13,7 @@ import { createDocumentModel } from "../document/document";
 import { ProblemDocument } from "../document/document-types";
 import { CDocument, FAKE_EXCHANGE_ID, FAKE_HISTORY_ENTRY_ID, TreeManager } from "./tree-manager";
 import { HistoryEntrySnapshot } from "./history";
+import { PatchApplicationError } from "./tree";
 import { expectEntryToBeComplete } from "./undo-store-test-utils";
 
 const TestSharedModel = SharedModel
@@ -385,6 +386,31 @@ it("applies model replacements after the patches, in the same action", async () 
   expect(spy).toHaveBeenCalledTimes(1);
   expect(spy.mock.calls[0][0]).toEqual([true, "replaced"]);
   expect(docContent.tileMap.get("t1")).toBe(tile);
+});
+
+it("undoes the changes a failing patch made before it threw", () => {
+  const {docModel, docContent, tileContent} = setupDocument();
+  tileContent.setActionText("initial");
+  const t1 = getSnapshot(docContent.tileMap.get("t1")!);
+
+  // MST reconciles t1 first, then throws on t9, whose id doesn't match its key.
+  const tileMapPatch: IJsonPatch = {op: "replace", path: "/content/tileMap", value: {
+    t1: {...t1, content: {...t1.content, actionText: "changed"}},
+    t9: {id: "other", content: {type: "TestTile"}}
+  }};
+  let error: unknown;
+  try {
+    docModel.applyPatchesFromManager(FAKE_HISTORY_ENTRY_ID, FAKE_EXCHANGE_ID,
+      [{op: "replace", path: "/content/tileMap/t1/content/flag", value: true}, tileMapPatch]);
+  } catch (e) {
+    error = e;
+  }
+
+  expect(error).toBeInstanceOf(PatchApplicationError);
+  expect((error as PatchApplicationError).numApplied).toBe(1);
+  expect(tileContent.flag).toBe(true);
+  expect(tileContent.actionText).toBe("initial");
+  expect(docContent.tileMap.has("t9")).toBe(false);
 });
 
 // A history entry containing a patch that references a non-existent tile.
