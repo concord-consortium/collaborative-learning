@@ -1,5 +1,6 @@
 import { RefObject, useEffect, useRef } from "react";
 import { DataGridHandle } from "react-data-grid";
+import { TRow } from "./table-types";
 
 // How close to the bottom still counts as "following". A couple of pixels of slack absorbs the
 // fractional scrollHeight browsers report at non-integer zoom, which would otherwise read as
@@ -35,10 +36,22 @@ function prefersReducedMotion() {
  * Only follows while the view is already at the bottom. A student who scrolled up to read earlier
  * rows must not be yanked back by the next recorded point, so scrolling away opts out until they
  * scroll back down.
+ *
+ * Only an append scrolls: the row count grew and a different row is now last. A row inserted
+ * mid-table (a Data Card insert, or undoing a delete) leaves the view where it is, as does a sort or
+ * reorder that changes the last row without adding one.
  */
-export function useFollowNewRows(gridRef: RefObject<DataGridHandle>, rowCount: number) {
+export function useFollowNewRows(
+  gridRef: RefObject<DataGridHandle>, rows: ReadonlyArray<Pick<TRow, "__id__">>, inputRowId: string
+) {
+  const rowCount = rows.length;
+  // An editable table's rows end with the input row, which is always last; look past it.
+  const lastRow = rows[rows.length - 1];
+  const lastRowId = (lastRow?.__id__ === inputRowId ? rows[rows.length - 2] : lastRow)?.__id__;
+
   const following = useRef(true);
   const lastRowCount = useRef(rowCount);
+  const prevLastRowId = useRef(lastRowId);
   const lastRowAt = useRef(0);
   const animatingUntil = useRef(0);
 
@@ -58,10 +71,11 @@ export function useFollowNewRows(gridRef: RefObject<DataGridHandle>, rowCount: n
   }, [gridRef]);
 
   useEffect(() => {
-    const grew = rowCount > lastRowCount.current;
+    const appended = rowCount > lastRowCount.current && lastRowId !== prevLastRowId.current;
     lastRowCount.current = rowCount;
+    prevLastRowId.current = lastRowId;
     const element = gridRef.current?.element;
-    if (!grew || !following.current || !element) return;
+    if (!appended || !following.current || !element) return;
 
     const now = Date.now();
     const rapid = now - lastRowAt.current < kSmoothMinIntervalMs;
@@ -75,8 +89,8 @@ export function useFollowNewRows(gridRef: RefObject<DataGridHandle>, rowCount: n
     // rather than leaving it to finish one row short.
     animatingUntil.current = smooth ? now + kAnimationWindowMs : 0;
 
-    // scrollTo rather than the grid's scrollToCell, which also moves the selected cell -- following
-    // the data must not steal a cell the student is editing.
+    // scrollTo on the grid rather than the grid's scrollToCell, which uses scrollIntoView and so
+    // also scrolls the document to bring the row on screen.
     element.scrollTo({ top, behavior: smooth ? "smooth" : "auto" });
-  }, [gridRef, rowCount]);
+  }, [gridRef, rowCount, lastRowId]);
 }

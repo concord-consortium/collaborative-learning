@@ -197,7 +197,7 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
     ...rowLabelProps, showRowLabels, measureColumnWidth, lookupImage, onSort,
   });
 
-  useFollowNewRows(gridRef, rows.length);
+  useFollowNewRows(gridRef, rows, inputRowId.current);
 
   // Keep columns/rows accessible to keyboard-nav handlers without triggering re-renders.
   // selectedCellRef is sourced from useDataSet (destructured below as selectedCell).

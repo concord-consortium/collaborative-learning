@@ -21,20 +21,48 @@ function freezeTime() {
   jest.spyOn(Date, "now").mockReturnValue(Date.now() + 10_000);
 }
 
-function renderFollow(grid: ReturnType<typeof makeElement>, rowCount: number) {
+const kInputRowId = "input-row";
+
+interface IFollowProps { count: number, caseIds?: string[], readOnly?: boolean }
+
+/** The grid's rows, shaped as the table builds them: one per case, then the input row unless the
+ *  table is read-only. The cases are case-1..case-count unless a test gives its own, so growing the
+ *  count reads as an append. */
+function rowsFor({ count, caseIds, readOnly }: IFollowProps) {
+  const ids = caseIds ?? Array.from({ length: count }, (_, i) => `case-${i + 1}`);
+  const rows = ids.map(id => ({ __id__: id }));
+  return readOnly ? rows : [...rows, { __id__: kInputRowId }];
+}
+
+function renderFollow(grid: ReturnType<typeof makeElement>, rowCount: number, readOnly = false) {
   const ref = { current: grid as any };
-  return renderHook(({ count }) => useFollowNewRows(ref, count), { initialProps: { count: rowCount } });
+  return renderHook(
+    (props: IFollowProps) => useFollowNewRows(ref, rowsFor(props), kInputRowId),
+    { initialProps: { count: rowCount, readOnly } as IFollowProps }
+  );
 }
 
 describe("useFollowNewRows", () => {
   afterEach(() => jest.restoreAllMocks());
 
+  // The input row is always last in an editable table, so the hook has to look past it to see a
+  // new case arrive.
   it("scrolls to the newest row when a row arrives", () => {
     const grid = makeElement();            // scrollTop 400 of 500 - 100: already at the bottom
     const { rerender } = renderFollow(grid, 5);
 
     grid.element.scrollHeight = 530;
     rerender({ count: 6 });
+
+    expect(grid.element.scrollTop).toBe(430);
+  });
+
+  it("scrolls to the newest row in a read-only table, which has no input row", () => {
+    const grid = makeElement();
+    const { rerender } = renderFollow(grid, 5, true);
+
+    grid.element.scrollHeight = 530;
+    rerender({ count: 6, readOnly: true });
 
     expect(grid.element.scrollTop).toBe(430);
   });
@@ -87,6 +115,26 @@ describe("useFollowNewRows", () => {
     const { rerender } = renderFollow(grid, 5);
 
     rerender({ count: 5 });
+
+    expect(grid.element.scrollTop).toBe(400);
+  });
+
+  it("does not scroll when a row is inserted mid-table", () => {
+    const grid = makeElement();
+    const { rerender } = renderFollow(grid, 5);
+
+    grid.element.scrollHeight = 530;
+    // grew, but the same case is still last
+    rerender({ count: 6, caseIds: ["case-1", "case-2", "new", "case-3", "case-4", "case-5"] });
+
+    expect(grid.element.scrollTop).toBe(400);
+  });
+
+  it("does not scroll when a sort or reorder puts a different row last", () => {
+    const grid = makeElement();
+    const { rerender } = renderFollow(grid, 5);
+
+    rerender({ count: 5, caseIds: ["case-5", "case-4", "case-3", "case-2", "case-1"] });
 
     expect(grid.element.scrollTop).toBe(400);
   });
