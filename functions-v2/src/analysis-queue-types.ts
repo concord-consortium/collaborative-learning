@@ -67,6 +67,8 @@ export interface AnalysisImagedQueueDocument extends AnalysisQueueDocument {
   summarizer: "text" | "image";
   classification: AnalysisClassification;
   renderTarget: {clueUrl: string; unit: string};
+  /** A hash of the document content this run read; written to the gate on success. */
+  contentHash?: string;
   /** Present whenever the summarizer succeeded, whether or not the summary is being sent. */
   docSummary?: string;
   sendSummary: boolean;

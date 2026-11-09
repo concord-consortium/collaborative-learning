@@ -28,7 +28,18 @@ export const AIContentModel = TileContentModel
     hidePrompt: types.optional(types.boolean, false),
     prompt: "",
     text: "This is where the dynamically generated AI response will appear.",
-    refreshCount: types.optional(types.number, 0)
+    refreshCount: types.optional(types.number, 0),
+    /**
+     * A hash of the request (document summary, unit context and prompt) this tile's text was
+     * generated from. Not the document's history index: the tile's own setText writes advance
+     * that, so an index gate would invalidate itself on every refresh and could never fire.
+     */
+    evaluatedRequestHash: types.maybe(types.string),
+    /**
+     * When the server generated `text`, in milliseconds. Saved with the text because a gated mount
+     * makes no request, so there is no response to read the date from.
+     */
+    evaluatedAt: types.maybe(types.number)
   })
   .views(self => ({
     get isUserResizable() {
@@ -37,7 +48,9 @@ export const AIContentModel = TileContentModel
   }))
   .actions(self => ({
     exportJson() {
-      const { refreshCount: _, ...snapshot } = getSnapshot(self);
+      // Per-session bookkeeping rather than authored content: a copy of this tile lands in a
+      // document whose summary differs, where a carried-over hash or date would mean nothing.
+      const { refreshCount: _, evaluatedRequestHash: __, evaluatedAt: ___, ...snapshot } = getSnapshot(self);
       return stringify(snapshot);
     },
     // The setters below are pure mutations wired to controlled inputs (they fire on every keystroke).
@@ -53,8 +66,12 @@ export const AIContentModel = TileContentModel
     },
     // setText is only called by the AI-response effect on mount/refresh, never by a student, so it must
     // not emit an answer-change event. The student-triggered requestRefresh below is what gets logged.
-    setText(text: string) {
+    setText(text: string, evaluatedAt?: number) {
       self.text = text;
+      self.evaluatedAt = evaluatedAt;
+    },
+    setEvaluatedRequestHash(hash: string | undefined) {
+      self.evaluatedRequestHash = hash;
     },
     requestRefresh() {
       self.refreshCount++;

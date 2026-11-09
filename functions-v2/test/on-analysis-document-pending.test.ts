@@ -15,6 +15,7 @@ import * as classifier from "../../shared/ai-analysis-classify";
 import * as summarizer from "../../shared/ai-summarizer/ai-summarizer";
 import * as claimRequestIdsModule from "../src/claim-request-ids";
 import {kMaxFrameHeightPx} from "../../shared/render-page";
+import {hashDocumentContent} from "../../shared/ai-evaluation-gate";
 import {pngHeaderBytes} from "../../shared/png-header-test-helpers";
 // fetch/Response are ambient globals here, but ReadableStream needs an explicit import.
 import {ReadableStream} from "node:stream/web";
@@ -488,6 +489,17 @@ describe("functions", () => {
         expect(shutterbug.postedPage()).toContain(`Math.min(height, ${kMaxFrameHeightPx})`);
       });
 
+      // The gate records this, so it must be what was read, not what the request was made against.
+      test("the imaged record carries the hash of the content this run read", async () => {
+        await givenDocument("mixedHash", mixedDoc);
+        stubShutterbug(shutterbugOk());
+
+        await runPending("mixedHash", {requestHash: "r1"});
+
+        expect(await imagedRecord("mixedHash"))
+          .toMatchObject({contentHash: hashDocumentContent(mixedDoc), requestHash: "r1"});
+      });
+
       test("a populated document's requestId rides through to the imaged record", async () => {
         await givenDocument("mixed1b", mixedDoc);
         stubShutterbug(shutterbugOk());
@@ -704,7 +716,7 @@ describe("functions", () => {
            "own skipped-empty status, and a late id is re-queued instead of also skipped",
       async () => {
         await givenDocument("emptymidflight1", emptyDoc);
-        await seedPendingDoc("emptymidflight1", {requestIds: ["req-emptymidflight-a"]});
+        await seedPendingDoc("emptymidflight1", {requestIds: ["req-emptymidflight-a"], requestHash: "r1"});
         const pendingDocRef = admin.firestore().doc("analysis/queue/pending/emptymidflight1");
         const realDoc = admin.firestore().doc.bind(admin.firestore());
         const docSpy = jest.spyOn(admin.firestore(), "doc").mockImplementation((path: string) => {
@@ -717,7 +729,7 @@ describe("functions", () => {
           } as any;
         });
 
-        await runPending("emptymidflight1", {requestIds: ["req-emptymidflight-a"]});
+        await runPending("emptymidflight1", {requestIds: ["req-emptymidflight-a"], requestHash: "r1"});
         docSpy.mockRestore();
 
         expect(await statusFor("emptymidflight1", "req-emptymidflight-a"))
@@ -728,7 +740,8 @@ describe("functions", () => {
         // It's back on a fresh pending document instead, for its own run to judge.
         const requeued = await pendingDocRef.get();
         expect(requeued.exists).toBe(true);
-        expect(requeued.data()).toMatchObject({requestIds: ["req-emptymidflight-b"]});
+        // With its requestHash, so a successful run of it still records the gate.
+        expect(requeued.data()).toMatchObject({requestIds: ["req-emptymidflight-b"], requestHash: "r1"});
       });
 
       // A third click can independently create a fresh pending document in this gap; re-creation

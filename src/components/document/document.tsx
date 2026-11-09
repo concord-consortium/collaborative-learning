@@ -7,6 +7,7 @@ import React from "react";
 import FileSaver from "file-saver";
 import { kAnalyzerUserParams } from "../../../shared/shared";
 import { documentHasStudentWork } from "../../../shared/ai-analysis-classify";
+import { hashDocumentContent, isUnchangedSinceEvaluation } from "../../../shared/ai-evaluation-gate";
 import { DEBUG_HISTORY_VIEW } from "../../lib/debug";
 import { Logger } from "../../lib/logger";
 import { LogEventName } from "../../lib/logger-types";
@@ -16,7 +17,8 @@ import {
 } from "../../models/document/document-comments-manager";
 import { LearningLogDocument, LearningLogPublication, PersonalDocument } from "../../models/document/document-types";
 import { getDocumentDisplayTitle, getDocumentTitleWithTimestamp } from "../../models/document/document-utils";
-import { IDEAS_EMPTY_MESSAGE, IDEAS_REQUEST_FAILED_MESSAGE } from "../../models/document/ai-evaluation-messages";
+import { IDEAS_EMPTY_MESSAGE, IDEAS_REQUEST_FAILED_MESSAGE, IDEAS_UNCHANGED_MESSAGE }
+  from "../../models/document/ai-evaluation-messages";
 import { logDocumentEvent, logDocumentViewEvent } from "../../models/document/log-document-event";
 import { waitForSaveSettled } from "../../models/document/wait-for-save-settled";
 import { IToolbarModel } from "../../models/stores/problem-configuration";
@@ -570,17 +572,60 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
     const aiEnabled = !!appConfig.aiEvaluation;
     const isEmpty = !document.content || !documentHasStudentWork(getSnapshot(document.content));
     const skipEmptyDocument = isEmpty && aiEnabled;
-    const requestId = (!isEmpty && aiEnabled) ? nanoid() : null;
-    // Must be recorded before any await below, so a status for this click can never find a stale id.
-    commentsManager.setLatestIdeasRequestId(requestId);
+    // Raised before the gate read below, so a second click during it is turned away by
+    // `canRequestIdeas` instead of starting a second evaluation. Every path below releases it.
+    commentsManager.setIdeasClickInProgress(true);
 
-    // Unselect all tiles, so that the whole-document comments are shown
+    // Before the gate read, so the panel opens at once even when that read stalls. Unselecting
+    // all tiles shows the whole-document comments.
     ui.clearSelectedTiles();
     persistentUI.openResourceDocument(document, appConfig, user, this.stores.sortedDocuments);
     persistentUI.toggleShowChatPanel(true);
 
+    // Before any request id is minted: a click that turns out to be gated must not leave an id
+    // registered that a later status could match.
+    let isUnchanged = false;
+    if (aiEnabled && !isEmpty) {
+      let gateTimer: ReturnType<typeof setTimeout> | undefined;
+      try {
+        // This read has no timeout of its own and runs before the request deadline below is even
+        // created, so a stalled connection would leave ideasClickInProgress -- and the Ideas
+        // button -- disabled for the rest of the session. Bounded by the request's own deadline.
+        const gate = await Promise.race([
+          firebase.getEvaluationGate(user, document.key, document.uid),
+          // Fails open on expiry: no gate permits the evaluation.
+          new Promise<undefined>(resolve => {
+            gateTimer = setTimeout(() => resolve(undefined), kIdeasRequestDeadlineMs);
+          })
+        ]);
+        // The local content, not the saved copy: an edit not yet saved hashes differently from
+        // the gate, so the request goes ahead. The save writes this same string.
+        const contentHash = hashDocumentContent(JSON.stringify(getSnapshot(document.content!)));
+        const { requestHash } = firebase.getEvaluationRequest();
+        isUnchanged = isUnchangedSinceEvaluation(gate, contentHash, requestHash);
+      } catch (error) {
+        // Fail open: a gate we can't read must not withhold an evaluation, and must not leave the
+        // button disabled by throwing out of the handler.
+        console.error("Ideas gate check failed:", error);
+      } finally {
+        clearTimeout(gateTimer);
+      }
+    }
+
+    const requestId = (!isEmpty && !isUnchanged && aiEnabled) ? nanoid() : null;
+    // Must be recorded before any await below, so a status for this click can never find a stale id.
+    commentsManager.setLatestIdeasRequestId(requestId);
+
     if (skipEmptyDocument) {
       commentsManager.showStatusMessage(IDEAS_EMPTY_MESSAGE);
+      commentsManager.setIdeasClickInProgress(false);
+      return;
+    }
+
+    // The empty check runs first, so an empty document is told it is empty rather than unchanged.
+    if (isUnchanged) {
+      commentsManager.showStatusMessage(IDEAS_UNCHANGED_MESSAGE);
+      commentsManager.setIdeasClickInProgress(false);
       return;
     }
 
@@ -594,8 +639,6 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
         documentKey: document.key, documentType: document.type, documentUid: document.uid,
         requestId, reason
       });
-
-    commentsManager.setIdeasClickInProgress(true);
 
     // setLastEditedNow/getLastEditedTimestamp have no timeout of their own, so a stalled
     // connection could leave ideasClickInProgress (and the Ideas button) disabled forever.

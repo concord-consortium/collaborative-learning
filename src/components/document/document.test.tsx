@@ -1,5 +1,6 @@
 import { act, configure, fireEvent, render, screen } from "@testing-library/react";
 import React from "react";
+import { getSnapshot } from "mobx-state-tree";
 import { Provider } from "mobx-react";
 import { DocumentComponent } from "./document";
 import { createDocumentModel, DocumentModelType, SaveState } from "../../models/document/document";
@@ -9,7 +10,9 @@ import { specStores } from "../../models/stores/spec-stores";
 import { specAppConfig } from "../../models/stores/spec-app-config";
 import { createSingleTileContent } from "../../utilities/test-utils";
 import { kAnalyzerUserParams } from "../../../shared/shared";
-import { IDEAS_EMPTY_MESSAGE, IDEAS_REQUEST_FAILED_MESSAGE } from "../../models/document/ai-evaluation-messages";
+import { hashDocumentContent } from "../../../shared/ai-evaluation-gate";
+import { IDEAS_EMPTY_MESSAGE, IDEAS_REQUEST_FAILED_MESSAGE, IDEAS_UNCHANGED_MESSAGE }
+  from "../../models/document/ai-evaluation-messages";
 import { Logger } from "../../lib/logger";
 import { kIdeasRequestDeadlineMs } from "../../models/document/document-comments-manager";
 import { logDocumentEvent } from "../../models/document/log-document-event";
@@ -86,6 +89,10 @@ function makeStores(aiEvaluation?: "categorize-design" | "custom") {
   jest.spyOn(stores.db.firebase, "getLastEditedTimestamp").mockResolvedValue(1000 as any);
   jest.spyOn(stores.db.firebase, "getEvaluationStatusPath").mockReturnValue("status/path");
   jest.spyOn(stores.db.firebase, "ref").mockReturnValue({ on: jest.fn(), off: jest.fn() } as any);
+  // Defaults that read as "changed": these scenarios are about documents never yet evaluated.
+  jest.spyOn(stores.db.firebase, "getEvaluationGate").mockResolvedValue(undefined);
+  jest.spyOn(stores.db.firebase, "getEvaluationRequest")
+    .mockReturnValue({ aiPrompt: undefined, context: undefined, requestHash: "request-hash" });
   return stores;
 }
 
@@ -100,6 +107,14 @@ function populatedDocument() {
     type: ProblemDocument, uid: "u1", key: "doc1", createdAt: 1,
     content: createSingleTileContent({ type: "Text", format: "markdown", text: "hello" })
   });
+}
+
+// The gate the server would have recorded after evaluating this document as it is now.
+function gateMatching(document: DocumentModelType, stores: ReturnType<typeof specStores>) {
+  return {
+    contentHash: hashDocumentContent(JSON.stringify(getSnapshot(document.content!))),
+    requestHash: stores.db.firebase.getEvaluationRequest().requestHash
+  };
 }
 
 function clickIdeas() {
@@ -117,7 +132,7 @@ describe("Ideas button", () => {
     jest.useRealTimers();
   });
 
-  it("on an empty document: no evaluation write, no log, nudge shown, gate not raised", async () => {
+  it("on an empty document: no evaluation write, no log, nudge shown, gate released", async () => {
     const stores = makeStores("categorize-design");
     const document = emptyDocument();
     renderDocument(document, stores);
@@ -131,7 +146,8 @@ describe("Ideas button", () => {
     expect(document.commentsManager?.latestIdeasRequestId).toBeNull();
     expect(document.commentsManager?.statusMessage).toMatchObject({ message: IDEAS_EMPTY_MESSAGE });
     expect(document.commentsManager?.canRequestIdeas).toBe(true);
-    // The gate is not raised by an empty click, so the button stays enabled while the nudge shows.
+    // An empty click raises and releases the gate in one synchronous block, so the button is
+    // still enabled by the time the nudge shows.
     expect(screen.getByTestId("ideas-button")).not.toBeDisabled();
   });
 
@@ -159,8 +175,11 @@ describe("Ideas button", () => {
     renderDocument(document, stores);
 
     clickIdeas();
-    // No await has run yet, so this confirms the id was recorded before any async gap.
+    // Only the gate read has settled. The id is minted as soon as it does and before
+    // waitForSaveSettled resolves, so no status for this click can ever find a stale id.
+    await flushMicrotasks();
     expect(document.commentsManager?.latestIdeasRequestId).toEqual(expect.any(String));
+    expect(stores.db.firebase.setLastEditedNow).not.toHaveBeenCalled();
     const requestId = document.commentsManager?.latestIdeasRequestId;
 
     // waitForSaveSettled is still waiting on Saving -> Saved.
@@ -176,6 +195,74 @@ describe("Ideas button", () => {
     expect(stores.db.firebase.getEvaluationStatusPath)
       .toHaveBeenCalledWith(stores.user, document.key, document.uid, requestId);
     expect(stores.db.firebase.ref).toHaveBeenCalledWith("status/path");
+  });
+
+  it("on an unchanged document and request: nudges and makes no request", async () => {
+    const stores = makeStores("categorize-design");
+    const document = populatedDocument();
+    jest.spyOn(stores.db.firebase, "getEvaluationGate").mockResolvedValue(gateMatching(document, stores));
+    renderDocument(document, stores);
+
+    clickIdeas();
+    await flushMicrotasks();
+
+    expect(document.commentsManager?.statusMessage).toMatchObject({ message: IDEAS_UNCHANGED_MESSAGE });
+    expect(stores.db.firebase.setLastEditedNow).not.toHaveBeenCalled();
+    expect(document.commentsManager?.latestIdeasRequestId).toBeNull();
+    // The gate is raised before the read above, so this early return has to release it or the
+    // button stays disabled for the rest of the session.
+    expect(document.commentsManager?.canRequestIdeas).toBe(true);
+  });
+
+  // Covers an edit not yet saved, too: the local content is what is hashed.
+  it("on content that differs from the gate: requests rather than nudging", async () => {
+    const stores = makeStores("categorize-design");
+    const document = populatedDocument();
+    const gate = gateMatching(document, stores);
+    jest.spyOn(stores.db.firebase, "getEvaluationGate")
+      .mockResolvedValue({ ...gate, contentHash: `${gate.contentHash}-earlier` });
+    renderDocument(document, stores);
+
+    clickIdeas();
+    await flushMicrotasks();
+
+    expect(document.commentsManager?.statusMessage?.message).not.toBe(IDEAS_UNCHANGED_MESSAGE);
+    expect(stores.db.firebase.setLastEditedNow).toHaveBeenCalled();
+  });
+
+  // The same document asked about from a different problem, or under a revised prompt.
+  it("on a request that differs from the gate: requests rather than nudging", async () => {
+    const stores = makeStores("categorize-design");
+    const document = populatedDocument();
+    const gate = gateMatching(document, stores);
+    jest.spyOn(stores.db.firebase, "getEvaluationGate")
+      .mockResolvedValue({ ...gate, requestHash: `${gate.requestHash}-other-problem` });
+    renderDocument(document, stores);
+
+    clickIdeas();
+    await flushMicrotasks();
+
+    expect(document.commentsManager?.statusMessage?.message).not.toBe(IDEAS_UNCHANGED_MESSAGE);
+    expect(stores.db.firebase.setLastEditedNow).toHaveBeenCalled();
+  });
+
+  it("when the gate read fails: requests anyway rather than withholding or throwing", async () => {
+    const stores = makeStores("categorize-design");
+    jest.spyOn(stores.db.firebase, "getEvaluationGate").mockRejectedValue(new Error("rtdb unavailable"));
+    const document = populatedDocument();
+    const consoleErrorSpy = jest.spyOn(console, "error").mockImplementation(() => {});
+    renderDocument(document, stores);
+
+    clickIdeas();
+    await flushMicrotasks();
+
+    // Proceeds exactly as the changed path does, instead of nudging or leaving the gate stuck.
+    expect(stores.db.firebase.setLastEditedNow).toHaveBeenCalled();
+    expect(document.commentsManager?.statusMessage).toBeNull();
+    expect(document.commentsManager?.pendingComments).toHaveLength(1);
+    expect(consoleErrorSpy).toHaveBeenCalledWith("Ideas gate check failed:", expect.any(Error));
+
+    consoleErrorSpy.mockRestore();
   });
 
   it("a status already present at the path when the listener attaches (a previous request's) " +
@@ -374,6 +461,44 @@ describe("Ideas button", () => {
     expectIdeasFailureLogged("client-error", document);
 
     consoleErrorSpy.mockRestore();
+  });
+
+  // The gate read runs after ideasClickInProgress is raised but before the request deadline below
+  // is created, so without a bound of their own a stalled connection here would disable the Ideas
+  // button for the rest of the session, with no message and nothing to retry.
+  it("when a gate read never settles: fails open, requests anyway, and releases the gate", async () => {
+    jest.useFakeTimers();
+    const stores = makeStores("categorize-design");
+    jest.spyOn(stores.db.firebase, "getEvaluationGate")
+      .mockReturnValue(new Promise<unknown>(() => { /* never settles */ }));
+    const document = populatedDocument();
+    renderDocument(document, stores);
+
+    clickIdeas();
+    await flushMicrotasks();
+    expect(document.commentsManager?.canRequestIdeas).toBe(false);
+    // Opened while the read is still stalled, not after it gives up.
+    expect(stores.persistentUI.showChatPanel).toBe(true);
+
+    await act(async () => {
+      await jest.advanceTimersByTimeAsync(kIdeasRequestDeadlineMs);
+    });
+
+    // Failed open: the unreadable gate did not withhold the evaluation, and the click carried on
+    // into the request rather than stopping here.
+    expect(document.commentsManager?.statusMessage?.message).not.toBe(IDEAS_UNCHANGED_MESSAGE);
+    expect(stores.db.firebase.setLastEditedNow).toHaveBeenCalled();
+
+    // The click's own gate is released rather than held open by the stalled read. Asserted on
+    // ideasClickInProgress and not canRequestIdeas, because the request this click started has
+    // queued a pending AI comment, which legitimately keeps the button disabled until the
+    // evaluation lands -- exactly as it would after any successful click.
+    await act(async () => {
+      await jest.advanceTimersByTimeAsync(kIdeasRequestDeadlineMs);
+    });
+    expect(document.commentsManager?.ideasClickInProgress).toBe(false);
+
+    jest.useRealTimers();
   });
 
   it("releases the gate and shows a failure message if the request exceeds its deadline, and " +

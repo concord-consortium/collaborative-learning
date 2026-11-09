@@ -4,6 +4,7 @@ import { getParentOfType, getSnapshot, isAlive } from "mobx-state-tree";
 import React, { useEffect, useRef, useState } from "react";
 import { documentHasStudentWork } from "../../../shared/ai-analysis-classify";
 import { documentSummarizer } from "../../../shared/ai-summarizer/ai-summarizer";
+import { hashString } from "../../../shared/hash-string";
 import { formatUnitSummarySlice, unitSummarySlice } from "../../../shared/unit-summary-slice";
 import { useReadOnlyContext } from "../../components/document/read-only-context";
 import { BasicEditableTileTitle } from "../../components/tiles/basic-editable-tile-title";
@@ -16,7 +17,8 @@ import { useStores } from "../../hooks/use-stores";
 import { useUserContext } from "../../hooks/use-user-context";
 import { DocumentContentModel } from "../../models/document/document-content";
 import { getDocumentIdentifier } from "../../models/document/document-utils";
-import { AI_TILE_EMPTY_MESSAGE, AI_TILE_REQUEST_FAILED_MESSAGE } from "../../models/document/ai-evaluation-messages";
+import { AI_TILE_EMPTY_MESSAGE, AI_TILE_REQUEST_FAILED_MESSAGE, AI_TILE_UNCHANGED_MESSAGE }
+  from "../../models/document/ai-evaluation-messages";
 import { liveProblemsFromUnit } from "../../models/curriculum/unit-utils";
 import { AIContentModelType, logAiEvent } from "./ai-content";
 import { changeSlashesToUnderscores } from "./ai-utils";
@@ -28,19 +30,18 @@ export const AIComponent: React.FC<ITileProps> = observer((props) => {
   const content = model.content as AIContentModelType;
   const userContext = useUserContext();
   const readOnly = useReadOnlyContext();
-  const stores = useStores();
-  const { appConfig, documents, networkDocuments, unit } = stores;
+  const { appConfig, documents, networkDocuments, unit } = useStores();
   const systemPrompt = appConfig.getSetting("systemPrompt", "ai");
   const getAiContent = userContext.classHash ? useFirebaseFunction("getAiContent_v2") : null;
   const [isUpdating, setIsUpdating] = useState(false);
-  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+  // Why these are component state and not content.text: the analysis is the student's to keep
+  // while they work, so nothing transient may overwrite it. A message written into content.text
+  // would be saved into the document and replace the last analysis for good.
+  const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const identifier = getDocumentIdentifier(getParentOfType(model, DocumentContentModel));
   // Guards against overlapping refresh requests: each run's generation, checked after its await,
   // tells a superseded request not to touch text or isUpdating.
   const requestGenerationRef = useRef(0);
-  // Text to restore when a request is invalidated with no successor to finish the job (e.g. the
-  // class context disappears mid-request). Shared across runs, and cleared once no longer needed.
-  const previousTextRef = useRef<string | undefined>(undefined);
   // The refreshCount this effect last ran against. The effect also reruns when userContext, the
   // document or unit config changes, so "has ever been refreshed" would misread those as the
   // student asking — see userRequested below.
@@ -69,16 +70,10 @@ export const AIComponent: React.FC<ITileProps> = observer((props) => {
     // many times they clicked before. Decides whether a failure is theirs to see — see the catch.
     const userRequested = content.refreshCount > lastRefreshCountRef.current;
     lastRefreshCountRef.current = content.refreshCount;
-    // Undo a superseded run's own blanking before anything else runs, so this run starts from real
-    // text — otherwise this run's own capture below would save the blank, not the good text.
-    if (previousTextRef.current !== undefined) {
-      content.setText(previousTextRef.current);
-      previousTextRef.current = undefined;
-      if (!getAiContent) setIsUpdating(false);
-    }
     if (getAiContent) {
       const queryAI = async () => {
         setIsUpdating(true);
+        setStatusMessage(null);
         try {
           if (!identifier || !model.id) {
             console.error("No document identifier or tileId found");
@@ -100,12 +95,10 @@ export const AIComponent: React.FC<ITileProps> = observer((props) => {
           }
           // A student document with no work in it: nudge, and make no request.
           if (!documentHasStudentWork(getSnapshot(document.content))) {
-            content.setText(AI_TILE_EMPTY_MESSAGE);
+            setStatusMessage(AI_TILE_EMPTY_MESSAGE);
             return;
           }
 
-          previousTextRef.current = content.text;
-          content.setText("");
           const summary = documentSummarizer(document.content, {});
           // document's own curriculum stamp, not stores.problemOrdinal (the displayed problem,
           // which can diverge from the document's -- four-up view, a teacher inspecting a
@@ -128,6 +121,25 @@ export const AIComponent: React.FC<ITileProps> = observer((props) => {
             : `No information about the current document could be found.\n\n\n`;
           dynamicContentPrompt += `Using this information, respond to the following prompt:\n\n${content.prompt}`;
 
+          // The gate hashes the whole request, built above but not yet sent, and runs before
+          // anything is written, so a gated run leaves the saved answer alone. Hashing the request
+          // rather than the document history index is what makes the gate able to fire at all:
+          // this tile's own setText advances that index on every refresh, while handleAiTile keeps
+          // AI tiles out of the summary, so nothing the tile writes can move this hash. The prompt
+          // is in it because an author editing the prompt has changed the request without touching
+          // the document, and must not be told nothing has changed.
+          // systemPrompt is sent alongside dynamicContentPrompt, so a change to it alone sends a
+          // request. The server cache does not compare the system prompt yet (CLUE-802), so that
+          // request returns the cached answer built with the old one. NUL separates the two
+          // prompts because neither can contain it, so no pair of prompts can collide.
+          const requestHash = hashString(`${systemPrompt ?? ""}\u0000${dynamicContentPrompt}`);
+          if (requestHash === content.evaluatedRequestHash) {
+            // Only someone who pressed Refresh is told why nothing happened; a rerun from any
+            // other dependency is nobody asking, and a message there would appear unprompted.
+            if (userRequested) setStatusMessage(AI_TILE_UNCHANGED_MESSAGE);
+            return;
+          }
+
           const response = await getAiContent({
             context: userContext,
             dynamicContentPrompt,
@@ -143,25 +155,30 @@ export const AIComponent: React.FC<ITileProps> = observer((props) => {
           if (response.data.error) {
             throw new Error(response.data.error);
           }
-          content.setText(response.data.text);
-          previousTextRef.current = undefined;
-          if (response.data.lastUpdated) {
-            const timestamp = response.data.lastUpdated;
-            setLastUpdated(new Date(timestamp._seconds*1000));
+          // An OpenAI failure is cached server-side as empty text, and a retry returns that
+          // cached entry with no error at all. Treating it as a real answer would blank the
+          // analysis and -- far worse, now that there is a gate -- record the hash, so the
+          // student could never retry. Routed through the catch, which leaves both alone.
+          if (!response.data.text?.trim()) {
+            throw new Error("The AI returned an empty response");
+          }
+          const lastUpdated = response.data.lastUpdated;
+          content.setText(response.data.text, lastUpdated ? lastUpdated._seconds * 1000 : undefined);
+          // The server returns the prompt its answer was actually built from. Under lock
+          // contention it can hand back an answer generated for a different revision of this
+          // tile, and recording our hash against it would gate away the request we really made.
+          // Older deployments omit the field; an unverifiable answer is gated as before rather
+          // than costing every student a second request.
+          const answeredPrompt = response.data.prompt;
+          if (typeof answeredPrompt !== "string" || answeredPrompt === dynamicContentPrompt) {
+            content.setEvaluatedRequestHash(requestHash);
           }
         } catch (error) {
-          // A requested refresh reports: restoring would look like a refresh that did nothing, and
-          // this message is document content, the same tradeoff AI_TILE_EMPTY_MESSAGE makes above.
-          // An automatic one restores instead, so a transient failure cannot replace a good saved
-          // answer. A superseded run is neither, and isAlive guards a tile deleted mid-request.
+          // Only a requested refresh reports: an automatic one failing is not something the
+          // student asked about, and the last analysis is still on screen either way. A superseded
+          // run is neither, and isAlive guards a tile deleted mid-request.
           if (isCurrent() && isAlive(content)) {
-            if (userRequested) {
-              content.setText(AI_TILE_REQUEST_FAILED_MESSAGE);
-              previousTextRef.current = undefined;
-            } else if (previousTextRef.current !== undefined) {
-              content.setText(previousTextRef.current);
-              previousTextRef.current = undefined;
-            }
+            if (userRequested) setStatusMessage(AI_TILE_REQUEST_FAILED_MESSAGE);
             // Logged either way; console.error reaches nobody, as Rollbar captures only uncaught
             // errors. Its own event, not logAiEvent: that cascades into QUESTION_ANSWERS_CHANGE
             // for a tile inside a Question tile, carrying the prompt and sibling answers.
@@ -175,6 +192,11 @@ export const AIComponent: React.FC<ITileProps> = observer((props) => {
         }
       };
       queryAI();
+    } else {
+      // No class context, so no request will run. Bumping the generation above already made any
+      // in-flight request's own `finally` a no-op, so this is the only thing left that can clear
+      // the loading state -- without it the tile shows "Loading..." forever.
+      setIsUpdating(false);
     }
   }, [
     content.refreshCount, content, documentId, documents, getAiContent, identifier, model.id, networkDocuments,
@@ -254,13 +276,17 @@ export const AIComponent: React.FC<ITileProps> = observer((props) => {
         {renderDescription()}
         <div className="ai-output focusable">
           <div className="last-updated">
-            {lastUpdated ? lastUpdated.toLocaleString("en-US", {dateStyle: "long", timeStyle: "short"}) : "..."}
+            {content.evaluatedAt
+              ? new Date(content.evaluatedAt).toLocaleString("en-US", {dateStyle: "long", timeStyle: "short"})
+              : "..."}
           </div>
-          {isUpdating ? (
-            <p>Loading...</p>
-          ) : (
-            <Markdown>{content.text}</Markdown>
-          )}
+          {/* Mounted even when empty: a region added at the moment it gains text is not
+              reliably announced. role="status" is polite, which is right for these -- none of
+              them should interrupt a student mid-sentence. */}
+          <p className="ai-status" role="status">
+            {isUpdating ? "Loading..." : statusMessage}
+          </p>
+          <Markdown>{content.text}</Markdown>
         </div>
       </div>
     </div>

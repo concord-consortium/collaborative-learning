@@ -1,7 +1,10 @@
 import { defaultAIContent, AIContentModel, kDefaultAIDescription } from "./ai-content";
 import { logTileChangeEvent } from "../../models/tiles/log/log-tile-change-event";
 import { LogEventName } from "../../lib/logger-types";
+import { getSnapshot } from "mobx-state-tree";
 import { TileModel } from "../../models/tiles/tile-model";
+import { getTileContentInfo } from "../../models/tiles/tile-content-info";
+import { kAITileType } from "./ai-types";
 import "./ai-registration";
 
 jest.mock("../../models/tiles/log/log-tile-change-event", () => ({ logTileChangeEvent: jest.fn() }));
@@ -65,6 +68,23 @@ describe("AIContent", () => {
     expect(content.refreshCount).toBe(2);
     const json = JSON.parse(content.exportJson());
     expect(json.refreshCount).toBeUndefined();
+  });
+
+  it("exportJson excludes the evaluated request hash and date", () => {
+    const content = AIContentModel.create();
+    content.setEvaluatedRequestHash("1a2b3c");
+    content.setText("an answer", 1700000000000);
+    const json = JSON.parse(content.exportJson());
+    expect(json.evaluatedRequestHash).toBeUndefined();
+    expect(json.evaluatedAt).toBeUndefined();
+  });
+
+  it("a copy drops the evaluated request hash and date", () => {
+    const content = AIContentModel.create({ prompt: "ask", evaluatedRequestHash: "1a2b3c", evaluatedAt: 1 });
+    const copy = getTileContentInfo(kAITileType)!.updateContentForCopy!(getSnapshot(content), true);
+    expect(copy).toMatchObject({ prompt: "ask", hidePrompt: true });
+    expect(copy.evaluatedRequestHash).toBeUndefined();
+    expect(copy.evaluatedAt).toBeUndefined();
   });
 
   // setText is driven by the AI-response effect on load, not a student, so none of the setters log.
