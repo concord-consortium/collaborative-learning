@@ -59,7 +59,7 @@ function createContent() {
 }
 
 function renderProgram(content: DataflowContentModelType, options: { readOnly?: boolean } = {}) {
-  const onActiveReteManagerChanged = jest.fn();
+  const onReteManagerRef = jest.fn();
   const stores = specStores();
   const result = render(
     <ModalProvider>
@@ -73,13 +73,13 @@ function renderProgram(content: DataflowContentModelType, options: { readOnly?: 
             tileContent={content}
             tileElt={null}
             onRegisterTileApi={jest.fn()}
-            onActiveReteManagerChanged={onActiveReteManagerChanged}
+            onReteManagerRef={onReteManagerRef}
           />
         </DndContext>
       </Provider>
     </ModalProvider>
   );
-  return { ...result, onActiveReteManagerChanged, stores };
+  return { ...result, onReteManagerRef, stores };
 }
 
 // The instance the nth `new ReteManager(...)` returned.
@@ -87,8 +87,8 @@ function managerInstance(index: number): ManagerStub {
   return MockedReteManager.mock.results[index].value;
 }
 
-function lastReportedManager(onActiveReteManagerChanged: jest.Mock) {
-  const { calls } = onActiveReteManagerChanged.mock;
+function lastReportedManager(onReteManagerRef: jest.Mock) {
+  const { calls } = onReteManagerRef.mock;
   return calls[calls.length - 1][0];
 }
 
@@ -103,17 +103,17 @@ describe("DataflowProgram rete manager routing", () => {
   });
 
   it("reports the editor manager once on mount", () => {
-    const { onActiveReteManagerChanged } = renderProgram(createContent());
+    const { onReteManagerRef } = renderProgram(createContent());
     expect(MockedReteManager).toHaveBeenCalledTimes(1);
-    expect(onActiveReteManagerChanged).toHaveBeenCalledTimes(1);
-    expect(lastReportedManager(onActiveReteManagerChanged)).toBe(managerInstance(0));
+    expect(onReteManagerRef).toHaveBeenCalledTimes(1);
+    expect(lastReportedManager(onReteManagerRef)).toBe(managerInstance(0));
   });
 
   it("reports undefined on unmount", () => {
-    const { onActiveReteManagerChanged, unmount } = renderProgram(createContent());
+    const { onReteManagerRef, unmount } = renderProgram(createContent());
     unmount();
-    expect(onActiveReteManagerChanged).toHaveBeenCalledTimes(2);
-    expect(lastReportedManager(onActiveReteManagerChanged)).toBeUndefined();
+    expect(onReteManagerRef).toHaveBeenCalledTimes(2);
+    expect(lastReportedManager(onReteManagerRef)).toBeUndefined();
   });
 });
 

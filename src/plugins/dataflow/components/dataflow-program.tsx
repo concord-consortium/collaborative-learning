@@ -49,7 +49,7 @@ interface IProps {
   tileContent: DataflowContentModelType;
   tileElt: HTMLElement | null;
   onRegisterTileApi: ITileProps["onRegisterTileApi"];
-  onActiveReteManagerChanged?: (reteManager: ReteManager | undefined) => void;
+  onReteManagerRef?: (reteManager: ReteManager | undefined) => void;
   onProgramContainerRef?: (el: HTMLElement | null) => void;
   onProgramApiRef?: (api: IDataflowProgramApi | null) => void;
 }
@@ -272,7 +272,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     if (!this.props.readOnly && isAlive(this.props.tileContent)) this.props.tileContent.stopRecording();
     this.reteManager?.dispose();
     this.reteManager = undefined;
-    this.props.onActiveReteManagerChanged?.(undefined);
+    this.props.onReteManagerRef?.(undefined);
     this.props.onProgramApiRef?.(null);
   }
 
@@ -304,7 +304,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
 
     const nodeModel = this.props.program?.nodes.get(objectId);
 
-    const reteManager = this.activeReteManager;
+    const reteManager = this.reteManager;
     const nodeView = reteManager?.area.nodeViews.get(objectId);
     const { tileElt } = this.props;
     if (!nodeModel || !nodeView || !tileElt) return undefined;
@@ -333,23 +333,13 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       this.setDataRate(this.props.programDataRate);
     }
 
-    // We need to update an observable that the getObjectBoundingBox
-    // can watch. This is because the location of the blocks changes
-    // when the reteManager changes. A newly created manager's elements
-    // won't be setup yet so we need to wait for that to finish before
-    // the boundingBoxes are re computed.
-    const reteManager = this.activeReteManager;
+    // Bump an observable that getObjectBoundingBox watches, so the bounding boxes are recomputed
+    // after each update. A newly created manager's elements aren't set up yet, so wait for that
+    // before recomputing.
+    const reteManager = this.reteManager;
     reteManager?.setupComplete.then(() =>
       runInAction(() => this.updateObservable.updateCount++)
     );
-  }
-
-  private get activeReteManager() {
-    return this.reteManager;
-  }
-
-  private reportActiveReteManager() {
-    this.props.onActiveReteManagerChanged?.(this.activeReteManager);
   }
 
   private initReteManagersIfNeeded() {
@@ -390,7 +380,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       this.toolDiv, this.props.tileContent, this.stores, this.props.readOnly);
 
     this.reteManager = reteManager;
-    this.reportActiveReteManager();
+    this.props.onReteManagerRef?.(reteManager);
   };
 
   private setDataRate = (rate: number) => {

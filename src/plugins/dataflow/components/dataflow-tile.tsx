@@ -87,7 +87,7 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
     }
   }
 
-  private handleActiveReteManagerChanged = (reteManager: ReteManager | undefined) => {
+  private handleReteManagerRef = (reteManager: ReteManager | undefined) => {
     this.setState({ reteManager });
   };
 
@@ -153,7 +153,7 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
             tileContent={tileContent}
             tileElt={tileElt}
             onRegisterTileApi={onRegisterTileApi}
-            onActiveReteManagerChanged={this.handleActiveReteManagerChanged}
+            onReteManagerRef={this.handleReteManagerRef}
             onProgramContainerRef={el => this.programContainerEl = el}
             onProgramApiRef={api => this.programApi = api}
           />

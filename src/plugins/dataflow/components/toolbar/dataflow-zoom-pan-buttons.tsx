@@ -154,8 +154,6 @@ function PanPalette({ onSelect, onClose }: IPanPaletteProps) {
 // (default right); the corner triangle (or touch-hold) opens the palette to pick another.
 export const PanButton = observer(function PanButton({ name }: IToolbarButtonComponentProps) {
   const reteManager = useContext(DataflowReteManagerContext);
-  // Kept on the tile content rather than the manager: the active manager's content is not always
-  // the tile's own.
   const content = useContext(TileModelContext)?.content as DataflowContentModelType | undefined;
   const isOpen = !!content?.panPaletteOpen;
   const lastDirection = content?.lastPanDirection ?? "right";
