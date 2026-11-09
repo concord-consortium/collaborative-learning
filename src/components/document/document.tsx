@@ -572,9 +572,15 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
     const aiEnabled = !!appConfig.aiEvaluation;
     const isEmpty = !document.content || !documentHasStudentWork(getSnapshot(document.content));
     const skipEmptyDocument = isEmpty && aiEnabled;
-    // Raised before the gate reads below, so a second click during them is turned away by
+    // Raised before the gate read below, so a second click during it is turned away by
     // `canRequestIdeas` instead of starting a second evaluation. Every path below releases it.
     commentsManager.setIdeasClickInProgress(true);
+
+    // Before the gate read, so the panel opens at once even when that read stalls. Unselecting
+    // all tiles shows the whole-document comments.
+    ui.clearSelectedTiles();
+    persistentUI.openResourceDocument(document, appConfig, user, this.stores.sortedDocuments);
+    persistentUI.toggleShowChatPanel(true);
 
     // Before any request id is minted: a click that turns out to be gated must not leave an id
     // registered that a later status could match.
@@ -609,11 +615,6 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
     const requestId = (!isEmpty && !isUnchanged && aiEnabled) ? nanoid() : null;
     // Must be recorded before any await below, so a status for this click can never find a stale id.
     commentsManager.setLatestIdeasRequestId(requestId);
-
-    // Unselect all tiles, so that the whole-document comments are shown
-    ui.clearSelectedTiles();
-    persistentUI.openResourceDocument(document, appConfig, user, this.stores.sortedDocuments);
-    persistentUI.toggleShowChatPanel(true);
 
     if (skipEmptyDocument) {
       commentsManager.showStatusMessage(IDEAS_EMPTY_MESSAGE);

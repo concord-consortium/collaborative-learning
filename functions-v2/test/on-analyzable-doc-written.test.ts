@@ -22,6 +22,8 @@ describe("functions", () => {
     await clearFirestoreData(projectConfig);
     await admin.firestore().collection("analysis").doc("queue").create({});
     await getDatabase().ref("demo").set(null);
+    // The mocked logger records calls for the whole file, so each test starts with its own.
+    jest.clearAllMocks();
   });
 
   describe("on-analyzable-doc-written with timestamp", () => {
@@ -376,6 +378,41 @@ describe("functions", () => {
       await saveContent(contentA);
 
       expect(await writeEvaluation({timestamp: 1001, requestHash: "r1"})).toMatchObject({requestHash: "r1"});
+    });
+
+    // Gates are per evaluator: a matching gate recorded by another one says nothing about this one.
+    test("queues an unrequested evaluation when only another evaluator's gate matches", async () => {
+      await saveContent(contentA);
+      await seedGate(gateFor(contentA), "custom");
+
+      expect(await writeEvaluation({timestamp: 1001, requestHash: "r1"})).toMatchObject({requestHash: "r1"});
+    });
+
+    // Fail open: a gate that cannot be read must never withhold an evaluation.
+    test("queues an unrequested evaluation when the gate cannot be read", async () => {
+      await saveContent(contentA);
+      await seedGate(gateFor(contentA));
+      const db = getDatabase();
+      const realRef = db.ref.bind(db);
+      const spy = jest.spyOn(db, "ref").mockImplementation((path) => {
+        const ref = realRef(path);
+        if (typeof path === "string" && path.includes("evaluationGate")) {
+          return Object.assign(Object.create(Object.getPrototypeOf(ref)), ref, {
+            once: async () => {
+              throw new Error("rtdb unavailable");
+            },
+          });
+        }
+        return ref;
+      });
+
+      try {
+        expect(await writeEvaluation({timestamp: 1001, requestHash: "r1"})).toMatchObject({requestHash: "r1"});
+      } finally {
+        spy.mockRestore();
+      }
+      expect(logger.warn).toHaveBeenCalledWith(
+        `Could not check the evaluation gate for ${documentPath}`, expect.any(Error));
     });
 
     // A skipped request would leave the Ideas client waiting for a comment that never arrives.

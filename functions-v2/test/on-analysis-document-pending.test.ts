@@ -716,7 +716,7 @@ describe("functions", () => {
            "own skipped-empty status, and a late id is re-queued instead of also skipped",
       async () => {
         await givenDocument("emptymidflight1", emptyDoc);
-        await seedPendingDoc("emptymidflight1", {requestIds: ["req-emptymidflight-a"]});
+        await seedPendingDoc("emptymidflight1", {requestIds: ["req-emptymidflight-a"], requestHash: "r1"});
         const pendingDocRef = admin.firestore().doc("analysis/queue/pending/emptymidflight1");
         const realDoc = admin.firestore().doc.bind(admin.firestore());
         const docSpy = jest.spyOn(admin.firestore(), "doc").mockImplementation((path: string) => {
@@ -729,7 +729,7 @@ describe("functions", () => {
           } as any;
         });
 
-        await runPending("emptymidflight1", {requestIds: ["req-emptymidflight-a"]});
+        await runPending("emptymidflight1", {requestIds: ["req-emptymidflight-a"], requestHash: "r1"});
         docSpy.mockRestore();
 
         expect(await statusFor("emptymidflight1", "req-emptymidflight-a"))
@@ -740,7 +740,8 @@ describe("functions", () => {
         // It's back on a fresh pending document instead, for its own run to judge.
         const requeued = await pendingDocRef.get();
         expect(requeued.exists).toBe(true);
-        expect(requeued.data()).toMatchObject({requestIds: ["req-emptymidflight-b"]});
+        // With its requestHash, so a successful run of it still records the gate.
+        expect(requeued.data()).toMatchObject({requestIds: ["req-emptymidflight-b"], requestHash: "r1"});
       });
 
       // A third click can independently create a fresh pending document in this gap; re-creation

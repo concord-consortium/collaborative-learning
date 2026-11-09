@@ -577,6 +577,7 @@ export const onAnalysisDocumentPending =
           };
           if (doc.aiPrompt) newPendingDoc.aiPrompt = doc.aiPrompt;
           if (doc.requestContext) newPendingDoc.requestContext = doc.requestContext;
+          if (doc.requestHash) newPendingDoc.requestHash = doc.requestHash;
 
           // A transaction, as on-analyzable-doc-written.ts uses: a plain `set()` could overwrite a
           // document created in the meantime instead of joining ids to it. Keeping that document's

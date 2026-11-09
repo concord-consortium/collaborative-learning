@@ -15,10 +15,10 @@ registerTileContentInfo({
   modelClass: AIContentModel,
   defaultContent: defaultAIContent,
   defaultHeight: kAIDefaultHeight,
-  // evaluatedRequestHash is dropped for the same reason exportJson drops it: it records what
-  // this tile last asked about, not what the author wrote, and a copy must evaluate afresh.
+  // Dropped for the same reason exportJson drops them: they record what this tile last asked
+  // about, not what the author wrote, and a copy must evaluate afresh.
   updateContentForCopy: (oldContent: any) => {
-    const { evaluatedRequestHash: _, ...rest } = oldContent;
+    const { evaluatedRequestHash: _, evaluatedAt: __, ...rest } = oldContent;
     return { ...rest, hidePrompt: true };
   }
 });

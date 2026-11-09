@@ -1,3 +1,6 @@
+const defaultGetSetting = (key: string, category: string): string | undefined =>
+  key === "systemPrompt" && category === "ai" ? "You are a helpful AI assistant." : undefined;
+
 // Mock the useStores hook to provide unit.code and appConfig
 const mockStores = {
   unit: {
@@ -10,12 +13,7 @@ const mockStores = {
     config: undefined as { aiUnitSummary?: unknown } | undefined,
   },
   appConfig: {
-    getSetting: jest.fn((key: string, category: string): string | undefined => {
-      if (key === "systemPrompt" && category === "ai") {
-        return "You are a helpful AI assistant.";
-      }
-      return undefined;
-    })
+    getSetting: jest.fn(defaultGetSetting)
   },
   ui: {
     selectedTileIds: [] as string[],
@@ -212,6 +210,7 @@ describe("AIComponent", () => {
       mockStores.networkDocuments.getDocument.mockReturnValue(undefined);
       mockGetAiContent.mockClear();
       mockStores.unit.config = undefined;
+      mockStores.appConfig.getSetting.mockImplementation(defaultGetSetting);
     });
 
     // AI tiles also sit in authored curriculum sections, with no documentId — the tile must stay
@@ -352,10 +351,9 @@ describe("AIComponent", () => {
     });
 
     describe("the document-changed gate", () => {
-      // Hashing the request the tile actually sent, rather than rebuilding it here, keeps these
-      // from passing against a request the production code no longer makes.
-      // Built from the request the tile actually sent, including the system prompt, which is
-      // part of what the model is given and so part of what the gate must notice changing.
+      // Hashes the request the tile actually sent, so these cannot pass against a request the
+      // production code no longer makes. The formula is copied from the tile: a change to it
+      // must change this too.
       const hashOfLastRequest = () => {
         const sent = mockGetAiContent.mock.calls[mockGetAiContent.mock.calls.length - 1][0];
         return hashString(`${sent.systemPrompt ?? ""}\u0000${sent.dynamicContentPrompt}`);
@@ -432,7 +430,8 @@ describe("AIComponent", () => {
         expect(mockGetAiContent).toHaveBeenCalledTimes(1);
 
         mockStores.appConfig.getSetting.mockImplementation((key: string, category: string) =>
-          key === "systemPrompt" && category === "ai" ? "You are a terse AI assistant." : undefined);
+          key === "systemPrompt" && category === "ai"
+            ? "You are a terse AI assistant." : defaultGetSetting(key, category));
 
         await pressUpdate(aiContent);
 
@@ -462,6 +461,19 @@ describe("AIComponent", () => {
         expect(aiContent.evaluatedRequestHash).toBe(goodHash);
       });
 
+      // The current server always echoes the prompt it answered, so this is the production path.
+      it("records the gate when the server answered the prompt that was sent", async () => {
+        mockStores.documents.getDocument.mockReturnValue(documentWith(populatedDocContent()));
+        const { aiContent, aiModel } = tileWithPrompt();
+        mockGetAiContent.mockImplementationOnce(async (request: { dynamicContentPrompt: string }) =>
+          ({ data: { text: "an answer", prompt: request.dynamicContentPrompt } }));
+
+        await renderTile(aiModel);
+
+        expect(aiContent.text).toBe("an answer");
+        expect(aiContent.evaluatedRequestHash).toBe(hashOfLastRequest());
+      });
+
       // Under lock contention the server hands back whatever the lock holder generated, which can
       // be an answer for a different revision of this tile. Recording our hash against it would
       // gate away the request we actually made.
@@ -481,9 +493,9 @@ describe("AIComponent", () => {
         expect(aiContent.evaluatedRequestHash).toBe(goodHash);
       });
 
-      // A mount is nobody asking, and the nudge is document content: writing it would replace the
-      // saved answer permanently, for a student who never pressed anything. This is the student
-      // case -- a copied tile has hidePrompt set, so there is no Update button in a workspace.
+      // A mount is nobody asking, so no nudge appears for a student who never pressed anything.
+      // This is the student case -- a copied tile has hidePrompt set, so there is no Update button
+      // in a workspace.
       it("on mount with nothing changed, makes no request and leaves the saved answer alone", async () => {
         mockStores.documents.getDocument.mockReturnValue(documentWith(populatedDocContent()));
         const { aiContent, aiModel } = tileWithPrompt();
@@ -496,6 +508,29 @@ describe("AIComponent", () => {
 
         expect(aiContent.text).toBe("the saved answer");
         expect(mockGetAiContent).not.toHaveBeenCalled();
+        expect(screen.queryByText(AI_TILE_UNCHANGED_MESSAGE)).not.toBeInTheDocument();
+      });
+
+      // A gated mount makes no request, so the date has to come from the saved content. The
+      // unmount matters: a tile still mounted from the first answer would show the date anyway.
+      it("on a remount with nothing changed, shows the saved answer's date", async () => {
+        mockStores.documents.getDocument.mockReturnValue(documentWith(populatedDocContent()));
+        const { aiContent, aiModel } = tileWithPrompt();
+        const answeredAt = new Date("2026-03-04T15:30:00Z");
+        mockGetAiContent.mockResolvedValueOnce(
+          { data: { text: "an answer", lastUpdated: { _seconds: answeredAt.getTime() / 1000 } } });
+
+        const { unmount } = render(<AIComponent {...defaultProps} model={aiModel} documentId="test-doc-1" />);
+        await act(async () => { await Promise.resolve(); });
+        expect(aiContent.text).toBe("an answer");
+        unmount();
+        mockGetAiContent.mockClear();
+
+        await renderTile(aiModel);
+
+        expect(mockGetAiContent).not.toHaveBeenCalled();
+        expect(screen.getByText(answeredAt.toLocaleString("en-US", { dateStyle: "long", timeStyle: "short" })))
+          .toBeInTheDocument();
       });
 
       // Update exists only in the authoring view. Leaving the old text there would look like a
@@ -726,8 +761,8 @@ describe("AIComponent", () => {
       expect(aiContent.text).toBe("a good answer");
     });
 
-    // The student clicked Update, so restoring the old text would look exactly like a refresh
-    // that did nothing. This is the case the durable message exists for.
+    // The student clicked Update, so a failure with no message would look like a refresh that
+    // silently did nothing.
     it("on a populated document, when a student-requested refresh rejects: the failure message " +
        "is shown and the last analysis is left in place", async () => {
       mockStores.documents.getDocument.mockReturnValue(documentWith(populatedDocContent()));

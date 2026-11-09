@@ -34,7 +34,6 @@ export const AIComponent: React.FC<ITileProps> = observer((props) => {
   const systemPrompt = appConfig.getSetting("systemPrompt", "ai");
   const getAiContent = userContext.classHash ? useFirebaseFunction("getAiContent_v2") : null;
   const [isUpdating, setIsUpdating] = useState(false);
-  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   // Why these are component state and not content.text: the analysis is the student's to keep
   // while they work, so nothing transient may overwrite it. A message written into content.text
   // would be saved into the document and replace the last analysis for good.
@@ -162,7 +161,8 @@ export const AIComponent: React.FC<ITileProps> = observer((props) => {
           if (!response.data.text?.trim()) {
             throw new Error("The AI returned an empty response");
           }
-          content.setText(response.data.text);
+          const lastUpdated = response.data.lastUpdated;
+          content.setText(response.data.text, lastUpdated ? lastUpdated._seconds * 1000 : undefined);
           // The server returns the prompt its answer was actually built from. Under lock
           // contention it can hand back an answer generated for a different revision of this
           // tile, and recording our hash against it would gate away the request we really made.
@@ -171,10 +171,6 @@ export const AIComponent: React.FC<ITileProps> = observer((props) => {
           const answeredPrompt = response.data.prompt;
           if (typeof answeredPrompt !== "string" || answeredPrompt === dynamicContentPrompt) {
             content.setEvaluatedRequestHash(requestHash);
-          }
-          if (response.data.lastUpdated) {
-            const timestamp = response.data.lastUpdated;
-            setLastUpdated(new Date(timestamp._seconds*1000));
           }
         } catch (error) {
           // Only a requested refresh reports: an automatic one failing is not something the
@@ -279,7 +275,9 @@ export const AIComponent: React.FC<ITileProps> = observer((props) => {
         {renderDescription()}
         <div className="ai-output focusable">
           <div className="last-updated">
-            {lastUpdated ? lastUpdated.toLocaleString("en-US", {dateStyle: "long", timeStyle: "short"}) : "..."}
+            {content.evaluatedAt
+              ? new Date(content.evaluatedAt).toLocaleString("en-US", {dateStyle: "long", timeStyle: "short"})
+              : "..."}
           </div>
           {/* Mounted even when empty: a region added at the moment it gains text is not
               reliably announced. role="status" is polite, which is right for these -- none of

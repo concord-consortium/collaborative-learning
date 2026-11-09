@@ -477,6 +477,8 @@ describe("Ideas button", () => {
     clickIdeas();
     await flushMicrotasks();
     expect(document.commentsManager?.canRequestIdeas).toBe(false);
+    // Opened while the read is still stalled, not after it gives up.
+    expect(stores.persistentUI.showChatPanel).toBe(true);
 
     await act(async () => {
       await jest.advanceTimersByTimeAsync(kIdeasRequestDeadlineMs);
