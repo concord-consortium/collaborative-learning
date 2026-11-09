@@ -203,7 +203,7 @@ A **patch source** (`IPlaybackPatchSource` in `playback-patch-source.ts`) is wha
 
 ### The JSON copy
 
-When the history holds a load entry (`needsJsonCopy`), the first move builds a `JsonHistoryCopy` of the main document from its snapshot. The copy is plain JSON. It applies every entry as stored, load entries included, so it can be at any position in any format. Each move moves the copy first, one entry at a time. `applyJsonPatches` applies an entry all or nothing, so if an entry doesn't apply, the copy stops before it and the trees stop at the same position.
+When the history holds a load entry or a pending one was handed over (`needsJsonCopy`, see below), the first move builds a `JsonHistoryCopy` of the main document from its snapshot. The copy is plain JSON. It applies every entry as stored, load entries included, so it can be at any position in any format. Each move moves the copy first, one entry at a time. `applyJsonPatches` applies an entry all or nothing, so if an entry doesn't apply, the copy stops before it and the trees stop at the same position.
 
 Playback runs on a copy of the document that the canvas makes (`canvas.tsx`), with the history from Firestore. If the live document converted old content and its load entry is still pending, the Firestore history doesn't have that entry, but the copy's content is converted. So the canvas hands the pending entry to the playback copy's TreeManager as `localLoadEntry`. It stays out of the history. The JSON copy starts from the document's JSON with that entry undone (`getJsonCopyStart`), so it holds the stored content the Firestore history reaches.
 

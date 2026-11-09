@@ -218,8 +218,8 @@ export const TreeManager = types
    */
   localLoadEntry: undefined as HistoryEntrySnapshot | undefined,
   /**
-   * A JSON copy of the main document that playback keeps at the current position when the
-   * history holds a load entry. It is built on the first move that needs it.
+   * A JSON copy of the main document that playback keeps at the current position when
+   * `needsJsonCopy` is true. It is built on the first move that needs it.
    */
   jsonHistoryCopy: undefined as JsonHistoryCopy | undefined
 }))
@@ -670,7 +670,7 @@ export const TreeManager = types
     let source: IPlaybackPatchSource = defaultPatchSource;
     // Where this move goes. A JSON copy can stop it short of the requested position.
     let targetPosition = newHistoryPosition;
-    // Only a history that holds a load entry has a JSON copy. The copy moves first:
+    // Only a document that needs a JSON copy (see needsJsonCopy) has one. The copy moves first:
     // it finds an entry that doesn't apply, and it says which models are old.
     let copy: JsonHistoryCopy | undefined;
     if (self.needsJsonCopy && self.mainDocument) {
