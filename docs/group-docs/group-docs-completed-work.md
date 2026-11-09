@@ -55,7 +55,7 @@ Two changes touching the same tile (even at disjoint sub-paths) still conflict â
 
 Design and out-of-scope items: [merge-independent-forks-design.md](../superpowers/specs/2026-04-22-merge-independent-forks-design.md).
 
-## GD-18: Settled-state document saves (CLUE-751)
+## GD-18: Settled-state document saves (PR #3086 / CLUE-751)
 
 Every RTDB content save records whether its `lastHistoryEntryId` is exact, so the saved content is known to be the document's state at that entry, and that entry is already in Firestore. Group documents save only from a settled history, so the saved content is canonical state at a known position. Implementation: `ContentSaveSender` in [src/models/document/content-save-sender.ts](../../src/models/document/content-save-sender.ts), with the commit and settled signals supplied by `FirestoreHistoryManagerConcurrent` in [src/models/history/firestore-history-manager-concurrent.ts](../../src/models/history/firestore-history-manager-concurrent.ts). The sender is a plain class: it sends one write at a time, always the newest state, and shows `Retrying` when writes keep failing.
 

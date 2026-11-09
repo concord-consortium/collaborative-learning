@@ -16,7 +16,7 @@ Forward-looking plan for group documents. For completed work (GD-1 through GD-6,
 | **GD-15** | Finer-grained `doc` scope | Split GD-9's single `doc` scope bucket so concurrent tile-adds and unrelated layout edits don't conflict |
 | **GD-16** | E2E Test Framework | Add Playwright support so tests can drive two browser windows with independent focus state, enabling automated tests for concurrent-editing UI issues |
 | **GD-17** | Type-Aware Merge Delegation | Common mechanism for tiles, shared models, and the document level to register conflict-detection / merge functions. Foundation for GD-10, GD-14, GD-15 |
-| **GD-18** | Settled-State Document Saves | Done: see [completed work](group-docs-completed-work.md#gd-18-settled-state-document-saves-clue-751). Saves record whether their `lastHistoryEntryId` is exact, so saved content reflects canonical state at a known position. Prerequisite for GD-19 |
+| **GD-18** | Settled-State Document Saves | Done: see [completed work](group-docs-completed-work.md#gd-18-settled-state-document-saves-pr-3086--clue-751). Saves record whether their `lastHistoryEntryId` is exact, so saved content reflects canonical state at a known position. Prerequisite for GD-19 |
 | **GD-19** | Transaction-Free History | Replace the per-document Firestore transaction with a multi-parent DAG of history entries, removing the write-rate choke point and moving conflict detection client-side |
 | **GD-20** | Background Entries (DataFlow) | Make tick-rate producer changes (dataflow) ordinary history entries with a `background` flag plus runner lock, asymmetric conflict resolution, producer notification, and skip-by-default scrubber/undo. Unblocks DataFlow in group docs |
 | **GD-21** | Collaborative Text-Tile Editing | Replace the text tile's single serialized string field with a fine-grained representation so edits produce small targeted patches instead of full-text replacements. Reduces history size today; prerequisite for text-tile collaborative merging via GD-14/GD-17; carries enough intent for a Slate-aware applier to preserve cursor/selection on remote updates |
@@ -145,7 +145,7 @@ Reproduction scripts and observed behavior for each case live in [test-scripts/s
 
 ### GD-18: Settled-State Document Saves
 
-Done. Group documents save only from a settled history, and every content save records whether its `lastHistoryEntryId` is exact. See [completed work](group-docs-completed-work.md#gd-18-settled-state-document-saves-clue-751). Prerequisite for GD-19.
+Done. Group documents save only from a settled history, and every content save records whether its `lastHistoryEntryId` is exact. See [completed work](group-docs-completed-work.md#gd-18-settled-state-document-saves-pr-3086--clue-751). Prerequisite for GD-19.
 
 ### GD-19: Transaction-Free History
 
