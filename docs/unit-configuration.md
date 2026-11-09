@@ -290,6 +290,11 @@ Not updated to common toolbar framework. However, supports toolbar configuration
 Common toolbar framework.  Supports:
 
 - `data-set-view`: Immediate creation of a linked tile.
+- `table-it`: Dataflow's own linked-table button. Unlike `data-set-view` it reuses the table the
+  program is already linked to rather than adding another, which keeps a capture tied to the one
+  program it describes.
+- `record-sample`: Append the program's current values to the linked table as a single point,
+  creating that table when the program has none.
 - `data-set-link`: Bring up a dialog to choose a tile to link to (or create a new one). Not in the
   default toolbar; configure it explicitly for a unit where students need to link data into a tile
   that already exists.
@@ -313,14 +318,17 @@ Common toolbar framework.  Supports:
 - `reset`: Restart the program's running state: releases holds and clears the mini-graphs.
   Recorded data is kept.
 
-Defaults:
+Defaults, in the order they appear in the toolbar:
 
-- `["data-set-view", "Table"]`
+- `connect`
+- `reset`
+- `table-it`
 - `["data-set-view", "Graph"]`
+- `record-sample`
 - `record`
 - `stop`
 - `clear`
-- `delete`
+- `|`
 - `group`
 - `ungroup`
 - `|`
@@ -329,8 +337,7 @@ Defaults:
 - `fit-all`
 - `pan`
 - `|`
-- `connect`
-- `reset`
+- `delete`
 
 Additional Live Output / sampling keys (all optional; each defaults to today's behavior):
 
