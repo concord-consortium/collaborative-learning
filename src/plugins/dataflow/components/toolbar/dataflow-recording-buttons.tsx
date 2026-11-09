@@ -1,11 +1,10 @@
-import React, { useContext } from "react";
+import React from "react";
 import { observer } from "mobx-react";
 
-import { TileModelContext } from "../../../../components/tiles/tile-api";
 import { useReadOnlyContext } from "../../../../components/document/read-only-context";
 import { TileToolbarButton } from "../../../../components/toolbar/tile-toolbar-button";
 import { IToolbarButtonComponentProps } from "../../../../components/toolbar/toolbar-button-manager";
-import { DataflowContentModelType } from "../../model/dataflow-content";
+import { useDataflowContent } from "../../hooks/use-dataflow-content";
 import { useLinkedTable } from "./dataflow-table-buttons";
 
 import RecordIcon from "../../assets/icons/record-icon.svg";
@@ -14,12 +13,6 @@ import ClearIcon from "../../assets/icons/clear-icon.svg";
 
 /** Shared with dataflow-tile's busy-toolbar exemption. */
 export const kStopButtonName = "stop";
-
-function useRecordingContent() {
-  const tile = useContext(TileModelContext);
-  const readOnly = useReadOnlyContext();
-  return { content: tile?.content as DataflowContentModelType | undefined, readOnly };
-}
 
 /**
  * Starts a run, appending to whatever the table already holds.
@@ -33,7 +26,6 @@ export const RecordButton = observer(function RecordButton({ name }: IToolbarBut
   const { content, readOnly, addTable } = useLinkedTable();
 
   function handleClick() {
-    if (!content) return;
     content.showCaptureInTable(addTable);
     content.startRecording();
   }
@@ -43,7 +35,7 @@ export const RecordButton = observer(function RecordButton({ name }: IToolbarBut
       name={name}
       title="Record data"
       onClick={handleClick}
-      disabled={!content || readOnly || content.isRecording}
+      disabled={readOnly || content.isRecording}
       disabledMessage="Stop the current recording to start another"
     >
       <RecordIcon />
@@ -53,15 +45,16 @@ export const RecordButton = observer(function RecordButton({ name }: IToolbarBut
 
 /** The only live control during a run -- see ToolbarBusyContext in dataflow-tile.tsx. */
 export const StopButton = observer(function StopButton({ name }: IToolbarButtonComponentProps) {
-  const { content, readOnly } = useRecordingContent();
-  const recording = !!content?.isRecording;
+  const content = useDataflowContent();
+  const readOnly = useReadOnlyContext();
+  const recording = content.isRecording;
   return (
     <TileToolbarButton
       name={name}
       title="Stop recording"
-      onClick={() => content?.stopRecording()}
+      onClick={() => content.stopRecording()}
       highlighted={recording}
-      disabled={!content || readOnly || !recording}
+      disabled={readOnly || !recording}
       disabledMessage="Start a recording to enable this action"
     >
       <StopIcon />
@@ -77,14 +70,15 @@ export const StopButton = observer(function StopButton({ name }: IToolbarButtonC
  * the structural-change detach this stays on the undo stack.
  */
 export const ClearButton = observer(function ClearButton({ name }: IToolbarButtonComponentProps) {
-  const { content, readOnly } = useRecordingContent();
-  const hasData = !!content && content.dataSet.cases.length > 0;
+  const content = useDataflowContent();
+  const readOnly = useReadOnlyContext();
+  const hasData = content.dataSet.cases.length > 0;
   return (
     <TileToolbarButton
       name={name}
       title="Clear recording"
-      onClick={() => content?.clearRecording()}
-      disabled={!content || readOnly || content.isRecording || !hasData}
+      onClick={() => content.clearRecording()}
+      disabled={readOnly || content.isRecording || !hasData}
       disabledMessage="Record some data to enable this action"
     >
       <ClearIcon />

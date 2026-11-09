@@ -14,7 +14,7 @@ import { isInputVariable, isOutputVariable } from "../../shared-variables/simula
 import { IDefaultContentOptions, ITileExportOptions } from "../../../models/tiles/tile-content-info";
 import { ITileMetadataModel } from "../../../models/tiles/tile-metadata";
 import { tileContentAPIActions, tileContentAPIViews } from "../../../models/tiles/tile-model-hooks";
-import { TileContentModel } from "../../../models/tiles/tile-content";
+import { ITileContentModel, TileContentModel } from "../../../models/tiles/tile-content";
 import {
   SharedDataSet, kSharedDataSetType, SharedDataSetType,
 } from "../../../models/shared/shared-data-set";
@@ -675,8 +675,6 @@ export const DataflowContentModel = TileContentModel
       self.dataSet.setName(captureName(self.dataSet.name, startedAt));
     },
   }))
-  // Its own block so `self` can see prepareCapture: within one .actions() block, `self` does not
-  // include the actions that block is defining.
   .actions(self => ({
     startRecording() {
       // Only when there is nothing to keep, so a run started after single samples appends to them
@@ -735,6 +733,10 @@ export const DataflowContentModel = TileContentModel
 
 export type DataflowContentModelType = Instance<typeof DataflowContentModel>;
 export type DataflowContentModelSnapshotIn = SnapshotIn<typeof DataflowContentModel>;
+
+export function isDataflowContentModel(model?: ITileContentModel): model is DataflowContentModelType {
+  return model?.type === kDataflowTileType;
+}
 
 export function formatTime(seconds: number) {
   const minutes = Math.floor(seconds / 60);
