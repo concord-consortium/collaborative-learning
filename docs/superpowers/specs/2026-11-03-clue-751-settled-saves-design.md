@@ -276,14 +276,24 @@ mishandled. When the loaded envelope has `settled: true`, the initial load takes
 from the envelope's `lastHistoryEntryId` and applies only the entries after it. Unmarked envelopes keep
 today's behavior. Remove the FIXME comment.
 
-**The CLUE-773 overlap.** CLUE-773 converts old tiles at load and holds the conversion entry in
-`pendingConversionEntry` until the first local entry completes. Until then the content is converted
-but history doesn't have the entry, so no snapshot is usable (section 2) and an unmount flush or
-intermediate save stamps the loaded id without `settled`. Whichever of CLUE-751 and CLUE-773 lands
-second adds this condition. Waiting for commits also closes the window CLUE-773 left: content stamped
+**The CLUE-773 overlap.** CLUE-773 converts old tiles at load and holds the load entry that records
+the conversion in the tree manager's `pendingLoadEntry` until the first entry that changes the
+content completes. Until then the content is converted but history doesn't have the entry, so no
+snapshot is usable (section 2) and an unmount flush or intermediate save stamps the loaded id
+without `settled`. CLUE-773 landed first, so CLUE-751 adds this condition as a snapshot blocker.
+Waiting for commits also closes the window CLUE-773 left: content stamped
 at or after the conversion entry isn't saved until that entry is in Firestore. CLUE-773 converts only
 individual documents; snapshot pre-processor changes on group documents, and other pre-processor
 changes on any document, are not detected (see "Known gaps").
+
+**Catching up converted content.** The entries a load is missing were recorded against the stored
+format, so they can't be applied to converted content. When the load converted old models, or a
+missing entry is a load entry, the catch-up applies them to the stored JSON instead: it undoes the
+pending load entry, applies the entries as JSON patches, each all or nothing, and sets the result as
+the content, which converts it again and rebuilds the pending load entry. A load entry among the
+missing entries is applied like any other: it is one a session made at load and uploaded with the
+edit after it, before its content save failed. Entries after it are in the current format, and the
+result needs no conversion.
 
 ### 4. Open-entry timeout
 
@@ -443,7 +453,8 @@ document) is written up by CLUE-788.
 
 - **CLUE-760** (background entries): lands after CLUE-751 and adds its 3-second rate and indicator
   rule to the new sender. A tick-only save is a save of a settled state, because ticks are synchronous.
-- **CLUE-773** (history migrations): in progress. Overlaps only at the pending conversion entry.
+- **CLUE-773** (history migrations): landed first. Overlaps at the pending load entry and the load
+  catch-up of converted content (section 3).
 - **CLUE-788**: out-of-order entries, drift entries, and one mechanism for every document.
 - **GD-19 / GD-22**: retire the upload race. GD-19 also reimplements the concurrent manager's commit
   and void signals (commit becomes the entry's echo).

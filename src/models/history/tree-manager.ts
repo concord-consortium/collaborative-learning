@@ -135,6 +135,35 @@ function getJsonCopyStart(documentJson: object, treeId: string, history: readonl
   return documentJson;
 }
 
+/**
+ * Applies entries a load is missing to the document's JSON as it was stored, before the load
+ * converted its old models, and returns the content they reach. The entries were recorded against
+ * the stored models, and a load entry among them converts those models itself, so neither fits
+ * the converted MST content. Entries are applied one at a time, each all or nothing, and
+ * application stops at the first one that fails.
+ */
+function applyEntriesToStoredJson(documentJson: any, treeId: string,
+    pendingLoadEntry: HistoryEntrySnapshot | undefined, snapshots: HistoryEntrySnapshot[]) {
+  let applied = 0;
+  let error: string | undefined;
+  try {
+    if (pendingLoadEntry) {
+      applyJsonPatches(documentJson,
+        getEntryPatchesForTree(HistoryEntry.create(pendingLoadEntry), treeId, HistoryOperation.Undo));
+    }
+    for (const snapshot of snapshots) {
+      const entry = HistoryEntry.create(snapshot);
+      const otherTree = entry.records.find(record => record.tree !== treeId);
+      if (otherTree) throw new Error(`Unknown tree '${otherTree.tree}'`);
+      applyJsonPatches(documentJson, getEntryPatchesForTree(entry, treeId, HistoryOperation.Redo));
+      applied++;
+    }
+  } catch (e) {
+    error = e instanceof Error ? e.message : String(e);
+  }
+  return { content: documentJson.content, applied, error };
+}
+
 export const FAKE_HISTORY_ENTRY_ID = "FAKE_HISTORY_ENTRY_ID";
 export const FAKE_EXCHANGE_ID = "FAKE_EXCHANGE_ID";
 
@@ -156,6 +185,8 @@ interface IMainDocument extends TreeAPI {
   key: string;
   uid: string;
   metadata: IDocumentMetadata;
+  // Replaces the content with stored content, converting its old models.
+  setContent(content: any): void;
 }
 
 /**
@@ -756,8 +787,24 @@ export const TreeManager = types
    *
    * An entry that fails may be partly applied and isn't counted in `applied`, so a caller
    * must treat any `error` as leaving the content not exact.
+   *
+   * When the load converted old models, or an entry is a load entry, the entries are applied to
+   * the stored JSON instead (see applyEntriesToStoredJson), and the document's content is set to
+   * the result, which converts it again and rebuilds the pending load entry from it.
    */
   applyEntriesAtLoad: flow(function* applyEntriesAtLoad(snapshots: HistoryEntrySnapshot[]) {
+    const { mainDocument, pendingLoadEntry } = self;
+    if (mainDocument && (pendingLoadEntry || snapshots.some(snapshot => snapshot?.isLoadEntry))) {
+      const documentJson = toJsonValue(getSnapshot(mainDocument as unknown as IAnyStateTreeNode));
+      const stored = applyEntriesToStoredJson(documentJson, mainDocument.key, pendingLoadEntry, snapshots);
+      if (stored.applied > 0) {
+        mainDocument.setContent(stored.content);
+      }
+      return stored.error === undefined
+        ? { applied: stored.applied }
+        : { applied: stored.applied, error: stored.error };
+    }
+
     const trees = Object.values(self.trees);
     // FAKE ids keep what the trees do while applying out of the history.
     yield Promise.all(trees.map(tree => {
