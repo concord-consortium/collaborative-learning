@@ -44,6 +44,22 @@ Location: `firestore-history-manager-concurrent.ts:resumeUploadsAfterDelay()`
 
 The `setTimeout` call doesn't store or cancel previous timers. Multiple calls could schedule multiple timeouts, potentially resuming uploads at unexpected times. This is low priority since it's primarily used for debugging/testing, but storing the timeout ID and clearing it before scheduling a new one would make it more robust.
 
+## Remote Entries That Fail to Apply Stay in History
+
+Location: `firestore-history-manager-concurrent.ts:doApplyHistoryEntries()`
+
+Each delivered entry is added to local history with `addHistoryEntryAfterApplying` before any of its patches are applied. The patches of the whole batch are then combined into one `applyPatch` per tree. If that throws partway, the patches before the failing one stay in the content, since MST doesn't roll back a failed action, and the rest never apply. Every entry in the batch stays in local history as if it had applied, and nothing records which one failed. `finishApplyingPatchesFromManager` is skipped, and `expectedRemoteHead` isn't advanced.
+
+What follows:
+- Later deliveries skip entries already in local history, so the failed ones are never retried. Newer entries that build on them are applied over content missing their changes, and either fail too or land on the wrong state.
+- Until an apply succeeds, every upload transaction sees a head other than `expectedRemoteHead` and aborts. A member editing alone, with nobody else writing, never gets another delivery, so their later edits stay only in memory.
+- The tree keeps `applyingManagerPatches` set, so its tiles don't resync with shared-model changes until the next apply finishes.
+- The session stops being exact, so this client stops saving content. If the failing entry is in the chain, every member that loads the document fails on it, and no member saves content again.
+
+The failure is logged as `HISTORY_REMOTE_APPLY_FAILED`, which shows how often it happens.
+
+**Needed**: GD-19 should decide what happens to a delivered entry that fails to apply, and to the entries built on it. One direction is to apply and add entries one at a time, recording only those that applied, and to skip or quarantine a failing entry. The [background entries design](background-entries-design.md) already skips a failing patch in a background entry, and treats any apply failure in a user entry as a bug.
+
 ## Test Coverage Gaps
 
 Primarily in:
