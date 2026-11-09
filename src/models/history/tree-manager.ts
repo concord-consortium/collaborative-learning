@@ -930,11 +930,9 @@ export const TreeManager = types
       // entry's partial was applied last, so it rolls back first; then
       // fully-applied segments roll back in reverse segment order.
       //
-      // The failing entry's partial is undone with the reverse patches the
-      // tree reported for each patch it applied (PatchApplicationError), not
-      // with the entry's opposite patches: an entry's inverse patches don't
-      // have to pair one-to-one with its patches. A whole entry's opposite
-      // patches do undo it, so fully-applied segments use those.
+      // A partly applied entry rolls back with the reverse patches the tree
+      // reported, since an entry's inverse patches don't have to pair with its
+      // patches.
       //
       // Trees that failed unexpectedly are skipped entirely: we don't
       // have a trustworthy numApplied count and can't safely roll back
