@@ -185,7 +185,13 @@ The snapshot reflects X even when later entries have completed since, so a DataF
 faster than its uploads still gets exact saves, each one upload behind. This holds on group documents
 too, where a lone runner otherwise never settles and has no idle member to save in its place.
 
-Snapshots are kept only until a newer one is saved, or are voided.
+Snapshots are kept only until a newer one is saved, or are voided. While entries wait to commit, the
+newest snapshot is kept, and of the older ones only those taken at least the minimum save gap (1
+second) after the one kept before them, up to 10 in all. Saves are written no closer together than
+that gap, so most of the dropped snapshots would never have been written. A commit saves the newest
+snapshot kept among its entries, which is still exact and at most about a second older. When commits
+fall further behind than the cap reaches, an individual document falls back to intermediate saves and
+a group document waits for the commits to catch up or for its settled save.
 
 **Group documents also save the current state when settled.** An idle member has no local entries,
 so it saves the current content when settled, per the GD-18 definition: nothing in
@@ -388,11 +394,23 @@ names are left to the builder.
   builder's check (see "Left to the builder") catches them. CLUE-788 section 2 covers recording all of
   these as drift entries.
 - **Changes made while monitoring is off.** Changes made after the load but before the hook enables
-  history monitoring (mount-time fixups, such as a tile syncing to a shared model), changes made
-  while the sender drains after unmount, and patches made outside an action while a flow is
-  suspended are not detected. Such a change can sit inside a settled save. A detector would also
-  flag load-time fixups and leave those documents never exact, so CLUE-788's drift entries are the
-  fix.
+  history monitoring (mount-time fixups, such as a tile syncing to a shared model), fixups made while
+  the load catch-up runs (the document is read-only then, so monitoring is off), and changes made
+  while the sender drains after unmount are not detected. Such a change can sit inside a settled
+  save. A detector would also flag load-time fixups and leave those documents never exact, so
+  CLUE-788's drift entries are the fix. Blocking code-driven changes during the catch-up isn't
+  attempted: CLUE has no model-level lock, and blocking tile fixups needs an understanding of all of
+  them first. What to do with changes during the drain is an open question in CLUE-788.
+- **Patches made outside an action while a flow is suspended.** The tree monitor doesn't flag them,
+  since the suspended flow counts as tracked. MST protection should make them impossible, so one
+  would be an error, not drift. CLUE-788 records the investigation.
+- **A remote entry that always fails to apply.** A group client whose remote apply failed stops
+  saving content and logs `HISTORY_REMOTE_APPLY_FAILED`. If the failing entry is in the chain, every
+  member that loads fails on it, no member saves content again, and each later load shows content
+  missing everything after it. Group documents aren't widely used yet, so this stays strict: no
+  unsettled content is saved to get past it. The log shows whether it happens. Applying entries one
+  at a time and skipping a failing one, or saving the settled state stamped with the remote head
+  after a failure, are the options if it does.
 - **The group initial load from an unmarked envelope.** The content and Firestore's last entry are
   read separately, so an entry committed between the two reads is skipped, and that session's saves
   are still marked settled. A load from a `settled` envelope doesn't have this. Marking unmarked
