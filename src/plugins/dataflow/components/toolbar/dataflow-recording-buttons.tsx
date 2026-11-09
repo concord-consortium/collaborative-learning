@@ -25,16 +25,11 @@ export const kStopButtonName = "stop";
 export const RecordButton = observer(function RecordButton({ name }: IToolbarButtonComponentProps) {
   const { content, readOnly, addTable } = useLinkedTable();
 
-  function handleClick() {
-    content.showCaptureInTable(addTable);
-    content.startRecording();
-  }
-
   return (
     <TileToolbarButton
       name={name}
       title="Record data"
-      onClick={handleClick}
+      onClick={() => content.startRecording(addTable)}
       disabled={readOnly || content.isRecording}
       disabledMessage="Stop the current recording to start another"
     >

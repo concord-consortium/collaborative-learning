@@ -355,20 +355,20 @@ describe("prepareCapture", () => {
 describe("startRecording", () => {
   it("prepares the capture when the dataset is empty", () => {
     const content = setupContentWithTwoNamedNodes("Sensor", "Servo");
-    content.startRecording();
+    content.startRecording(jest.fn());
     expect(content.isRecording).toBe(true);
     expect(content.dataSet.attributes.map(a => a.name)).toEqual(["Point", "Sensor", "Servo"]);
   });
 
   // Point numbering continues rather than restarting. (prepareCapture's own idempotency is what
-  // protects the columns here; the guard in startRecording is pinned by the name test below.)
+  // protects the columns here; the empty-table guard is pinned by the name test below.)
   it("leaves existing points alone and appends to them", () => {
     const content = setupContentWithTwoNamedNodes("Sensor", "Servo");
     content.prepareCapture();
     recordCase(content);
     const pointId = content.dataSet.attributes[0].id;
 
-    content.startRecording();
+    content.startRecording(jest.fn());
     recordCase(content);
 
     expect(content.dataSet.cases).toHaveLength(2);
@@ -383,14 +383,14 @@ describe("startRecording", () => {
     content.prepareCapture(new Date(2026, 9, 30, 14, 32, 7));
     recordCase(content);
 
-    content.startRecording();
+    content.startRecording(jest.fn());
 
     expect(content.dataSet.name).toBe("Program 1 14:32:07");
   });
 
   it("stops recording", () => {
     const content = setupContentWithTwoNamedNodes("Sensor", "Servo");
-    content.startRecording();
+    content.startRecording(jest.fn());
     content.stopRecording();
     expect(content.isRecording).toBe(false);
   });

@@ -121,7 +121,7 @@ describe("DataflowProgram recording lifecycle", () => {
   it("stops a recording left running when the component unmounts", () => {
     const content = createContent();
     const { unmount } = renderProgram(content);
-    act(() => content.startRecording());
+    act(() => content.startRecording(jest.fn()));
     expect(content.isRecording).toBe(true);
     unmount();
     expect(content.isRecording).toBe(false);
@@ -130,7 +130,7 @@ describe("DataflowProgram recording lifecycle", () => {
   it("does not stop recording on unmount of a read-only view", () => {
     const content = createContent();
     const { unmount } = renderProgram(content, { readOnly: true });
-    act(() => content.startRecording());
+    act(() => content.startRecording(jest.fn()));
     expect(content.isRecording).toBe(true);
     unmount();
     expect(content.isRecording).toBe(true);

@@ -76,7 +76,7 @@ describe("DataflowProgramTopbar while recording", () => {
     expect(screen.getByTestId("rate-select")).toBeEnabled();
     expect(screen.queryByTestId("recording-elapsed")).toBeNull();
 
-    act(() => { tileContent.startRecording(); });
+    act(() => { tileContent.startRecording(jest.fn()); });
 
     expect(screen.getByTestId("rate-select")).toBeDisabled();
     expect(screen.getByTestId("recording-elapsed")).toBeInTheDocument();
@@ -85,7 +85,7 @@ describe("DataflowProgramTopbar while recording", () => {
   // The denominator is how long this program could still record; it shrinks as blocks are added.
   it("shows the elapsed time over the recordable window", () => {
     const { tileContent } = renderTopbar(false);
-    act(() => { tileContent.startRecording(); });
+    act(() => { tileContent.startRecording(jest.fn()); });
 
     expect(screen.getByTestId("recording-elapsed").textContent)
       .toMatch(/^\d{2}:\d{2}\/\d{2,}:\d{2}$/);

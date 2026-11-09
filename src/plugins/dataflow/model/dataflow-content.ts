@@ -676,13 +676,6 @@ export const DataflowContentModel = TileContentModel
     },
   }))
   .actions(self => ({
-    startRecording() {
-      // Only when there is nothing to keep, so a run started after single samples appends to them
-      // rather than discarding them. prepareCapture is idempotent about columns, so what this
-      // guard really protects is the capture's name -- preparing again would restamp its time.
-      if (self.dataSet.cases.length === 0) self.prepareCapture();
-      self.isRecording = true;
-    },
     stopRecording() {
       self.isRecording = false;
     },
@@ -709,7 +702,8 @@ export const DataflowContentModel = TileContentModel
      *
      * `addTable` adds a table tile linked to this program's dataset. It is passed in so this model
      * doesn't depend on the document, and called from inside this action so the new table, its
-     * columns and, for a sample, the row are one history entry: one undo removes them all.
+     * columns and, for a sample, the row are one history entry: one undo removes them all. Record
+     * goes through here too, from startRecording.
      */
     showCaptureInTable(addTable: () => void) {
       if (!self.linkedTableTileId) addTable();
@@ -723,6 +717,15 @@ export const DataflowContentModel = TileContentModel
     },
   }))
   .actions(self => ({
+    /**
+     * Starts a run, adding and preparing the table first if needed. See showCaptureInTable for
+     * `addTable`. A table that already holds points keeps them: the run appends to them, and the
+     * capture keeps the time it was first prepared.
+     */
+    startRecording(addTable: () => void) {
+      self.showCaptureInTable(addTable);
+      self.isRecording = true;
+    },
     /** Appends the program's current values to the table as the next point, adding and preparing
      * the table first if needed. See showCaptureInTable for `addTable`. */
     recordSingleSample(addTable: () => void) {

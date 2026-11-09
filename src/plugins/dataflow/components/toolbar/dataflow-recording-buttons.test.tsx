@@ -66,7 +66,7 @@ describe("RecordButton", () => {
 
   it("is disabled while a recording is running", () => {
     const { button, content } = setup(RecordButton);
-    act(() => content.startRecording());
+    act(() => content.startRecording(jest.fn()));
     expect(button.getAttribute("aria-disabled")).toBe("true");
   });
 
@@ -84,7 +84,7 @@ describe("StopButton", () => {
 
   it("ends the recording", () => {
     const { button, content } = setup(StopButton);
-    act(() => content.startRecording());
+    act(() => content.startRecording(jest.fn()));
     fireEvent.click(button);
     expect(content.isRecording).toBe(false);
   });
@@ -137,7 +137,7 @@ describe("ClearButton", () => {
 
   it("is disabled while a recording is running", () => {
     const { content, button } = setupWithTable();
-    act(() => content.startRecording());
+    act(() => content.startRecording(jest.fn()));
     expect(button.getAttribute("aria-disabled")).toBe("true");
   });
 
