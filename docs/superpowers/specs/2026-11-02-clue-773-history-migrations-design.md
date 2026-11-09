@@ -1,6 +1,6 @@
 # CLUE-773: History playback across tile schema changes
 
-Status: design; PR 1 of 3 (recording) in review, 2026-11-04.
+Status: PRs 1 and 2 merged; PR 3 (legacy DataFlow bridge) in review, 2026-11-09.
 
 ## Why
 
@@ -16,9 +16,10 @@ tile, and nothing tells the developer.
 The code already has one workaround: `DataflowContentModel` keeps a deprecated `programZoom`
 property only so that old `/programZoom/...` patches still resolve.
 
-The `clue-dataflow-behavior` study (cc-data-studies) measured the damage. Of 411 DataFlow documents
-whose history starts in May 2024 or later, 174 stop on an entry in the legacy DataFlow format and
-can't be scrubbed back to their start. Researchers want to see that early program history.
+The `clue-dataflow-behavior` study (cc-data-studies) measured the damage. Of the 462 DataFlow
+documents in its data whose history starts in May 2024 or later, 175 stop on an entry in the legacy
+DataFlow format and can't be scrubbed back to their start. Researchers want to see that early
+program history.
 
 History has a second audience besides CLUE's playback. It is meant to let a "dumb" service, one
 that doesn't load CLUE's code, rebuild the document at any entry by applying JSON patches. For
@@ -60,7 +61,7 @@ customer.
   problem.
 - **Backfilling load entries into stored legacy DataFlow histories.** A document whose stored
   content is still legacy gets one the next time its owner edits it, like any other conversion. For
-  the rest, CLUE builds them in memory at read time (section 6). A follow-up script can store them
+  the rest, CLUE finds those conversions at read time (section 6). A follow-up script can store them
   so dumb services can cross the legacy conversion too.
 - **Patch-level migrations.** The design leaves room for them (section 3). No tile gets one in this
   story.
@@ -417,46 +418,46 @@ and a later story starts playback from it.
 
 ### 6. The legacy DataFlow bridge
 
-Legacy DataFlow documents converted before load entries existed have stored histories that go
-straight from legacy entries to new-format entries. Playback builds the missing load entry in
-memory, and from there the general mechanism takes over. A tile that a stored load entry
-already covers needs no bridge.
+Legacy DataFlow documents converted without a load entry (before load entries were recorded, or in
+a concurrent document) have stored histories that go straight from legacy entries to new-format
+entries. A **history bridge** that DataFlow registers finds each tile's missing conversion and
+reports it as a **virtual conversion**: the tile's path, the position the conversion sits at, and
+the tile's legacy JSON just before it. The JSON copy crosses a virtual conversion like a load entry,
+and from there the general mechanism takes over. A load entry that a viewer hands to the playback
+copy (section 2) counts as coming after the stored history.
 
-- **Finding the boundary.** For each DataFlow tile, the last legacy entry before its first
-  new-format entry. An entry is legacy when its DataFlow patches use legacy paths:
-  `program/values/<n>/...`, numeric node ids under `program/nodes/<n>`, legacy `inputs` / `outputs`
-  connection paths, or a `program` value whose `id` is `"dataflow@0.1.0"`. Legacy patches appear in
-  many actions, not only `setProgram` (`setSlate` and `addCanonicalCases`, for example), so the check
-  is by path, not by action.
+- **Finding the boundary.** For each DataFlow tile, its last legacy entry. An entry is legacy when
+  its DataFlow patches use legacy paths: `program/values/...`, numeric node ids under
+  `program/nodes/<n>`, legacy `inputs` / `outputs` connection paths, a program, content or tile
+  value holding a legacy program, or the legacy `program/id` set. Load entries don't count: one that
+  converts a legacy tile has legacy patches. When the next entry that touches the tile is a load
+  entry, the history records the conversion, and the tile needs no virtual conversion. In the study,
+  legacy patches outside `setProgram` come only from undo, redo and tile copies, but the check is by
+  path, not by action.
 - **A legacy program with no id.** Many legacy tiles were added with a program that has a `values`
   map but no `id`, because a separate `setProgram` entry set the id. A program with no `id` and a
   `values` map is legacy. DataFlow's `getVersion`, its converter and the legacy-patch check all use
   this rule, so the JSON copy treats that tile as old wherever it appears, including after a forward
   redo of its add.
-- **The old state at the boundary.** The load entry needs the tile's legacy JSON at the
-  boundary, and the stored content only has the converted form. The candidates, in order of
-  preference:
-  1. **Replay forward from the start.** If a document's history starts from a known state, applying
-     the legacy entries forward in JSON gives the legacy tile at the boundary.
-  2. **A reverse conversion.** A function from the new format back to the legacy one. The forward
-     conversion ([convert-legacy-dataflow.ts](../../../src/plugins/dataflow/model/convert-legacy-dataflow.ts))
-     loses information: it drops node `data` fields, the output side of connections and the
-     `values` structure, and maps "Heat Lamp" to "Light Bulb". The reverse only has to rebuild
-     what the earlier legacy entries touch, but a `remove` or `replace` on a path it didn't rebuild
-     fails.
-  3. **A patch-level migration** for this one step.
-
-  The harness decides which works on the study's documents. The builder may combine them, for
-  example forward replay where the start is known and the reverse conversion elsewhere.
-- **Then** the in-memory load entry is the diff between that legacy tile and the converted
-  tile at the boundary, as in section 2.
+- **The old state at the boundary.** The virtual conversion needs the tile's legacy JSON at the
+  boundary, and the stored content only has the converted form. The bridge replays the tile's
+  patches forward from the last entry that adds or replaces the whole tile, or a model holding it
+  such as the tile map. When there is no such entry, or a patch doesn't apply, the bridge can't
+  rebuild the tile, and playback stops at the boundary (section 7). A reverse conversion was
+  considered and not built: the forward conversion
+  ([convert-legacy-dataflow.ts](../../../src/plugins/dataflow/model/convert-legacy-dataflow.ts))
+  loses information (it drops node `data` fields, the output side of connections and the `values`
+  structure, and maps "Heat Lamp" to "Light Bulb"), so a reverse one fails on a `remove` or
+  `replace` of a path it didn't rebuild. Neither was a patch-level migration for this one step.
+- **Then** the JSON copy diffs that legacy tile against the converted tile the first time it
+  crosses the conversion backward, as section 2 does for a load entry.
 
 The harness is an uncommitted, throwaway Jest file, `src/models/history/zz-local-replay.test.ts`,
 kept in the developer's worktree. It reads the study data from
 `cc-data-studies/studies/clue-dataflow-behavior/local-data/clue-documents/`, which holds student
 data and stays on the developer's machine.
 
-**Pass bar:** each of the 174 documents plays back to its start, unless it stops on one of the
+**Pass bar:** each of the 175 documents plays back to its start, unless it stops on one of the
 non-schema causes (see Non-goals) or on a legacy shape the PR names as one the bridge can't handle.
 
 **A named shape the bridge doesn't handle: `program/id` recorded before the tile's add.** In many
@@ -472,9 +473,9 @@ legacy conversion, plays back.
 
 - **An entry doesn't apply to the JSON copy.** The chain is broken there: a non-schema bug, or a
   conversion with no load entry. Playback shows today's failure banner.
-- **The legacy bridge can't build the old state.** Playback treats the boundary as the oldest
-  position it can reach and says earlier history isn't available, not the failure banner. *My
-  call.*
+- **The legacy bridge can't build the old state, or the tile isn't in the JSON copy at the
+  boundary.** Playback treats the boundary as the oldest position it can reach and says "Earlier
+  history isn't available." in a status region, not the failure banner. *My call.*
 - **A conversion throws on an old tile** (the legacy conversion throws on an unknown node type, for
   example). The move doesn't advance; the failure banner shows at the first entry it would cross.
   When it throws while building the rollback of a move MST stopped short, the move is rolled back to
@@ -485,19 +486,21 @@ legacy conversion, plays back.
   and playback stays at the position it started from. The trees, the JSON copy and the position
   then agree, and the failure banner shows.
 
-The exact wording and how the slider shows an unreachable range are left to the builder. CLUE-760 is
-reworking the same slider, so whichever lands second follows the other.
+The slider doesn't mark the range playback can't reach. CLUE-760 is reworking the same slider, so
+whichever lands second follows the other.
 
 ### 8. The developer doc
 
 A new doc, `docs/tile-schema-changes.md`, linked from
-[undo-and-time-travel.md](../../undo-and-time-travel.md) and [tile-creation.md](../../tile-creation.md):
+[undo-and-time-travel.md](../../undo-and-time-travel.md), [tile-creation.md](../../tile-creation.md)
+and [history-framework.md](../../history-framework.md):
 
 - What history is for, including dumb services, and why a schema change must leave the chain
   intact.
 - The checklist: bump the version; register `getVersion` and `currentVersion` if the type has none;
   write the migration in `convertSnapshot` and have the type's preprocessor call it; add fixtures of
-  old content with old history; add the boundary test (see Testing).
+  old content with old history; add a crossing test (see Testing); don't use a snapshot
+  post-processor to change what is saved.
 - **Ids:** when to make new ids deterministic (no churn in playback, and concurrent conversions
   agree) and when to keep them random (when they could collide, or stable ids would make the
   conversion hard to maintain).
@@ -579,12 +582,12 @@ a follow-up story.
   real document load and tree manager. Another runs it on a chain the current code records in the
   test, with a conversion that shortens an array, so the order of the stored inverse patches
   matters.
-- **Legacy DataFlow.** Fixtures, small documents from the study each with its history, covering:
-  legacy ticks (`setProgram` values only), node moves and additions, a connection added and later
-  deleted, a whole-program `setProgram`, legacy value patches inside other actions, and a document
-  whose bridge needs the fallback. Fixtures are stripped to what the tests need and checked for
-  student names and free text before they are committed. The pass bar (section 6) is checked with
-  the harness.
+- **Legacy DataFlow.** Fixtures, small documents each with its history. From the study: legacy
+  ticks (`setProgram` values only), node moves and additions, a connection added and later deleted,
+  a tile added with a legacy program that has no id, and a history that starts after the tile's add.
+  Synthetic, because the study has none: a whole-program `setProgram`, and legacy value patches
+  inside other actions. Fixtures are stripped to what the tests need and checked for student names
+  and free text before they are committed. The pass bar (section 6) is checked with the harness.
 - **Can't go further.** A failed legacy bridge shows "earlier history isn't available", not the
   failure banner.
 - **No slowdown.** A document with no load entries and no legacy entries never builds a JSON
@@ -666,7 +669,7 @@ A change to this design made in a later PR updates this document in that PR.
   doesn't know its version stops editing. This story designs it (section 4); building it is a
   follow-up.
 - The audit checks its conclusions against real documents.
-- Pass bar for the 174 legacy documents: play back to the start, or stop on a non-schema cause or a
+- Pass bar for the 175 legacy documents: play back to the start, or stop on a non-schema cause or a
   named shape the bridge can't handle.
 - `programZoom` gets no code change; it is the developer doc's example.
 
@@ -698,5 +701,7 @@ A change to this design made in a later PR updates this document in that PR.
 - *Settled in PR 2:* the tree API for applying patches and replacing old tiles in one action.
   `applyPatchesFromManager` takes optional `modelReplacements`, applied after the patches in the
   same action; a failure throws `ModelReplacementError`.
-- Which of the three legacy bridge approaches to use, decided with the harness.
-- The "earlier history isn't available" wording and slider treatment.
+- *Settled in PR 3:* the legacy bridge replays forward from the tile's last whole-tile add or
+  replace, with no reverse conversion and no fallback.
+- *Settled in PR 3:* the wording is "Earlier history isn't available.", and the slider doesn't mark
+  the range playback can't reach.
