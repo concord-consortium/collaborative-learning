@@ -2,9 +2,6 @@
 @import "../../../../components/mixins";
 @import "../dataflow-vars";
 
-// The rate selector and the elapsed readout are the header's only content now, so they read as
-// plain controls on the toolbar rather than the dark chrome the old three-section header needed.
-// Lightly rounded rather than pill-shaped, per the design in the story.
 $rate-text: #545454;          // the toolbar's icon grey, so label and icons match
 $rate-border: #b7b7b7;
 $rate-corner-radius: 3px;
@@ -19,7 +16,7 @@ $rate-control-height: 22px;
   margin-left: 3px;
 
   .samplerate-label {
-    // 14px to match the labelling elsewhere in the tile, including the node labels.
+    // 14px to match the labeling elsewhere in the tile, including the node labels.
     font-size: 14px;
     font-weight: 500;
     color: $rate-text;
