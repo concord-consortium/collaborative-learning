@@ -9,22 +9,23 @@ import { IToolbarButtonComponentProps } from "../../../../components/toolbar/too
 import { useUIStore } from "../../../../hooks/use-stores";
 import { getTileComponentInfo } from "../../../../models/tiles/tile-component-info";
 import { getTileCreateActionName } from "../../../../models/tiles/tile-content-info";
-import { DataflowContentModelType, kDataflowTableTileType } from "../../model/dataflow-content";
+import { kDataflowTableTileType } from "../../model/dataflow-content";
+import { useDataflowContent } from "../../hooks/use-dataflow-content";
 
 import ViewBadgeIcon from "../../../../assets/icons/view/view-badge.svg";
 import RecordSampleIcon from "../../assets/icons/record-sample-icon.svg";
 
-function useTableButton() {
+export function useLinkedTable() {
   const tile = useContext(TileModelContext);
   const addTilesContext = useContext(AddTilesContext);
   const ui = useUIStore();
   const readOnly = useReadOnlyContext();
-  const content = tile?.content as DataflowContentModelType | undefined;
+  const content = useDataflowContent();
 
   /** Adds a table linked to the program's dataset. The content calls it from inside its own
    * action, so the table joins that action's history entry. */
   const addTable = () => {
-    const sharedModel = content?.sharedModel;
+    const sharedModel = content.sharedModel;
     if (!tile || !addTilesContext || !sharedModel) return;
     addTilesContext.addTileAfter(kDataflowTableTileType, tile, [sharedModel]);
   };
@@ -33,7 +34,7 @@ function useTableButton() {
    * renders only for the selected tile (tile-toolbar.tsx), so selecting the table takes the sample
    * button off screen and a second sample becomes unclickable. */
   const selectTable = () => {
-    const tableId = content?.linkedTableTileId;
+    const tableId = content.linkedTableTileId;
     if (tableId) ui.setSelectedTileId(tableId);
   };
   return { content, readOnly, addTable, selectTable };
@@ -48,11 +49,10 @@ function useTableButton() {
 export const DataflowTableButton = observer(function DataflowTableButton(
   { name }: IToolbarButtonComponentProps
 ) {
-  const { content, readOnly, addTable, selectTable } = useTableButton();
+  const { content, readOnly, addTable, selectTable } = useLinkedTable();
   const Icon = getTileComponentInfo(kDataflowTableTileType)?.Icon;
 
   function handleClick() {
-    if (!content) return;
     const hadTable = !!content.linkedTableTileId;
     content.showCaptureInTable(addTable);
     // An existing table may be anywhere in the document, so reveal it. A new one is added right
@@ -65,7 +65,7 @@ export const DataflowTableButton = observer(function DataflowTableButton(
       name={name}
       title={getTileCreateActionName(kDataflowTableTileType)}
       onClick={handleClick}
-      disabled={!content || readOnly}
+      disabled={readOnly}
     >
       {Icon ? <BadgedIcon Icon={Icon} Badge={ViewBadgeIcon} /> : "??"}
     </TileToolbarButton>
@@ -76,10 +76,10 @@ export const DataflowTableButton = observer(function DataflowTableButton(
 export const RecordSingleSampleButton = observer(function RecordSingleSampleButton(
   { name }: IToolbarButtonComponentProps
 ) {
-  const { content, readOnly, addTable } = useTableButton();
+  const { content, readOnly, addTable } = useLinkedTable();
 
   function handleClick() {
-    content?.recordSingleSample(addTable);
+    content.recordSingleSample(addTable);
   }
 
   return (
@@ -87,7 +87,7 @@ export const RecordSingleSampleButton = observer(function RecordSingleSampleButt
       name={name}
       title="Record single sample"
       onClick={handleClick}
-      disabled={!content || readOnly}
+      disabled={readOnly}
     >
       <RecordSampleIcon />
     </TileToolbarButton>

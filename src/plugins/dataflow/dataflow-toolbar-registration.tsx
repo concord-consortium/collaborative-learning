@@ -12,6 +12,8 @@ import { resetProgramForTile } from "./utilities/device-actions";
 import { ConnectDeviceButton } from "./components/toolbar/dataflow-connect-button";
 import { ZoomInButton, ZoomOutButton, FitAllButton, PanButton } from "./components/toolbar/dataflow-zoom-pan-buttons";
 import { DataflowTableButton, RecordSingleSampleButton } from "./components/toolbar/dataflow-table-buttons";
+import { ClearButton, kStopButtonName, RecordButton, StopButton }
+  from "./components/toolbar/dataflow-recording-buttons";
 
 import DeleteIcon from "../../assets/icons/delete/delete-selection-icon.svg";
 import ResetIcon from "./assets/icons/reset-icon.svg";
@@ -72,7 +74,7 @@ const UngroupNodesButton = observer(function UngroupNodesButton({ name }: IToolb
 });
 
 // Resets the tile's program (resetProgramForTile says what that keeps). Disabled for read-only
-// views and for the playback manager shown in Done mode, which is constructed read-only.
+// views.
 const ResetProgramButton = observer(function ResetProgramButton({ name }: IToolbarButtonComponentProps) {
   const reteManager = useContext(DataflowReteManagerContext);
   const model = useContext(TileModelContext);
@@ -87,7 +89,7 @@ const ResetProgramButton = observer(function ResetProgramButton({ name }: IToolb
 
   return (
     <TileToolbarButton name={name} title="Reset program" onClick={handleClick} disabled={disabled}
-        disabledMessage="Reset isn't available while a recording is shown or in a read-only view">
+        disabledMessage="Reset isn't available while a recording is in progress or in a read-only view">
       <ResetIcon />
     </TileToolbarButton>
   );
@@ -111,6 +113,18 @@ registerTileToolbarButtons('dataflow',
   {
     name: "record-sample",
     component: RecordSingleSampleButton
+  },
+  {
+    name: "record",
+    component: RecordButton
+  },
+  {
+    name: kStopButtonName,
+    component: StopButton
+  },
+  {
+    name: "clear",
+    component: ClearButton
   },
   {
     // Dialog-mediated view. Also takes an argument for tile type.

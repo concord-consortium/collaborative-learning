@@ -4,10 +4,10 @@ import { isAlive } from "mobx-state-tree";
 import classNames from "classnames";
 import { TileToolbarButton } from "../../../../components/toolbar/tile-toolbar-button";
 import { IToolbarButtonComponentProps } from "../../../../components/toolbar/toolbar-button-manager";
-import { TileModelContext } from "../../../../components/tiles/tile-api";
+import { useDataflowContent } from "../../hooks/use-dataflow-content";
 import { useTouchHold } from "../../../../hooks/use-touch-hold";
 import { DataflowReteManagerContext } from "../dataflow-rete-manager-context";
-import { DataflowContentModelType, PanDirection } from "../../model/dataflow-content";
+import { PanDirection } from "../../model/dataflow-content";
 import { MIN_ZOOM, MAX_ZOOM, kPanStep } from "../../rete/rete-manager";
 
 import ZoomInIcon from "../../../../clue/assets/icons/zoom-in-icon.svg";
@@ -154,17 +154,14 @@ function PanPalette({ onSelect, onClose }: IPanPaletteProps) {
 // (default right); the corner triangle (or touch-hold) opens the palette to pick another.
 export const PanButton = observer(function PanButton({ name }: IToolbarButtonComponentProps) {
   const reteManager = useContext(DataflowReteManagerContext);
-  // Toolbar-only state lives on the real tile content: the active manager's mstContent is a snapshot
-  // COPY during recorded-data playback, whose volatiles would reset the remembered direction on every
-  // mode change. Pan operations still go to the active manager, which owns the visible canvas.
-  const content = useContext(TileModelContext)?.content as DataflowContentModelType | undefined;
-  const isOpen = !!content?.panPaletteOpen;
-  const lastDirection = content?.lastPanDirection ?? "right";
+  const content = useDataflowContent();
+  const isOpen = content.panPaletteOpen;
+  const lastDirection = content.lastPanDirection;
 
   // Deselecting the tile unmounts the toolbar; the model volatile would otherwise stay open. Deleting
   // the tile destroys the content before this runs.
   useEffect(() => () => {
-    if (content && isAlive(content)) content.setPanPaletteOpen(false);
+    if (isAlive(content)) content.setPanPaletteOpen(false);
   }, [content]);
 
   // Clicking anywhere outside the trigger or the palette closes the flyout (capture phase, so a
@@ -179,7 +176,7 @@ export const PanButton = observer(function PanButton({ name }: IToolbarButtonCom
       // something focusable still claims focus itself, since that happens after pointerdown.
       const focusedPalette = document.activeElement?.closest(".dataflow-pan-palette");
       focusedPalette?.parentElement?.querySelector<HTMLButtonElement>("button.toolbar-button")?.focus();
-      content?.setPanPaletteOpen(false);
+      content.setPanPaletteOpen(false);
     };
     document.addEventListener("pointerdown", handlePointerDown, true);
     return () => document.removeEventListener("pointerdown", handlePointerDown, true);
@@ -188,7 +185,7 @@ export const PanButton = observer(function PanButton({ name }: IToolbarButtonCom
   const { onClick } = useTouchHold(toggleOpen, panLastDirection);
 
   function toggleOpen() {
-    content?.setPanPaletteOpen(!isOpen);
+    content.setPanPaletteOpen(!isOpen);
   }
 
   function pan(direction: PanDirection) {
@@ -197,7 +194,7 @@ export const PanButton = observer(function PanButton({ name }: IToolbarButtonCom
   }
 
   function panLastDirection() {
-    content?.setPanPaletteOpen(false);
+    content.setPanPaletteOpen(false);
     pan(lastDirection);
   }
 
@@ -209,12 +206,12 @@ export const PanButton = observer(function PanButton({ name }: IToolbarButtonCom
   // Panning is repetitive, so selecting a direction pans and leaves the palette open for more
   // clicks; only Escape, the triangle, the face, or deselecting the tile closes it.
   function handleSelect(direction: PanDirection) {
-    content?.setLastPanDirection(direction);
+    content.setLastPanDirection(direction);
     pan(direction);
   }
 
   const palette = isOpen
-    ? <PanPalette onSelect={handleSelect} onClose={() => content?.setPanPaletteOpen(false)} />
+    ? <PanPalette onSelect={handleSelect} onClose={() => content.setPanPaletteOpen(false)} />
     : undefined;
 
   return (

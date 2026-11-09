@@ -564,15 +564,15 @@ export interface ProgramDataRate {
 export const DEFAULT_DATA_RATE = 1000;
 export const ProgramDataRates: ProgramDataRate[] = [
   {
-    text: "50ms",
+    text: "50 ms",
     val: 50
   },
   {
-    text: "100ms",
+    text: "100 ms",
     val: 100
   },
   {
-    text: "500ms",
+    text: "500 ms",
     val: 500
   },
   {

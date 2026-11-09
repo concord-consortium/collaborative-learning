@@ -13,9 +13,7 @@ import { TimerNodeModel } from "../nodes/timer-node";
 import { ControlNodeModel } from "../nodes/control-node";
 import { withoutUndo } from "../../../models/history/without-undo";
 import { uniqueId } from "../../../utilities/js-utils";
-import { BaseNodeModel, IBaseNodeModel } from "../nodes/base-node";
-import { IDataSet } from "../../../models/data/data-set";
-import { getAttributeIdForNode } from "./utilities/recording-utilities";
+import { BaseNodeModel } from "../nodes/base-node";
 import { getNewIndexedName } from "../nodes/utilities/indexed-name";
 import { STATE_VERSION_CURRENT } from "./dataflow-state-versions";
 
@@ -263,34 +261,7 @@ export const DataflowProgramModel = types.
     },
     setProcessor(processor: DataflowProcessor) {
       self.processor = processor;
-    },
-    playbackNodesWithCaseData(dataSet: IDataSet, playBackIndex: number) {
-      self.clearRecentTicks();
-      const startIndex = Math.max(playBackIndex - kMaxNodeValues, 0);
-
-      for (let index = startIndex; index <= playBackIndex; index++) {
-        self.addNewTick(index.toString());
-        const caseId = dataSet.getCaseAtIndex(index)?.__id__;
-        if (!caseId) break;
-        let nodeIndex = 0;
-        self.nodes.forEach((_node) => {
-          const node = _node.data as IBaseNodeModel;
-          const attrId = getAttributeIdForNode(dataSet, nodeIndex);
-
-          // The user might have messed with the table, so the attribute might not exist
-          if (attrId) {
-            const nodeValue = dataSet.getValue(caseId, attrId) as number;
-            node.setNodeValue(nodeValue);
-          }
-
-          nodeIndex++;
-        });
-      }
-
-      // add one more tick so the last point is graphed
-      self.addNewTick((playBackIndex+1).toString());
     }
-
   }))
   .actions(self => ({
     setStructureChangeHandler(handler: (() => void) | undefined) {

@@ -293,6 +293,11 @@ Common toolbar framework.  Supports:
 - `data-set-link`: Bring up a dialog to choose a tile to link to (or create a new one). Not in the
   default toolbar; configure it explicitly for a unit where students need to link data into a tile
   that already exists.
+- `record`: starts a continuous recording into the linked table, appending to any points already
+  there, and creates that table when the program has none; disabled while a recording is running.
+- `stop`: ends the run. The only toolbar button that stays live while recording.
+- `clear`: empties the linked table in place, leaving it linked and showing the capture's columns
+  ready for the next run; disabled when nothing has been recorded.
 - `delete`: Delete the selected block(s).
 - `group`: Group the selected blocks.
 - `ungroup`: Ungroup the selected group.
@@ -312,6 +317,9 @@ Defaults:
 
 - `["data-set-view", "Table"]`
 - `["data-set-view", "Graph"]`
+- `record`
+- `stop`
+- `clear`
 - `delete`
 - `group`
 - `ungroup`

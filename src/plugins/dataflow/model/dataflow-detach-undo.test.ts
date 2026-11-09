@@ -320,4 +320,19 @@ describe("the first capture into a new table", () => {
     expect(content.linkedTableTileId).toBeDefined();
     expect(content.dataSet.attributes.map(a => a.name)).toEqual(["Point", "Sensor", "Servo"]);
   });
+
+  it("records Record's new table and columns as one entry", async () => {
+    const { content, manager, addTable } = await setupProgramWithoutTable();
+    const history = manager.document.history;
+    const entriesBefore = history.length;
+
+    content.startRecording(addTable);
+    await settleOn(manager, "DataflowTool.startRecording");
+
+    expect(history.slice(entriesBefore).map(entry => entry.modelActionKey))
+      .toEqual(["DataflowTool.startRecording"]);
+    expect(content.linkedTableTileId).toBeDefined();
+    expect(content.dataSet.attributes.map(a => a.name)).toEqual(["Point", "Sensor", "Servo"]);
+    expect(content.isRecording).toBe(true);
+  });
 });

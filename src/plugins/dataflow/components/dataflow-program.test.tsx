@@ -1,5 +1,5 @@
 import React from "react";
-import { act, fireEvent, render, screen, within } from "@testing-library/react";
+import { act, render } from "@testing-library/react";
 import { DndContext } from "@dnd-kit/core";
 import { Provider } from "mobx-react";
 import { ModalProvider } from "react-modal-hook";
@@ -23,8 +23,7 @@ type ManagerStub =
     | "dispose" | "fitContent" | "tickAndProcessNodes" | "updateSharedProgramData">
   & { area: Pick<ReteManager["area"], "nodeViews">; editor: Pick<ReteManager["editor"], "clear"> };
 
-// A real ReteManager needs a live rete area, so stub the class. The instances are identity-compared
-// to tell the editor manager (created first) from the playback manager (created on entering Done).
+// A real ReteManager needs a live rete area, so stub the class.
 jest.mock("../rete/rete-manager", () => {
   const actual = jest.requireActual("../rete/rete-manager");
   return {
@@ -60,7 +59,7 @@ function createContent() {
 }
 
 function renderProgram(content: DataflowContentModelType, options: { readOnly?: boolean } = {}) {
-  const onActiveReteManagerChanged = jest.fn();
+  const onReteManagerRef = jest.fn();
   const stores = specStores();
   const result = render(
     <ModalProvider>
@@ -74,13 +73,13 @@ function renderProgram(content: DataflowContentModelType, options: { readOnly?: 
             tileContent={content}
             tileElt={null}
             onRegisterTileApi={jest.fn()}
-            onActiveReteManagerChanged={onActiveReteManagerChanged}
+            onReteManagerRef={onReteManagerRef}
           />
         </DndContext>
       </Provider>
     </ModalProvider>
   );
-  return { ...result, onActiveReteManagerChanged, stores };
+  return { ...result, onReteManagerRef, stores };
 }
 
 // The instance the nth `new ReteManager(...)` returned.
@@ -88,16 +87,9 @@ function managerInstance(index: number): ManagerStub {
   return MockedReteManager.mock.results[index].value;
 }
 
-function lastReportedManager(onActiveReteManagerChanged: jest.Mock) {
-  const { calls } = onActiveReteManagerChanged.mock;
+function lastReportedManager(onReteManagerRef: jest.Mock) {
+  const { calls } = onReteManagerRef.mock;
   return calls[calls.length - 1][0];
-}
-
-// Record a tick's worth of data and stop, which is what puts the tile in Done mode.
-function recordAndStop() {
-  fireEvent.click(screen.getByTestId("record-data-button"));
-  act(() => { jest.advanceTimersByTime(kDataRate + 10); });
-  fireEvent.click(screen.getByTestId("record-data-button"));
 }
 
 describe("DataflowProgram rete manager routing", () => {
@@ -111,43 +103,37 @@ describe("DataflowProgram rete manager routing", () => {
   });
 
   it("reports the editor manager once on mount", () => {
-    const { onActiveReteManagerChanged } = renderProgram(createContent());
+    const { onReteManagerRef } = renderProgram(createContent());
     expect(MockedReteManager).toHaveBeenCalledTimes(1);
-    expect(onActiveReteManagerChanged).toHaveBeenCalledTimes(1);
-    expect(lastReportedManager(onActiveReteManagerChanged)).toBe(managerInstance(0));
-  });
-
-  it("reports the playback manager once recording finishes, and the editor manager again on clear", () => {
-    const content = createContent();
-    const { onActiveReteManagerChanged } = renderProgram(content);
-    const editorManager = managerInstance(0);
-
-    recordAndStop();
-
-    // Entering Done creates the playback manager over a copy of the content; it owns the visible
-    // canvas, so it is what the toolbar must act on. One report per transition, no re-render churn.
-    expect(MockedReteManager).toHaveBeenCalledTimes(2);
-    const playbackManager = managerInstance(1);
-    expect(playbackManager).not.toBe(editorManager);
-    expect(onActiveReteManagerChanged).toHaveBeenCalledTimes(2);
-    expect(lastReportedManager(onActiveReteManagerChanged)).toBe(playbackManager);
-
-    // Clearing the recorded data goes through a confirmation alert; in Done mode the record button
-    // is labeled "Clear" too, so scope the lookup to the dialog.
-    fireEvent.click(screen.getByTestId("record-data-button"));
-    fireEvent.click(within(screen.getByRole("dialog")).getByRole("button", { name: "Clear" }));
-
-    expect(playbackManager.dispose).toHaveBeenCalled();
-    expect(content.isDataSetEmptyCases).toBe(true);
-    expect(onActiveReteManagerChanged).toHaveBeenCalledTimes(3);
-    expect(lastReportedManager(onActiveReteManagerChanged)).toBe(editorManager);
+    expect(onReteManagerRef).toHaveBeenCalledTimes(1);
+    expect(lastReportedManager(onReteManagerRef)).toBe(managerInstance(0));
   });
 
   it("reports undefined on unmount", () => {
-    const { onActiveReteManagerChanged, unmount } = renderProgram(createContent());
+    const { onReteManagerRef, unmount } = renderProgram(createContent());
     unmount();
-    expect(onActiveReteManagerChanged).toHaveBeenCalledTimes(2);
-    expect(lastReportedManager(onActiveReteManagerChanged)).toBeUndefined();
+    expect(onReteManagerRef).toHaveBeenCalledTimes(2);
+    expect(lastReportedManager(onReteManagerRef)).toBeUndefined();
+  });
+});
+
+describe("DataflowProgram recording lifecycle", () => {
+  it("stops a recording left running when the component unmounts", () => {
+    const content = createContent();
+    const { unmount } = renderProgram(content);
+    act(() => content.startRecording(jest.fn()));
+    expect(content.isRecording).toBe(true);
+    unmount();
+    expect(content.isRecording).toBe(false);
+  });
+
+  it("does not stop recording on unmount of a read-only view", () => {
+    const content = createContent();
+    const { unmount } = renderProgram(content, { readOnly: true });
+    act(() => content.startRecording(jest.fn()));
+    expect(content.isRecording).toBe(true);
+    unmount();
+    expect(content.isRecording).toBe(true);
   });
 });
 

@@ -46,7 +46,7 @@ context('Simulator Tile', function () {
 
     cy.log("links to dataflow tile");
     clueCanvas.addTile("dataflow");
-    dataflowTile.selectSamplingRate("50ms");
+    dataflowTile.selectSamplingRate("50 ms");
 
     // Simulation options are not present in the sensor before the simulation has been added to the document
     const sensor = "sensor";

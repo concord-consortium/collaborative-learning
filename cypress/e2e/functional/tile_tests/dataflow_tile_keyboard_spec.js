@@ -19,7 +19,6 @@ context('Dataflow keyboard accessibility (CLUE-455)', function () {
 
   const focusOrder = [
     ['data-testid', 'rate-select'],
-    ['data-testid', 'record-data-button'],
     ['data-testid', 'add-sensor-button'],
     // The toolbar is one tab stop (roving tabindex), so only its first button appears here.
     ['class', 'table-it'],

@@ -12,7 +12,7 @@ let docEditor = new DocEditor;
 
 const programTitle = "Program 1";
 // Preparing a capture appends its start time to the program's name, so the linked table's header
-// reads "Program 1 14:32:07". Clearing the recording strips it again, back to programTitle.
+// reads "Program 1 14:32:07". Clearing restamps it, since the next run starts from there.
 const capturedTitle = /^Program 1 \d{2}:\d{2}:\d{2}$/;
 const graphTitle = "Graph 1";
 
@@ -21,9 +21,8 @@ const programNodes = [
   { name: "demo-output", title: "Demo Device 1", attribute: "Demo Device 1" }];
 // Point, not "Time (sec)": a capture numbers its points 1, 2, 3 and records its start time in the
 // program's name instead (see prepareCapture). Table It prepares these columns up front, so an
-// empty linked table already carries them; only clearing the recording puts x | y back.
+// empty linked table already carries them.
 const linkedTableAttributes = ["Point", programNodes[0].attribute, programNodes[1].attribute];
-const defaultTableAttributes = ["x", "y"];
 const timer1 = 5;
 const timer2 = 3;
 
@@ -49,8 +48,10 @@ context('Dataflow Tool Tile', function () {
     dataflowToolTile.recordData("1000", timer1);
     dataflowToolTile.checkLinkedTableRecordedData(tableTile, capturedTitle, linkedTableAttributes, timer1);
 
+    // Clear returns the table to the state Table It leaves: the capture's columns, empty.
     dataflowToolTile.clearRecordedData();
-    dataflowToolTile.checkEmptyLinkedTable(tableTile, programTitle, defaultTableAttributes);
+    dataflowToolTile.getClearButton().should("have.attr", "aria-disabled", "true");
+    dataflowToolTile.checkEmptyLinkedTable(tableTile, capturedTitle, linkedTableAttributes);
 
     dataflowToolTile.recordData("1000", timer2);
     dataflowToolTile.checkLinkedTableRecordedData(tableTile, capturedTitle, linkedTableAttributes, timer2);
@@ -131,57 +132,31 @@ context('Dataflow Tool Tile', function () {
     dataflowToolTile.recordData("1000", timer1);
     clueCanvas.clickToolbarButtonLabelled("dataflow", "table-it", "Table It!");
 
-    // record data
+    // Clear empties the table in place and leaves it linked, so the next run reuses it.
     dataflowToolTile.clearRecordedData();
     dataflowToolTile.recordDataWithoutStop("1000", timer2);
 
     // reload while recording
     cy.reload();
 
-    // check buttons after reload
-    dataflowToolTile.checkRecordedStateButtons();
+    // After a reload the run is over -- isRecording is volatile, so nothing resumes. The toolbar
+    // renders only for the selected tile, and a reload clears the selection.
+    dataflowToolTile.getDataflowTile().click();
+    dataflowToolTile.getRecordButton().should("not.have.attr", "aria-disabled");
+    dataflowToolTile.getStopButton().should("have.attr", "aria-disabled", "true");
+    dataflowToolTile.getClearButton().should("not.have.attr", "aria-disabled");
     dataflowToolTile.checkLinkedTableRecordedData(tableTile, capturedTitle, linkedTableAttributes, timer2);
 
-    // play recorded data
-    dataflowToolTile.clickPlayButton();
-
-    // reload while playing
-    cy.reload();
-
-    // check buttons after reload
-    dataflowToolTile.checkRecordedStateButtons();
-    dataflowToolTile.checkLinkedTableRecordedData(tableTile, capturedTitle, linkedTableAttributes, timer2);
-
-    // pause recorded data
-    dataflowToolTile.clickPlayButton();
-    cy.wait(1000);
-    dataflowToolTile.clickPauseButton();
-
-    // reload while in pause
-    cy.reload();
-
-    // check buttons after reload
-    dataflowToolTile.checkRecordedStateButtons();
-    dataflowToolTile.checkLinkedTableRecordedData(tableTile, capturedTitle, linkedTableAttributes, timer2);
-
-    // click clear
-    dataflowToolTile.getRecordingClearButton().click();
-
-    // reload before confirming clear
-    cy.reload();
-
-    // check buttons after reload
-    dataflowToolTile.checkRecordedStateButtons();
-    dataflowToolTile.checkLinkedTableRecordedData(tableTile, capturedTitle, linkedTableAttributes, timer2);
-
-    // record data
     dataflowToolTile.clearRecordedData();
 
-    // reload after confirming clear
-    // cy.reload();
+    // reload after clearing
+    cy.reload();
 
-    // check buttons after reload
-    dataflowToolTile.checkInitialStateButtons();
-    dataflowToolTile.checkEmptyLinkedTable(tableTile, programTitle, defaultTableAttributes);
+    dataflowToolTile.getDataflowTile().click();
+    dataflowToolTile.getRecordButton().should("not.have.attr", "aria-disabled");
+    dataflowToolTile.getStopButton().should("have.attr", "aria-disabled", "true");
+    // Nothing recorded any more, so there is nothing left to clear.
+    dataflowToolTile.getClearButton().should("have.attr", "aria-disabled", "true");
+    dataflowToolTile.checkEmptyLinkedTable(tableTile, capturedTitle, linkedTableAttributes);
   });
 });

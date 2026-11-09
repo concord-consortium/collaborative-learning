@@ -15,7 +15,7 @@ import { SharedModelDocumentManager } from "../../../models/document/shared-mode
 import { ITileEnvironment } from "../../../models/tiles/tile-content";
 import { registerTileTypes } from "../../../register-tile-types";
 import { recordCase } from "./utilities/recording-utilities";
-import { addAttributeToDataSet, addCanonicalCasesToDataSet } from "../../../models/data/data-set";
+import { addAttributeToDataSet } from "../../../models/data/data-set";
 import { uniqueId } from "../../../utilities/js-utils";
 
 registerTileTypes(["Dataflow", "Table", "Graph"]);
@@ -350,13 +350,49 @@ describe("prepareCapture", () => {
     content.prepareCapture();
     expect(content.dataSet.attributes.map(a => a.name)).toEqual(["Point", "Sensor", "Servo", "Extra"]);
   });
+});
 
-  it("drops the capture time again when the recording is cleared", () => {
+describe("startRecording", () => {
+  it("prepares the capture when the dataset is empty", () => {
+    const content = setupContentWithTwoNamedNodes("Sensor", "Servo");
+    content.startRecording(jest.fn());
+    expect(content.isRecording).toBe(true);
+    expect(content.dataSet.attributes.map(a => a.name)).toEqual(["Point", "Sensor", "Servo"]);
+  });
+
+  // Point numbering continues rather than restarting. (prepareCapture's own idempotency is what
+  // protects the columns here; the empty-table guard is pinned by the name test below.)
+  it("leaves existing points alone and appends to them", () => {
+    const content = setupContentWithTwoNamedNodes("Sensor", "Servo");
+    content.prepareCapture();
+    recordCase(content);
+    const pointId = content.dataSet.attributes[0].id;
+
+    content.startRecording(jest.fn());
+    recordCase(content);
+
+    expect(content.dataSet.cases).toHaveLength(2);
+    expect(content.dataSet.getValueAtIndex(1, pointId)).toBe(2);
+  });
+
+  // Appending must not restamp the name: the capture's time is when collection began, and
+  // prepareCapture would overwrite it with the time Record was pressed again.
+  it("keeps the original capture time when it appends", () => {
     const content = setupContentWithTwoNamedNodes("Sensor", "Servo");
     content.setContentTitle("Program 1");
-    content.prepareCapture(new Date(2026, 9, 29, 14, 32, 7));
-    content.resetRecording();
-    expect(content.dataSet.name).toBe("Program 1");
+    content.prepareCapture(new Date(2026, 9, 30, 14, 32, 7));
+    recordCase(content);
+
+    content.startRecording(jest.fn());
+
+    expect(content.dataSet.name).toBe("Program 1 14:32:07");
+  });
+
+  it("stops recording", () => {
+    const content = setupContentWithTwoNamedNodes("Sensor", "Servo");
+    content.startRecording(jest.fn());
+    content.stopRecording();
+    expect(content.isRecording).toBe(false);
   });
 });
 
@@ -423,48 +459,6 @@ describe("getTimeAtRecordedIndex", () => {
   });
 });
 
-// A single sample puts rows in the table without being a recording. Deriving the program's mode
-// from "the dataset has cases" made one sample flip the tile into Done -- playback shown, program
-// read-only, the record button offering Clear -- which made single-sample capture unusable.
-describe("hasRecordedRun", () => {
-  it("stays false after single samples, so the program keeps running", () => {
-    const content = setupContentWithTwoNamedNodes("Sensor", "Servo");
-    content.prepareCapture();
-    recordCase(content);
-    recordCase(content);
-    expect(content.dataSet.cases).toHaveLength(2);
-    expect(content.hasRecordedRun).toBe(false);
-  });
-
-  it("is true once a recording has been started", () => {
-    const content = setupContentWithTwoNamedNodes("Sensor", "Servo");
-    content.prepareCapture();
-    content.setRecordedRun(true);
-    expect(content.hasRecordedRun).toBe(true);
-  });
-
-  it("goes back to false when the recording is reset", () => {
-    const content = setupContentWithTwoNamedNodes("Sensor", "Servo");
-    content.setRecordedRun(true);
-    content.resetRecording();
-    expect(content.hasRecordedRun).toBe(false);
-  });
-
-  // A document saved before the flag existed has no value for it, and its recording must still
-  // open in Done rather than looking like a fresh program.
-  it("falls back to the row count for a document saved before the flag existed", () => {
-    const legacy = defaultDataflowContent();
-    expect(legacy.recordedRun).toBeUndefined();
-    expect(legacy.hasRecordedRun).toBe(false);
-
-    // Rows with no flag is what a pre-flag saved recording looks like.
-    addAttributeToDataSet(legacy.dataSet, { name: "Time (sec)" });
-    addCanonicalCasesToDataSet(legacy.dataSet, [{ [legacy.dataSet.attributes[0].id]: 0 }]);
-    expect(legacy.recordedRun).toBeUndefined();
-    expect(legacy.hasRecordedRun).toBe(true);
-  });
-});
-
 // One name shared by a node and its column, in both directions. A rename deliberately does not
 // detach -- the columns still describe the program -- so without this the headers go stale.
 //
@@ -520,15 +514,16 @@ describe("node and column name sync", () => {
     expect(content.dataSet.attributes[0].name).toBe("Point");
   });
 
-  // Between captures the dataset holds the default x | y placeholder. Those columns describe no
-  // node, so syncing from them renamed the program's first block to "y".
-  it("does not rename a node after the recording is cleared", () => {
-    const content = setupContentWithTwoNamedNodes("Sensor", "Servo");
-    content.prepareCapture();
-    content.resetRecording();
+  // A fresh tile, and a program whose capture has been detached, both hold the default x | y pair.
+  // With a single node the counts match, so the point-column check is the only thing stopping the
+  // sync renaming that node to "y".
+  it("does not rename a node from the default x | y columns", () => {
+    const content = setupContentWithTwoNamedNodes("Sensor");
+    expect(columnNames(content)).toEqual(["x", "y"]);
+
     content.updateAfterSharedModelChanges(content.sharedModel);
-    expect([...content.program.nodes.values()].map(n => n.data.orderedDisplayName))
-      .toEqual(["Sensor", "Servo"]);
+
+    expect(content.program.nodes.get("node-0")?.data.orderedDisplayName).toBe("Sensor");
   });
 
   // A capture the program no longer holds describes the old program, so renames must not reach it.
@@ -606,20 +601,6 @@ describe("a capture whose last table has been deleted", () => {
     content.program.removeNode("node-0");
 
     expect(content.dataSet.cases).toHaveLength(0);
-  });
-});
-
-describe("a recording that has not ticked yet", () => {
-  // The columns are already prepared but no rows exist, so a toolbar click that re-prepared would
-  // clear recordedRun and leave the program in Ready when the recording stopped.
-  it("keeps recordedRun when the table is touched before the first row", () => {
-    const content = setupContentWithTwoNamedNodes("Sensor", "Servo");
-    content.prepareCapture();
-    content.setRecordedRun(true);
-    expect(content.dataSet.cases).toHaveLength(0);
-
-    content.prepareCapture();          // what a re-prepare would do
-    expect(content.hasRecordedRun).toBe(false);   // ...which is why the button must not call it
   });
 });
 
