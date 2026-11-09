@@ -383,6 +383,36 @@ describe("playback across a load entry", () => {
     expect(getTile(document, "t1").label).toBe("x");
   });
 
+  it("stops playback when the JSON copy can't get back to a rollback's stop position", async () => {
+    const oldEntries = [
+      // Undoing this entry applies to the copy, but redoing it doesn't: its patch's parent doesn't
+      // exist.
+      makeEntry([makeRecord([replace(`${t1Path}/content/missing/x`, 1)],
+        [replace(`${t1Path}/content/text`, "a")])]),
+      makeEntry([replaceRecord("/content/tileMap/t2/content/nope/deep", 1, 2)]),
+      makeEntry([replaceRecord(`${t1Path}/content/text`, "b", "c")])
+    ];
+    const content = {
+      tileMap: { ...t1Content().tileMap, t2: { id: "t2", content: { type: "TestTile", nope: { deep: 2 } } } }
+    };
+    const { document, manager } = await setupConvertedDocument(content, oldEntries);
+    jest.spyOn(console, "warn").mockImplementation(() => undefined);
+    const errorSpy = jest.spyOn(console, "error").mockImplementation(() => undefined);
+
+    // MST stops at 2, where `nope` is frozen. The copy reached 0 and can't redo entry 0.
+    await manager.goToHistoryEntryPosition(0);
+
+    expect(manager.numHistoryEventsApplied).toBe(2);
+    expect(manager.jsonHistoryCopy!.position).toBe(0);
+    expect(manager.jsonCopyOutOfStep).toBe(true);
+    expect(manager.historyPlaybackFailures.map(f => [f.historyIndex, f.direction]))
+      .toEqual([[0, "redo"], [1, "undo"]]);
+    expect(errorSpy).toHaveBeenCalledWith(expect.stringContaining(
+      "The playback JSON copy stopped at history position 0 instead of going back to 2"));
+    // The old tile's model replacement holds its state at the copy's position.
+    expect(getTile(document, "t1").label).toBe("a");
+  });
+
   it("rolls back a current tile's MST failure and replaces old tiles at the stop", async () => {
     const oldEntries = [
       makeEntry([replaceRecord(`${t1Path}/content/text`, "a", "b")]),
