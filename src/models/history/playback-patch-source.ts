@@ -6,7 +6,7 @@ import {
 import { getEntryPatchesForTree, HistoryEntryType, HistoryOperation } from "./history";
 import { JsonHistoryCopy } from "./json-history-copy";
 import {
-  convertJsonAtPath, convertModelJsonAtPath, getModelPath, modelJsonNeedsConversion
+  convertJsonAtPath, convertModelJsonAtPath, getModelPath, isObject, modelJsonNeedsConversion
 } from "./schema-conversion";
 
 /**
@@ -60,10 +60,6 @@ export class ModelReplacementError extends Error {
     this.name = "ModelReplacementError";
     this.cause = cause;
   }
-}
-
-function isObject(value: unknown): value is Record<string, any> {
-  return !!value && typeof value === "object" && !Array.isArray(value);
 }
 
 function sharedModelPathOf(id: string) {

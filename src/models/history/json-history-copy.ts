@@ -1,5 +1,5 @@
 import { cloneDeep } from "lodash";
-import { applyJsonPatches } from "./json-patch";
+import { applyJsonPatches, unescapeSegment } from "./json-patch";
 import { convertOldModelJsonAtPath, isNonCurrentModelJsonAtPath } from "./schema-conversion";
 import { getEntryPatchesForTree, HistoryEntryType, HistoryOperation } from "./history";
 
@@ -37,7 +37,7 @@ export class JsonHistoryCopy {
     if (path === "") return this.json;
     let value: any = this.json;
     for (const rawSegment of path.split("/").slice(1)) {
-      const segment = rawSegment.replace(/~1/g, "/").replace(/~0/g, "~");
+      const segment = unescapeSegment(rawSegment);
       if (value == null || typeof value !== "object" || !Object.prototype.hasOwnProperty.call(value, segment)) {
         return undefined;
       }

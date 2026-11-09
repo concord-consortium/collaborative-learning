@@ -9,7 +9,7 @@ import { ISchemaVersionInfo } from "../tiles/schema-version-info";
 import { HistoryEntrySnapshot } from "./history";
 import { diffJson } from "./json-patch";
 
-function isObject(value: unknown): value is Record<string, any> {
+export function isObject(value: unknown): value is Record<string, any> {
   return !!value && typeof value === "object" && !Array.isArray(value);
 }
 

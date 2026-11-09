@@ -32,7 +32,7 @@ export class JsonPatchError extends Error {
 // Puts back what one applied patch changed.
 type UndoPatch = () => void;
 
-function unescapeSegment(segment: string) {
+export function unescapeSegment(segment: string) {
   return segment.replace(/~1/g, "/").replace(/~0/g, "~");
 }
 
