@@ -228,6 +228,33 @@ describe("history loading", () => {
     });
   });
 
+  describe("local load entry", () => {
+    const loadEntry: HistoryEntrySnapshot = { id: "loadEntry", isLoadEntry: true };
+
+    async function subscribeWithLocalEntry(entries: HistoryEntrySnapshot[], lastHistoryEntry?: LastHistoryEntry) {
+      const { treeManager } = setupDocument();
+      const { historyManager } = setupFirestoreHistoryManager(treeManager);
+      treeManager.setLocalLoadEntry(loadEntry);
+      getLastHistoryEntry.mockResolvedValue(lastHistoryEntry);
+      loadHistory.mockImplementation((firestore, path, historyLoaded) => {
+        historyLoaded(entries.map((entry, index) => ({ id: entry.id!, index, entry })));
+        return () => undefined;
+      });
+      await historyManager.subscribeToFirestoreHistory();
+      await when(() => treeManager.numHistoryEventsApplied !== undefined);
+      return { treeManager, historyManager };
+    }
+
+    it("keeps a local load entry out of the history and the starting position", async () => {
+      const { treeManager, historyManager } = await subscribeWithLocalEntry(
+        [{ id: "a1" }, { id: "a2" }], { index: 1, id: "a2" });
+      expect(treeManager.document.history.map(e => e.id)).toEqual(["a1", "a2"]);
+      expect(treeManager.numHistoryEventsApplied).toBe(2);
+      expect(historyManager.historyStatus).toBe(HistoryStatus.HISTORY_LOADED);
+      expect(treeManager.needsJsonCopy).toBe(true);
+    });
+  });
+
   describe("subscribeToFirestoreHistory", () => {
     it("results in zero history entries if loadHistory does nothing", async () => {
       const { treeManager } = setupDocument();

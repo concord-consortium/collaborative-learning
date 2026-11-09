@@ -4,13 +4,11 @@ There are several ways the program can be displayed:
 - a live editable view
 - a read only view when looking at the document on the left of CLUE
 - a read only view in a thumbnail of the document
-- a read only view when the program has been recorded
 
-When testing or updating the code of programs there are 4 cases to handle:
+When testing or updating the code of programs there are 3 cases to handle:
 - **single live view**: there is just one view of the program and it is editable.
 - **live plus readOnly views**: there is a live view of the program and there are other readOnly views in the same application displaying the program.
 - **only readOnly views**: there is one or more readOnly views and no live view.
-- **recorded program**: the program has been recorded and the user can play it back.
 
 ## Single Live View
 This is the easiest and probably where you'll start your development. You can use the standalone editor `/editor/` to work on this case.
@@ -20,9 +18,6 @@ This will happen when you have the same document open on the left and right side
 
 ## Only ReadOnly Views
 This can happen when a user closes the live document on the right of CLUE and is just looking at it on the left. However that case doesn't usually cause problems. The harder case is when a second user is looking at document that is being edited by another user. The best way to test this is to use the CLUE `demo` mode to open a student browser tab and teacher browser tab for a class and then edit the document as a student and view the document as the teacher.
-
-## Recorded Program
-After the program has been recorded, a copy of the program is created and is displayed using a readOnly view of this copy. This readOnly view is updated when the user plays back the recording. The mechanism of this playback is not the same as the mechanism for showing a readOnly document to another user.
 
 # Dataflow processing
 
@@ -86,7 +81,6 @@ At any sampling rate faster than 1 s, a program in a hidden page ticks about onc
 - A **Live Output** node sends only on a tick, so a servo moves at most once per tick.
 - The plots under the nodes get one point per tick.
 - **A recording gets the wrong times.** `recordCase` writes the time column as the tick count times the sampling rate, not the time that has passed. A recording at 100 ms that runs for a minute in a hidden page gets about 60 rows, timed from 0 to 6 s.
-- Playback also moves one row per tick, so it slows down too.
 
 For what a hidden page does to a device connection, see [Hidden pages](../src/plugins/dataflow/docs/serial.md#hidden-pages) in the serial connections doc.
 
@@ -114,15 +108,9 @@ This is where nodes should put their main `nodeValue` and any state that can not
 ## Node Instance Properties
 These are usually used when a node needs to work with a control after it has been created.
 
-# Recording and Playback Support
+# Recording
 
-A key part of recording and playback is that the diagram is locked during the recording. So the user cannot change numeric inputs or drop down menus of the nodes. And after recording the program remained locked until the user clears it. This way the user can playback the recording and the only information need for a near perfect playback are a single value from each nodes. These values are stored in a dataset so they can be used by other tiles in CLUE.
-
-A recorded program is played back by making a copy of the `DataflowProgramModel` MST object and creating a `playbackReteManager` with this model. This `playbackReteManager` is bound to a second div in the DataflowProgram component.
-
-Then on each "tick" the DataflowProgram updates each node's value from the data in the dataset. The dataset does not include the inputs of each node. The `process` is run after these values are updated.
-
-In most cases this provides enough information for the node displays (sentences or displayValues) to show the same value the user saw when the program was running for real. The one current exception is the control node (Hold block) which can't tell if its "wait" timer was running during the playback tick. So in this case the control node shows a slightly different display.
+While a run is in progress the diagram is locked (`shouldShowProgramCover`): the user cannot change numeric inputs or drop down menus of the nodes, add nodes, or edit connections. The lock ends as soon as Stop is pressed, not when the recording is cleared. Each node's current value is captured into the dataset on every tick (`recordCase`), so the capture can be used by other tiles in CLUE -- a linked Table or Graph -- without needing to replay the program itself. Clear empties the capture in place (`clearRecording`) and re-prepares it, so the linked table stays linked and shows the capture's columns, empty, with a fresh capture time. The detach (`detachLinkedTables`) now runs only from the structural-change reaction.
 
 # Undo Support
 Currently undo is not fully supported. When a live program view does not watch the MST model for changes. Only a readonly program view does that. So when a change is undone or redone by the undo system the live program view will not update.

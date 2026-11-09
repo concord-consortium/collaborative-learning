@@ -9,6 +9,7 @@ import { defaultTextContent } from "../../models/tiles/text/text-content";
 import { specStores } from "../../models/stores/spec-stores";
 import { specAppConfig } from "../../models/stores/spec-app-config";
 import { TileApiInterface, TileApiInterfaceContext, TileModelContext } from "../tiles/tile-api";
+import { ToolbarBusyContext } from "./tile-toolbar-context";
 
 import CopyIcon from "../../../assets/icons/copy/copy-icon-default.svg";
 
@@ -513,5 +514,60 @@ describe("Tile toolbar ARIA and keyboard", () => {
     fireEvent.keyDown(buttons[0], { key: "Tab", shiftKey: true });
     expect(document.activeElement).toBe(tileElement);
     cleanup();
+  });
+});
+
+describe("ToolbarBusyContext", () => {
+  function renderButton(busy: boolean, exempt?: string[]) {
+    render(
+      <ToolbarBusyContext.Provider value={{ busy, exempt }}>
+        <TileToolbarButton name="zoom-in" title="Zoom In" onClick={jest.fn()}>x</TileToolbarButton>
+      </ToolbarBusyContext.Provider>
+    );
+    return screen.getByRole("button");
+  }
+
+  it("leaves buttons alone when nothing is busy", () => {
+    expect(renderButton(false).getAttribute("aria-disabled")).toBeNull();
+  });
+
+  it("disables a button while the tile is busy", () => {
+    expect(renderButton(true).getAttribute("aria-disabled")).toBe("true");
+  });
+
+  // The pan button's corner triangle has its own onClick with stopPropagation, so a disabled
+  // button's bubbling handler never sees it -- the palette opened mid-recording.
+  it("blocks a nested handler that stops propagation", () => {
+    const nested = jest.fn();
+    render(
+      <ToolbarBusyContext.Provider value={{ busy: true }}>
+        <TileToolbarButton name="pan" title="Pan" onClick={jest.fn()}>
+          <span data-testid="corner" onClick={e => { e.stopPropagation(); nested(); }} />
+        </TileToolbarButton>
+      </ToolbarBusyContext.Provider>
+    );
+
+    fireEvent.click(screen.getByTestId("corner"));
+
+    expect(nested).not.toHaveBeenCalled();
+  });
+
+  it("lets a nested handler run when the button is not busy", () => {
+    const nested = jest.fn();
+    render(
+      <ToolbarBusyContext.Provider value={{ busy: false }}>
+        <TileToolbarButton name="pan" title="Pan" onClick={jest.fn()}>
+          <span data-testid="corner" onClick={e => { e.stopPropagation(); nested(); }} />
+        </TileToolbarButton>
+      </ToolbarBusyContext.Provider>
+    );
+
+    fireEvent.click(screen.getByTestId("corner"));
+
+    expect(nested).toHaveBeenCalled();
+  });
+
+  it("leaves an exempt button enabled", () => {
+    expect(renderButton(true, ["zoom-in"]).getAttribute("aria-disabled")).toBeNull();
   });
 });

@@ -1,0 +1,135 @@
+import { compare } from "fast-json-patch";
+import { cloneDeep } from "lodash";
+import { IJsonPatch } from "mobx-state-tree";
+
+// Plain-JSON patch application and diffing for history entries, applied to and computed from plain
+// JSON rather than MST trees.
+//
+// Diffing uses fast-json-patch's `compare`, but applying doesn't use its `applyPatch`. MST keeps
+// every declared model prop, so it records a `replace` for a `types.maybe` prop even when the prop
+// is `undefined`, and setting the prop to `undefined` records a `replace` with no value. In stored
+// JSON, an `undefined` prop is a missing member. With validation on, `applyPatch` rejects both of
+// those patches. With validation off, it applies a patch that doesn't fit, such as an out-of-range
+// array index, instead of throwing, so playback couldn't tell where a chain of history entries
+// breaks.
+//
+// A patch under a prop that a snapshot post-processor drops has no parent here, so applying it
+// throws. See the post-processor rule in .eslintrc.js.
+
+export class JsonPatchError extends Error {
+  // The index of the patch that failed.
+  readonly failedIndex: number;
+  readonly cause: unknown;
+
+  constructor(message: string, failedIndex: number, cause?: unknown) {
+    super(message);
+    this.name = "JsonPatchError";
+    this.failedIndex = failedIndex;
+    this.cause = cause;
+  }
+}
+
+// Puts back what one applied patch changed.
+type UndoPatch = () => void;
+
+export function unescapeSegment(segment: string) {
+  return segment.replace(/~1/g, "/").replace(/~0/g, "~");
+}
+
+// Applies one patch and returns how to undo it, from the values it actually replaced or removed.
+function applyJsonPatch(doc: object, patch: IJsonPatch): UndoPatch {
+  if (!patch.path?.startsWith("/")) throw new Error(`patch path "${patch.path}" doesn't start with /`);
+
+  const segments = patch.path.split("/").slice(1).map(unescapeSegment);
+  const key = segments.pop() as string;
+  // see the own-properties rule in applyJsonPatches
+  if (key === "__proto__") throw new Error(`unsafe path segment in ${patch.path}`);
+  let parent: any = doc;
+  for (const segment of segments) {
+    parent = parent != null && typeof parent === "object" && Object.hasOwn(parent, segment)
+      ? parent[segment] : undefined;
+  }
+  if (parent == null || typeof parent !== "object") {
+    throw new Error(`parent of ${patch.path} does not resolve to an object or array`);
+  }
+
+  // History patch values are frozen, so inserted values are cloned.
+  const value = cloneDeep(patch.value);
+
+  if (Array.isArray(parent)) {
+    const isEnd = patch.op === "add" && key === "-";
+    const index = isEnd ? parent.length : Number(key);
+    if (!isEnd && !/^\d+$/.test(key)) throw new Error(`invalid array index in ${patch.path}`);
+    if (patch.op === "add") {
+      if (index > parent.length) throw new Error(`array index out of range in ${patch.path}`);
+      parent.splice(index, 0, value);
+      return () => parent.splice(index, 1);
+    }
+    if (index >= parent.length) throw new Error(`array index out of range in ${patch.path}`);
+    const oldItem = parent[index];
+    if (patch.op === "replace") {
+      parent[index] = value;
+      return () => { parent[index] = oldItem; };
+    }
+    parent.splice(index, 1);
+    return () => parent.splice(index, 0, oldItem);
+  }
+
+  const hadMember = Object.hasOwn(parent, key);
+  const oldMember = parent[key];
+  if (patch.op === "remove" || value === undefined) {
+    delete parent[key];
+  } else {
+    parent[key] = value;
+  }
+  return () => {
+    if (hadMember) parent[key] = oldMember;
+    else delete parent[key];
+  };
+}
+
+/**
+ * Applies `patches` to `doc` in place, all or none. When a patch fails, the patches before it are
+ * undone and a `JsonPatchError` is thrown, leaving `doc` as it was. They are undone from the
+ * values they replaced, not from any recorded inverse patches.
+ *
+ * It matches how MST applies recorded patches, which is looser than RFC 6902:
+ * - A path that doesn't start with `/` throws, including an empty one.
+ * - Path segments are JSON-pointer unescaped (`~1` is `/`, `~0` is `~`).
+ * - The parent must resolve to an object or an array, or the call throws.
+ * - On an object parent, `add` and `replace` set the member, even if it is missing (a
+ *   `types.maybe` prop that was `undefined` is missing from the JSON). A value of `undefined`
+ *   deletes the member. `remove` deletes the member, and removing a missing member is a no-op.
+ * - On an array parent, `add` inserts at an index from 0 to the length, or at `-`. `replace`
+ *   and `remove` need an index less than the length. Anything else throws.
+ *
+ * The parent is resolved through own properties only, and `__proto__` is never set, so a stored
+ * patch can't reach `Object.prototype`.
+ */
+export function applyJsonPatches(doc: object, patches: readonly IJsonPatch[]) {
+  const undoPatches: UndoPatch[] = [];
+  patches.forEach((patch, i) => {
+    try {
+      undoPatches.push(applyJsonPatch(doc, patch));
+    } catch (e) {
+      undoPatches.reverse().forEach(undoPatch => undoPatch());
+      throw new JsonPatchError(`Failed to apply patch ${i}: ${(e as Error).message}`, i, e);
+    }
+  });
+}
+
+/** Returns a deep copy of `value` containing only JSON-representable data. */
+export function toJsonValue<T>(value: T): T {
+  return JSON.parse(JSON.stringify(value));
+}
+
+/**
+ * Returns patches that turn `before` into `after`, with `basePath` prepended to each path.
+ */
+export function diffJson(before: unknown, after: unknown, basePath: string): IJsonPatch[] {
+  if (before === undefined || after === undefined) {
+    throw new Error(`diffJson at ${basePath}: ${before === undefined ? "before" : "after"} is undefined`);
+  }
+  const operations = compare(toJsonValue(before) as object, toJsonValue(after) as object);
+  return operations.map(operation => ({ ...operation, path: `${basePath}${operation.path}` }) as IJsonPatch);
+}

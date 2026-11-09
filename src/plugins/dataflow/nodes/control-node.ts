@@ -172,16 +172,6 @@ export class ControlNode extends BaseNode<
     const { nodeValue, timerRunning } = this.model;
     const resultString = getNumDisplayStr(nodeValue);
 
-    if (this.model.waitDuration && this.services.playback) {
-      // We can't tell if we are waiting from the dataset values
-      // because we don't know if the timer was running.
-      // We could guess the state by comparing the input value
-      // with the output value, but they might be same even if
-      // we aren't holding the value.
-      // So instead we just leave off the hold information.
-      return ` → ${resultString}`;
-    }
-
     const { gateActive } = this.model;
     const waitString = `waiting → ${resultString}`;
     const onString = `on → ${resultString}`;

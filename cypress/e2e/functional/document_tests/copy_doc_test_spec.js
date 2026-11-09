@@ -146,7 +146,9 @@ context('Copy Document', () => {
     textTile.getTextTile().first().scrollIntoView().should('be.visible');
     textTile.getTextEditor().first().should('contain', 'Hello World');
 
-    tableTile.getTableTile().scrollIntoView().should('be.visible');
+    // first(): recording in the Dataflow tile below creates a second table, so this names the one
+    // the test added.
+    tableTile.getTableTile().first().scrollIntoView().should('be.visible');
     tableTile.getTableCell().eq(1).should('contain', '3');
 
     geometryTile.getGeometryTile().scrollIntoView().should('be.visible');

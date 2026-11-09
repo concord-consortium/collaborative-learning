@@ -6,19 +6,24 @@ import { DataflowNodePlot } from "./dataflow-node-plot";
 
 // chart.js needs a real canvas, which jsdom does not provide, and nothing here depends on what the
 // chart draws.
-jest.mock("react-chartjs-2", () => ({ Line: () => <div data-testid="line-chart" /> }));
+const mockLine = jest.fn();
+jest.mock("react-chartjs-2", () => ({
+  Line: (props: any) => { mockLine(props); return <div data-testid="line-chart" />; }
+}));
 
-// Fresh spies per test: every case asserts on setTickMax/setTickMin.
+// The ds setters write through: lineData updates dsMin/dsMax in the same render that reads them.
 function makeModel(bounds: Partial<IBaseNodeModel> = {}) {
-  return {
+  const model = {
     type: "Generator",
     watchedValues: {},
     getTickEntries: () => [],
     dsMax: 1, dsMin: 0, tickMax: 1, tickMin: 0,
-    setDsMax: jest.fn(), setDsMin: jest.fn(),
+    setDsMax: jest.fn((max: number) => { model.dsMax = max; }),
+    setDsMin: jest.fn((min: number) => { model.dsMin = min; }),
     setTickMax: jest.fn(), setTickMin: jest.fn(),
     ...bounds
-  } as unknown as IBaseNodeModel;
+  };
+  return model as unknown as IBaseNodeModel;
 }
 
 function OpenablePlot({ model, onNodePointerDown }:
@@ -73,5 +78,63 @@ describe("DataflowNodePlot", () => {
     fireEvent.mouseDown(screen.getByText("+"));
     expect(empty.setTickMax).toHaveBeenCalledWith(0.4);
     expect(empty.setTickMin).toHaveBeenCalledWith(-0.4);
+  });
+
+  const servoModel = (entries: any[]) => makeModel({
+    watchedValues: { nodeValue: {} },
+    getTickEntries: () => entries,
+    dsMax: -Infinity, dsMin: Infinity, tickMax: undefined, tickMin: undefined
+  } as any);
+  const percentScale = { toPlot: (v: number) => v / 180 * 100, min: 0, max: 100 };
+  const axisOfLastChart = () => {
+    const y = mockLine.mock.lastCall[0].options.scales.y;
+    return { min: y.min, max: y.max };
+  };
+
+  it("plots through the declared scale, so the trace is in the node's display units", () => {
+    const model = servoModel([{ nodeValue: 90 }, { nodeValue: 180 }]);
+    render(<DataflowNodePlot model={model} recordedTicks={["a", "b"]} plotScale={() => percentScale} />);
+
+    expect(mockLine.mock.lastCall[0].data.datasets[0].data).toEqual([50, 100]);
+  });
+
+  it("uses the declared range as the axis even when the values never reach it", () => {
+    const model = servoModel([{ nodeValue: 18 }, { nodeValue: 36 }]);
+    render(<DataflowNodePlot model={model} recordedTicks={["a", "b"]} plotScale={() => percentScale} />);
+
+    expect(axisOfLastChart()).toEqual({ min: 0, max: 100 });
+  });
+
+  it("scales to the data when the node declares no range", () => {
+    const model = servoModel([{ nodeValue: 18 }, { nodeValue: 36 }]);
+    render(<DataflowNodePlot model={model} recordedTicks={["a", "b"]} />);
+
+    expect(axisOfLastChart()).toEqual({ min: 18, max: 36 });
+  });
+
+  // Both of these read the declared axis rather than the data, which spans 10 to 20 once converted.
+  it("zooms within the declared axis, not within the data", () => {
+    const model = servoModel([{ nodeValue: 18 }, { nodeValue: 36 }]);
+    render(<DataflowNodePlot model={model} recordedTicks={["a", "b"]} plotScale={() => percentScale} />);
+
+    fireEvent.mouseDown(screen.getByText("+"));
+    expect(model.setTickMax).toHaveBeenCalledWith(90);
+    expect(model.setTickMin).toHaveBeenCalledWith(10);
+  });
+
+  it("spaces the axis ticks across the declared range", () => {
+    const model = servoModel([{ nodeValue: 18 }, { nodeValue: 36 }]);
+    render(<DataflowNodePlot model={model} recordedTicks={["a", "b"]} plotScale={() => percentScale} />);
+
+    expect(mockLine.mock.lastCall[0].options.scales.y.ticks.stepSize).toBe(50);
+  });
+
+  it("lets a zoom override the declared range", () => {
+    const model = servoModel([{ nodeValue: 90 }]);
+    model.tickMax = 60;
+    model.tickMin = 20;
+    render(<DataflowNodePlot model={model} recordedTicks={["a"]} plotScale={() => percentScale} />);
+
+    expect(axisOfLastChart()).toEqual({ min: 20, max: 60 });
   });
 });

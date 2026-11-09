@@ -10,9 +10,9 @@ import { typeField } from "../../../utilities/mst-utils";
 import { INodeServices } from "./service-types";
 import { DemoOutputControl } from "./controls/demo-output-control";
 import { InputValueControl } from "./controls/input-value-control";
-import { MinigraphOptions } from "./dataflow-node-plot-types";
+import { IPlotScale, MinigraphOptions } from "./dataflow-node-plot-types";
 import { getValueOrZero } from "./utilities/view-utilities";
-import { servoAngleForValue, servoDisplayMessage } from "./utilities/servo";
+import { servoAngleForValue, servoDisplayMessage, servoPlotScale } from "./utilities/servo";
 
 const tiltMinigraphOptions: MinigraphOptions = {
   backgroundColor: "#fff",
@@ -45,6 +45,8 @@ export const DemoOutputNodeModel = BaseNodeModel.named("DemoOutputNodeModel")
 }))
 .actions(self => ({
   setOutputType(val: string) {
+    // A Servo's 180 degrees read as a Gripper's percentage would graph as 18000 on a 0-100 axis.
+    if (val !== self.outputType) self.resetGraphForNewUnits();
     self.outputType = val;
     // We call process here so the tilt can be added or removed from
     // the watched values. By using the data function to do this we ensure
@@ -130,6 +132,25 @@ export class DemoOutputNode extends BaseNode<
 
   private get servoProportionMode() {
     return this.services.stores.appConfig.getSetting("servoInputMode", "dataflow") === "proportion";
+  }
+
+  getPlotScale(valueKey: string): IPlotScale | undefined {
+    // Only the block's own value sets the axis. Tilt is watched but never declares a scale, so
+    // it can't be converted by the position's.
+    if (valueKey !== "nodeValue") return undefined;
+    const { outputType } = this.model;
+    if (kServoOutputTypes.includes(outputType)) {
+      return servoPlotScale(this.servoProportionMode);
+    }
+    if (outputType === "Grabber" || outputType === "Advanced Grabber") {
+      // Stored as the 0-1 fraction GrabberAnimation's playToPercent takes; the field reads a
+      // percentage, so the graph does too.
+      return { toPlot: value => value * 100, min: 0, max: 100 };
+    }
+    if (kBinaryOutputTypes.includes(outputType)) {
+      return { min: 0, max: 1 };
+    }
+    return undefined;
   }
 
   getNodeValueDisplayMessage = () => {

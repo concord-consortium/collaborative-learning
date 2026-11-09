@@ -1,4 +1,7 @@
-import { applySnapshot, types, Instance, SnapshotIn, onAction, addDisposer, destroy, typecheck } from "mobx-state-tree";
+import {
+  applySnapshot, types, Instance, SnapshotIn, onAction, addDisposer, destroy, typecheck, isStateTreeNode,
+  getSnapshot, resolvePath, IAnyStateTreeNode
+} from "mobx-state-tree";
 import { forEach } from "lodash";
 import { QueryClient, UseQueryResult } from "react-query";
 import { autorun } from "mobx";
@@ -21,6 +24,8 @@ import { Tree } from "../history/tree";
 import { TreeMonitor } from "../history/tree-monitor";
 import { ITileEnvironment } from "../tiles/tile-content";
 import { TreeManager } from "../history/tree-manager";
+import { buildLoadEntry, convertContentJson } from "../history/schema-conversion";
+import { toJsonValue } from "../history/json-patch";
 import { ESupportType } from "../curriculum/support";
 import { kSharedDataSetType, SharedDataSet, SharedDataSetType } from "../shared/shared-data-set";
 import { createFormulaDataSetProxy } from "../data/formula-data-set-proxy";
@@ -33,6 +38,7 @@ import { DocumentTypeEnum, IDocumentContext, ISetProperties, isPublishedType,
   PlanningDocument, ProblemDocument, ProblemPublication, SupportPublication
 } from "./document-types";
 import { DocumentCommentsManager } from "./document-comments-manager";
+import { kTileSubtreeRegex } from "./document-paths";
 
 export enum ContentStatus {
   Valid,
@@ -63,6 +69,36 @@ export interface ISavedEnvelope {
   lastHistoryEntryIndex?: number;
   settled: boolean;
   exactSince?: string;
+}
+
+function resolveJsonPath(json: any, path: string) {
+  return path.split("/").slice(1).reduce((value, segment) => value?.[segment], json);
+}
+
+/**
+ * Converts the old tiles and shared models in stored content before MST sees them, so the
+ * conversion can be recorded as JSON patches. Concurrent documents (group and class-wide) are not
+ * converted here; their snapshot preprocessors convert them as MST loads them, and no conversion
+ * is recorded. Returns undefined for those, for content that is already an MST node, and for empty
+ * content; otherwise the result, with no converted paths when nothing is old.
+ */
+function convertStoredContent(content: unknown, concurrent?: boolean) {
+  return content && !isStateTreeNode(content) && !concurrent ? convertContentJson(content) : undefined;
+}
+
+/**
+ * Builds the load entry that records the conversion of `originalContent`'s old models into the
+ * document's content, or undefined when nothing was converted.
+ */
+function buildDocumentLoadEntry(document: IAnyStateTreeNode, treeId: string, originalContent: unknown,
+    convertedPaths: string[]) {
+  if (!convertedPaths.length) return undefined;
+  const changes = convertedPaths.map(path => ({
+    path,
+    before: toJsonValue(resolveJsonPath({ content: originalContent }, path)),
+    after: toJsonValue(getSnapshot(resolvePath(document, path)))
+  }));
+  return buildLoadEntry(treeId, changes);
 }
 
 export const DocumentModel = Tree.named("Document")
@@ -227,14 +263,30 @@ export const DocumentModel = Tree.named("Document")
       this.setProperty(key, value == null ? value : `${value}`);
     },
 
+    // Normal callers reach this only for documents that aren't being monitored. A monitored call
+    // would also record this replacement as an entry, which doesn't chain from the load entry.
     setContent(snapshot: DocumentContentSnapshotType) {
+      const conversion = convertStoredContent(snapshot, self.concurrent);
+      if (conversion?.convertedPaths.length && self.treeMonitor?.isEnabled) {
+        console.error(`setContent converted old content in document ${self.key} while it is being ` +
+          "monitored, so its history won't chain across the conversion.");
+      }
+      const content = conversion ? conversion.content : snapshot;
       if (self.content) {
-        applySnapshot(self.content, snapshot);
+        applySnapshot(self.content, content);
       }
       else {
-        self.content = DocumentContentModel.create(snapshot);
+        self.content = DocumentContentModel.create(content);
         const sharedModelManager = getSharedModelManager(self);
         (sharedModelManager as ISharedModelDocumentManager).setDocument(self.content);
+      }
+      // The pending load entry turns the stored content into the live content, so it is
+      // rebuilt from the new content, or cleared when nothing in it is old. An entry that has
+      // already been flushed is in the history and stays there.
+      if (conversion) {
+        const manager = self.treeManagerAPI as Instance<typeof TreeManager> | undefined;
+        manager?.setPendingLoadEntry(
+          buildDocumentLoadEntry(self, self.key, snapshot, conversion.convertedPaths));
       }
     },
 
@@ -405,7 +457,16 @@ export const createDocumentModel = (snapshot?: DocumentModelSnapshotType) => {
   try {
     let document: DocumentModelType;
     try {
-      document = DocumentModel.create(snapshot, fullEnvironment);
+      const originalContent = snapshot?.content;
+      const conversion = convertStoredContent(originalContent, snapshot?.concurrent);
+      document = DocumentModel.create(
+        snapshot && conversion ? { ...snapshot, content: conversion.content } : snapshot, fullEnvironment);
+      const entry = conversion &&
+        buildDocumentLoadEntry(document, document.key, originalContent, conversion.convertedPaths);
+      if (entry) {
+        const manager = document.treeManagerAPI as Instance<typeof TreeManager> | undefined;
+        manager?.setPendingLoadEntry(entry);
+      }
     } catch (e) {
       if (!snapshot?.content ) {
         // More info is logged about this error in the next catch statement
@@ -437,14 +498,12 @@ export const createDocumentModel = (snapshot?: DocumentModelSnapshotType) => {
     setTimeout(() => formulaManager.addAdapters(createFormulaAdapters(adapterApi)));
 
     addDisposer(document, onAction(document, (call) => {
-      if (!document.content || !call.path?.match(/\/content\/tileMap\//)) {
+      const tileId = call.path ? kTileSubtreeRegex.exec(call.path)?.[1] : undefined;
+      if (!document.content || !tileId) {
         return;
       }
-      const tileTypeId = call.path?.match(/\/content\/tileMap\/([^/]*)/)?.[1];
-      if (tileTypeId) {
-        const tile = document.content.tileMap.get(tileTypeId);
-        tile?.onTileAction(call);
-      }
+      const tile = document.content.tileMap.get(tileId);
+      tile?.onTileAction(call);
     }));
     if (document.content) {
       sharedModelManager.setDocument(document.content);

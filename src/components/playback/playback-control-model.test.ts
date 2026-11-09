@@ -1,4 +1,4 @@
-import { IJsonPatch, Instance } from "mobx-state-tree";
+import { IJsonPatch, Instance, unprotect } from "mobx-state-tree";
 import { createDocumentModel } from "../../models/document/document";
 import { DocumentContentModel } from "../../models/document/document-content";
 import { ProblemDocument } from "../../models/document/document-types";
@@ -589,6 +589,21 @@ describe("PlaybackControlModel", () => {
 
       expect(model.playbackFailureWarning).toBeNull();
       expect(model.currentStopIndex).toBe(1);
+    });
+
+    it("says playback has stopped once the playback copy is out of step, at any stop", async () => {
+      const { model, treeManager } = setupModel(4, { appliedPosition: 0 });
+      unprotect(treeManager);
+      treeManager.jsonCopyOutOfStep = true;
+      const kStopped = "History playback stopped because of an error. Close and reopen the history to try again.";
+
+      await model.goToSliderStop(3);
+      expect(model.playbackFailureWarning).toBe(kStopped);
+      expect(model.currentStopIndex).toBe(0);
+
+      // Asking for the stop it is already on doesn't clear it.
+      await model.goToSliderStop(0);
+      expect(model.playbackFailureWarning).toBe(kStopped);
     });
   });
 

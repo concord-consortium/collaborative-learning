@@ -6,23 +6,26 @@ import { DocumentContentModelType } from "../document/document-content";
 import { SharedModelMapSnapshotOutType } from "../document/shared-model-entry";
 import { SharedModelType } from "../shared/shared-model";
 import { ITileModel, TileModel } from "../tiles/tile-model";
+import { ModelReplacementError } from "./playback-patch-source";
 import { TreeManagerAPI } from "./tree-manager-api";
 
 /**
- * Error thrown when applyPatch fails partway through a batch.
- * Includes the number of patches that were successfully applied so callers
- * can identify which input patch caused the failure. The caller is
- * responsible for rolling back the partial application using the inverse
- * patches it already has access to (e.g. from history entry records).
+ * Error thrown when a patch in a batch fails to apply. Whatever part of the failing patch MST
+ * applied has been undone, so the tree holds exactly the first `numApplied` patches.
+ * `reversePatches[i]` holds the reverse patches MST reported while applying patch `i`; applying
+ * them in reverse order undoes that patch. The caller rolls back with these rather than with
+ * recorded inverse patches, which don't have to pair one-to-one with the patches.
  */
 export class PatchApplicationError extends Error {
   numApplied: number;
+  reversePatches: IJsonPatch[][];
 
-  constructor(numApplied: number, originalError: unknown) {
+  constructor(numApplied: number, originalError: unknown, reversePatches: IJsonPatch[][]) {
     const message = originalError instanceof Error ? originalError.message : String(originalError);
     super(`Patch application failed after ${numApplied} patches: ${message}`);
     this.name = "PatchApplicationError";
     this.numApplied = numApplied;
+    this.reversePatches = reversePatches;
   }
 }
 
@@ -159,29 +162,21 @@ export const Tree = types.model("Tree", {
     // Actually apply the patches.
     // It might be called multiple times after startApplyingPatchesFromManager.
     //
-    // Patches are applied as a single batch for performance. MST's applyPatch
-    // wraps the array in one action, which means middlewares (like the
-    // TreeMonitor) fire once for the whole batch instead of once per patch.
-    // With hundreds or thousands of patches during history playback, applying
-    // them one at a time would be significantly slower.
-    //
-    // However, batch applyPatch doesn't tell us which patch failed if an
-    // error occurs partway through. To work around this, we register an
-    // onPatch listener that counts successfully applied patches. On
-    // failure, we throw a PatchApplicationError containing the count so
-    // the caller can identify which input patch caused the failure. The
-    // caller is responsible for rolling back the partial application
-    // using the inverse patches it already has (e.g. from the history
-    // entry records that produced the batch).
+    // Patches apply one at a time so a failure is tied to its patch; see
+    // PatchApplicationError for what the caller gets. The TreeMonitor
+    // middleware is already recording this action, so it skips each nested
+    // applyPatch call.
     //
     // MST treats a patch with an empty or missing path as a whole-tree
-    // snapshot replacement. Applying such a patch produces multiple onPatch
-    // calls (one per field in the resulting snapshot) which would break our
-    // 1:1 mapping between input patches and onPatch events. We reject both
-    // the undefined/missing case AND the empty-string case upfront because
-    // neither form should appear in recorded history patches, and either
-    // would silently corrupt the numApplied counter.
-    applyPatchesFromManager(historyEntryId: string, exchangeId: string, patchesToApply: readonly IJsonPatch[]) {
+    // snapshot replacement. We reject both the undefined/missing case AND
+    // the empty-string case upfront because neither form should appear in
+    // recorded history patches.
+    //
+    // `modelReplacements` (see TreeAPI.applyPatchesFromManager) are applied
+    // after the listener is disposed, since their failure rolls back the
+    // whole move.
+    applyPatchesFromManager(historyEntryId: string, exchangeId: string, patchesToApply: readonly IJsonPatch[],
+        modelReplacements?: readonly IJsonPatch[]) {
       for (const patch of patchesToApply) {
         if (!patch.path) {
           // Throw PatchApplicationError (with numApplied=0) so this
@@ -194,21 +189,41 @@ export const Tree = types.model("Tree", {
             new Error(
               "History patches must have a non-empty path. " +
               "Pathless or root-snapshot patches are not supported."
-            )
+            ),
+            []
           );
         }
       }
 
-      let numApplied = 0;
-      const disposer = onPatch(self, () => {
-        numApplied++;
+      const reversePatches: IJsonPatch[][] = [];
+      let currentReversePatches: IJsonPatch[] = [];
+      let failure: { error: unknown } | undefined;
+      const disposer = onPatch(self, (_patch, reversePatch) => {
+        currentReversePatches.push(reversePatch);
       });
       try {
-        applyPatch(self, patchesToApply);
-      } catch (e) {
-        throw new PatchApplicationError(numApplied, e);
+        for (const patch of patchesToApply) {
+          applyPatch(self, patch);
+          reversePatches.push(currentReversePatches);
+          currentReversePatches = [];
+        }
+      } catch (error) {
+        failure = { error };
       } finally {
         disposer();
+      }
+      if (failure) {
+        // MST may have made some of the failing patch's changes before it threw.
+        applyPatch(self, [...currentReversePatches].reverse());
+        throw new PatchApplicationError(reversePatches.length, failure.error, reversePatches);
+      }
+
+      if (modelReplacements && modelReplacements.length > 0) {
+        try {
+          applyPatch(self, modelReplacements);
+        } catch (e) {
+          throw new ModelReplacementError(e);
+        }
       }
 
       // We return a promise because the API is async

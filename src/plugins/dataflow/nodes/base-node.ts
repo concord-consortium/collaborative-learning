@@ -4,7 +4,7 @@ import { Socket } from "rete/_types/presets/classic";
 import { DataflowProgramChange } from "../dataflow-logger";
 import { INodeServices } from "./service-types";
 import { Schemes } from "./rete-scheme";
-import { MinigraphOptions, defaultMinigraphOptions } from "./dataflow-node-plot-types";
+import { IPlotScale, MinigraphOptions, defaultMinigraphOptions } from "./dataflow-node-plot-types";
 import { getParentWithTypeName } from "../../../utilities/mst-utils";
 import { DEBUG_DATAFLOW } from "../../../lib/debug";
 
@@ -192,6 +192,17 @@ export const BaseNodeModel = types.model("BaseNodeModel",
    */
   resetRunningState() {
     self.resetGraph();
+  },
+
+  /**
+   * Clears a graph whose plotted values are about to mean something else, which is what an output
+   * block changing type does. The current tick's entry is re-seeded because `resetGraph` drops it
+   * and nothing creates another until the next tick -- without that, every write in between is
+   * dropped with a "No current tick entry" warning.
+   */
+  resetGraphForNewUnits() {
+    self.resetGraph();
+    if (self.currentTick) self.createNextTickEntry(undefined, self.currentTick);
   }
 }));
 export interface IBaseNodeModel extends Instance<typeof BaseNodeModel> {}
@@ -203,6 +214,8 @@ export type IBaseNode = Schemes['Node'] & {
   dispose(): void;
   process(): void;
   select(): void;
+  /** Renames the node and its column in a capture, as one change. */
+  rename(name: string): void;
   isConnected(inputKey: string): boolean;
   logControlEvent(
     operation: string,
@@ -216,6 +229,7 @@ export type IBaseNode = Schemes['Node'] & {
   ): void;
   readOnly?: boolean;
   getSharedProgramNodeValue(): string;
+  getPlotScale(valueKey: string): IPlotScale | undefined;
 }
 
 export class BaseNode<
@@ -292,6 +306,10 @@ export class BaseNode<
     this.services.selectNode(this.id);
   }
 
+  rename(name: string) {
+    this.services.renameNode(this.id, name);
+  }
+
   isConnected(inputKey: string) {
     return this.services.isConnected(this.id, inputKey);
   }
@@ -346,6 +364,15 @@ export class BaseNode<
   recordedValues() {
     const { recordedTicks } = this.services;
     return recordedTicks.map(tick => this.model.tickEntries.get(tick)?.nodeValue);
+  }
+
+  /**
+   * How the minigraph should plot a watched value: the conversion into the units the node's own
+   * field shows, and the axis those units span. Undefined scales the axis to the data, which is
+   * right for anything without a fixed range -- sensors, Number, Generator, Timer.
+   */
+  getPlotScale(valueKey: string): IPlotScale | undefined {
+    return undefined;
   }
 
   getSharedProgramNodeValue() {

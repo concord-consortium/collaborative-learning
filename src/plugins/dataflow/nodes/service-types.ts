@@ -10,6 +10,8 @@ export interface INodeServices {
   process(): void;
   logTileChangeEvent(event: Pick<ITileChangeLogEvent, "operation" | "change">): void;
   selectNode(nodeId: string): void;
+  /** Renames the node and its column in a capture, as one change. */
+  renameNode(nodeId: string, name: string): void;
   update(type: "node" | "connection" | "socket" | "control", id: string): void;
   isConnected(nodeId: string, inputKey: string): boolean;
   removeInputConnection(nodeId: string, inputKey: string): void;
@@ -23,5 +25,4 @@ export interface INodeServices {
    */
   inTick: boolean;
   readOnly?: boolean;
-  playback?: boolean;
 }
