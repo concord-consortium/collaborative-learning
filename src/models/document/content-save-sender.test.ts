@@ -1,5 +1,5 @@
 import { action, computed, makeObservable, observable, runInAction } from "mobx";
-import { flow, Instance, types } from "mobx-state-tree";
+import { destroy, flow, Instance, types } from "mobx-state-tree";
 import { deferred } from "promise-assist";
 import { ICommitListener, ICommitSource, ICommittedEntry } from "../history/history-commits";
 import { FAKE_HISTORY_ENTRY_ID, IHistoryManager, TreeManagerType } from "../history/tree-manager";
@@ -296,10 +296,11 @@ describe("ContentSaveSender", () => {
     it("keeps saving exactly while entries complete faster than they commit", async () => {
       const { commits, contentRef, edit } = track(setup());
       const ids: string[] = [];
-      for (let i = 0; i < 10; i++) {
+      for (let i = 0; i < kMaxUsableSnapshots; i++) {
         ids.push(await edit(`text-${i}`));
+        jest.setSystemTime(Date.now() + kMinimumSaveGapMs);
       }
-      for (let i = 0; i < 10; i++) {
+      for (let i = 0; i < kMaxUsableSnapshots; i++) {
         commits.commit(ids[i]);
         jest.advanceTimersByTime(kMinimumSaveGapMs);
         expect(contentRef.update).toHaveBeenCalledTimes(i + 1);
@@ -312,11 +313,60 @@ describe("ContentSaveSender", () => {
       }
     });
 
+    it("keeps one snapshot per minimum save gap while entries wait to commit, and the newest", async () => {
+      const { commits, contentRef, edit } = track(setup());
+      const start = Date.now();
+      const editAt = async (offset: number, text: string) => {
+        jest.setSystemTime(start + offset);
+        return edit(text);
+      };
+      const a = await editAt(0, "alpha");
+      const b = await editAt(300, "bravo");
+      const c = await editAt(600, "charlie");
+      const d = await editAt(kMinimumSaveGapMs + 100, "delta");
+      const e = await editAt(kMinimumSaveGapMs + 200, "echo");
+
+      commits.commit(a);
+      expect(contentRef.update).toHaveBeenCalledTimes(1);
+      expect(textOf(contentRef.writes[0].values)).toBe("alpha");
+      contentRef.writes[0].resolve();
+      await flush();
+      jest.advanceTimersByTime(kMinimumSaveGapMs);
+
+      // b and c were taken less than the gap after a, so their snapshots were dropped
+      commits.commit(b);
+      commits.commit(c);
+      jest.advanceTimersByTime(kMinimumSaveGapMs);
+      expect(contentRef.update).toHaveBeenCalledTimes(1);
+
+      // a commit saves the newest snapshot kept among its entries
+      commits.commit(d, e);
+      expect(contentRef.update).toHaveBeenCalledTimes(2);
+      expect(contentRef.writes[1].values).toMatchObject({ lastHistoryEntryId: e, settled: true });
+      expect(textOf(contentRef.writes[1].values)).toBe("echo");
+    });
+
+    it("saves the nearest older kept snapshot when a commit's own snapshot was dropped", async () => {
+      const { commits, contentRef, edit } = track(setup());
+      const start = Date.now();
+      const a = await edit("alpha");
+      jest.setSystemTime(start + 300);
+      const b = await edit("bravo");
+      jest.setSystemTime(start + 600);
+      await edit("charlie");
+
+      commits.commit(a, b);
+      expect(contentRef.update).toHaveBeenCalledTimes(1);
+      expect(contentRef.writes[0].values).toMatchObject({ lastHistoryEntryId: a, settled: true });
+      expect(textOf(contentRef.writes[0].values)).toBe("alpha");
+    });
+
     it("keeps only the newest usable snapshots while entries wait to commit", async () => {
       const { commits, contentRef, edit } = track(setup());
       const ids: string[] = [];
       for (let i = 0; i <= kMaxUsableSnapshots; i++) {
         ids.push(await edit(`text-${i}`));
+        jest.setSystemTime(Date.now() + kMinimumSaveGapMs);
       }
       commits.commit(ids[0]);
       expect(contentRef.update).not.toHaveBeenCalled();
@@ -582,6 +632,47 @@ describe("ContentSaveSender", () => {
       contentRef.writes[1].resolve();
       await flush();
       expect(document.savedEnvelope).toEqual({ lastHistoryEntryId: a, lastHistoryEntryIndex: 1, settled: false });
+    });
+
+    it("records an intermediate save's envelope without an index, or without an entry, as it leaves them",
+        async () => {
+      const { contentRef, document, edit } = track(setup());
+      document.setSavedEnvelope({ lastHistoryEntryId: "loaded", settled: true, exactSince: "e0" });
+      await edit("alpha");
+      jest.advanceTimersByTime(kIntermediateSaveIntervalMs);
+      expect(contentRef.writes[0].values).toMatchObject({ lastHistoryEntryId: "loaded", lastHistoryEntryIndex: null });
+      contentRef.writes[0].resolve();
+      await flush();
+      expect(document.savedEnvelope).toEqual({ lastHistoryEntryId: "loaded", settled: false });
+
+      document.setSavedEnvelope(undefined);
+      await edit("bravo");
+      jest.advanceTimersByTime(kIntermediateSaveIntervalMs);
+      expect(contentRef.update).toHaveBeenCalledTimes(2);
+      contentRef.writes[1].resolve();
+      await flush();
+      expect(document.savedEnvelope).toEqual({ settled: false });
+    });
+
+    it("does nothing when a write lands after the document is destroyed", async () => {
+      const { commits, contentRef, document, edit, onContentSaved, sender, updateTools } = track(setup());
+      const a = await edit("alpha");
+      commits.commit(a);
+      sender.dispose();
+      destroy(document);
+      const warn = jest.spyOn(console, "warn").mockImplementation(() => undefined);
+      const error = jest.spyOn(console, "error").mockImplementation(() => undefined);
+      try {
+        contentRef.writes[0].resolve();
+        await flush();
+        expect(warn).not.toHaveBeenCalled();
+        expect(error).not.toHaveBeenCalled();
+        expect(onContentSaved).not.toHaveBeenCalled();
+        expect(updateTools).not.toHaveBeenCalled();
+      } finally {
+        warn.mockRestore();
+        error.mockRestore();
+      }
     });
 
     it("sends no exact save older than the newest intermediate content when intermediate writes finish out of order",
@@ -1688,6 +1779,28 @@ describe("ContentSaveSender", () => {
       await edit("charlie");
       jest.advanceTimersByTime(kSenderUnmountLimitMs);
       expect(contentRef.update).toHaveBeenCalledTimes(2);
+    });
+
+    it("records the envelope as unsettled when it stops with an intermediate save in flight", async () => {
+      const { contentRef, document, edit, sender } = track(setup());
+      document.setSavedEnvelope(
+        { lastHistoryEntryId: "loaded", lastHistoryEntryIndex: 7, settled: true, exactSince: "e0" });
+      await edit("alpha");
+      sender.detach();
+      jest.advanceTimersByTime(kSenderUnmountLimitMs);
+      expect(contentRef.update).toHaveBeenCalledTimes(1);
+      expect(document.savedEnvelope)
+        .toEqual({ lastHistoryEntryId: "loaded", lastHistoryEntryIndex: 7, settled: false });
+
+      // a sender attached before the write lands sends an intermediate save on page hide
+      const next = track({ sender: getContentSaveSender(document,
+        { contentRef, updateTools: () => Promise.resolve(), random: () => 0 }) });
+      expect(next.sender).not.toBe(sender);
+      await edit("bravo");
+      next.sender.handlePageHide();
+      expect(contentRef.update).toHaveBeenCalledTimes(2);
+      expect(contentRef.writes[1].values).toMatchObject({ settled: null });
+      expect(textOf(contentRef.writes[1].values)).toBe("bravo");
     });
 
     it("stops 30 seconds after detach on a group document without an intermediate save", async () => {

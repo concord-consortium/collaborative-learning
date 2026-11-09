@@ -1,5 +1,5 @@
 import { comparer, reaction } from "mobx";
-import { getPath, getSnapshot, onSnapshot } from "mobx-state-tree";
+import { getPath, getSnapshot, isAlive, onSnapshot } from "mobx-state-tree";
 import { IUnsettledEvidence } from "../../lib/db-types";
 import { LogEventName } from "../../lib/logger-types";
 import { HistoryEntryType } from "../history/history";
@@ -20,7 +20,7 @@ export const kGroupSaveJitterMs = 200;
 // The most time a sender keeps saving after it is detached.
 export const kSenderUnmountLimitMs = 30000;
 // The most usable snapshots kept for entries waiting to commit. Older ones are dropped.
-export const kMaxUsableSnapshots = 200;
+export const kMaxUsableSnapshots = 10;
 
 export interface IValueRef {
   on(event: "value", cb: (snapshot: { val(): unknown }) => void): unknown;
@@ -82,9 +82,14 @@ const getSaveIndex = (save: IWaitingSave) => "buildValues" in save ? save.index 
 
 // What was kept when a local entry completed, until that entry commits. The content snapshot is
 // kept only when it is usable: exactly the history through its entry, once the entry commits.
-type IKeptSnapshot =
-  { usable: true; snapshot: DocumentContentSnapshotType; exactSince: string; changeSeq: number } |
-  { usable: false; changeSeq: number };
+interface IUsableSnapshot {
+  usable: true;
+  snapshot: DocumentContentSnapshotType;
+  exactSince: string;
+  changeSeq: number;
+  takenAt: number;
+}
+type IKeptSnapshot = IUsableSnapshot | { usable: false; changeSeq: number };
 
 // The state of a group document's history manager that the sender reads.
 interface IGroupHistoryState {
@@ -333,6 +338,10 @@ export class ContentSaveSender {
       }
     } catch (error) {
       console.error("Failed to send the last content save", error);
+    }
+    // A sender attached after this one stops reads the envelope before the write in flight lands.
+    if (Array.from(this.writesInFlight).some(save => save.kind === "intermediate")) {
+      this.recordUnsettledEnvelope();
     }
     this.finishDrain();
   };
@@ -591,22 +600,37 @@ export class ContentSaveSender {
         && getSnapshotBlockers(this.document).length === 0;
       this.keptSnapshots.set(entry.id, usable
         ? { usable, snapshot: getSnapshot<DocumentContentSnapshotType>(content), exactSince,
-            changeSeq: this.dirtySeq }
+            changeSeq: this.dirtySeq, takenAt: Date.now() }
         : { usable, changeSeq: this.dirtySeq });
       if (usable) {
-        this.limitUsableSnapshots();
+        this.thinUsableSnapshots();
       }
     } catch (error) {
       console.error("Failed to keep the content snapshot of a history entry", error);
     }
   };
 
-  // Drops the snapshots of the oldest usable entries past the limit, keeping their content changes.
-  private limitUsableSnapshots() {
-    const usable = Array.from(this.keptSnapshots).filter(([, kept]) => kept.usable);
-    usable.slice(0, Math.max(0, usable.length - kMaxUsableSnapshots)).forEach(([id, kept]) => {
-      this.keptSnapshots.set(id, { usable: false, changeSeq: kept.changeSeq });
-    });
+  /**
+   * Keeps few snapshots while entries wait to commit. The newest is always kept. An older one is kept
+   * only when it was taken at least the minimum save gap after the one kept before it, since saves are
+   * written no closer together than that. Past the limit, the oldest are dropped. A dropped snapshot's
+   * entry keeps its content change, and a commit saves the newest snapshot kept among its entries.
+   */
+  private thinUsableSnapshots() {
+    const usable = Array.from(this.keptSnapshots)
+      .filter((pair): pair is [string, IUsableSnapshot] => pair[1].usable);
+    // The snapshot before the newest was the newest until now, so the gap before it is checked now.
+    const previous = usable[usable.length - 2];
+    const beforePrevious = usable[usable.length - 3];
+    if (previous && beforePrevious && previous[1].takenAt - beforePrevious[1].takenAt < kMinimumSaveGapMs) {
+      this.dropSnapshot(previous);
+      usable.splice(usable.length - 2, 1);
+    }
+    usable.slice(0, Math.max(0, usable.length - kMaxUsableSnapshots)).forEach(pair => this.dropSnapshot(pair));
+  }
+
+  private dropSnapshot([id, kept]: [string, IKeptSnapshot]) {
+    this.keptSnapshots.set(id, { usable: false, changeSeq: kept.changeSeq });
   }
 
   private commitListener: ICommitListener = {
@@ -638,9 +662,7 @@ export class ContentSaveSender {
     },
     // The snapshots are dropped, but the content changes they were taken at are kept.
     onUncommittedVoided: () => {
-      this.keptSnapshots.forEach((kept, id) => {
-        this.keptSnapshots.set(id, { usable: false, changeSeq: kept.changeSeq });
-      });
+      this.keptSnapshots.forEach((kept, id) => this.dropSnapshot([id, kept]));
     }
   };
 
@@ -862,6 +884,8 @@ export class ContentSaveSender {
 
   private handleWriteSucceeded(save: IQueuedSave) {
     this.writesInFlight.delete(save);
+    // The write may land after the document is gone, and there is nothing left to tell.
+    if (!isAlive(this.document)) return;
     // Two writes in flight can finish out of order. One that finishes after a newer one reports
     // nothing, since the newer content is what the RTDB holds.
     const isNewest = save.changeSeq >= this.savedSeq;
@@ -931,6 +955,12 @@ export class ContentSaveSender {
       settled,
       ...(settled && save.exactSince !== undefined && { exactSince: save.exactSince })
     });
+  }
+
+  // Records the envelope as an intermediate save leaves it, before that save lands.
+  private recordUnsettledEnvelope() {
+    const { exactSince, ...envelope } = this.document.savedEnvelope ?? {};
+    this.document.setSavedEnvelope({ ...envelope, settled: false });
   }
 
   // Sends the saved content's tools and reports the id the save was stamped with.
