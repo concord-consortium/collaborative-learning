@@ -1,6 +1,7 @@
 import { reaction, when } from "mobx";
 import { applyPatch, IJsonPatch, Instance, types } from "mobx-state-tree";
 import { Firestore } from "../../lib/firestore";
+import { LogEventName } from "../../lib/logger-types";
 import { UserContextProvider } from "../stores/user-context-provider";
 import { TreeManager } from "./tree-manager";
 import { HistoryEntry, HistoryEntrySnapshot } from "./history";
@@ -1313,7 +1314,8 @@ describe("FirestoreHistoryManagerConcurrent", () => {
 
     it("leaves the session not exact when the initial apply fails", async () => {
       const consoleError = jest.spyOn(console, "error").mockImplementation(() => undefined);
-      const { manager, tree, historyManager } = await setupManager();
+      const logEvent = jest.fn();
+      const { manager, tree, historyManager } = await setupManager({}, { logEvent });
       tree.setItems([Item.create({ id: "a" })]);
       tree.applyPatchesFromManager = jest.fn(async () => { throw new Error("boom"); }) as any;
 
@@ -1323,6 +1325,9 @@ describe("FirestoreHistoryManagerConcurrent", () => {
       expect(manager.exactness.isExact).toBe(false);
       expect(manager.exactness.notExactReason).toBe("initial-apply-failed");
       expect(consoleError).toHaveBeenCalledWith("Could not apply remote history entries", expect.any(Error));
+      expect(logEvent).toHaveBeenCalledWith(LogEventName.HISTORY_REMOTE_APPLY_FAILED, {
+        reason: "initial-apply-failed", entryCount: 1, lastEntryId: "e0", lastEntryIndex: 0, error: "Error: boom"
+      });
       expect(historyManager.applying).toBe(false);
       expect(historyManager.isHistorySettled).toBe(true);
       consoleError.mockRestore();
@@ -1330,7 +1335,8 @@ describe("FirestoreHistoryManagerConcurrent", () => {
 
     it("leaves the session not exact when a later apply fails", async () => {
       const consoleError = jest.spyOn(console, "error").mockImplementation(() => undefined);
-      const { manager, tree, historyManager } = await setupManager();
+      const logEvent = jest.fn();
+      const { manager, tree, historyManager } = await setupManager({}, { logEvent });
       tree.setItems([Item.create({ id: "a" })]);
 
       historyManager.syncRemoteFirestoreHistory([makeWrapperDoc(0, undefined, colorEntry("e0", "red"))]);
@@ -1346,6 +1352,9 @@ describe("FirestoreHistoryManagerConcurrent", () => {
       expect(manager.exactness.isExact).toBe(false);
       expect(manager.exactness.notExactReason).toBe("remote-apply-failed");
       expect(consoleError).toHaveBeenCalledWith("Could not apply remote history entries", expect.any(Error));
+      expect(logEvent).toHaveBeenCalledWith(LogEventName.HISTORY_REMOTE_APPLY_FAILED, {
+        reason: "remote-apply-failed", entryCount: 2, lastEntryId: "e1", lastEntryIndex: 1, error: "Error: boom"
+      });
       consoleError.mockRestore();
     });
   });

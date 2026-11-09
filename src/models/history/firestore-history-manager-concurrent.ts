@@ -1,6 +1,7 @@
 import { action, computed, makeObservable, observable, runInAction } from "mobx";
 import { getSnapshot, Instance, IJsonPatch } from "mobx-state-tree";
 import { IDocumentMetadata } from "../../../shared/shared";
+import { LogEventName } from "../../lib/logger-types";
 import { typeConverter } from "../../utilities/db-utils";
 import { getLastHistoryEntry, IFirestoreHistoryEntryDoc, LastHistoryEntry } from "./history-firestore";
 import { CDocumentType, FAKE_EXCHANGE_ID, FAKE_HISTORY_ENTRY_ID } from "./tree-manager";
@@ -262,9 +263,14 @@ export class FirestoreHistoryManagerConcurrent extends FirestoreHistoryManager {
     this.applyHistoryEntries(historyEntryDocs).then(
       () => { this.firstApplyFinished = true; },
       error => {
-        this.treeManager.exactness.markNotExact(
-          this.firstApplyFinished ? "remote-apply-failed" : "initial-apply-failed");
+        const reason = this.firstApplyFinished ? "remote-apply-failed" : "initial-apply-failed";
+        this.treeManager.exactness.markNotExact(reason);
         console.error("Could not apply remote history entries", error);
+        const last = historyEntryDocs[historyEntryDocs.length - 1];
+        this.logEvent?.(LogEventName.HISTORY_REMOTE_APPLY_FAILED, {
+          reason, entryCount: historyEntryDocs.length, lastEntryId: last?.id, lastEntryIndex: last?.index,
+          error: String(error)
+        });
       }
     );
   }
