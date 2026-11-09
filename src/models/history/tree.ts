@@ -162,18 +162,10 @@ export const Tree = types.model("Tree", {
     // Actually apply the patches.
     // It might be called multiple times after startApplyingPatchesFromManager.
     //
-    // The patches are applied one at a time, inside this one action, so a
-    // failure is tied to the patch that caused it. The TreeMonitor
+    // Patches apply one at a time so a failure is tied to its patch; see
+    // PatchApplicationError for what the caller gets. The TreeMonitor
     // middleware is already recording this action, so it skips each nested
     // applyPatch call.
-    //
-    // While each patch applies, an onPatch listener collects the reverse
-    // patches MST reports for it: one for each change MST makes, which may
-    // be several for one patch (replacing an existing model changes each of
-    // its fields). These are the exact undo of what was applied. If a patch
-    // throws, its own partial changes are undone and a PatchApplicationError
-    // carries the reverse patches of the patches before it, so the caller
-    // can roll them back without relying on recorded inverse patches.
     //
     // MST treats a patch with an empty or missing path as a whole-tree
     // snapshot replacement. We reject both the undefined/missing case AND
