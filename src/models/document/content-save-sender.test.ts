@@ -2,6 +2,7 @@ import { action, computed, makeObservable, observable, runInAction } from "mobx"
 import { destroy, flow, Instance, types } from "mobx-state-tree";
 import { deferred } from "promise-assist";
 import { ICommitListener, ICommitSource, ICommittedEntry } from "../history/history-commits";
+import { buildLoadEntry } from "../history/schema-conversion";
 import { FAKE_HISTORY_ENTRY_ID, IHistoryManager, TreeManagerType } from "../history/tree-manager";
 import { registerTileComponentInfo } from "../tiles/tile-component-info";
 import { registerTileContentInfo } from "../tiles/tile-content-info";
@@ -389,6 +390,31 @@ describe("ContentSaveSender", () => {
       expect(contentRef.update).toHaveBeenCalledTimes(1);
       expect(textOf(contentRef.writes[0].values)).toBe("bravo");
       expect(contentRef.writes[0].values.lastHistoryEntryId).toBe(b);
+    });
+
+    it("skips a snapshot taken while the load entry is pending, and uses the next usable one", async () => {
+      const { commits, contentRef, document, edit, treeManager } = track(setup());
+      const loadEntry = buildLoadEntry(document.key, [{
+        path: "/content/tileMap/t1/content", before: { type: "TestTile", text: "stored" }, after: { type: "TestTile" }
+      }]);
+      treeManager.setPendingLoadEntry(loadEntry);
+      const ids: string[] = [];
+      const remove = treeManager.addEntryCompletedListener(entry => { ids.push(entry.id); });
+      // A title change isn't a content change, so the load entry stays pending.
+      document.setTitle("renamed");
+      await flush();
+      remove();
+      expect(ids).toHaveLength(1);
+      expect(treeManager.pendingLoadEntry).toBe(loadEntry);
+
+      commits.commit(ids[0]);
+      expect(contentRef.update).not.toHaveBeenCalled();
+      const a = await edit("alpha");
+      expect(treeManager.pendingLoadEntry).toBeUndefined();
+      commits.commit(loadEntry.id!, a);
+      expect(contentRef.update).toHaveBeenCalledTimes(1);
+      expect(contentRef.writes[0].values.lastHistoryEntryId).toBe(a);
+      expect(textOf(contentRef.writes[0].values)).toBe("alpha");
     });
 
     it("skips a snapshot taken while a flow that had changed state was running", async () => {

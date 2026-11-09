@@ -154,6 +154,10 @@ export function getSnapshotBlockers(document: DocumentModelType): string[] {
   if (isApplyingRemoteEntries(document)) {
     blockers.push("applying-remote-entries");
   }
+  // The content holds the load's conversion, which history gets only with the next content change.
+  if (getTreeManager(document)?.pendingLoadEntry) {
+    blockers.push("pending-load-entry");
+  }
   return blockers;
 }
 
