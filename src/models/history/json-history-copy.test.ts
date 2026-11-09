@@ -204,8 +204,8 @@ describe("JsonHistoryCopy", () => {
       const copy = copyOf(tileAt(undefined, "THROW"));
       expect(copy.needsConversion(t1Path)).toBe(true);
       expect(() => copy.getConvertedModel(t1Path)).toThrow("cannot convert");
-      });
     });
+  });
 
   describe("with a virtual conversion", () => {
     const t1Path = "/content/tileMap/t1";
@@ -269,6 +269,17 @@ describe("JsonHistoryCopy", () => {
       expect(copy.moveTo(entries, 0)).toMatchObject({ position: 2, failure: { historyIndex: 1 } });
       expect(copy.getJson(t1Path)).toEqual(
         { id: "t1", content: { type: "VersionedTestTile", version: "2", label: "c" } });
+    });
+
+    it("stops at the higher of two virtual conversions it can't cross", () => {
+      const entries = history();
+      const copy = new JsonHistoryCopy(kTreeId, endJson(), 3);
+      copy.setVirtualConversions([
+        { path: t1Path, position: 3, oldJson: undefined },
+        { path: "/content/tileMap/t2", position: 1, oldJson: undefined }
+      ]);
+      expect(copy.oldestReachablePosition).toBe(3);
+      expect(copy.moveTo(entries, 0)).toEqual({ position: 3, unavailable: true });
     });
 
     it("stops at a virtual conversion whose model isn't in the copy", () => {
