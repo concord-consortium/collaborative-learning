@@ -128,9 +128,10 @@ export const AIComponent: React.FC<ITileProps> = observer((props) => {
           // AI tiles out of the summary, so nothing the tile writes can move this hash. The prompt
           // is in it because an author editing the prompt has changed the request without touching
           // the document, and must not be told nothing has changed.
-          // systemPrompt is sent alongside dynamicContentPrompt, so an authored change to it
-          // changes the request even when the document and the tile's prompt are identical. NUL
-          // separates them because neither can contain it, so no pair of prompts can collide.
+          // systemPrompt is sent alongside dynamicContentPrompt, so a change to it alone sends a
+          // request. The server cache does not compare the system prompt yet (CLUE-802), so that
+          // request returns the cached answer built with the old one. NUL separates the two
+          // prompts because neither can contain it, so no pair of prompts can collide.
           const requestHash = hashString(`${systemPrompt ?? ""}\u0000${dynamicContentPrompt}`);
           if (requestHash === content.evaluatedRequestHash) {
             // Only someone who pressed Refresh is told why nothing happened; a rerun from any

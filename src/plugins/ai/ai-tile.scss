@@ -78,11 +78,8 @@
   }
 
   // Sits above the analysis, which stays on screen underneath it while the student works.
-  // Always mounted so screen readers announce it reliably, so it must take no room when empty.
-  .ai-status:empty {
-    display: none;
-  }
-
+  // Always mounted so screen readers announce it reliably. When empty it loses its box but not
+  // display: display: none would drop it from the accessibility tree until text arrives.
   .ai-status {
     margin: 0 0 8px;
     padding: 5px 8px;
@@ -90,5 +87,11 @@
     font-style: italic;
     background-color: #f8f8f0;
     border-left: 3px solid #ddd;
+
+    &:empty {
+      margin: 0;
+      padding: 0;
+      border: 0;
+    }
   }
 }
