@@ -11,7 +11,7 @@ import { registerTileContentInfo } from "../tiles/tile-content-info";
 import { createDocumentModel, DocumentModelType } from "../document/document";
 import { DocumentContentModel } from "../document/document-content";
 import { ProblemDocument } from "../document/document-types";
-import { HistoryEntrySnapshot, TreePatchRecordSnapshot } from "./history";
+import { HistoryEntry, HistoryEntrySnapshot, TreePatchRecordSnapshot } from "./history";
 import { IVirtualConversion, registerHistoryBridge } from "./history-bridges";
 import { JsonHistoryCopy } from "./json-history-copy";
 import { toJsonValue } from "./json-patch";
@@ -60,9 +60,9 @@ const t1Path = "/content/tileMap/t1";
 
 // The conversions the test bridge reports. Only the virtual conversion tests set them, and they
 // clear them afterward, so the bridge reports nothing to the other tests.
-let bridgedConversions: IVirtualConversion[] = [];
+let virtualConversions: IVirtualConversion[] = [];
 registerHistoryBridge({
-  findVirtualConversions: (_history, treeId) => treeId === kTreeId ? bridgedConversions : []
+  findVirtualConversions: (_history, treeId) => treeId === kTreeId ? virtualConversions : []
 });
 const kFixturePath = path.join(__dirname, "fixtures", "conversion-chain.json");
 
@@ -619,15 +619,15 @@ describe("playback across a load entry", () => {
 
   describe("with a virtual conversion", () => {
     afterEach(() => {
-      bridgedConversions = [];
+      virtualConversions = [];
     });
 
     // t1 is v1 for two entries, the bridge's conversion makes it v2 at position 2 with real item
     // ids, and two v2 entries follow.
-    const bridgedOldTile = () => ({ id: "t1", content: { type: kVersionedTestTileType, text: "b", items: [
+    const oldTileBeforeConversion = () => ({ id: "t1", content: { type: kVersionedTestTileType, text: "b", items: [
       { value: "a" }
     ] } });
-    const bridgedEntries = () => [
+    const virtualConversionEntries = () => [
       makeEntry([replaceRecord(`${t1Path}/content/text`, "a", "b")]),
       makeEntry([addItemRecord(t1Path, 0, "a")]),
       makeEntry([replaceRecord(`${t1Path}/content/label`, "b", "x")]),
@@ -637,20 +637,20 @@ describe("playback across a load entry", () => {
     ];
     const kEndIds = ["i1", "i2"];
 
-    function setupBridgedDocument(oldJson: unknown) {
+    function setupVirtualConversionDocument(oldJson: unknown) {
       const content = { tileMap: { t1: { id: "t1", content: {
         type: kVersionedTestTileType, version: "2", label: "x",
         items: [{ id: "i1", value: "a" }, { id: "i2", value: "z" }]
       } } } };
       const document = createDocumentModel({ uid: "1", type: ProblemDocument, key: kTreeId, content });
       const manager = document.treeManagerAPI as Instance<typeof TreeManager>;
-      bridgedConversions = [{ path: t1Path, position: 2, oldJson }];
-      manager.setChangeDocument(CDocument.create({ history: bridgedEntries() }));
+      virtualConversions = [{ path: t1Path, position: 2, oldJson }];
+      manager.setChangeDocument(CDocument.create({ history: virtualConversionEntries() }));
       manager.setNumHistoryEntriesApplied(4);
       const endJson: any = toJsonValue(getSnapshot(document));
       const replay = (position: number) => {
         const replayCopy = new JsonHistoryCopy(kTreeId, cloneDeep(endJson), 4);
-        replayCopy.setVirtualConversions(cloneDeep(bridgedConversions));
+        replayCopy.setVirtualConversions(cloneDeep(virtualConversions));
         replayCopy.moveTo(manager.document.history, position);
         return replayCopy;
       };
@@ -658,7 +658,7 @@ describe("playback across a load entry", () => {
     }
 
     it("crosses a virtual conversion like a stored one", async () => {
-      const { document, manager, endJson, replay } = setupBridgedDocument(bridgedOldTile());
+      const { document, manager, endJson, replay } = setupVirtualConversionDocument(oldTileBeforeConversion());
       expect(manager.needsJsonCopy).toBe(true);
 
       const visits = [3, 2, 1, 0, 2, 4];
@@ -677,7 +677,7 @@ describe("playback across a load entry", () => {
     });
 
     it("stops at the oldest reachable position without a failure banner", async () => {
-      const { document, manager } = setupBridgedDocument(undefined);
+      const { document, manager } = setupVirtualConversionDocument(undefined);
 
       await manager.goToHistoryEntryPosition(0);
 
@@ -694,8 +694,8 @@ describe("playback across a load entry", () => {
       expect(manager.oldestReachablePosition).toBe(2);
     });
 
-    it("returns to the end with real ids after reaching the unavailable boundary", async () => {
-      const { document, manager, endJson } = setupBridgedDocument(undefined);
+    it("returns to the end with real ids after stopping at the oldest reachable position", async () => {
+      const { document, manager, endJson } = setupVirtualConversionDocument(undefined);
 
       for (const position of [0, 1, 3, 2, 4]) {
         await manager.goToHistoryEntryPosition(position);
@@ -706,6 +706,47 @@ describe("playback across a load entry", () => {
       expect(endIds).toEqual(kEndIds);
       expect(getTile(document, "t1").items.map(item => item.id)).toEqual(endIds);
       expect(manager.historyPlaybackFailures).toEqual([]);
+    });
+
+    it("updates the oldest reachable position when the conversions change", async () => {
+      const { document, manager } = setupVirtualConversionDocument(undefined);
+      await manager.goToHistoryEntryPosition(0);
+      expect(manager.oldestReachablePosition).toBe(2);
+
+      // An entry arrives, and the bridge can now rebuild the old tile.
+      virtualConversions = [{ path: t1Path, position: 2, oldJson: oldTileBeforeConversion() }];
+      manager.addHistoryEntryAfterApplying(
+        HistoryEntry.create(makeEntry([replaceRecord(`${t1Path}/content/label`, "x", "y")])));
+      await manager.goToHistoryEntryPosition(0);
+
+      expect(manager.numHistoryEventsApplied).toBe(0);
+      expect(getTile(document, "t1").label).toBe("a");
+      expect(manager.oldestReachablePosition).toBeUndefined();
+      expect(manager.historyPlaybackFailures).toEqual([]);
+    });
+
+    it("finds the virtual conversions again when the history, the bridges or the local load entry change",
+        () => {
+      const { manager } = setupVirtualConversionDocument(undefined);
+      const atPosition = (position: number) => [{ path: t1Path, position, oldJson: undefined }];
+      const expectPosition = (position: number) =>
+        expect(manager.virtualConversions.map(conversion => conversion.position)).toEqual([position]);
+      expectPosition(2);
+
+      // Each change to what the bridge reports shows only once the manager looks again.
+      const changes: Array<() => void> = [
+        () => manager.addHistoryEntryAfterApplying(
+          HistoryEntry.create(makeEntry([replaceRecord(`${t1Path}/content/label`, "x", "y")]))),
+        () => manager.setChangeDocument(CDocument.create({ history: getSnapshot(manager.document.history) })),
+        () => registerHistoryBridge({ findVirtualConversions: () => [] }),
+        () => manager.setLocalLoadEntry({ ...makeEntry([]), isLoadEntry: true })
+      ];
+      changes.forEach((change, i) => {
+        virtualConversions = atPosition(3 + i);
+        expectPosition(2 + i);
+        change();
+        expectPosition(3 + i);
+      });
     });
   });
 });

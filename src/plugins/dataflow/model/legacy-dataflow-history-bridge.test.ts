@@ -4,13 +4,14 @@ jest.mock("../components/dataflow-tile", () => ({ __esModule: true, default: () 
 import fs from "fs";
 import path from "path";
 import { cloneDeep } from "lodash";
-import { getSnapshot, IJsonPatch, Instance } from "mobx-state-tree";
+import { applySnapshot, getSnapshot, IJsonPatch, Instance } from "mobx-state-tree";
 import { registerTileTypes } from "../../../register-tile-types";
 import { createDocumentModel, DocumentModelType } from "../../../models/document/document";
 import { DocumentContentModel } from "../../../models/document/document-content";
 import { ProblemDocument } from "../../../models/document/document-types";
 import { HistoryEntrySnapshot } from "../../../models/history/history";
 import { toJsonValue } from "../../../models/history/json-patch";
+import { buildLoadEntry, convertOldModelJsonAtPath } from "../../../models/history/schema-conversion";
 import { CDocument, TreeManager } from "../../../models/history/tree-manager";
 import { DataflowContentModelType } from "./dataflow-content";
 import { isLegacyDataflowPatch, legacyDataflowHistoryBridge } from "./legacy-dataflow-history-bridge";
@@ -47,14 +48,34 @@ function getProgramJson(document: DocumentModelType): any {
 }
 
 let entryCount = 0;
-function makeEntry(patches: IJsonPatch[], extra: Partial<HistoryEntrySnapshot> = {}, tree = kTreeId) {
+function makeEntry(patches: IJsonPatch[], extra: Partial<HistoryEntrySnapshot> = {}, tree = kTreeId,
+    inversePatches: IJsonPatch[] = []) {
   const action = "/content/tileMap/t1/content/setProgram";
   return {
     id: `entry-${++entryCount}`, tree: kTreeId, action, undoable: true, state: "complete" as const,
-    records: [{ tree, action, patches, inversePatches: [] }],
+    records: [{ tree, action, patches, inversePatches }],
     ...extra
   };
 }
+
+// The load entry a document records when it loads with `legacyTile` as t1.
+function buildTileLoadEntry(legacyTile: any) {
+  const converted = convertOldModelJsonAtPath(kTilePath, cloneDeep(legacyTile));
+  return buildLoadEntry(kTreeId, [{ path: kTilePath, before: legacyTile, after: converted }]);
+}
+
+// A legacy t1 with one node, whose value the history below changes from 4 to 5.
+const legacyTileWithNode = (nodeValue: number): any => ({ id: "t1", content: { type: "Dataflow", program: {
+  id: "dataflow@0.1.0",
+  nodes: { 1: { id: 1, name: "Number", x: 10, y: 20, inputs: {}, outputs: {}, data: { plot: false } } },
+  values: { 1: { currentValues: { nodeValue } } }
+} } });
+const kNodeValuePath = `${kProgramPath}/values/1/currentValues/nodeValue`;
+const kNodeXPath = `${kProgramPath}/nodes/1@t1/x`;
+const setNodeValue = () => makeEntry([{ op: "replace", path: kNodeValuePath, value: 5 }], {}, kTreeId,
+  [{ op: "replace", path: kNodeValuePath, value: 4 }]);
+const moveNode = () => makeEntry([{ op: "replace", path: kNodeXPath, value: 11 }], {}, kTreeId,
+  [{ op: "replace", path: kNodeXPath, value: 10 }]);
 
 function findConversions(entries: HistoryEntrySnapshot[]) {
   const history = CDocument.create({ history: entries }).history;
@@ -77,6 +98,7 @@ describe("isLegacyDataflowPatch", () => {
 
   it("is true for legacy paths", () => {
     expect(isLegacyDataflowPatch(patch(`${kProgramPath}/values/3/currentValues/nodeValue`, 1))).toBe(true);
+    expect(isLegacyDataflowPatch(patch(`${kProgramPath}/values`, {}))).toBe(true);
     expect(isLegacyDataflowPatch({ op: "add", path: `${kProgramPath}/nodes/3`, value: { id: 3 } })).toBe(true);
     expect(isLegacyDataflowPatch(patch(`${kProgramPath}/nodes/3/x`, 10))).toBe(true);
     expect(isLegacyDataflowPatch({ op: "remove", path: `${kProgramPath}/nodes/abc/inputs/num1` })).toBe(true);
@@ -90,7 +112,7 @@ describe("isLegacyDataflowPatch", () => {
       .toBe(true);
   });
 
-  it("is true for a program, content or tile value holding a legacy program saved without an id", () => {
+  it("is true for a program, content or tile value holding a legacy program added without an id", () => {
     const noIdProgram = { nodes: {}, values: {} };
     expect(isLegacyDataflowPatch(patch(kProgramPath, noIdProgram))).toBe(true);
     expect(isLegacyDataflowPatch(patch(`${kTilePath}/content`, { program: noIdProgram }))).toBe(true);
@@ -120,12 +142,27 @@ describe("isLegacyDataflowPatch", () => {
 });
 
 describe("legacyDataflowHistoryBridge", () => {
+  beforeAll(async () => {
+    await registerTileTypes(["Dataflow"]);
+  });
+
   it("puts the conversion after the last legacy entry of each tile", () => {
     const conversions = findConversions([
       addLegacyTile("t1"), legacyValue("t1"), addLegacyTile("t2"), currentMove("t1"), legacyValue("t2")
     ]);
     expect(conversions.map(c => [c.path, c.position])).toEqual([
       ["/content/tileMap/t1", 2], ["/content/tileMap/t2", 5]
+    ]);
+  });
+
+  it("rebuilds each tile from its own patches when an entry changes several tiles", () => {
+    const bothTiles = makeEntry([...legacyValue("t1").records[0].patches, ...legacyValue("t2").records[0].patches]);
+    const conversions = findConversions([
+      addLegacyTile("t1"), addLegacyTile("t2"), bothTiles, currentMove("t1"), currentMove("t2")
+    ]);
+    const values = { 1: { currentValues: {} } };
+    expect(conversions.map(c => [c.path, c.position, (c.oldJson as any)?.content.program.values])).toEqual([
+      ["/content/tileMap/t1", 3, values], ["/content/tileMap/t2", 3, values]
     ]);
   });
 
@@ -148,8 +185,28 @@ describe("legacyDataflowHistoryBridge", () => {
     expect((conversion.oldJson as any).title).toBe("Program 2");
   });
 
+  it("rebuilds the legacy tile from a replace of the whole tile", () => {
+    const tile = { ...addLegacyTile().records[0].patches[0].value, title: "Replaced" };
+    const replaceTile = makeEntry([{ op: "replace", path: kTilePath, value: tile }]);
+    const [conversion] = findConversions([replaceTile, legacyValue(), currentMove()]);
+    expect((conversion.oldJson as any).title).toBe("Replaced");
+  });
+
+  it("rebuilds the legacy tile from a replace of the tile map that holds it", () => {
+    const tile = addLegacyTile().records[0].patches[0].value;
+    const replaceTileMap = (title: string) =>
+      makeEntry([{ op: "replace", path: "/content/tileMap", value: { t1: { ...tile, title } } }]);
+    const [onlyReplace] = findConversions([replaceTileMap("A"), legacyValue(), currentMove()]);
+    expect(onlyReplace.oldJson).toEqual({ ...tile, title: "A",
+      content: { ...tile.content, program: { ...kLegacyProgram, values: { 1: { currentValues: {} } } } } });
+    const [afterAdd] = findConversions([addLegacyTile(), replaceTileMap("B"), legacyValue(), currentMove()]);
+    expect((afterAdd.oldJson as any).title).toBe("B");
+  });
+
   it("can't rebuild the legacy tile without an add or when a patch doesn't apply", () => {
     expect(findConversions([legacyValue(), currentMove()])[0].oldJson).toBeUndefined();
+    const addWithNoValue = makeEntry([{ op: "add", path: kTilePath }]);
+    expect(findConversions([addWithNoValue, legacyValue(), currentMove()])[0].oldJson).toBeUndefined();
     const missingParent = makeEntry([{ op: "replace", path: `${kProgramPath}/values/9/currentValues/x`, value: 1 }]);
     expect(findConversions([addLegacyTile(), missingParent, currentMove()])[0].oldJson).toBeUndefined();
   });
@@ -160,12 +217,21 @@ describe("legacyDataflowHistoryBridge", () => {
   });
 
   it("skips tiles a stored load entry already covers", () => {
-    const loadEntry = makeEntry([{ op: "replace", path: `${kProgramPath}/id`, value: "dataflow@1" }],
-      { isLoadEntry: true, undoable: false });
+    // The load entry's patches use the legacy format, since they convert a legacy tile.
+    const loadEntry = buildTileLoadEntry(legacyTileWithNode(5));
+    expect(loadEntry.records![0].patches!.some(patch => isLegacyDataflowPatch(patch as IJsonPatch))).toBe(true);
     const conversions = findConversions([
       addLegacyTile("t1"), addLegacyTile("t2"), legacyValue("t1"), legacyValue("t2"), loadEntry, currentMove()
     ]);
     expect(conversions.map(c => c.path)).toEqual(["/content/tileMap/t2"]);
+  });
+
+  it("keeps the conversion of a tile that a current entry changes before a later load entry", () => {
+    // A later schema change converts the tile again.
+    const laterLoadEntry = makeEntry([{ op: "add", path: `${kTilePath}/content/programZoom`, value: {} }],
+      { isLoadEntry: true, undoable: false });
+    const conversions = findConversions([addLegacyTile(), legacyValue(), currentMove(), laterLoadEntry]);
+    expect(conversions.map(c => [c.path, c.position])).toEqual([[kTilePath, 2]]);
   });
 });
 
@@ -198,7 +264,7 @@ describe("playback of legacy DataFlow history", () => {
     });
   });
 
-  it("crosses the boundary to the add of a legacy program saved without an id", async () => {
+  it("crosses the boundary to the add of a legacy program added without an id", async () => {
     const { fixture, document, manager } = loadFixture("no-id-program-add");
     const addedProgram: any = fixture.history[0].records![0].patches[0].value.content.program;
     expect(addedProgram.id).toBeUndefined();
@@ -224,6 +290,74 @@ describe("playback of legacy DataFlow history", () => {
     await manager.goToHistoryEntryPosition(fixture.history.length);
     expect(manager.historyPlaybackFailures).toEqual([]);
     expect(getProgramJson(document)).toEqual(endProgram);
+  });
+
+  // A document that loads t1 in the legacy format, with a history that holds one legacy entry and
+  // not t1's add.
+  const legacyContent = () => ({
+    tileMap: { t1: legacyTileWithNode(5) }, rowMap: { r1: { id: "r1", tiles: [{ tileId: "t1" }] } }, rowOrder: ["r1"]
+  });
+  const createDocument = (content: any) =>
+    createDocumentModel({ uid: "u1", type: ProblemDocument, key: kTreeId, content });
+  const getNodeValue = (document: DocumentModelType) =>
+    (getProgramJson(document).nodes["1@t1"].data as any).value;
+
+  it("plays back across a stored load entry to the start of a tile added before the history", async () => {
+    const loadEntry = buildTileLoadEntry(legacyTileWithNode(5));
+    const history = [setNodeValue(), loadEntry, moveNode()];
+    const live = createDocument(legacyContent());
+    const endTile: any = toJsonValue(getSnapshot(live.content!.tileMap.get("t1")!));
+    endTile.content.program.nodes["1@t1"].x = 11;
+    const document = createDocument({ ...legacyContent(), tileMap: { t1: endTile } });
+    const manager = document.treeManagerAPI as Instance<typeof TreeManager>;
+    manager.setChangeDocument(CDocument.create({ history }));
+    manager.setNumHistoryEntriesApplied(history.length);
+    expect(manager.virtualConversions).toEqual([]);
+
+    await manager.goToHistoryEntryPosition(0);
+    expect(manager.historyPlaybackFailures).toEqual([]);
+    expect(manager.numHistoryEventsApplied).toBe(0);
+    expect(manager.oldestReachablePosition).toBeUndefined();
+    expect(getNodeValue(document)).toBe(4);
+  });
+
+  it("plays back legacy stored content whose load entry was handed over and later arrives", async () => {
+    // The canvas makes the playback document from the live one, which converted t1 when it loaded
+    // and hands over its load entry before uploading it.
+    const live = createDocument(legacyContent());
+    const loadEntry = (live.treeManagerAPI as Instance<typeof TreeManager>).pendingLoadEntry!;
+    const document = createDocumentModel(getSnapshot(live));
+    const manager = document.treeManagerAPI as Instance<typeof TreeManager>;
+    manager.setLocalLoadEntry(loadEntry);
+    manager.setChangeDocument(CDocument.create({ history: [setNodeValue()] }));
+    manager.setNumHistoryEntriesApplied(1);
+    expect(manager.virtualConversions).toEqual([]);
+
+    await manager.goToHistoryEntryPosition(0);
+    expect(manager.historyPlaybackFailures).toEqual([]);
+    expect(manager.numHistoryEventsApplied).toBe(0);
+    expect(manager.oldestReachablePosition).toBeUndefined();
+    expect(getNodeValue(document)).toBe(4);
+
+    // The student's load entry and an edit arrive.
+    applySnapshot(manager.document, { history: [setNodeValue(), cloneDeep(loadEntry), moveNode()] });
+    expect(manager.virtualConversions).toEqual([]);
+    await manager.goToHistoryEntryPosition(3);
+    expect(getProgramJson(document).nodes["1@t1"].x).toBe(11);
+    await manager.goToHistoryEntryPosition(0);
+    expect(manager.historyPlaybackFailures).toEqual([]);
+    expect(manager.numHistoryEventsApplied).toBe(0);
+    expect(getNodeValue(document)).toBe(4);
+  });
+
+  it("doesn't let a handed-over load entry that the history holds cover later legacy entries", () => {
+    const document = createDocument(legacyContent());
+    const manager = document.treeManagerAPI as Instance<typeof TreeManager>;
+    const loadEntry = buildTileLoadEntry(legacyTileWithNode(4));
+    // A student on a release from before the conversion edits the legacy content after the load.
+    manager.setChangeDocument(CDocument.create({ history: [loadEntry, setNodeValue()] }));
+    manager.setLocalLoadEntry(loadEntry);
+    expect(manager.virtualConversions.map(c => [c.path, c.position])).toEqual([[kTilePath, 2]]);
   });
 
   it("stops at the boundary of a tile with no add entry", async () => {

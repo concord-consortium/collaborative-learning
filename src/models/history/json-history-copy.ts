@@ -1,6 +1,6 @@
 import { IJsonPatch } from "mobx-state-tree";
 import { cloneDeep } from "lodash";
-import { applyJsonPatches, diffJson, unescapeSegment } from "./json-patch";
+import { applyJsonPatches, diffJson, getJsonAtPath } from "./json-patch";
 import { convertOldModelJsonAtPath, isNonCurrentModelJsonAtPath } from "./schema-conversion";
 import { getEntryPatchesForTree, HistoryEntryType, HistoryOperation } from "./history";
 import { IVirtualConversion } from "./history-bridges";
@@ -22,8 +22,9 @@ interface ICopyConversion extends IVirtualConversion {
 
 /**
  * A plain JSON copy of a document that history playback keeps beside the MST trees. Every entry
- * a move crosses, load entries included, is applied to the copy, so it can say where the move has
- * to stop and which models are old there. It never touches an MST tree.
+ * a move crosses, load entries included, is applied to the copy, and so is every virtual
+ * conversion, so it can say where the move has to stop and which models are old there. It never
+ * touches an MST tree.
  */
 export class JsonHistoryCopy {
   private json: object;
@@ -70,16 +71,7 @@ export class JsonHistoryCopy {
    * a clone, so callers must treat it as read-only.
    */
   getJson(path: string): unknown {
-    if (path === "") return this.json;
-    let value: any = this.json;
-    for (const rawSegment of path.split("/").slice(1)) {
-      const segment = unescapeSegment(rawSegment);
-      if (value == null || typeof value !== "object" || !Object.prototype.hasOwnProperty.call(value, segment)) {
-        return undefined;
-      }
-      value = value[segment];
-    }
-    return value;
+    return getJsonAtPath(this.json, path);
   }
 
   /**
@@ -125,7 +117,8 @@ export class JsonHistoryCopy {
   /**
    * Applies entries one at a time, in the same direction and record order as
    * `goToHistoryEntryPosition`. An entry that fails is left unapplied (applyJsonPatches applies
-   * all of an entry's patches or none), and the move stops there.
+   * all of an entry's patches or none), and the move stops there. It also crosses the virtual
+   * conversions at each position it passes, and stops at one it can't cross backward.
    */
   moveTo(history: readonly HistoryEntryType[], target: number): IJsonCopyMoveResult {
     this.convertedModels.clear();
@@ -174,8 +167,8 @@ export class JsonHistoryCopy {
 
   /**
    * Returns the copy at `position` to the old format by applying the inverse of each conversion
-   * there, computing it on the first crossing. Returns false, changing nothing, when one of them
-   * can't be crossed.
+   * there, computing it on the first crossing. Returns false, leaving the JSON unchanged, when one
+   * of them can't be crossed.
    */
   private crossConversionsBackward(position: number) {
     const conversions = this.conversionsAt(position);

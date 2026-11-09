@@ -83,10 +83,10 @@ function getEntriesBetween(history: readonly HistoryEntryType[], from: number, t
  * Moves the JSON copy toward `target` and builds the patch source for the move. A model is
  * treated as old when it is old in the copy at either end of the move, when a patch in the move
  * carries an old version of it, or when a load entry or a virtual conversion in the move changes
- * it. The patches catch an old model that is absent at both ends. The load-entry check is a
- * backstop: a model a load entry converts is old at the end of the move before that entry, or was
- * added in the move with an old value. The copy can stop short of `target`; the source covers only
- * the entries up to where it stopped.
+ * it. The patches catch an old model that is absent at both ends. The load-entry and
+ * virtual-conversion checks are backstops: a model either one converts is old at the end of the
+ * move before the conversion, or was added in the move with an old value. The copy can stop short
+ * of `target`; the source covers only the entries up to where it stopped.
  */
 function moveJsonCopy(copy: JsonHistoryCopy, history: readonly HistoryEntryType[], treeId: string,
     target: number, virtualConversions: readonly IVirtualConversion[]
@@ -103,8 +103,8 @@ function moveJsonCopy(copy: JsonHistoryCopy, history: readonly HistoryEntryType[
   const oldPaths = new Set([...collectModelPaths(entries, treeId)].filter(path =>
     oldAtStart.has(path) || copy.needsConversion(path) ||
     hasOldValue(patches, path) || loadEntryPaths.has(path)));
-  // A virtual conversion at position b sits between entries b-1 and b, so a move ending at b
-  // doesn't cross it.
+  // A move crosses a virtual conversion (see IVirtualConversion.position) when its lower end is
+  // below the conversion's position and its upper end is at or above it.
   const low = Math.min(start, moved.position);
   const high = Math.max(start, moved.position);
   virtualConversions
@@ -234,8 +234,9 @@ export const TreeManager = types
    */
   jsonHistoryCopy: undefined as JsonHistoryCopy | undefined,
   /**
-   * Set when a playback move stops at a virtual conversion whose old state can't be rebuilt:
-   * the oldest position playback can reach.
+   * The oldest position playback can reach. It is set when a playback move stops at a virtual
+   * conversion it can't cross backward, because the bridge couldn't rebuild the old state or the
+   * model isn't in the copy there. Each later move updates it from the conversions then.
    */
   oldestReachablePosition: undefined as number | undefined
 }))
@@ -246,27 +247,37 @@ export const TreeManager = types
   let scannedLength = 0;
   let hasLoadEntry = false;
   // Finding virtual conversions runs every registered bridge, so the result is kept until the
-  // history changes.
-  let bridgedKey: { history: unknown; length: number; treeId: string; bridgeCount: number } | undefined;
-  let bridgedConversions = kNoVirtualConversions;
+  // history array or its length, the tree id, the number of bridges or the local load entry
+  // changes.
+  let virtualKey: {
+    history: unknown; length: number; treeId: string; bridgeCount: number; localLoadEntry: unknown
+  } | undefined;
+  let virtualConversions = kNoVirtualConversions;
 
   function getVirtualConversions() {
     const bridges = getHistoryBridges();
     const treeId = self.mainDocument?.key;
     if (bridges.length === 0 || treeId === undefined) return kNoVirtualConversions;
     const history = self.document.history;
-    if (bridgedKey?.history !== history || bridgedKey.length !== history.length ||
-        bridgedKey.treeId !== treeId || bridgedKey.bridgeCount !== bridges.length) {
-      bridgedKey = { history, length: history.length, treeId, bridgeCount: bridges.length };
-      bridgedConversions = bridges.flatMap(bridge => bridge.findVirtualConversions(history, treeId));
+    const { localLoadEntry } = self;
+    if (virtualKey?.history !== history || virtualKey.length !== history.length ||
+        virtualKey.treeId !== treeId || virtualKey.bridgeCount !== bridges.length ||
+        virtualKey.localLoadEntry !== localLoadEntry) {
+      virtualKey = { history, length: history.length, treeId, bridgeCount: bridges.length, localLoadEntry };
+      // A local load entry that the history doesn't hold yet comes after it, so the bridges see
+      // the conversion it records.
+      const bridgeHistory = localLoadEntry && !history.some(entry => entry.id === localLoadEntry.id)
+        ? [...history, HistoryEntry.create(localLoadEntry)]
+        : history;
+      virtualConversions = bridges.flatMap(bridge => bridge.findVirtualConversions(bridgeHistory, treeId));
     }
-    return bridgedConversions;
+    return virtualConversions;
   }
 
   return {
     /**
      * The conversions the registered history bridges find in the history: ones it never
-     * recorded, because the models were converted before load entries existed.
+     * recorded (see IVirtualConversion).
      */
     get virtualConversions(): readonly IVirtualConversion[] {
       return getVirtualConversions();
@@ -735,7 +746,10 @@ export const TreeManager = types
       source = oldModelSource;
       targetPosition = moved.position;
       // Stopping where earlier history can't be rebuilt isn't a failure; playback says so instead.
-      if (moved.unavailable) self.oldestReachablePosition = copy.oldestReachablePosition;
+      // The conversions change as the history grows, which can move that position or remove it.
+      if (moved.unavailable || self.oldestReachablePosition !== undefined) {
+        self.oldestReachablePosition = copy.oldestReachablePosition || undefined;
+      }
       if (moved.failure) {
         const { historyIndex, direction: failureDirection, message } = moved.failure;
         recordFailure(historyIndex, failureDirection, message);

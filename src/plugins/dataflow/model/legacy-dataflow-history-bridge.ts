@@ -2,14 +2,15 @@ import { IJsonPatch } from "mobx-state-tree";
 import { kTileMapPath, kTileSubtreePartsRegex } from "../../../models/document/document-paths";
 import { HistoryEntryType } from "../../../models/history/history";
 import { IHistoryBridge, IVirtualConversion } from "../../../models/history/history-bridges";
-import { applyJsonPatches, JsonPatchError, toJsonValue } from "../../../models/history/json-patch";
+import { applyJsonPatches, getJsonAtPath, JsonPatchError } from "../../../models/history/json-patch";
 import { getDataflowProgramVersion, STATE_VERSION_RETE_V1 } from "./dataflow-state-versions";
 
 /**
- * Legacy DataFlow tiles (program `dataflow@0.1.0`, or a program with no id and a `values` map)
- * were converted to the current format before history recorded load entries, so their
- * history goes straight from legacy entries to current ones. This bridge finds that boundary for
- * each tile and rebuilds the legacy tile there, so playback can cross it.
+ * Legacy DataFlow tiles (see `getDataflowProgramVersion`) were converted to the current format
+ * without a load entry: before load entries were recorded, or in a concurrent document, which
+ * doesn't record them yet. Their history goes straight from legacy entries to current ones. This
+ * bridge finds that boundary for each tile and rebuilds the legacy tile there, so playback can
+ * cross it.
  */
 
 // The program's path inside the tile.
@@ -27,8 +28,7 @@ function isLegacyProgram(program: any) {
 /**
  * True when a patch on a DataFlow tile uses the legacy program format: a path into the legacy
  * `values` map, a numeric node id, a node's legacy `inputs` or `outputs`, a program, content
- * or tile value holding a legacy program (with the legacy id, or with no id and a `values` map),
- * or the legacy id set on the program.
+ * or tile value holding a legacy program, or the legacy id set on the program.
  */
 export function isLegacyDataflowPatch(patch: IJsonPatch): boolean {
   const match = kTileSubtreePartsRegex.exec(patch.path);
@@ -42,7 +42,7 @@ export function isLegacyDataflowPatch(patch: IJsonPatch): boolean {
   if (!rest.startsWith(`${kProgramPath}/`)) return false;
 
   const segments = rest.slice(kProgramPath.length + 1).split("/");
-  if (segments[0] === "values" && segments.length > 1) return true;
+  if (segments[0] === "values") return true;
   const nodesIndex = segments.indexOf("nodes");
   if (nodesIndex < 0 || nodesIndex + 1 >= segments.length) return false;
   if (/^\d+$/.test(segments[nodesIndex + 1])) return true;
@@ -57,45 +57,65 @@ function isAtOrUnder(path: string, modelPath: string) {
   return path === modelPath || path.startsWith(`${modelPath}/`);
 }
 
+// True when a patch at `path` sets the model at `modelPath` along with what holds it, such as a
+// replace of the whole tile map.
+function isAbove(path: string, modelPath: string) {
+  return modelPath.startsWith(`${path}/`);
+}
+
+// The tile that an add or replace at or above the tile path leaves in place, or undefined.
+function getTileSetBy(patch: IJsonPatch, tilePath: string) {
+  if (patch.op === "remove") return undefined;
+  if (!isAtOrUnder(tilePath, patch.path)) return undefined;
+  return getJsonAtPath(patch.value, tilePath.slice(patch.path.length));
+}
+
 /**
  * Rebuilds a tile's JSON at the end of entry `lastIndex` by replaying its patches forward from the
- * last patch that adds or replaces the whole tile. Returns undefined when there is no such patch
- * or a patch doesn't apply.
+ * last entry with a patch that adds or replaces the whole tile, or a model holding it. Returns
+ * undefined when there is no such entry, or the tile is gone or a patch doesn't apply after it.
  */
 function rebuildTileJson(
   patchesByEntry: readonly (readonly IJsonPatch[])[], tilePath: string, lastIndex: number
 ): unknown {
-  const isWholeTile = (patch: IJsonPatch) => patch.path === tilePath && (patch.op === "add" || patch.op === "replace");
+  const setsTile = (patch: IJsonPatch) => getTileSetBy(patch, tilePath) !== undefined;
   let addIndex = lastIndex;
-  while (addIndex >= 0 && !patchesByEntry[addIndex].some(isWholeTile)) addIndex--;
+  while (addIndex >= 0 && !patchesByEntry[addIndex].some(setsTile)) addIndex--;
   if (addIndex < 0) return undefined;
 
-  // The tile is kept under a wrapper so a patch at the tile path can replace or remove it.
-  const kWrapperPath = "/tile";
-  const rebase = (patch: IJsonPatch): IJsonPatch =>
-    ({ ...patch, path: kWrapperPath + patch.path.slice(tilePath.length) });
+  // The patches are applied to a document that holds only the tile map, so a patch above the tile
+  // path applies as recorded.
+  const documentJson = kTileMapPath.split("/").slice(1)
+    .reduceRight<object>((inner, key) => ({ [key]: inner }), {});
   const addPatches = patchesByEntry[addIndex];
-  const addPatchIndex = addPatches.length - 1 - [...addPatches].reverse().findIndex(isWholeTile);
-  const wrapper: { tile?: unknown } = { tile: toJsonValue(addPatches[addPatchIndex].value) };
-  // The patches after the add in its own entry, then those in the later entries.
-  const later = [addPatches.slice(addPatchIndex + 1), ...patchesByEntry.slice(addIndex + 1, lastIndex + 1)];
+  const addPatchIndex = addPatches.findIndex(setsTile);
+  // The first add and the patches after it in its own entry, then those in the later entries.
+  const patches = [addPatches.slice(addPatchIndex), ...patchesByEntry.slice(addIndex + 1, lastIndex + 1)];
   try {
-    later.forEach(patches => {
-      applyJsonPatches(wrapper, patches.filter(patch => isAtOrUnder(patch.path, tilePath)).map(rebase));
+    patches.forEach(entryPatches => {
+      applyJsonPatches(documentJson, entryPatches.filter(patch =>
+        isAtOrUnder(patch.path, tilePath) || isAbove(patch.path, tilePath)));
     });
   } catch (error) {
     if (error instanceof JsonPatchError) return undefined;
     throw error;
   }
-  return wrapper.tile;
+  return getJsonAtPath(documentJson, tilePath);
 }
 
+/**
+ * Puts a virtual conversion after each tile's last legacy entry. Load entries don't count as
+ * legacy entries, although a load entry that converts a legacy tile has legacy patches. When the
+ * next entry that touches the tile is a load entry, the history records the conversion, and the
+ * tile needs no virtual conversion.
+ */
 export const legacyDataflowHistoryBridge: IHistoryBridge = {
   findVirtualConversions(history: readonly HistoryEntryType[], treeId: string): IVirtualConversion[] {
     const patchesByEntry = history.map(entry => getForwardPatches(entry, treeId));
 
     const lastLegacyIndex = new Map<string, number>();
     patchesByEntry.forEach((patches, index) => {
+      if (history[index].isLoadEntry) return;
       patches.forEach(patch => {
         if (!isLegacyDataflowPatch(patch)) return;
         const tileId = getTileId(patch.path);
@@ -106,10 +126,9 @@ export const legacyDataflowHistoryBridge: IHistoryBridge = {
     const conversions: IVirtualConversion[] = [];
     lastLegacyIndex.forEach((lastLegacy, tileId) => {
       const tilePath = `${kTileMapPath}/${tileId}`;
-      // A stored load entry after the legacy entries already covers the tile.
-      const isCovered = history.some((entry, index) => index > lastLegacy && entry.isLoadEntry &&
-        patchesByEntry[index].some(patch => isAtOrUnder(patch.path, tilePath)));
-      if (isCovered) return;
+      const next = patchesByEntry.findIndex((patches, index) =>
+        index > lastLegacy && patches.some(patch => isAtOrUnder(patch.path, tilePath)));
+      if (next >= 0 && history[next].isLoadEntry) return;
       conversions.push({
         path: tilePath,
         position: lastLegacy + 1,
