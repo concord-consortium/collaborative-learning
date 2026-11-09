@@ -4,7 +4,7 @@ import { convertLegacyDataflowProgram } from "./convert-legacy-dataflow";
 import { DataflowContentModel } from "./dataflow-content";
 import { STATE_VERSION_CURRENT } from "./dataflow-state-versions";
 
-describe("convertLegacyDataflowContent", () => {
+describe("tileSnapshotPreProcessor", () => {
   it("should handle a legacy document", () => {
     const tile = legacyDataflow.tileMap.CIUYXl4cwYYrfP5t;
     const newTile = tileSnapshotPreProcessor(tile);
@@ -18,7 +18,10 @@ describe("convertLegacyDataflowContent", () => {
     const convertedTile = tileSnapshotPreProcessor(mockTile);
     expect(convertedTile).toBe(mockTile);
   });
-  it("converts a legacy program saved without an id", () => {
+});
+
+describe("convertLegacyDataflowProgram", () => {
+  it("converts a legacy program added without an id", () => {
     const program = {
       nodes: { 1: { id: 1, name: "Number", x: 10, y: 20, inputs: {}, outputs: {}, data: { plot: false } } },
       values: { 1: { currentValues: { nodeValue: 4 } } }

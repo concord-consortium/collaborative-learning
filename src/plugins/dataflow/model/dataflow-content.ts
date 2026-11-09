@@ -101,8 +101,8 @@ export const DataflowContentModel = TileContentModel
      * like `/programZoom/dx`; if the property is absent those paths no longer resolve, MST throws,
      * and `TreeManager` halts playback at that entry with a failure banner rather than skipping it.
      *
-     * Removing it needs either a major version with a patch migration, or for history replay to
-     * tolerate paths that reference removed properties.
+     * Removing it needs a DataFlow version bump and a `convertSnapshot` step that drops it; see the
+     * worked example in docs/tile-schema-changes.md.
      */
     programZoom: types.optional(ProgramZoom, DEFAULT_PROGRAM_ZOOM),
     // Resolved unit output config (settings.dataflow.*), mirrored here so the snapshot-only AI tile

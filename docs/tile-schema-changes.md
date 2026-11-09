@@ -14,21 +14,27 @@ Two kinds of reader use that chain:
 
 - **CLUE's playback** walks the entries backward and forward from the document's current content.
 - **Services that don't run CLUE's code** can rebuild the document at any entry by applying the
-  stored JSON patches with an ordinary JSON patch library. An analysis service looking at student
-  work, or a service that stores full document states at intervals, works this way.
+  stored JSON patches with a JSON patch library, such as an analysis service looking at student
+  work, or one that stores full document states at intervals. The library has to apply the patches
+  the way MST records them: MST records a `replace` for an optional property that is missing from
+  the stored JSON, and a `replace` with no value when it clears one. `fast-json-patch` with
+  validation off applies both; a strict library rejects them. A service also can't cross a
+  conversion that a history bridge supplies, such as legacy DataFlow's, because it isn't stored
+  (see "How playback crosses the change").
 
 Conversion at load is not an MST action, so on its own it records nothing. Old entries would keep
 the old paths and values, new entries would use the new ones, and nothing in between would say the
 format changed. Playback would stop with the failure banner at the first old entry that touches a
 changed part of the tile, and a patch-applying service would fail the same way.
 
-To prevent that, a load that converts old tiles or shared models records a **load entry**. A load
-entry records the changes CLUE made to the stored content while loading it. Today those are schema
-conversions. Its patches take each converted model from its old JSON to its converted JSON, and
-back. They come from a generic diff, so you write nothing for them. The entry is flagged
-`isLoadEntry` and `background`, and it is never undoable. Playback applies it like any other entry
-to a plain JSON copy of the document, so it can cross the change in either direction. It never
-applies it to a live MST tree.
+To prevent that, a load that converts old tiles or shared models makes a **load entry**, which is
+added to the history with the first change after the load (except in concurrent documents; see
+"Concurrent documents" below). A load entry records the changes CLUE made to the stored content
+while loading it. Today those are schema conversions. Its patches take each converted model from
+its old JSON to its converted JSON, and back. They come from a generic diff, so you write nothing
+for them. The entry is flagged `isLoadEntry` and `background`, and it is never undoable. Playback
+applies it like any other entry to a plain JSON copy of the document, so it can cross the change in
+either direction. It never applies it to a live MST tree.
 
 For this to work you tell the system which version your type's JSON is at, and how to convert an
 older one. Everything else is done for you.
@@ -126,13 +132,16 @@ older one. Everything else is done for you.
 
 ## How playback crosses the change
 
-Playback only does extra work for a document whose history has a load entry, whose live copy
-converted old content and holds that load entry until it saves, or whose history has an entry in
-a legacy format that a registered history bridge recognizes. A bridge
-([history-bridges.ts](../src/models/history/history-bridges.ts)) finds conversions that history
-never recorded; DataFlow's
+Playback only does extra work for a document when:
+
+- its history has a load entry;
+- its live copy converted old content and holds that load entry until it saves; or
+- a registered history bridge finds a conversion its history never recorded.
+
+A bridge ([history-bridges.ts](../src/models/history/history-bridges.ts)) finds conversions that
+history never recorded; DataFlow's
 [legacy bridge](../src/plugins/dataflow/model/legacy-dataflow-history-bridge.ts) is the example.
-Other documents play back as before, with no JSON copy.
+Other documents play back without a JSON copy.
 
 When it does, playback keeps a JSON copy of the document beside the MST trees and applies every
 entry it crosses to that copy as stored. At each move it asks `getVersion` about the tiles the move
@@ -143,9 +152,9 @@ converter declines. A tile that is old at either end gets a **model replacement*
 result, in the same action as the move's other patches.
 
 If an entry doesn't apply to the JSON copy, or `convertSnapshot` throws, playback stops there and
-shows the failure banner. If a bridge can't rebuild a tile's old state, playback treats that
-boundary as the oldest position it can reach and says "Earlier history isn't available." It does
-not show the failure banner.
+shows the failure banner. A bridge's conversion that playback can't cross backward is different:
+playback stops there without the banner and says "Earlier history isn't available." See "History
+bridges" in [history-framework.md](./history-framework.md) for when that happens.
 
 ## Ids
 
@@ -182,10 +191,10 @@ exist until the end of the move, when the model replacement adds it. Other model
 to it can be set before then and resolve when read afterward. But MST runs an added object's
 `afterCreate` and `afterAttach` hooks when a later patch in the move goes into it, and a hook that
 runs then sees those references missing. For example, `CategorySet.afterAttach` would skip the
-listener that clears its cached categories. Before giving a shared model a `schemaVersion`, check the hooks of the
-models that refer into it, and make them tolerate a reference that resolves later, for instance by
-reading it in a view or a reaction instead of once in the hook. See "Old models and model
-replacements" in [history-framework.md](history-framework.md).
+listener that clears its cached categories. Before giving a shared model a `schemaVersion`, check
+the hooks of the models that refer into it, and make them tolerate a reference that resolves later,
+for instance by reading it in a view or a reaction instead of once in the hook. See "Old models
+and model replacements" in [history-framework.md](history-framework.md).
 
 ## Performance
 
@@ -209,8 +218,8 @@ With the mechanism above, removing it needs only:
 
 The recorded load entry removes the field from the converted tile. Old `/programZoom/...`
 patches still apply to the JSON copy, which holds the old format at those positions, and playback
-replaces the old tile through the conversion, so the MST model never sees a `programZoom` patch. No
-code change is made for this here. This is a description of what the change would take.
+replaces the old tile through the conversion, so the MST model never sees a `programZoom` patch.
+`programZoom` is still in the model; this section only describes what removing it would take.
 
 ## Concurrent documents
 
@@ -222,8 +231,10 @@ copy. A load entry recorded there would therefore be applied to every other clie
 and then saved. A client released before concurrent documents learn to handle load entries has no
 way to refuse one.
 
-Their playback works like any other document's: the history bridges and the JSON copy apply to it,
-so legacy DataFlow history in a concurrent document plays back across the conversion. Two problems
+Until they record load entries, a schema change breaks playback of a concurrent document across
+the conversion unless a history bridge covers it. The history bridges and the JSON copy apply to
+concurrent documents like any other, so legacy DataFlow history in a concurrent document plays
+back across the conversion. Two problems
 are unsolved for them. Clients converting the same old document at the same time each make their
 own load entry. A tab still running an older release can't apply a newer conversion's entries and
 would keep writing old-format ones.

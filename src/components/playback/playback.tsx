@@ -55,7 +55,7 @@ return (
           role="alert">
         {historyEntryRequestError}
       </div>
-      {/* Rendered from the start for the same reason. Playback stops here without a failure
+      {/* Rendered from the start for the same reason. A backward seek stops here without a failure
           because the history before this point can't be rebuilt. */}
       <div className="playback-history-unavailable" data-testid="playback-history-unavailable"
           role="status">
