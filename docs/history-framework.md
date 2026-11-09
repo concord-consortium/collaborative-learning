@@ -199,7 +199,7 @@ A **patch source** (`IPlaybackPatchSource` in `playback-patch-source.ts`) is wha
 - `getPatches(entry, treeId, direction)`: the patches a tree receives for one entry, going forward (redo) or backward (undo). The move and the rollback after a failure both use it, so they agree on what was applied.
 - `getModelReplacements(treeId)`: whole-model `replace` patches the tree applies after all of the move's patches, in the same action.
 
-`defaultPatchSource` returns each entry's recorded patches unchanged, gives load entries no patches, and has no model replacements. Every document without a load entry uses it, so its playback is the same as before load entries existed.
+`defaultPatchSource` returns each entry's recorded patches unchanged, gives load entries no patches, and has no model replacements. Every document that doesn't need a JSON copy uses it.
 
 ### The JSON copy
 
@@ -250,7 +250,7 @@ The JSON copy follows the same rule: `applyJsonPatches` applies an entry's patch
 
 ### Performance
 
-Applying one patch at a time and collecting reverse patches adds a small cost to each patch, compared with applying the whole batch in one `applyPatch` call, as the tree did before. Every playback move pays it, with or without a JSON copy. On a real document the cost doesn't show, because MST's own work for each patch is much larger:
+Applying one patch at a time and collecting reverse patches adds a small cost to each patch, compared with applying the whole batch in one `applyPatch` call. Every playback move pays it, with or without a JSON copy. On a real document the cost doesn't show, because MST's own work for each patch is much larger:
 
 - In Chrome, with a development build, on a document whose Dataflow tile drove a Simulator tile at the fastest sampling rate for about four minutes (5,015 history entries, 100,145 patches), playback moves took the same time either way, within about 3%. A move across the whole history took about 14.5 s, a move across 100 entries about 0.3 s, and a move of one entry about 3 ms. Nearly all of it was MST applying the patches, about 0.14 ms each, because each tick adds and removes model nodes. This was measured on a copy of the document made the way the canvas makes playback copies, without rendering.
 - In a Jest test, 20,000 `replace` patches to one string field of one tile, which MST applies cheaply, took about 340 ms one at a time, against about 270 ms in one `applyPatch` call.
