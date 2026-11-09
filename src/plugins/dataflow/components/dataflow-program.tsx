@@ -399,7 +399,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
 
   private shouldShowProgramCover() {
     // Only while a run is in progress. A finished recording leaves the program editable, and
-    // editing it detaches the capture rather than being blocked (CLUE-740).
+    // editing it detaches the capture rather than being blocked.
     return this.props.readOnly || this.props.tileContent.isRecording;
   }
 

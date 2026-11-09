@@ -201,7 +201,7 @@ export const DataflowContentModel = TileContentModel
     unseenConnectError: false,
     // Volatile (not persisted): a reload must not resume a run. Lives on the model rather than in
     // DataflowProgram's React state so the tile toolbar's buttons can reach it -- a toolbar button
-    // renders from a different component tree and cannot see that state. (CLUE-771)
+    // renders from a different component tree and cannot see that state.
     isRecording: false,
   }))
   .views(self => ({
