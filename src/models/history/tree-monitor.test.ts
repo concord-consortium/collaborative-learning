@@ -29,7 +29,10 @@ const TestTile = TileContentModel
     }),
     waitWithoutChanging: flow(function* (gate: Promise<void>) {
       yield gate;
-    })
+    }),
+    changeNothing() {
+      // An action that records an empty patch record
+    }
   }));
 interface TestTileType extends Instance<typeof TestTile> {}
 
@@ -116,6 +119,28 @@ describe("TreeMonitor", () => {
       expect(treeMonitor.getRunningCallsWithChanges()).toEqual([]);
       gate.resolve();
       await promise;
+    });
+  });
+
+  describe("unsent records", () => {
+    // The exchange of the open entry for the call to `action`, once the call has finished.
+    function exchangeOf(treeManager: Instance<typeof TreeManager>, action: string) {
+      const entry = treeManager.activeHistoryEntries.find(e => e.action === `/content/tileMap/t1/content/${action}`);
+      return Array.from(entry!.activeExchanges.keys())[0];
+    }
+
+    it("knows a finished call changed nothing until its record is sent", async () => {
+      const { tileContent, treeMonitor, treeManager } = setupDocument();
+      tileContent.changeNothing();
+      const unchanged = exchangeOf(treeManager, "changeNothing");
+      expect(treeMonitor.isUnsentRecordWithoutChanges(unchanged)).toBe(true);
+      tileContent.setText("x");
+      const changed = exchangeOf(treeManager, "setText");
+      expect(treeMonitor.isUnsentRecordWithoutChanges(changed)).toBe(false);
+
+      await new Promise(resolve => setTimeout(resolve));
+      expect(treeManager.activeHistoryEntries).toHaveLength(0);
+      expect(treeMonitor.isUnsentRecordWithoutChanges(unchanged)).toBe(false);
     });
   });
 

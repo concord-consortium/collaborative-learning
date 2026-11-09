@@ -17,6 +17,10 @@ import {
 import { FAKE_HISTORY_ENTRY_ID } from "./tree-manager";
 import { createActionTrackingMiddleware3, IActionTrackingMiddleware3Call } from "./create-action-tracking-middleware-3";
 
+// TODO: CLUE Specific filtering of 'changeCount', should we record
+// this or not?
+const filterChangeCount = (patch: IJsonPatch) => !patch.path.match(/\/changeCount/);
+
 export class TreeMonitor {
   tree: Instance<typeof Tree>;
   manager: TreeManagerAPI;
@@ -25,6 +29,9 @@ export class TreeMonitor {
   // Top-level calls between onStart and onFinish. A flow stays here while it is suspended.
   private trackedCalls = new Set<{ call: IActionTrackingMiddleware3Call<CallEnv>, env: CallEnv }>();
   private runningCallCountBox = observable.box(0);
+  // For each finished call whose record hasn't reached the manager yet, keyed by the call's
+  // exchange id: whether the record has changes.
+  private unsentRecords = new Map<string, boolean>();
 
   /**
    * Called when the tree changes while monitoring is enabled and no tracked call is running,
@@ -175,8 +182,9 @@ export class TreeMonitor {
         recorder.stop();
 
         if (error === undefined) {
+          self.unsentRecords.set(env.exchangeId, recorder.patches.some(filterChangeCount));
           // recordAction is async
-          self.recordAction(call, env);
+          self.recordAction(call, env).finally(() => self.unsentRecords.delete(env.exchangeId));
         } else if (env.historyEntryId === FAKE_HISTORY_ENTRY_ID) {
           // History playback (goToHistoryEntryPosition / replayHistoryToTrees)
           // uses FAKE_HISTORY_ENTRY_ID to mark its own apply calls. It
@@ -236,6 +244,14 @@ export class TreeMonitor {
       }
     });
     return result;
+  }
+
+  /**
+   * True when the exchange belongs to a call that has finished without changing the tree, and
+   * its empty record hasn't reached the manager yet.
+   */
+  isUnsentRecordWithoutChanges(exchangeId: string) {
+    return this.unsentRecords.get(exchangeId) === false;
   }
 
   private trackCall(call: IActionTrackingMiddleware3Call<CallEnv>, env: CallEnv) {
@@ -345,9 +361,6 @@ export class TreeMonitor {
       return;
     }
 
-    // TODO: CLUE Specific filtering of 'changeCount', should we record
-    // this or not?
-    const filterChangeCount = (patch: IJsonPatch) => !patch.path.match(/\/changeCount/);
     const patches = recorder.patches.filter(filterChangeCount);
     const inversePatches = recorder.inversePatches.filter(filterChangeCount);
 

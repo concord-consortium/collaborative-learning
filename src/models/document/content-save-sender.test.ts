@@ -34,7 +34,10 @@ const TestTile = TileContentModel
     }),
     waitWithoutChanging: flow(function* (gate: Promise<void>) {
       yield gate;
-    })
+    }),
+    changeNothing() {
+      // Like a tile's setup calls, which run as actions but change nothing
+    }
   }));
 interface TestTileType extends Instance<typeof TestTile> {}
 
@@ -514,6 +517,28 @@ describe("ContentSaveSender", () => {
       jest.advanceTimersByTime(kMinimumSaveGapMs);
       expect(contentRef.update).toHaveBeenCalledTimes(2);
       expect(contentRef.writes[1].values.lastHistoryEntryId).toBe(ids[0]);
+    });
+
+    it("doesn't count the open entry of a call that changed nothing", async () => {
+      const { commits, contentRef, tile, treeManager } = track(setup());
+      const openWhenCompleted: number[] = [];
+      const ids: string[] = [];
+      const remove = treeManager.addEntryCompletedListener(entry => {
+        ids.push(entry.id);
+        openWhenCompleted.push(treeManager.activeHistoryEntries.length);
+      });
+      // The second call's entry opens before the first call's entry completes, as when a tile that
+      // was just added runs its setup calls.
+      tile.setText("alpha");
+      tile.changeNothing();
+      await flush();
+      remove();
+      expect(ids).toHaveLength(1);
+      expect(openWhenCompleted).toEqual([1]);
+
+      commits.commit(ids[0]);
+      expect(contentRef.update).toHaveBeenCalledTimes(1);
+      expect(contentRef.writes[0].values).toMatchObject({ lastHistoryEntryId: ids[0], settled: true });
     });
 
     it("skips a snapshot taken while a group document applied remote entries", async () => {

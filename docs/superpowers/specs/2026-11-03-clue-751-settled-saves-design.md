@@ -158,12 +158,17 @@ Saving follows one rule for every document, implemented once in the sender (sect
 snapshots share structure, so this is cheap. The snapshot taken at X can't be used if, when X
 completed:
 
-- another tree-manager entry was open (its patches may be in the snapshot), or
+- another tree-manager entry that could hold changes was open (its patches may be in the snapshot).
+  An entry that has recorded nothing and waits only for the empty records of calls that changed
+  nothing doesn't count: it is dropped when it closes. The tree monitor knows a call's patches when
+  the call finishes, before its record reaches the manager. Many calls open such an entry briefly,
+  such as the setup calls of a tile that was just added; counting them left an added tile on an
+  intermediate save. Or
 - a tracked MST flow was running and had changed state. The tree monitor records a flow as one action
   and creates its entry only at `flow_return`, so a running flow has no entry in
   `activeHistoryEntries`; the check has to look at the tree monitor's running calls. A flow that hasn't
   changed state doesn't count. Or
-- a pending CLUE-773 conversion entry hadn't been added to history yet.
+- a pending CLUE-773 load entry hadn't been added to history yet.
 
 A snapshot skipped for one of these reasons is covered by the next usable one.
 

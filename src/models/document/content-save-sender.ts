@@ -1,5 +1,5 @@
 import { comparer, reaction } from "mobx";
-import { getPath, getSnapshot, isAlive, onSnapshot } from "mobx-state-tree";
+import { getSnapshot, isAlive, onSnapshot } from "mobx-state-tree";
 import { IUnsettledEvidence } from "../../lib/db-types";
 import { LogEventName } from "../../lib/logger-types";
 import { HistoryEntryType } from "../history/history";
@@ -104,10 +104,6 @@ interface IGroupHistoryState {
 const kEnvelopeFields = ["lastHistoryEntryId", "lastHistoryEntryIndex", "settled"] as const;
 type EnvelopeValues = Partial<Record<typeof kEnvelopeFields[number], unknown>>;
 
-// Document actions the sender calls itself. Like any action each one briefly opens a history
-// entry, but they never change the content, so those entries don't block a snapshot.
-const kContentFreeDocumentActions = ["setSaveState", "incChangeCount", "setSavedEnvelope"];
-
 const getTreeManager = (document: DocumentModelType) =>
   document.treeManagerAPI as TreeManagerType | undefined;
 
@@ -131,12 +127,17 @@ function isLocalChange(document: DocumentModelType) {
     .some(call => call.historyEntryId !== FAKE_HISTORY_ENTRY_ID);
 }
 
-// The tree manager's open entries, leaving out those of the content-free document actions.
+/**
+ * The tree manager's open entries that may hold changes, leaving out those that have recorded
+ * nothing and wait only for the empty records of calls that changed nothing. Such an entry is
+ * dropped when it closes, so it never describes a change. Many calls briefly open one, such as the
+ * sender's own document actions and the setup calls of a tile that was just added.
+ */
 function getOpenEntries(document: DocumentModelType) {
-  const documentPath = getPath(document);
-  const contentFreeActions = kContentFreeDocumentActions.map(name => `${documentPath}/${name}`);
-  return getTreeManager(document)?.activeHistoryEntries
-    .filter(entry => !contentFreeActions.includes(entry.action ?? "")) ?? [];
+  const monitor = document.treeMonitor;
+  return getTreeManager(document)?.activeHistoryEntries.filter(entry =>
+    entry.records.length > 0 ||
+    Array.from(entry.activeExchanges.keys()).some(id => !monitor?.isUnsentRecordWithoutChanges(id))) ?? [];
 }
 
 /**
