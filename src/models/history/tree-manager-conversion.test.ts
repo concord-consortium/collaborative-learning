@@ -470,6 +470,78 @@ describe("playback across a load entry", () => {
     expect(getTile(document, "t1").label).toBe("b");
   });
 
+  it("rolls back a partly applied entry that adds an old tile when a forward move fails", async () => {
+    const t3Path = "/content/tileMap/t3";
+    const oldEntries = [
+      makeEntry([replaceRecord(`${t1Path}/content/text`, "a", "b")]),
+      // MST can undo this entry but not redo it: `nope` is frozen, so the second patch fails after
+      // the old tile t3 is added.
+      makeEntry([makeRecord(
+        [{ op: "add", path: t3Path, value: oldTile("t3", "m") },
+          replace("/content/tileMap/t2/content/nope/deep", 2)],
+        [{ op: "remove", path: t3Path }, replace("/content/tileMap/t2/content/text", "p")])]),
+      makeEntry([replaceRecord(`${t1Path}/content/text`, "b", "c")])
+    ];
+    const content = {
+      tileMap: {
+        ...t1Content().tileMap, t3: oldTile("t3", "m"),
+        t2: { id: "t2", content: { type: "TestTile", text: "q", nope: { deep: 2 } } }
+      }
+    };
+    const { document, manager, endPosition, copyJson } = await setupConvertedDocument(content, oldEntries);
+    const warnSpy = jest.spyOn(console, "warn").mockImplementation(() => undefined);
+    await manager.goToHistoryEntryPosition(0);
+    expect(manager.numHistoryEventsApplied).toBe(0);
+
+    await manager.goToHistoryEntryPosition(endPosition);
+
+    expect(manager.numHistoryEventsApplied).toBe(1);
+    expect(manager.jsonHistoryCopy!.position).toBe(1);
+    expect(manager.historyPlaybackFailures.map(f => [f.historyIndex, f.direction])).toEqual([[1, "redo"]]);
+    expect(document.content!.tileMap.has("t3")).toBe(false);
+    expect(getTile(document, "t1").label).toBe("b");
+    expectTileToMatchConvertedJson(getTile(document, "t1"), copyJson(t1Path));
+    expect(warnSpy).not.toHaveBeenCalledWith(expect.stringContaining("inconsistent state"));
+  });
+
+  it("rolls back every entry of a forward move when MST rejects an old tile's model replacement", async () => {
+    const t3Path = "/content/tileMap/t3";
+    const t4Path = "/content/tileMap/t4";
+    const oldEntries = [
+      makeEntry([makeRecord([{ op: "add", path: t3Path, value: oldTile("t3", "m") }],
+        [{ op: "remove", path: t3Path }])]),
+      makeEntry([replaceRecord(`${t1Path}/content/text`, "a", "b")]),
+      makeEntry([makeRecord([{ op: "remove", path: t4Path }],
+        [{ op: "add", path: t4Path, value: oldTile("t4", "n", ["a"]) }])]),
+      makeEntry([replaceRecord(`${t1Path}/content/text`, "b", "c")])
+    ];
+    const content = { tileMap: { ...t1Content().tileMap, t3: oldTile("t3", "m") } };
+    const { document, manager, copyJson } = await setupConvertedDocument(content, oldEntries);
+    const warnSpy = jest.spyOn(console, "warn").mockImplementation(() => undefined);
+    await manager.goToHistoryEntryPosition(0);
+    expect(manager.numHistoryEventsApplied).toBe(0);
+    expect(document.content!.tileMap.has("t4")).toBe(true);
+
+    // The conversion of t1 at position 4 gives content that MST rejects, so the move rolls back to
+    // 0, undoing t3's whole-tile add and t4's whole-tile remove.
+    const convertSnapshot = versionedTestTileSchema.convertSnapshot;
+    jest.spyOn(versionedTestTileSchema, "convertSnapshot").mockImplementation((tile: any) => {
+      const converted: any = convertSnapshot(tile);
+      return tile.content.text === "c" ? { ...converted, content: { ...converted.content, items: "bad" } } : converted;
+    });
+    await manager.goToHistoryEntryPosition(4);
+
+    expect(manager.numHistoryEventsApplied).toBe(0);
+    expect(manager.jsonHistoryCopy!.position).toBe(0);
+    expect(manager.historyPlaybackFailures.map(f => [f.historyIndex, f.direction])).toEqual([[0, "redo"]]);
+    expect(document.content!.tileMap.has("t3")).toBe(false);
+    expectTileToMatchConvertedJson(getTile(document, "t4"), copyJson(t4Path));
+    expect(getTile(document, "t1").label).toBe("a");
+    expectTileToMatchConvertedJson(getTile(document, "t1"), copyJson(t1Path));
+    expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining("Replacing a model failed"));
+    expect(warnSpy).not.toHaveBeenCalledWith(expect.stringContaining("inconsistent state"));
+  });
+
   it("never builds a JSON copy for a history without a load entry", async () => {
     const tilePath = "/content/tileMap/t1/content/text";
     const docContent = DocumentContentModel.create({
