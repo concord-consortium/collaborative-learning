@@ -1,10 +1,12 @@
 import ClueCanvas from '../../../support/elements/common/cCanvas';
 import TextToolTile from '../../../support/elements/tile/TextToolTile';
 import DataflowToolTile from '../../../support/elements/tile/DataflowToolTile';
+import SortedWork from '../../../support/elements/common/SortedWork';
 
 const clueCanvas = new ClueCanvas;
 const textToolTile = new TextToolTile;
 const dataflowToolTile = new DataflowToolTile;
+const sortWork = new SortedWork;
 
 function visitUnit(studentId) {
   const queryParams = `${Cypress.config("qaUnitStudent5")}`.replace("student:5", `student:${studentId}`);
@@ -43,7 +45,8 @@ function waitForEnvelope(predicate, description, attemptsLeft = 20) {
 }
 
 context("Settled saves", function () {
-  it("saves an individual document exactly and catches it up on reload", function () {
+  it("saves an individual document exactly, opens its history at the newest entry, and catches it up on reload",
+      function () {
     visitUnit(5);
 
     cy.log("a burst of edits ends in an exact save");
@@ -67,8 +70,20 @@ context("Settled saves", function () {
           cy.log("put the older envelope back so the document is behind its history");
           cy.window().then(win => getEnvelopeRef(win).set(e1));
 
-          cy.reload();
+          cy.log("a teacher's history of the document opens at the last edit");
+          cy.visit(Cypress.config("qaUnitTeacher6"));
           cy.waitForLoad();
+          cy.openTopTab("sort-work");
+          cy.get(".section-header-arrow").click({ multiple: true });
+          sortWork.getSortWorkItem().contains("Student 5").click();
+          const teacherTextTile = () => cy.get(".resource-and-chat-panel .text-tool");
+          teacherTextTile().should("contain", "first burst of edits").and("not.contain", lastEdit);
+          cy.get(".resource-and-chat-panel .toolbar .tool.toggleplayback:visible").click();
+          cy.get('[data-testid="playback-slider"]').should("be.visible");
+          teacherTextTile().should("contain", lastEdit);
+          cy.get('[data-testid="playback-play-button"]').should("have.class", "disabled");
+
+          visitUnit(5);
 
           cy.log("the load applies the history entries after the envelope");
           textToolTile.getTextTile().last().should("contain", lastEdit);

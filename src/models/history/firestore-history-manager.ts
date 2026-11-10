@@ -1,5 +1,5 @@
 import { action, computed, makeObservable, observable, runInAction, when } from "mobx";
-import { addDisposer, getSnapshot, Instance, applySnapshot } from "mobx-state-tree";
+import { addDisposer, getSnapshot, Instance, applySnapshot, isAlive } from "mobx-state-tree";
 import firebase from "firebase/app";
 import { getSimpleDocumentPath } from "../../../shared/shared";
 import { Firestore } from "../../lib/firestore";
@@ -34,6 +34,9 @@ export enum HistoryStatus {
   NO_HISTORY,
   HISTORY_LOADED,
   HISTORY_LOADING,
+  // The history has loaded, and the content is being moved forward from the entry it holds to the
+  // newest one (see contentEntryId).
+  HISTORY_CATCHING_UP,
 }
 
 export interface IFirestoreHistoryManagerArgs {
@@ -58,6 +61,10 @@ export interface IFirestoreHistoryManagerArgs {
   onLocalEntryUploaded?: (entry: HistoryEntryType) => void;
   // Logs an event about the document, such as a load catch-up that couldn't finish.
   logEvent?: TreeManagerLogger;
+  // For playback: the last history entry the content holds, when that can be older than the newest
+  // entry in Firestore. Once the history loads, the content is moved forward from there to the
+  // newest entry. Undefined means the content holds every entry.
+  contentEntryId?: string;
 }
 
 /**
@@ -88,6 +95,11 @@ export class FirestoreHistoryManager implements ICommitSource {
   lastCommitted: ICommittedEntry | undefined = undefined;
   // The last Firestore entry catchUpAtLoad applied to the loaded content, when it applied any.
   caughtUpTo: ICommittedEntry | undefined = undefined;
+  // The envelope whose content catchUpAtLoad applied the entries through caughtUpTo to.
+  caughtUpFrom: ISavedEnvelope | undefined = undefined;
+  contentEntryId: string | undefined;
+  // True until the content has been moved from contentEntryId to the newest entry.
+  catchingUpToNewest: boolean;
   private commitListeners = new Set<ICommitListener>();
   // The local entries recorded for upload that haven't been reported committed, in chain order.
   private uncommitted: Array<ICommittedEntry & { uploaded: boolean }> = [];
@@ -101,7 +113,8 @@ export class FirestoreHistoryManager implements ICommitSource {
     loadedEnvelope,
     onContentDrift,
     onLocalEntryUploaded,
-    logEvent
+    logEvent,
+    contentEntryId
   }: IFirestoreHistoryManagerArgs) {
     this.firestore = firestore;
     this.userContextProvider = userContextProvider;
@@ -112,6 +125,8 @@ export class FirestoreHistoryManager implements ICommitSource {
     this.onContentDrift = onContentDrift;
     this.onLocalEntryUploaded = onLocalEntryUploaded;
     this.logEvent = logEvent;
+    this.contentEntryId = contentEntryId;
+    this.catchingUpToNewest = contentEntryId !== undefined;
 
     if (syncRemoteHistory) {
       this.subscribeToFirestoreHistory();
@@ -125,6 +140,8 @@ export class FirestoreHistoryManager implements ICommitSource {
       setHistoryError: action,
       historyEntryRequestError: observable,
       lastCommitted: observable.ref,
+      catchingUpToNewest: observable,
+      setCatchingUpToNewest: action,
       setHistoryEntryRequestError: action,
       historyStatus: computed,
       historyStatusString: computed
@@ -334,6 +351,7 @@ export class FirestoreHistoryManager implements ICommitSource {
           const lastApplied = entries[applied - 1];
           if (lastApplied) {
             this.caughtUpTo = { id: lastApplied.id, index: lastApplied.index };
+            this.caughtUpFrom = envelope;
           }
           if (error !== undefined) {
             incomplete("catch-up-apply-failed", { gap, applied, error });
@@ -409,6 +427,18 @@ export class FirestoreHistoryManager implements ICommitSource {
   }
 
   get historyStatus() : HistoryStatus {
+    const status = this.getLoadStatus();
+    return status === HistoryStatus.HISTORY_LOADED && this.catchingUpToNewest
+      ? HistoryStatus.HISTORY_CATCHING_UP
+      : status;
+  }
+
+  setCatchingUpToNewest(value: boolean) {
+    this.catchingUpToNewest = value;
+  }
+
+  // The status of loading the history, leaving out the move to the newest entry.
+  private getLoadStatus() : HistoryStatus {
     if (this.historyError) {
       return HistoryStatus.HISTORY_ERROR;
     }
@@ -449,6 +479,8 @@ export class FirestoreHistoryManager implements ICommitSource {
         const {numHistoryEventsApplied} = this.treeManager;
         return `Loading history (${historyLength}/${numHistoryEventsApplied})`;
       }
+      case HistoryStatus.HISTORY_CATCHING_UP:
+        return "Loading the latest changes.";
       default:
         return "Unknown history status";
     }
@@ -514,6 +546,35 @@ export class FirestoreHistoryManager implements ICommitSource {
       console.warn("moveToHistoryEntryAfterLoad: seek stopped at",
         this.treeManager.numHistoryEventsApplied, "instead of", position, "for id:", historyId);
       this.setHistoryEntryRequestError(seekIncompleteMessage(historyId));
+    }
+  }
+
+  /**
+   * Once the history has loaded, moves the content from the entry it holds to the newest entry,
+   * so playback opens with content that holds every entry it shows. A move that stops on an entry
+   * that doesn't apply leaves playback there, with the failure marked. Content whose entry isn't in
+   * the history is left at the newest entry, as content is when its entry isn't known.
+   */
+  private async moveContentToNewestEntry(contentEntryId: string) {
+    const { treeManager } = this;
+    try {
+      // Bounded, like moveToHistoryEntryAfterLoad, so a history that never loads doesn't leak the
+      // reaction.
+      await when(() => {
+        const status = this.getLoadStatus();
+        return status === HistoryStatus.HISTORY_LOADED || status === HistoryStatus.HISTORY_ERROR;
+      }, { timeout: 30000 });
+      if (this.historyError || !isAlive(treeManager)) return;
+      const newest = treeManager.document.history.length;
+      const contentPosition = treeManager.findHistoryEntryIndex(contentEntryId) + 1;
+      if (contentPosition > 0 && contentPosition < newest) {
+        treeManager.setNumHistoryEntriesApplied(contentPosition);
+        await treeManager.goToHistoryEntryPosition(newest);
+      }
+    } catch (error) {
+      console.warn("Could not move the playback content to the newest history entry:", error);
+    } finally {
+      this.setCatchingUpToNewest(false);
     }
   }
 
@@ -591,6 +652,9 @@ export class FirestoreHistoryManager implements ICommitSource {
 
     // TODO: we should move this function into the history manager
     treeManager.setNumHistoryEntriesAppliedFromFirestore(firestore, documentPath);
+    if (this.contentEntryId !== undefined) {
+      void this.moveContentToNewestEntry(this.contentEntryId);
+    }
 
     const snapshotUnsubscribe = loadHistory(firestore, `${documentPath}/history`,
       (history, error) => {

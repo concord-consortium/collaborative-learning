@@ -206,4 +206,30 @@ describe("Canvas Component", () => {
       .toEqual(copyTile.items.map(item => item.id));
   });
 
+  it("tells the playback copy's history manager which entry the live content holds", () => {
+    let copyContentEntryId: string | undefined;
+    jest.spyOn(FirestoreHistoryManager.prototype as any, "subscribeToFirestoreHistory")
+      .mockImplementation(function(this: FirestoreHistoryManager) {
+        copyContentEntryId = this.contentEntryId;
+      });
+    jest.spyOn(FirestoreHistoryManager.prototype as any, "waitUntilEnvironmentAndMetadataDocReady")
+      .mockResolvedValue(undefined);
+    const document = createDocumentModel({
+      type: ProblemDocument, title: "test", uid: "1", key: "test", createdAt: 1, visibility: "public",
+      content: createSingleTileContent({ type: "Text", text: "test" })
+    });
+    document.setSavedEnvelope({ lastHistoryEntryId: "e4", exactThrough: { index: 4, since: "first" } });
+    document.setShowPlaybackControls(true);
+
+    render(
+      <Provider stores={specStores()}>
+        <ModalProvider>
+          <CanvasComponent context="test" document={document} readOnly={true} showPlayback={true} />
+        </ModalProvider>
+      </Provider>
+    );
+
+    expect(copyContentEntryId).toBe("e4");
+  });
+
 });

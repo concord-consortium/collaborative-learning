@@ -107,7 +107,8 @@ const makeUserContextProviderMock = (uid = "1234") => {
 
 function setupFirestoreHistoryManager(
   treeManager: Instance<typeof TreeManager>,
-  firestoreMock?: Firestore
+  firestoreMock?: Firestore,
+  contentEntryId?: string
 ) {
   const firestore = firestoreMock ?? makeFirestoreMock();
   const userContextProviderMock = makeUserContextProviderMock();
@@ -118,7 +119,8 @@ function setupFirestoreHistoryManager(
     uploadLocalHistory: false,
     // Don't automatically call mirrorHistoryFromFirestore in constructor
     // so tests can set up mocks first
-    syncRemoteHistory: false
+    syncRemoteHistory: false,
+    contentEntryId
   });
   return { historyManager, firestoreMock: firestore };
 }
@@ -250,6 +252,71 @@ describe("history loading", () => {
       expect(treeManager.numHistoryEventsApplied).toBe(2);
       expect(historyManager.historyStatus).toBe(HistoryStatus.HISTORY_LOADED);
       expect(treeManager.needsJsonCopy).toBe(true);
+    });
+  });
+
+  describe("content behind its history", () => {
+    const setText = (id: string, from: string | undefined, to: string, path = "/content/tileMap/t1/content/text") =>
+      ({
+        id, tree: "test", action: "/content/tileMap/t1/content/setText", undoable: true, state: "complete",
+        records: [{
+          tree: "test", action: "/content/tileMap/t1/content/setText",
+          patches: [{ op: "replace", path, value: to }],
+          inversePatches: [{ op: "replace", path, value: from }]
+        }]
+      } as HistoryEntrySnapshot);
+    const entries = [setText("e0", undefined, "a"), setText("e1", "a", "b"), setText("e2", "b", "c")];
+
+    // Subscribes a playback copy whose content is the text after `contentEntryId`, and returns a
+    // function that delivers the Firestore history.
+    async function subscribeBehind(contentEntryId: string | undefined, text: string,
+        history: HistoryEntrySnapshot[] = entries) {
+      const { treeManager, tileContent } = setupDocument({
+        tileMap: { t1: { id: "t1", content: { type: "TestTile", text } as any } }
+      });
+      const { historyManager } = setupFirestoreHistoryManager(treeManager, undefined, contentEntryId);
+      getLastHistoryEntry.mockResolvedValue({ index: history.length - 1, id: history[history.length - 1].id! });
+      let deliver: () => void = () => undefined;
+      loadHistory.mockImplementation((firestore, path, historyLoaded) => {
+        deliver = () => historyLoaded(history.map((entry, index) => ({ id: entry.id!, index, entry })));
+        return () => undefined;
+      });
+      await historyManager.subscribeToFirestoreHistory();
+      await when(() => treeManager.numHistoryEventsApplied !== undefined);
+      return { treeManager, tileContent, historyManager, deliver: () => deliver() };
+    }
+
+    it("moves the content from its entry to the newest one before the history counts as loaded", async () => {
+      const { treeManager, tileContent, historyManager, deliver } = await subscribeBehind("e0", "a");
+      deliver();
+      expect(historyManager.historyStatus).toBe(HistoryStatus.HISTORY_CATCHING_UP);
+      expect(historyManager.historyStatusString).toBe("Loading the latest changes.");
+      await when(() => historyManager.historyStatus === HistoryStatus.HISTORY_LOADED);
+      expect(tileContent.text).toBe("c");
+      expect(treeManager.numHistoryEventsApplied).toBe(3);
+      expect(treeManager.historyPlaybackFailures).toHaveLength(0);
+    });
+
+    it("stops at the last entry that applies, and marks the failure", async () => {
+      const failing = [entries[0], setText("e1", "a", "b", "/content/tileMap/missing/content/text"), entries[2]];
+      const { treeManager, tileContent, historyManager, deliver } = await subscribeBehind("e0", "a", failing);
+      deliver();
+      await when(() => historyManager.historyStatus === HistoryStatus.HISTORY_LOADED);
+      expect(tileContent.text).toBe("a");
+      expect(treeManager.numHistoryEventsApplied).toBe(1);
+      expect(treeManager.historyPlaybackFailures.map(f => [f.historyIndex, f.direction])).toEqual([[1, "redo"]]);
+    });
+
+    it("leaves the content at the newest entry when it holds it, its entry isn't in the history, or none is given",
+        async () => {
+      for (const contentEntryId of ["e2", "unknown", undefined]) {
+        // Text no entry sets, so any move would change it.
+        const { treeManager, tileContent, historyManager, deliver } = await subscribeBehind(contentEntryId, "z");
+        deliver();
+        await when(() => historyManager.historyStatus === HistoryStatus.HISTORY_LOADED);
+        expect(tileContent.text).toBe("z");
+        expect(treeManager.numHistoryEventsApplied).toBe(3);
+      }
     });
   });
 
@@ -785,6 +852,7 @@ describe("catchUpAtLoad", () => {
     expect(getHistoryEntriesAfter).toHaveBeenCalledWith(firestore, documentPath, 5, 7);
     expect(tileContent.text).toBe("e7");
     expect(historyManager.caughtUpTo).toEqual({ id: "e7", index: 7 });
+    expect(historyManager.caughtUpFrom).toBe(historyManager.loadedEnvelope);
     expect(treeManager.document.history.length).toBe(0);
     expect(treeManager.exactness.exactSince).toBe("e2");
     expect(treeManager.exactness.isExact).toBe(true);
