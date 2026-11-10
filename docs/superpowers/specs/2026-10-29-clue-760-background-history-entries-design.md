@@ -139,15 +139,35 @@ covered by the entry's flag.
   was a user change. Starting, stopping and clearing a recording stay user changes.
 - **`SimulatorTool.step`** ([simulator-content.ts](../../../src/plugins/simulator/model/simulator-content.ts)).
   The activity recorder already ignores it as a tick. Once the recorder reads the flag instead, the
-  Simulator has to set it, or every step would start counting as student activity. *My call*,
-  overlapping CLUE-761.
+  Simulator has to set it, or every step would start counting as student activity. This overlaps
+  CLUE-761.
 
 - **`DataflowProgram.processAfterProgramChange`** ([rete-manager.tsx](../../../src/plugins/dataflow/rete/rete-manager.tsx)).
-  It runs when the tile loads, and again as a separate entry after a block is removed or a
+  It runs when the tile loads, and again as a separate entry after a block is added or removed or a
   connection changes, to recompute values. Without the flag it would add a user stop each time the
-  document is opened, and a second stop after each connection edit. Flagging it also makes it not
-  undoable, so undoing a connection edit takes one undo instead of the two its FIXME complains about.
-  *My call.*
+  document is opened, and a second stop after each block or connection edit.
+
+  The usual fix for a follow-up entry like this is to group it into the user's action, so one
+  change makes one entry. That is preferred over making an action not undoable, because a
+  not-undoable change that a later user change relies on can leave the document in a state where
+  undoing that user change, or the undo after it, fails. Here the flag is the better fix, because
+  `processAfterProgramChange` writes only what a tick writes:
+  - It runs the same `process()` as a tick, without `inTick`, and doesn't add a tick. Source blocks
+    (number, generator, timer, sensor) only produce new values inside a tick.
+  - Derived blocks save their computed value into the current tick's entry
+    (`tickEntries/<currentTick>/nodeValue`, through `saveNodeValue`). The control block also writes
+    `timerRunning` there, and the demo output block writes its `tilt`, as they do on every tick.
+    The rest is volatile state.
+  - It doesn't change blocks, connections or settings.
+
+  Grouping would also be worse for undo here. A tick keeps only the most recent `kMaxNodeValues`
+  tick entries, so once enough ticks have run, a user entry holding a `tickEntries/<tick>/...`
+  patch can't be undone: its inverse patch points into an entry that is gone. Kept as its own
+  background entry, undoing a connection edit undoes only the connection, and the next tick
+  recomputes the values. This is the same undo-around-ticks situation as every tick, so it gets no
+  handling of its own. The FIXMEs about the second history entry
+  ([dataflow-program-model.ts](../../../src/plugins/dataflow/model/dataflow-program-model.ts),
+  rete-manager.tsx) are resolved by this and are removed.
 
 `SharedProgramData.setProgramNodes` also runs every interval, but it only changes volatile state and
 records no entry.
@@ -352,11 +372,12 @@ the background check covers them and that clause goes too.
 - CLUE-760 doesn't change where playback starts. That waits for CLUE-751 and a later story.
 - The activity recorder uses the flag.
 - Recorded cases are background.
+- The Simulator's `step` is flagged here, not in CLUE-761.
+- `processAfterProgramChange` is background, because it writes only what a tick writes. A follow-up
+  entry that changes anything else is grouped into the user's action instead.
 
 ## My calls (check these)
 
-- `processAfterProgramChange` is background.
-- The Simulator's `step` is flagged here, not in CLUE-761.
 - A link marker is added here, as a single point; CLUE-635 adds ranges.
 - A failed background-only save still shows `Retrying`.
 - `producerTileId` is stored now. `producerId` and `runnerSessionId` are not.
@@ -375,6 +396,11 @@ the background check covers them and that clause goes too.
 - **Tree monitor:** an action calling `asBackground()` records `background: true` and its
   `producerTileId`, and isn't undoable. A child action calling it warns and records a user entry.
   Shared-model follow-up records stay in the flagged entry.
+- **DataFlow:** after adding a block, removing one, and adding and removing a connection, the
+  `processAfterProgramChange` entry is background, and every patch in it is under a block's
+  `tickEntries` or is a demo output's `tilt`. A new write elsewhere fails the test, which is the
+  signal to group that change into the user's action instead. Undoing a connection edit takes one
+  undo.
 - **Legacy rule:** cases from real entry shapes: `tickAndProcess`, values-only `setProgram`,
   `setProgram` with a node move, Simulator `step`, and an entry with no `model`.
 - **Playback model:** stops skip background entries. A user stop lands right after its entry. The
