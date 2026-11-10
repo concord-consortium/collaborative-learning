@@ -18,6 +18,7 @@ import { CanvasComponent } from "./canvas";
 import { DocumentContextReact } from "./document-context";
 import { DocumentToolbar } from "./document-toolbar";
 import { SaveIndicator } from "./save-indicator";
+import { SaveStoppedNotice, useSaveStoppedNotice } from "./save-stopped-notice";
 
 import "./editable-document-content.scss";
 
@@ -92,7 +93,11 @@ export const EditableDocumentContent = observer(function EditableDocumentContent
   const editableTileApiInterfaceRef: EditableTileApiInterfaceRef = useRef(null);
   // Until the document has caught up to its history it can't be edited or saved.
   const { historyCatchUpPending } = document;
-  const isReadOnly = !isPrimary || readOnly || document.isPublished || historyCatchUpPending;
+  const isEditable = isPrimary && !readOnly && !document.isPublished && !historyCatchUpPending;
+  // A notice that can't be closed also stops editing, since the edits might not be kept.
+  const saveStopped = useSaveStoppedNotice(document);
+  const showSaveStopped = isEditable && saveStopped;
+  const isReadOnly = !isEditable || (!!showSaveStopped && !showSaveStopped.notice.dismissible);
   let modifiedToolbar = toolbar;
   if (toolbar && isPrimary && DEBUG_HISTORY_VIEW) {
     // The snapshot is read-only so we need to clone it before modifying
@@ -142,6 +147,7 @@ export const EditableDocumentContent = observer(function EditableDocumentContent
               readOnly={isReadOnly}
               {...{mode, isPrimary, document, showPlayback}}
             />
+            {showSaveStopped && <SaveStoppedNotice state={showSaveStopped} />}
           </div>
         </EditableTileApiInterfaceRefContext.Provider>
       </DocumentContextReact.Provider>

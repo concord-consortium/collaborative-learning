@@ -1274,6 +1274,18 @@ describe("ContentSaveSender", () => {
   });
 
   describe("group documents", () => {
+    it("logs once when the session stops being exact, even for a later sender", () => {
+      const logEvent = jest.fn();
+      const { contentRef, document, sender, treeManager } = track(setup({ logEvent }, true));
+      treeManager.exactness.markNotExact("unrecorded-change");
+      treeManager.exactness.markNotExact("timed-out-entry");
+      expect(logEvent.mock.calls).toEqual([[LogEventName.CONTENT_SAVE_GROUP_STOPPED, { reason: "unrecorded-change" }]]);
+
+      sender.dispose();
+      track({ sender: getContentSaveSender(document, { contentRef, updateTools: () => Promise.resolve(), logEvent }) });
+      expect(logEvent).toHaveBeenCalledTimes(1);
+    });
+
     it("saves the current state, stamped with the remote head, when an idle member settles", async () => {
       const { applyRemote, contentRef, document, onContentSaved } = track(setup({}, true));
       await applyRemote("r9", "remote");

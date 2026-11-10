@@ -4,6 +4,7 @@ import { IExactThrough, INotExactEvidence } from "../../lib/db-types";
 import { LogEventName } from "../../lib/logger-types";
 import { HistoryEntryType } from "../history/history";
 import { ICommitListener, ICommittedEntry, isCommitSource } from "../history/history-commits";
+import { SessionExactness } from "../history/session-exactness";
 import { FAKE_HISTORY_ENTRY_ID, TreeManagerType } from "../history/tree-manager";
 import { buildExactSave, buildIntermediateSave, getDocumentTools } from "./content-save-envelope";
 import { DocumentModelType, SaveState } from "./document";
@@ -213,6 +214,9 @@ const sameTools = (a: string[], b: string[]) =>
 
 // One sender for each document, see getContentSaveSender.
 const senders = new WeakMap<DocumentModelType, ContentSaveSender>();
+
+// The group document sessions whose stop has been logged, so a later sender doesn't log it again.
+const groupSessionsLoggedAsStopped = new WeakSet<SessionExactness>();
 
 interface IFallbackEpisode {
   startedAt: number;
@@ -486,6 +490,12 @@ export class ContentSaveSender {
     }
     this.listenToEnvelope();
     this.disposers.push(() => this.stopEnvelopeListener?.());
+    // A group document makes no intermediate saves, so this client saves no more content.
+    this.disposers.push(reaction(() => treeManager.exactness.notExactReason, reason => {
+      if (!reason || groupSessionsLoggedAsStopped.has(treeManager.exactness)) return;
+      groupSessionsLoggedAsStopped.add(treeManager.exactness);
+      this.logEvent(LogEventName.CONTENT_SAVE_GROUP_STOPPED, { reason });
+    }, { fireImmediately: true }));
     this.disposers.push(reaction(() => {
       const manager = getGroupHistoryState(this.document);
       return [manager?.isHistorySettled, manager?.applying, manager?.expectedRemoteHead,
