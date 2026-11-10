@@ -468,6 +468,39 @@ describe("PlaybackControlModel", () => {
     });
   });
 
+  describe("seekInProgress", () => {
+    it("reports a seek in progress from the request until the document settles", async () => {
+      const { model, treeManager } = setupModel(5, { appliedPosition: 0 });
+      let finishSeek: () => void = () => undefined;
+      jest.spyOn(treeManager, "goToHistoryEntryPosition")
+        .mockImplementation(() => new Promise<void>(resolve => { finishSeek = resolve; }));
+      expect(model.seekInProgress).toBe(false);
+
+      const seek = model.goToSliderStop(3);
+      expect(model.seekInProgress).toBe(true);
+
+      finishSeek();
+      await seek;
+      expect(model.seekInProgress).toBe(false);
+    });
+
+    it("stops reporting a seek in progress when the seek throws", async () => {
+      const { model, treeManager } = setupModel(5, { appliedPosition: 0 });
+      let failSeek: (error: Error) => void = () => undefined;
+      jest.spyOn(treeManager, "goToHistoryEntryPosition")
+        .mockImplementation(() => new Promise<void>((_resolve, reject) => { failSeek = reject; }));
+
+      const seek = model.goToSliderStop(3);
+      expect(model.seekInProgress).toBe(true);
+
+      await jestSpyConsole("warn", async () => {
+        failSeek(new Error("seek failed"));
+        await seek;
+      });
+      expect(model.seekInProgress).toBe(false);
+    });
+  });
+
   describe("following the end of the history", () => {
     // Entries recorded while the reader watches do not move the document on their own, so a
     // reader sitting at the end would be left a stop behind the change that just happened.

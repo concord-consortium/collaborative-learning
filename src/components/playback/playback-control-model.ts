@@ -105,6 +105,9 @@ export class PlaybackControlModel {
   sliderPlaying = false;
   playbackFailureWarning: string | null = null;
   selectedFailure: HistoryPlaybackFailure | null = null;
+  // True from the moment a seek starts until the document has settled, which for a move across
+  // thousands of background entries can take seconds.
+  seekInProgress = false;
 
   private treeManager: Instance<typeof TreeManager>;
   private advanceTimer: ReturnType<typeof setTimeout> | undefined = undefined;
@@ -348,7 +351,13 @@ export class PlaybackControlModel {
     // and the loop then goes to wherever the reader has got to by that point rather than
     // replaying every stop they dragged across.
     if (!this.seekLoop) {
-      this.seekLoop = this.runSeekLoop().finally(() => { this.seekLoop = undefined; });
+      this.seekInProgress = true;
+      this.seekLoop = this.runSeekLoop().finally(() => {
+        runInAction(() => {
+          this.seekLoop = undefined;
+          this.seekInProgress = false;
+        });
+      });
     }
     await this.seekLoop;
   }

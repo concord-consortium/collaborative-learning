@@ -579,6 +579,40 @@ $border-radius-base: 6px;
   white-space: nowrap;
 }
 
+$seek-progress-track-color: $charcoal-light-4;
+$seek-progress-arc-color: $charcoal-dark-1;
+
+.playback-seek-status {
+  display: flex;
+  align-items: center;
+
+  .playback-seek-progress {
+    flex: none;
+    box-sizing: border-box;
+    width: 16px;
+    height: 16px;
+    margin-right: 8px;
+    border: 2px solid $seek-progress-track-color;
+    border-top-color: $seek-progress-arc-color;
+    border-radius: 50%;
+    animation: playback-seek-spin 0.8s linear infinite;
+  }
+
+  // The spinner is the visible cue; the words are for screen readers.
+  .playback-seek-message {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+}
+
+@keyframes playback-seek-spin {
+  to { transform: rotate(360deg); }
+}
+
 .time-info {
   width: 85px;
   text-align: center;

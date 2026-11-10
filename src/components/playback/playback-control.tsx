@@ -16,6 +16,9 @@ import { PlaybackControlModel } from "./playback-control-model";
 
 import "./playback-control.scss";
 
+// A move that settles within this long needs no explanation, and showing one would only flash.
+export const kSeekProgressDelayMs = 300;
+
 export interface IMarkerProps {
   id: number;
   location: number;
@@ -42,6 +45,18 @@ export const PlaybackControlComponent: React.FC<IProps> = observer((props: IProp
   const [model] = useState(() =>
     new PlaybackControlModel(treeManager, requestedHistoryId ? undefined : "end"));
   useEffect(() => () => model.dispose(), [model]);
+
+  // Only a seek that has run for a while is reported as loading.
+  const [showSeekProgress, setShowSeekProgress] = useState(false);
+  const seekInProgress = model.seekInProgress;
+  useEffect(() => {
+    if (!seekInProgress) {
+      setShowSeekProgress(false);
+      return;
+    }
+    const timer = setTimeout(() => setShowSeekProgress(true), kSeekProgressDelayMs);
+    return () => clearTimeout(timer);
+  }, [seekInProgress]);
 
   // The chat panel filters itself to the moment on screen. Deriving that from the current
   // stop covers every way the document can move, including seeks the slider did not start.
@@ -156,7 +171,8 @@ export const PlaybackControlComponent: React.FC<IProps> = observer((props: IProp
 
     return (
       <>
-        <div className="slider-container" ref={sliderContainerRef} data-testid="playback-slider">
+        <div className="slider-container" ref={sliderContainerRef} data-testid="playback-slider"
+            aria-busy={showSeekProgress}>
           <Slider
             min={0}
             max={model.lastStopIndex}
@@ -268,6 +284,13 @@ export const PlaybackControlComponent: React.FC<IProps> = observer((props: IProp
         {renderSliderContainer()}
       </div>
       {renderTimeInfo()}
+      {/* Rendered whether or not there is anything to say, so screen readers announce the
+          change. */}
+      <div className="playback-seek-status" data-testid="playback-seek-status" role="status">
+        {showSeekProgress && <span className="playback-seek-progress" data-testid="playback-seek-progress"
+            aria-hidden="true" />}
+        {showSeekProgress && <span className="playback-seek-message">Loading this point in the history…</span>}
+      </div>
       {model.playbackFailureWarning && !model.selectedFailure &&
         <div className="playback-failure-warning" data-testid="playback-failure-warning">
           {model.playbackFailureWarning}

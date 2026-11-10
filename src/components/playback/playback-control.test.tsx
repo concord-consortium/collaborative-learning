@@ -6,7 +6,7 @@ import { DocumentContentModel } from "../../models/document/document-content";
 import { ProblemDocument } from "../../models/document/document-types";
 import { CDocument, TreeManager } from "../../models/history/tree-manager";
 import { HistoryEntry } from "../../models/history/history";
-import { PlaybackControlComponent } from "./playback-control";
+import { kSeekProgressDelayMs, PlaybackControlComponent } from "./playback-control";
 
 // The slider is the subject of these tests, so everything the component pulls
 // from stores and Firestore hooks is stubbed; only the TreeManager is real.
@@ -169,5 +169,67 @@ describe("PlaybackControlComponent", () => {
     const timeInfo = screen.getByTestId("playback-time-info").textContent;
     expect(timeInfo).toContain("(1)");
     expect(timeInfo).toContain("9:01 am");
+  });
+
+  describe("progress for a slow move", () => {
+    // Only setTimeout is faked: the component's delay is a timer, and the seek rides on
+    // microtasks and nextTick that must keep running.
+    beforeEach(() => {
+      jest.useFakeTimers({
+        doNotFake: [
+          "Date", "hrtime", "nextTick", "performance", "queueMicrotask",
+          "requestAnimationFrame", "cancelAnimationFrame", "requestIdleCallback", "cancelIdleCallback",
+          "setImmediate", "clearImmediate", "setInterval", "clearInterval"
+        ]
+      });
+    });
+    afterEach(() => {
+      jest.useRealTimers();
+    });
+
+    it("shows the progress indicator only after a seek has run for 300 ms", async () => {
+      expect(kSeekProgressDelayMs).toBe(300);
+      const treeManager = setupTreeManager(5);
+      let finishSeek: () => void = () => undefined;
+      jest.spyOn(treeManager, "goToHistoryEntryPosition")
+        .mockImplementation(() => new Promise<void>(resolve => { finishSeek = resolve; }));
+      render(<PlaybackControlComponent treeManager={treeManager} requestedHistoryId={undefined} />);
+      const status = screen.getByTestId("playback-seek-status");
+      const sliderContainer = screen.getByTestId("playback-slider");
+      expect(status.getAttribute("role")).toBe("status");
+      expect(status.textContent).toBe("");
+
+      // One arrow key press asks for the stop before the current one.
+      act(() => { fireEvent.keyDown(screen.getByRole("slider"), { key: "ArrowLeft", keyCode: 37 }); });
+
+      act(() => { jest.advanceTimersByTime(kSeekProgressDelayMs - 1); });
+      expect(screen.queryByTestId("playback-seek-progress")).toBeNull();
+      expect(sliderContainer.getAttribute("aria-busy")).not.toBe("true");
+      expect(status.textContent).toBe("");
+
+      act(() => { jest.advanceTimersByTime(1); });
+      expect(screen.getByTestId("playback-seek-progress")).toBeInTheDocument();
+      expect(sliderContainer.getAttribute("aria-busy")).toBe("true");
+      expect(status.textContent).toBe("Loading this point in the history…");
+
+      await act(async () => { finishSeek(); });
+      expect(screen.queryByTestId("playback-seek-progress")).toBeNull();
+      expect(sliderContainer.getAttribute("aria-busy")).not.toBe("true");
+      expect(status.textContent).toBe("");
+    });
+
+    it("never shows the progress indicator for a seek that settles within the delay", async () => {
+      const treeManager = setupTreeManager(5);
+      let finishSeek: () => void = () => undefined;
+      jest.spyOn(treeManager, "goToHistoryEntryPosition")
+        .mockImplementation(() => new Promise<void>(resolve => { finishSeek = resolve; }));
+      render(<PlaybackControlComponent treeManager={treeManager} requestedHistoryId={undefined} />);
+
+      act(() => { fireEvent.keyDown(screen.getByRole("slider"), { key: "ArrowLeft", keyCode: 37 }); });
+      await act(async () => { finishSeek(); });
+      act(() => { jest.advanceTimersByTime(kSeekProgressDelayMs * 2); });
+
+      expect(screen.queryByTestId("playback-seek-progress")).toBeNull();
+    });
   });
 });
