@@ -257,6 +257,11 @@ caught up, and its catch-up starts when it is opened for editing, or before tile
 While it isn't caught up, its toolbar keeps the tools that don't change it (Edit among them), so it can
 still be viewed and opened for editing.
 
+A document this session created skips the catch-up. Its history in Firestore is still empty, so it
+opens caught up and exact from the beginning of its history (`since: "first"`). Without this, every
+new document showed the spinner for the Firestore query that finds its last entry, and the tools that
+copy tiles into it ignored clicks meanwhile.
+
 While a document isn't open for editing, the RTDB content listener can replace its content with what
 the RTDB holds. It records the envelope that content came from in the document's `savedEnvelope`, and
 the catch-up starts from that envelope rather than the one first loaded.
@@ -655,6 +660,7 @@ These were left to the builder in the design.
   unmarked envelope behind Firestore applies nothing and is not exact; a failed apply opens with what
   applied and is not exact, and an error thrown while applying counts as an apply failure. Only the gap
   is fetched, bounded by the last entry, and nothing is fetched when the envelope is at the last entry.
+  A document this session created opens caught up and exact from the start, without a catch-up.
   A gap over 200 entries isn't fetched, is logged, and leaves the session not exact. A hole in the
   indexes or a broken `previousEntryId` chain stops the apply at the hole. A user who turns out not to
   be the owner gets no catch-up. The sender saves the caught-up content when it starts.
