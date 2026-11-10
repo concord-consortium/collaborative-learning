@@ -1,9 +1,10 @@
 import {
-  computed, IReactionDisposer, makeAutoObservable, observable, reaction, runInAction
+  comparer, computed, IReactionDisposer, makeAutoObservable, observable, reaction, runInAction
 } from "mobx";
 import { Instance } from "mobx-state-tree";
 import { WithId } from "../../hooks/firestore-hooks";
 import { CommentDocument } from "../../lib/firestore-schema";
+import { isBackgroundEntry } from "../../models/history/background-entries";
 import { HistoryEntryType } from "../../models/history/history";
 import { logCurrentHistoryEvent } from "../../models/history/log-history-event";
 import { HistoryPlaybackFailure, TreeManager } from "../../models/history/tree-manager";
@@ -15,22 +16,59 @@ const kPlaybackFailureWarning = "History playback could not apply some changes a
 const kPlaybackStoppedWarning =
   "History playback stopped because of an error. Close and reopen the history to try again.";
 
+/**
+ * A slider stop is a state of the document rather than a change to it. Its position is a history
+ * position, which counts applied entries, so position p is the document with entries 0..p-1
+ * applied. Background entries are applied on the way between stops but are never stops of their
+ * own.
+ */
+interface ISliderStopBase {
+  position: number;
+  created?: Date;
+}
 // The document before any of its history was applied. It describes no change, so it has no date.
-interface IInitialSliderStop {
+interface IInitialSliderStop extends ISliderStopBase {
   kind: "initial";
 }
-interface IHistorySliderStop {
-  kind: "history";
+// The oldest position playback can reach, when the history before it can't be rebuilt.
+interface IEarliestSliderStop extends ISliderStopBase {
+  kind: "earliest";
+}
+// The document right after a person's change.
+interface IUserSliderStop extends ISliderStopBase {
+  kind: "user";
   entry: HistoryEntryType;
-  index: number;
   created: Date;
 }
-export interface ICommentSliderStop {
+// The whole history, when background entries follow the last user change. It keeps the end of
+// the slider on the live document while a program runs.
+interface ILatestSliderStop extends ISliderStopBase {
+  kind: "latest";
+  entry: HistoryEntryType;
+  created: Date;
+}
+// The document its author was looking at: the one after the entry just before the comment.
+export interface ICommentSliderStop extends ISliderStopBase {
   kind: "comment";
-  entry: WithId<CommentDocument>;
+  comment: WithId<CommentDocument>;
   created: Date;
 }
-export type ISliderStop = IInitialSliderStop | IHistorySliderStop | ICommentSliderStop;
+// The history entry a link into the document pointed at.
+interface ILinkSliderStop extends ISliderStopBase {
+  kind: "link";
+  entryId: string;
+}
+export type ISliderStop = IInitialSliderStop | IEarliestSliderStop | IUserSliderStop | ILatestSliderStop |
+  ICommentSliderStop | ILinkSliderStop;
+
+// Stops for the document's own states come before stops for events from outside it that share
+// their position, so a comment or link stands after the entry before it. The outside events are
+// in created order among themselves; the document's own stops never share a position.
+const isOutsideEventStop = (stop: ISliderStop) => stop.kind === "comment" || stop.kind === "link";
+const stopRank = (stop: ISliderStop) => isOutsideEventStop(stop) ? 1 : 0;
+const compareStops = (a: ISliderStop, b: ISliderStop) =>
+  (a.position - b.position) || (stopRank(a) - stopRank(b)) ||
+  ((a.created?.getTime() ?? 0) - (b.created?.getTime() ?? 0));
 
 // A request for one stop, or for wherever the end of the slider is.
 export type StopRequest = number | "end";
@@ -105,12 +143,15 @@ export class PlaybackControlModel {
     }, { autoBind: true });
 
     // A reader following along asked for the end of the slider, so a new stop appearing past
-    // them is a new answer to that request. Entries and comments arrive the same way here.
+    // them is a new answer to that request. Entries and comments arrive the same way here. A
+    // background entry arriving after another one adds no stop but moves the latest stop on, so
+    // the history's length is watched as well.
     this.followEndDisposer = reaction(
-      () => this.lastStopIndex,
-      lastStopIndex => {
+      () => [this.lastStopIndex, this.treeManager.document.history.length],
+      ([lastStopIndex]) => {
         if (this.requestedStop === "end") void this.goToSliderStop(lastStopIndex);
-      }
+      },
+      { equals: comparer.structural }
     );
   }
 
@@ -130,34 +171,37 @@ export class PlaybackControlModel {
   }
 
   get sliderStops(): ISliderStop[] {
-    // History entries must stay in index order (their position in the array),
-    // not sorted by created time. Created times can be out of order when
-    // sub-actions complete before their parent action.
-    const historyStops: IHistorySliderStop[] = this.treeManager.document.history.map(
-      (entry, index) => ({ kind: "history", entry, created: entry.created, index }));
+    const history = this.treeManager.document.history;
+    const stops: ISliderStop[] = [{ kind: "initial", position: 0 }];
 
-    // Insert comments at the correct position among history entries based
-    // on the comment's created time. Each comment goes after the last
-    // history entry whose created time is <= the comment's created time.
-    // allComments is already in created order.
-    const allComments = this.allComments;
-    const stops: ISliderStop[] = [{ kind: "initial" }];
-    let commentIdx = 0;
-    for (const historyStop of historyStops) {
-      while (commentIdx < allComments.length &&
-             allComments[commentIdx].createdAt.getTime() < historyStop.created.getTime()) {
-        const comment = allComments[commentIdx];
-        stops.push({ kind: "comment", entry: comment, created: comment.createdAt });
-        commentIdx++;
+    // History entries are walked in index order (their position in the array), not by created
+    // time. Created times can be out of order when sub-actions complete before their parent
+    // action.
+    history.forEach((entry, index) => {
+      if (!isBackgroundEntry(entry)) {
+        stops.push({ kind: "user", position: index + 1, entry, created: entry.created });
       }
-      stops.push(historyStop);
+    });
+    const lastEntry = history.length > 0 ? history[history.length - 1] : undefined;
+    if (lastEntry && isBackgroundEntry(lastEntry)) {
+      stops.push({ kind: "latest", position: history.length, entry: lastEntry, created: lastEntry.created });
     }
-    while (commentIdx < allComments.length) {
-      const comment = allComments[commentIdx];
-      stops.push({ kind: "comment", entry: comment, created: comment.createdAt });
-      commentIdx++;
+
+    // Each comment goes before the first entry created later than it, background entries
+    // included, so its position is that entry's index. allComments is already in created order,
+    // so the walk only moves forward.
+    const allComments = this.allComments;
+    let entryIndex = 0;
+    for (const comment of allComments) {
+      const commentTime = comment.createdAt.getTime();
+      while (entryIndex < history.length && history[entryIndex].created.getTime() <= commentTime) {
+        entryIndex++;
+      }
+      stops.push({ kind: "comment", position: entryIndex, comment, created: comment.createdAt });
     }
-    return stops;
+
+    // Stops stay in history order, so Play and the slider never move backward through history.
+    return stops.sort(compareStops);
   }
 
   get lastStopIndex() {
@@ -181,7 +225,7 @@ export class PlaybackControlModel {
     if (historyPosition === undefined) return requested ?? this.lastStopIndex;
     // Several stops can share one history position — a comment and the entry before it — so
     // a stop that already represents the position is left alone rather than snapped onto the
-    // history entry.
+    // entry's stop.
     if (requested !== undefined &&
         this.historyPositionForStopIndex(requested) === historyPosition) {
       return requested;
@@ -215,14 +259,13 @@ export class PlaybackControlModel {
   // When the change or comment the thumb is on was made. Undefined at the initial stop,
   // which describes no change.
   get sliderStopTime() {
-    const stop = this.sliderStop;
-    return stop?.kind === "initial" ? undefined : stop?.created;
+    return this.sliderStop?.created;
   }
 
-  // The entry the thumb's stop applied, if it is a history stop rather than a comment.
+  // The last entry applied at the thumb's stop, if it is a stop for an entry rather than a comment.
   get sliderStopHistoryIndex() {
     const stop = this.sliderStop;
-    return stop?.kind === "history" ? stop.index : undefined;
+    return stop?.kind === "user" || stop?.kind === "latest" ? stop.position - 1 : undefined;
   }
 
   get playbackDisabled() {
@@ -230,37 +273,37 @@ export class PlaybackControlModel {
       this.currentStopIndex === this.lastStopIndex;
   }
 
-  /**
-   * A slider stop is a state of the document rather than a change to it. A history position
-   * counts applied entries, so position p is the document with entries 0..p-1 applied.
-   *
-   * A history stop is the document once its entry has been applied. A comment stop takes the
-   * position of the entry before it, which is the document its author was looking at. The
-   * initial stop is the document before any of the history was applied.
-   */
+  // The history position a stop shows. Nothing should ask for a stop past the last one, but the
+  // last stop is the closest thing to one if anything does.
   historyPositionForStopIndex(stopIndex: number) {
     const stops = this.sliderStops;
-    for (let i = stopIndex; i >= 0; i--) {
-      const stop = stops[i];
-      if (stop?.kind === "history") return stop.index + 1;
-    }
-    return 0;
+    return stops[Math.max(0, Math.min(stopIndex, stops.length - 1))].position;
   }
 
-  // The inverse: the stop that represents a history position. Every position within the
-  // history has a history stop of its own, including the last; a comment written after the
-  // final entry stands beyond that stop rather than in place of it.
+  /**
+   * The inverse: the stop that represents a history position. That is the document's own stop at
+   * the position when there is one, rather than a comment that shares it, so a comment written
+   * after the final entry stands beyond the end of the history rather than in place of it.
+   *
+   * Background entries have no stops, so a seek that stops on a failing one can leave the
+   * document between two stops. The thumb then shows the stop before it.
+   */
   stopIndexForHistoryPosition(historyPosition: number) {
-    if (historyPosition <= 0) return 0;
-    // Nothing should ask for a position past the end of the history, but the last stop is
-    // the closest thing to one if anything does.
-    if (historyPosition > this.treeManager.document.history.length) return this.lastStopIndex;
-    return this.sliderStops.findIndex(s => s.kind === "history" && s.index === historyPosition - 1);
+    const stops = this.sliderStops;
+    let found = 0;
+    for (let i = 0; i < stops.length && stops[i].position <= historyPosition; i++) {
+      if (stops[i].position === historyPosition && stopRank(stops[i]) === 0) return i;
+      found = i;
+    }
+    return found;
+  }
+
+  private commentStopIndex(comment: WithId<CommentDocument>) {
+    return this.sliderStops.findIndex(s => s.kind === "comment" && s.comment.id === comment.id);
   }
 
   getCommentLocation(comment: WithId<CommentDocument>) {
-    const index = this.sliderStops.findIndex(s => s.kind === "comment" && s.entry.id === comment.id);
-    return this.railLocation(index);
+    return this.railLocation(this.commentStopIndex(comment));
   }
 
   // One marker per failing entry, however many times playback has run into it.
@@ -272,14 +315,23 @@ export class PlaybackControlModel {
     for (const failure of this.treeManager.historyPlaybackFailures) {
       if (seenIndices.has(failure.historyIndex)) continue;
       seenIndices.add(failure.historyIndex);
-      // The stop that would have applied the failing entry, which is the one playback
-      // could not reach.
-      markers.push({
-        failure,
-        location: this.railLocation(this.stopIndexForHistoryPosition(failure.historyIndex + 1))
-      });
+      markers.push({ failure, location: this.railLocation(this.unreachedStopIndex(failure)) });
     }
     return markers;
+  }
+
+  // The stop playback could not reach past a failing entry. Going forward, that is the first stop
+  // with the entry applied; going back, the nearest stop without it.
+  private unreachedStopIndex({ historyIndex, direction }: HistoryPlaybackFailure) {
+    const stops = this.sliderStops;
+    if (direction === "redo") {
+      const index = stops.findIndex(s => s.position >= historyIndex + 1);
+      return index === -1 ? this.lastStopIndex : index;
+    }
+    for (let i = stops.length - 1; i >= 0; i--) {
+      if (stops[i].position <= historyIndex) return i;
+    }
+    return 0;
   }
 
   setSelectedFailure(failure: HistoryPlaybackFailure | null) {
@@ -302,7 +354,7 @@ export class PlaybackControlModel {
   }
 
   async goToComment(comment: WithId<CommentDocument>) {
-    const index = this.sliderStops.findIndex(s => s.kind === "comment" && s.entry.id === comment.id);
+    const index = this.commentStopIndex(comment);
     if (index !== -1) {
       await this.goToSliderStop(index);
     }

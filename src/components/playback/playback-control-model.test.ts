@@ -3,7 +3,7 @@ import { createDocumentModel } from "../../models/document/document";
 import { DocumentContentModel } from "../../models/document/document-content";
 import { ProblemDocument } from "../../models/document/document-types";
 import { CDocument, TreeManager } from "../../models/history/tree-manager";
-import { HistoryEntry } from "../../models/history/history";
+import { HistoryEntry, HistoryEntrySnapshot } from "../../models/history/history";
 import { WithId } from "../../hooks/firestore-hooks";
 import { CommentDocument } from "../../lib/firestore-schema";
 import { kPlaybackStepMs, PlaybackControlModel, StopRequest } from "./playback-control-model";
@@ -40,7 +40,23 @@ interface ISetupOptions {
   // What the reader has already asked for when the control opens. Absent means "end", the
   // way a control opens when no link is sending the document anywhere.
   initialRequest?: StopRequest | undefined;
+  // The entries produced by code rather than by a person.
+  backgroundIndexes?: number[];
 }
+
+// Entries carry no patch records unless a test gives them some, so seeking between them moves
+// the history position without needing tile content to replay against.
+const entrySnapshot = (index: number, fields: Partial<HistoryEntrySnapshot> = {}): HistoryEntrySnapshot => ({
+  id: `entry-${index}`,
+  tree: "test",
+  model: "TestTile",
+  action: "/setText",
+  undoable: true,
+  state: "complete",
+  created: entryCreated(index),
+  records: [],
+  ...fields
+});
 
 function setupTreeManager(entryCount: number, options: ISetupOptions = {}) {
   const docModel = createDocumentModel({
@@ -51,17 +67,9 @@ function setupTreeManager(entryCount: number, options: ISetupOptions = {}) {
   });
   const treeManager = docModel.treeManagerAPI as Instance<typeof TreeManager>;
 
-  // Entries carry no patch records unless the test asks for a failing one, so seeking
-  // between them moves the history position without needing tile content to replay against.
-  const history = Array.from({ length: entryCount }, (_, index) => ({
-    id: `entry-${index}`,
-    tree: "test",
-    model: "TestTile",
-    action: "/setText",
-    undoable: true,
-    state: "complete" as const,
-    created: entryCreated(index),
-    records: index === options.failingEntryIndex ? [failingRecord] : []
+  const history = Array.from({ length: entryCount }, (_, index) => entrySnapshot(index, {
+    ...(options.backgroundIndexes?.includes(index) ? { background: true } : {}),
+    ...(index === options.failingEntryIndex ? { records: [failingRecord] } : {})
   }));
   treeManager.setChangeDocument(CDocument.create({ history }));
   treeManager.setNumHistoryEntriesApplied(
@@ -78,11 +86,12 @@ function setupModel(entryCount: number, options: ISetupOptions = {}) {
   return { model, treeManager };
 }
 
-const addEntry = (treeManager: Instance<typeof TreeManager>, index: number) =>
-  treeManager.addHistoryEntryAfterApplying(HistoryEntry.create({
-    id: `entry-${index}`, tree: "test", model: "TestTile", action: "/setText",
-    undoable: true, state: "complete", created: entryCreated(index), records: []
-  }));
+const addEntry = (treeManager: Instance<typeof TreeManager>, index: number,
+                  fields: Partial<HistoryEntrySnapshot> = {}) =>
+  treeManager.addHistoryEntryAfterApplying(HistoryEntry.create(entrySnapshot(index, fields)));
+
+const stopKinds = (model: PlaybackControlModel) => model.sliderStops.map(s => s.kind);
+const stopPositions = (model: PlaybackControlModel) => model.sliderStops.map(s => s.position);
 
 const makeComment = (id: string, createdAt: Date) => ({
   id, uid: "2", name: "Teacher 1", content: "Nice work", createdAt
@@ -136,22 +145,86 @@ describe("PlaybackControlModel", () => {
       const { model } = setupModel(3);
 
       expect(model.sliderStops[0].kind).toBe("initial");
-      expect(model.sliderStops.map(s => s.kind)).toEqual(["initial", "history", "history", "history"]);
+      expect(stopKinds(model)).toEqual(["initial", "user", "user", "user"]);
     });
 
     it("places a comment after the last entry created before it", () => {
       // Entries are a minute apart, so 90 seconds in falls between entries 1 and 2.
       const { model } = setupModel(3, { comments: [makeComment("c1", commentCreated(90))] });
 
-      expect(model.sliderStops.map(s => s.kind))
-        .toEqual(["initial", "history", "history", "comment", "history"]);
+      expect(stopKinds(model)).toEqual(["initial", "user", "user", "comment", "user"]);
     });
 
     it("keeps a comment written after the final entry at the end", () => {
       const { model } = setupModel(3, { comments: [makeComment("c1", commentCreated(600))] });
 
-      expect(model.sliderStops.map(s => s.kind))
-        .toEqual(["initial", "history", "history", "history", "comment"]);
+      expect(stopKinds(model)).toEqual(["initial", "user", "user", "user", "comment"]);
+    });
+
+    it("never makes a stop for a background entry", () => {
+      const { model } = setupModel(5, { backgroundIndexes: [1, 2, 4] });
+
+      expect(stopKinds(model)).toEqual(["initial", "user", "user", "latest"]);
+      expect(stopPositions(model)).toEqual([0, 1, 4, 5]);
+    });
+
+    it("has no latest stop when the history ends with a user change", () => {
+      const { model } = setupModel(3, { backgroundIndexes: [1] });
+
+      expect(stopKinds(model)).toEqual(["initial", "user", "user"]);
+      expect(stopPositions(model)).toEqual([0, 1, 3]);
+    });
+
+    it("has an initial and a latest stop for a history of only background entries", () => {
+      const { model } = setupModel(2, { backgroundIndexes: [0, 1] });
+
+      expect(stopKinds(model)).toEqual(["initial", "latest"]);
+      expect(stopPositions(model)).toEqual([0, 2]);
+    });
+
+    it("places a comment at the entry before it, counting background entries", () => {
+      // Entries are at 0, 60, 120 and 180 seconds, so the first one later than the comment is
+      // entry 3, and the comment shows the document with entries 0 to 2 applied.
+      const { model } = setupModel(4, {
+        backgroundIndexes: [1, 2], comments: [makeComment("c1", commentCreated(150))]
+      });
+
+      expect(stopKinds(model)).toEqual(["initial", "user", "comment", "user"]);
+      expect(stopPositions(model)).toEqual([0, 1, 3, 4]);
+    });
+
+    it("places a comment at an entry's exact time after that entry", () => {
+      const { model } = setupModel(3, {
+        comments: [makeComment("c1", commentCreated(60)), makeComment("c0", commentCreated(-30))]
+      });
+
+      expect(stopKinds(model)).toEqual(["initial", "comment", "user", "user", "comment", "user"]);
+      expect(stopPositions(model)).toEqual([0, 0, 1, 2, 2, 3]);
+      expect(model.sliderStops[1]).toMatchObject({ kind: "comment", comment: { id: "c0" } });
+      expect(model.sliderStops[4]).toMatchObject({ kind: "comment", comment: { id: "c1" } });
+    });
+
+    it("treats an old tick entry with no flag as background", () => {
+      const { model, treeManager } = setupModel(0);
+      treeManager.setChangeDocument(CDocument.create({
+        history: [
+          entrySnapshot(0),
+          entrySnapshot(1, { action: "/content/tileMap/t1/content/program/tickAndProcess" })
+        ]
+      }));
+
+      expect(stopKinds(model)).toEqual(["initial", "user", "latest"]);
+      expect(stopPositions(model)).toEqual([0, 1, 2]);
+    });
+
+    it("never makes a stop for a load entry", () => {
+      const { model, treeManager } = setupModel(0);
+      treeManager.setChangeDocument(CDocument.create({
+        history: [entrySnapshot(0, { isLoadEntry: true, background: true }), entrySnapshot(1)]
+      }));
+
+      expect(stopKinds(model)).toEqual(["initial", "user"]);
+      expect(stopPositions(model)).toEqual([0, 2]);
     });
 
     it("grows as the document records new history entries", () => {
@@ -176,7 +249,7 @@ describe("PlaybackControlModel", () => {
       expect(model.historyPositionForStopIndex(0)).toBe(0);
     });
 
-    it("reports the entry a history stop applied", () => {
+    it("reports the entry a user stop applied", () => {
       const { model } = setupModel(3);
 
       // Stop 1 is entry 0 applied, which is a history position of 1.
@@ -184,7 +257,7 @@ describe("PlaybackControlModel", () => {
     });
 
     it("reports the document a comment's author was looking at", () => {
-      // Stops are [initial, h0, h1, comment, h2].
+      // Stops are [initial, u0, u1, comment, u2].
       const { model } = setupModel(3, { comments: [makeComment("c1", commentCreated(90))] });
 
       // Entries 0 and 1 were both applied before the comment was written.
@@ -205,8 +278,8 @@ describe("PlaybackControlModel", () => {
       expect(model.stopIndexForHistoryPosition(2)).toBe(2);
     });
 
-    it("reports the last history stop for the end of the history", () => {
-      // Stops are [initial, h0, h1, h2, comment]. The end of the history is entry 2, which
+    it("reports the last user stop for the end of the history", () => {
+      // Stops are [initial, u0, u1, u2, comment]. The end of the history is entry 2, which
       // is stop 3; the comment written after it stands beyond that stop, not in place of it.
       const { model } = setupModel(3, { comments: [makeComment("c1", commentCreated(600))] });
 
@@ -233,7 +306,7 @@ describe("PlaybackControlModel", () => {
     // Dragging to the end of the slider asks for the trailing comment, whose history position
     // is the end of the history, so the document agrees with the request and it stands.
     it("stays on the trailing comment after the reader drags back and forward again", async () => {
-      // Stops are [initial, h0, h1, h2, comment].
+      // Stops are [initial, u0, u1, u2, comment].
       const { model } = setupModel(3, { comments: [makeComment("c1", commentCreated(600))] });
 
       await model.goToSliderStop(1);
@@ -244,7 +317,7 @@ describe("PlaybackControlModel", () => {
     });
 
     it("follows a new trailing comment after the reader drags back and forward again", async () => {
-      // Stops are [initial, h0, h1, h2, c1].
+      // Stops are [initial, u0, u1, u2, c1].
       const { model } = setupModel(3, { comments: [makeComment("c1", commentCreated(600))] });
       await model.goToSliderStop(1);
       await model.goToSliderStop(model.lastStopIndex);
@@ -261,7 +334,7 @@ describe("PlaybackControlModel", () => {
     // The readout names the entry a stop applied, so landing on the comment instead would
     // stop naming the change on screen.
     it("lands on the entry on screen when a seek it did not ask for reaches the end", async () => {
-      // Stops are [initial, h0, h1, h2, comment].
+      // Stops are [initial, u0, u1, u2, comment].
       const { model, treeManager } = setupModel(3, {
         comments: [makeComment("c1", commentCreated(600))], appliedPosition: 0
       });
@@ -286,8 +359,8 @@ describe("PlaybackControlModel", () => {
     // stopIndexForHistoryPosition answers the end of the history with the last stop, which is
     // the trailing comment. The reader asked for the entry, so requestedStopIndex has to
     // outrank that — which is why it cannot be kept for comment stops alone.
-    it("stays on the last history stop when comments sit after the final entry", async () => {
-      // Stops are [initial, h0, h1, h2, comment].
+    it("stays on the last user stop when comments sit after the final entry", async () => {
+      // Stops are [initial, u0, u1, u2, comment].
       const { model } = setupModel(3, { comments: [makeComment("c1", commentCreated(600))] });
 
       await model.goToSliderStop(3);
@@ -296,7 +369,7 @@ describe("PlaybackControlModel", () => {
     });
 
     it("stays on a comment stop that already represents the document's position", async () => {
-      // Stops are [initial, h0, h1, comment, h2]; the comment and entry 1 share position 2.
+      // Stops are [initial, u0, u1, comment, u2]; the comment and entry 1 share position 2.
       const { model } = setupModel(3, { comments: [makeComment("c1", commentCreated(90))] });
 
       await model.goToSliderStop(3);
@@ -318,6 +391,14 @@ describe("PlaybackControlModel", () => {
       const { model } = setupModel(3, { appliedPosition: undefined, initialRequest: 1 });
 
       expect(model.currentStopIndex).toBe(1);
+    });
+
+    it("puts a stop the document stops between on the stop before it", () => {
+      // Stops are [initial, user at 1, user at 4].
+      const { model } = setupModel(4, { backgroundIndexes: [1, 2], appliedPosition: 3 });
+
+      expect(model.currentStopIndex).toBe(1);
+      expect(model.sliderStop).toMatchObject({ kind: "user", position: 1 });
     });
   });
 
@@ -460,6 +541,21 @@ describe("PlaybackControlModel", () => {
       expect(model.currentStopIndex).toBe(2);
     });
 
+    // A running program adds background entries all the time. They move the latest stop rather
+    // than adding stops, so the stop count alone can't tell the reader there is more to see.
+    it("keeps following the end as background entries arrive", async () => {
+      const { model, treeManager } = setupModel(3, { backgroundIndexes: [2] });
+      expect(stopKinds(model)).toEqual(["initial", "user", "user", "latest"]);
+      const stopCount = model.sliderStops.length;
+
+      addEntry(treeManager, 3, { background: true });
+      await flushPromises();
+
+      expect(treeManager.numHistoryEventsApplied).toBe(4);
+      expect(model.sliderStops.length).toBe(stopCount);
+      expect(model.currentStopIndex).toBe(3);
+    });
+
     it("leaves a reader who has picked a stop where they are", async () => {
       const { model, treeManager } = setupModel(3);
       await model.goToSliderStop(1);
@@ -565,7 +661,7 @@ describe("PlaybackControlModel", () => {
     });
 
     it("warns and reports where playback stopped when an entry cannot be applied", async () => {
-      // Stops are [initial, h0, h1, h2, h3] and entry 2 cannot be applied.
+      // Stops are [initial, u0, u1, u2, u3] and entry 2 cannot be applied.
       const { model } = setupModel(4, { appliedPosition: 0, failingEntryIndex: 2 });
 
       await jestSpyConsole("warn", async () => {
@@ -681,7 +777,7 @@ describe("PlaybackControlModel", () => {
 
   describe("getCommentLocation", () => {
     it("places a comment along the rail by its stop index", () => {
-      // Stops are [initial, h0, h1, comment, h2], so the comment is 3 of 4 along.
+      // Stops are [initial, u0, u1, comment, u2], so the comment is 3 of 4 along.
       const comment = makeComment("c1", commentCreated(90));
       const { model } = setupModel(3, { comments: [comment] });
 
@@ -699,6 +795,27 @@ describe("PlaybackControlModel", () => {
 
       await runPlaybackStep();
       expect(model.currentStopIndex).toBe(2);
+    });
+
+    it("plays from user stop to user stop", async () => {
+      const { model, treeManager } = setupModel(5, { backgroundIndexes: [1, 2, 4], appliedPosition: 0 });
+      model.togglePlay(true);
+
+      const positions: Array<number | undefined> = [];
+      for (let step = 0; step < 3; step++) {
+        // Nothing moves before the step is due.
+        jest.advanceTimersByTime(kPlaybackStepMs - 1);
+        await flushPromises();
+        expect(treeManager.numHistoryEventsApplied).toBe(positions[positions.length - 1] ?? 0);
+
+        jest.advanceTimersByTime(1);
+        await flushPromises();
+        positions.push(treeManager.numHistoryEventsApplied);
+      }
+
+      expect(positions).toEqual([1, 4, 5]);
+      await runPlaybackStep();
+      expect(model.sliderPlaying).toBe(false);
     });
 
     it("stops playing once it reaches the end of the history", async () => {
@@ -769,7 +886,7 @@ describe("PlaybackControlModel", () => {
 
     // The tree manager keys its own dedup on the direction as well as the entry, so an entry
     // that fails on the way back and again on the way forward is two failures there. They are
-    // one place on the rail, so they are one marker here.
+    // one entry, so they are one marker here.
     it("reports one marker for an entry that fails in both directions", async () => {
       const { model, treeManager } = setupModel(4, { appliedPosition: 0, failingEntryIndex: 2 });
 
@@ -786,6 +903,27 @@ describe("PlaybackControlModel", () => {
       expect(treeManager.historyPlaybackFailures.map(f => f.direction).sort())
         .toEqual(["redo", "undo"]);
       expect(model.uniqueFailures.length).toBe(1);
+    });
+
+    // The marker goes on the stop playback could not reach, which depends on the direction it
+    // was heading when the background entry between two user stops failed.
+    it("marks a forward failure on the next stop and an undo failure on the stop before", async () => {
+      // Stops are [initial, user at 1, user at 4], and entry 2 cannot be applied.
+      const forward = setupModel(4, { backgroundIndexes: [1, 2], appliedPosition: 0, failingEntryIndex: 2 });
+      await jestSpyConsole("warn", async () => {
+        await forward.model.goToSliderStop(2);
+      });
+      expect(forward.treeManager.historyPlaybackFailures.map(f => f.direction)).toEqual(["redo"]);
+      // Stop 2 of 2 along the rail.
+      expect(forward.model.uniqueFailures.map(m => m.location)).toEqual([100]);
+
+      const back = setupModel(4, { backgroundIndexes: [1, 2], failingEntryIndex: 2 });
+      await jestSpyConsole("warn", async () => {
+        await back.model.goToSliderStop(0);
+      });
+      expect(back.treeManager.historyPlaybackFailures.map(f => f.direction)).toEqual(["undo"]);
+      // Stop 1 of 2 along the rail.
+      expect(back.model.uniqueFailures.map(m => m.location)).toEqual([50]);
     });
   });
 });
