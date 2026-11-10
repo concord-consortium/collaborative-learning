@@ -1,11 +1,13 @@
 # CLUE-751: Save documents only when their history is settled
 
-Status: design, 2026-11-03.
+Status: built in PR #3086. Designed 2026-11-03, and updated 2026-11-10 to describe what was built,
+including the changes made in review.
 
 This is GD-18 from the group documents plan. The group-document reasoning (why saves must reflect
-canonical state, the stale-check and jitter protocol, and the worked scenarios) is in
-[settled-state-doc-saves-design.md](../../group-docs/settled-state-doc-saves-design.md). This spec
-covers what CLUE-751 builds, which goes further than that design: it covers individual documents
+canonical state, the stale-check and jitter protocol, and the worked scenarios) was in the GD-18
+design, `docs/group-docs/settled-state-doc-saves-design.md`, which this PR retires; it is in the
+repository history before this PR. This spec covers what CLUE-751 builds, which goes further than
+that design: it covers individual documents
 too, saves the snapshot taken when each entry completes, and replaces the content-save sender.
 
 "Individual document" means any document that isn't `concurrent`: problem, personal, learning-log
@@ -56,7 +58,7 @@ found more problems in how saves are sent:
 - **Exact saves keep coming while entries complete faster than they upload**, such as a DataFlow
   program at 20 Hz, on individual and group documents.
 - **An individual document's content keeps being saved even when its history can't settle.**
-- **An individual document loaded behind its history catches up at load.**
+- **An individual document loaded behind its history catches up when it is opened for editing.**
 - **A tree-manager exchange can't hold an entry open forever.**
 - **Saves are sent one at a time, always newest-wins, with visible failure.**
 - **Group documents make fewer redundant saves**, per the GD-18 design.
@@ -112,30 +114,37 @@ point the guarantee starts from.
 The RTDB content envelope (`DBDocument` in [db-types.ts](../../../src/lib/db-types.ts)) gets these
 optional fields next to `lastHistoryEntryId`:
 
-- **`settled: true`** on an exact save. It is positive on purpose: envelopes saved before this change,
-  and saves from clients that haven't reloaded since the deploy, lack it, so readers treat them the
-  same as intermediate saves.
-- **`exactSince`** on an exact save: the entry from which history recreates the content. Replaying
-  from the state at `exactSince` through `lastHistoryEntryId` gives exactly the saved content. It is
-  carried forward from session to session while each load is exact (section 3), and restarts at the
-  loaded id when it isn't. For a document created after this change, the guarantee starts at the
-  beginning of its history; how that is encoded is left to the builder.
-- **`lastHistoryEntryIndex`** on every save: the stamped entry's `index` in Firestore. Group documents
-  use it for the stale-check (section 2), and individual documents use it to fetch only the entries a
-  load is missing (section 3).
-- **`unsettled`** on an intermediate save (section 6), holding evidence for debugging:
+- **`exactThrough: { id, index, contentHash, since }`** on an exact save, written in the same
+  `update()` as the content.
+  - `id` is the stamped entry, and `index` its `index` in Firestore. Group documents use the index for
+    the stale-check (section 2), and individual documents use it to fetch only the entries a load is
+    missing (section 3).
+  - `since` is the entry from which history recreates the content. Replaying from the state at `since`
+    through `id` gives exactly the saved content. It is carried forward from session to session while
+    each load is exact (section 3), and restarts at the loaded id when it isn't. For a document with
+    no history before the session, it is `"first"`, the start of history.
+  - `contentHash` is `hashString` of the content string.
+
+  A client that hasn't reloaded since the deploy saves with `update()` of only `content`,
+  `changeCount` and `lastHistoryEntryId`, so it leaves an `exactThrough` in place next to its own id
+  and content. A reader therefore trusts `exactThrough` only while `id` is the envelope's
+  `lastHistoryEntryId` and `contentHash` matches the stored content (`readSavedEnvelope`). Binding to
+  the id alone isn't enough: such a client can stamp the same id with content that is ahead of it.
+  Envelopes saved before this change, and envelopes whose `exactThrough` doesn't match, are treated the
+  same as intermediate saves. One object also means the evidence can't be half stale.
+- **`notExact`** on an intermediate save (section 6), holding evidence for debugging:
   - the open entries: each one's id, model, action, the names of its open exchanges (the tree manager
     already stores names like `"recordAction.sharedModelChanges"`), and when it opened
   - running tracked flows that have changed state, with their action names
   - the ids of completed entries that haven't committed
   - why the session stopped being exact, if it did
-  - when the document stopped being settled
+  - when the stretch with unsaved changes and no exact save began
 
-The save uses `update()`, which merges fields, so each save clears the other kind's fields: an exact
-save writes `unsettled: null`, and an intermediate save writes `settled: null` and `exactSince: null`.
+The save uses `update()`, which merges fields, so each save clears the other kind's field: an exact
+save writes `notExact: null`, and an intermediate save writes `exactThrough: null`.
 
 **Every save is stamped.** An intermediate save stamps the last entry from this session that has
-committed, or the loaded envelope's id when none has. So every id ever written is in Firestore, and
+committed, or, when none has, the last entry the load caught up to, or else the loaded envelope's id. So every id ever written is in Firestore, and
 is a lower bound on what the content holds.
 
 **What readers can rely on:**
@@ -143,7 +152,7 @@ is a lower bound on what the content holds.
 | Reader asks | Uses |
 |---|---|
 | "Is entry X saved?" (activity recorder, drift check, CLUE-773's conversion entry order) | `lastHistoryEntryId` from any save. It is always a lower bound. |
-| "Is the content exactly the state at X?" (playback start, group-document load, GD-19's `tips`) | `lastHistoryEntryId` only when `settled: true`, and only back to `exactSince`. Otherwise fall back as for an old envelope. |
+| "Is the content exactly the state at X?" (playback start, group-document load, GD-19's `tips`) | `lastHistoryEntryId` only when `exactThrough` is trusted, and only back to its `since`. Otherwise fall back as for an old envelope. |
 
 ### 2. Snapshot saving
 
@@ -201,32 +210,36 @@ a group document waits for the commits to catch up or for its settled save.
 **Group documents also save the current state when settled.** An idle member has no local entries,
 so it saves the current content when settled, per the GD-18 definition: nothing in
 `completedHistoryEntryQueue`, no upload in flight, no apply in progress, nothing in
-`pendingDownloadBuffer`, no entry open, and no running flow that has changed state. That save is
+`pendingDownloadBuffer`, no entry open, no running flow that has changed state, and a session that is
+still exact. That save is
 stamped with `expectedRemoteHead`, the last canonical entry. It is not stamped with the last entry in
 local history, because after a fork rollback that is a revert entry, which is local-only and would
 trip the drift check on the next load. These fields aren't MobX-observable today; making them
 observable is part of this work.
 
 **Group stale-check and jitter.** Before any group save, compare the save's chain index with the
-envelope's `lastHistoryEntryIndex`. If the envelope is at or past it, skip. Otherwise wait a random
+index in the envelope's `exactThrough`. If the envelope is at or past it, skip. Otherwise wait a random
 0–200 ms, re-check, and save. Local history can't order two ids (entries before the load point aren't
-in it), which is why the index is stored. An envelope without an index is treated as behind. GD-19
+in it), which is why the index is stored. An envelope whose `exactThrough` doesn't name its
+`lastHistoryEntryId` is treated as behind. GD-19
 replaces the single id and index with `tips`. A committing writer learns of its commit before the
 others receive the entry, so it usually saves first and the idle members skip.
 
 **A new envelope listener for group documents.** The GD-18 design assumed an existing RTDB listener
 covered the envelope's id. None does for group documents. Add one that listens only to the envelope's
-`lastHistoryEntryId`, `lastHistoryEntryIndex` and `settled` children, not the content.
+`lastHistoryEntryId` and `exactThrough` children, not the content. Without the content it can't check
+the hash, so it checks only that `exactThrough` names the id. A mismatch it can't see makes a member
+skip a save it would have made, and the next load still checks the hash.
 
 ### 3. Loading
 
-**Individual documents catch up at load.** If the loaded envelope has `settled: true` and its id isn't
-Firestore's last entry for the document, the entries after it are applied at load, as group documents
-already do. This restores edits that reached history but not the content, so the user sees their last
-few seconds of work come back, and it keeps the next entry's `previousEntryId` and the content in
-agreement.
+**Individual documents catch up when opened for editing.** If the envelope has a trusted `exactThrough`
+and its id isn't Firestore's last entry for the document, the entries after it are applied, as group
+documents already do at load. This restores edits that reached history but not the content, so the
+user sees their last few seconds of work come back, and it keeps the next entry's `previousEntryId`
+and the content in agreement.
 
-Only a `settled` envelope is caught up. An unmarked envelope's id is only a lower bound: an
+Only an envelope with a trusted `exactThrough` is caught up. An unmarked envelope's id is only a lower bound: an
 intermediate save's content can already hold entries that hadn't committed when it was stamped, and
 older envelopes under-claim the same way. Applying the entries after that id could apply some of them
 twice. So an unmarked envelope whose id isn't the last entry opens with the content as saved, the
@@ -236,6 +249,20 @@ The catch-up runs only for documents the current user owns, and not for publicat
 edits and saves an individual document, so other viewers (teachers, other students, exemplars) open
 without waiting.
 
+It runs when the owner opens the document for editing, not when the document is loaded. The
+other-documents listener loads every personal document and learning log when the app starts, so a
+catch-up at load would query Firestore for each one. An owned document is loaded read-only until its
+catch-up finishes. The catch-up also runs before tiles are copied into a document.
+
+While a document isn't open for editing, the RTDB content listener can replace its content with what
+the RTDB holds. It records the envelope that content came from in the document's `savedEnvelope`, and
+the catch-up starts from that envelope rather than the one first loaded.
+
+As soon as the sender starts after a catch-up that applied entries, it saves the caught-up content,
+stamped with the last entry applied, unless an entry has committed since or a snapshot couldn't be
+used then. Otherwise the RTDB content would stay behind its history until the next edit committed,
+and the content listener would bring that older content back once the document closed.
+
 The catch-up never loads the whole history. DataFlow and Simulator documents can have very large
 histories, and today an individual load reads only the last entry (`getLastHistoryEntry`, a
 `limit(1)` query on `index` descending, via `getFirestoreHistoryInfo`). The catch-up keeps it that
@@ -243,25 +270,26 @@ way:
 
 1. **Nothing to catch up.** When the envelope's `lastHistoryEntryId` is the last entry, there are no
    extra reads. This is the common case.
-2. **The saved entry's index.** It comes from the envelope's `lastHistoryEntryIndex`. An envelope saved
-   before this change has no index, so the load reads that one entry by id (an entry's Firestore doc
-   id is its entry id) to get it.
+2. **The saved entry's index.** It comes from the envelope's `exactThrough`. Envelopes saved before
+   this change have no `exactThrough`, so they are never caught up and need no index.
 3. **The cap.** The gap's size, the last entry's index minus the saved index, is known before anything
    is fetched. A gap of more than 200 entries isn't fetched: the document opens with the content as
    saved, the session is not exact, and the gap size is logged. A usual gap is the last few seconds of
    edits before a tab closed; with CLUE-760's 3-second background saves and a DataFlow program at
    20 Hz that is about 60 entries. Gaps beyond the cap come from content saves failing for a long time
    while uploads succeed.
-4. **The fetch.** Only the gap is fetched: `where("index", ">", savedIndex).orderBy("index")`. This
-   uses the single-field index that the existing `orderBy("index")` queries use, so no new Firestore
-   index is needed.
+4. **The fetch.** Only the gap is fetched:
+   `where("index", ">", savedIndex).where("index", "<=", lastIndex).orderBy("index")`. Both range
+   filters are on the same field, so this uses the single-field index that the existing
+   `orderBy("index")` queries use, and no new Firestore index is needed.
 5. **A complete gap.** The fetched indexes must run without holes, and each entry's `previousEntryId`
    must be the entry before it. A hole means an upload failed for good. Entries up to the hole are
    applied, and the session is not exact.
-6. **A saved id that isn't in Firestore**, such as an old envelope stamped with an entry that never
-   uploaded, gets no catch-up, and the session is not exact.
+6. **A saved id that isn't in Firestore** gets no catch-up, and the session is not exact. With
+   nothing to fetch, a saved id other than the last entry can't be in Firestore. Otherwise the first
+   fetched entry's `previousEntryId` doesn't name it, which is a hole.
 
-Opening the document waits for the catch-up: one more query, or two for an envelope without an index.
+Opening the document for editing waits for the catch-up: one more query.
 Applying entries after the user has started editing would collide with their new entries, so the
 document, its toolbar and its 4-up corner stay read-only until the catch-up finishes. A gap over the
 cap doesn't wait.
@@ -269,23 +297,23 @@ cap doesn't wait.
 If an entry fails to apply, the document opens with what applied, and the session is not exact. The
 failure is logged.
 
-**Whether a load is exact.** A load is exact when the envelope had `settled: true` and any missing
-entries applied cleanly. Then `exactSince` carries forward. An unmarked envelope at Firestore's last
+**Whether a load is exact.** A load is exact when the envelope had a trusted `exactThrough` and any
+missing entries applied cleanly. Then its `since` carries forward. An unmarked envelope at Firestore's last
 entry starts the session's exact saves at the loaded id. An unmarked envelope with a gap leaves the
 session not exact.
 
 **The group-document initial load.** The FIXME at `getInitialLastHistoryEntry` in
 `firestore-history-manager-concurrent.ts` describes a race: the content and
 `metadata.lastHistoryEntry` are fetched separately, so an entry committed between the two fetches is
-mishandled. When the loaded envelope has `settled: true`, the initial load takes its starting point
-from the envelope's `lastHistoryEntryId` and applies only the entries after it. Unmarked envelopes keep
+mishandled. When the loaded envelope has a trusted `exactThrough`, the initial load takes its starting
+point from the envelope's `lastHistoryEntryId` and applies only the entries after it. Unmarked envelopes keep
 today's behavior. Remove the FIXME comment.
 
 **The CLUE-773 overlap.** CLUE-773 converts old tiles at load and holds the load entry that records
 the conversion in the tree manager's `pendingLoadEntry` until the first entry that changes the
 content completes. Until then the content is converted but history doesn't have the entry, so no
 snapshot is usable (section 2) and an unmount flush or intermediate save stamps the loaded id
-without `settled`. CLUE-773 landed first, so CLUE-751 adds this condition as a snapshot blocker.
+without `exactThrough`. CLUE-773 landed first, so CLUE-751 adds this condition as a snapshot blocker.
 Waiting for commits also closes the window CLUE-773 left: content stamped
 at or after the conversion entry isn't saved until that entry is in Firestore. CLUE-773 converts only
 individual documents; snapshot pre-processor changes on group documents, and other pre-processor
@@ -317,7 +345,7 @@ Firestore, later entries are no longer blocked behind it, and the log shows the 
 
 Running MST flows don't time out: force-completing one would mean splitting its recorded changes
 partway through. A flow that never returns leaves the session on intermediate saves, and the
-`unsettled` evidence names it. No keep-alive is needed, since no known exchange legitimately stays
+`notExact` evidence names it. No keep-alive is needed, since no known exchange legitimately stays
 open for 30 seconds.
 
 Force-completing was chosen over reverting the entry's patches. Reverting could break later entries
@@ -331,7 +359,8 @@ React. The hook only creates it and hands it the document. It holds the snapshot
 from sections 1–2 for both kinds of document; the history managers supply the signals.
 
 - **Triggered by commits and the settled state,** through MobX reactions, not by `onSnapshot`.
-- **One write in flight at a time.** When it finishes, the sender sends whatever is newest by then.
+- **One write in flight at a time,** except on page hide and at the end of the drain, which don't
+  wait. When it finishes, the sender sends whatever is newest by then.
 - **A retry re-reads the newest state.** It never resends an older one.
 - **The RTDB write alone decides success.** The Firestore `tools` update goes out separately,
   only when the list of tile types changes.
@@ -351,10 +380,13 @@ document its last save after the upload queue drains in the background.
 **Page hide.** On `pagehide`, an individual document sends its newest usable committed snapshot right
 away, skipping the minimum gap. It doesn't make an intermediate save while its saves are exact:
 entries still uploading are likely lost with the tab, and if they do land, the next load catches up
-from that settled envelope (section 3). When the document already relies on intermediate saves (a
-fallback episode is open, or the session isn't exact) and the latest change isn't covered, it sends
-an intermediate save right away instead, so a tab closed during a Firestore outage loses nothing the
-5-second cadence hadn't sent yet.
+from that exact envelope (section 3). When the document already relies on intermediate saves (a
+fallback episode is open, the session isn't exact, or the envelope the RTDB holds has no
+`exactThrough`, or there is none) and the latest change isn't covered, it sends an intermediate save
+right away instead, so a tab closed during a Firestore outage loses nothing the 5-second cadence
+hadn't sent yet. The next load can't catch up from an envelope without `exactThrough`, so an
+intermediate save over it loses nothing. The sender listens for `pagehide` itself, so a tab closed
+while the sender drains after unmount still gets this save.
 
 When the hook unmounts, the last-edited time (and the session-end evaluation request it triggers)
 is set when the sender finishes, not at unmount, so the evaluation reads the final content.
@@ -374,15 +406,15 @@ place, so without them work is lost. A group document can't know it has one acti
 one (see Anti-goals).
 
 When a qualifying document has had unsaved changes and no exact save for **5 seconds**, the sender
-saves the current content, stamped with the last committed entry, with the `unsettled` evidence. It
+saves the current content, stamped as section 1 describes, with the `notExact` evidence. It
 repeats at most every 5 seconds while that lasts. This covers a running flow or a stuck exchange, an
 upload that has stalled, Firestore being unavailable, and a session that is no longer exact.
 
-**Logging.** Each fallback episode is logged: once when it starts, with the `unsettled` evidence, and
-once when the next exact save ends it, with its duration and number of intermediate saves. An episode
-in a session that is no longer exact ends when the session does. The evidence in the envelope only
-lasts until the next exact save, so the log is the lasting record for metrics and debugging. Event
-names are left to the builder.
+**Logging.** Each fallback episode is logged: once when it starts (`CONTENT_SAVE_FALLBACK_START`),
+with the `notExact` evidence, and once when the next exact save ends it (`CONTENT_SAVE_FALLBACK_END`),
+with its duration and number of intermediate saves. An episode in a session that is no longer exact
+ends when the session does. The evidence in the envelope only lasts until the next exact save, so the
+log is the lasting record for metrics and debugging.
 
 ### 7. The activity recorder
 
@@ -392,6 +424,35 @@ names are left to the builder.
   active editor often skips its save because another member made it, and without this the editor's
   recorder would fall back to the 30-second timeout for every change.
 - The 30-second timeout and the `pagehide` recording stay as a backstop.
+
+### 8. A group document that stops saving
+
+A group document makes no intermediate saves, so once its session isn't exact this client saves no
+more content. Other members who are still exact keep saving, but a member working alone sees `Saving`
+for the rest of the session. Logs aren't watched routinely, so the user is told, and a report is how
+these bugs come to light. The sender logs `CONTENT_SAVE_GROUP_STOPPED` with the reason once per
+session, and the document shows a notice over its content and toolbar, with the reason as a code for
+reports. Every reason is a bug, so the notice shouldn't come up often.
+
+Reloading starts a new session, which is exact when its load applies cleanly, and its first settled
+check saves the head. Closing and reopening the document doesn't, since the document model stays in
+the store. The notice depends on what the user would see and whether reloading helps:
+
+| Reason | What breaks | Notice |
+|---|---|---|
+| An entry stayed open for 30 seconds (`timed-out-entry`) | Nothing visible: the entry's records reach history, and a late record becomes a new entry. | Can be closed; suggests reloading. |
+| A change with no entry (`unrecorded-change`) | The change is only on this screen. Later entries that build on it can fail to apply at load, for every member. | Can't be closed, and the document is read-only; asks for a reload. A second one for the same document in the same tab within 10 minutes (`sessionStorage`) means the reload didn't help, so it asks the user to tell their teacher instead. |
+| An entry fails to apply at load (`initial-apply-failed`) | Every load fails the same way, and edits made now chain after the failing entry. | Can't be closed; asks the user to tell their teacher. |
+| Another member's entry fails to apply (`remote-apply-failed`) | This screen is missing the entry. A reload helps when this tab's own changes caused the failure; otherwise the reload ends in `initial-apply-failed`. | Can't be closed; asks for a reload. |
+| The saved content is at an entry the history doesn't have (`saved-id-missing`) | The document looks right, but no load is exact, so no member saves again. It takes another writer. | Can be closed; asks the user to tell their teacher. |
+
+A notice that can't be closed makes the document under it inert. A failed apply marks the session not
+exact before the history manager's `applying` flag clears, since the sender checks for a settled save
+as soon as it does.
+
+Closing the document and reopening it automatically, in place of a reload, would need changes beyond
+the document's own components (the documents store, the workspace and the listeners), so it isn't
+attempted.
 
 ### Known gaps
 
@@ -404,14 +465,14 @@ names are left to the builder.
   `pendingLocal` only when its own echo arrives, and there is no transaction promise or splice.
   CLUE-751 adds the race to GD-22's list in the plan instead of fixing it.
 - **Undetected drift.** Snapshot pre-processor changes at load that aren't CLUE-773 conversions, and
-  all pre-processor changes on group documents, aren't detected, so `exactSince` can carry forward
-  across them. Changes after monitoring starts that produce no entry are detected only where the
-  builder's check (see "Left to the builder") catches them. CLUE-788 section 2 covers recording all of
+  all pre-processor changes on group documents, aren't detected, so `exactThrough.since` can carry
+  forward across them. Changes after monitoring starts that produce no entry are detected only where
+  the tree monitor's check catches them (see "Choices made in building"). CLUE-788 section 2 covers recording all of
   these as drift entries.
 - **Changes made while monitoring is off.** Changes made after the load but before the hook enables
   history monitoring (mount-time fixups, such as a tile syncing to a shared model), fixups made while
   the load catch-up runs (the document is read-only then, so monitoring is off), and changes made
-  while the sender drains after unmount are not detected. Such a change can sit inside a settled
+  while the sender drains after unmount are not detected. Such a change can sit inside an exact
   save. A detector would also flag load-time fixups and leave those documents never exact, so
   CLUE-788's drift entries are the fix. Blocking code-driven changes during the catch-up isn't
   attempted: CLUE has no model-level lock, and blocking tile fixups needs an understanding of all of
@@ -420,15 +481,18 @@ names are left to the builder.
   since the suspended flow counts as tracked. MST protection should make them impossible, so one
   would be an error, not drift. CLUE-788 records the investigation.
 - **A remote entry that always fails to apply.** A group client whose remote apply failed stops
-  saving content and logs `HISTORY_REMOTE_APPLY_FAILED`. If the failing entry is in the chain, every
-  member that loads fails on it, no member saves content again, and each later load shows content
-  missing everything after it. Group documents aren't widely used yet, so this stays strict: no
-  unsettled content is saved to get past it. The log shows whether it happens. Applying entries one
-  at a time and skipping a failing one, or saving the settled state stamped with the remote head
-  after a failure, are the options if it does.
+  saving content, logs `HISTORY_REMOTE_APPLY_FAILED` and shows its notice (section 8). If the failing
+  entry is in the chain, every member that loads fails on it, no member saves content again, and each
+  later load shows content missing everything after it. Group documents aren't widely used yet, so
+  this stays strict: no content that isn't exact is saved to get past it. The notices and the log show
+  whether it happens. Applying entries one at a time and skipping a failing one, or saving the settled
+  state stamped with the remote head after a failure, are the options if it does.
+- **Saved content at an entry the history doesn't have.** Every later session's load is not exact, so
+  no member saves content again. A repair, such as a member whose load applied cleanly saving its
+  content stamped with the remote head, is recorded in the group-docs implementation todos.
 - **The group initial load from an unmarked envelope.** The content and Firestore's last entry are
   read separately, so an entry committed between the two reads is skipped, and that session's saves
-  are still marked settled. A load from a `settled` envelope doesn't have this. Marking unmarked
+  are still marked exact. A load from an envelope with a trusted `exactThrough` doesn't have this. Marking unmarked
   group loads not exact instead would stop every existing group document from saving, since group
   documents make no intermediate saves. GD-22's list in the group-docs plan records it.
 - **Individual uploads that fail for good.** The Firestore SDK retries transient write failures
@@ -447,9 +511,15 @@ names are left to the builder.
   [README](../../group-docs/README.md). Add the upload race to GD-22.
 - Update [group-docs-current-state.md](../../group-docs/group-docs-current-state.md) where it describes
   saves.
-- Retire [settled-state-doc-saves-design.md](../../group-docs/settled-state-doc-saves-design.md), and
-  fix the links to it from [transaction-free-history-design.md](../../group-docs/transaction-free-history-design.md)
-  and [background-entries-design.md](../../group-docs/background-entries-design.md).
+- Retire `settled-state-doc-saves-design.md`, and fix the links to it from
+  [transaction-free-history-design.md](../../group-docs/transaction-free-history-design.md) and
+  [background-entries-design.md](../../group-docs/background-entries-design.md).
+- Update [group-docs-classroom-readiness.md](../../group-docs/group-docs-classroom-readiness.md),
+  [group-docs-jira-mapping.md](../../group-docs/group-docs-jira-mapping.md), and
+  [group-docs-implementation-todos.md](../../group-docs/group-docs-implementation-todos.md) (remote
+  entries that fail to apply, and saved content at an entry the history doesn't have).
+- Describe the catch-up and the envelope's id in [history-framework.md](../../history-framework.md),
+  and the envelope fields in [metadata-fields.md](../../document-metadata/metadata-fields.md).
 
 The work CLUE-751 leaves for later (out-of-order entries, drift entries, one mechanism for every
 document) is written up by CLUE-788.
@@ -474,15 +544,19 @@ document) is written up by CLUE-788.
   too.
 - Group documents also save the current state when an idle member settles, with the GD-18 stale-check
   and jitter.
-- Exact saves are marked with a positive `settled: true` and record `exactSince`. Intermediate saves
-  carry `unsettled` evidence instead.
+- Exact saves write `exactThrough`, bound to the envelope's id and a hash of its content, so a save by
+  a client that doesn't know the field can't leave a stale mark behind. Intermediate saves carry
+  `notExact` evidence instead.
 - Content saves wait for commits (rather than readers waiting for the entry to appear).
 - Intermediate saves are for documents known to have a single writer, which today means individual
   documents only.
-- Individual documents apply missing entries at load, only from a `settled` envelope and only for
-  the owner; a failure leaves the session not exact.
-- The catch-up fetches only the missing entries, using `lastHistoryEntryIndex`, which every save
-  writes. A gap of more than 200 entries isn't fetched, and the session is not exact.
+- Individual documents apply missing entries when the owner opens them for editing, only from an
+  envelope with a trusted `exactThrough`; a failure leaves the session not exact. The caught-up
+  content is saved as soon as the sender starts.
+- The catch-up fetches only the missing entries, using `exactThrough`'s index. A gap of more than 200
+  entries isn't fetched, and the session is not exact.
+- A group document whose session stops being exact shows a notice over the document, chosen by the
+  reason (section 8).
 - Running flows that have changed state count as open. Only tree-manager exchanges time out, and
   are force-completed. No keep-alive.
 - Every fallback episode is logged.
@@ -503,58 +577,85 @@ document) is written up by CLUE-788.
 - The save indicator rules in section 5.
 - The activity recorder keeps its 30-second timeout and `pagehide` recording as a backstop.
 - Group saves are stamped with `expectedRemoteHead` (settled saves) or the committed entry (snapshot
-  saves), and write `lastHistoryEntryIndex` for the stale-check.
-- An intermediate save with nothing committed this session stamps the loaded envelope's id.
+  saves), and write the index in `exactThrough` for the stale-check.
+- An intermediate save with nothing committed this session stamps the last entry the load caught up
+  to, or else the loaded envelope's id.
 - A failed apply at load opens the document with what applied.
-- The group-document initial load starts from a `settled` envelope's id.
+- The group-document initial load starts from an exact envelope's id.
+- The notices' wording, and the 10-minute window for a repeated unrecorded change.
 - Upload failures that never recover leave the session on intermediate saves; no ordered retry.
 
-## Left to the builder
+## Choices made in building
 
-- How the sender detects a content change made after monitoring starts that produced no entry, and
-  how a running flow reports that it has changed state.
-- How the history managers expose commits and voids to the sender.
-- How `exactSince` encodes "from the beginning of history".
-- Event names and fields for the timeout, load-failure and fallback-episode logs.
-- The retry backoff curve and when it shows `Retrying`.
+These were left to the builder in the design.
+
+- The tree monitor detects a change made after monitoring starts that produced no entry with an
+  `onPatch` listener that fires while no tracked call is running. It reports a running flow that has
+  changed state through its running calls, and a call that has finished but whose record hasn't
+  reached the manager yet through `hasCallWithUnrecordedChanges` and `isFinishedCallExchange`.
+- The history managers expose commits and voids through `ICommitSource` and `ICommitListener`
+  ([history-commits.ts](../../../src/models/history/history-commits.ts)).
+- "From the beginning of history" is `since: "first"` (`kHistoryStart`).
+- The log events are `HISTORY_ENTRY_TIMED_OUT`, `HISTORY_LOAD_CATCH_UP_INCOMPLETE`,
+  `HISTORY_REMOTE_APPLY_FAILED`, `CONTENT_SAVE_FALLBACK_START`, `CONTENT_SAVE_FALLBACK_END` and
+  `CONTENT_SAVE_GROUP_STOPPED`.
+- Retries wait 1 second, doubling to at most 30 seconds, and the indicator shows `Retrying` from the
+  third consecutive failure. A successful write starts the count again.
 
 ## Testing
 
-- **Snapshot saving (individual):** a save holds the snapshot taken at its stamped entry, is marked
-  `settled` with `exactSince`, and is sent only after that entry and every earlier one have uploaded.
-  Entries completing faster than uploads still produce exact saves. A snapshot taken while another
-  entry was open, or while a flow that changed state was running, is skipped. A flow that changed
-  nothing doesn't block. A pending conversion entry blocks exact saves.
+- **Snapshot saving (individual):** a save holds the snapshot taken at its stamped entry, writes
+  `exactThrough` with its index, `since` and content hash, and is sent only after that entry and every
+  earlier one have uploaded. Entries completing faster than uploads still produce exact saves. A
+  snapshot taken while another entry was open, while an open entry had recorded changes, or while a
+  flow that changed state was running, is skipped. A flow or call that changed nothing doesn't block.
+  A pending conversion entry blocks exact saves.
 - **Snapshot saving (group):** a committed transaction saves the newest usable snapshot among its
-  entries. A remote entry applied, a rollback or a merge voids uncommitted snapshots. A lone runner
-  ticking faster than its uploads still produces exact saves.
+  entries, and a transaction Firestore reruns reports each entry once, with the index of the attempt
+  that commits. A remote entry applied, a rollback or a merge voids uncommitted snapshots. A lone
+  runner ticking faster than its uploads still produces exact saves.
 - **Settled saves (group):** an idle member saves the current state when settled, stamped with
   `expectedRemoteHead`. No save while the queue is non-empty, an upload is in flight, or an apply is
-  running. A rolled-back local entry is never saved. The stale-check skips a save when the envelope's
-  index is at or past it.
-- **Exactness:** a change with no entry after monitoring starts makes later saves not exact.
-  `exactSince` carries forward across an exact load and restarts after an unmarked one.
-- **Envelope fields:** an exact save clears `unsettled`, an intermediate save clears `settled` and
-  `exactSince`, and every save is stamped with an id that is in Firestore.
-- **Load (individual):** a settled envelope behind Firestore applies the missing entries and keeps
-  `exactSince`; an unmarked envelope behind Firestore applies nothing and is not exact;
-  a failed apply opens with what applied and is not exact. Only the gap is fetched: no extra read when
-  the envelope is at the last entry, and one read by id for an envelope without an index. A gap over
-  200 entries isn't fetched, is logged, and leaves the session not exact. A hole in the indexes or a
-  broken `previousEntryId` chain stops the apply at the hole. A saved id missing from Firestore gets
-  no catch-up.
-- **Initial load (group):** a `settled` envelope's id sets where remote entries start applying.
+  running, and a settled save doesn't replace a commit's save at the same index. A rolled-back local
+  entry is never saved. The stale-check skips a save when the envelope's index is at or past it, and
+  counts an envelope whose `exactThrough` names another id as behind.
+- **Exactness:** a change with no entry after monitoring starts makes later saves not exact. A
+  finished call counts as unrecorded changes until its record reaches the manager, or its record
+  returns early. `since` carries forward across an exact load and restarts after an unmarked one. A
+  failed group apply is not exact before `applying` clears.
+- **Envelope fields:** an exact save clears `notExact`, an intermediate save clears `exactThrough`, and
+  every save is stamped with an id that is in Firestore. A reader drops `exactThrough` after a save
+  that stamped another id, or another content string, over it.
+- **Load (individual):** the catch-up starts only when it is asked for, once, and from the envelope
+  it is given. An exact envelope behind Firestore applies the missing entries and keeps `since`; an
+  unmarked envelope behind Firestore applies nothing and is not exact; a failed apply opens with what
+  applied and is not exact, and an error thrown while applying counts as an apply failure. Only the gap
+  is fetched, bounded by the last entry, and nothing is fetched when the envelope is at the last entry.
+  A gap over 200 entries isn't fetched, is logged, and leaves the session not exact. A hole in the
+  indexes or a broken `previousEntryId` chain stops the apply at the hole. A user who turns out not to
+  be the owner gets no catch-up. The sender saves the caught-up content when it starts.
+- **Load of converted content:** the missing entries are applied to the stored JSON when the load
+  converted old models, or when the gap holds a load entry even though the load converted nothing.
+- **Initial load (group):** an exact envelope's id sets where remote entries start applying.
 - **Timeout:** an entry whose exchanges stay open past the timeout is force-completed and marked, a
-  late record becomes a new entry, and later saves are not exact. A long-running flow is not timed out.
+  late record becomes a new entry, and later saves are not exact. An entry that completes in time
+  isn't timed out.
 - **Sender:** one write in flight; a failed write retries with the newest state and never resends an
-  older one; a slow `tools` update doesn't delay or reorder content saves; failures eventually show
-  `Retrying`; the minimum gap holds and is settable per save.
-- **Intermediate saves:** made after 5 seconds without an exact save, stamped with the last committed
-  entry, carrying the evidence; never made on a group document; an episode is logged at its start and
-  end.
-- **Lifetime:** after unmount, the sender finishes the pending exact save, or makes an intermediate
-  save after 30 seconds and stops.
+  older one; a slow `tools` update doesn't delay or reorder content saves; failures show `Retrying`
+  from the third, a success starts the count again, and retries wait at most 30 seconds; the minimum
+  gap holds and is settable per save.
+- **Intermediate saves:** made after 5 seconds without an exact save, stamped as section 1
+  describes, carrying the evidence; never made on a group document; an episode is logged at its start
+  and end.
+- **Lifetime and page hide:** after unmount, the sender finishes the pending exact save, or makes an
+  intermediate save after 30 seconds and stops. The window's `pagehide` reaches the sender while it
+  drains, stops reaching it once it is disposed, and isn't listened to on a group document.
+- **A group document that stops saving:** each reason gets its notice; one that can't be closed makes
+  the document under it inert; a repeated unrecorded change in the same tab asks the user to tell their
+  teacher; the stop is logged once per session.
 - **Activity recorder:** on a group document, a save by another member counts the editor's change.
-- **Cypress:** an individual document reloads with content matching its stamped entry after a burst
-  of edits; a DataFlow tile at 20 Hz still produces exact saves; a document whose last uploads landed
-  after its last save catches up on reload.
+- **Content listener:** it records the envelope its content came from.
+- **Cypress:** after a burst of edits, an individual document's envelope is exact; with an older
+  envelope put back, a reload brings the last edit's text back and the next save is exact past it. A
+  DataFlow program running at its default rate keeps producing exact saves, at least three entries
+  past the first.
