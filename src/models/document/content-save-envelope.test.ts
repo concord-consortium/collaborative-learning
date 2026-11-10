@@ -1,12 +1,13 @@
-import { IUnsettledEvidence } from "../../lib/db-types";
-import { buildExactSave, buildIntermediateSave, getDocumentTools } from "./content-save-envelope";
+import { INotExactEvidence } from "../../lib/db-types";
+import { hashString } from "../../utilities/js-utils";
+import { buildExactSave, buildIntermediateSave, getDocumentTools, readSavedEnvelope } from "./content-save-envelope";
 import { DocumentContentSnapshotType } from "./document-content";
 
-const evidence: IUnsettledEvidence = {
+const evidence: INotExactEvidence = {
   openEntries: [],
   runningFlows: [{ action: "/content/tileMap/t1/content/run" }],
   uncommittedEntryIds: ["e2"],
-  unsettledSince: 1234
+  since: 1234
 };
 
 describe("getDocumentTools", () => {
@@ -46,41 +47,53 @@ describe("buildExactSave", () => {
       content: "{}",
       changeCount: 3,
       lastHistoryEntryId: "e5",
-      lastHistoryEntryIndex: 5,
-      settled: true,
-      exactSince: "e0",
-      unsettled: null
+      exactThrough: { id: "e5", index: 5, contentHash: hashString("{}"), since: "e0" },
+      notExact: null
     });
   });
 });
 
 describe("buildIntermediateSave", () => {
-  it("returns the intermediate save fields and clears the exact ones", () => {
+  it("returns the intermediate save fields and clears exactThrough", () => {
     expect(buildIntermediateSave({
-      content: "{}", changeCount: 4, entry: { id: "e1", index: 1 }, evidence
+      content: "{}", changeCount: 4, entry: { id: "e1" }, evidence
     })).toEqual({
       content: "{}",
       changeCount: 4,
       lastHistoryEntryId: "e1",
-      lastHistoryEntryIndex: 1,
-      settled: null,
-      exactSince: null,
-      unsettled: evidence
+      exactThrough: null,
+      notExact: evidence
     });
   });
 
-  it("clears the index when the entry has none", () => {
-    const values = buildIntermediateSave({ content: "{}", changeCount: 4, entry: { id: "e1" }, evidence });
-    expect(values).toEqual({
-      content: "{}", changeCount: 4, lastHistoryEntryId: "e1", lastHistoryEntryIndex: null,
-      settled: null, exactSince: null, unsettled: evidence
-    });
-  });
-
-  it("omits the id fields when given no entry", () => {
+  it("omits the id when given no entry", () => {
     const values = buildIntermediateSave({ content: "{}", changeCount: 4, evidence });
-    expect(values).toEqual({ content: "{}", changeCount: 4, settled: null, exactSince: null, unsettled: evidence });
+    expect(values).toEqual({ content: "{}", changeCount: 4, exactThrough: null, notExact: evidence });
     expect("lastHistoryEntryId" in values).toBe(false);
-    expect("lastHistoryEntryIndex" in values).toBe(false);
+  });
+});
+
+describe("readSavedEnvelope", () => {
+  const content = JSON.stringify({ tileMap: {} });
+  const exactThrough = { id: "e5", index: 5, contentHash: hashString(content), since: "e2" };
+
+  it("keeps exactThrough when it was written with the envelope's id and content", () => {
+    expect(readSavedEnvelope({ content, lastHistoryEntryId: "e5", exactThrough }))
+      .toEqual({ lastHistoryEntryId: "e5", exactThrough: { index: 5, since: "e2" } });
+  });
+
+  it("drops exactThrough after a save that stamped another id over it", () => {
+    expect(readSavedEnvelope({ content, lastHistoryEntryId: "e6", exactThrough }))
+      .toEqual({ lastHistoryEntryId: "e6" });
+  });
+
+  it("drops exactThrough after a save that wrote other content with the same id", () => {
+    const later = JSON.stringify({ tileMap: { t1: {} } });
+    expect(readSavedEnvelope({ content: later, lastHistoryEntryId: "e5", exactThrough }))
+      .toEqual({ lastHistoryEntryId: "e5" });
+  });
+
+  it("returns nothing for an envelope without an id", () => {
+    expect(readSavedEnvelope({ content })).toBeUndefined();
   });
 });

@@ -725,7 +725,7 @@ describe("useDocumentSyncToFirebase hook", () => {
 
       window.dispatchEvent(new Event("pagehide"));
       expect(contentUpdate).toHaveBeenCalledTimes(2);
-      expect(writes[1].values).toMatchObject({ lastHistoryEntryId: b, settled: true });
+      expect(writes[1].values).toMatchObject({ lastHistoryEntryId: b, exactThrough: { id: b } });
       expect(Object.keys(JSON.parse(writes[1].values.content).tileMap)).toHaveLength(2);
       expect(mockSetLastEditedOnDisconnect).toHaveBeenCalledTimes(1);
 

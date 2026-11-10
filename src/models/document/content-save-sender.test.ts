@@ -8,8 +8,9 @@ import { registerTileComponentInfo } from "../tiles/tile-component-info";
 import { registerTileContentInfo } from "../tiles/tile-content-info";
 import { TileContentModel } from "../tiles/tile-content";
 import { LogEventName } from "../../lib/logger-types";
+import { hashString } from "../../utilities/js-utils";
 import {
-  collectUnsettledEvidence, ContentSaveSender, getContentSaveSender, IContentRef, IContentSaveSenderOptions,
+  collectNotExactEvidence, ContentSaveSender, getContentSaveSender, IContentRef, IContentSaveSenderOptions,
   kGroupSaveJitterMs, kIntermediateSaveIntervalMs, kMaxEvidenceEntryIds, kMaxUsableSnapshots, kMinimumSaveGapMs,
   kSenderUnmountLimitMs
 } from "./content-save-sender";
@@ -282,10 +283,8 @@ describe("ContentSaveSender", () => {
       expect(values.content).not.toContain("bravo");
       expect(values).toMatchObject({
         lastHistoryEntryId: a,
-        lastHistoryEntryIndex: 1,
-        settled: true,
-        exactSince: "e0",
-        unsettled: null
+        exactThrough: { id: a, index: 1, contentHash: hashString(values.content), since: "e0" },
+        notExact: null
       });
     });
 
@@ -311,7 +310,7 @@ describe("ContentSaveSender", () => {
         const write = contentRef.lastWrite;
         expect(textOf(write.values)).toBe(`text-${i}`);
         expect(write.values.lastHistoryEntryId).toBe(ids[i]);
-        expect(write.values.settled).toBe(true);
+        expect(write.values.exactThrough).toMatchObject({ id: ids[i] });
         write.resolve();
         await flush();
       }
@@ -346,7 +345,7 @@ describe("ContentSaveSender", () => {
       // a commit saves the newest snapshot kept among its entries
       commits.commit(d, e);
       expect(contentRef.update).toHaveBeenCalledTimes(2);
-      expect(contentRef.writes[1].values).toMatchObject({ lastHistoryEntryId: e, settled: true });
+      expect(contentRef.writes[1].values).toMatchObject({ lastHistoryEntryId: e, exactThrough: { id: e } });
       expect(textOf(contentRef.writes[1].values)).toBe("echo");
     });
 
@@ -361,7 +360,7 @@ describe("ContentSaveSender", () => {
 
       commits.commit(a, b);
       expect(contentRef.update).toHaveBeenCalledTimes(1);
-      expect(contentRef.writes[0].values).toMatchObject({ lastHistoryEntryId: a, settled: true });
+      expect(contentRef.writes[0].values).toMatchObject({ lastHistoryEntryId: a, exactThrough: { id: a } });
       expect(textOf(contentRef.writes[0].values)).toBe("alpha");
     });
 
@@ -376,7 +375,7 @@ describe("ContentSaveSender", () => {
       expect(contentRef.update).not.toHaveBeenCalled();
       commits.commit(ids[1]);
       expect(contentRef.update).toHaveBeenCalledTimes(1);
-      expect(contentRef.writes[0].values).toMatchObject({ lastHistoryEntryId: ids[1], settled: true });
+      expect(contentRef.writes[0].values).toMatchObject({ lastHistoryEntryId: ids[1], exactThrough: { id: ids[1] } });
       expect(textOf(contentRef.writes[0].values)).toBe("text-1");
     });
 
@@ -472,7 +471,7 @@ describe("ContentSaveSender", () => {
       commits.commit(b);
       jest.advanceTimersByTime(10000);
       await flush();
-      expect(contentRef.writes.map(write => write.values.settled)).toEqual([true, null]);
+      expect(contentRef.writes.map(write => write.values.exactThrough !== null)).toEqual([true, false]);
     });
 
     it("drops uncommitted snapshots when they are voided", async () => {
@@ -482,7 +481,7 @@ describe("ContentSaveSender", () => {
       commits.commit(a);
       jest.advanceTimersByTime(10000);
       await flush();
-      expect(contentRef.writes.map(write => write.values.settled)).toEqual([null]);
+      expect(contentRef.writes.map(write => write.values.exactThrough !== null)).toEqual([false]);
     });
 
     it("saves the newest usable snapshot among entries committed together", async () => {
@@ -496,7 +495,7 @@ describe("ContentSaveSender", () => {
       commits.commit(a, b, c);
       expect(contentRef.update).toHaveBeenCalledTimes(1);
       expect(textOf(contentRef.writes[0].values)).toBe("bravo");
-      expect(contentRef.writes[0].values).toMatchObject({ lastHistoryEntryId: b, lastHistoryEntryIndex: 2 });
+      expect(contentRef.writes[0].values).toMatchObject({ lastHistoryEntryId: b, exactThrough: { index: 2 } });
     });
 
     it("doesn't count the entries of its own document actions as open entries", async () => {
@@ -538,7 +537,7 @@ describe("ContentSaveSender", () => {
 
       commits.commit(ids[0]);
       expect(contentRef.update).toHaveBeenCalledTimes(1);
-      expect(contentRef.writes[0].values).toMatchObject({ lastHistoryEntryId: ids[0], settled: true });
+      expect(contentRef.writes[0].values).toMatchObject({ lastHistoryEntryId: ids[0], exactThrough: { id: ids[0] } });
     });
 
     it("skips a snapshot taken while a group document applied remote entries", async () => {
@@ -664,37 +663,37 @@ describe("ContentSaveSender", () => {
       sender.detach();
       expect(onDrained).toHaveBeenCalledTimes(1);
       expect(document.savedEnvelope).toEqual(
-        { lastHistoryEntryId: b, lastHistoryEntryIndex: 2, settled: true, exactSince: "e0" });
+        { lastHistoryEntryId: b, exactThrough: { index: 2, since: "e0" } });
     });
 
     it("records the envelope each newest write leaves in the RTDB", async () => {
       const { commits, contentRef, document, edit } = track(setup());
-      document.setSavedEnvelope({ lastHistoryEntryId: "loaded", lastHistoryEntryIndex: 7, settled: false });
+      document.setSavedEnvelope({ lastHistoryEntryId: "loaded" });
       const a = await edit("alpha");
       commits.commit(a);
       contentRef.writes[0].resolve();
       await flush();
       expect(document.savedEnvelope).toEqual(
-        { lastHistoryEntryId: a, lastHistoryEntryIndex: 1, settled: true, exactSince: "e0" });
+        { lastHistoryEntryId: a, exactThrough: { index: 1, since: "e0" } });
 
       await edit("bravo");
       jest.advanceTimersByTime(kIntermediateSaveIntervalMs);
-      expect(contentRef.writes[1].values).toMatchObject({ settled: null });
+      expect(contentRef.writes[1].values).toMatchObject({ exactThrough: null });
       contentRef.writes[1].resolve();
       await flush();
-      expect(document.savedEnvelope).toEqual({ lastHistoryEntryId: a, lastHistoryEntryIndex: 1, settled: false });
+      expect(document.savedEnvelope).toEqual({ lastHistoryEntryId: a });
     });
 
-    it("records an intermediate save's envelope without an index, or without an entry, as it leaves them",
+    it("records an intermediate save's envelope without exactThrough, or without an entry, as it leaves them",
         async () => {
       const { contentRef, document, edit } = track(setup());
-      document.setSavedEnvelope({ lastHistoryEntryId: "loaded", settled: true, exactSince: "e0" });
+      document.setSavedEnvelope({ lastHistoryEntryId: "loaded", exactThrough: { index: 7, since: "e0" } });
       await edit("alpha");
       jest.advanceTimersByTime(kIntermediateSaveIntervalMs);
-      expect(contentRef.writes[0].values).toMatchObject({ lastHistoryEntryId: "loaded", lastHistoryEntryIndex: null });
+      expect(contentRef.writes[0].values).toMatchObject({ lastHistoryEntryId: "loaded", exactThrough: null });
       contentRef.writes[0].resolve();
       await flush();
-      expect(document.savedEnvelope).toEqual({ lastHistoryEntryId: "loaded", settled: false });
+      expect(document.savedEnvelope).toEqual({ lastHistoryEntryId: "loaded" });
 
       document.setSavedEnvelope(undefined);
       await edit("bravo");
@@ -702,7 +701,7 @@ describe("ContentSaveSender", () => {
       expect(contentRef.update).toHaveBeenCalledTimes(2);
       contentRef.writes[1].resolve();
       await flush();
-      expect(document.savedEnvelope).toEqual({ settled: false });
+      expect(document.savedEnvelope).toEqual({});
     });
 
     it("does nothing when a write lands after the document is destroyed", async () => {
@@ -950,9 +949,9 @@ describe("ContentSaveSender", () => {
       expect(contentRef.update).toHaveBeenCalledTimes(1);
       const { values } = contentRef.writes[0];
       expect(textOf(values)).toBe("alpha");
-      expect(values).toMatchObject({ settled: null, exactSince: null });
+      expect(values).toMatchObject({ exactThrough: null });
       expect(values).not.toHaveProperty("lastHistoryEntryId");
-      expect(values.unsettled.openEntries).toEqual([{
+      expect(values.notExact.openEntries).toEqual([{
         id: "open", model: "TestTile", action: "/stuck",
         exchanges: ["TreeManager.createHistoryEntry /stuck"], openedAt
       }]);
@@ -961,13 +960,13 @@ describe("ContentSaveSender", () => {
     it("stamps an intermediate save with the last committed entry, or the loaded id before any commit",
         async () => {
       const { commits, contentRef, document, edit, onContentSaved, treeManager } = track(setup());
-      document.setSavedEnvelope({ lastHistoryEntryId: "loaded", lastHistoryEntryIndex: 7, settled: true });
+      document.setSavedEnvelope({ lastHistoryEntryId: "loaded", exactThrough: { index: 7, since: "loaded" } });
       treeManager.exactness.markNotExact("unrecorded-change");
       const a = await edit("alpha");
 
       jest.advanceTimersByTime(kIntermediateSaveIntervalMs);
       expect(contentRef.update).toHaveBeenCalledTimes(1);
-      expect(contentRef.writes[0].values).toMatchObject({ lastHistoryEntryId: "loaded", lastHistoryEntryIndex: 7 });
+      expect(contentRef.writes[0].values).toMatchObject({ lastHistoryEntryId: "loaded", exactThrough: null });
       contentRef.writes[0].resolve();
       await flush();
       expect(onContentSaved).toHaveBeenLastCalledWith(document, "loaded");
@@ -977,7 +976,7 @@ describe("ContentSaveSender", () => {
       jest.advanceTimersByTime(kIntermediateSaveIntervalMs);
       expect(contentRef.update).toHaveBeenCalledTimes(2);
       expect(contentRef.writes[1].values).toMatchObject({
-        lastHistoryEntryId: a, lastHistoryEntryIndex: 1, settled: null
+        lastHistoryEntryId: a, exactThrough: null
       });
       expect(textOf(contentRef.writes[1].values)).toBe("bravo");
       contentRef.writes[1].resolve();
@@ -987,7 +986,7 @@ describe("ContentSaveSender", () => {
 
     it("stamps an intermediate save with the entry the load caught up to before any commit", async () => {
       const { commits, contentRef, document, edit, treeManager } = track(setup());
-      document.setSavedEnvelope({ lastHistoryEntryId: "loaded", lastHistoryEntryIndex: 7, settled: true });
+      document.setSavedEnvelope({ lastHistoryEntryId: "loaded", exactThrough: { index: 7, since: "loaded" } });
       commits.caughtUpTo = { id: "caught-up", index: 9 };
       treeManager.exactness.markNotExact("catch-up-hole");
       await edit("alpha");
@@ -995,7 +994,7 @@ describe("ContentSaveSender", () => {
       jest.advanceTimersByTime(kIntermediateSaveIntervalMs);
       expect(contentRef.update).toHaveBeenCalledTimes(1);
       expect(contentRef.writes[0].values).toMatchObject({
-        lastHistoryEntryId: "caught-up", lastHistoryEntryIndex: 9, settled: null
+        lastHistoryEntryId: "caught-up", exactThrough: null
       });
     });
 
@@ -1026,7 +1025,7 @@ describe("ContentSaveSender", () => {
 
     it("records running flows, uncommitted entries and the not-exact reason as evidence", async () => {
       const { contentRef, edit, tile, treeManager } = track(setup());
-      const unsettledSince = Date.now();
+      const since = Date.now();
       const { gate, first, second } = twoStepGate();
       const promise = tile.setTextLater("flow", gate);
       first.resolve();
@@ -1036,12 +1035,12 @@ describe("ContentSaveSender", () => {
 
       jest.advanceTimersByTime(kIntermediateSaveIntervalMs);
       expect(contentRef.update).toHaveBeenCalledTimes(1);
-      expect(contentRef.writes[0].values.unsettled).toEqual({
+      expect(contentRef.writes[0].values.notExact).toEqual({
         openEntries: [],
         runningFlows: [{ action: "/content/tileMap/t1/content/setTextLater" }],
         uncommittedEntryIds: [a],
         notExactReason: "timed-out-entry",
-        unsettledSince
+        since
       });
 
       second.resolve();
@@ -1051,7 +1050,7 @@ describe("ContentSaveSender", () => {
     it("logs an episode once at its start and once when an exact save ends it", async () => {
       const logEvent = jest.fn();
       const { commits, contentRef, edit, openEntry } = track(setup({ logEvent }));
-      const unsettledSince = Date.now();
+      const since = Date.now();
       const closeEntry = openEntry("open");
       const a = await edit("alpha");
       jest.advanceTimersByTime(kIntermediateSaveIntervalMs);
@@ -1067,7 +1066,7 @@ describe("ContentSaveSender", () => {
       const c = await edit("charlie");
       commits.commit(a, b, c);
       jest.advanceTimersByTime(kMinimumSaveGapMs);
-      expect(contentRef.writes[2].values).toMatchObject({ lastHistoryEntryId: c, settled: true });
+      expect(contentRef.writes[2].values).toMatchObject({ lastHistoryEntryId: c, exactThrough: { id: c } });
       contentRef.writes[2].resolve();
       await flush();
 
@@ -1075,7 +1074,7 @@ describe("ContentSaveSender", () => {
         [LogEventName.CONTENT_SAVE_FALLBACK_START, expect.objectContaining({
           openEntries: [expect.objectContaining({ id: "open" })],
           uncommittedEntryIds: [a],
-          unsettledSince
+          since
         })],
         [LogEventName.CONTENT_SAVE_FALLBACK_END, {
           durationMs: kIntermediateSaveIntervalMs + kMinimumSaveGapMs,
@@ -1121,7 +1120,7 @@ describe("ContentSaveSender", () => {
       commits.commit(b);
       jest.advanceTimersByTime(1000);
       expect(contentRef.update).toHaveBeenCalledTimes(2);
-      expect(contentRef.writes[1].values).toMatchObject({ lastHistoryEntryId: b, settled: true });
+      expect(contentRef.writes[1].values).toMatchObject({ lastHistoryEntryId: b, exactThrough: { id: b } });
     });
 
     it("never replaces a pending exact save with an intermediate one", async () => {
@@ -1135,7 +1134,7 @@ describe("ContentSaveSender", () => {
           jest.advanceTimersByTime(4000);
         }
       });
-      expect(contentRef.writes.map(write => write.values.settled)).toEqual([true, true, true, true]);
+      expect(contentRef.writes.map(write => write.values.exactThrough !== null)).toEqual([true, true, true, true]);
     });
 
     it("never overwrites an intermediate save's content with an older exact save", async () => {
@@ -1157,7 +1156,7 @@ describe("ContentSaveSender", () => {
 
       commits.commit(b, c);
       expect(contentRef.update).toHaveBeenCalledTimes(2);
-      expect(contentRef.writes[1].values).toMatchObject({ lastHistoryEntryId: c, settled: true });
+      expect(contentRef.writes[1].values).toMatchObject({ lastHistoryEntryId: c, exactThrough: { id: c } });
       expect(textOf(contentRef.writes[1].values)).toBe("charlie");
     });
 
@@ -1182,7 +1181,7 @@ describe("ContentSaveSender", () => {
     it("keeps only the newest uncommitted entry ids in the evidence", () => {
       const { document } = track(setup());
       const ids = Array.from({ length: kMaxEvidenceEntryIds + 5 }, (_, i) => `e${i}`);
-      expect(collectUnsettledEvidence(document, ids, 0).uncommittedEntryIds).toEqual(ids.slice(5));
+      expect(collectNotExactEvidence(document, ids, 0).uncommittedEntryIds).toEqual(ids.slice(5));
     });
 
     it("never makes an intermediate save on a group document", async () => {
@@ -1223,7 +1222,7 @@ describe("ContentSaveSender", () => {
         expect(savedAt).toEqual([5000, 10000, 15000, 20000]);
         expect(contentRef.writes.map(write => textOf(write.values)))
           .toEqual(["alpha", "bravo", "charlie", "delta"]);
-        contentRef.writes.forEach(write => expect(write.values.settled).toBeNull());
+        contentRef.writes.forEach(write => expect(write.values.exactThrough).toBeNull());
         expect(document.saveState).toBe(SaveState.Saved);
         await new Promise(resolve => jest.requireActual<typeof import("timers")>("timers").setImmediate(resolve));
         expect(unhandledRejections).toEqual([]);
@@ -1241,10 +1240,8 @@ describe("ContentSaveSender", () => {
       const { values } = contentRef.writes[0];
       expect(values).toMatchObject({
         lastHistoryEntryId: "r9",
-        lastHistoryEntryIndex: 1,
-        settled: true,
-        exactSince: "e0",
-        unsettled: null
+        exactThrough: { id: "r9", index: 1, contentHash: hashString(values.content), since: "e0" },
+        notExact: null
       });
       expect(textOf(values)).toBe("remote");
 
@@ -1278,7 +1275,7 @@ describe("ContentSaveSender", () => {
       commits.commit(a);
       await flush();
       expect(contentRef.update).toHaveBeenCalledTimes(1);
-      expect(contentRef.writes[0].values).toMatchObject({ lastHistoryEntryId: a, lastHistoryEntryIndex: 2 });
+      expect(contentRef.writes[0].values).toMatchObject({ lastHistoryEntryId: a, exactThrough: { index: 2 } });
       expect(textOf(contentRef.writes[0].values)).toBe("alpha");
       contentRef.writes[0].resolve();
       await flush();
@@ -1312,10 +1309,20 @@ describe("ContentSaveSender", () => {
       expect(contentRef.update).toHaveBeenCalledTimes(2);
     });
 
+    it("treats an envelope whose exactThrough names another id as behind", async () => {
+      const { commits, contentRef } = track(setup({}, true));
+      // A client that doesn't know exactThrough stamped its own id over a save at index 9.
+      contentRef.fireEnvelope({ lastHistoryEntryId: "other", exactThrough: { id: "r9", index: 9 } });
+      await flush();
+      commits.setRemoteHead("r4", 4);
+      await flush();
+      expect(contentRef.update).toHaveBeenCalledTimes(1);
+    });
+
     it("skips a save when the envelope is already at or past its index", async () => {
       const { commits, contentRef } = track(setup({}, true));
-      // An envelope without an index counts as behind.
-      contentRef.fireEnvelope({ lastHistoryEntryId: "old", lastHistoryEntryIndex: null, settled: null });
+      // An envelope without exactThrough counts as behind.
+      contentRef.fireEnvelope({ lastHistoryEntryId: "old", exactThrough: null });
       await flush();
       commits.setRemoteHead("r4", 4);
       await flush();
@@ -1323,11 +1330,11 @@ describe("ContentSaveSender", () => {
       contentRef.writes[0].resolve();
       await flush();
 
-      contentRef.fireEnvelope({ lastHistoryEntryId: "r9", lastHistoryEntryIndex: 9, settled: true });
+      contentRef.fireEnvelope({ lastHistoryEntryId: "r9", exactThrough: { id: "r9", index: 9 } });
       await flush();
       commits.setRemoteHead("r9", 9);
       await flush();
-      contentRef.fireEnvelope({ lastHistoryEntryId: "r12", lastHistoryEntryIndex: 12, settled: true });
+      contentRef.fireEnvelope({ lastHistoryEntryId: "r12", exactThrough: { id: "r12", index: 12 } });
       await flush();
       commits.setRemoteHead("r10", 10);
       jest.advanceTimersByTime(10000);
@@ -1351,7 +1358,7 @@ describe("ContentSaveSender", () => {
       commits.setRemoteHead("r9", 9);
       await flush();
       jest.advanceTimersByTime(50);
-      contentRef.fireEnvelope({ lastHistoryEntryId: "r9", lastHistoryEntryIndex: 9, settled: true });
+      contentRef.fireEnvelope({ lastHistoryEntryId: "r9", exactThrough: { id: "r9", index: 9 } });
       await flush();
       jest.advanceTimersByTime(10000);
       await flush();
@@ -1367,7 +1374,7 @@ describe("ContentSaveSender", () => {
       jest.advanceTimersByTime(1);
       expect(contentRef.update).toHaveBeenCalledTimes(1);
       expect(contentRef.writes[0].values).toMatchObject({
-        lastHistoryEntryId: a, lastHistoryEntryIndex: 1, settled: true, exactSince: "e0"
+        lastHistoryEntryId: a, exactThrough: { index: 1, since: "e0" }
       });
       expect(textOf(contentRef.writes[0].values)).toBe("alpha");
       contentRef.writes[0].resolve();
@@ -1377,7 +1384,7 @@ describe("ContentSaveSender", () => {
       const b = await edit("bravo");
       commits.commit(b);
       jest.advanceTimersByTime(50);
-      contentRef.fireEnvelope({ lastHistoryEntryId: b, lastHistoryEntryIndex: 2, settled: true });
+      contentRef.fireEnvelope({ lastHistoryEntryId: b, exactThrough: { id: b, index: 2 } });
       await flush();
       jest.advanceTimersByTime(10000);
       await flush();
@@ -1408,7 +1415,7 @@ describe("ContentSaveSender", () => {
       await flush();
       expect(contentRef.update).toHaveBeenCalledTimes(2);
       expect(contentRef.writes[1].values).toMatchObject({
-        lastHistoryEntryId: e6, lastHistoryEntryIndex: 7, settled: true
+        lastHistoryEntryId: e6, exactThrough: { id: e6, index: 7 }
       });
       expect(textOf(contentRef.writes[1].values)).toBe("tick-6");
       contentRef.writes[1].resolve();
@@ -1424,7 +1431,7 @@ describe("ContentSaveSender", () => {
       const a = await edit("alpha");
       commits.commit(a);
       expect(document.saveState).toBe(SaveState.Saving);
-      contentRef.fireEnvelope({ lastHistoryEntryId: "r3", lastHistoryEntryIndex: 3, settled: true });
+      contentRef.fireEnvelope({ lastHistoryEntryId: "r3", exactThrough: { id: "r3", index: 3 } });
       await flush();
       expect(document.saveState).toBe(SaveState.Saved);
       expect(onContentSaved).toHaveBeenCalledWith(document, "r3");
@@ -1436,7 +1443,7 @@ describe("ContentSaveSender", () => {
       const b = await edit("bravo");
       commits.commit(b);
       await edit("charlie");
-      contentRef.fireEnvelope({ lastHistoryEntryId: "r6", lastHistoryEntryIndex: 6, settled: true });
+      contentRef.fireEnvelope({ lastHistoryEntryId: "r6", exactThrough: { id: "r6", index: 6 } });
       await flush();
       expect(document.saveState).toBe(SaveState.Saving);
       expect(onContentSaved.mock.calls).toEqual([[document, "r3"], [document, "r6"]]);
@@ -1462,7 +1469,7 @@ describe("ContentSaveSender", () => {
 
       // The winner saves the head before this client's settled save is sent.
       jest.advanceTimersByTime(kGroupSaveJitterMs / 4);
-      contentRef.fireEnvelope({ lastHistoryEntryId: "r1", lastHistoryEntryIndex: 1, settled: true });
+      contentRef.fireEnvelope({ lastHistoryEntryId: "r1", exactThrough: { id: "r1", index: 1 } });
       await flush();
       jest.advanceTimersByTime(kGroupSaveJitterMs);
       await flush();
@@ -1477,7 +1484,7 @@ describe("ContentSaveSender", () => {
       commits.commit(a);
       expect(contentRef.update).toHaveBeenCalledTimes(1);
       // The RTDB raises local events for a write before the server accepts it.
-      contentRef.fireEnvelope({ lastHistoryEntryId: a, lastHistoryEntryIndex: 1, settled: true });
+      contentRef.fireEnvelope({ lastHistoryEntryId: a, exactThrough: { id: a, index: 1 } });
       await flush();
       expect(document.saveState).toBe(SaveState.Saving);
 
@@ -1492,12 +1499,12 @@ describe("ContentSaveSender", () => {
   });
 
   describe("page hide", () => {
-    const settledEnvelope = { lastHistoryEntryId: "loaded", lastHistoryEntryIndex: 7, settled: true };
-    const unmarkedEnvelope = { lastHistoryEntryId: "loaded", lastHistoryEntryIndex: 7, settled: false };
+    const exactEnvelope = { lastHistoryEntryId: "loaded", exactThrough: { index: 7, since: "loaded" } };
+    const unmarkedEnvelope = { lastHistoryEntryId: "loaded" };
 
     it("sends the newest committed snapshot at once on page hide", async () => {
       const { commits, contentRef, document, edit, sender } = track(setup());
-      document.setSavedEnvelope(settledEnvelope);
+      document.setSavedEnvelope(exactEnvelope);
       const a = await edit("alpha");
       commits.commit(a);
       jest.advanceTimersByTime(200);
@@ -1508,7 +1515,7 @@ describe("ContentSaveSender", () => {
 
       sender.handlePageHide();
       expect(contentRef.update).toHaveBeenCalledTimes(2);
-      expect(contentRef.writes[1].values).toMatchObject({ lastHistoryEntryId: b, settled: true });
+      expect(contentRef.writes[1].values).toMatchObject({ lastHistoryEntryId: b, exactThrough: { id: b } });
       expect(textOf(contentRef.writes[1].values)).toBe("bravo");
 
       // the earlier write finishing doesn't send the same save again
@@ -1549,14 +1556,14 @@ describe("ContentSaveSender", () => {
 
     it("makes no intermediate save on page hide before the document relies on them", async () => {
       const { contentRef, document, edit, openEntry, sender } = track(setup());
-      document.setSavedEnvelope(settledEnvelope);
+      document.setSavedEnvelope(exactEnvelope);
       openEntry("open");
       await edit("alpha");
       sender.handlePageHide();
       expect(contentRef.update).not.toHaveBeenCalled();
     });
 
-    it("sends an intermediate save at once on page hide when the loaded envelope wasn't settled", async () => {
+    it("sends an intermediate save at once on page hide when the loaded envelope has no exactThrough", async () => {
       const { commits, contentRef, document, edit, sender } = track(setup());
       document.setSavedEnvelope(unmarkedEnvelope);
       const a = await edit("alpha");
@@ -1567,13 +1574,13 @@ describe("ContentSaveSender", () => {
       await edit("bravo");
       sender.handlePageHide();
       expect(contentRef.update).toHaveBeenCalledTimes(2);
-      expect(contentRef.writes[1].values).toMatchObject({ lastHistoryEntryId: a, settled: null });
+      expect(contentRef.writes[1].values).toMatchObject({ lastHistoryEntryId: a, exactThrough: null });
       expect(textOf(contentRef.writes[1].values)).toBe("bravo");
     });
 
     it("makes no intermediate save on page hide when the loaded envelope was settled", async () => {
       const { commits, contentRef, document, edit, sender } = track(setup());
-      document.setSavedEnvelope(settledEnvelope);
+      document.setSavedEnvelope(exactEnvelope);
       const a = await edit("alpha");
       commits.commit(a);
       expect(contentRef.update).toHaveBeenCalledTimes(1);
@@ -1605,7 +1612,7 @@ describe("ContentSaveSender", () => {
       commits.commit(a);
       await edit("bravo");
       sender.handlePageHide();
-      expect(contentRef.writes[1].values).toMatchObject({ settled: null });
+      expect(contentRef.writes[1].values).toMatchObject({ exactThrough: null });
 
       contentRef.writes[1].resolve();
       await flush();
@@ -1617,12 +1624,12 @@ describe("ContentSaveSender", () => {
     it("sends an intermediate save at once on page hide after a drain ended on an intermediate save",
         async () => {
       const { contentRef, document, edit, sender, updateTools } = track(setup());
-      document.setSavedEnvelope(settledEnvelope);
+      document.setSavedEnvelope(exactEnvelope);
       await edit("alpha");
       sender.detach();
       jest.advanceTimersByTime(kSenderUnmountLimitMs);
       expect(contentRef.update).toHaveBeenCalledTimes(1);
-      expect(contentRef.writes[0].values).toMatchObject({ settled: null });
+      expect(contentRef.writes[0].values).toMatchObject({ exactThrough: null });
       contentRef.writes[0].resolve();
       await flush();
 
@@ -1631,7 +1638,7 @@ describe("ContentSaveSender", () => {
       await edit("bravo");
       remounted.handlePageHide();
       expect(contentRef.update).toHaveBeenCalledTimes(2);
-      expect(contentRef.writes[1].values).toMatchObject({ settled: null });
+      expect(contentRef.writes[1].values).toMatchObject({ exactThrough: null });
       expect(textOf(contentRef.writes[1].values)).toBe("bravo");
     });
 
@@ -1644,7 +1651,7 @@ describe("ContentSaveSender", () => {
       commits.commit(b);
       sender.handlePageHide();
       expect(contentRef.update).toHaveBeenCalledTimes(2);
-      expect(contentRef.writes[1].values).toMatchObject({ lastHistoryEntryId: b, settled: true });
+      expect(contentRef.writes[1].values).toMatchObject({ lastHistoryEntryId: b, exactThrough: { id: b } });
       expect(textOf(contentRef.writes[1].values)).toBe("bravo");
     });
 
@@ -1659,7 +1666,7 @@ describe("ContentSaveSender", () => {
       await edit("bravo");
       sender.handlePageHide();
       expect(contentRef.update).toHaveBeenCalledTimes(2);
-      expect(contentRef.writes[1].values).toMatchObject({ settled: null });
+      expect(contentRef.writes[1].values).toMatchObject({ exactThrough: null });
       expect(textOf(contentRef.writes[1].values)).toBe("bravo");
     });
 
@@ -1673,7 +1680,7 @@ describe("ContentSaveSender", () => {
       await edit("bravo");
       sender.handlePageHide();
       expect(contentRef.update).toHaveBeenCalledTimes(2);
-      expect(contentRef.writes[1].values).toMatchObject({ settled: null });
+      expect(contentRef.writes[1].values).toMatchObject({ exactThrough: null });
       expect(textOf(contentRef.writes[1].values)).toBe("bravo");
     });
 
@@ -1690,7 +1697,7 @@ describe("ContentSaveSender", () => {
       expect(contentRef.update).toHaveBeenCalledTimes(1);
       sender.handlePageHide();
       expect(contentRef.update).toHaveBeenCalledTimes(2);
-      expect(contentRef.writes[1].values).toMatchObject({ lastHistoryEntryId: b, settled: true });
+      expect(contentRef.writes[1].values).toMatchObject({ lastHistoryEntryId: b, exactThrough: { id: b } });
     });
   });
 
@@ -1724,8 +1731,8 @@ describe("ContentSaveSender", () => {
       const { commits, contentRef, sender: attached } = track(setup({}, true));
       const newRef = new FakeContentRef();
       attached.attach({ contentRef: newRef, updateTools: () => Promise.resolve(), random: () => 0 });
-      contentRef.fireEnvelope({ lastHistoryEntryId: "r9", lastHistoryEntryIndex: 9, settled: true });
-      newRef.fireEnvelope({ lastHistoryEntryId: "r5", lastHistoryEntryIndex: 5, settled: true });
+      contentRef.fireEnvelope({ lastHistoryEntryId: "r9", exactThrough: { id: "r9", index: 9 } });
+      newRef.fireEnvelope({ lastHistoryEntryId: "r5", exactThrough: { id: "r5", index: 5 } });
       await flush();
       commits.setRemoteHead("r5", 5);
       await flush();
@@ -1748,7 +1755,7 @@ describe("ContentSaveSender", () => {
       await flush();
       jest.advanceTimersByTime(kMinimumSaveGapMs);
       expect(contentRef.update).toHaveBeenCalledTimes(2);
-      expect(contentRef.writes[1].values).toMatchObject({ lastHistoryEntryId: b, settled: true });
+      expect(contentRef.writes[1].values).toMatchObject({ lastHistoryEntryId: b, exactThrough: { id: b } });
 
       contentRef.writes[1].resolve();
       await flush();
@@ -1776,7 +1783,7 @@ describe("ContentSaveSender", () => {
       commits.commit(a);
       jest.advanceTimersByTime(kMinimumSaveGapMs);
       expect(contentRef.update).toHaveBeenCalledTimes(2);
-      expect(contentRef.writes[1].values).toMatchObject({ lastHistoryEntryId: a, settled: true });
+      expect(contentRef.writes[1].values).toMatchObject({ lastHistoryEntryId: a, exactThrough: { id: a } });
     });
 
     it("makes one intermediate save and stops 30 seconds after detach on an individual document", async () => {
@@ -1794,9 +1801,9 @@ describe("ContentSaveSender", () => {
       expect(contentRef.update).toHaveBeenCalledTimes(1);
       jest.advanceTimersByTime(1);
       expect(contentRef.update).toHaveBeenCalledTimes(2);
-      expect(contentRef.writes[1].values).toMatchObject({ settled: null });
+      expect(contentRef.writes[1].values).toMatchObject({ exactThrough: null });
       expect(textOf(contentRef.writes[1].values)).toBe("bravo");
-      expect(contentRef.writes[1].values.unsettled.uncommittedEntryIds).toContain(a);
+      expect(contentRef.writes[1].values.notExact.uncommittedEntryIds).toContain(a);
       expect(logEvent.mock.calls.map(([event, params]) => [event, params.endedBy])).toEqual([
         [LogEventName.CONTENT_SAVE_FALLBACK_START, undefined],
         [LogEventName.CONTENT_SAVE_FALLBACK_END, "session-end"]
@@ -1812,7 +1819,7 @@ describe("ContentSaveSender", () => {
 
     it("reports the writes sent before the drain timeout once they finish", async () => {
       const { contentRef, document, edit, onContentSaved, sender, updateTools } = track(setup());
-      document.setSavedEnvelope({ lastHistoryEntryId: "loaded", lastHistoryEntryIndex: 7, settled: true });
+      document.setSavedEnvelope({ lastHistoryEntryId: "loaded", exactThrough: { index: 7, since: "loaded" } });
       await edit("alpha");
       sender.detach();
       jest.advanceTimersByTime(kIntermediateSaveIntervalMs);
@@ -1832,16 +1839,16 @@ describe("ContentSaveSender", () => {
       expect(contentRef.update).toHaveBeenCalledTimes(2);
     });
 
-    it("records the envelope as unsettled when it stops with an intermediate save in flight", async () => {
+    it("records the envelope without exactThrough when it stops with an intermediate save in flight", async () => {
       const { contentRef, document, edit, sender } = track(setup());
       document.setSavedEnvelope(
-        { lastHistoryEntryId: "loaded", lastHistoryEntryIndex: 7, settled: true, exactSince: "e0" });
+        { lastHistoryEntryId: "loaded", exactThrough: { index: 7, since: "e0" } });
       await edit("alpha");
       sender.detach();
       jest.advanceTimersByTime(kSenderUnmountLimitMs);
       expect(contentRef.update).toHaveBeenCalledTimes(1);
       expect(document.savedEnvelope)
-        .toEqual({ lastHistoryEntryId: "loaded", lastHistoryEntryIndex: 7, settled: false });
+        .toEqual({ lastHistoryEntryId: "loaded" });
 
       // a sender attached before the write lands sends an intermediate save on page hide
       const next = track({ sender: getContentSaveSender(document,
@@ -1850,7 +1857,7 @@ describe("ContentSaveSender", () => {
       await edit("bravo");
       next.sender.handlePageHide();
       expect(contentRef.update).toHaveBeenCalledTimes(2);
-      expect(contentRef.writes[1].values).toMatchObject({ settled: null });
+      expect(contentRef.writes[1].values).toMatchObject({ exactThrough: null });
       expect(textOf(contentRef.writes[1].values)).toBe("bravo");
     });
 
@@ -1920,7 +1927,7 @@ describe("ContentSaveSender", () => {
       const b = await other.edit("bravo");
       other.commits.commit(b);
       other.sender.detach();
-      other.contentRef.fireEnvelope({ lastHistoryEntryId: b, lastHistoryEntryIndex: 1, settled: true });
+      other.contentRef.fireEnvelope({ lastHistoryEntryId: b, exactThrough: { id: b, index: 1 } });
       await flush();
       jest.advanceTimersByTime(kGroupSaveJitterMs);
       expect(other.contentRef.update).not.toHaveBeenCalled();
@@ -1987,7 +1994,7 @@ describe("ContentSaveSender", () => {
       const a = await edit("alpha");
       commits.commit(a);
       expect(contentRef.update).toHaveBeenCalledTimes(1);
-      expect(contentRef.writes[0].values).toMatchObject({ lastHistoryEntryId: a, settled: true });
+      expect(contentRef.writes[0].values).toMatchObject({ lastHistoryEntryId: a, exactThrough: { id: a } });
     });
 
     it("uses the newest options after attach", async () => {

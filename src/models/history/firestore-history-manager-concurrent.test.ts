@@ -1263,9 +1263,9 @@ describe("FirestoreHistoryManagerConcurrent", () => {
       for (let i = 0; i < 10; i++) await Promise.resolve();
     };
 
-    it("starts from a settled envelope's id without querying Firestore for the last entry", async () => {
+    it("starts from an exact envelope's id without querying Firestore for the last entry", async () => {
       const { manager, tree, historyManager } = await setupManager({}, {
-        savedEnvelope: { lastHistoryEntryId: "e5", lastHistoryEntryIndex: 5, settled: true, exactSince: "e2" },
+        savedEnvelope: { lastHistoryEntryId: "e5", exactThrough: { index: 5, since: "e2" } },
       });
       expect(getLastHistoryEntry).not.toHaveBeenCalled();
       expect(historyManager.expectedRemoteHead).toBe("e5");
@@ -1286,9 +1286,9 @@ describe("FirestoreHistoryManagerConcurrent", () => {
       expect(historyManager.expectedRemoteHeadIndex).toBe(6);
     });
 
-    it("skips entries up to a settled envelope's index when its id isn't in the history", async () => {
+    it("skips entries up to an exact envelope's index when its id isn't in the history", async () => {
       const { manager, tree, historyManager } = await setupManager({}, {
-        savedEnvelope: { lastHistoryEntryId: "e5", lastHistoryEntryIndex: 5, settled: true, exactSince: "e2" },
+        savedEnvelope: { lastHistoryEntryId: "e5", exactThrough: { index: 5, since: "e2" } },
       });
       tree.setItems([Item.create({ id: "a", color: "e5" })]);
 
@@ -1305,10 +1305,10 @@ describe("FirestoreHistoryManagerConcurrent", () => {
       expect(manager.exactness.notExactReason).toBe("saved-id-missing");
     });
 
-    it("keeps querying Firestore for the last entry when the envelope isn't settled", async () => {
+    it("queries Firestore for the last entry when the envelope has no exactThrough", async () => {
       getLastHistoryEntry.mockResolvedValue({ id: "e7", index: 7 });
       const { manager, historyManager } = await setupManager({}, {
-        savedEnvelope: { lastHistoryEntryId: "e5", lastHistoryEntryIndex: 5, settled: false },
+        savedEnvelope: { lastHistoryEntryId: "e5" },
       });
       expect(getLastHistoryEntry).toHaveBeenCalledTimes(1);
       expect(historyManager.expectedRemoteHead).toBe("e7");

@@ -9,7 +9,6 @@ import { TileContentModel } from "../tiles/tile-content";
 import { registerTileContentInfo } from "../tiles/tile-content-info";
 import { TreeManager } from "./tree-manager";
 import { getHistoryEntriesAfter as _getHistoryEntriesAfter,
-  getHistoryEntryIndex as _getHistoryEntryIndex,
   getLastHistoryEntry as _getLastHistoryEntry,
   LastHistoryEntry,
   loadHistory as _loadHistory } from "./history-firestore";
@@ -24,7 +23,6 @@ jest.mock("./history-firestore");
 // This adds the mock api types to these functions
 const getLastHistoryEntry = jest.mocked(_getLastHistoryEntry);
 const loadHistory = jest.mocked(_loadHistory);
-const getHistoryEntryIndex = jest.mocked(_getHistoryEntryIndex);
 const getHistoryEntriesAfter = jest.mocked(_getHistoryEntriesAfter);
 
 const TestTile = TileContentModel
@@ -699,7 +697,6 @@ describe("catchUpAtLoad", () => {
 
   beforeEach(() => {
     getLastHistoryEntry.mockReset();
-    getHistoryEntryIndex.mockReset();
     getHistoryEntriesAfter.mockReset();
   });
 
@@ -753,27 +750,26 @@ describe("catchUpAtLoad", () => {
 
   it("reads nothing more when the envelope is at Firestore's last entry", async () => {
     const { treeManager, historyManager } = setupCatchUp(
-      { lastHistoryEntryId: "e7", lastHistoryEntryIndex: 7, settled: true, exactSince: "e2" },
+      { lastHistoryEntryId: "e7", exactThrough: { index: 7, since: "e2" } },
       { id: "e7", index: 7 });
     await historyManager.catchUpAtLoad();
     expect(getHistoryEntriesAfter).not.toHaveBeenCalled();
     expect(historyManager.caughtUpTo).toBeUndefined();
-    expect(getHistoryEntryIndex).not.toHaveBeenCalled();
     expect(treeManager.exactness.exactSince).toBe("e2");
     expect(treeManager.exactness.isExact).toBe(true);
   });
 
-  it("starts at the saved id when an unsettled envelope is at Firestore's last entry", async () => {
+  it("starts at the saved id when an envelope without exactThrough is at Firestore's last entry", async () => {
     const { treeManager, historyManager } = setupCatchUp(
-      { lastHistoryEntryId: "e7", lastHistoryEntryIndex: 7, settled: false }, { id: "e7", index: 7 });
+      { lastHistoryEntryId: "e7" }, { id: "e7", index: 7 });
     await historyManager.catchUpAtLoad();
     expect(treeManager.exactness.exactSince).toBe("e7");
     expect(treeManager.exactness.isExact).toBe(true);
   });
 
-  it("applies the missing entries and keeps exactSince when the envelope was settled", async () => {
+  it("applies the missing entries and keeps exactSince when the envelope has exactThrough", async () => {
     const { treeManager, tileContent, historyManager, firestore } = setupCatchUp(
-      { lastHistoryEntryId: "e5", lastHistoryEntryIndex: 5, settled: true, exactSince: "e2" },
+      { lastHistoryEntryId: "e5", exactThrough: { index: 5, since: "e2" } },
       { id: "e7", index: 7 });
     getHistoryEntriesAfter.mockResolvedValue([entryDoc(6, "e5"), entryDoc(7, "e6")]);
     await historyManager.catchUpAtLoad();
@@ -785,39 +781,18 @@ describe("catchUpAtLoad", () => {
     expect(treeManager.exactness.isExact).toBe(true);
   });
 
-  it("reads the saved entry's index when the envelope has none", async () => {
-    const { tileContent, historyManager, firestore } = setupCatchUp(
-      { lastHistoryEntryId: "e5", settled: true, exactSince: "e2" }, { id: "e7", index: 7 });
-    getHistoryEntryIndex.mockResolvedValue(5);
-    getHistoryEntriesAfter.mockResolvedValue([entryDoc(6, "e5"), entryDoc(7, "e6")]);
-    await historyManager.catchUpAtLoad();
-    expect(getHistoryEntryIndex).toHaveBeenCalledTimes(1);
-    expect(getHistoryEntryIndex).toHaveBeenCalledWith(firestore, documentPath, "e5");
-    expect(getHistoryEntriesAfter).toHaveBeenCalledWith(firestore, documentPath, 5);
-    expect(tileContent.text).toBe("e7");
-  });
-
-  it("doesn't catch up from an envelope that wasn't settled, and leaves the session not exact", async () => {
+  it("doesn't catch up from an envelope without exactThrough, and leaves the session not exact", async () => {
     const { treeManager, tileContent, historyManager, logEvent } = setupCatchUp(
-      { lastHistoryEntryId: "e5", lastHistoryEntryIndex: 5, settled: false }, { id: "e7", index: 7 });
+      { lastHistoryEntryId: "e5" }, { id: "e7", index: 7 });
     getHistoryEntriesAfter.mockResolvedValue([entryDoc(6, "e5"), entryDoc(7, "e6")]);
     await historyManager.catchUpAtLoad();
     expect(getHistoryEntriesAfter).not.toHaveBeenCalled();
     expect(tileContent.text).toBeUndefined();
     expect(historyManager.caughtUpTo).toBeUndefined();
     expect(treeManager.exactness.isExact).toBe(false);
-    expect(treeManager.exactness.notExactReason).toBe("unsettled-envelope-gap");
+    expect(treeManager.exactness.notExactReason).toBe("unmarked-envelope-gap");
     expect(logEvent).toHaveBeenCalledWith(LogEventName.HISTORY_LOAD_CATCH_UP_INCOMPLETE,
-      expect.objectContaining({ reason: "unsettled-envelope-gap", savedId: "e5", gap: 2 }));
-  });
-
-  it("doesn't read the saved entry's index for an envelope that wasn't settled", async () => {
-    const { treeManager, historyManager } = setupCatchUp(
-      { lastHistoryEntryId: "e5", settled: false }, { id: "e7", index: 7 });
-    await historyManager.catchUpAtLoad();
-    expect(getHistoryEntryIndex).not.toHaveBeenCalled();
-    expect(getHistoryEntriesAfter).not.toHaveBeenCalled();
-    expect(treeManager.exactness.notExactReason).toBe("unsettled-envelope-gap");
+      expect.objectContaining({ reason: "unmarked-envelope-gap", savedId: "e5" }));
   });
 
   it("starts at the beginning of history for a document with no history", async () => {
@@ -837,7 +812,7 @@ describe("catchUpAtLoad", () => {
 
   it("doesn't fetch a gap over 200 entries and leaves the session not exact", async () => {
     const { treeManager, tileContent, historyManager, logEvent } = setupCatchUp(
-      { lastHistoryEntryId: "e5", lastHistoryEntryIndex: 5, settled: true, exactSince: "e2" },
+      { lastHistoryEntryId: "e5", exactThrough: { index: 5, since: "e2" } },
       { id: "e300", index: 300 });
     await historyManager.catchUpAtLoad();
     expect(getHistoryEntriesAfter).not.toHaveBeenCalled();
@@ -850,7 +825,7 @@ describe("catchUpAtLoad", () => {
 
   it("applies entries up to a hole and leaves the session not exact", async () => {
     const { treeManager, tileContent, historyManager, logEvent } = setupCatchUp(
-      { lastHistoryEntryId: "e5", lastHistoryEntryIndex: 5, settled: true, exactSince: "e2" },
+      { lastHistoryEntryId: "e5", exactThrough: { index: 5, since: "e2" } },
       { id: "e8", index: 8 });
     getHistoryEntriesAfter.mockResolvedValue([entryDoc(6, "e5"), entryDoc(8, "e7")]);
     await historyManager.catchUpAtLoad();
@@ -864,7 +839,7 @@ describe("catchUpAtLoad", () => {
 
   it("treats entries that stop short of Firestore's last entry as a hole", async () => {
     const { treeManager, tileContent, historyManager } = setupCatchUp(
-      { lastHistoryEntryId: "e5", lastHistoryEntryIndex: 5, settled: true, exactSince: "e2" },
+      { lastHistoryEntryId: "e5", exactThrough: { index: 5, since: "e2" } },
       { id: "e7", index: 7 });
     getHistoryEntriesAfter.mockResolvedValue([entryDoc(6, "e5")]);
     await historyManager.catchUpAtLoad();
@@ -872,20 +847,9 @@ describe("catchUpAtLoad", () => {
     expect(treeManager.exactness.notExactReason).toBe("catch-up-hole");
   });
 
-  it("leaves the session not exact when the saved id isn't in Firestore", async () => {
-    const { treeManager, tileContent, historyManager } = setupCatchUp(
-      { lastHistoryEntryId: "e5", settled: true, exactSince: "e2" }, { id: "e7", index: 7 });
-    getHistoryEntryIndex.mockResolvedValue(undefined);
-    await historyManager.catchUpAtLoad();
-    expect(getHistoryEntriesAfter).not.toHaveBeenCalled();
-    expect(tileContent.text).toBeUndefined();
-    expect(treeManager.exactness.isExact).toBe(false);
-    expect(treeManager.exactness.notExactReason).toBe("saved-id-missing");
-  });
-
   it("leaves the session not exact when the envelope names an id Firestore has no entry for", async () => {
     const { treeManager, historyManager } = setupCatchUp(
-      { lastHistoryEntryId: "e5", lastHistoryEntryIndex: 5, settled: true, exactSince: "e2" }, undefined);
+      { lastHistoryEntryId: "e5", exactThrough: { index: 5, since: "e2" } }, undefined);
     await historyManager.catchUpAtLoad();
     expect(getHistoryEntriesAfter).not.toHaveBeenCalled();
     expect(treeManager.exactness.notExactReason).toBe("saved-id-missing");
@@ -893,7 +857,7 @@ describe("catchUpAtLoad", () => {
 
   it("leaves the session not exact when an entry fails to apply, keeping what applied", async () => {
     const { treeManager, tileContent, historyManager, logEvent } = setupCatchUp(
-      { lastHistoryEntryId: "e5", lastHistoryEntryIndex: 5, settled: true, exactSince: "e2" },
+      { lastHistoryEntryId: "e5", exactThrough: { index: 5, since: "e2" } },
       { id: "e7", index: 7 });
     getHistoryEntriesAfter.mockResolvedValue([
       entryDoc(6, "e5"), entryDoc(7, "e6", textEntry("e7", "no-such-tree"))
@@ -911,7 +875,7 @@ describe("catchUpAtLoad", () => {
     jest.useFakeTimers();
     jest.spyOn(console, "warn").mockImplementation(() => undefined);
     const { treeManager, historyManager } = setupCatchUp(
-      { lastHistoryEntryId: "e5", lastHistoryEntryIndex: 5, settled: true, exactSince: "e2" },
+      { lastHistoryEntryId: "e5", exactThrough: { index: 5, since: "e2" } },
       { id: "e7", index: 7 }, { firestore: makeFirestoreMock(false) });
     const catchUp = historyManager.catchUpAtLoad();
     await jest.advanceTimersByTimeAsync(10000);
@@ -922,7 +886,7 @@ describe("catchUpAtLoad", () => {
 
   it("skips another user's document without reading its history", async () => {
     const { treeManager, historyManager } = setupCatchUp(
-      { lastHistoryEntryId: "e5", lastHistoryEntryIndex: 5, settled: true, exactSince: "e2" },
+      { lastHistoryEntryId: "e5", exactThrough: { index: 5, since: "e2" } },
       { id: "e7", index: 7 }, { uid: "2" });
     expect(historyManager.isOtherUsersDocument).toBe(true);
     await historyManager.catchUpAtLoad();
@@ -934,7 +898,7 @@ describe("catchUpAtLoad", () => {
 
   it("catches up while the current user isn't known yet", async () => {
     const { treeManager, tileContent, historyManager } = setupCatchUp(
-      { lastHistoryEntryId: "e5", lastHistoryEntryIndex: 5, settled: true, exactSince: "e2" },
+      { lastHistoryEntryId: "e5", exactThrough: { index: 5, since: "e2" } },
       { id: "e7", index: 7 }, { uid: "0" });
     getHistoryEntriesAfter.mockResolvedValue([entryDoc(6, "e5"), entryDoc(7, "e6")]);
     expect(historyManager.isOtherUsersDocument).toBe(false);
@@ -945,7 +909,7 @@ describe("catchUpAtLoad", () => {
 
   it("treats a fetched entry doc without an entry as a hole", async () => {
     const { treeManager, tileContent, historyManager } = setupCatchUp(
-      { lastHistoryEntryId: "e5", lastHistoryEntryIndex: 5, settled: true, exactSince: "e2" },
+      { lastHistoryEntryId: "e5", exactThrough: { index: 5, since: "e2" } },
       { id: "e7", index: 7 });
     getHistoryEntriesAfter.mockResolvedValue([
       entryDoc(6, "e5"), { ...entryDoc(7, "e6"), entry: undefined as unknown as HistoryEntrySnapshot }
@@ -957,7 +921,7 @@ describe("catchUpAtLoad", () => {
 
   it("skips the catch-up for a manager that doesn't upload local history", async () => {
     const { treeManager, historyManager } = setupCatchUp(
-      { lastHistoryEntryId: "e5", lastHistoryEntryIndex: 5, settled: true, exactSince: "e2" },
+      { lastHistoryEntryId: "e5", exactThrough: { index: 5, since: "e2" } },
       { id: "e7", index: 7 }, { uploadLocalHistory: false });
     await historyManager.catchUpAtLoad();
     expect(getLastHistoryEntry).not.toHaveBeenCalled();
@@ -967,7 +931,7 @@ describe("catchUpAtLoad", () => {
 
   it("chains the next local entry after Firestore's last entry", async () => {
     const { treeManager, tileContent, historyManager, set, setCalled } = setupCatchUp(
-      { lastHistoryEntryId: "e5", lastHistoryEntryIndex: 5, settled: true, exactSince: "e2" },
+      { lastHistoryEntryId: "e5", exactThrough: { index: 5, since: "e2" } },
       { id: "e7", index: 7 });
     getHistoryEntriesAfter.mockResolvedValue([entryDoc(6, "e5"), entryDoc(7, "e6")]);
     treeManager.setHistoryManager(historyManager);

@@ -1,6 +1,6 @@
 import { comparer, reaction } from "mobx";
 import { getSnapshot, isAlive, onSnapshot } from "mobx-state-tree";
-import { IUnsettledEvidence } from "../../lib/db-types";
+import { IExactThrough, INotExactEvidence } from "../../lib/db-types";
 import { LogEventName } from "../../lib/logger-types";
 import { HistoryEntryType } from "../history/history";
 import { ICommitListener, ICommittedEntry, isCommitSource } from "../history/history-commits";
@@ -68,7 +68,7 @@ interface IQueuedSave extends IPendingSave {
   notBefore?: number;
   buildValues(changeCount: number): Record<string, unknown>;
   // Set on an intermediate save.
-  evidence?: IUnsettledEvidence;
+  evidence?: INotExactEvidence;
 }
 
 // An intermediate save is built from the content as it is when it is sent, so it waits unbuilt.
@@ -101,7 +101,7 @@ interface IGroupHistoryState {
 }
 
 // The envelope children a group document listens to.
-const kEnvelopeFields = ["lastHistoryEntryId", "lastHistoryEntryIndex", "settled"] as const;
+const kEnvelopeFields = ["lastHistoryEntryId", "exactThrough"] as const;
 type EnvelopeValues = Partial<Record<typeof kEnvelopeFields[number], unknown>>;
 
 const getTreeManager = (document: DocumentModelType) =>
@@ -168,8 +168,8 @@ export function getSnapshotBlockers(document: DocumentModelType): string[] {
  * What may keep the document's content from being exact, recorded with an intermediate save. The
  * envelope is written to the RTDB, which rejects undefined values, so unset fields are left out.
  */
-export function collectUnsettledEvidence(document: DocumentModelType, uncommittedEntryIds: string[],
-    unsettledSince: number): IUnsettledEvidence {
+export function collectNotExactEvidence(document: DocumentModelType, uncommittedEntryIds: string[],
+    since: number): INotExactEvidence {
   const openEntries = getOpenEntries(document).map(entry => ({
     id: entry.id,
     ...(entry.model !== undefined && { model: entry.model }),
@@ -185,7 +185,7 @@ export function collectUnsettledEvidence(document: DocumentModelType, uncommitte
     runningFlows,
     uncommittedEntryIds: uncommittedEntryIds.slice(-kMaxEvidenceEntryIds),
     ...(notExactReason && { notExactReason }),
-    unsettledSince
+    since
   };
 }
 
@@ -219,11 +219,11 @@ interface IFallbackEpisode {
 
 /**
  * Saves a document's content to its RTDB envelope. A snapshot is taken when each local history
- * entry completes and is saved, marked settled, once that entry has committed. Only one write is
+ * entry completes and is saved, marked with exactThrough, once that entry has committed. Only one write is
  * in flight at a time, and each write sends the newest save waiting by then.
  *
  * An individual document that has had unsaved changes and no exact save for 5 seconds falls back
- * to intermediate saves of its current content, which aren't marked settled and record why. Each
+ * to intermediate saves of its current content, which clear exactThrough and record why. Each
  * such stretch is logged once when its first intermediate save is sent, and once when it ends.
  *
  * A group document also saves its current content, stamped with the head of the shared chain,
@@ -260,7 +260,7 @@ export class ContentSaveSender {
   private intermediateSeq = 0;
   // When the current stretch with unsaved changes and no exact save began: the first change after
   // the content was exactly saved, or the last exact save when it left changes unsaved.
-  private unsettledSince: number | undefined;
+  private noExactSaveSince: number | undefined;
   private intermediateTimer: ReturnType<typeof setTimeout> | undefined;
   private intermediateDueAt: number | undefined;
   private lastIntermediateWriteAt: number | undefined;
@@ -331,7 +331,7 @@ export class ContentSaveSender {
    */
   private isLatestChangeSaved() {
     if (this.pendingSave || this.writesInFlight.size > 0) return false;
-    if (!this.document.concurrent) return this.unsettledSince === undefined;
+    if (!this.document.concurrent) return this.noExactSaveSince === undefined;
     const committed = this.lastCommittedLocal;
     return this.savedSeq >= this.dirtySeq
       || (!!committed && committed.changeSeq >= this.dirtySeq && this.isReachedByEnvelope(committed.index));
@@ -348,7 +348,7 @@ export class ContentSaveSender {
     }
     // A sender attached after this one stops reads the envelope before the write in flight lands.
     if (Array.from(this.writesInFlight).some(save => save.kind === "intermediate")) {
-      this.recordUnsettledEnvelope();
+      this.recordNotExactEnvelope();
     }
     this.finishDrain();
   };
@@ -399,12 +399,13 @@ export class ContentSaveSender {
 
   /**
    * Whether intermediate saves are already standing in for exact ones on this individual document.
-   * They also are while the envelope the RTDB holds isn't settled, or there is none: the next load
-   * catches up only from a settled envelope, so an intermediate save over it loses nothing.
+   * They also are while the envelope the RTDB holds has no exactThrough, or there is none: the next
+   * load catches up only from an envelope with exactThrough, so an intermediate save over it loses
+   * nothing.
    */
   private isRelyingOnIntermediateSaves() {
     return !!this.fallbackEpisode || !getTreeManager(this.document)?.exactness.isExact
-      || this.document.savedEnvelope?.settled !== true;
+      || !this.document.savedEnvelope?.exactThrough;
   }
 
   dispose() {
@@ -440,9 +441,9 @@ export class ContentSaveSender {
   }
 
   private startGroupSaves(treeManager: TreeManagerType) {
-    const { lastHistoryEntryId, lastHistoryEntryIndex, settled } = this.document.savedEnvelope ?? {};
-    if (settled && lastHistoryEntryId && typeof lastHistoryEntryIndex === "number") {
-      this.advanceEnvelopeEntry({ id: lastHistoryEntryId, index: lastHistoryEntryIndex });
+    const { lastHistoryEntryId, exactThrough } = this.document.savedEnvelope ?? {};
+    if (lastHistoryEntryId && exactThrough) {
+      this.advanceEnvelopeEntry({ id: lastHistoryEntryId, index: exactThrough.index });
     }
     this.listenToEnvelope();
     this.disposers.push(() => this.stopEnvelopeListener?.());
@@ -454,7 +455,9 @@ export class ContentSaveSender {
     }, this.scheduleSettledCheck, { fireImmediately: true, equals: comparer.structural }));
   }
 
-  // Listens only to the envelope's id, index and settled mark, not its content.
+  // Listens only to the envelope's id and exactThrough, not its content, so exactThrough's content
+  // hash isn't checked. A client that doesn't know exactThrough stamps its own id over it, so a
+  // match on the id is what is checked.
   private listenToEnvelope() {
     this.stopEnvelopeListener?.();
     this.envelopeValues = {};
@@ -482,9 +485,11 @@ export class ContentSaveSender {
     this.envelopeCheckScheduled = false;
     if (!this.running) return;
     try {
-      const { lastHistoryEntryId: id, lastHistoryEntryIndex: index, settled } = this.envelopeValues;
-      // An envelope without an index, or not marked settled, can't be ordered against a save.
-      if (typeof id !== "string" || typeof index !== "number" || settled !== true) return;
+      const id = this.envelopeValues.lastHistoryEntryId;
+      const exactThrough = this.envelopeValues.exactThrough as Partial<IExactThrough> | null | undefined;
+      // An envelope whose exactThrough doesn't describe its id can't be ordered against a save.
+      if (typeof id !== "string" || exactThrough?.id !== id || typeof exactThrough.index !== "number") return;
+      const { index } = exactThrough;
       // The RTDB reports this client's own write before the server accepts it, and reverts it if
       // the write fails, so a write in flight isn't counted as saved.
       if (Array.from(this.writesInFlight).some(save => getSaveIndex(save) === index)) return;
@@ -575,7 +580,7 @@ export class ContentSaveSender {
   private showAllChangesSaved() {
     if (this.savedSeq >= this.dirtySeq) return;
     this.savedSeq = this.dirtySeq;
-    this.unsettledSince = undefined;
+    this.noExactSaveSince = undefined;
     this.setSaveState(SaveState.Saved);
     this.checkDrained();
   }
@@ -676,8 +681,8 @@ export class ContentSaveSender {
   private handleContentChanged = () => {
     if (!isLocalChange(this.document)) return;
     this.dirtySeq++;
-    if (this.unsettledSince === undefined) {
-      this.unsettledSince = Date.now();
+    if (this.noExactSaveSince === undefined) {
+      this.noExactSaveSince = Date.now();
     }
     if (this.consecutiveFailures < kRetryingAfterFailures) {
       this.setSaveState(SaveState.Saving);
@@ -707,8 +712,8 @@ export class ContentSaveSender {
     }
     const snapshot = getSnapshot<DocumentContentSnapshotType>(content);
     const entry = this.getIntermediateStamp();
-    const evidence = collectUnsettledEvidence(this.document, Array.from(this.keptSnapshots.keys()),
-      this.unsettledSince ?? Date.now());
+    const evidence = collectNotExactEvidence(this.document, Array.from(this.keptSnapshots.keys()),
+      this.noExactSaveSince ?? Date.now());
     return {
       kind: "intermediate",
       changeSeq: this.dirtySeq,
@@ -727,17 +732,17 @@ export class ContentSaveSender {
     const manager = getTreeManager(this.document)?.historyManager;
     const entry = isCommitSource(manager) ? manager.lastCommitted ?? manager.caughtUpTo : undefined;
     if (entry) return entry;
-    const { lastHistoryEntryId, lastHistoryEntryIndex } = this.document.savedEnvelope ?? {};
-    return lastHistoryEntryId ? { id: lastHistoryEntryId, index: lastHistoryEntryIndex } : undefined;
+    const { lastHistoryEntryId, exactThrough } = this.document.savedEnvelope ?? {};
+    return lastHistoryEntryId ? { id: lastHistoryEntryId, index: exactThrough?.index } : undefined;
   }
 
   // Undefined when no intermediate save is needed. Any pending save goes first, so an exact one wins.
   private getIntermediateSaveDueAt() {
     if (!this.running || this.document.concurrent || this.pendingSave
-        || this.unsettledSince === undefined || this.savedSeq >= this.dirtySeq) {
+        || this.noExactSaveSince === undefined || this.savedSeq >= this.dirtySeq) {
       return undefined;
     }
-    const since = Math.max(this.unsettledSince, this.lastIntermediateWriteAt ?? this.unsettledSince);
+    const since = Math.max(this.noExactSaveSince, this.lastIntermediateWriteAt ?? this.noExactSaveSince);
     return since + kIntermediateSaveIntervalMs;
   }
 
@@ -918,7 +923,7 @@ export class ContentSaveSender {
       }
     } else if (isNewest) {
       this.endFallbackEpisode("exact-save");
-      this.unsettledSince = save.changeSeq >= this.dirtySeq ? undefined : Date.now();
+      this.noExactSaveSince = save.changeSeq >= this.dirtySeq ? undefined : Date.now();
     }
     if (isNewest) {
       this.reportWrite(save);
@@ -952,22 +957,19 @@ export class ContentSaveSender {
    * document read. An intermediate save without an entry leaves the envelope's id and index as they were.
    */
   private recordSavedEnvelope(save: IQueuedSave) {
-    const { lastHistoryEntryId, lastHistoryEntryIndex } = save.lastHistoryEntryId
-      ? { lastHistoryEntryId: save.lastHistoryEntryId, lastHistoryEntryIndex: save.index }
-      : this.document.savedEnvelope ?? {};
-    const settled = save.kind !== "intermediate";
+    const lastHistoryEntryId = save.lastHistoryEntryId ?? this.document.savedEnvelope?.lastHistoryEntryId;
+    const { index, exactSince } = save;
+    const exact = save.kind !== "intermediate" && index !== undefined && exactSince !== undefined;
     this.document.setSavedEnvelope({
       ...(lastHistoryEntryId !== undefined && { lastHistoryEntryId }),
-      ...(lastHistoryEntryIndex !== undefined && { lastHistoryEntryIndex }),
-      settled,
-      ...(settled && save.exactSince !== undefined && { exactSince: save.exactSince })
+      ...(exact && { exactThrough: { index, since: exactSince } })
     });
   }
 
   // Records the envelope as an intermediate save leaves it, before that save lands.
-  private recordUnsettledEnvelope() {
-    const { exactSince, ...envelope } = this.document.savedEnvelope ?? {};
-    this.document.setSavedEnvelope({ ...envelope, settled: false });
+  private recordNotExactEnvelope() {
+    const lastHistoryEntryId = this.document.savedEnvelope?.lastHistoryEntryId;
+    this.document.setSavedEnvelope(lastHistoryEntryId !== undefined ? { lastHistoryEntryId } : {});
   }
 
   // Sends the saved content's tools and reports the id the save was stamped with.

@@ -11,7 +11,8 @@ import {
   DBGroupUserConnections, DBPublication, DBDocumentType, DBImage, DBTileComment,
   DBUserStar, DBOfferingUserProblemDocument, DBOtherDocument, IDocumentProperties, DBOtherPublication, DBSupport
 } from "./db-types";
-import { DocumentModelType, ISavedEnvelope, createDocumentModel, isVisibilityType } from "../models/document/document";
+import { DocumentModelType, createDocumentModel, isVisibilityType } from "../models/document/document";
+import { readSavedEnvelope } from "../models/document/content-save-envelope";
 import {
   DocumentType, LearningLogDocument, LearningLogPublication, OtherDocumentType, OtherPublicationType,
   PersonalDocument, PersonalPublication, PlanningDocument, ProblemDocument, ProblemOrPlanningDocumentType,
@@ -1353,17 +1354,8 @@ export class DB {
             // Stash the envelope's history fields for the history catch-up and drift check that
             // run once the Firestore history is read. Skipped for pre-feature saves and fresh docs
             // with no prior history.
-            if (typeof document.lastHistoryEntryId === "string") {
-              const envelope: ISavedEnvelope = {
-                lastHistoryEntryId: document.lastHistoryEntryId,
-                settled: document.settled === true
-              };
-              if (typeof document.lastHistoryEntryIndex === "number") {
-                envelope.lastHistoryEntryIndex = document.lastHistoryEntryIndex;
-              }
-              if (typeof document.exactSince === "string") {
-                envelope.exactSince = document.exactSince;
-              }
+            const envelope = readSavedEnvelope(document);
+            if (envelope) {
               docModel.setSavedEnvelope(envelope);
             }
             return docModel;

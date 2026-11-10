@@ -1,7 +1,9 @@
-import { IUnsettledEvidence } from "../../lib/db-types";
+import { DBDocument, INotExactEvidence } from "../../lib/db-types";
+import { hashString } from "../../utilities/js-utils";
 import { ITileMapEntry } from "../../../shared/shared";
 import { IArrowAnnotation } from "../annotations/arrow-annotation";
 import { ICommittedEntry } from "../history/history-commits";
+import { ISavedEnvelope } from "./document";
 import { DocumentContentSnapshotType } from "./document-content";
 
 /**
@@ -53,18 +55,16 @@ export function buildExactSave({ content, changeCount, entry, exactSince }: IExa
     content,
     changeCount,
     lastHistoryEntryId: entry.id,
-    lastHistoryEntryIndex: entry.index,
-    settled: true,
-    exactSince,
-    unsettled: null
+    exactThrough: { id: entry.id, index: entry.index, contentHash: hashString(content), since: exactSince },
+    notExact: null
   };
 }
 
 interface IIntermediateSaveArgs {
   content: string;
   changeCount: number;
-  entry?: { id: string; index?: number };
-  evidence: IUnsettledEvidence;
+  entry?: { id: string };
+  evidence: INotExactEvidence;
 }
 
 /**
@@ -73,11 +73,27 @@ interface IIntermediateSaveArgs {
  */
 export function buildIntermediateSave({ content, changeCount, entry, evidence }: IIntermediateSaveArgs)
     : Record<string, unknown> {
-  const values: Record<string, unknown> = { content, changeCount };
-  if (entry) {
-    values.lastHistoryEntryId = entry.id;
-    // Cleared when unknown, so the merge can't leave an older entry's index next to this id.
-    values.lastHistoryEntryIndex = entry.index ?? null;
-  }
-  return { ...values, settled: null, exactSince: null, unsettled: evidence };
+  return {
+    content,
+    changeCount,
+    ...(entry && { lastHistoryEntryId: entry.id }),
+    exactThrough: null,
+    notExact: evidence
+  };
+}
+
+/**
+ * The history fields of a stored envelope. Its exactThrough is kept only when it was written with
+ * this id and content: a client that doesn't know the field saves without clearing it.
+ */
+export function readSavedEnvelope(dbDocument: Pick<DBDocument, "content" | "lastHistoryEntryId" | "exactThrough">)
+    : ISavedEnvelope | undefined {
+  const { content, lastHistoryEntryId, exactThrough } = dbDocument;
+  if (typeof lastHistoryEntryId !== "string") return undefined;
+  const exact = exactThrough?.id === lastHistoryEntryId && typeof exactThrough.index === "number"
+    && typeof exactThrough.since === "string" && typeof content === "string"
+    && exactThrough.contentHash === hashString(content);
+  return exact
+    ? { lastHistoryEntryId, exactThrough: { index: exactThrough.index, since: exactThrough.since } }
+    : { lastHistoryEntryId };
 }

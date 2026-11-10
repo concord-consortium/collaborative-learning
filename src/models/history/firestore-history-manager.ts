@@ -6,7 +6,7 @@ import { Firestore } from "../../lib/firestore";
 import { UserContextProvider } from "../stores/user-context-provider";
 import { LogEventName } from "../../lib/logger-types";
 import {
-  getHistoryEntriesAfter, getHistoryEntryIndex, getLastHistoryEntry, IFirestoreHistoryEntryDoc, loadHistory
+  getHistoryEntriesAfter, getLastHistoryEntry, IFirestoreHistoryEntryDoc, loadHistory
 } from "./history-firestore";
 import { CDocument, CDocumentType, TreeManagerLogger, TreeManagerType } from "./tree-manager";
 import { HistoryEntry, HistoryEntrySnapshot, HistoryEntryType } from "./history";
@@ -43,7 +43,7 @@ export interface IFirestoreHistoryManagerArgs {
   uploadLocalHistory: boolean;
   syncRemoteHistory: boolean;
   // History fields recorded alongside the document content at save time (from the RTDB
-  // envelope). When the envelope is settled, catchUpAtLoad applies the entries after its
+  // envelope). When the envelope has exactThrough, catchUpAtLoad applies the entries after its
   // lastHistoryEntryId. When the Firestore history first loads, we verify its lastHistoryEntryId
   // is present in the history. If not, the content reflects entries that never made it to the
   // history chain — drift. Undefined skips the check.
@@ -281,8 +281,8 @@ export class FirestoreHistoryManager implements ICommitSource {
    * applying the entries its saved envelope is missing, and decide where the session's exact
    * saves start. Managers that mirror the remote history or don't upload local history skip it, as
    * does another user's copy of the document, leaving its exactness undecided.
-   * Only a settled envelope is caught up. The id of one that isn't settled can be older than what
-   * its content holds, so applying the entries after it could apply some of them twice.
+   * Only an envelope with exactThrough is caught up. The id of one without it can be older than
+   * what its content holds, so applying the entries after it could apply some of them twice.
    * Never rejects: anything that keeps the catch-up from finishing leaves the session not exact.
    */
   async catchUpAtLoad() {
@@ -292,7 +292,7 @@ export class FirestoreHistoryManager implements ICommitSource {
     const savedId = envelope?.lastHistoryEntryId;
     // Where exact saves start once the content is known to match `contentId`.
     const startAt = (contentId: string) => {
-      exactness.startAt(envelope?.settled && envelope.exactSince ? envelope.exactSince : contentId);
+      exactness.startAt(envelope?.exactThrough?.since ?? contentId);
     };
     const incomplete = (reason: NotExactReason, params: Record<string, unknown> = {}) => {
       exactness.markNotExact(reason);
@@ -306,18 +306,8 @@ export class FirestoreHistoryManager implements ICommitSource {
       if (this.isOtherUsersDocument) return;
       const { documentPath, lastEntryIndex, lastEntryId } = await this.getFirestoreHistoryInfo();
       const last = { id: lastEntryId, index: lastEntryIndex };
-      const saved = { id: savedId, index: envelope?.lastHistoryEntryIndex };
-      let plan = planCatchUp(saved, last);
-      if (!envelope?.settled && plan.kind !== "none") {
-        const gap = saved.index === undefined ? undefined : lastEntryIndex - saved.index;
-        incomplete("unsettled-envelope-gap", gap === undefined ? {} : { gap });
-        return;
-      }
-      if (plan.kind === "need-index") {
-        saved.index = await getHistoryEntryIndex(this.firestore, documentPath, savedId!);
-        plan = saved.index === undefined ? { kind: "saved-id-missing" } : planCatchUp(saved, last);
-      }
-
+      const saved = { id: savedId, index: envelope?.exactThrough?.index };
+      const plan = planCatchUp(saved, last);
       switch (plan.kind) {
         case "none":
           // With nothing to fetch, a saved id other than the last entry can't be in Firestore: an
@@ -328,8 +318,8 @@ export class FirestoreHistoryManager implements ICommitSource {
             startAt(savedId ?? lastEntryId ?? kHistoryStart);
           }
           return;
-        case "saved-id-missing":
-          exactness.markNotExact("saved-id-missing");
+        case "unmarked":
+          incomplete("unmarked-envelope-gap");
           return;
         case "too-large":
           incomplete("catch-up-gap-too-large", { gap: plan.gap });

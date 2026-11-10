@@ -27,6 +27,10 @@ function readEnvelope() {
   return cy.window().then(win => getEnvelopeRef(win).once("value")).then(snapshot => snapshot.val());
 }
 
+// Whether the envelope's exactThrough describes its id: the content is exactly the history.
+const isExact = envelope => envelope.exactThrough?.id === envelope.lastHistoryEntryId;
+const exactIndex = envelope => envelope.exactThrough.index;
+
 // Polls the envelope until `predicate` holds, with a bounded number of retries.
 function waitForEnvelope(predicate, description, attemptsLeft = 20) {
   return readEnvelope().then(envelope => {
@@ -47,17 +51,18 @@ context("Settled saves", function () {
     textToolTile.verifyTextTileIsEditable();
     textToolTile.enterText("first burst of edits");
     cy.waitForSave();
-    waitForEnvelope(e => e.settled === true, "is settled").then(e1 => {
+    waitForEnvelope(isExact, "is exact").then(e1 => {
       expect(e1.lastHistoryEntryId).to.be.a("string");
-      expect(e1.lastHistoryEntryIndex).to.be.a("number");
-      expect(e1.exactSince).to.be.a("string");
-      expect(e1.unsettled).to.equal(undefined);
+      expect(e1.exactThrough.index).to.be.a("number");
+      expect(e1.exactThrough.contentHash).to.be.a("number");
+      expect(e1.exactThrough.since).to.be.a("string");
+      expect(e1.notExact).to.equal(undefined);
 
       cy.log("one more edit is saved");
       const lastEdit = " and one last edit";
       textToolTile.enterAdditionalText(lastEdit);
       cy.waitForSave();
-      waitForEnvelope(e => e.lastHistoryEntryIndex > e1.lastHistoryEntryIndex, "holds the last edit")
+      waitForEnvelope(e => isExact(e) && exactIndex(e) > exactIndex(e1), "holds the last edit")
         .then(e2 => {
           cy.log("put the older envelope back so the document is behind its history");
           cy.window().then(win => getEnvelopeRef(win).set(e1));
@@ -72,8 +77,8 @@ context("Settled saves", function () {
           textToolTile.enterAdditionalText(" after the reload");
           cy.waitForSave();
           waitForEnvelope(
-            e => e.settled === true && e.lastHistoryEntryIndex > e2.lastHistoryEntryIndex,
-            "is settled past the last edit"
+            e => isExact(e) && exactIndex(e) > exactIndex(e2),
+            "is exact past the last edit"
           );
         });
     });
@@ -88,13 +93,13 @@ context("Settled saves", function () {
     dataflowToolTile.getCreateNodeButton("generator").click();
     dataflowToolTile.getNode("generator").should("exist");
 
-    waitForEnvelope(e => e.settled === true, "is settled").then(first => {
+    waitForEnvelope(isExact, "is exact").then(first => {
       cy.wait(3000);
       waitForEnvelope(
-        e => e.settled === true && e.lastHistoryEntryId !== first.lastHistoryEntryId,
-        "is settled at a later entry"
+        e => isExact(e) && e.lastHistoryEntryId !== first.lastHistoryEntryId,
+        "is exact at a later entry"
       ).then(second => {
-        expect(second.lastHistoryEntryIndex).to.be.greaterThan(first.lastHistoryEntryIndex);
+        expect(exactIndex(second)).to.be.greaterThan(exactIndex(first));
       });
     });
   });

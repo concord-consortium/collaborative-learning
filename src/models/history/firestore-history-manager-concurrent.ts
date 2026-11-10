@@ -134,26 +134,24 @@ export class FirestoreHistoryManagerConcurrent extends FirestoreHistoryManager {
   }
 
   /**
-   * The entry the loaded content was saved at, when its envelope is settled and records the
-   * entry's index. The content is then known to be exactly the state at that entry.
+   * The entry the loaded content was saved at, when its envelope has exactThrough. The content is
+   * then known to be exactly the state at that entry.
    */
-  private get settledEnvelopeEntry(): LastHistoryEntry {
+  private get exactEnvelopeEntry(): LastHistoryEntry {
     const envelope = this.savedEnvelope;
-    if (!envelope?.settled || !envelope.lastHistoryEntryId || typeof envelope.lastHistoryEntryIndex !== "number") {
-      return undefined;
-    }
-    return { id: envelope.lastHistoryEntryId, index: envelope.lastHistoryEntryIndex };
+    if (!envelope?.exactThrough || !envelope.lastHistoryEntryId) return undefined;
+    return { id: envelope.lastHistoryEntryId, index: envelope.exactThrough.index };
   }
 
   async getInitialLastHistoryEntry() {
     if (!this.initialLastHistoryPromise) {
       await this.environmentAndMetadataDocReadyPromise;
       const { firestore, documentPath, savedEnvelope } = this;
-      const settledEntry = this.settledEnvelopeEntry;
-      // Without a settled envelope this is Firestore's last entry when the query runs, which is
+      const exactEntry = this.exactEnvelopeEntry;
+      // Without exactThrough this is Firestore's last entry when the query runs, which is
       // past the content if another client commits an entry after the content was read.
-      const lastEntryPromise = settledEntry
-        ? Promise.resolve(settledEntry)
+      const lastEntryPromise = exactEntry
+        ? Promise.resolve(exactEntry)
         : getLastHistoryEntry(firestore, documentPath);
       this.initialLastHistoryPromise = lastEntryPromise.then(entry => {
         // Seed expectedRemoteHead from the initial load exactly once.
@@ -163,9 +161,7 @@ export class FirestoreHistoryManagerConcurrent extends FirestoreHistoryManager {
         // its own action batch for the mutation even though the .then
         // callback itself is not an action context.
         this.setExpectedRemoteHead(entry?.id ?? null, entry?.index);
-        this.treeManager.exactness.startAt(settledEntry
-          ? savedEnvelope?.exactSince ?? settledEntry.id
-          : entry?.id ?? kHistoryStart);
+        this.treeManager.exactness.startAt(savedEnvelope?.exactThrough?.since ?? entry?.id ?? kHistoryStart);
         return entry;
       });
     }

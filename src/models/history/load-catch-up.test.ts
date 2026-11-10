@@ -8,8 +8,8 @@ describe("planCatchUp", () => {
     expect(planCatchUp({}, { id: "e9", index: 9 })).toEqual({ kind: "none" }));
   it("needs nothing when Firestore has no history", () =>
     expect(planCatchUp({ id: "e5", index: 5 }, { id: null, index: -1 })).toEqual({ kind: "none" }));
-  it("asks for the index when the envelope has none", () =>
-    expect(planCatchUp({ id: "e5" }, { id: "e9", index: 9 })).toEqual({ kind: "need-index" }));
+  it("doesn't catch up an envelope without exactThrough, which gives no index", () =>
+    expect(planCatchUp({ id: "e5" }, { id: "e9", index: 9 })).toEqual({ kind: "unmarked" }));
   it("needs nothing when the saved entry is not before the last entry", () =>
     expect(planCatchUp({ id: "e5", index: 9 }, { id: "e9", index: 9 })).toEqual({ kind: "none" }));
   it("fetches a gap of up to 200 entries", () => {

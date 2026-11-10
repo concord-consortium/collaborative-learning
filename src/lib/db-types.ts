@@ -132,23 +132,34 @@ export interface DBDocument {
   // Firestore (metadata.lastHistoryEntry) because we need it co-located with
   // the content in RTDB — we can't transact across RTDB and Firestore.
   lastHistoryEntryId?: string;
-  // Position of lastHistoryEntryId in the history chain.
-  lastHistoryEntryIndex?: number;
-  // True only when the content is exactly the result of the history up to lastHistoryEntryId.
-  settled?: true;
-  // Id of the history entry from which the saving session guaranteed exactness.
-  exactSince?: string;
-  // Why the content could not be marked settled, written with saves that aren't.
-  unsettled?: IUnsettledEvidence;
+  // Written by a save whose content is exactly the history through an entry. A save that doesn't
+  // know this field leaves it in place, so it is trusted only while its id is lastHistoryEntryId
+  // and its contentHash is the hash of content (see readSavedEnvelope).
+  exactThrough?: IExactThrough;
+  // Why the content may hold more than the history through lastHistoryEntryId describes, written
+  // with saves that clear exactThrough.
+  notExact?: INotExactEvidence;
   type: DBDocumentType;
 }
 
-export interface IUnsettledEvidence {
+export interface IExactThrough {
+  // The last entry the content holds, and its Firestore index.
+  id: string;
+  index: number;
+  // hashString of the content string.
+  contentHash: number;
+  // The history entry from which history recreates the content, or "first" for the start of
+  // history. Carried forward from session to session while each load is exact.
+  since: string;
+}
+
+export interface INotExactEvidence {
   openEntries: Array<{ id: string; model?: string; action?: string; exchanges: string[]; openedAt: number }>;
   runningFlows: Array<{ action: string }>;
   uncommittedEntryIds: string[];
   notExactReason?: string;
-  unsettledSince: number;
+  // When the stretch with unsaved changes and no exact save began.
+  since: number;
 }
 
 // Note: axes-typed documents do not have any type specific metadata. They have generic metadata,

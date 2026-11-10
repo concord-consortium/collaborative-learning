@@ -79,18 +79,6 @@ export function loadHistory(
 }
 
 /**
- * Read the index of one history entry, or undefined if the entry isn't in Firestore
- * or has no numeric index.
- */
-export async function getHistoryEntryIndex(firestore: Firestore, documentPath: string, entryId: string)
-    : Promise<number | undefined> {
-  const snapshot = await firestore.doc(`${documentPath}/history/${entryId}`).get();
-  if (!snapshot.exists) return undefined;
-  const index = snapshot.get("index");
-  return typeof index === "number" ? index : undefined;
-}
-
-/**
  * Read, in one query, every history entry whose index is greater than `afterIndex`.
  */
 export async function getHistoryEntriesAfter(firestore: Firestore, documentPath: string, afterIndex: number)

@@ -63,12 +63,13 @@ export function isVisibilityType(value: string): value is VisibilityType {
   return VisibilityTypeEnumValues.indexOf(value as VisibilityType) >= 0;
 }
 
-// The history fields of the RTDB envelope a document's content was loaded from.
+// The history fields of a document's RTDB envelope: the one its content was loaded from, until a
+// content save writes a newer one.
 export interface ISavedEnvelope {
   lastHistoryEntryId?: string;
-  lastHistoryEntryIndex?: number;
-  settled: boolean;
-  exactSince?: string;
+  // Set when the content is exactly the history through lastHistoryEntryId: that entry's Firestore
+  // index, and the entry from which history recreates the content.
+  exactThrough?: { index: number; since: string };
 }
 
 function resolveJsonPath(json: any, path: string) {
