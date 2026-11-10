@@ -147,6 +147,9 @@ interface FirestoreMockOptions {
   txMetadataLastHistoryEntry?: { id: string; index: number } | null;
   // When given, each transaction waits for it before running its body.
   transactionGate?: Promise<void>;
+  // How many times each transaction runs its body, as Firestore does on contention. Each run reads
+  // the next value of txMetadataLastHistoryEntries.
+  txMetadataLastHistoryEntries?: Array<{ id: string; index: number } | null>;
 }
 
 interface FirestoreMockCapture {
@@ -184,21 +187,22 @@ function makeFirestoreMock(opts: FirestoreMockOptions = {}): {
     timestamp: jest.fn(() => new Date()),
     runTransaction: jest.fn(async (fn: (tx: any) => Promise<void>) => {
       await opts.transactionGate;
-      const tx = {
-        get: jest.fn(async () => ({
-          exists: true,
-          data: () => ({
-            lastHistoryEntry: opts.txMetadataLastHistoryEntry ?? null,
+      const attempts = opts.txMetadataLastHistoryEntries ?? [opts.txMetadataLastHistoryEntry ?? null];
+      for (const lastHistoryEntry of attempts) {
+        const tx = {
+          get: jest.fn(async () => ({
+            exists: true,
+            data: () => ({ lastHistoryEntry }),
+          })),
+          set: jest.fn((ref: any, data: any) => {
+            capture.transactionSetCalls.push({ ref, data });
           }),
-        })),
-        set: jest.fn((ref: any, data: any) => {
-          capture.transactionSetCalls.push({ ref, data });
-        }),
-        update: jest.fn((ref: any, data: any) => {
-          capture.transactionUpdateCalls.push({ ref, data });
-        }),
-      };
-      await fn(tx);
+          update: jest.fn((ref: any, data: any) => {
+            capture.transactionUpdateCalls.push({ ref, data });
+          }),
+        };
+        await fn(tx);
+      }
     }),
   } as unknown as Firestore;
   return { firestore, capture };
@@ -1128,6 +1132,22 @@ describe("FirestoreHistoryManagerConcurrent", () => {
       return entry;
     };
     const makeListener = () => ({ onCommitted: jest.fn(), onUncommittedVoided: jest.fn() });
+
+    it("reports each entry once, with the index of the attempt that commits, when the transaction reruns",
+        async () => {
+      getLastHistoryEntry.mockResolvedValue({ id: "r4", index: 4 });
+      const { manager, historyManager } = await setupManager({
+        txMetadataLastHistoryEntries: [{ id: "r4", index: 3 }, { id: "r4", index: 4 }],
+      });
+      const listener = makeListener();
+      historyManager.addCommitListener(listener);
+      queueEntry(manager, historyManager, "L1");
+
+      await historyManager.uploadQueuedHistoryEntries();
+
+      expect(listener.onCommitted.mock.calls).toEqual([[[{ id: "L1", index: 5 }]]]);
+      expect(historyManager.expectedRemoteHeadIndex).toBe(5);
+    });
 
     it("reports each entry of a committed transaction with its Firestore index", async () => {
       getLastHistoryEntry.mockResolvedValue({ id: "r4", index: 4 });

@@ -777,6 +777,23 @@ describe("applying the entries a load is missing to converted content", () => {
     expect(toJsonValue(getSnapshot(document.content!))).toEqual(earlier.endJson.content);
   });
 
+  it("applies a load entry among them as JSON when the load converted nothing", async () => {
+    const stored = { tileMap: { t1: oldTile("t1", "a", ["a"]) } };
+    const earlier = await setupConvertedDocument(cloneDeep(stored), []);
+    const gap: HistoryEntrySnapshot[] = toJsonValue(getSnapshot(earlier.manager.document.history));
+    // Content already in the current format, such as the converted content the load entry made.
+    const converted = loadStoredContent(cloneDeep(stored));
+    const currentFormat = toJsonValue(getSnapshot(converted.document.content!));
+    const { document, manager } = loadStoredContent(currentFormat);
+    expect(manager.pendingLoadEntry).toBeUndefined();
+
+    const result = await manager.applyEntriesAtLoad(gap);
+
+    expect(result).toEqual({ applied: 2 });
+    expect(manager.pendingLoadEntry).toBeUndefined();
+    expect(toJsonValue(getSnapshot(document.content!))).toEqual(earlier.endJson.content);
+  });
+
   it("stops at an entry that doesn't apply, keeping the entries before it", async () => {
     const { document, manager } = loadStoredContent({ tileMap: { t1: oldTile("t1", "a") } });
     const [first] = t1OldEntries();

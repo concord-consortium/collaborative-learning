@@ -893,6 +893,30 @@ describe("catchUpAtLoad", () => {
     expect(treeManager.exactness.notExactReason).toBe("history-unavailable");
   });
 
+  it("counts an error thrown while applying as an apply failure, not missing history", async () => {
+    const { treeManager, historyManager, logEvent } = setupCatchUp(
+      { lastHistoryEntryId: "e5", exactThrough: { index: 5, since: "e2" } },
+      { id: "e7", index: 7 });
+    getHistoryEntriesAfter.mockResolvedValue([entryDoc(6, "e5"), entryDoc(7, "e6")]);
+    jest.spyOn(treeManager, "applyEntriesAtLoad").mockRejectedValue(new Error("boom"));
+    await historyManager.catchUpAtLoad();
+    expect(treeManager.exactness.notExactReason).toBe("catch-up-apply-failed");
+    expect(logEvent).toHaveBeenCalledWith(LogEventName.HISTORY_LOAD_CATCH_UP_INCOMPLETE,
+      expect.objectContaining({ reason: "catch-up-apply-failed", error: "boom" }));
+  });
+
+  it("skips the document when the current user turns out to be someone else", async () => {
+    const { treeManager, historyManager } = setupCatchUp(
+      { lastHistoryEntryId: "e5", exactThrough: { index: 5, since: "e2" } },
+      { id: "e7", index: 7 }, { uid: "0" });
+    const catchUp = historyManager.catchUpAtLoad();
+    historyManager.userContextProvider.userContext.uid = "2";
+    await catchUp;
+    expect(getLastHistoryEntry).not.toHaveBeenCalled();
+    expect(treeManager.exactness.exactSince).toBeUndefined();
+    expect(treeManager.exactness.notExactReason).toBeUndefined();
+  });
+
   it("skips another user's document without reading its history", async () => {
     const { treeManager, historyManager } = setupCatchUp(
       { lastHistoryEntryId: "e5", exactThrough: { index: 5, since: "e2" } },

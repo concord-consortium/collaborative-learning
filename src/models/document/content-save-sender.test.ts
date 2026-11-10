@@ -11,8 +11,8 @@ import { LogEventName } from "../../lib/logger-types";
 import { hashString } from "../../utilities/js-utils";
 import {
   collectNotExactEvidence, ContentSaveSender, getContentSaveSender, IContentRef, IContentSaveSenderOptions,
-  kGroupSaveJitterMs, kIntermediateSaveIntervalMs, kMaxEvidenceEntryIds, kMaxUsableSnapshots, kMinimumSaveGapMs,
-  kSenderUnmountLimitMs
+  kGroupSaveJitterMs, kIntermediateSaveIntervalMs, kMaxEvidenceEntryIds, kMaxRetryDelayMs, kMaxUsableSnapshots,
+  kMinimumSaveGapMs, kSenderUnmountLimitMs
 } from "./content-save-sender";
 import { createDocumentModel, DocumentModelType, SaveState } from "./document";
 import { DocumentContentModel } from "./document-content";
@@ -581,6 +581,22 @@ describe("ContentSaveSender", () => {
       expect(contentRef.writes[0].values).toMatchObject({ lastHistoryEntryId: ids[0], exactThrough: { id: ids[0] } });
     });
 
+    it("counts an open entry that has recorded changes, even when it waits only on a finished call", async () => {
+      const { commits, contentRef, document, edit, treeManager } = track(setup());
+      treeManager.createHistoryEntry({
+        id: "open", exchangeId: "open-x", tree: document.key, model: "TestTile", action: "/stuck", undoable: true
+      });
+      treeManager.startExchange("open", "open-y", "finished call");
+      treeManager.addTreePatchRecord("open", "open-x", { tree: document.key, action: "/stuck",
+        patches: [{ op: "replace", path: "/content/tileMap/t1/content/text", value: "stuck" }],
+        inversePatches: [{ op: "replace", path: "/content/tileMap/t1/content/text", value: "" }] });
+      jest.spyOn(document.treeMonitor!, "isFinishedCallExchange").mockImplementation(id => id === "open-y");
+
+      const a = await edit("alpha");
+      commits.commit(a);
+      expect(contentRef.update).not.toHaveBeenCalled();
+    });
+
     it("skips a snapshot taken while a group document applied remote entries", async () => {
       const { commits, contentRef, edit } = track(setup({}, true));
       commits.setApplying(true);
@@ -820,6 +836,34 @@ describe("ContentSaveSender", () => {
         contentRef.writes[3].resolve();
         await flush();
         expect(document.saveState).toBe(SaveState.Saved);
+
+        // a success starts the count again
+        const b = await edit("bravo");
+        commits.commit(b);
+        jest.advanceTimersByTime(kMinimumSaveGapMs);
+        expect(contentRef.update).toHaveBeenCalledTimes(5);
+        contentRef.writes[4].reject(new Error("offline"));
+        await flush();
+        expect(document.saveState).toBe(SaveState.Saving);
+        jest.advanceTimersByTime(999);
+        expect(contentRef.update).toHaveBeenCalledTimes(5);
+        jest.advanceTimersByTime(1);
+        expect(contentRef.update).toHaveBeenCalledTimes(6);
+      });
+    });
+
+    it("waits no more than 30 seconds between retries", async () => {
+      const { commits, contentRef, edit } = track(setup());
+      const a = await edit("alpha");
+
+      await jestSpyConsole("warn", async () => {
+        commits.commit(a);
+        for (let failures = 1; failures <= 8; failures++) {
+          contentRef.lastWrite.reject(new Error("offline"));
+          await flush();
+          jest.advanceTimersByTime(kMaxRetryDelayMs);
+          expect(contentRef.update).toHaveBeenCalledTimes(failures + 1);
+        }
       });
     });
 
@@ -1416,6 +1460,18 @@ describe("ContentSaveSender", () => {
       jest.advanceTimersByTime(10000);
       await flush();
       expect(contentRef.update).toHaveBeenCalledTimes(1);
+    });
+
+    it("doesn't replace a commit's save with a settled save at the same index", async () => {
+      // The commit's save waits half the jitter. A settled save queued in its place would wait it all.
+      const random = jest.fn().mockReturnValueOnce(0.5).mockReturnValue(1);
+      const { commits, contentRef, edit } = track(setup({ random }, true));
+      const a = await edit("alpha");
+      commits.commit(a);
+      await flush();
+      jest.advanceTimersByTime(kGroupSaveJitterMs / 2);
+      expect(contentRef.update).toHaveBeenCalledTimes(1);
+      expect(contentRef.writes[0].values).toMatchObject({ lastHistoryEntryId: a, exactThrough: { index: 1 } });
     });
 
     it("stamps a snapshot save with the committed entry and stale-checks it too", async () => {

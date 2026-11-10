@@ -148,6 +148,16 @@ describe("TreeMonitor", () => {
       expect(treeMonitor.hasCallWithUnrecordedChanges()).toBe(false);
     });
 
+    it("forgets a finished call whose record returns early without reaching the manager", async () => {
+      const { tileContent, treeMonitor } = setupDocument();
+      jest.spyOn(treeMonitor as unknown as { recordAction: () => Promise<void> }, "recordAction")
+        .mockResolvedValue(undefined);
+      tileContent.setText("x");
+      expect(treeMonitor.hasCallWithUnrecordedChanges()).toBe(true);
+      await new Promise(resolve => setTimeout(resolve));
+      expect(treeMonitor.hasCallWithUnrecordedChanges()).toBe(false);
+    });
+
     it("counts a running flow that has changed the tree as unrecorded changes", async () => {
       const { tileContent, treeMonitor } = setupDocument();
       const first = deferred<void>();
