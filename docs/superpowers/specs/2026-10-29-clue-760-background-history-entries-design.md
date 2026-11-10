@@ -375,11 +375,11 @@ the background check covers them and that clause goes too.
 - The Simulator's `step` is flagged here, not in CLUE-761.
 - `processAfterProgramChange` is background, because it writes only what a tick writes. A follow-up
   entry that changes anything else is grouped into the user's action instead.
-- A failed background-only save still shows `Retrying`.
 
 ## My calls (check these)
 
 - A link marker is added here, as a single point; CLUE-635 adds ranges.
+- A failed background-only save still shows `Retrying`.
 - `producerTileId` is stored now. `producerId` and `runnerSessionId` are not.
 - An "earliest available" stop at the oldest reachable position, with the stops before it
   unavailable.
