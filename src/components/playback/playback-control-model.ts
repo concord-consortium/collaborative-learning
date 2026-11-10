@@ -30,9 +30,11 @@ interface ISliderStopBase {
 interface IInitialSliderStop extends ISliderStopBase {
   kind: "initial";
 }
-// The oldest position playback can reach, when the history before it can't be rebuilt.
+// The oldest position playback can reach, when the history before it can't be rebuilt and no
+// other stop is there. Like a link stop, it shows the document right after an entry.
 interface IEarliestSliderStop extends ISliderStopBase {
   kind: "earliest";
+  created: Date;
 }
 // The document right after a person's change.
 interface IUserSliderStop extends ISliderStopBase {
@@ -53,10 +55,12 @@ export interface ICommentSliderStop extends ISliderStopBase {
   comment: WithId<CommentDocument>;
   created: Date;
 }
-// The history entry a link into the document pointed at.
+// The history entry a link into the document pointed at, when no stop of the document's own
+// shows it. It shows the document right after that entry, which is usually a background one.
 interface ILinkSliderStop extends ISliderStopBase {
   kind: "link";
   entryId: string;
+  created: Date;
 }
 export type ISliderStop = IInitialSliderStop | IEarliestSliderStop | IUserSliderStop | ILatestSliderStop |
   ICommentSliderStop | ILinkSliderStop;
@@ -110,6 +114,7 @@ export class PlaybackControlModel {
   seekInProgress = false;
 
   private treeManager: Instance<typeof TreeManager>;
+  private requestedHistoryId: string | undefined;
   private advanceTimer: ReturnType<typeof setTimeout> | undefined = undefined;
   // The stop this model is on its way to: queued for the seek loop, or being sought now.
   // rc-slider reports every mouse move of a drag, and only the last of them is worth
@@ -122,13 +127,17 @@ export class PlaybackControlModel {
    * @param initialRequest what the reader has already asked for. `"end"` for a control
    * opened normally; `undefined` when a link is about to send the document to a particular
    * history entry, so that the thumb follows it there rather than holding it at the end.
+   * @param requestedHistoryId the history entry a link into the document asked for, which the
+   * slider keeps a stop and a marker for so the reader can come back to it.
    */
-  constructor(treeManager: Instance<typeof TreeManager>, initialRequest: StopRequest | undefined) {
+  constructor(treeManager: Instance<typeof TreeManager>, initialRequest: StopRequest | undefined,
+              requestedHistoryId?: string) {
     this.treeManager = treeManager;
     this.requestedStop = initialRequest;
+    this.requestedHistoryId = requestedHistoryId;
     makeAutoObservable<PlaybackControlModel,
-                       "treeManager" | "advanceTimer" | "queuedStopIndex" | "seekLoop" |
-                       "followEndDisposer" | "requestedStopIndex">(this, {
+                       "treeManager" | "requestedHistoryId" | "advanceTimer" | "queuedStopIndex" |
+                       "seekLoop" | "followEndDisposer" | "requestedStopIndex" | "linkStopIndex">(this, {
       // The comment queries hand back a new array whenever their results change, so tracking
       // the reference is enough, and it leaves the comment objects themselves alone.
       comments: observable.ref,
@@ -138,10 +147,12 @@ export class PlaybackControlModel {
       // not observable and could not invalidate a cached computed.
       uniqueFailures: false,
       treeManager: false,
+      requestedHistoryId: false,
       advanceTimer: false,
       seekLoop: false,
       followEndDisposer: false,
       requestedStopIndex: computed,
+      linkStopIndex: computed,
       queuedStopIndex: observable
     }, { autoBind: true });
 
@@ -188,6 +199,19 @@ export class PlaybackControlModel {
     const lastEntry = history.length > 0 ? history[history.length - 1] : undefined;
     if (lastEntry && isBackgroundEntry(lastEntry)) {
       stops.push({ kind: "latest", position: history.length, entry: lastEntry, created: lastEntry.created });
+    }
+
+    // The oldest reachable position and a link's entry each get a stop unless one of the
+    // document's own stops already shows them. Both usually fall on a background entry.
+    const hasOwnStopAt = (position: number) => stops.some(s => position === s.position);
+    const earliest = this.earliestReachablePosition;
+    if (earliest > 0 && earliest <= history.length && !hasOwnStopAt(earliest)) {
+      stops.push({ kind: "earliest", position: earliest, created: history[earliest - 1].created });
+    }
+    const linkPosition = this.linkPosition;
+    if (linkPosition !== undefined && !hasOwnStopAt(linkPosition)) {
+      const linkEntry = history[linkPosition - 1];
+      stops.push({ kind: "link", position: linkPosition, entryId: linkEntry.id, created: linkEntry.created });
     }
 
     // Each comment goes before the first entry created later than it, background entries
@@ -268,7 +292,57 @@ export class PlaybackControlModel {
   // The last entry applied at the thumb's stop, if it is a stop for an entry rather than a comment.
   get sliderStopHistoryIndex() {
     const stop = this.sliderStop;
-    return stop?.kind === "user" || stop?.kind === "latest" ? stop.position - 1 : undefined;
+    return stop?.kind === "user" || stop?.kind === "latest" || stop?.kind === "link" ||
+      stop?.kind === "earliest" ? stop.position - 1 : undefined;
+  }
+
+  /**
+   * The history position a link into the document asked for: the document with the linked
+   * entry applied. `"first"` names the document before it had any entry. Undefined without a
+   * link, or when the history has no entry with the id.
+   */
+  get linkPosition(): number | undefined {
+    const historyId = this.requestedHistoryId;
+    if (historyId === undefined) return undefined;
+    if (historyId === "first") return 0;
+    const index = this.treeManager.findHistoryEntryIndex(historyId);
+    return index < 0 ? undefined : index + 1;
+  }
+
+  // The link's own stop, or the stop of the document's that already shows the linked entry.
+  private get linkStopIndex() {
+    const position = this.linkPosition;
+    if (position === undefined) return undefined;
+    const linkIndex = this.sliderStops.findIndex(s => s.kind === "link");
+    return linkIndex !== -1 ? linkIndex : this.stopIndexForHistoryPosition(position);
+  }
+
+  // Percentage along the rail of the link's marker.
+  get linkLocation(): number | undefined {
+    const index = this.linkStopIndex;
+    return index === undefined ? undefined : this.railLocation(index);
+  }
+
+  /**
+   * The oldest position playback can reach. The history bridges know where they can't rebuild
+   * the old state before any seek gets there, and a seek that stops short records where it found
+   * the boundary, so this is the later of the two.
+   */
+  get earliestReachablePosition(): number {
+    const unrebuildable = this.treeManager.virtualConversions
+      .filter(conversion => conversion.oldJson === undefined)
+      .map(conversion => conversion.position);
+    return Math.max(this.treeManager.oldestReachablePosition ?? 0, ...unrebuildable);
+  }
+
+  // The first stop the slider can move onto. The stops before it can't be reached.
+  get earliestStopIndex(): number {
+    return this.stopIndexForHistoryPosition(this.earliestReachablePosition);
+  }
+
+  // Percentage along the rail of the earliest stop, which is how far the unavailable range runs.
+  get unavailableLocation(): number {
+    return this.railLocation(this.earliestStopIndex);
   }
 
   get playbackDisabled() {
@@ -288,17 +362,24 @@ export class PlaybackControlModel {
    * the position when there is one, rather than a comment that shares it, so a comment written
    * after the final entry stands beyond the end of the history rather than in place of it.
    *
+   * When the document has no stop of its own there, a link's stop at the position comes next,
+   * since that is where a link's seek lands.
+   *
    * Background entries have no stops, so a seek that stops on a failing one can leave the
    * document between two stops. The thumb then shows the stop before it.
    */
   stopIndexForHistoryPosition(historyPosition: number) {
     const stops = this.sliderStops;
     let found = 0;
+    let linkFound: number | undefined;
     for (let i = 0; i < stops.length && stops[i].position <= historyPosition; i++) {
-      if (stops[i].position === historyPosition && stopRank(stops[i]) === 0) return i;
+      if (stops[i].position === historyPosition) {
+        if (stopRank(stops[i]) === 0) return i;
+        if (stops[i].kind === "link") linkFound = i;
+      }
       found = i;
     }
-    return found;
+    return linkFound ?? found;
   }
 
   private commentStopIndex(comment: WithId<CommentDocument>) {
@@ -341,7 +422,10 @@ export class PlaybackControlModel {
     this.selectedFailure = failure;
   }
 
-  async goToSliderStop(stopIndex: number) {
+  async goToSliderStop(requestedIndex: number) {
+    // The stops before the earliest available one can't be reached, so a request for one of
+    // them goes no further back than it.
+    const stopIndex = Math.max(requestedIndex, this.earliestStopIndex);
     // Asking for the last stop is asking to be at the end. The behavior we want when they
     // are at the end is to stay at the end as new stops are added, so record the request as
     // "end" rather than as the index that happens to be last right now.
@@ -365,6 +449,13 @@ export class PlaybackControlModel {
   async goToComment(comment: WithId<CommentDocument>) {
     const index = this.commentStopIndex(comment);
     if (index !== -1) {
+      await this.goToSliderStop(index);
+    }
+  }
+
+  async goToLink() {
+    const index = this.linkStopIndex;
+    if (index !== undefined) {
       await this.goToSliderStop(index);
     }
   }

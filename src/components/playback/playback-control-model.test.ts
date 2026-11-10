@@ -3,6 +3,7 @@ import { createDocumentModel } from "../../models/document/document";
 import { DocumentContentModel } from "../../models/document/document-content";
 import { ProblemDocument } from "../../models/document/document-types";
 import { CDocument, TreeManager } from "../../models/history/tree-manager";
+import { IVirtualConversion, registerHistoryBridge } from "../../models/history/history-bridges";
 import { HistoryEntry, HistoryEntrySnapshot } from "../../models/history/history";
 import { WithId } from "../../hooks/firestore-hooks";
 import { CommentDocument } from "../../lib/firestore-schema";
@@ -42,7 +43,15 @@ interface ISetupOptions {
   initialRequest?: StopRequest | undefined;
   // The entries produced by code rather than by a person.
   backgroundIndexes?: number[];
+  // The history entry a link into the document asked for.
+  requestedHistoryId?: string;
 }
+
+// The conversions the test bridge reports, standing in for a legacy tile whose old state can't
+// be rebuilt. Only the earliest available stop tests set them, before building the document,
+// and they clear them afterward.
+let mockVirtualConversions: IVirtualConversion[] = [];
+registerHistoryBridge({ findVirtualConversions: () => mockVirtualConversions });
 
 // Entries carry no patch records unless a test gives them some, so seeking between them moves
 // the history position without needing tile content to replay against.
@@ -81,7 +90,7 @@ function setupTreeManager(entryCount: number, options: ISetupOptions = {}) {
 function setupModel(entryCount: number, options: ISetupOptions = {}) {
   const treeManager = setupTreeManager(entryCount, options);
   const initialRequest = "initialRequest" in options ? options.initialRequest : "end";
-  const model = new PlaybackControlModel(treeManager, initialRequest);
+  const model = new PlaybackControlModel(treeManager, initialRequest, options.requestedHistoryId);
   model.setComments(options.comments ?? [], []);
   return { model, treeManager };
 }
@@ -793,6 +802,142 @@ describe("PlaybackControlModel", () => {
       // Asking for the stop it is already on doesn't clear it.
       await model.goToSliderStop(0);
       expect(model.playbackFailureWarning).toBe(kStopped);
+    });
+  });
+
+  describe("link stop", () => {
+    // A link sends the document to its entry as the control opens, so the control starts out
+    // following the document rather than the end.
+    const setupLink = (entryCount: number, requestedHistoryId: string, options: ISetupOptions = {}) =>
+      setupModel(entryCount, { initialRequest: undefined, requestedHistoryId, ...options });
+
+    it("gives a link to a background entry its own stop", () => {
+      const { model } = setupLink(4, "entry-2", { backgroundIndexes: [1, 2] });
+
+      expect(stopKinds(model)).toEqual(["initial", "user", "link", "user"]);
+      expect(stopPositions(model)).toEqual([0, 1, 3, 4]);
+      expect(model.sliderStops[2]).toMatchObject({ kind: "link", entryId: "entry-2" });
+      expect(model.linkPosition).toBe(3);
+      expect(model.linkLocation).toBeCloseTo(100 * 2 / 3);
+    });
+
+    it("adds no link stop for a link to a user entry, and puts the marker on its stop", () => {
+      const { model } = setupLink(4, "entry-0", { backgroundIndexes: [1, 2] });
+
+      expect(stopKinds(model)).toEqual(["initial", "user", "user"]);
+      expect(model.linkPosition).toBe(1);
+      const userStopIndex = model.sliderStops.findIndex(s => s.kind === "user" && s.position === 1);
+      expect(model.linkLocation).toBe(100 * userStopIndex / model.lastStopIndex);
+    });
+
+    it("points a link made before the document had any entry at the initial stop", () => {
+      const { model } = setupLink(3, "first");
+
+      expect(stopKinds(model)).toEqual(["initial", "user", "user", "user"]);
+      expect(model.linkPosition).toBe(0);
+      expect(model.linkLocation).toBe(0);
+    });
+
+    it("adds no link stop for an id the history doesn't have", () => {
+      const { model } = setupLink(3, "no-such-id");
+
+      expect(stopKinds(model)).toEqual(["initial", "user", "user", "user"]);
+      expect(model.linkPosition).toBeUndefined();
+      expect(model.linkLocation).toBeUndefined();
+    });
+
+    it("labels a link stop with the entry it points at", async () => {
+      const { model } = setupLink(4, "entry-2", { backgroundIndexes: [1, 2] });
+
+      await model.goToLink();
+
+      expect(model.sliderStopTime).toEqual(entryCreated(2));
+      expect(model.sliderStopHistoryIndex).toBe(2);
+    });
+
+    it("brings the reader back to the link's stop", async () => {
+      const { model, treeManager } = setupLink(4, "entry-2", { backgroundIndexes: [1, 2] });
+      await model.goToSliderStop(0);
+
+      await model.goToLink();
+
+      expect(treeManager.numHistoryEventsApplied).toBe(3);
+      expect(model.currentStopIndex).toBe(2);
+    });
+
+    it("puts the thumb on the link's stop when the link's seek reaches it beside a comment", async () => {
+      // The comment at 150 seconds shows the document with entries 0 to 2 applied, the same
+      // position as the link.
+      const { model, treeManager } = setupLink(4, "entry-2", {
+        backgroundIndexes: [1, 2], comments: [makeComment("c1", commentCreated(150))]
+      });
+      expect(stopKinds(model)).toEqual(["initial", "user", "link", "comment", "user"]);
+
+      await treeManager.goToHistoryEntryPosition(3);
+
+      expect(model.currentStopIndex).toBe(2);
+    });
+  });
+
+  describe("earliest available stop", () => {
+    afterEach(() => {
+      mockVirtualConversions = [];
+      jest.restoreAllMocks();
+    });
+
+    const kUnrebuildable: IVirtualConversion = { position: 3, oldJson: undefined, path: "/content/tileMap/t1" };
+
+    it("adds an earliest available stop where earlier history can't be rebuilt", () => {
+      // Entries 1 and 2 are background, so no user stop is at position 3.
+      mockVirtualConversions = [kUnrebuildable];
+      const { model } = setupModel(5, { backgroundIndexes: [1, 2] });
+
+      expect(stopKinds(model)).toEqual(["initial", "user", "earliest", "user", "user"]);
+      expect(stopPositions(model)).toEqual([0, 1, 3, 4, 5]);
+      expect(model.earliestReachablePosition).toBe(3);
+      expect(model.earliestStopIndex).toBe(2);
+      expect(model.unavailableLocation).toBe(50);
+
+      // Entry 2 is a user change here, so its stop is the earliest one available.
+      const { model: userModel } = setupModel(5);
+
+      expect(stopKinds(userModel)).toEqual(["initial", "user", "user", "user", "user", "user"]);
+      expect(userModel.earliestStopIndex).toBe(3);
+    });
+
+    it("adds no earliest stop for a conversion whose old state can be rebuilt", () => {
+      mockVirtualConversions = [{ ...kUnrebuildable, oldJson: { type: "Text" } }];
+      const { model } = setupModel(5, { backgroundIndexes: [1, 2] });
+
+      expect(stopKinds(model)).toEqual(["initial", "user", "user", "user"]);
+      expect(model.earliestReachablePosition).toBe(0);
+      expect(model.earliestStopIndex).toBe(0);
+      expect(model.unavailableLocation).toBe(0);
+    });
+
+    it("keeps the slider off the stops before the earliest available one", async () => {
+      mockVirtualConversions = [kUnrebuildable];
+      const { model, treeManager } = setupModel(5, { backgroundIndexes: [1, 2] });
+      const seek = jest.spyOn(treeManager, "goToHistoryEntryPosition");
+
+      await model.goToSliderStop(0);
+
+      expect(seek).toHaveBeenCalledWith(3);
+      expect(seek).not.toHaveBeenCalledWith(0);
+      expect(treeManager.numHistoryEventsApplied).toBe(3);
+      expect(model.sliderValue).toBe(2);
+    });
+
+    it("moves the earliest stop to where a seek found the oldest reachable position", () => {
+      mockVirtualConversions = [kUnrebuildable];
+      const { model, treeManager } = setupModel(6, { backgroundIndexes: [1, 2, 3] });
+      expect(stopPositions(model)).toEqual([0, 1, 3, 5, 6]);
+
+      treeManager.setOldestReachablePosition(4);
+
+      expect(stopKinds(model)).toEqual(["initial", "user", "earliest", "user", "user"]);
+      expect(stopPositions(model)).toEqual([0, 1, 4, 5, 6]);
+      expect(model.earliestStopIndex).toBe(2);
     });
   });
 

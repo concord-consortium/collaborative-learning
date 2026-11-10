@@ -6,7 +6,9 @@ import { DocumentContentModel } from "../../models/document/document-content";
 import { ProblemDocument } from "../../models/document/document-types";
 import { CDocument, TreeManager } from "../../models/history/tree-manager";
 import { HistoryEntry } from "../../models/history/history";
+import { IVirtualConversion, registerHistoryBridge } from "../../models/history/history-bridges";
 import { kSeekProgressDelayMs, PlaybackControlComponent } from "./playback-control";
+import { PlaybackControlModel } from "./playback-control-model";
 
 // The slider is the subject of these tests, so everything the component pulls
 // from stores and Firestore hooks is stubbed; only the TreeManager is real.
@@ -38,11 +40,17 @@ jest.mock("../../hooks/use-nav-tab-panel-info", () => ({
   useNavTabPanelInfo: () => ({ setPlaybackTime: mockSetPlaybackTime })
 }));
 
+// The conversions the test bridge reports, standing in for a legacy tile whose old state can't
+// be rebuilt. A test sets them before building its document.
+let mockVirtualConversions: IVirtualConversion[] = [];
+registerHistoryBridge({ findVirtualConversions: () => mockVirtualConversions });
+
 // Entry N is created N minutes after this, so entries stay in a known time order.
 const historyStart = new Date("2026-02-25T09:00:00").getTime();
 const entryCreated = (index: number) => new Date(historyStart + index * 60 * 1000);
 
-function setupTreeManager(entryCount: number) {
+// backgroundIndexes are the entries produced by code rather than by a person.
+function setupTreeManager(entryCount: number, backgroundIndexes: number[] = []) {
   const docModel = createDocumentModel({
     uid: "1",
     type: ProblemDocument,
@@ -61,7 +69,8 @@ function setupTreeManager(entryCount: number) {
     undoable: true,
     state: "complete" as const,
     created: entryCreated(index),
-    records: []
+    records: [],
+    ...(backgroundIndexes.includes(index) ? { background: true } : {})
   }));
   treeManager.setChangeDocument(CDocument.create({ history }));
   treeManager.setNumHistoryEntriesApplied(entryCount);
@@ -169,6 +178,57 @@ describe("PlaybackControlComponent", () => {
     const timeInfo = screen.getByTestId("playback-time-info").textContent;
     expect(timeInfo).toContain("(1)");
     expect(timeInfo).toContain("9:01 am");
+  });
+
+  describe("link marker", () => {
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+
+    it("marks the point a link asked for and goes back to it when clicked", async () => {
+      const goToLink = jest.spyOn(PlaybackControlModel.prototype, "goToLink");
+      // Entries 1 and 2 are background, so the link to entry 2 has a stop of its own.
+      const treeManager = setupTreeManager(4, [1, 2]);
+      render(<PlaybackControlComponent treeManager={treeManager} requestedHistoryId="entry-2" />);
+      await act(async () => { await treeManager.goToHistoryEntryPosition(0); });
+
+      const marker = screen.getByRole("button", { name: "Linked point in history" });
+      await act(async () => { fireEvent.click(marker); });
+
+      expect(goToLink).toHaveBeenCalledTimes(1);
+      expect(treeManager.numHistoryEventsApplied).toBe(3);
+      // The stops are [initial, entry 0, link, entry 3].
+      expect(sliderValue()).toBe("2");
+    });
+
+    it("has no link marker without a link", () => {
+      const treeManager = setupTreeManager(3);
+      render(<PlaybackControlComponent treeManager={treeManager} requestedHistoryId={undefined} />);
+
+      expect(screen.queryByRole("button", { name: "Linked point in history" })).toBeNull();
+    });
+  });
+
+  describe("unavailable range", () => {
+    afterEach(() => {
+      mockVirtualConversions = [];
+    });
+
+    it("shades the stops before the earliest available one", () => {
+      mockVirtualConversions = [{ position: 3, oldJson: undefined, path: "/content/tileMap/t1" }];
+      const treeManager = setupTreeManager(5, [1, 2]);
+      render(<PlaybackControlComponent treeManager={treeManager} requestedHistoryId={undefined} />);
+
+      // The stops are [initial, entry 0, earliest, entry 3, entry 4].
+      expect(screen.getByTestId("playback-unavailable-range").style.width).toBe("50%");
+    });
+
+    it("shades nothing when all of the history is available", () => {
+      const treeManager = setupTreeManager(5, [1, 2]);
+      render(<PlaybackControlComponent treeManager={treeManager} requestedHistoryId={undefined} />);
+
+      expect(screen.queryByTestId("playback-unavailable-range")).toBeNull();
+    });
   });
 
   describe("progress for a slow move", () => {

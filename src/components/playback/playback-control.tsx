@@ -12,6 +12,7 @@ import PauseButton from "../../clue/assets/icons/playback/pause-button.svg";
 import { useDocumentComments, useDocumentCommentsAtSimplifiedPath } from "../../hooks/document-comment-hooks";
 import { useNavTabPanelInfo } from "../../hooks/use-nav-tab-panel-info";
 import { CommentMarker } from "./comment-marker";
+import { LinkMarker } from "./link-marker";
 import { PlaybackControlModel } from "./playback-control-model";
 
 import "./playback-control.scss";
@@ -27,7 +28,8 @@ export interface IMarkerProps {
 interface IProps {
   treeManager: Instance<typeof TreeManager>;
   // Set when a link asked for a particular entry of this document. The document is about to
-  // be sent there, so the reader is not following the end of its history.
+  // be sent there, so the reader is not following the end of its history. The slider keeps a
+  // marker on that entry.
   requestedHistoryId: string | undefined;
 }
 
@@ -43,7 +45,7 @@ export const PlaybackControlComponent: React.FC<IProps> = observer((props: IProp
   const [markers, setMarkers] = useState<IMarkerProps[]>([]);
 
   const [model] = useState(() =>
-    new PlaybackControlModel(treeManager, requestedHistoryId ? undefined : "end"));
+    new PlaybackControlModel(treeManager, requestedHistoryId ? undefined : "end", requestedHistoryId));
   useEffect(() => () => model.dispose(), [model]);
 
   // Only a seek that has run for a while is reported as loading.
@@ -218,6 +220,28 @@ export const PlaybackControlComponent: React.FC<IProps> = observer((props: IProp
     );
   };
 
+  const renderLinkMarker = () => {
+    const linkLocation = model.linkLocation;
+    if (linkLocation === undefined) return null;
+    return (
+      <div className="link-marker-container" data-testid="link-marker">
+        <LinkMarker location={linkLocation} activeNavTab={activeNavTab} onClick={model.goToLink} />
+      </div>
+    );
+  };
+
+  // The stops before the earliest available one can't be reached. The shading sits behind the
+  // rail and lets clicks through to it, and the model keeps the thumb off those stops.
+  const renderUnavailableRange = () => {
+    if (model.earliestStopIndex <= 0) return null;
+    return (
+      <div className="playback-unavailable-range-container">
+        <div className="playback-unavailable-range" data-testid="playback-unavailable-range"
+            style={{ width: `${model.unavailableLocation}%` }} />
+      </div>
+    );
+  };
+
   const renderPlaybackFailureMarkers = () => {
     const failureMarkers = model.uniqueFailures;
     if (failureMarkers.length === 0) return null;
@@ -280,7 +304,9 @@ export const PlaybackControlComponent: React.FC<IProps> = observer((props: IProp
       <div className={sliderComponentClass}>
         {renderMarkerComponent()}
         {renderCommentMarkers()}
+        {renderLinkMarker()}
         {renderPlaybackFailureMarkers()}
+        {renderUnavailableRange()}
         {renderSliderContainer()}
       </div>
       {renderTimeInfo()}
