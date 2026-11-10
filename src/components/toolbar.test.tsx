@@ -186,6 +186,25 @@ describe("ToolbarComponent", () => {
     expect(screen.getByTestId("tool-select")).not.toHaveAttribute("aria-disabled");
   });
 
+  // A document shown outside the workspace catches up only once its Edit tool opens it for editing.
+  it("keeps the tools that don't change the document enabled while it is catching up", () => {
+    const pendingDocument = createDocumentModel({
+      uid: "1", type: "problem", key: "pending", createdAt: 0, content: {}
+    });
+    pendingDocument.setHistoryCatchUpPending(true);
+    const viewConfig: IToolbarModelSnapshot = [
+      { id: "edit", title: "Edit", iconId: "icon-edit-tool", isDefault: false, isTileTool: false }
+    ];
+    render(
+      <ModalProvider>
+        <Provider stores={stores}>
+          <ToolbarComponent toolbarModel={ToolbarModel.create(viewConfig)} document={pendingDocument}/>
+        </Provider>
+      </ModalProvider>
+    );
+    expect(screen.getByTestId("tool-edit")).not.toHaveAttribute("aria-disabled");
+  });
+
   // A section toolbar has no document of its own, and the primary workspace document it copies
   // into is not available for a window after load. Buttons must report that accurately: a click
   // on a button whose action cannot run is discarded without feedback.

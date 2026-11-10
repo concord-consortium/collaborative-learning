@@ -74,6 +74,10 @@ context("Settled saves", function () {
           textToolTile.getTextTile().last().should("contain", lastEdit);
 
           cy.log("the next save is exact");
+          // The tile mounts once the catch-up finishes, and a text editor that was just mounted
+          // drops keystrokes for a moment (see TextToolTile.enterText).
+          textToolTile.verifyTextTileIsEditable();
+          cy.wait(500);
           textToolTile.enterAdditionalText(" after the reload");
           cy.waitForSave();
           waitForEnvelope(

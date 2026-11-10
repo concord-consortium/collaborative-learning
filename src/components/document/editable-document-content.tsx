@@ -123,13 +123,22 @@ export const EditableDocumentContent = observer(function EditableDocumentContent
     contained ? "contained-editable-document-content" : "full-screen-editable-document-content",
     {"comment-select" : documentSelectedForComment, "full-height": fullHeight}, className);
 
-  // Opening the document for editing catches it up to its history first.
+  // Opening the document for editing catches it up to its history first. Until then it shows a
+  // spinner rather than a document whose toolbar ignores clicks.
   const editable = !readOnly && !document.isPublished;
   useEffect(() => {
     if (editable) documents.historyCatchUp(document);
   }, [editable, documents, document]);
   useDocumentSyncToFirebase(user, firebase, firestore, document, readOnly || historyCatchUpPending,
     (doc, lastHistoryEntryId) => activityRecorder?.onContentSaved(doc, lastHistoryEntryId));
+  if (editable && historyCatchUpPending) {
+    return (
+      <div className={editableDocContentClass} data-focus-document={document.key}>
+        <div className="history-catch-up-spinner" role="status" aria-label="Loading the document"
+            data-testid="history-catch-up-spinner"/>
+      </div>
+    );
+  }
   // Skip the save indicator for non-editable documents and when Firebase sync is disabled
   // (doc-editor, iframe, authoring); those contexts have their own storage mechanisms.
   const showSaveIndicator = !isReadOnly && !(window as any).DISABLE_FIREBASE_SYNC;

@@ -30,6 +30,11 @@ export type OnToolClickedHandler = (tool: IToolbarButtonModel) => boolean|void;
 // This toolbar works with both the document and section models.
 // Since many of the tools are shared between the two, each model is
 // passed as an optional prop instead of using two separate components.
+// Toolbar tools that read the document but don't change it.
+const kToolsThatDontEditTheDocument = [
+  "edit", "selectAll", "togglePlayback", "copyToWorkspace", "copyToDocument", "readAloud", "historyView"
+];
+
 interface IProps {
   ariaLabel?: string;
   document?: DocumentModelType;
@@ -138,8 +143,10 @@ export const ToolbarComponent = observer(function ToolbarComponent(props: IProps
   const isButtonDisabled = (toolButton: IToolbarButtonModel) => {
     const { persistentUI: { problemWorkspace: { primaryDocumentKey } } } = stores;
 
-    // A document still catching up to its history can't be edited yet.
-    if (document?.historyCatchUpPending) return true;
+    // A document still catching up to its history can't be edited yet. Tools that don't change it
+    // still work: a document shown outside the workspace doesn't catch up until it is opened for
+    // editing, which its Edit tool does.
+    if (document?.historyCatchUpPending && !kToolsThatDontEditTheDocument.includes(toolButton.id)) return true;
 
     const selectedTileIds = getSelectedTileIdsInDocument();
 
