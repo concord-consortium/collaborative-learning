@@ -401,7 +401,6 @@ export const TreeManager = types
       self.logger?.(LogEventName.HISTORY_ENTRY_TIMED_OUT, {
         entryId, model: entry.model, action: entry.action, openExchanges
       });
-      // eslint-disable-next-line no-console
       console.error(`History entry timed out with open exchanges ${json({
         entryId, model: entry.model, action: entry.action, openExchanges
       })}`);
