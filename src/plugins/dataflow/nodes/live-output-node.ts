@@ -12,11 +12,12 @@ import { NodeLiveOutputTypes, NodeMicroBitHubs, baseLiveOutputOptions,
   kGripperOutputTypes, kMicroBitHubRelaysIndexed, resolveAllowedOutputTypes,
   kServoOutputTypes, outputGateState, unsupportedOutputOption } from "../model/utilities/node";
 import { InputValueControl } from "./controls/input-value-control";
+import { IPlotScale } from "./dataflow-node-plot-types";
 import { SerialDevice } from "../../../models/stores/serial";
 import { deviceProtocol, deviceDisplayName, deviceSupportsOutput } from "../model/utilities/device-capabilities";
 import { simulatedHub, simulatedHubName } from "../model/utilities/simulated-output";
 import { getValueOrZero } from "./utilities/view-utilities";
-import { servoAngleForValue, servoDisplayMessage } from "./utilities/servo";
+import { servoAngleForValue, servoDisplayMessage, servoPlotScale } from "./utilities/servo";
 
 export const LiveOutputTickEntry = BaseTickEntry.named("LiveOutputTickEntry")
 .props({
@@ -60,6 +61,10 @@ export const LiveOutputNodeModel = BaseNodeModel.named("LiveOutputNodeModel")
       getSharedVar: () => VariableType | undefined )
   {
     if (outputType === self.liveOutputType) return;
+
+    // A Servo's 180 degrees read as a Gripper's percentage would graph as 18000 on a 0-100 axis.
+    // Skipped when the block is only getting its first type, where nothing has been plotted yet.
+    if (self.liveOutputType) self.resetGraphForNewUnits();
 
     self.liveOutputType = outputType;
 
@@ -409,6 +414,22 @@ export class LiveOutputNode extends BaseNode<
 
   private get servoProportionMode() {
     return this.services.stores.appConfig.getSetting("servoInputMode", "dataflow") === "proportion";
+  }
+
+  getPlotScale(valueKey: string): IPlotScale | undefined {
+    if (valueKey !== "nodeValue") return undefined;
+    const { liveOutputType } = this.model;
+    if (kServoOutputTypes.includes(liveOutputType)) {
+      return servoPlotScale(this.servoProportionMode);
+    }
+    if (kGripperOutputTypes.includes(liveOutputType)) {
+      // Already a percentage: writeToOutForBBGripper divides by 100 to drive the hardware.
+      return { min: 0, max: 100 };
+    }
+    if (kBinaryOutputTypes.includes(liveOutputType)) {
+      return { min: 0, max: 1 };
+    }
+    return undefined;
   }
 
   private get allowedLiveOutputTypes() {

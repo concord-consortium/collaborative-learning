@@ -277,27 +277,4 @@ describe("load entry", () => {
     expect(manager.document.history.map(e => e.isLoadEntry)).toEqual([undefined, true, undefined]);
     expect(manager.pendingLoadEntry).toBeUndefined();
   });
-
-  it("plays back across a load entry without applying it", async () => {
-    const { document, manager } = makeDocument(oldContent());
-    document.treeMonitor!.enableMonitoring();
-    const getTile = () => document.content!.tileMap.get("t1")!.content as VersionedTestTileType;
-    const convertedTile = getSnapshot(getTile());
-    getTile().setLabel("x");
-    await expectEntryToBeComplete(manager, 2);
-    manager.setNumHistoryEntriesApplied(2);
-
-    await manager.goToHistoryEntryPosition(0);
-
-    expect(manager.numHistoryEventsApplied).toBe(0);
-    expect(manager.historyPlaybackFailures).toEqual([]);
-    expect(getSnapshot(getTile())).toEqual(convertedTile);
-
-    await manager.goToHistoryEntryPosition(2);
-
-    expect(manager.numHistoryEventsApplied).toBe(2);
-    expect(manager.historyPlaybackFailures).toEqual([]);
-    expect(getTile().label).toBe("x");
-    expect(getTile().version).toBe("2");
-  });
 });

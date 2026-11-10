@@ -1,8 +1,10 @@
 import ClueCanvas from '../../../support/elements/common/cCanvas';
 import DataflowToolTile from '../../../support/elements/tile/DataflowToolTile';
+import TableToolTile from '../../../support/elements/tile/TableToolTile';
 
 let clueCanvas = new ClueCanvas;
 let dataflowToolTile = new DataflowToolTile;
+let tableToolTile = new TableToolTile;
 let dragXDestination = 300;
 let dragYDestination = 50;
 
@@ -544,6 +546,34 @@ context('Dataflow Tool Tile', function () {
     cy.get(".primary-workspace [data-testid='connect-device-button']")
       .should("have.class", "connect-attention");
   });
+  // Covers the two things only a real document shows: the button is actually in the
+  // toolbar after Table It and Graph It, and a sample reaches a table that the click created.
+  it("records single samples into a table it creates", () => {
+    loadEditor(false);
+    clueCanvas.addTile("dataflow");
+    dataflowToolTile.getCreateNodeButton("number").click();
+
+    cy.log("Record Single Sample sits after Table It and Graph It");
+    dataflowToolTile.getRecordSampleButton().should("exist");
+    cy.get(".primary-workspace .dataflow-toolbar .toolbar-button").then($buttons => {
+      const classes = [...$buttons].map(b => b.className);
+      const firstView = classes.findIndex(c => c.includes("data-set-view"));
+      const sample = classes.findIndex(c => c.includes("record-sample"));
+      expect(sample).to.be.greaterThan(firstView);
+    });
+
+    cy.log("the first sample creates the table and lands in it");
+    dataflowToolTile.getRecordSampleButton().click();
+    tableToolTile.getTableTile().should("exist");
+    tableToolTile.getTableTile().find(".rdg-row:not(.input-row)").should("have.length", 1);
+
+    cy.log("a second sample is the next point");
+    dataflowToolTile.getRecordSampleButton().click();
+    // Excluding .input-row: an editable table always renders one, so "at least 2" was satisfied
+    // by a single sample and the second click proved nothing.
+    tableToolTile.getTableTile().find(".rdg-row:not(.input-row)").should("have.length", 2);
+  });
+
   it("Sensor Node and Record Data", () => {
     const sensorNode = "sensor";
     loadEditor(false);
@@ -570,7 +600,7 @@ context('Dataflow Tool Tile', function () {
     });
 
     cy.log("verify clear button");
-    dataflowToolTile.getClearButton().click();
+    dataflowToolTile.getClearProgramButton().click();
     dataflowToolTile.getNode(sensorNode).should("not.exist");
 
     cy.log("verify sensor select");
@@ -599,7 +629,7 @@ context('Dataflow Tool Tile', function () {
     dataflowToolTile.getSensorDropdownOptions(sensorNode).each(($tab, index, $typeList) => {
       expect($tab.text()).to.contain(sensorSelect[index]);
     });
-    dataflowToolTile.getClearButton().click();
+    dataflowToolTile.getClearProgramButton().click();
     dataflowToolTile.getNode(sensorNode).should("not.exist");
 
     cy.log("verify node inputs outputs");
@@ -635,51 +665,42 @@ context('Dataflow Tool Tile', function () {
     dataflowToolTile.selectSamplingRate(rate);
 
     cy.log("verify recording and stop recording");
-    dataflowToolTile.verifyRecordButtonText();
-    dataflowToolTile.verifyRecordButtonIcon();
+    dataflowToolTile.getDataflowTile().click();
+    dataflowToolTile.getRecordButton().should("not.have.attr", "aria-disabled");
+    dataflowToolTile.getStopButton().should("have.attr", "aria-disabled", "true");
     dataflowToolTile.getRecordButton().click();
-    dataflowToolTile.verifyPlayButtonText();
-    dataflowToolTile.verifyPlayButtonIcon();
-    dataflowToolTile.getPlayButton().should("be.disabled");
-    dataflowToolTile.verifyStopButtonText();
-    dataflowToolTile.verifyStopButtonIcon();
-    dataflowToolTile.getTimeSlider().should("be.visible");
-    dataflowToolTile.getCountdownTimer().should("contain", "/");
+    dataflowToolTile.getRecordButton().should("have.attr", "aria-disabled", "true");
+    dataflowToolTile.getStopButton().should("not.have.attr", "aria-disabled");
+    dataflowToolTile.getCountdownTimer().should("be.visible");
     cy.wait(5000);
 
     dataflowToolTile.getStopButton().click();
 
-    cy.log("verify play and pause recording");
-    dataflowToolTile.getPlayButton().should("be.enabled");
-    dataflowToolTile.verifyRecordingClearButtonText();
-    dataflowToolTile.verifyRecordingClearButtonIcon();
-    dataflowToolTile.getPlayButton().click();
-
-    dataflowToolTile.verifyPauseButtonText();
-    dataflowToolTile.verifyPauseButtonIcon();
-    dataflowToolTile.getPauseButton().should("be.enabled");
-    dataflowToolTile.getPauseButton().click();
-
-    dataflowToolTile.getPlayButton().should("be.enabled");
-    dataflowToolTile.getPlayButton().click();
-    cy.wait(5000);
+    cy.log("verify state after stopping");
+    dataflowToolTile.getRecordButton().should("not.have.attr", "aria-disabled");
+    dataflowToolTile.getStopButton().should("have.attr", "aria-disabled", "true");
 
     cy.log("verify clear recording");
-    dataflowToolTile.verifyRecordingClearButtonText();
-    dataflowToolTile.verifyRecordingClearButtonIcon();
-    dataflowToolTile.getRecordingClearButton().click();
-    dataflowToolTile.getClearDataWarningTitle().should("have.text", "Clear Data");
-    dataflowToolTile.getClearDataWarningContent().should(
-      "contain",
-      "Remove the program's recorded data and any linked displays of this data? This action is not undoable.");
-    dataflowToolTile.getClearDataWarningCancel().click();
-    dataflowToolTile.verifyRecordingClearButtonText();
-    dataflowToolTile.verifyRecordingClearButtonIcon();
-    dataflowToolTile.getRecordingClearButton().click();
-    dataflowToolTile.getClearDataWarningClear().click();
+    dataflowToolTile.clearRecordedData();
     dataflowToolTile.getSamplingRateLabel().should("have.text", "Sampling Rate");
-    dataflowToolTile.verifyRecordButtonText();
-    dataflowToolTile.verifyRecordButtonIcon();
+    dataflowToolTile.getRecordButton().should("not.have.attr", "aria-disabled");
+  });
+
+  it("disables everything but Stop while recording", () => {
+    loadEditor(false);
+    clueCanvas.addTile("dataflow");
+    dataflowToolTile.getDataflowTile().click();
+    dataflowToolTile.getCreateNodeButton("number").click();
+
+    dataflowToolTile.getRecordButton().click();
+    dataflowToolTile.getStopButton().should("not.have.attr", "aria-disabled");
+    dataflowToolTile.getRecordButton().should("have.attr", "aria-disabled", "true");
+    dataflowToolTile.getClearButton().should("have.attr", "aria-disabled", "true");
+    dataflowToolTile.getTableItButton().should("have.attr", "aria-disabled", "true");
+
+    dataflowToolTile.getStopButton().click();
+    dataflowToolTile.getRecordButton().should("not.have.attr", "aria-disabled");
+    dataflowToolTile.getTableItButton().should("not.have.attr", "aria-disabled");
   });
 
   // A block created outside the viewport still exists, so the only symptom is that the

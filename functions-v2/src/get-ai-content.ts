@@ -68,6 +68,10 @@ function returnCachedContent(cachedContent: DocumentSnapshot) {
   if (data) {
     return {
       text: data.content,
+      // The prompt this answer was built from. Callers that cache or gate on their own request
+      // need it: waitForContent returns whatever the lock holder generated, which under
+      // contention can be an answer for a different revision of the same tile.
+      prompt: data.prompt,
       lastUpdated: data.lastUpdated,
       error: null,
     };
@@ -161,6 +165,7 @@ async function generateContent(firestoreRoot: string, unit: string, classHash: s
 
   return {
     text: content,
+    prompt: tilePrompt,
     lastUpdated,
     error: errorMessage,
   };

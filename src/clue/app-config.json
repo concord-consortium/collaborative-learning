@@ -366,9 +366,15 @@
       },
       "dataflow": {
         "tools": [
-          ["data-set-view", "Table"],
+          "connect",
+          "reset",
+          "table-it",
           ["data-set-view", "Graph"],
-          "delete",
+          "record-sample",
+          "record",
+          "stop",
+          "clear",
+          "|",
           "group",
           "ungroup",
           "|",
@@ -377,8 +383,7 @@
           "fit-all",
           "pan",
           "|",
-          "connect",
-          "reset"
+          "delete"
         ]
       },
       "diagram": {

@@ -214,4 +214,24 @@
       background: none;
     }
   }
+
+  // Shares the slot of .playback-failure-warning. A forward seek blocked at the oldest reachable
+  // position shows that warning, which explains the stop, so this message gives way to it.
+  &:has(.playback-failure-warning) .playback-history-unavailable {
+    display: none;
+  }
+
+  .playback-history-unavailable {
+    @include playback-alert;
+    bottom: 100%;
+    max-width: 90%;
+    text-align: center;
+
+    // Rendered from the start, like the request error, and must not paint an empty pill.
+    &:empty {
+      padding: 0;
+      border: 0;
+      background: none;
+    }
+  }
 }

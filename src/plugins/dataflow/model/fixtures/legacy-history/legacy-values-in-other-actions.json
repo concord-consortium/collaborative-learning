@@ -1,0 +1,229 @@
+{
+  "description": "Synthetic: in the study, legacy patches outside setProgram come only from undo, redo and tile copies. Here legacy value patches are recorded under a text tile's setSlate and a table tile's addCanonicalCases, and a current-format entry moves the node.",
+  "synthetic": true,
+  "content": {
+    "rowMap": {
+      "r1": {
+        "id": "r1",
+        "isSectionHeader": false,
+        "tiles": [
+          {
+            "tileId": "t1"
+          }
+        ]
+      }
+    },
+    "rowOrder": [
+      "r1"
+    ],
+    "tileMap": {
+      "t1": {
+        "id": "t1",
+        "title": "Program 1",
+        "content": {
+          "type": "Dataflow",
+          "program": {
+            "id": "dataflow@1",
+            "recentTicks": [
+              "legacyTick"
+            ],
+            "nodes": {
+              "1@t1": {
+                "id": "1@t1",
+                "name": "Number",
+                "x": 120,
+                "y": 20,
+                "data": {
+                  "type": "Number",
+                  "plot": false,
+                  "orderedDisplayName": "Number 1",
+                  "tickEntries": {
+                    "legacyTick": {
+                      "open": true,
+                      "nodeValue": "5"
+                    }
+                  },
+                  "value": 5
+                }
+              }
+            },
+            "connections": {}
+          },
+          "programDataRate": 1000,
+          "programZoom": {
+            "dx": 0,
+            "dy": 0,
+            "scale": 1
+          }
+        }
+      }
+    }
+  },
+  "history": [
+    {
+      "id": "e1",
+      "tree": "doc1",
+      "action": "/content/addTile",
+      "undoable": true,
+      "created": 1700000001000,
+      "records": [
+        {
+          "tree": "doc1",
+          "action": "/content/addTile",
+          "patches": [
+            {
+              "op": "add",
+              "path": "/content/tileMap/t1",
+              "value": {
+                "id": "t1",
+                "title": "Program 1",
+                "content": {
+                  "type": "Dataflow",
+                  "program": {
+                    "id": "dataflow@0.1.0",
+                    "nodes": {
+                      "1": {
+                        "id": 1,
+                        "name": "Number",
+                        "x": 100,
+                        "y": 20,
+                        "inputs": {},
+                        "outputs": {
+                          "num": {
+                            "connections": {}
+                          }
+                        },
+                        "data": {
+                          "plot": false,
+                          "orderedDisplayName": "Number 1",
+                          "nodeValueUnits": ""
+                        }
+                      }
+                    },
+                    "values": {
+                      "1": {
+                        "currentValues": {
+                          "nodeValue": 0
+                        },
+                        "recentValues": {
+                          "nodeValue": "[0]"
+                        }
+                      }
+                    }
+                  },
+                  "programDataRate": 1000,
+                  "programZoom": {
+                    "dx": 0,
+                    "dy": 0,
+                    "scale": 1
+                  }
+                }
+              }
+            }
+          ],
+          "inversePatches": [
+            {
+              "op": "remove",
+              "path": "/content/tileMap/t1"
+            }
+          ]
+        }
+      ],
+      "state": "complete"
+    },
+    {
+      "id": "e2",
+      "tree": "doc1",
+      "action": "/content/tileMap/t2/content/setSlate",
+      "undoable": true,
+      "created": 1700000002000,
+      "records": [
+        {
+          "tree": "doc1",
+          "action": "/content/tileMap/t2/content/setSlate",
+          "patches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/values/1/recentValues/nodeValue",
+              "value": "[0,0]"
+            }
+          ],
+          "inversePatches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/values/1/recentValues/nodeValue",
+              "value": "[0]"
+            }
+          ]
+        }
+      ],
+      "state": "complete"
+    },
+    {
+      "id": "e3",
+      "tree": "doc1",
+      "action": "/content/tileMap/t3/content/addCanonicalCases",
+      "undoable": true,
+      "created": 1700000003000,
+      "records": [
+        {
+          "tree": "doc1",
+          "action": "/content/tileMap/t3/content/addCanonicalCases",
+          "patches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/values/1/currentValues/nodeValue",
+              "value": 5
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/values/1/recentValues/nodeValue",
+              "value": "[0,0,5]"
+            }
+          ],
+          "inversePatches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/values/1/currentValues/nodeValue",
+              "value": 0
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/values/1/recentValues/nodeValue",
+              "value": "[0,0]"
+            }
+          ]
+        }
+      ],
+      "state": "complete"
+    },
+    {
+      "id": "e4",
+      "tree": "doc1",
+      "action": "/content/tileMap/t1/content/program/nodes/1@t1/setPosition",
+      "undoable": true,
+      "created": 1700000004000,
+      "records": [
+        {
+          "tree": "doc1",
+          "action": "/content/tileMap/t1/content/program/nodes/1@t1/setPosition",
+          "patches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/nodes/1@t1/x",
+              "value": 120
+            }
+          ],
+          "inversePatches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/nodes/1@t1/x",
+              "value": 100
+            }
+          ]
+        }
+      ],
+      "state": "complete"
+    }
+  ]
+}

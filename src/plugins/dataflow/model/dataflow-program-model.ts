@@ -13,9 +13,7 @@ import { TimerNodeModel } from "../nodes/timer-node";
 import { ControlNodeModel } from "../nodes/control-node";
 import { withoutUndo } from "../../../models/history/without-undo";
 import { uniqueId } from "../../../utilities/js-utils";
-import { BaseNodeModel, IBaseNodeModel } from "../nodes/base-node";
-import { IDataSet } from "../../../models/data/data-set";
-import { getAttributeIdForNode } from "./utilities/recording-utilities";
+import { BaseNodeModel } from "../nodes/base-node";
 import { getNewIndexedName } from "../nodes/utilities/indexed-name";
 import { STATE_VERSION_CURRENT } from "./dataflow-state-versions";
 
@@ -172,7 +170,9 @@ export const DataflowProgramModel = types.
   })
   .volatile(self => ({
     processor: undefined as DataflowProcessor | undefined,
-    _connectionWrappers: {} as Record<string, ConnectionModelWrapper>
+    _connectionWrappers: {} as Record<string, ConnectionModelWrapper>,
+    // Set by the tile content; see notifyStructureChange.
+    structureChangeHandler: undefined as (() => void) | undefined
   }))
   .views(self => ({
     get currentTick() {
@@ -261,52 +261,50 @@ export const DataflowProgramModel = types.
     },
     setProcessor(processor: DataflowProcessor) {
       self.processor = processor;
-    },
-    playbackNodesWithCaseData(dataSet: IDataSet, playBackIndex: number) {
-      self.clearRecentTicks();
-      const startIndex = Math.max(playBackIndex - kMaxNodeValues, 0);
-
-      for (let index = startIndex; index <= playBackIndex; index++) {
-        self.addNewTick(index.toString());
-        const caseId = dataSet.getCaseAtIndex(index)?.__id__;
-        if (!caseId) break;
-        let nodeIndex = 0;
-        self.nodes.forEach((_node) => {
-          const node = _node.data as IBaseNodeModel;
-          const attrId = getAttributeIdForNode(dataSet, nodeIndex);
-
-          // The user might have messed with the table, so the attribute might not exist
-          if (attrId) {
-            const nodeValue = dataSet.getValue(caseId, attrId) as number;
-            node.setNodeValue(nodeValue);
-          }
-
-          nodeIndex++;
-        });
-      }
-
-      // add one more tick so the last point is graphed
-      self.addNewTick((playBackIndex+1).toString());
     }
-
+  }))
+  .actions(self => ({
+    setStructureChangeHandler(handler: (() => void) | undefined) {
+      self.structureChangeHandler = handler;
+    },
+    /**
+     * Every action that adds or removes a node or a connection calls this once it has made the
+     * change. The tile content uses it to detach linked tables, whose columns no longer describe
+     * the program.
+     *
+     * It is called from inside those actions, rather than from a reaction to the change, so that
+     * what the handler does is a child action: it joins the change's history entry, and one undo
+     * reverses both. Undo applies patches without calling actions, so the handler does not run
+     * again then.
+     *
+     * The content model checks, outside production, that an action which changes the structure
+     * calls this.
+     */
+    notifyStructureChange() {
+      self.structureChangeHandler?.();
+    }
   }))
   .actions(self => ({
     addNode(node: IDataflowNodeModel) {
       self.nodes.put(node);
+      self.notifyStructureChange();
     },
     addNodeSnapshot(nodeSnapshot: DataflowNodeSnapshotIn) {
       const node = self.nodes.put(nodeSnapshot);
       node.data.createNextTickEntry(undefined, self.currentTick);
+      self.notifyStructureChange();
       return node;
     },
     addConnection(connection: IConnectionModel) {
       self.connections.put(connection);
+      self.notifyStructureChange();
     },
     removeConnection(id: IConnectionModel["id"]) {
       self.connections.delete(id);
       if (self._connectionWrappers[id]) {
         delete self._connectionWrappers[id];
       }
+      self.notifyStructureChange();
     }
   }))
   .actions(self => ({
@@ -352,6 +350,7 @@ export const DataflowProgramModel = types.
         group.removeNodeId(id);
         if (group.nodeIds.size < 2) self.ungroupGroup(group.id);
       }
+      self.notifyStructureChange();
     }
   }))
   .actions(self => ({

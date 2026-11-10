@@ -1,4 +1,4 @@
-import { IJsonPatch, Instance } from "mobx-state-tree";
+import { IJsonPatch, Instance, unprotect } from "mobx-state-tree";
 import { createDocumentModel } from "../../models/document/document";
 import { DocumentContentModel } from "../../models/document/document-content";
 import { ProblemDocument } from "../../models/document/document-types";
@@ -578,6 +578,66 @@ describe("PlaybackControlModel", () => {
       expect(model.currentStopIndex).toBe(2);
     });
 
+    describe("with history that can't be rebuilt before position 2", () => {
+      // Stands in for a seek through the tree manager that stops short at `stop`, and then throws
+      // when `error` is given.
+      function stopSeeksAt(treeManager: Instance<typeof TreeManager>, stop: number, error?: Error) {
+        jest.spyOn(treeManager, "goToHistoryEntryPosition").mockImplementation((async () => {
+          treeManager.setNumHistoryEntriesApplied(stop);
+          treeManager.setOldestReachablePosition(2);
+          if (error) throw error;
+        }) as any);
+      }
+
+      afterEach(() => {
+        jest.restoreAllMocks();
+      });
+
+      it("doesn't warn when a seek stops at the oldest reachable position", async () => {
+        const { model, treeManager } = setupModel(4);
+        stopSeeksAt(treeManager, 2);
+
+        await model.goToSliderStop(0);
+
+        expect(model.playbackFailureWarning).toBeNull();
+        expect(model.currentStopIndex).toBe(2);
+        expect(model.sliderValue).toBe(2);
+      });
+
+      it("still warns when a seek that stops at the oldest reachable position throws", async () => {
+        const { model, treeManager } = setupModel(4);
+        stopSeeksAt(treeManager, 2, new Error("seek failed"));
+
+        await jestSpyConsole("warn", async () => {
+          await model.goToSliderStop(0);
+        });
+
+        expect(model.playbackFailureWarning).toBeTruthy();
+        expect(model.currentStopIndex).toBe(2);
+      });
+
+      it("still warns when a seek stops short anywhere else", async () => {
+        const { model, treeManager } = setupModel(4);
+        stopSeeksAt(treeManager, 3);
+
+        await model.goToSliderStop(0);
+
+        expect(model.playbackFailureWarning).toBeTruthy();
+        expect(model.currentStopIndex).toBe(3);
+      });
+
+      it("still warns when a forward seek from the oldest reachable position is blocked there",
+          async () => {
+        const { model, treeManager } = setupModel(4, { appliedPosition: 2 });
+        stopSeeksAt(treeManager, 2);
+
+        await model.goToSliderStop(4);
+
+        expect(model.playbackFailureWarning).toBeTruthy();
+        expect(model.currentStopIndex).toBe(2);
+      });
+    });
+
     it("clears an earlier warning once a seek lands where it was asked to", async () => {
       const { model } = setupModel(4, { appliedPosition: 0, failingEntryIndex: 2 });
       await jestSpyConsole("warn", async () => {
@@ -589,6 +649,21 @@ describe("PlaybackControlModel", () => {
 
       expect(model.playbackFailureWarning).toBeNull();
       expect(model.currentStopIndex).toBe(1);
+    });
+
+    it("says playback has stopped once the playback copy is out of step, at any stop", async () => {
+      const { model, treeManager } = setupModel(4, { appliedPosition: 0 });
+      unprotect(treeManager);
+      treeManager.jsonCopyOutOfStep = true;
+      const kStopped = "History playback stopped because of an error. Close and reopen the history to try again.";
+
+      await model.goToSliderStop(3);
+      expect(model.playbackFailureWarning).toBe(kStopped);
+      expect(model.currentStopIndex).toBe(0);
+
+      // Asking for the stop it is already on doesn't clear it.
+      await model.goToSliderStop(0);
+      expect(model.playbackFailureWarning).toBe(kStopped);
     });
   });
 

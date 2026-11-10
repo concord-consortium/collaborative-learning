@@ -1,4 +1,5 @@
-import { DemoOutputNode, DemoOutputNodeModel } from "./demo-output-node";
+import { DemoOutputNode, DemoOutputNodeModel, IDemoOutputNodeModel } from "./demo-output-node";
+import { DataflowNodeModel, DataflowProgramModel } from "../model/dataflow-program-model";
 
 // Object.create bypasses the constructor, as the live-output-node tests do; stub only what data()
 // and the readout touch. The getSetting stub honors the `group` argument (production passes
@@ -94,5 +95,86 @@ describe("DemoOutputNode.getNodeValueDisplayMessage", () => {
     const node = realNode("Light Bulb");
     drive(node, 1);
     expect(read(node)).toBe("on");
+  });
+});
+
+describe("DemoOutputNode.getPlotScale", () => {
+  const scaleOf = (type: string, settings?: Record<string, unknown>) =>
+    stubbedNode(type as any, settings as any).getPlotScale("nodeValue");
+
+  it("graphs a Servo in % rotation over a 0-100 axis in proportion mode", () => {
+    const scale = scaleOf("Servo", { servoInputMode: "proportion" });
+    expect(scale?.toPlot?.(90)).toBe(50);
+    expect(scale).toMatchObject({ min: 0, max: 100 });
+  });
+
+  it("graphs a Servo over its full travel in degrees mode", () => {
+    expect(scaleOf("Servo")).toMatchObject({ min: 0, max: 180 });
+    expect(scaleOf("Servo")?.toPlot).toBeUndefined();
+  });
+
+  // The demo Gripper stores the 0-1 fraction GrabberAnimation takes, unlike the live Gripper,
+  // which stores a percentage. Both graph as a percentage, as both fields read.
+  it("graphs a Gripper as a percentage of the 0-1 fraction it stores", () => {
+    const scale = scaleOf("Grabber");
+    expect(scale?.toPlot?.(0.5)).toBe(50);
+    expect(scale).toMatchObject({ min: 0, max: 100 });
+  });
+
+  it("graphs a binary output over 0-1", () => {
+    expect(scaleOf("Light Bulb")).toMatchObject({ min: 0, max: 1 });
+  });
+
+  it("graphs the Advanced Gripper's position as a percentage, like the plain Gripper", () => {
+    const scale = scaleOf("Advanced Grabber");
+    expect(scale?.toPlot?.(0.5)).toBe(50);
+    expect(scale).toMatchObject({ min: 0, max: 100 });
+  });
+
+  it("declares nothing for an output type it does not recognize, so the graph auto-scales", () => {
+    expect(scaleOf("Mystery Device")).toBeUndefined();
+  });
+
+  it("declares nothing for the tilt series", () => {
+    expect(stubbedNode("Advanced Grabber" as any).getPlotScale("tilt")).toBeUndefined();
+  });
+});
+
+// CLUE-789 review: a type change makes everything already plotted mean something else -- a Servo's
+// 180 degrees, read as a Gripper's percentage, graphs as 18000 on a 0-100 axis.
+describe("DemoOutputNode type change clears the graph", () => {
+  function runningBlock(outputType: string) {
+    const program = DataflowProgramModel.create();
+    program.addNode(DataflowNodeModel.create({
+      id: "out", name: "Demo Output", x: 0, y: 0, data: { type: "Demo Output", outputType }
+    }));
+    program.addNewTick("t0");
+    return program.nodes.get("out")!.data as IDemoOutputNodeModel;
+  }
+
+  it("drops what was recorded under the old type", () => {
+    const model = runningBlock("Servo");
+    model.setNodeValue(180);
+    expect(model.nodeValue).toBe(180);
+
+    model.setOutputType("Grabber");
+    expect(model.nodeValue).toBeUndefined();
+  });
+
+  // resetGraph drops the open tick entry, and nothing creates another until the next tick.
+  it("leaves an entry open, so the next write is not lost", () => {
+    const model = runningBlock("Servo");
+    model.setNodeValue(180);
+    model.setOutputType("Grabber");
+
+    model.setNodeValue(0.5);
+    expect(model.nodeValue).toBe(0.5);
+  });
+
+  it("keeps the graph when the same type is re-selected", () => {
+    const model = runningBlock("Servo");
+    model.setNodeValue(180);
+    model.setOutputType("Servo");
+    expect(model.nodeValue).toBe(180);
   });
 });

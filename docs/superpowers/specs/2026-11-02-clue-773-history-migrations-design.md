@@ -1,6 +1,6 @@
 # CLUE-773: History playback across tile schema changes
 
-Status: design; PR 1 of 3 (recording) in review, 2026-11-04.
+Status: implemented (PRs 1-3).
 
 ## Why
 
@@ -16,9 +16,10 @@ tile, and nothing tells the developer.
 The code already has one workaround: `DataflowContentModel` keeps a deprecated `programZoom`
 property only so that old `/programZoom/...` patches still resolve.
 
-The `clue-dataflow-behavior` study (cc-data-studies) measured the damage. Of 411 DataFlow documents
-whose history starts in May 2024 or later, 174 stop on an entry in the legacy DataFlow format and
-can't be scrubbed back to their start. Researchers want to see that early program history.
+The `clue-dataflow-behavior` study (cc-data-studies) measured the damage. Of the 462 DataFlow
+documents in its data whose history starts in May 2024 or later, 175 stop on an entry in the legacy
+DataFlow format and can't be scrubbed back to their start. Researchers want to see that early
+program history.
 
 History has a second audience besides CLUE's playback. It is meant to let a "dumb" service, one
 that doesn't load CLUE's code, rebuild the document at any entry by applying JSON patches. For
@@ -43,8 +44,8 @@ customer.
   on plain JSON in place of a snapshot preprocessor, and a function that reads a tile's version from
   its JSON. A patch-level migration is an optional optimization a tile can add later.
 - **CLUE's playback crosses conversions.** It keeps a JSON copy of the document, finds which tiles are
-  in an old format at the position it is showing, converts their JSON, and loads it into those
-  tiles.
+  in an old format at the position it is showing, converts their JSON, and replaces those tiles
+  with it.
 - Shared models use the same mechanism.
 - Legacy DataFlow documents in the study play back to their start (see the pass bar in section 6).
 - A developer doc says what to do when changing a tile's or shared model's schema.
@@ -60,7 +61,7 @@ customer.
   problem.
 - **Backfilling load entries into stored legacy DataFlow histories.** A document whose stored
   content is still legacy gets one the next time its owner edits it, like any other conversion. For
-  the rest, CLUE builds them in memory at read time (section 6). A follow-up script can store them
+  the rest, CLUE finds those conversions at read time (section 6). A follow-up script can store them
   so dumb services can cross the legacy conversion too.
 - **Patch-level migrations.** The design leaves room for them (section 3). No tile gets one in this
   story.
@@ -216,7 +217,12 @@ the document is created and kept pending.
 - **The playback copy needs it too.** Playback builds its document from a snapshot of the live,
   already converted document and loads history from Firestore itself (`createHistoryDocumentCopy`
   in [canvas.tsx](../../../src/components/document/canvas.tsx)). That copy sees no conversion, so a
-  viewer's live document hands its pending load entry to the copy. A saving client's entry
+  viewer's live document hands its pending load entry to the copy. The entry stays out of the
+  copy's history: the JSON copy (section 3) starts from the snapshot with the entry undone, so it
+  holds the stored content that the Firestore history reaches. Whatever arrives later, the
+  student's own load entry and edits or edits from a release before the conversion, then plays
+  back as ordinary entries. Adding the viewer's entry to the history instead would leave it after
+  the student's entries, and the two conversions make different ids. A saving client's entry
   is uploaded, and Firestore's local cache shows a pending write to listeners in the same browser,
   so the copy finds it. The one gap is playback opened in the short window after the converted
   content is saved and before the entry is written. That is left to CLUE-751, which handles the
@@ -252,7 +258,7 @@ documents need the bridge in section 6.
 ### 3. Playback across a conversion
 
 **A JSON copy of the document.** When a document's history has a load entry (or legacy
-entries, section 6), playback keeps a plain JSON copy of each tree beside the MST playback trees.
+entries, section 6), playback keeps a plain JSON copy of the document beside the MST playback trees.
 Every entry playback crosses is applied to the JSON copy as stored, in either direction, the
 load entry included. A document with neither skips all of this and plays back as today.
 
@@ -261,21 +267,28 @@ backward across a load entry, its inverse patches return the copy to the old for
 old entries before it then apply to the copy as they were recorded.
 
 **Which tiles are old.** Playback calls `getVersion` on the JSON copy of each tile the move touched,
-at both ends of the move. A tile that is current at both ends has its patches applied to the MST
-tree as today. A tile that is old at either end is loaded: playback runs `convertSnapshot` on its
-JSON at the target position and puts the result into the MST tile, so the MST tree always holds
-current-format tiles. "Either end" covers a move that crosses the conversion: going forward out of
-the old region, the MST tile holds a converted copy with made-up ids, and the new-format patches
-refer to the real ones, so the tile is loaded from the JSON, which holds the real state.
+at both ends of the move, and `convertSnapshot` where the version differs (section 1). A tile is
+also old when a patch in the move carries an old version of it, which finds a tile that is absent
+at both ends, or when a load entry in the move changes it. A tile that is current by all of these
+has its patches applied to the MST tree as today, and so does a tile its converter declines. The
+copy keeps each tile's conversion at its position until it moves, so checking a tile and then
+replacing it converts it once. A tile that is old gets a model replacement: playback runs
+`convertSnapshot` on its JSON at the target position and puts the result into the MST tile, so the
+MST tree always holds current-format tiles. "Either end" covers a move that crosses the conversion:
+going forward out of the old region, the MST tile holds a converted copy with made-up ids, and the
+new-format patches refer to the real ones, so the tile is replaced from the JSON, which holds the
+real state.
 
-**How a tile is loaded.** By a `replace` patch at the tile's path, `/content/tileMap/<tileId>`, with
-the converted JSON as its value, in the same `applyPatch` call as the move's other patches. A
+**How a tile is replaced.** By a model replacement: a `replace` patch at the tile's path,
+`/content/tileMap/<tileId>`, with the converted JSON as its value, in a second `applyPatch` call
+after the move's patches, inside the same action (the `modelReplacements` argument of
+`applyPatchesFromManager`). A
 `replace` patch and `applySnapshot` do the same thing to an existing node in MST: the patch assigns
 the value, MST reconciles it with the node there, and since the type and `id` match it calls
 `applySnapshot` on that node (`tryToReconcileNode` in mobx-state-tree). So the tile's preprocessors
 and lifecycle hooks behave the same either way; only the action's name differs (`@APPLY_PATCHES`
-or `@APPLY_SNAPSHOT`), which matters only to middleware. The patch keeps the load inside the existing
-batched apply.
+or `@APPLY_SNAPSHOT`), which matters only to middleware. The patch keeps the replacement inside the
+existing batched apply.
 
 The difference that matters is **updating the tile in place versus removing it and adding it
 again**. Reconciling keeps the `TileModel` and content nodes. Their `afterCreate` and `afterAttach`
@@ -284,10 +297,10 @@ children with new ids are destroyed and created fresh. Removing and re-adding th
 break references to it: `SharedModelEntry`'s `tiles` and `provider` are `safeReference`s
 ([shared-model-entry.ts](../../../src/models/document/shared-model-entry.ts)), which drop a tile the
 moment it is detached, so a re-added tile would silently fall out of its shared models. So a tile is
-always loaded in place.
+always replaced in place.
 
-**One action per tree.** Today a tree applies a move's patches in a single MST `applyPatch` call
-inside one action (`applyPatchesFromManager` in [tree.ts](../../../src/models/history/tree.ts)),
+**One action per tree.** A tree applies a move's patches inside one action
+(`applyPatchesFromManager` in [tree.ts](../../../src/models/history/tree.ts)),
 between `startApplyingPatchesFromManager` and `finishApplyingPatchesFromManager`, which hold off
 shared-model syncing until the end. MobX reactions run when the outermost action ends, so nothing
 observes the tree part-way through, even when two tiles' patches are interleaved. The new apply
@@ -299,37 +312,46 @@ keeps that. For each old tile in a move:
   `tiles` list gaining or losing it. An add's value is replaced by the converted JSON of the tile:
   its state at the target position if it exists there, or the add's own value converted if it
   doesn't.
-- A tile that exists at both ends and wasn't added in the move gets one in-place `replace` with its
-  converted state at the target position. It can go anywhere in the batch, because the node is never
-  detached, so nothing that refers to it changes.
+- A tile that exists at the target gets one in-place `replace` with its converted state there, after
+  the move's patches. A tile added in the move gets it too, with the same value as its add. The node
+  is never detached, so nothing that refers to it changes.
 
 The current tiles' patches are applied in recorded order around these. Each old tile goes from one
 complete state to another once per move, which avoids exposing a converted copy of some
 intermediate state.
 
 **Where it hooks in.** [tree-manager.ts](../../../src/models/history/tree-manager.ts)
-`goToHistoryEntryPosition`, which builds batches through `getEntryPatchesForTree`. Failure location
-still works per entry: an entry that doesn't apply to the JSON copy is found exactly, and MST apply
-failures for current tiles are handled as today. `replayHistoryToTrees` is only called from tests;
-routing it through the same code is *builder's choice*.
+`goToHistoryEntryPosition`, which builds batches through a patch source (`IPlaybackPatchSource`).
+Failure location still works per entry: an entry that doesn't apply to the JSON copy is found
+exactly, and MST apply failures for current tiles are handled as today. `replayHistoryToTrees` is
+only called from tests, and isn't routed through the patch source.
+
+**Rolling back a partly applied entry.** An entry's inverse patches don't have to pair one-to-one
+with its patches, and a load entry's don't, since its two directions are separate diffs. So a
+partly applied entry is undone from what was actually applied. The JSON copy's patch applier keeps
+the values each patch replaced and puts them back when a later patch fails. An MST tree applies its
+patches one at a time and collects the reverse patches MST reports for each through `onPatch`;
+when a patch fails, the tree undoes that patch's own changes, and the manager rolls back the
+entry's earlier patches with their reverse patches. A whole entry's opposite patches do undo it, so
+fully applied entries are rolled back with those.
 
 *My call:* the concurrent manager's `doApplyHistoryEntries`
 ([firestore-history-manager-concurrent.ts](../../../src/models/history/firestore-history-manager-concurrent.ts)),
 which applies remote entries to a live tree, gets no JSON copy. Live clients receive only
 current-format entries, apart from the group-document cases in section 4.
 
-**Cost.** Each load of an old tile runs its conversion, and a conversion that makes random ids (the
-legacy DataFlow conversion gives connections random ids) makes different ones on every load. MST
-then replaces those objects instead of updating them, and their components remount. Highlight and
+**Cost.** Each replacement of an old tile runs its conversion, and a conversion that makes random
+ids (the legacy DataFlow conversion gives connections random ids) makes different ones every time.
+MST then replaces those objects instead of updating them, and their components remount. Highlight and
 selection refs on them drop. Playback is read-only, so this is accepted for a tile without
 deterministic ids or a patch-level migration. The cost follows the positions playback shows, not the
 number of entries:
 
 - Scrubbing already keeps only the latest request (`runSeekLoop` in
   [playback-control-model.ts](../../../src/components/playback/playback-control-model.ts)), so a
-  drag loads each old tile once per seek that runs, not once per entry passed.
+  drag replaces each old tile once per seek that runs, not once per entry passed.
 - Playing advances one stop at a time and waits for each seek to settle before scheduling the next
-  (`advance` in the same file), so it loads each old tile once per stop.
+  (`advance` in the same file), so it replaces each old tile once per stop.
 - Applying entries to the JSON copy is cheap.
 
 **Optimizations left for later:**
@@ -368,9 +390,9 @@ one can land first.
 - **If another client's entries land first,** the converting client rebuilds the affected tiles from
   the pre-conversion JSON it kept. It applies the incoming entries to that JSON. If one of them is a
   load entry for the tile, the JSON is now the winner's converted tile, with the winner's ids;
-  the client loads it into its tile and drops its own conversion for that tile. If they are
-  old-format edits, the client converts the JSON again, loads it, and rebuilds its uncommitted
-  load entry from the new diff.
+  the client replaces its tile with it and drops its own conversion for that tile. If they are
+  old-format edits, the client converts the JSON again, replaces the tile with it, and rebuilds its
+  uncommitted load entry from the new diff.
 - A tile with deterministic ids makes this cheaper, since both clients' conversions agree, but
   the design can't rely on it, because ids are each tile's choice.
 
@@ -396,42 +418,58 @@ and a later story starts playback from it.
 
 ### 6. The legacy DataFlow bridge
 
-Legacy DataFlow documents converted before load entries existed have stored histories that go
-straight from legacy entries to new-format entries. Playback builds the missing load entry in
-memory, and from there the general mechanism takes over. A tile that a stored load entry
-already covers needs no bridge.
+Legacy DataFlow documents converted without a load entry (before load entries were recorded, or in
+a concurrent document) have stored histories that go straight from legacy entries to new-format
+entries. A **history bridge** that DataFlow registers finds each tile's missing conversion and
+reports it as a **virtual conversion**: the tile's path, the position the conversion sits at, and
+the tile's legacy JSON just before it. The JSON copy crosses a virtual conversion like a load entry,
+and from there the general mechanism takes over. A load entry that a viewer hands to the playback
+copy (section 2) counts as coming after the stored history.
 
-- **Finding the boundary.** For each DataFlow tile, the last legacy entry before its first
-  new-format entry. An entry is legacy when its DataFlow patches use legacy paths:
-  `program/values/<n>/...`, numeric node ids under `program/nodes/<n>`, legacy `inputs` / `outputs`
-  connection paths, or a `program` value whose `id` is `"dataflow@0.1.0"`. Legacy patches appear in
-  many actions, not only `setProgram` (`setSlate` and `addCanonicalCases`, for example), so the check
-  is by path, not by action.
-- **The old state at the boundary.** The load entry needs the tile's legacy JSON at the
-  boundary, and the stored content only has the converted form. The candidates, in order of
-  preference:
-  1. **Replay forward from the start.** If a document's history starts from a known state, applying
-     the legacy entries forward in JSON gives the legacy tile at the boundary.
-  2. **A reverse conversion.** A function from the new format back to the legacy one. The forward
-     conversion ([convert-legacy-dataflow.ts](../../../src/plugins/dataflow/model/convert-legacy-dataflow.ts))
-     loses information: it drops node `data` fields, the output side of connections and the
-     `values` structure, and maps "Heat Lamp" to "Light Bulb". The reverse only has to rebuild
-     what the earlier legacy entries touch, but a `remove` or `replace` on a path it didn't rebuild
-     fails.
-  3. **A patch-level migration** for this one step.
-
-  The harness decides which works on the study's documents. The builder may combine them, for
-  example forward replay where the start is known and the reverse conversion elsewhere.
-- **Then** the in-memory load entry is the diff between that legacy tile and the converted
-  tile at the boundary, as in section 2.
+- **Finding the boundary.** For each DataFlow tile, its last legacy entry. An entry is legacy when
+  its DataFlow patches use legacy paths: `program/values/...`, numeric node ids under
+  `program/nodes/<n>`, legacy `inputs` / `outputs` connection paths, a program, content or tile
+  value holding a legacy program, or the legacy `program/id` set. Load entries don't count: one that
+  converts a legacy tile has legacy patches. When the next entry that touches the tile is a load
+  entry with a legacy patch on the tile, forward or inverse, the history records the conversion, and
+  the tile needs no virtual conversion. A load entry from a later DataFlow schema change has none,
+  so it doesn't hide the legacy conversion before it. In the study,
+  legacy patches outside `setProgram` come only from undo, redo and tile copies, but the check is by
+  path, not by action.
+- **A legacy program with no id.** Many legacy tiles were added with a program that has a `values`
+  map but no `id`, because a separate `setProgram` entry set the id. A program with no `id` and a
+  `values` map is legacy. DataFlow's `getVersion`, its converter and the legacy-patch check all use
+  this rule, so the JSON copy treats that tile as old wherever it appears, including after a forward
+  redo of its add.
+- **The old state at the boundary.** The virtual conversion needs the tile's legacy JSON at the
+  boundary, and the stored content only has the converted form. The bridge replays the tile's
+  patches forward from the last entry that adds or replaces the whole tile, or a model holding it
+  such as the tile map. When there is no such entry, or a patch doesn't apply, it takes the tile
+  from the undo patches of the next entry that touches the tile, when they put back the legacy tile,
+  as when that entry deletes it. Otherwise the bridge can't rebuild the tile, and playback stops at
+  the boundary (section 7). A reverse conversion was
+  considered and not built: the forward conversion
+  ([convert-legacy-dataflow.ts](../../../src/plugins/dataflow/model/convert-legacy-dataflow.ts))
+  loses information (it drops node `data` fields, the output side of connections and the `values`
+  structure, and maps "Heat Lamp" to "Light Bulb"), so a reverse one fails on a `remove` or
+  `replace` of a path it didn't rebuild. Neither was a patch-level migration for this one step.
+- **Then** the JSON copy diffs that legacy tile against the converted tile the first time it
+  crosses the conversion backward, as section 2 does for a load entry.
 
 The harness is an uncommitted, throwaway Jest file, `src/models/history/zz-local-replay.test.ts`,
 kept in the developer's worktree. It reads the study data from
 `cc-data-studies/studies/clue-dataflow-behavior/local-data/clue-documents/`, which holds student
 data and stays on the developer's machine.
 
-**Pass bar:** each of the 174 documents plays back to its start, unless it stops on one of the
+**Pass bar:** each of the 175 documents plays back to its start, unless it stops on one of the
 non-schema causes (see Non-goals) or on a legacy shape the PR names as one the bridge can't handle.
+
+**A named shape the bridge doesn't handle: `program/id` recorded before the tile's add.** In many
+legacy documents, the `setProgram` entry that sets a tile's `program/id` is recorded one entry
+*before* that tile's `addTile` entry. Undoing it finds no tile, in MST as much as in the JSON copy,
+so playback stops one entry before the tile's add, with the failure banner. This is an ordering
+problem in the recorded history, not a schema one. Everything after that entry, including the
+legacy conversion, plays back.
 
 `programZoom` stays.
 
@@ -439,40 +477,50 @@ non-schema causes (see Non-goals) or on a legacy shape the PR names as one the b
 
 - **An entry doesn't apply to the JSON copy.** The chain is broken there: a non-schema bug, or a
   conversion with no load entry. Playback shows today's failure banner.
-- **The legacy bridge can't build the old state.** Playback treats the boundary as the oldest
-  position it can reach and says earlier history isn't available, not the failure banner. *My
-  call.*
+- **The legacy bridge can't build the old state, or the tile isn't in the JSON copy at the
+  boundary.** Playback treats the boundary as the oldest position it can reach and says "Earlier
+  history isn't available." in a status region, not the failure banner. *My call.*
 - **A conversion throws on an old tile** (the legacy conversion throws on an unknown node type, for
-  example). The failure banner, at that position.
+  example). The move doesn't advance; the failure banner shows at the first entry it would cross.
+  When it throws while building the rollback of a move MST stopped short, the move is rolled back to
+  where it started instead, so the trees, the JSON copy and the position agree.
+- **MST rejects a converted tile's model replacement** (the converted JSON doesn't fit the model).
+  The tree's patches for the move have already applied when the replacement fails, so the whole move
+  is rolled back
+  and playback stays at the position it started from. The trees, the JSON copy and the position
+  then agree, and the failure banner shows.
 
-The exact wording and how the slider shows an unreachable range are left to the builder. CLUE-760 is
-reworking the same slider, so whichever lands second follows the other.
+The slider doesn't mark the range playback can't reach. CLUE-760 is reworking the same slider, so
+whichever lands second follows the other.
 
 ### 8. The developer doc
 
 A new doc, `docs/tile-schema-changes.md`, linked from
-[undo-and-time-travel.md](../../undo-and-time-travel.md) and [tile-creation.md](../../tile-creation.md):
+[undo-and-time-travel.md](../../undo-and-time-travel.md), [tile-creation.md](../../tile-creation.md)
+and [history-framework.md](../../history-framework.md):
 
 - What history is for, including dumb services, and why a schema change must leave the chain
   intact.
 - The checklist: bump the version; register `getVersion` and `currentVersion` if the type has none;
   write the migration in `convertSnapshot` and have the type's preprocessor call it; add fixtures of
-  old content with old history; add the boundary test (see Testing).
+  old content with old history; add a crossing test (see Testing); don't use a snapshot
+  post-processor to change what is saved.
 - **Ids:** when to make new ids deterministic (no churn in playback, and concurrent conversions
   agree) and when to keep them random (when they could collide, or stable ids would make the
   conversion hard to maintain).
-- **Loads are in place:** a tile loaded during playback keeps its nodes and volatile state, so its
-  views must not depend on state set only in `afterCreate` from properties that a load changes.
+- **Model replacements are in place:** a tile replaced during playback keeps its nodes and volatile
+  state, so its views must not depend on state set only in `afterCreate` from properties that a
+  replacement changes.
 - **Shared models:** a shared model migration must keep the ids that tiles refer to (for example a
-  DataSet's attribute and case ids). Otherwise tiles loaded at an old position point at objects that
-  no longer exist.
+  DataSet's attribute and case ids). Otherwise tiles replaced at an old position point at objects
+  that no longer exist.
 - **Performance:** a conversion with random ids gives an old tile's new objects new ids on every
-  load. A tile that writes many entries should consider deterministic ids or a patch-level
+  replacement. A tile that writes many entries should consider deterministic ids or a patch-level
   migration.
 - **`programZoom` as the worked example.** Under this design, removing it needs only a version bump
   and a `convertSnapshot` that drops the field. Old `/programZoom/...` patches still apply to the
-  JSON copy, and the old tile is loaded through the conversion. The deprecated property exists today
-  only because nothing could cross a conversion. The doc describes it; no code changes.
+  JSON copy, and the old tile is replaced through the conversion. The deprecated property exists
+  today only because nothing could cross a conversion. The doc describes it; no code changes.
 - Group documents: section 4's check must ship before the first schema change that relies on it.
 - The known limit of content saved behind history.
 
@@ -517,16 +565,17 @@ a follow-up story.
 - **Load entry.** Recorded once at a load that converted something. Its inverse patches take
   the converted JSON back to the stored old JSON exactly, and its forward patches take that back to
   the converted JSON. It isn't undoable. A viewer keeps it in memory and hands it to the playback
-  copy.
+  copy, whose JSON copy starts with it undone.
 - **Crossing the conversion boundary.** Every schema change gets this test. Start from an old-format
   document with old-format history. Load it so the conversion runs and the load entry is
   recorded, then add new-format entries. Scrub backward to the start and forward to the end. No
   playback failures. At every position, the JSON copy equals a plain replay of the stored entries,
   and each MST tile equals its JSON run through `convertSnapshot`, ids aside.
 - **Interleaved patches.** An entry that mixes an old tile's patches with a current tile's in one
-  record, and one that splits a tile's patches across records. Each old tile is loaded once per
+  record, and one that splits a tile's patches across records. Each old tile is replaced once per
   move, and the result matches the JSON copy.
-- **Loads keep references.** A move that loads an old tile attached to a shared model, and one that
+- **Model replacements keep references.** A move that replaces an old tile attached to a shared
+  model, and one that
   adds an old tile and attaches it in the same entry. The shared model's `tiles` list matches the
   JSON copy afterward.
 - **Shared models.** A test-only shared model type with a version and a migration goes through the
@@ -537,12 +586,12 @@ a follow-up story.
   real document load and tree manager. Another runs it on a chain the current code records in the
   test, with a conversion that shortens an array, so the order of the stored inverse patches
   matters.
-- **Legacy DataFlow.** Fixtures, small documents from the study each with its history, covering:
-  legacy ticks (`setProgram` values only), node moves and additions, a connection added and later
-  deleted, a whole-program `setProgram`, legacy value patches inside other actions, and a document
-  whose bridge needs the fallback. Fixtures are stripped to what the tests need and checked for
-  student names and free text before they are committed. The pass bar (section 6) is checked with
-  the harness.
+- **Legacy DataFlow.** Fixtures, small documents each with its history. From the study: legacy
+  ticks (`setProgram` values only), node moves and additions, a connection added and later deleted,
+  a tile added with a legacy program that has no id, and a history that starts after the tile's add.
+  Synthetic, because the study has none: a whole-program `setProgram`, and legacy value patches
+  inside other actions. Fixtures are stripped to what the tests need and checked for student names
+  and free text before they are committed. The pass bar (section 6) is checked with the harness.
 - **Can't go further.** A failed legacy bridge shows "earlier history isn't available", not the
   failure banner.
 - **No slowdown.** A document with no load entries and no legacy entries never builds a JSON
@@ -562,8 +611,8 @@ The story ships as three stacked PRs, merged in order. Each one is useful on its
    `background: true`, and CLUE-760 hides background entries on the slider. Tests with a plain JSON
    patch library and no CLUE code take the end document back to its start and forward again,
    across a load entry.
-2. **Play back across load entries.** The tree API for loads, the JSON copy, the playback
-   patch source, crossing a conversion in both directions, rolling back a move that fails part-way,
+2. **Play back across load entries.** The tree API for model replacements, the JSON copy, the
+   playback patch source, crossing a conversion in both directions, rolling back a move that fails part-way,
    and handing a pending entry to the playback copy (sections 3 and 7).
 3. **Bridge legacy DataFlow history.** The history-bridge registry and virtual conversions, the
    "earlier history isn't available" boundary, the DataFlow bridge (section 6), and the developer
@@ -581,18 +630,18 @@ A change to this design made in a later PR updates this document in that PR.
 - **CLUE-751** (settled-state saves): makes `lastHistoryEntryId` exact, which the content-behind-history
   fix needs. It should also cover playback opened after converted content is saved but before the
   load entry is written (section 2).
-- **CLUE-783** (large history performance): the batched apply that the old-tile loads join.
+- **CLUE-783** (large history performance): the batched apply that the old-tile replacements join.
 - **CLUE-788** (drift between stored content and what MST loads):
   - The load entry is meant to grow into its load-time drift entry: one entry per load, holding
     every change loading made, not only schema conversions.
   - In-session drift, changes made with no entry open, is different. MST can represent it, so it
     should be an ordinary background entry, not a load entry, or playback would skip it.
-  - Playback (Delivery 2) decides which models are old, and loads them instead of applying their
-    patches, from the versions in the JSON copy. It also loads each model that a load entry in the
-    move changes. Before the load entry, though, a model whose change wasn't a version conversion
-    is current, so playback applies its recorded patches to MST rather than loading it from the
-    JSON copy. A load entry that carries non-version changes would update the JSON copy without
-    MST reloading that model at those positions. CLUE-788's design has to settle that.
+  - Playback (Delivery 2) decides which models are old, and replaces them instead of applying their
+    patches, from the versions in the JSON copy. It also replaces each model that a load entry in
+    the move changes. Before the load entry, though, a model whose change wasn't a version
+    conversion is current, so playback applies its recorded patches to MST rather than replacing it
+    from the JSON copy. A load entry that carries non-version changes would update the JSON copy
+    without MST replacing that model at those positions. CLUE-788's design has to settle that.
 - **CLUE-792** ("Concurrent documents: stop editing when a load entry arrives") and
   **CLUE-793** ("Concurrent documents: record load entries and merge them with concurrent
   edits"): section 4. CLUE-792 must ship at least one release before CLUE-793.
@@ -614,8 +663,8 @@ A change to this design made in a later PR updates this document in that PR.
 - Developers write a conversion function on JSON and a version reader. Conversion can be a new
   system rather than MST snapshot preprocessors. Patch-level migrations are an optional
   optimization.
-- Playback keeps a JSON copy, reads tile versions from it, and loads old tiles from their converted
-  JSON.
+- Playback keeps a JSON copy, reads tile versions from it, and replaces old tiles with their
+  converted JSON.
 - Each tile decides whether its conversion makes deterministic or random ids. Random ids are
   supported and their churn is accepted.
 - Tiles provide `getVersion`, since the version lives inside the tile's content.
@@ -624,7 +673,7 @@ A change to this design made in a later PR updates this document in that PR.
   doesn't know its version stops editing. This story designs it (section 4); building it is a
   follow-up.
 - The audit checks its conclusions against real documents.
-- Pass bar for the 174 legacy documents: play back to the start, or stop on a non-schema cause or a
+- Pass bar for the 175 legacy documents: play back to the start, or stop on a non-schema cause or a
   named shape the bridge can't handle.
 - `programZoom` gets no code change; it is the developer doc's example.
 
@@ -632,15 +681,15 @@ A change to this design made in a later PR updates this document in that PR.
 
 - Group documents don't record load entries until section 4 is built.
 - The load entry carries `background: true`, and this story adds the field if CLUE-760 hasn't.
-- Each old tile is loaded once per move, at its state at the target position, in the same action as
-  the other tiles' patches.
+- Each old tile is replaced once per move, at its state at the target position, in the same action
+  as the other tiles' patches.
 - Conversion is a registered `convertSnapshot` on the whole tile's JSON, and the type's MST
   preprocessor calls it. Existing preprocessors in other tiles stay until those tiles register a
   version.
-- A load is a `replace` patch at the tile's path, so the tile is updated in place. Whole-tile adds
-  and removes stay in recorded order.
-- Shared models are in this story's mechanism (version reader, JSON copy, loading), with no real
-  shared model migration written. A test-only type exercises it.
+- A model replacement is a `replace` patch at the tile's path, so the tile is updated in place.
+  Whole-tile adds and removes stay in recorded order.
+- Shared models are in this story's mechanism (version reader, JSON copy, model replacement), with
+  no real shared model migration written. A test-only type exercises it.
 - The concurrent manager's live apply gets no JSON copy.
 - A failed legacy bridge gets "earlier history isn't available". Other failures keep the banner.
 - Clients released before the group-document check aren't stopped by it, and there are no Firestore
@@ -653,6 +702,11 @@ A change to this design made in a later PR updates this document in that PR.
   `schemaVersion` (`getVersion`, `currentVersion`, `convertSnapshot`) on both the tile and the
   shared model registrations.
 - The JSON patch library and the diff used to build load entries.
-- The tree API for applying patches and loading old tiles in one action.
-- Which of the three legacy bridge approaches to use, decided with the harness.
-- The "earlier history isn't available" wording and slider treatment.
+- *Settled in PR 2:* the tree API for applying patches and replacing old tiles in one action.
+  `applyPatchesFromManager` takes optional `modelReplacements`, applied after the patches in the
+  same action; a failure throws `ModelReplacementError`.
+- *Settled in PR 3:* the legacy bridge replays forward from the tile's last whole-tile add or
+  replace, with no reverse conversion. When that fails, it falls back to the undo patches of the
+  next entry that touches the tile, if they put back the legacy tile.
+- *Settled in PR 3:* the wording is "Earlier history isn't available.", and the slider doesn't mark
+  the range playback can't reach.

@@ -201,10 +201,13 @@ class TableToolTile{
         this.getWorkspaceColumnHeader().eq(index).should("have.text", attributeName);
       });
     }
-    checkTableColumnValues(columnIndex, rows) {
+    // firstValue is the value expected in the top row: a dataflow capture numbers its points from
+    // 1, where a time column counted from 0.
+    checkTableColumnValues(columnIndex, rows, firstValue = 0) {
       this.getTableRow().should("have.length.least", rows);
       for(let rowIndex = 0; rowIndex < rows; rowIndex++) {
-        this.getTableCellWithRowColIndex(rowIndex, columnIndex).should("have.text", rowIndex.toString());
+        this.getTableCellWithRowColIndex(rowIndex, columnIndex)
+          .should("have.text", (rowIndex + firstValue).toString());
       }
     }
     checkEmptyTableValues() {

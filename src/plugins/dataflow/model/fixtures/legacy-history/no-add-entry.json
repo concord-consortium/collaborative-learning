@@ -1,0 +1,599 @@
+{
+  "description": "From the study, cut down to one DataFlow tile. The history starts after the tile was added, so the legacy tile can't be rebuilt and playback stops at the boundary.",
+  "content": {
+    "rowMap": {
+      "r1": {
+        "id": "r1",
+        "isSectionHeader": false,
+        "tiles": [
+          {
+            "tileId": "t1"
+          }
+        ]
+      }
+    },
+    "rowOrder": [
+      "r1"
+    ],
+    "tileMap": {
+      "t1": {
+        "id": "t1",
+        "content": {
+          "type": "Dataflow",
+          "program": {
+            "id": "dataflow@1",
+            "nodes": {
+              "6@t1": {
+                "id": "6@t1",
+                "name": "Demo Output",
+                "x": 573.9803947782306,
+                "y": 59.12550520359338,
+                "data": {
+                  "type": "Demo Output",
+                  "plot": false,
+                  "orderedDisplayName": "Demo Output 1",
+                  "tickEntries": {
+                    "voN0Y3lwMQz4K4AL": {
+                      "nodeValue": "0",
+                      "open": true
+                    },
+                    "tK2DAoyjNwhAp1CF": {
+                      "nodeValue": "0"
+                    },
+                    "sZrr54as4THnJPNz": {
+                      "nodeValue": "0"
+                    },
+                    "N1Kco3eTVn0dqJ9n": {
+                      "nodeValue": "0.24"
+                    },
+                    "p6Y3_0PqilrYZdSi": {
+                      "nodeValue": "0.76"
+                    },
+                    "legacyTick": {
+                      "nodeValue": "1"
+                    }
+                  },
+                  "outputType": "Grabber"
+                }
+              },
+              "1047@t1": {
+                "id": "1047@t1",
+                "name": "Generator",
+                "x": 133.6106665559261,
+                "y": 227.51362641426232,
+                "data": {
+                  "type": "Generator",
+                  "plot": false,
+                  "orderedDisplayName": "Generator 2",
+                  "tickEntries": {
+                    "voN0Y3lwMQz4K4AL": {
+                      "nodeValue": "-0.85",
+                      "open": true
+                    },
+                    "tK2DAoyjNwhAp1CF": {
+                      "nodeValue": "-0.85"
+                    },
+                    "sZrr54as4THnJPNz": {
+                      "nodeValue": "-0.38"
+                    },
+                    "N1Kco3eTVn0dqJ9n": {
+                      "nodeValue": "0.24"
+                    },
+                    "p6Y3_0PqilrYZdSi": {
+                      "nodeValue": "0.76"
+                    },
+                    "legacyTick": {
+                      "nodeValue": "1"
+                    }
+                  },
+                  "generatorType": "Sine",
+                  "amplitude": 1,
+                  "period": 10,
+                  "periodUnits": "sec"
+                }
+              }
+            },
+            "connections": {
+              "Lg0lM1vyQc59EyF5": {
+                "id": "Lg0lM1vyQc59EyF5",
+                "source": "1047@t1",
+                "sourceOutput": "value",
+                "target": "6@t1",
+                "targetInput": "nodeValue"
+              }
+            },
+            "recentTicks": [
+              "legacyTick",
+              "p6Y3_0PqilrYZdSi",
+              "N1Kco3eTVn0dqJ9n",
+              "sZrr54as4THnJPNz",
+              "tK2DAoyjNwhAp1CF",
+              "voN0Y3lwMQz4K4AL"
+            ]
+          },
+          "programDataRate": 1000,
+          "programZoom": {
+            "dx": 0,
+            "dy": 0,
+            "scale": 1
+          }
+        }
+      }
+    }
+  },
+  "history": [
+    {
+      "id": "e1",
+      "tree": "doc1",
+      "action": "/content/tileMap/t1/content/setProgram",
+      "undoable": true,
+      "created": 1700000000000,
+      "records": [
+        {
+          "tree": "doc1",
+          "action": "/content/tileMap/t1/content/setProgram",
+          "patches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/values/6/recentValues/nodeValue",
+              "value": "[]"
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/values/1047/recentValues/nodeValue",
+              "value": "[]"
+            }
+          ],
+          "inversePatches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/values/6/recentValues/nodeValue",
+              "value": "[0.36,0.84,1,0.78,0.25,0,0,0,0,0,0.36,0.84,1,0.78,0.26,0,0]"
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/values/1047/recentValues/nodeValue",
+              "value": "[0.84,1,0.78,0.25,-0.36,-0.84,-1,-0.77,-0.25,0.36,0.84,1,0.78,0.26,-0.36,-0.84,-1]"
+            }
+          ]
+        }
+      ],
+      "state": "complete"
+    },
+    {
+      "id": "e2",
+      "tree": "doc1",
+      "action": "/content/tileMap/t1/content/program/tickAndProcess",
+      "undoable": true,
+      "created": 1700000001000,
+      "records": [
+        {
+          "tree": "doc1",
+          "action": "/content/tileMap/t1/content/program/tickAndProcess",
+          "patches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/nodes/1047@t1/data/tickEntries/legacyTick/nodeValue",
+              "value": "1"
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/nodes/6@t1/data/tickEntries/legacyTick/nodeValue",
+              "value": "1"
+            },
+            {
+              "op": "add",
+              "path": "/content/tileMap/t1/content/program/recentTicks/1",
+              "value": "p6Y3_0PqilrYZdSi"
+            },
+            {
+              "op": "add",
+              "path": "/content/tileMap/t1/content/program/nodes/6@t1/data/tickEntries/p6Y3_0PqilrYZdSi",
+              "value": {
+                "open": true,
+                "nodeValue": "1"
+              }
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/nodes/6@t1/data/tickEntries/legacyTick/open"
+            },
+            {
+              "op": "add",
+              "path": "/content/tileMap/t1/content/program/nodes/1047@t1/data/tickEntries/p6Y3_0PqilrYZdSi",
+              "value": {
+                "open": true,
+                "nodeValue": "1"
+              }
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/nodes/1047@t1/data/tickEntries/legacyTick/open"
+            }
+          ],
+          "inversePatches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/nodes/1047@t1/data/tickEntries/legacyTick/nodeValue",
+              "value": "-1"
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/nodes/6@t1/data/tickEntries/legacyTick/nodeValue",
+              "value": "0"
+            },
+            {
+              "op": "remove",
+              "path": "/content/tileMap/t1/content/program/recentTicks/1"
+            },
+            {
+              "op": "remove",
+              "path": "/content/tileMap/t1/content/program/nodes/6@t1/data/tickEntries/p6Y3_0PqilrYZdSi"
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/nodes/6@t1/data/tickEntries/legacyTick/open",
+              "value": true
+            },
+            {
+              "op": "remove",
+              "path": "/content/tileMap/t1/content/program/nodes/1047@t1/data/tickEntries/p6Y3_0PqilrYZdSi"
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/nodes/1047@t1/data/tickEntries/legacyTick/open",
+              "value": true
+            }
+          ]
+        }
+      ],
+      "state": "complete"
+    },
+    {
+      "id": "e3",
+      "tree": "doc1",
+      "action": "/content/tileMap/t1/content/program/tickAndProcess",
+      "undoable": true,
+      "created": 1700000002000,
+      "records": [
+        {
+          "tree": "doc1",
+          "action": "/content/tileMap/t1/content/program/tickAndProcess",
+          "patches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/nodes/1047@t1/data/tickEntries/p6Y3_0PqilrYZdSi/nodeValue",
+              "value": "0.76"
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/nodes/6@t1/data/tickEntries/p6Y3_0PqilrYZdSi/nodeValue",
+              "value": "0.76"
+            },
+            {
+              "op": "add",
+              "path": "/content/tileMap/t1/content/program/recentTicks/2",
+              "value": "N1Kco3eTVn0dqJ9n"
+            },
+            {
+              "op": "add",
+              "path": "/content/tileMap/t1/content/program/nodes/6@t1/data/tickEntries/N1Kco3eTVn0dqJ9n",
+              "value": {
+                "open": true,
+                "nodeValue": "0.76"
+              }
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/nodes/6@t1/data/tickEntries/p6Y3_0PqilrYZdSi/open"
+            },
+            {
+              "op": "add",
+              "path": "/content/tileMap/t1/content/program/nodes/1047@t1/data/tickEntries/N1Kco3eTVn0dqJ9n",
+              "value": {
+                "open": true,
+                "nodeValue": "0.76"
+              }
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/nodes/1047@t1/data/tickEntries/p6Y3_0PqilrYZdSi/open"
+            }
+          ],
+          "inversePatches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/nodes/1047@t1/data/tickEntries/p6Y3_0PqilrYZdSi/nodeValue",
+              "value": "1"
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/nodes/6@t1/data/tickEntries/p6Y3_0PqilrYZdSi/nodeValue",
+              "value": "1"
+            },
+            {
+              "op": "remove",
+              "path": "/content/tileMap/t1/content/program/recentTicks/2"
+            },
+            {
+              "op": "remove",
+              "path": "/content/tileMap/t1/content/program/nodes/6@t1/data/tickEntries/N1Kco3eTVn0dqJ9n"
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/nodes/6@t1/data/tickEntries/p6Y3_0PqilrYZdSi/open",
+              "value": true
+            },
+            {
+              "op": "remove",
+              "path": "/content/tileMap/t1/content/program/nodes/1047@t1/data/tickEntries/N1Kco3eTVn0dqJ9n"
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/nodes/1047@t1/data/tickEntries/p6Y3_0PqilrYZdSi/open",
+              "value": true
+            }
+          ]
+        }
+      ],
+      "state": "complete"
+    },
+    {
+      "id": "e4",
+      "tree": "doc1",
+      "action": "/content/tileMap/t1/content/program/tickAndProcess",
+      "undoable": true,
+      "created": 1700000003000,
+      "records": [
+        {
+          "tree": "doc1",
+          "action": "/content/tileMap/t1/content/program/tickAndProcess",
+          "patches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/nodes/1047@t1/data/tickEntries/N1Kco3eTVn0dqJ9n/nodeValue",
+              "value": "0.24"
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/nodes/6@t1/data/tickEntries/N1Kco3eTVn0dqJ9n/nodeValue",
+              "value": "0.24"
+            },
+            {
+              "op": "add",
+              "path": "/content/tileMap/t1/content/program/recentTicks/3",
+              "value": "sZrr54as4THnJPNz"
+            },
+            {
+              "op": "add",
+              "path": "/content/tileMap/t1/content/program/nodes/6@t1/data/tickEntries/sZrr54as4THnJPNz",
+              "value": {
+                "open": true,
+                "nodeValue": "0.24"
+              }
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/nodes/6@t1/data/tickEntries/N1Kco3eTVn0dqJ9n/open"
+            },
+            {
+              "op": "add",
+              "path": "/content/tileMap/t1/content/program/nodes/1047@t1/data/tickEntries/sZrr54as4THnJPNz",
+              "value": {
+                "open": true,
+                "nodeValue": "0.24"
+              }
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/nodes/1047@t1/data/tickEntries/N1Kco3eTVn0dqJ9n/open"
+            }
+          ],
+          "inversePatches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/nodes/1047@t1/data/tickEntries/N1Kco3eTVn0dqJ9n/nodeValue",
+              "value": "0.76"
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/nodes/6@t1/data/tickEntries/N1Kco3eTVn0dqJ9n/nodeValue",
+              "value": "0.76"
+            },
+            {
+              "op": "remove",
+              "path": "/content/tileMap/t1/content/program/recentTicks/3"
+            },
+            {
+              "op": "remove",
+              "path": "/content/tileMap/t1/content/program/nodes/6@t1/data/tickEntries/sZrr54as4THnJPNz"
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/nodes/6@t1/data/tickEntries/N1Kco3eTVn0dqJ9n/open",
+              "value": true
+            },
+            {
+              "op": "remove",
+              "path": "/content/tileMap/t1/content/program/nodes/1047@t1/data/tickEntries/sZrr54as4THnJPNz"
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/nodes/1047@t1/data/tickEntries/N1Kco3eTVn0dqJ9n/open",
+              "value": true
+            }
+          ]
+        }
+      ],
+      "state": "complete"
+    },
+    {
+      "id": "e5",
+      "tree": "doc1",
+      "action": "/content/tileMap/t1/content/program/tickAndProcess",
+      "undoable": true,
+      "created": 1700000004000,
+      "records": [
+        {
+          "tree": "doc1",
+          "action": "/content/tileMap/t1/content/program/tickAndProcess",
+          "patches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/nodes/1047@t1/data/tickEntries/sZrr54as4THnJPNz/nodeValue",
+              "value": "-0.38"
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/nodes/6@t1/data/tickEntries/sZrr54as4THnJPNz/nodeValue",
+              "value": "0"
+            },
+            {
+              "op": "add",
+              "path": "/content/tileMap/t1/content/program/recentTicks/4",
+              "value": "tK2DAoyjNwhAp1CF"
+            },
+            {
+              "op": "add",
+              "path": "/content/tileMap/t1/content/program/nodes/6@t1/data/tickEntries/tK2DAoyjNwhAp1CF",
+              "value": {
+                "open": true,
+                "nodeValue": "0"
+              }
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/nodes/6@t1/data/tickEntries/sZrr54as4THnJPNz/open"
+            },
+            {
+              "op": "add",
+              "path": "/content/tileMap/t1/content/program/nodes/1047@t1/data/tickEntries/tK2DAoyjNwhAp1CF",
+              "value": {
+                "open": true,
+                "nodeValue": "-0.38"
+              }
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/nodes/1047@t1/data/tickEntries/sZrr54as4THnJPNz/open"
+            }
+          ],
+          "inversePatches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/nodes/1047@t1/data/tickEntries/sZrr54as4THnJPNz/nodeValue",
+              "value": "0.24"
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/nodes/6@t1/data/tickEntries/sZrr54as4THnJPNz/nodeValue",
+              "value": "0.24"
+            },
+            {
+              "op": "remove",
+              "path": "/content/tileMap/t1/content/program/recentTicks/4"
+            },
+            {
+              "op": "remove",
+              "path": "/content/tileMap/t1/content/program/nodes/6@t1/data/tickEntries/tK2DAoyjNwhAp1CF"
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/nodes/6@t1/data/tickEntries/sZrr54as4THnJPNz/open",
+              "value": true
+            },
+            {
+              "op": "remove",
+              "path": "/content/tileMap/t1/content/program/nodes/1047@t1/data/tickEntries/tK2DAoyjNwhAp1CF"
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/nodes/1047@t1/data/tickEntries/sZrr54as4THnJPNz/open",
+              "value": true
+            }
+          ]
+        }
+      ],
+      "state": "complete"
+    },
+    {
+      "id": "e6",
+      "tree": "doc1",
+      "action": "/content/tileMap/t1/content/program/tickAndProcess",
+      "undoable": true,
+      "created": 1700000005000,
+      "records": [
+        {
+          "tree": "doc1",
+          "action": "/content/tileMap/t1/content/program/tickAndProcess",
+          "patches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/nodes/1047@t1/data/tickEntries/tK2DAoyjNwhAp1CF/nodeValue",
+              "value": "-0.85"
+            },
+            {
+              "op": "add",
+              "path": "/content/tileMap/t1/content/program/recentTicks/5",
+              "value": "voN0Y3lwMQz4K4AL"
+            },
+            {
+              "op": "add",
+              "path": "/content/tileMap/t1/content/program/nodes/6@t1/data/tickEntries/voN0Y3lwMQz4K4AL",
+              "value": {
+                "open": true,
+                "nodeValue": "0"
+              }
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/nodes/6@t1/data/tickEntries/tK2DAoyjNwhAp1CF/open"
+            },
+            {
+              "op": "add",
+              "path": "/content/tileMap/t1/content/program/nodes/1047@t1/data/tickEntries/voN0Y3lwMQz4K4AL",
+              "value": {
+                "open": true,
+                "nodeValue": "-0.85"
+              }
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/nodes/1047@t1/data/tickEntries/tK2DAoyjNwhAp1CF/open"
+            }
+          ],
+          "inversePatches": [
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/nodes/1047@t1/data/tickEntries/tK2DAoyjNwhAp1CF/nodeValue",
+              "value": "-0.38"
+            },
+            {
+              "op": "remove",
+              "path": "/content/tileMap/t1/content/program/recentTicks/5"
+            },
+            {
+              "op": "remove",
+              "path": "/content/tileMap/t1/content/program/nodes/6@t1/data/tickEntries/voN0Y3lwMQz4K4AL"
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/nodes/6@t1/data/tickEntries/tK2DAoyjNwhAp1CF/open",
+              "value": true
+            },
+            {
+              "op": "remove",
+              "path": "/content/tileMap/t1/content/program/nodes/1047@t1/data/tickEntries/voN0Y3lwMQz4K4AL"
+            },
+            {
+              "op": "replace",
+              "path": "/content/tileMap/t1/content/program/nodes/1047@t1/data/tickEntries/tK2DAoyjNwhAp1CF/open",
+              "value": true
+            }
+          ]
+        }
+      ],
+      "state": "complete"
+    }
+  ]
+}
