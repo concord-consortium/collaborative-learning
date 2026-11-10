@@ -29,9 +29,9 @@ export class TreeMonitor {
   // Top-level calls between onStart and onFinish. A flow stays here while it is suspended.
   private trackedCalls = new Set<{ call: IActionTrackingMiddleware3Call<CallEnv>, env: CallEnv }>();
   private runningCallCountBox = observable.box(0);
-  // For each finished call whose record hasn't reached the manager yet, keyed by the call's
-  // exchange id: whether the record has changes.
-  private unsentRecords = new Map<string, boolean>();
+  // Calls that have finished but whose tree patch record hasn't reached the manager yet, keyed by
+  // the call's exchange id: whether the call changed the tree.
+  private finishedCalls = new Map<string, boolean>();
 
   /**
    * Called when the tree changes while monitoring is enabled and no tracked call is running,
@@ -182,9 +182,9 @@ export class TreeMonitor {
         recorder.stop();
 
         if (error === undefined) {
-          self.unsentRecords.set(env.exchangeId, recorder.patches.some(filterChangeCount));
+          self.finishedCalls.set(env.exchangeId, recorder.patches.some(filterChangeCount));
           // recordAction is async
-          self.recordAction(call, env).finally(() => self.unsentRecords.delete(env.exchangeId));
+          self.recordAction(call, env).finally(() => self.finishedCalls.delete(env.exchangeId));
         } else if (env.historyEntryId === FAKE_HISTORY_ENTRY_ID) {
           // History playback (goToHistoryEntryPosition / replayHistoryToTrees)
           // uses FAKE_HISTORY_ENTRY_ID to mark its own apply calls. It
@@ -247,11 +247,18 @@ export class TreeMonitor {
   }
 
   /**
-   * True when the exchange belongs to a call that has finished without changing the tree, and
-   * its empty record hasn't reached the manager yet.
+   * True while some call's changes are in the tree but in no history entry yet: a running call
+   * that has changed the tree, or a finished call that changed it and whose tree patch record
+   * hasn't reached the manager.
    */
-  isUnsentRecordWithoutChanges(exchangeId: string) {
-    return this.unsentRecords.get(exchangeId) === false;
+  hasCallWithUnrecordedChanges() {
+    return this.getRunningCallsWithChanges().length > 0 ||
+      Array.from(this.finishedCalls.values()).some(hasChanges => hasChanges);
+  }
+
+  /** True when the exchange belongs to a call that has finished but whose record hasn't reached the manager. */
+  isFinishedCallExchange(exchangeId: string) {
+    return this.finishedCalls.has(exchangeId);
   }
 
   private trackCall(call: IActionTrackingMiddleware3Call<CallEnv>, env: CallEnv) {
@@ -372,6 +379,8 @@ export class TreeMonitor {
       patches,
       inversePatches,
     };
+    // Sending the record can complete the entry, so the call stops counting as finished but unrecorded.
+    this.finishedCalls.delete(exchangeId);
     this.manager.addTreePatchRecord(historyEntryId, exchangeId, record);
 
     for (const exchange of exchangesToProcess) {

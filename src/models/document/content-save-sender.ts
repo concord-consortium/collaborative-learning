@@ -128,16 +128,18 @@ function isLocalChange(document: DocumentModelType) {
 }
 
 /**
- * The tree manager's open entries that may hold changes, leaving out those that have recorded
- * nothing and wait only for the empty records of calls that changed nothing. Such an entry is
- * dropped when it closes, so it never describes a change. Many calls briefly open one, such as the
- * sender's own document actions and the setup calls of a tile that was just added.
+ * The tree manager's open entries that may hold changes the tree monitor doesn't account for:
+ * those that have recorded changes, or wait on something other than a finished call, such
+ * as a shared model update or an undo. An entry that waits only on the exchanges of finished calls
+ * is left to the tree monitor (see hasCallWithUnrecordedChanges), so an entry whose calls changed
+ * nothing doesn't count. Many calls briefly open one, such as the sender's own document actions and
+ * the setup calls of a tile that was just added.
  */
 function getOpenEntries(document: DocumentModelType) {
   const monitor = document.treeMonitor;
   return getTreeManager(document)?.activeHistoryEntries.filter(entry =>
     entry.records.length > 0 ||
-    Array.from(entry.activeExchanges.keys()).some(id => !monitor?.isUnsentRecordWithoutChanges(id))) ?? [];
+    Array.from(entry.activeExchanges.keys()).some(id => !monitor?.isFinishedCallExchange(id))) ?? [];
 }
 
 /**
@@ -149,8 +151,8 @@ export function getSnapshotBlockers(document: DocumentModelType): string[] {
   if (getOpenEntries(document).length > 0) {
     blockers.push("open-entry");
   }
-  if (document.treeMonitor?.getRunningCallsWithChanges().length) {
-    blockers.push("running-call-with-changes");
+  if (document.treeMonitor?.hasCallWithUnrecordedChanges()) {
+    blockers.push("call-with-unrecorded-changes");
   }
   if (isApplyingRemoteEntries(document)) {
     blockers.push("applying-remote-entries");

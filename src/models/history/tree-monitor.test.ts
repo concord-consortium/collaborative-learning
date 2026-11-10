@@ -122,25 +122,51 @@ describe("TreeMonitor", () => {
     });
   });
 
-  describe("unsent records", () => {
+  describe("finished calls", () => {
     // The exchange of the open entry for the call to `action`, once the call has finished.
     function exchangeOf(treeManager: Instance<typeof TreeManager>, action: string) {
       const entry = treeManager.activeHistoryEntries.find(e => e.action === `/content/tileMap/t1/content/${action}`);
       return Array.from(entry!.activeExchanges.keys())[0];
     }
 
-    it("knows a finished call changed nothing until its record is sent", async () => {
+    it("knows a finished call until its record reaches the manager, and whether it changed the tree", async () => {
       const { tileContent, treeMonitor, treeManager } = setupDocument();
       tileContent.changeNothing();
       const unchanged = exchangeOf(treeManager, "changeNothing");
-      expect(treeMonitor.isUnsentRecordWithoutChanges(unchanged)).toBe(true);
+      expect(treeMonitor.isFinishedCallExchange(unchanged)).toBe(true);
+      expect(treeMonitor.hasCallWithUnrecordedChanges()).toBe(false);
+
       tileContent.setText("x");
       const changed = exchangeOf(treeManager, "setText");
-      expect(treeMonitor.isUnsentRecordWithoutChanges(changed)).toBe(false);
+      expect(treeMonitor.isFinishedCallExchange(changed)).toBe(true);
+      expect(treeMonitor.hasCallWithUnrecordedChanges()).toBe(true);
 
       await new Promise(resolve => setTimeout(resolve));
       expect(treeManager.activeHistoryEntries).toHaveLength(0);
-      expect(treeMonitor.isUnsentRecordWithoutChanges(unchanged)).toBe(false);
+      expect(treeMonitor.isFinishedCallExchange(unchanged)).toBe(false);
+      expect(treeMonitor.isFinishedCallExchange(changed)).toBe(false);
+      expect(treeMonitor.hasCallWithUnrecordedChanges()).toBe(false);
+    });
+
+    it("counts a running flow that has changed the tree as unrecorded changes", async () => {
+      const { tileContent, treeMonitor } = setupDocument();
+      const first = deferred<void>();
+      const second = deferred<void>();
+      let step = 0;
+      const gate = {
+        then: (resolve: () => void) => {
+          (step++ === 0 ? first : second).promise.then(resolve);
+        }
+      } as unknown as Promise<void>;
+
+      const promise = tileContent.setTextLater("x", gate);
+      expect(treeMonitor.hasCallWithUnrecordedChanges()).toBe(false);
+      first.resolve();
+      await Promise.resolve();
+      await Promise.resolve();
+      expect(treeMonitor.hasCallWithUnrecordedChanges()).toBe(true);
+      second.resolve();
+      await promise;
     });
   });
 
