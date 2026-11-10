@@ -195,6 +195,9 @@ the script. Both steps sharing one function means they can't disagree.
 has to work from the action path and the patches:
 
 - **DataFlow ticks:** `tickAndProcess` actions.
+- **DataFlow recomputes:** `processAfterProgramChange` actions, which section 1 flags from now on.
+  Without this, an old document has a user stop for each time it was opened and a second one
+  after each block or connection edit.
 - **Legacy DataFlow (before about May 2024):** ticks were recorded as `setProgram`, which also
   recorded every user change to the program. A `setProgram` record counts as a tick only if every
   patch is a `replace` of `program/values/<n>/currentValues/...` or
