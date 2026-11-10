@@ -307,10 +307,10 @@ export const PlaybackControlComponent: React.FC<IProps> = observer((props: IProp
           addMarkerSelected={addMarkerButtonSelected} onAddMarkerSelected={handleAddMarkerButtonSelected}/> */}
       <div className={sliderComponentClass}>
         {renderMarkerComponent()}
+        {renderUnavailableRange()}
         {renderCommentMarkers()}
         {renderLinkMarker()}
         {renderPlaybackFailureMarkers()}
-        {renderUnavailableRange()}
         {renderSliderContainer()}
       </div>
       {renderTimeInfo()}

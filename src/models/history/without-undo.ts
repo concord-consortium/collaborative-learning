@@ -60,7 +60,7 @@ function getRootCallEnv(name: string, options?: IChildActionOptions): CallEnv | 
 
   if (actionCall.parentActionEvent) {
     if (options?.unlessChildAction) {
-      // The caller has explicity said it is OK to ignore the call
+      // The caller has explicitly said it is OK to ignore the call
       // when we are in a child action.
       return;
     }

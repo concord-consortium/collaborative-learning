@@ -1,7 +1,7 @@
 // How the actions a running program makes are recorded in the document history, tested through a
 // real document with history enabled.
 import { when } from "mobx";
-import { Instance } from "mobx-state-tree";
+import { getSnapshot, Instance } from "mobx-state-tree";
 import { createDocumentModel } from "../../../models/document/document";
 import { ProblemDocument } from "../../../models/document/document-types";
 import { HistoryEntryType } from "../../../models/history/history";
@@ -74,6 +74,27 @@ describe("ReteManager history entries", () => {
     expect(ticks[0].background).toBe(true);
     expect(ticks[0].producerTileId).toBe("df1");
     expect(ticks[0].undoable).toBe(false);
+  });
+
+  it("records a running recording's case as a background entry and a single sample as a user entry", async () => {
+    const { content, manager, treeManager } = await setupProgram();
+    managers.push(manager);
+
+    content.recordTickCase();
+    await settle(treeManager);
+    const tickCases = entriesFor(treeManager, "/recordTickCase");
+    expect(tickCases).toHaveLength(1);
+    expect(tickCases[0].background).toBe(true);
+    expect(tickCases[0].producerTileId).toBe("df1");
+
+    content.recordSingleSample(jest.fn());
+    await settle(treeManager);
+    const samples = entriesFor(treeManager, "/recordSingleSample");
+    expect(samples).toHaveLength(1);
+    expect(samples[0].background).toBeUndefined();
+    const snapshot = JSON.parse(JSON.stringify(getSnapshot(samples[0])));
+    expect(snapshot).not.toHaveProperty("background");
+    expect(snapshot).not.toHaveProperty("producerTileId");
   });
 
   it("records the recompute after a program edit as a background entry that only touches running state",

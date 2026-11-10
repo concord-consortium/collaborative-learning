@@ -44,7 +44,7 @@ export const PlaybackComponent: React.FC<IProps> = observer((props: IProps) => {
   // The slider keeps the reader from going back past this position, so being there is the
   // moment to say why.
   const earliestReachablePosition = treeManager?.earliestReachablePosition ?? 0;
-  const atOldestReachablePosition = earliestReachablePosition > 0 &&
+  const atEarliestReachablePosition = earliestReachablePosition > 0 &&
     treeManager.numHistoryEventsApplied === earliestReachablePosition;
 
 return (
@@ -61,7 +61,7 @@ return (
           rebuilt, so the slider goes no further back. */}
       <div className="playback-history-unavailable" data-testid="playback-history-unavailable"
           role="status">
-        {atOldestReachablePosition && "Earlier history isn't available."}
+        {atEarliestReachablePosition && "Earlier history isn't available."}
       </div>
     </div>
   );
