@@ -10,6 +10,7 @@ import { urlParams } from "../utilities/url-params";
 import { DocumentModelType } from "src/models/document/document";
 import { getRootId } from "./root-id";
 import { IEvaluationRequestContext, kPlaceholderUnitCode } from "../../shared/shared";
+import { hashEvaluationRequest, kEvaluationGateKey } from "../../shared/ai-evaluation-gate";
 
 // Set this during database testing in combination with the urlParam testMigration=true to
 // override the top-level Firebase key regardless of mode. For example, setting this to "authed-copy"
@@ -220,6 +221,25 @@ export class Firebase {
     } else {
       return undefined;
     }
+  }
+
+  /**
+   * Where the server records what it last evaluated this document with. A sibling of
+   * the `evaluation` node rather than a child, so writing it cannot re-trigger the evaluation
+   * function -- see kEvaluationGateKey.
+   */
+  public getEvaluationGatePath(user: UserModelType, documentKey: string, userId?: string) {
+    const evaluation = this.db.stores.appConfig.aiEvaluation;
+    if (!evaluation) return undefined;
+    const metadataPath = this.getUserDocumentMetadataPath(user, documentKey, userId);
+    return `${metadataPath}/${kEvaluationGateKey}/${evaluation}`;
+  }
+
+  /** The recorded gate, or undefined when the document has never been evaluated. */
+  public async getEvaluationGate(user: UserModelType, documentKey: string, userId?: string): Promise<unknown> {
+    const path = this.getEvaluationGatePath(user, documentKey, userId);
+    if (!path) return undefined;
+    return (await this.ref(path).once("value")).val() ?? undefined;
   }
 
   /**
@@ -538,32 +558,41 @@ export class Firebase {
     };
   }
 
-private updateEvaluation = (targetRef: firebase.database.Reference | firebase.database.OnDisconnect,
-    requestId?: string) => {
-  const { aiEvaluation, aiPrompt } = this.db.stores.appConfig;
-  // Firebase rejects undefined, so an unknown context (and an absent requestId) is written as no
-  // field at all, rather than a field whose value is undefined.
-  const context = this.evaluationRequestContext;
-  const contextField = context ? { context } : {};
-  const requestIdField = requestId ? { requestId } : {};
-
-  // If this unit uses "custom" evaluation, read and store the prompt strings if they're defined.
-  if (aiEvaluation === "custom") {
-    if (!aiPrompt) return undefined;
+  /**
+   * The prompt and context an evaluation request carries, and the hash the gate compares them by.
+   * The Ideas button hashes the same values, so both go through here.
+   */
+  public getEvaluationRequest() {
+    const { aiEvaluation, aiPrompt } = this.db.stores.appConfig;
+    const context = this.evaluationRequestContext;
+    let promptToWrite = undefined;
     // Include teacher-added custom tag ids as AI categories so the AI can classify documents with
     // them (the cloud function builds its category enum from aiPrompt.categories). NOTE: this only
     // applies to "custom" evaluation; "categorize-design"/"mock" use categories fixed in the cloud
     // function, so custom tags are not offered to the AI in those modes.
-    const customCategories = Object.keys(this.db.stores.commentTags.customTagRecord);
-    const promptToWrite = customCategories.length > 0
-      ? { ...aiPrompt, categories: Array.from(new Set([...(aiPrompt.categories ?? []), ...customCategories])) }
-      : aiPrompt;
-    return targetRef.set({
-      aiPrompt: promptToWrite, ...contextField, ...requestIdField, timestamp: firebase.database.ServerValue.TIMESTAMP
-    });
+    if (aiEvaluation === "custom" && aiPrompt) {
+      const customCategories = Object.keys(this.db.stores.commentTags.customTagRecord);
+      promptToWrite = customCategories.length > 0
+        ? { ...aiPrompt, categories: Array.from(new Set([...(aiPrompt.categories ?? []), ...customCategories])) }
+        : aiPrompt;
+    }
+    return { aiPrompt: promptToWrite, context, requestHash: hashEvaluationRequest(promptToWrite, context) };
   }
 
-  return targetRef.set({ ...contextField, ...requestIdField, timestamp: firebase.database.ServerValue.TIMESTAMP });
+private updateEvaluation = (targetRef: firebase.database.Reference | firebase.database.OnDisconnect,
+    requestId?: string) => {
+  const { aiEvaluation } = this.db.stores.appConfig;
+  const { aiPrompt, context, requestHash } = this.getEvaluationRequest();
+  if (aiEvaluation === "custom" && !aiPrompt) return undefined;
+  // Firebase rejects undefined, so an absent prompt, context or requestId is written as no field at
+  // all, rather than a field whose value is undefined.
+  const promptField = aiPrompt ? { aiPrompt } : {};
+  const contextField = context ? { context } : {};
+  const requestIdField = requestId ? { requestId } : {};
+  return targetRef.set({
+    ...promptField, ...contextField, ...requestIdField, requestHash,
+    timestamp: firebase.database.ServerValue.TIMESTAMP
+  });
 };
 
 }

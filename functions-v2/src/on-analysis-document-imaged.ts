@@ -3,6 +3,7 @@ import * as logger from "firebase-functions/logger";
 import * as admin from "firebase-admin";
 // Modular import: admin.firestore.FieldValue is undefined in the functions emulator.
 import {FieldValue} from "firebase-admin/firestore";
+import {getDatabase} from "firebase-admin/database";
 import {getAnalysisQueueFirestorePath, getSummaryPath} from "./utils";
 import {
   type DocumentMetadata, type DocumentRepresentations, type MetadataGap, categorizeRepresentations,
@@ -10,6 +11,7 @@ import {
 import {Summary} from "./summary-types";
 import {defineSecret} from "firebase-functions/params";
 import {kAnalyzerUserParams} from "../../shared/shared";
+import {IEvaluationGate, kEvaluationGateKey} from "../../shared/ai-evaluation-gate";
 import {writeEvaluationStatusForRequests} from "./evaluation-status";
 import {claimRequestIds} from "./claim-request-ids";
 
@@ -271,6 +273,22 @@ export const onAnalysisDocumentImaged =
         name: kAnalyzerUserParams.fullName,
         uid: kAnalyzerUserParams.id,
       });
+
+      // Only now: the gate must advance on success alone, so a failed evaluation leaves it where
+      // it was and the next attempt is not skipped.
+      if (typeof queueDoc.contentHash === "string" && typeof queueDoc.requestHash === "string" &&
+          queueDoc.metadataPath && queueDoc.evaluator) {
+        try {
+          const gate: IEvaluationGate = {contentHash: queueDoc.contentHash, requestHash: queueDoc.requestHash};
+          await getDatabase()
+            .ref(`${queueDoc.metadataPath}/${kEvaluationGateKey}/${queueDoc.evaluator}`)
+            .set(gate);
+        } catch (err) {
+          // An unwritten gate costs one redundant evaluation; throwing here would cost the done
+          // record, the queue removal and the "commented" status the Ideas client waits for.
+          logger.warn("Could not advance the evaluation gate", event.document, err);
+        }
+      }
 
       // Add to "done" queue
       await firestore.collection(getAnalysisQueueFirestorePath("done")).add({

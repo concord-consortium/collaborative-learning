@@ -1,11 +1,9 @@
 import { uniqueId } from "../../../utilities/js-utils";
 import { ConnectionModelSnapshotIn, DataflowNodeSnapshotIn } from "./dataflow-program-model";
-import { STATE_VERSION_CURRENT, STATE_VERSION_RETE_V1 } from "./dataflow-state-versions";
+import { getDataflowProgramVersion, STATE_VERSION_CURRENT, STATE_VERSION_RETE_V1 } from "./dataflow-state-versions";
 
 export function convertLegacyDataflowProgram(tileId: string, program: any) {
-  const version = program.id;
-
-  if (version !== STATE_VERSION_RETE_V1) return program;
+  if (getDataflowProgramVersion(program) !== STATE_VERSION_RETE_V1) return program;
 
   const { nodes, values } = program;
 

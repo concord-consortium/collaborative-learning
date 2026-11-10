@@ -32,8 +32,23 @@ export class JsonPatchError extends Error {
 // Puts back what one applied patch changed.
 type UndoPatch = () => void;
 
-export function unescapeSegment(segment: string) {
+function unescapeSegment(segment: string) {
   return segment.replace(/~1/g, "/").replace(/~0/g, "~");
+}
+
+/**
+ * Resolves a JSON-pointer path in `doc` through own properties. An empty path is `doc` itself.
+ * Returns undefined when any segment doesn't resolve.
+ */
+export function getJsonAtPath(doc: unknown, path: string): unknown {
+  if (path === "") return doc;
+  let value: any = doc;
+  for (const rawSegment of path.split("/").slice(1)) {
+    const segment = unescapeSegment(rawSegment);
+    if (value == null || typeof value !== "object" || !Object.hasOwn(value, segment)) return undefined;
+    value = value[segment];
+  }
+  return value;
 }
 
 // Applies one patch and returns how to undo it, from the values it actually replaced or removed.

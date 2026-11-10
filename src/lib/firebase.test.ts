@@ -3,6 +3,7 @@ import { UserModelType } from "../models/stores/user";
 import { DocumentModelType } from "../models/document/document";
 import { DB } from "./db";
 import { Firebase } from "./firebase";
+import { hashEvaluationRequest } from "../../shared/ai-evaluation-gate";
 
 jest.mock("firebase/app", () => {
   const refMock = jest.fn(() => ({ set: jest.fn().mockResolvedValue(undefined) }));
@@ -276,6 +277,7 @@ describe("Firebase class", () => {
           expect(mockRef.set).toHaveBeenCalledWith({
             aiPrompt: "test prompt",
             context: expectedContext,
+            requestHash: expect.any(String),
             timestamp: "server-timestamp"
           });
         });
@@ -296,6 +298,8 @@ describe("Firebase class", () => {
           expect(mockRef.set).toHaveBeenCalledWith({
             aiPrompt: { categories: ["a", "custom-1"] },
             context: expectedContext,
+            // Hashed after the merge: a teacher adding a tag changes the request.
+            requestHash: hashEvaluationRequest({ categories: ["a", "custom-1"] }, expectedContext),
             timestamp: "server-timestamp"
           });
         });
@@ -328,6 +332,7 @@ describe("Firebase class", () => {
           expect(mockRef.set).toHaveBeenCalledTimes(2); // lastEditedAt + evaluation
           expect(mockRef.set).toHaveBeenCalledWith({
             context: expectedContext,
+            requestHash: expect.any(String),
             timestamp: "server-timestamp"
           });
         });
@@ -348,7 +353,7 @@ describe("Firebase class", () => {
 
       return firebaseBeforeLoad.setLastEditedNow(mockUser as any, mockDocumentKey, mockUserId)
         .then(() => {
-          expect(mockRef.set).toHaveBeenCalledWith({ timestamp: "server-timestamp" });
+          expect(mockRef.set).toHaveBeenCalledWith({ requestHash: expect.any(String), timestamp: "server-timestamp" });
         });
     });
 
@@ -365,7 +370,7 @@ describe("Firebase class", () => {
 
       return firebaseWithNoProblem.setLastEditedNow(mockUser as any, mockDocumentKey, mockUserId)
         .then(() => {
-          expect(mockRef.set).toHaveBeenCalledWith({ timestamp: "server-timestamp" });
+          expect(mockRef.set).toHaveBeenCalledWith({ requestHash: expect.any(String), timestamp: "server-timestamp" });
         });
     });
 
@@ -385,6 +390,7 @@ describe("Firebase class", () => {
         .then(() => {
           expect(mockRef.set).toHaveBeenCalledWith({
             context: { ...expectedContext, investigation: "0", problem: "1" },
+            requestHash: expect.any(String),
             timestamp: "server-timestamp"
           });
         });
@@ -410,6 +416,7 @@ describe("Firebase class", () => {
 
       expect(onDisconnectSet).toHaveBeenCalledWith({
         context: expectedContext,
+        requestHash: expect.any(String),
         timestamp: "server-timestamp"
       });
     });
@@ -429,6 +436,7 @@ describe("Firebase class", () => {
         .then(() => {
           expect(mockRef.set).toHaveBeenCalledWith({
             context: { ...expectedContext, offeringId: "" },
+            requestHash: expect.any(String),
             timestamp: "server-timestamp"
           });
         });
@@ -465,6 +473,7 @@ describe("Firebase class", () => {
           expect(mockRef.set).toHaveBeenCalledWith({
             context: expectedContext,
             requestId: "req-1",
+            requestHash: expect.any(String),
             timestamp: "server-timestamp"
           });
         });
@@ -485,6 +494,7 @@ describe("Firebase class", () => {
             aiPrompt: "test prompt",
             context: expectedContext,
             requestId: "req-2",
+            requestHash: expect.any(String),
             timestamp: "server-timestamp"
           });
         });

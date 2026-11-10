@@ -571,7 +571,8 @@ $border-radius-base: 6px;
   }
 }
 
-// The lower of the two playback alerts; the request error stacks above it.
+// The lower playback alert. It shares its slot with .playback-history-unavailable, which is
+// hidden while this shows (see playback.scss). The request error stacks above it.
 .playback-failure-warning {
   @include playback-alert;
   bottom: 100%;

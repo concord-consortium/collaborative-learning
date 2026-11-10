@@ -15,7 +15,12 @@ registerTileContentInfo({
   modelClass: AIContentModel,
   defaultContent: defaultAIContent,
   defaultHeight: kAIDefaultHeight,
-  updateContentForCopy: (oldContent: any) => ({ ...oldContent, hidePrompt: true })
+  // Dropped for the same reason exportJson drops them: they record what this tile last asked
+  // about, not what the author wrote, and a copy must evaluate afresh.
+  updateContentForCopy: (oldContent: any) => {
+    const { evaluatedRequestHash: _, evaluatedAt: __, ...rest } = oldContent;
+    return { ...rest, hidePrompt: true };
+  }
 });
 
 registerTileComponentInfo({

@@ -15,6 +15,7 @@ import {
   IPlaybackPatchSource, ModelReplacementError
 } from "./playback-patch-source";
 import { IJsonCopyMoveResult, JsonHistoryCopy } from "./json-history-copy";
+import { getHistoryBridges, IVirtualConversion } from "./history-bridges";
 import { applyJsonPatches, toJsonValue } from "./json-patch";
 import { IDocumentMetadata } from "../../../shared/shared";
 import { Firestore } from "../../lib/firestore";
@@ -83,14 +84,15 @@ function getEntriesBetween(history: readonly HistoryEntryType[], from: number, t
 /**
  * Moves the JSON copy toward `target` and builds the patch source for the move. A model is
  * treated as old when it is old in the copy at either end of the move, when a patch in the move
- * carries an old version of it, or when a load entry in the move changes it. The patches catch an
- * old model that is absent at both ends. The load-entry check is a backstop: a model a load entry
- * converts is old at the end of the move before that entry, or was added in the move with an old
- * value. The copy can stop short of `target`; the source covers only the entries up to where it
- * stopped.
+ * carries an old version of it, or when a load entry or a virtual conversion in the move changes
+ * it. The patches catch an old model that is absent at both ends. The load-entry and
+ * virtual-conversion checks are backstops: a model either one converts is old at the end of the
+ * move before the conversion, or was added in the move with an old value. The copy can stop short
+ * of `target`; the source covers only the entries up to where it stopped.
  */
 function moveJsonCopy(copy: JsonHistoryCopy, history: readonly HistoryEntryType[], treeId: string,
-    target: number): { moved: IJsonCopyMoveResult; source: IPlaybackPatchSource } {
+    target: number, virtualConversions: readonly IVirtualConversion[]
+): { moved: IJsonCopyMoveResult; source: IPlaybackPatchSource } {
   const start = copy.position;
   const requestedPaths = collectModelPaths(getEntriesBetween(history, start, target), treeId);
   const oldAtStart = new Set([...requestedPaths].filter(path => copy.needsConversion(path)));
@@ -103,6 +105,13 @@ function moveJsonCopy(copy: JsonHistoryCopy, history: readonly HistoryEntryType[
   const oldPaths = new Set([...collectModelPaths(entries, treeId)].filter(path =>
     oldAtStart.has(path) || copy.needsConversion(path) ||
     hasOldValue(patches, path) || loadEntryPaths.has(path)));
+  // A move crosses a virtual conversion (see IVirtualConversion.position) when its lower end is
+  // below the conversion's position and its upper end is at or above it.
+  const low = Math.min(start, moved.position);
+  const high = Math.max(start, moved.position);
+  virtualConversions
+    .filter(conversion => low < conversion.position && conversion.position <= high)
+    .forEach(conversion => oldPaths.add(conversion.path));
   return { moved, source: createOldModelPatchSource({ copy, treeId, oldPaths }) };
 }
 
@@ -163,6 +172,8 @@ function applyEntriesToStoredJson(documentJson: any, treeId: string,
   }
   return { content: documentJson.content, applied, error };
 }
+
+const kNoVirtualConversions: readonly IVirtualConversion[] = [];
 
 export const FAKE_HISTORY_ENTRY_ID = "FAKE_HISTORY_ENTRY_ID";
 export const FAKE_EXCHANGE_ID = "FAKE_EXCHANGE_ID";
@@ -270,7 +281,13 @@ export const TreeManager = types
    * A JSON copy of the main document that playback keeps at the current position when
    * `needsJsonCopy` is true. It is built on the first move that needs it.
    */
-  jsonHistoryCopy: undefined as JsonHistoryCopy | undefined
+  jsonHistoryCopy: undefined as JsonHistoryCopy | undefined,
+  /**
+   * The oldest position playback can reach. It is set when a playback move stops at a virtual
+   * conversion it can't cross backward, because the bridge couldn't rebuild the old state or the
+   * model isn't in the copy there. Each later move updates it from the conversions then.
+   */
+  oldestReachablePosition: undefined as number | undefined
 }))
 .views((self) => {
   // The history usually only grows during playback, so the scan resumes where it stopped. A new or
@@ -278,10 +295,46 @@ export const TreeManager = types
   let scannedHistory: unknown;
   let scannedLength = 0;
   let hasLoadEntry = false;
+  // Finding virtual conversions runs every registered bridge, so the result is kept until the key
+  // changes.
+  let virtualKey: {
+    history: unknown; length: number; treeId: string; bridgeCount: number; localLoadEntry: unknown
+  } | undefined;
+  let virtualConversions = kNoVirtualConversions;
+
+  function getVirtualConversions() {
+    const bridges = getHistoryBridges();
+    const treeId = self.mainDocument?.key;
+    if (bridges.length === 0 || treeId === undefined) return kNoVirtualConversions;
+    const history = self.document.history;
+    const { localLoadEntry } = self;
+    if (virtualKey?.history !== history || virtualKey.length !== history.length ||
+        virtualKey.treeId !== treeId || virtualKey.bridgeCount !== bridges.length ||
+        virtualKey.localLoadEntry !== localLoadEntry) {
+      virtualKey = { history, length: history.length, treeId, bridgeCount: bridges.length, localLoadEntry };
+      // A local load entry that the history doesn't hold yet comes after it, so the bridges see
+      // the conversion it records.
+      const bridgeHistory = localLoadEntry && !history.some(entry => entry.id === localLoadEntry.id)
+        ? [...history, HistoryEntry.create(localLoadEntry)]
+        : history;
+      virtualConversions = bridges.flatMap(bridge => bridge.findVirtualConversions(bridgeHistory, treeId));
+    }
+    return virtualConversions;
+  }
+
   return {
     /**
+     * The conversions the registered history bridges find in the history: ones it never
+     * recorded (see IVirtualConversion).
+     */
+    get virtualConversions(): readonly IVirtualConversion[] {
+      return getVirtualConversions();
+    },
+
+    /**
      * True when playback needs a JSON copy of the document: when the history holds a
-     * load entry, or a local load entry was handed over.
+     * load entry, a local load entry was handed over, or a history bridge finds a conversion it
+     * never recorded.
      */
     get needsJsonCopy() {
       if (self.localLoadEntry) return true;
@@ -294,7 +347,7 @@ export const TreeManager = types
       for (; scannedLength < history.length && !hasLoadEntry; scannedLength++) {
         hasLoadEntry = !!history[scannedLength].isLoadEntry;
       }
-      return hasLoadEntry;
+      return hasLoadEntry || getVirtualConversions().length > 0;
     }
   };
 })
@@ -455,6 +508,10 @@ export const TreeManager = types
     // setNumHistoryEntriesAppliedFromFirestore looks up the document's last entry.
     setNumHistoryEntriesApplied(value: number | undefined) {
       self.numHistoryEventsApplied = value;
+    },
+
+    setOldestReachablePosition(value: number | undefined) {
+      self.oldestReachablePosition = value;
     },
 
     /**
@@ -880,10 +937,17 @@ export const TreeManager = types
         const startJson = getJsonCopyStart(documentJson, key, history, initialPosition, self.localLoadEntry);
         copy = self.jsonHistoryCopy = new JsonHistoryCopy(key, startJson, initialPosition);
       }
+      const virtualConversions = self.virtualConversions;
+      copy.setVirtualConversions(virtualConversions);
       const { moved, source: oldModelSource } =
-        moveJsonCopy(copy, history, self.mainDocument.key, newHistoryPosition);
+        moveJsonCopy(copy, history, self.mainDocument.key, newHistoryPosition, virtualConversions);
       source = oldModelSource;
       targetPosition = moved.position;
+      // Stopping where earlier history can't be rebuilt isn't a failure; playback says so instead.
+      // The conversions change as the history grows, which can move that position or remove it.
+      if (moved.unavailable || self.oldestReachablePosition !== undefined) {
+        self.oldestReachablePosition = copy.oldestReachablePosition || undefined;
+      }
       if (moved.failure) {
         const { historyIndex, direction: failureDirection, message } = moved.failure;
         recordFailure(historyIndex, failureDirection, message);

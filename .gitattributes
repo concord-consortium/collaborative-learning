@@ -9,3 +9,4 @@ src/plugins/dataflow/firmware/guide-images/*.svg text eol=lf
 
 # Test fixtures, collapsed in GitHub reviews.
 src/models/history/fixtures/*.json linguist-generated=true
+src/plugins/dataflow/model/fixtures/legacy-history/*.json linguist-generated=true
