@@ -18,7 +18,10 @@ Two kinds of reader use that chain:
   work, or one that stores full document states at intervals. The library has to apply the patches
   the way MST records them: MST records a `replace` for an optional property that is missing from
   the stored JSON, and a `replace` with no value when it clears one. `fast-json-patch` with
-  validation off applies both; a strict library rejects them. A service also can't cross a
+  validation off applies both; a strict library rejects them. With validation off, it also inserts
+  at an array index past the end, which CLUE rejects as a broken chain, so a service should check
+  array bounds itself. It inserts patch values by reference, so a service should clone them before
+  applying, or later patches change the stored history. A service also can't cross a
   conversion that a history bridge supplies, such as legacy DataFlow's, because it isn't stored
   (see "How playback crosses the change").
 
