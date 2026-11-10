@@ -865,6 +865,37 @@ describe("PlaybackControlModel", () => {
       expect(model.currentStopIndex).toBe(2);
     });
 
+    it("moves the link stop and marker when a new link arrives", () => {
+      const { model } = setupLink(6, "entry-2", { backgroundIndexes: [1, 2, 3, 4] });
+      expect(stopPositions(model)).toEqual([0, 1, 3, 6]);
+
+      model.setRequestedHistoryId("entry-3");
+      expect(stopKinds(model)).toEqual(["initial", "user", "link", "user"]);
+      expect(stopPositions(model)).toEqual([0, 1, 4, 6]);
+      expect(model.linkPosition).toBe(4);
+
+      // A link to a user change has no stop of its own, so the marker moves onto that change.
+      model.setRequestedHistoryId("entry-0");
+      expect(stopKinds(model)).toEqual(["initial", "user", "user"]);
+      expect(model.linkLocation).toBe(50);
+    });
+
+    it("stops following the end when a new link arrives", async () => {
+      // Opened normally, so the reader is following the end.
+      const { model, treeManager } = setupModel(4, { backgroundIndexes: [1, 2] });
+      expect(model.requestedStop).toBe("end");
+      const seek = jest.spyOn(treeManager, "goToHistoryEntryPosition");
+
+      // The link stop lands before the end and moves the last stop on. That must not send a
+      // reader who was following the end back there while the link sends the document away.
+      model.setRequestedHistoryId("entry-2");
+      await flushPromises();
+
+      expect(model.requestedStop).toBeUndefined();
+      expect(seek).not.toHaveBeenCalled();
+      seek.mockRestore();
+    });
+
     it("puts the thumb on the link's stop when the link's seek reaches it beside a comment", async () => {
       // The comment at 150 seconds shows the document with entries 0 to 2 applied, the same
       // position as the link.

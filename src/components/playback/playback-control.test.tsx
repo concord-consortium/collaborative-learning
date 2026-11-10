@@ -201,6 +201,27 @@ describe("PlaybackControlComponent", () => {
       expect(sliderValue()).toBe("2");
     });
 
+    it("moves the link marker when a new link arrives for the open document", async () => {
+      // Entries 1 to 4 are background. The link to entry 2 has its own stop, and the link to
+      // entry 0 shares the stop of that change.
+      const treeManager = setupTreeManager(6, [1, 2, 3, 4]);
+      const { container, rerender } =
+        render(<PlaybackControlComponent treeManager={treeManager} requestedHistoryId="entry-2" />);
+      const markerLeft = () =>
+        (container.querySelector(".link-marker") as HTMLElement | null)?.style.left;
+      // The stops are [initial, entry 0, link, entry 5].
+      expect(markerLeft()).toMatch(/^calc\(66\.66\d*% - 10px\)$/);
+
+      rerender(<PlaybackControlComponent treeManager={treeManager} requestedHistoryId="entry-0" />);
+
+      // The stops are [initial, entry 0, entry 5].
+      expect(markerLeft()).toBe("calc(50% - 10px)");
+      await act(async () => {
+        fireEvent.click(screen.getByRole("button", { name: "Linked point in history" }));
+      });
+      expect(treeManager.numHistoryEventsApplied).toBe(1);
+    });
+
     it("has no link marker without a link", () => {
       const treeManager = setupTreeManager(3);
       render(<PlaybackControlComponent treeManager={treeManager} requestedHistoryId={undefined} />);

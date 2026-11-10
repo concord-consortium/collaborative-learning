@@ -136,8 +136,8 @@ export class PlaybackControlModel {
     this.requestedStop = initialRequest;
     this.requestedHistoryId = requestedHistoryId;
     makeAutoObservable<PlaybackControlModel,
-                       "treeManager" | "requestedHistoryId" | "advanceTimer" | "queuedStopIndex" |
-                       "seekLoop" | "followEndDisposer" | "requestedStopIndex" | "linkStopIndex">(this, {
+                       "treeManager" | "advanceTimer" | "queuedStopIndex" | "seekLoop" |
+                       "followEndDisposer" | "requestedStopIndex" | "linkStopIndex">(this, {
       // The comment queries hand back a new array whenever their results change, so tracking
       // the reference is enough, and it leaves the comment objects themselves alone.
       comments: observable.ref,
@@ -147,7 +147,6 @@ export class PlaybackControlModel {
       // not observable and could not invalidate a cached computed.
       uniqueFailures: false,
       treeManager: false,
-      requestedHistoryId: false,
       advanceTimer: false,
       seekLoop: false,
       followEndDisposer: false,
@@ -172,6 +171,17 @@ export class PlaybackControlModel {
   // The stop a request names, which for a request to follow along is wherever the end is now.
   private get requestedStopIndex() {
     return this.requestedStop === "end" ? this.lastStopIndex : this.requestedStop;
+  }
+
+  /**
+   * A new link into the document's history moves the link stop and marker to its entry. The
+   * document is about to be sent there, so, as when the control opens with a link, the reader
+   * is no longer following the end: the link stop appearing past them must not pull them back.
+   */
+  setRequestedHistoryId(requestedHistoryId: string | undefined) {
+    if (requestedHistoryId === this.requestedHistoryId) return;
+    if (requestedHistoryId !== undefined) this.requestedStop = undefined;
+    this.requestedHistoryId = requestedHistoryId;
   }
 
   setComments(comments?: WithId<CommentDocument>[], simplePathComments?: WithId<CommentDocument>[]) {

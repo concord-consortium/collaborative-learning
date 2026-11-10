@@ -47,6 +47,10 @@ export const PlaybackControlComponent: React.FC<IProps> = observer((props: IProp
   const [model] = useState(() =>
     new PlaybackControlModel(treeManager, requestedHistoryId ? undefined : "end", requestedHistoryId));
   useEffect(() => () => model.dispose(), [model]);
+  // A later link into the same document doesn't remount the control, so its id is passed on.
+  useEffect(() => {
+    model.setRequestedHistoryId(requestedHistoryId);
+  }, [model, requestedHistoryId]);
 
   // Only a seek that has run for a while is reported as loading.
   const [showSeekProgress, setShowSeekProgress] = useState(false);
