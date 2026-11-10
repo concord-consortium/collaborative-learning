@@ -1,8 +1,8 @@
 # CLUE-760: Background history entries for DataFlow
 
-Status: design approved, 2026-11-02; updated 2026-11-04 for the CLUE-773 implementation and
-2026-11-10 for the CLUE-751 implementation. CLUE-773's #3079 and #3080 are on master. CLUE-760 is
-built on CLUE-773's #3081 and CLUE-751's #3086, and merges after both.
+Status: design approved, 2026-11-02; updated 2026-11-04 and 2026-11-10 for the CLUE-773 and
+CLUE-751 implementations. The updates are awaiting review. CLUE-773 is on master. CLUE-760 builds on
+CLUE-751 (#3086) and merges after it.
 
 ## Why
 
@@ -64,11 +64,17 @@ same flag.
   react to. A story to build one follows only if the team wants it.
 - **Renaming the entry's `created` timestamp, or adding `firstPatchAt` / `completedAt`.** These only
   matter for a time-based slider and are deferred with it.
-- **Fixing playback failures in old histories.** That is CLUE-773. Hiding ticks does not fix them:
+- **Fixing the playback failures that remain in old histories.** Hiding ticks does not fix them:
   moving between two user stops still applies every tick in between, so a bad tick still stops
-  playback. CLUE-773 bridges the legacy DataFlow format, so most legacy documents play back to
-  their start. Documents where a legacy `setProgram` set the program's id just before the tile's
-  `addTile` entry still stop one entry before the add.
+  playback between two stops (see "Positions between stops" in section 3). CLUE-773 documents
+  them, and none has a story yet:
+  - legacy DataFlow documents where the `setProgram` that sets a tile's `program/id` is recorded
+    just before the tile's `addTile` entry. Playback stops one entry before the add (section 6 of
+    the [CLUE-773 design](2026-11-02-clue-773-history-migrations-design.md));
+  - failures that aren't schema changes: session-end gaps, missing tiles or nodes, undoing the first
+    entry, and content saved behind history (that design's Non-goals);
+  - Drawing groups from before 1.1.0, and Graph entries from before layers, found by the audit of
+    other tiles' past migrations (#3081's description).
 - **The rest of the Simulator work** (CLUE-761). CLUE-760 only flags the Simulator's `step` so the
   activity recorder doesn't regress (see below).
 
@@ -102,7 +108,7 @@ action that code, not a person, triggers. It:
 The tree monitor passes the flag through `addHistoryEntry` (in `recordAction`,
 [tree-monitor.ts](../../../src/models/history/tree-monitor.ts)). `HistoryEntry`
 ([history.ts](../../../src/models/history/history.ts)) already has
-`background: types.maybe(types.boolean)`, added by CLUE-773. It is absent on user entries and on
+`background: types.maybe(types.boolean)`. It is absent on user entries and on
 entries written before these changes. CLUE-760 adds one optional field:
 
 - `producerTileId: types.maybe(types.string)`.
@@ -110,7 +116,7 @@ entries written before these changes. CLUE-760 adds one optional field:
 GD-20's other fields (`producerId`, `runnerSessionId`) wait for the runner lock. Old clients ignore
 the new fields: MST drops snapshot properties a model doesn't define.
 
-**Not every background entry comes from `asBackground()`.** CLUE-773's load entry, which records the
+**Not every background entry comes from `asBackground()`.** The load entry, which records the
 changes CLUE makes to the stored content while loading it (such as converting old tiles to their
 current format), is built directly (`buildLoadEntry` in
 [schema-conversion.ts](../../../src/models/history/schema-conversion.ts)) with `isLoadEntry: true`,
@@ -177,7 +183,7 @@ has to work from the action path and the patches:
   patch (moving, adding or removing a node, changing a setting) makes it a user change.
 - **Simulator:** `step` actions on a Simulator tile.
 
-CLUE-773's legacy DataFlow bridge has `isLegacyDataflowPatch`
+The legacy DataFlow history bridge has `isLegacyDataflowPatch`
 ([legacy-dataflow-history-bridge.ts](../../../src/plugins/dataflow/model/legacy-dataflow-history-bridge.ts)).
 It answers a different question, whether a patch is in the legacy format, so it can't be the tick
 rule: a legacy node move is legacy but not a tick. Share its parsing of tile and `program/values`
@@ -199,7 +205,7 @@ entries.
   before the release that removes the read-time call.
 - A developer with the production service-account key runs it against production.
 - It must run before any future script that rewrites legacy DataFlow patches into the current
-  format (a follow-up CLUE-773 mentions). The rule recognizes legacy ticks by their legacy paths,
+  format, such as the follow-up that stores legacy DataFlow load entries. The rule recognizes legacy ticks by their legacy paths,
   so it can't find them once those paths are rewritten.
 
 ### 3. Playback
@@ -235,11 +241,11 @@ In [playback-control-model.ts](../../../src/components/playback/playback-control
 - **Positions between stops.** A seek that stops on a failing entry can leave the document between
   two stops. The thumb shows the stop before that position. A failure marker goes on the stop that
   playback couldn't reach.
-- **An "earliest available" stop.** CLUE-773 adds an oldest position that playback can reach, for
-  a legacy tile whose old state its bridge can't rebuild (`oldestReachablePosition` in
+- **An "earliest available" stop.** Playback has an oldest position it can reach, for a legacy
+  tile whose old state its history bridge can't rebuild (`oldestReachablePosition` in
   [tree-manager.ts](../../../src/models/history/tree-manager.ts)), and says "Earlier history isn't
-  available." there instead of the failure banner. It leaves the slider treatment to whichever
-  story lands second, which is this one. The bridge's boundary is a tile's last legacy entry, often
+  available." there instead of the failure banner. The slider doesn't mark the range before it
+  yet; CLUE-773 left that to this rework. The bridge's boundary is a tile's last legacy entry, often
   a tick, so that position usually falls between two user stops, and "the stop before" would be a
   stop playback can't reach. So, mirroring the latest stop:
   - the oldest reachable position gets its own stop, unless a stop is already there;
@@ -298,8 +304,8 @@ CLUE-751 narrows this but doesn't close it:
   their playback can still fail on the last few ticks.
 
 CLUE-760 accepts the remaining risk. CLUE-751 makes the content's `lastHistoryEntryId` exact, and a
-later story starts playback from it. CLUE-773 doesn't change where playback starts: its JSON copy
-starts from the saved content, as playback does.
+later story starts playback from it. Playback's JSON copy, which crosses load entries, starts from
+the same content, so it has the same limit.
 
 ### 5. Activity recorder
 
@@ -310,15 +316,15 @@ sees entries this client just wrote, which always carry the flag, so it doesn't 
 Recorded cases stop counting as activity (see section 1). A student who starts a recording and walks
 away no longer shows as active.
 
-CLUE-773 already makes the recorder skip load entries (`entry.isLoadEntry`), which a tick can flush
-into history when an old document opens with a running DataFlow tile. Load entries carry
-`background: true`, so the background check covers them and that clause goes too.
+The recorder also skips load entries (`entry.isLoadEntry`), which a tick can flush into history
+when an old document opens with a running DataFlow tile. Load entries carry `background: true`, so
+the background check covers them and that clause goes too.
 
 ## Related work
 
-- **CLUE-773:** playback across tile format changes: load entries, the JSON copy that crosses them,
-  and the legacy DataFlow bridge. It adds the `background` field and the oldest reachable position
-  this design builds on.
+- **CLUE-773** (merged): playback across tile format changes: load entries, the JSON copy that
+  crosses them, and the legacy DataFlow bridge. It added the `background` field and the oldest
+  reachable position this design builds on, and its design lists the playback failures that remain.
 - **CLUE-751 / GD-18:** settled-state saves. Its `ContentSaveSender` takes the background-only gap
   and indicator rule from section 4, and its load catch-up narrows the content-behind-history risk.
 - **GD-19 / GD-20:** the group-document side of background entries. This change is GD-20's tagging
@@ -354,7 +360,7 @@ into history when an old document opens with a running DataFlow tile. Load entri
 - A link marker is added here, as a single point; CLUE-635 adds ranges.
 - A failed background-only save still shows `Retrying`.
 - `producerTileId` is stored now. `producerId` and `runnerSessionId` are not.
-- An "earliest available" stop at CLUE-773's oldest reachable position, with the stops before it
+- An "earliest available" stop at the oldest reachable position, with the stops before it
   unavailable.
 
 ## Left to the builder
@@ -378,7 +384,7 @@ into history when an old document opens with a running DataFlow tile. Load entri
   and so do failure markers. A load entry is never a stop. A legacy document whose bridge
   can't rebuild the old state gets an earliest available stop, and the stops before it can't be
   reached.
-- **Performance:** CLUE-773 measured playback one entry at a time. Here one move between user
+- **Performance:** playback across load entries was measured one entry at a time (CLUE-773). Here one move between user
   stops applies every tick in between, and in a document with a load entry or a bridged legacy
   DataFlow tile each of those entries also moves the JSON copy. Time a move across thousands of ticks in a legacy DataFlow document.
 - **Save sender:** saves covering only background entries are sent at most every 3 seconds, and
