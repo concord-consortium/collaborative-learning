@@ -135,8 +135,8 @@ covered by the entry's flag.
   ([recording-utilities.ts](../../../src/plugins/dataflow/model/utilities/recording-utilities.ts)).
   It calls the dataset's `addCanonicalCases` directly, so the root action is a generic dataset
   action that user edits also use. Wrap it in a DataFlow content action that calls `asBackground()`.
-  *My call:* recorded cases are produced by code, so they are background, even though starting the
-  recording was a user change. Starting, stopping and clearing a recording stay user changes.
+  Recorded cases are produced by code, so they are background, even though starting the recording
+  was a user change. Starting, stopping and clearing a recording stay user changes.
 - **`SimulatorTool.step`** ([simulator-content.ts](../../../src/plugins/simulator/model/simulator-content.ts)).
   The activity recorder already ignores it as a tick. Once the recorder reads the flag instead, the
   Simulator has to set it, or every step would start counting as student activity. *My call*,
@@ -351,10 +351,10 @@ the background check covers them and that clause goes too.
 - Comments and links get their own stops, with markers, at their exact positions.
 - CLUE-760 doesn't change where playback starts. That waits for CLUE-751 and a later story.
 - The activity recorder uses the flag.
+- Recorded cases are background.
 
 ## My calls (check these)
 
-- Recorded cases are background.
 - `processAfterProgramChange` is background.
 - The Simulator's `step` is flagged here, not in CLUE-761.
 - A link marker is added here, as a single point; CLUE-635 adds ranges.
