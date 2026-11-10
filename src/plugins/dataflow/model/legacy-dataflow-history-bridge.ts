@@ -13,7 +13,6 @@ import { getDataflowProgramVersion, STATE_VERSION_RETE_V1 } from "./dataflow-sta
  * cross it.
  */
 
-// The program's path inside the tile.
 const kProgramPath = "/content/program";
 
 function getTileId(path: string) {

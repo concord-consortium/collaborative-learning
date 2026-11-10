@@ -215,10 +215,8 @@
     }
   }
 
-  // Shares the slot of .playback-failure-warning, right above the bar, with the request error
-  // above both. A seek back to the oldest reachable position clears that warning, but a forward
-  // seek from there that an entry blocks leaves the document at the same position with the
-  // warning showing. The warning explains that stop, so this message gives way to it.
+  // Shares the slot of .playback-failure-warning. A forward seek blocked at the oldest reachable
+  // position shows that warning, which explains the stop, so this message gives way to it.
   &:has(.playback-failure-warning) .playback-history-unavailable {
     display: none;
   }

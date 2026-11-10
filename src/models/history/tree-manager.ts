@@ -246,8 +246,7 @@ export const TreeManager = types
   let scannedHistory: unknown;
   let scannedLength = 0;
   let hasLoadEntry = false;
-  // Finding virtual conversions runs every registered bridge, so the result is kept until the
-  // history array or its length, the tree id, the number of bridges or the local load entry
+  // Finding virtual conversions runs every registered bridge, so the result is kept until the key
   // changes.
   let virtualKey: {
     history: unknown; length: number; treeId: string; bridgeCount: number; localLoadEntry: unknown
