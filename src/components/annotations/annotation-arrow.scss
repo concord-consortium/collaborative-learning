@@ -14,9 +14,9 @@
   }
 
   &.background-arrow {
+    // Width comes from the `hitStrokeWidth` prop, which narrows it on a short sparrow.
     .arrow-stem {
       stroke-opacity: 0;
-      stroke-width: 11px;
       pointer-events: none;
 
       .annotation-layer.show-handles & {

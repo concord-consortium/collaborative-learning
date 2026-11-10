@@ -17,6 +17,33 @@ export interface ITileSize {
 }
 
 /**
+ * How large an endpoint's drag handle may be when its tile has not declared a size for it.
+ *
+ * A handle wider than the object it marks covers whatever sits beside that object, invisibly: a
+ * geometry point's bounding box is 14px and a table row is 22px, so a single fixed radius swallows
+ * a point's neighbors and a row's label. The floor is the radius graph and numberline already pass
+ * by hand for their own small points.
+ */
+export function fitNodeRadius(boundingBox?: { height: number, width: number } | null) {
+  const maxRadius = kAnnotationNodeDefaultRadius / 2;
+  if (!boundingBox) return maxRadius;
+  const halfSmallestSide = Math.min(boundingBox.width, boundingBox.height) / 2;
+  return Math.max(kSmallAnnotationNodeRadius, Math.min(maxRadius, halfSmallestSide));
+}
+
+export const kMaxStemHitWidth = 11;
+const kMinStemHitWidth = 3;
+
+/**
+ * How wide the invisible band around a sparrow's stem that accepts a click may be. Full width on a
+ * long sparrow; narrowed on a short one, where an 11px band between endpoints 22px apart is a blob
+ * covering both of them and anything drawn between.
+ */
+export function fitStemHitWidth(endpointSeparation: number) {
+  return Math.max(kMinStemHitWidth, Math.min(kMaxStemHitWidth, endpointSeparation / 3));
+}
+
+/**
  * Find the point on the line from source to target that is closest to the input point.
  * @param source - The start point of the line.
  * @param target - The end point of the line.
