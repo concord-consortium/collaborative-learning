@@ -1361,5 +1361,23 @@ describe("FirestoreHistoryManagerConcurrent", () => {
       });
       consoleError.mockRestore();
     });
+
+    it("is already not exact when a failed apply stops applying", async () => {
+      const consoleError = jest.spyOn(console, "error").mockImplementation(() => undefined);
+      const { manager, tree, historyManager } = await setupManager({});
+      tree.setItems([Item.create({ id: "a" })]);
+      tree.applyPatchesFromManager = jest.fn(async () => { throw new Error("boom"); }) as any;
+      // The content save sender checks for a settled save as soon as applying clears.
+      const exactWhenApplyingCleared: boolean[] = [];
+      const dispose = reaction(() => historyManager.applying,
+        applying => { if (!applying) exactWhenApplyingCleared.push(manager.exactness.isExact); });
+
+      historyManager.syncRemoteFirestoreHistory([makeWrapperDoc(0, undefined, colorEntry("e0", "red"))]);
+      await flushApplies(historyManager);
+
+      expect(exactWhenApplyingCleared).toEqual([false]);
+      dispose();
+      consoleError.mockRestore();
+    });
   });
 });

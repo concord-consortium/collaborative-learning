@@ -251,16 +251,19 @@ export class FirestoreHistoryManagerConcurrent extends FirestoreHistoryManager {
     this.applyRemoteHistoryEntries(historyEntryDocs);
   }
 
+  private get applyFailedReason() {
+    return this.firstApplyFinished ? "remote-apply-failed" : "initial-apply-failed";
+  }
+
   /**
    * Apply entries delivered by the listener without waiting for them. A failure is logged, and
-   * leaves the session not exact: the content may hold only part of the entries.
+   * leaves the session not exact (see applyHistoryEntries).
    */
   private applyRemoteHistoryEntries(historyEntryDocs: IFirestoreHistoryEntryDoc[]) {
     this.applyHistoryEntries(historyEntryDocs).then(
       () => { this.firstApplyFinished = true; },
       error => {
-        const reason = this.firstApplyFinished ? "remote-apply-failed" : "initial-apply-failed";
-        this.treeManager.exactness.markNotExact(reason);
+        const reason = this.applyFailedReason;
         console.error("Could not apply remote history entries", error);
         const last = historyEntryDocs[historyEntryDocs.length - 1];
         this.logEvent?.(LogEventName.HISTORY_REMOTE_APPLY_FAILED, {
@@ -556,6 +559,11 @@ export class FirestoreHistoryManagerConcurrent extends FirestoreHistoryManager {
       runInAction(() => { this.applying = true; });
       try {
         await this.doApplyHistoryEntries(wrapperDocs);
+      } catch (error) {
+        // The content may hold only part of the entries. This is marked before applying clears,
+        // since the content save sender checks for a settled save as soon as it does.
+        this.treeManager.exactness.markNotExact(this.applyFailedReason);
+        throw error;
       } finally {
         runInAction(() => { this.applying = false; });
       }
