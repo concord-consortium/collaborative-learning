@@ -251,8 +251,10 @@ without waiting.
 
 It runs when the owner opens the document for editing, not when the document is loaded. The
 other-documents listener loads every personal document and learning log when the app starts, so a
-catch-up at load would query Firestore for each one. An owned document is loaded read-only until its
-catch-up finishes. The catch-up also runs before tiles are copied into a document.
+catch-up at load would query Firestore for each one. An owned document is loaded marked as not
+caught up, and its catch-up starts when it is opened for editing, or before tiles are copied into it.
+While it isn't caught up, its toolbar keeps the tools that don't change it (Edit among them), so it can
+still be viewed and opened for editing.
 
 While a document isn't open for editing, the RTDB content listener can replace its content with what
 the RTDB holds. It records the envelope that content came from in the document's `savedEnvelope`, and
@@ -290,9 +292,10 @@ way:
    fetched entry's `previousEntryId` doesn't name it, which is a hole.
 
 Opening the document for editing waits for the catch-up: one more query.
-Applying entries after the user has started editing would collide with their new entries, so the
-document, its toolbar and its 4-up corner stay read-only until the catch-up finishes. A gap over the
-cap doesn't wait.
+Applying entries after the user has started editing would collide with their new entries, so a
+document opened for editing shows a spinner in place of its toolbar and content until the catch-up
+finishes, and its 4-up corner stays read-only. Showing the document read-only meanwhile would leave a
+toolbar that ignores clicks. A gap over the cap doesn't wait.
 
 If an entry fails to apply, the document opens with what applied, and the session is not exact. The
 failure is logged.
