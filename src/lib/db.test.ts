@@ -28,6 +28,8 @@ import { LogEventName } from "./logger-types";
 import { deferred } from "promise-assist";
 import { hashString } from "../utilities/js-utils";
 import { FirestoreHistoryManager } from "../models/history/firestore-history-manager";
+import { kHistoryStart } from "../models/history/session-exactness";
+import { TreeManagerType } from "../models/history/tree-manager";
 
 // This is needed so MST can deserialize snapshots referring to tools
 import { registerTileTypes } from "../register-tile-types";
@@ -583,6 +585,16 @@ describe("db", () => {
       // The RTDB read resolves the server timestamp; Firestore stores the same value.
       expect(written[0].createdAt).toBe(999);
     });
+
+    it("records the key of the document it creates, so opening it skips the history catch-up", async () => {
+      mockFirestore.mockImplementation(() => ({
+        doc: () => ({ get: () => Promise.resolve({ exists: false }), set: () => Promise.resolve() })
+      }));
+      stubRtdbForCreate();
+      await db.connect({ appMode: "test", stores, dontStartListeners: true });
+      const { document } = await db.createDocument({ type: AxesDocument, kind: GroupDocument });
+      expect((db as any).createdDocumentKeys.has(document.self.documentKey)).toBe(true);
+    });
   });
 
   // These pin which fields the builder derives from the stores and which it takes from its caller. They
@@ -1026,6 +1038,23 @@ describe("db", () => {
       catchUp.resolve();
       await Promise.all([first, second]);
       expect(doc.historyCatchUpPending).toBe(false);
+    });
+
+    it("opens a document this session created as caught up, exact from the start of its history", async () => {
+      stubRtdb({ createdAt: 1, properties: {} }, { changeCount: 0 });
+      setUpHistoryManagers("u1");
+      const catchUpSpy = jest.spyOn(FirestoreHistoryManager.prototype, "catchUpAtLoad")
+        .mockReturnValue(new Promise<void>(() => undefined));
+      // Stands in for createDocument, which records the key of each document it creates.
+      (db as any).createdDocumentKeys.add("c4");
+
+      const doc = await db.openDocument({ documentKey: "c4", type: "problem", userId: "u1",
+        firestoreMetadata: { uid: "u1", type: "problem", key: "c4" } } as any);
+
+      expect(doc.historyCatchUpPending).toBe(false);
+      expect((doc.treeManagerAPI as TreeManagerType).exactness.exactSince).toBe(kHistoryStart);
+      await stores.documents.historyCatchUp(doc);
+      expect(catchUpSpy).not.toHaveBeenCalled();
     });
 
     it("doesn't catch up or wait for another user's individual document", async () => {

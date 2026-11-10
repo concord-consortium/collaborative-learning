@@ -200,6 +200,8 @@ export class DB {
 
   private authStateUnsubscribe?: firebase.Unsubscribe;
   private documentFetchPromiseMap = new Map<string, Promise<DocumentModelType>>();
+  // The documents this session created, which have no history in Firestore to catch up to.
+  private createdDocumentKeys = new Set<string>();
   private canonicalResolvePromiseMap = new Map<string, Promise<IResolvedCanonicalDocument>>();
   private groupDocumentDisposer?: IReactionDisposer;
 
@@ -806,6 +808,7 @@ export class DB {
       const documentPath = this.firebase.getUserDocumentPath(user, undefined, owner);
       const documentRef = this.firebase.ref(documentPath).push();
       const documentKey = documentRef.key!;
+      this.createdDocumentKeys.add(documentKey);
       const metadataPath = this.firebase.getUserDocumentMetadataPath(user, documentKey, owner);
       const metadataRef = this.firebase.ref(metadataPath);
       const version = "1.0";
@@ -1371,6 +1374,9 @@ export class DB {
           // An individual document that may be behind its history is handed out read-only, until it
           // is opened for editing and has caught up (see historyCatchUp).
           documents.add(document);
+          if (this.createdDocumentKeys.has(documentKey)) {
+            documents.startNewDocumentHistory(document);
+          }
           resolve(document);
         })
         .catch((msg) => {

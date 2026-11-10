@@ -17,6 +17,7 @@ import { logDocumentEvent } from "../document/log-document-event";
 import { TreeManagerLogger, TreeManagerType } from "../history/tree-manager";
 import { FirestoreHistoryManager, IFirestoreHistoryManagerArgs } from "../history/firestore-history-manager";
 import { FirestoreHistoryManagerConcurrent } from "../history/firestore-history-manager-concurrent";
+import { kHistoryStart } from "../history/session-exactness";
 import { UserContextProvider } from "./user-context-provider";
 import type { ActivityRecorder } from "./activity-recorder";
 
@@ -208,6 +209,16 @@ export const DocumentsModel = types
         self.historyCatchUps.set(document, catchUp);
       }
       return catchUp;
+    },
+    /**
+     * Marks a document this session has just created as caught up. Its history in Firestore is
+     * still empty, so it can be edited at once, and its exact saves start from the beginning of its
+     * history.
+     */
+    startNewDocumentHistory(document: DocumentModelType) {
+      if (!document.historyCatchUpPending) return;
+      (document.treeManagerAPI as TreeManagerType).exactness.startAt(kHistoryStart);
+      document.setHistoryCatchUpPending(false);
     },
     setAppConfig(appConfig: AppConfigModelType) {
       self.appConfig = appConfig;
