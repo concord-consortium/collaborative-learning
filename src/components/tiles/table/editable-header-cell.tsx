@@ -72,7 +72,7 @@ export const EditableHeaderCell = forwardRef<HTMLDivElement, IProps>(
     <div className="editable-header-cell" onClick={handleClick} style={ehcStyle}>
       {isEditing
         ? <HeaderCellInput style={style} inputStyle={inputStyle} initialValue={editableName ? name as string : ""}
-            onKeyDown={handleKeyDown} onClose={handleClose} />
+            ariaLabel="Column name" onKeyDown={handleKeyDown} onClose={handleClose} />
         : (
           <div
             ref={ref}

@@ -30,7 +30,7 @@ describe("EditableHeaderCell", () => {
 
     rerender(renderCell("Gripper", true));
 
-    expect(screen.getByRole("textbox")).toHaveValue("Gripper");
+    expect(screen.getByRole("textbox", { name: "Column name" })).toHaveValue("Gripper");
   });
 
   it("saves the typed name on Enter", () => {

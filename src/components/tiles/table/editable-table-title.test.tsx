@@ -12,7 +12,7 @@ describe("EditableTableTitle", () => {
     const onEndEdit = jest.fn();
     render(<EditableTableTitle model={model} titleCellWidth={100} titleCellHeight={30} onEndEdit={onEndEdit} />);
     fireEvent.click(screen.getByRole("button"));
-    return { input: screen.getByRole("textbox"), onEndEdit };
+    return { input: screen.getByRole("textbox", { name: "Table title" }), onEndEdit };
   }
 
   it("starts editing from the current title", () => {

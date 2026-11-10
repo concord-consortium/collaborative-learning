@@ -6,8 +6,8 @@ describe("HeaderCellInput", () => {
   function renderInput() {
     const onKeyDown = jest.fn();
     const onClose = jest.fn();
-    render(<HeaderCellInput initialValue="Servo" onKeyDown={onKeyDown} onClose={onClose} />);
-    return { input: screen.getByRole("textbox"), onKeyDown, onClose };
+    render(<HeaderCellInput initialValue="Servo" ariaLabel="Column name" onKeyDown={onKeyDown} onClose={onClose} />);
+    return { input: screen.getByRole("textbox", { name: "Column name" }), onKeyDown, onClose };
   }
 
   it("starts from the initial value", () => {
