@@ -33,7 +33,9 @@ export interface IContentRef {
   child(path: string): IValueRef;
 }
 
-export type SaveKind = "exact" | "intermediate" | "settled";
+// A snapshot save holds the content kept when a local entry completed, and a settled save holds a
+// group document's current content once its history settles. Both are exact saves.
+export type SaveKind = "snapshot" | "intermediate" | "settled";
 
 export interface IPendingSave {
   kind: SaveKind;
@@ -376,21 +378,21 @@ export class ContentSaveSender {
   }
 
   /**
-   * Sends the pending exact save now, without waiting for the minimum gap, a backoff or the write
+   * Sends the pending snapshot save now, without waiting for the minimum gap, a backoff or the write
    * in flight, since the page may be gone before they end. Changes that haven't committed are left
    * for the next load to catch up from history, so no intermediate save is made, unless the
-   * document already relies on intermediate saves and no exact save covers the latest change. Then
+   * document already relies on intermediate saves and no snapshot save covers the latest change. Then
    * an intermediate save is sent instead. A group document saves through its usual checks.
    */
   handlePageHide() {
     if (!this.running || this.document.concurrent) return;
     const save = this.pendingSave;
-    const exactSaveCoversLatest = save?.kind === "exact" && save.changeSeq >= this.dirtySeq;
-    if (this.isRelyingOnIntermediateSaves() && !exactSaveCoversLatest && !this.isLatestChangeWritten()) {
+    const snapshotSaveCoversLatest = save?.kind === "snapshot" && save.changeSeq >= this.dirtySeq;
+    if (this.isRelyingOnIntermediateSaves() && !snapshotSaveCoversLatest && !this.isLatestChangeWritten()) {
       this.sendIntermediateSaveNow();
       return;
     }
-    if (save?.kind !== "exact" || this.writesInFlight.has(save) || this.isOlderThanIntermediateContent(save)) {
+    if (save?.kind !== "snapshot" || this.writesInFlight.has(save) || this.isOlderThanIntermediateContent(save)) {
       return;
     }
     this.clearWriteTimer();
@@ -656,7 +658,7 @@ export class ContentSaveSender {
             changeSeq = kept.changeSeq;
           }
           if (kept?.usable) {
-            newest = this.createExactSave(entry, kept.snapshot, kept.exactSince, kept.changeSeq);
+            newest = this.createSnapshotSave(entry, kept.snapshot, kept.exactSince, kept.changeSeq);
           }
           this.keptSnapshots.delete(entry.id);
         });
@@ -690,10 +692,10 @@ export class ContentSaveSender {
     this.scheduleIntermediateSave();
   };
 
-  private createExactSave(entry: ICommittedEntry, snapshot: DocumentContentSnapshotType, exactSince: string,
+  private createSnapshotSave(entry: ICommittedEntry, snapshot: DocumentContentSnapshotType, exactSince: string,
       changeSeq: number): IQueuedSave {
     return {
-      kind: "exact",
+      kind: "snapshot",
       changeSeq,
       snapshot,
       lastHistoryEntryId: entry.id,

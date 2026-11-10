@@ -606,7 +606,7 @@ describe("ContentSaveSender", () => {
       contentRef.writes[0].resolve();
       await flush();
       commits.commit(b);
-      expect(getMinimumGapMs).toHaveBeenCalledWith(expect.objectContaining({ kind: "exact", changeSeq: 2 }));
+      expect(getMinimumGapMs).toHaveBeenCalledWith(expect.objectContaining({ kind: "snapshot", changeSeq: 2 }));
       jest.advanceTimersByTime(2999);
       expect(contentRef.update).toHaveBeenCalledTimes(1);
       jest.advanceTimersByTime(1);

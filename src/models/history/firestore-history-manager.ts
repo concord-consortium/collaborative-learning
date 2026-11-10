@@ -47,8 +47,8 @@ export interface IFirestoreHistoryManagerArgs {
   // lastHistoryEntryId. When the Firestore history first loads, we verify its lastHistoryEntryId
   // is present in the history. If not, the content reflects entries that never made it to the
   // history chain — drift. Undefined skips the check.
-  savedEnvelope?: ISavedEnvelope;
-  // Invoked once if the loaded Firestore history doesn't contain the saved envelope's
+  loadedEnvelope?: ISavedEnvelope;
+  // Invoked once if the loaded Firestore history doesn't contain the loaded envelope's
   // lastHistoryEntryId. The owner decides how to react — typically by
   // setting the document content into an error state. Keeping this as a
   // callback avoids the history layer having to import DocumentModel.
@@ -76,7 +76,7 @@ export class FirestoreHistoryManager implements ICommitSource {
   historyError = undefined as firebase.firestore.FirestoreError | undefined;
   environmentAndMetadataDocReadyPromise: Promise<void> | undefined;
   firestoreHistoryInfoPromise: Promise<IFirestoreHistoryInfo> | undefined;
-  savedEnvelope: ISavedEnvelope | undefined;
+  loadedEnvelope: ISavedEnvelope | undefined;
   onContentDrift: ((message: string) => void) | undefined;
   onLocalEntryUploaded: ((entry: HistoryEntryType) => void) | undefined;
   logEvent: TreeManagerLogger | undefined;
@@ -98,7 +98,7 @@ export class FirestoreHistoryManager implements ICommitSource {
     treeManager,
     uploadLocalHistory,
     syncRemoteHistory,
-    savedEnvelope,
+    loadedEnvelope,
     onContentDrift,
     onLocalEntryUploaded,
     logEvent
@@ -108,7 +108,7 @@ export class FirestoreHistoryManager implements ICommitSource {
     this.treeManager = treeManager;
     this.uploadLocalHistory = uploadLocalHistory;
     this.syncRemoteHistory = syncRemoteHistory;
-    this.savedEnvelope = savedEnvelope;
+    this.loadedEnvelope = loadedEnvelope;
     this.onContentDrift = onContentDrift;
     this.onLocalEntryUploaded = onLocalEntryUploaded;
     this.logEvent = logEvent;
@@ -278,7 +278,7 @@ export class FirestoreHistoryManager implements ICommitSource {
 
   /**
    * Bring an individual document's loaded content up to the last history entry in Firestore,
-   * applying the entries its saved envelope is missing, and decide where the session's exact
+   * applying the entries its loaded envelope is missing, and decide where the session's exact
    * saves start. Managers that mirror the remote history or don't upload local history skip it, as
    * does another user's copy of the document, leaving its exactness undecided.
    * Only an envelope with exactThrough is caught up. The id of one without it can be older than
@@ -288,7 +288,7 @@ export class FirestoreHistoryManager implements ICommitSource {
   async catchUpAtLoad() {
     if (this.syncRemoteHistory || !this.uploadLocalHistory || this.isOtherUsersDocument) return;
     const { exactness } = this.treeManager;
-    const envelope = this.savedEnvelope;
+    const envelope = this.loadedEnvelope;
     const savedId = envelope?.lastHistoryEntryId;
     // Where exact saves start once the content is known to match `contentId`.
     const startAt = (contentId: string) => {
@@ -533,11 +533,11 @@ export class FirestoreHistoryManager implements ICommitSource {
    * which today is gated by syncRemoteHistory=true in the manager args.
    * In practice that means group documents (see documents.ts) and the
    * playback path (see canvas.tsx). Playback doesn't pass
-   * a saved envelope so the check is a no-op there. Other document
+   * a loaded envelope so the check is a no-op there. Other document
    * types never subscribe, so the drift check does not run for them.
    */
   checkContentDriftAgainstHistory(history: IFirestoreHistoryEntryDoc[]) {
-    const savedId = this.savedEnvelope?.lastHistoryEntryId;
+    const savedId = this.loadedEnvelope?.lastHistoryEntryId;
     if (!savedId) return;
     const found = history.some(doc => doc.entry?.id === savedId);
     if (found) return;

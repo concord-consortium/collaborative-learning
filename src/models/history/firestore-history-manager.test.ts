@@ -720,7 +720,7 @@ describe("catchUpAtLoad", () => {
     return { id: entry.id!, index, previousEntryId, entry };
   }
 
-  function setupCatchUp(savedEnvelope: ISavedEnvelope | undefined, lastHistoryEntry: LastHistoryEntry,
+  function setupCatchUp(loadedEnvelope: ISavedEnvelope | undefined, lastHistoryEntry: LastHistoryEntry,
       options: { uploadLocalHistory?: boolean, firestore?: Firestore, uid?: string } = {}) {
     const { treeManager, tileContent } = setupDocument();
     const setCalled = deferred<void>();
@@ -742,7 +742,7 @@ describe("catchUpAtLoad", () => {
       treeManager,
       uploadLocalHistory: options.uploadLocalHistory ?? true,
       syncRemoteHistory: false,
-      savedEnvelope,
+      loadedEnvelope,
       logEvent
     });
     return { treeManager, tileContent, historyManager, firestore, set, setCalled, logEvent };

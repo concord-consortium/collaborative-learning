@@ -99,7 +99,7 @@ export class FirestoreHistoryManagerConcurrent extends FirestoreHistoryManager {
     // getInitialLastHistoryEntry.
     this.getInitialLastHistoryEntry();
 
-    // Make the upload, download and pause state observable so the UI and the content saver
+    // Make the upload, download and pause state observable so the UI and the content save sender
     // can react to changes.
     // The <this, "setExpectedRemoteHead"> type parameter widens
     // AnnotationsMap to include the private setter, which otherwise
@@ -138,7 +138,7 @@ export class FirestoreHistoryManagerConcurrent extends FirestoreHistoryManager {
    * then known to be exactly the state at that entry.
    */
   private get exactEnvelopeEntry(): LastHistoryEntry {
-    const envelope = this.savedEnvelope;
+    const envelope = this.loadedEnvelope;
     if (!envelope?.exactThrough || !envelope.lastHistoryEntryId) return undefined;
     return { id: envelope.lastHistoryEntryId, index: envelope.exactThrough.index };
   }
@@ -146,7 +146,7 @@ export class FirestoreHistoryManagerConcurrent extends FirestoreHistoryManager {
   async getInitialLastHistoryEntry() {
     if (!this.initialLastHistoryPromise) {
       await this.environmentAndMetadataDocReadyPromise;
-      const { firestore, documentPath, savedEnvelope } = this;
+      const { firestore, documentPath, loadedEnvelope } = this;
       const exactEntry = this.exactEnvelopeEntry;
       // Without exactThrough this is Firestore's last entry when the query runs, which is
       // past the content if another client commits an entry after the content was read.
@@ -161,7 +161,7 @@ export class FirestoreHistoryManagerConcurrent extends FirestoreHistoryManager {
         // its own action batch for the mutation even though the .then
         // callback itself is not an action context.
         this.setExpectedRemoteHead(entry?.id ?? null, entry?.index);
-        this.treeManager.exactness.startAt(savedEnvelope?.exactThrough?.since ?? entry?.id ?? kHistoryStart);
+        this.treeManager.exactness.startAt(loadedEnvelope?.exactThrough?.since ?? entry?.id ?? kHistoryStart);
         return entry;
       });
     }

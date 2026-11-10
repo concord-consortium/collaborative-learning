@@ -1265,7 +1265,7 @@ describe("FirestoreHistoryManagerConcurrent", () => {
 
     it("starts from an exact envelope's id without querying Firestore for the last entry", async () => {
       const { manager, tree, historyManager } = await setupManager({}, {
-        savedEnvelope: { lastHistoryEntryId: "e5", exactThrough: { index: 5, since: "e2" } },
+        loadedEnvelope: { lastHistoryEntryId: "e5", exactThrough: { index: 5, since: "e2" } },
       });
       expect(getLastHistoryEntry).not.toHaveBeenCalled();
       expect(historyManager.expectedRemoteHead).toBe("e5");
@@ -1288,7 +1288,7 @@ describe("FirestoreHistoryManagerConcurrent", () => {
 
     it("skips entries up to an exact envelope's index when its id isn't in the history", async () => {
       const { manager, tree, historyManager } = await setupManager({}, {
-        savedEnvelope: { lastHistoryEntryId: "e5", exactThrough: { index: 5, since: "e2" } },
+        loadedEnvelope: { lastHistoryEntryId: "e5", exactThrough: { index: 5, since: "e2" } },
       });
       tree.setItems([Item.create({ id: "a", color: "e5" })]);
 
@@ -1308,7 +1308,7 @@ describe("FirestoreHistoryManagerConcurrent", () => {
     it("queries Firestore for the last entry when the envelope has no exactThrough", async () => {
       getLastHistoryEntry.mockResolvedValue({ id: "e7", index: 7 });
       const { manager, historyManager } = await setupManager({}, {
-        savedEnvelope: { lastHistoryEntryId: "e5" },
+        loadedEnvelope: { lastHistoryEntryId: "e5" },
       });
       expect(getLastHistoryEntry).toHaveBeenCalledTimes(1);
       expect(historyManager.expectedRemoteHead).toBe("e7");
