@@ -3,7 +3,7 @@ jest.mock("../components/dataflow-tile", () => ({ __esModule: true, default: () 
 
 import fs from "fs";
 import path from "path";
-import { cloneDeep } from "lodash";
+import { cloneDeep, omit, sortBy } from "lodash";
 import { applySnapshot, getSnapshot, IJsonPatch, Instance } from "mobx-state-tree";
 import { registerTileTypes } from "../../../register-tile-types";
 import { createDocumentModel, DocumentModelType } from "../../../models/document/document";
@@ -277,6 +277,12 @@ describe("playback of legacy DataFlow history", () => {
     "legacy-ticks", "node-moves-and-additions", "connection-added-and-deleted", "whole-program-set-program",
     "legacy-values-in-other-actions"
   ];
+  // The converter makes new connection ids each time, so connections are compared without them.
+  const withoutConnectionIds = (program: any) => ({
+    ...program,
+    connections: sortBy(Object.values(program.connections).map((c: any) => omit(c, "id")), c => JSON.stringify(c))
+  });
+
   crossable.forEach(name => {
     it(`plays ${name} back to the start and forward to the end`, async () => {
       const { fixture, document, manager } = loadFixture(name);
@@ -284,11 +290,24 @@ describe("playback of legacy DataFlow history", () => {
       const endConnectionIds = Object.keys(fixture.content.tileMap.t1.content.program.connections);
       expect(Object.keys(endProgram.connections)).toEqual(endConnectionIds);
       expect(manager.needsJsonCopy).toBe(true);
+      const [conversion] = manager.virtualConversions;
+      expect(conversion.position).toBeGreaterThan(1);
+
+      // Reached backward across the conversion, this state comes from the rebuilt legacy tile.
+      await manager.goToHistoryEntryPosition(conversion.position - 1);
+      expect(manager.historyPlaybackFailures).toEqual([]);
+      const programBeforeConversion = getProgramJson(document);
 
       await manager.goToHistoryEntryPosition(0);
       expect(manager.historyPlaybackFailures).toEqual([]);
       expect(manager.numHistoryEventsApplied).toBe(0);
       expect(manager.oldestReachablePosition).toBeUndefined();
+      expect(document.content!.tileMap.get("t1")).toBeUndefined();
+
+      // Reached forward from the tile's add, the same state doesn't depend on the rebuilt tile.
+      await manager.goToHistoryEntryPosition(conversion.position - 1);
+      expect(manager.historyPlaybackFailures).toEqual([]);
+      expect(withoutConnectionIds(getProgramJson(document))).toEqual(withoutConnectionIds(programBeforeConversion));
 
       await manager.goToHistoryEntryPosition(fixture.history.length);
       expect(manager.historyPlaybackFailures).toEqual([]);
