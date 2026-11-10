@@ -194,6 +194,24 @@ context('Table Tile Keyboard Navigation', function () {
       cy.get('.primary-workspace .column-header-cell .editable-header-cell .header-name').eq(0).click();
       cy.get('.primary-workspace .column-header-cell .editable-header-cell .header-name').eq(0).click();
       cy.get('.primary-workspace .column-header-cell .editable-header-cell input').should('exist').focus();
+
+      cy.log('Header rename: arrow keys and End move the cursor instead of leaving the editor');
+      // The editor opens with the whole name selected; ArrowLeft collapses the
+      // selection to the start.
+      cy.realPress('ArrowLeft');
+      cy.get('.primary-workspace .column-header-cell .editable-header-cell input')
+        .should('be.focused')
+        .should(($input) => {
+          expect($input[0].selectionStart).to.equal(0);
+          expect($input[0].selectionEnd).to.equal(0);
+        });
+      cy.realPress('End');
+      cy.get('.primary-workspace .column-header-cell .editable-header-cell input')
+        .should('be.focused')
+        .should(($input) => {
+          expect($input[0].selectionStart).to.equal(originalName.length);
+        });
+
       cy.realPress('Escape');
       cy.get('.primary-workspace .column-header-cell .editable-header-cell input').should('not.exist');
       cy.get('.primary-workspace .column-header-cell .editable-header-cell .header-name')

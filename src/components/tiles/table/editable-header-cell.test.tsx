@@ -1,8 +1,8 @@
 import React from "react";
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { EditableHeaderCell } from "./editable-header-cell";
 
-function renderCell(name: string, isEditing: boolean) {
+function renderCell(name: string, isEditing: boolean, onParentKeyDown?: (e: React.KeyboardEvent) => void) {
   const column = {
     key: "attr1", name, width: 100,
     appData: {
@@ -10,7 +10,13 @@ function renderCell(name: string, isEditing: boolean) {
       onBeginHeaderCellEdit: jest.fn(), onHeaderCellEditKeyDown: jest.fn(), onEndHeaderCellEdit: jest.fn()
     }
   };
-  return <EditableHeaderCell column={column as any} height={30} headerNameTabIndex={0} {...({} as any)} />;
+  // The parent stands in for the column header cell and the data grid, which both handle keys
+  // that bubble up from the cell.
+  return (
+    <div onKeyDown={onParentKeyDown}>
+      <EditableHeaderCell column={column as any} height={30} headerNameTabIndex={0} {...({} as any)} />
+    </div>
+  );
 }
 
 describe("EditableHeaderCell", () => {
@@ -24,5 +30,35 @@ describe("EditableHeaderCell", () => {
     rerender(renderCell("Gripper", true));
 
     expect(screen.getByRole("textbox")).toHaveValue("Gripper");
+  });
+
+  // The data grid moves to another cell on these keys, which would end the edit instead of moving
+  // the cursor in the name.
+  it.each(["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "Home", "End", "PageUp", "PageDown"])(
+    "keeps %s inside the name input while editing", key => {
+      const onParentKeyDown = jest.fn();
+      render(renderCell("Servo", true, onParentKeyDown));
+
+      fireEvent.keyDown(screen.getByRole("textbox"), { key });
+
+      expect(onParentKeyDown).not.toHaveBeenCalled();
+    });
+
+  it("passes Tab on while editing so the grid can move to the next cell", () => {
+    const onParentKeyDown = jest.fn();
+    render(renderCell("Servo", true, onParentKeyDown));
+
+    fireEvent.keyDown(screen.getByRole("textbox"), { key: "Tab" });
+
+    expect(onParentKeyDown).toHaveBeenCalled();
+  });
+
+  it("passes arrow keys on when not editing so they move between the header controls", () => {
+    const onParentKeyDown = jest.fn();
+    render(renderCell("Servo", false, onParentKeyDown));
+
+    fireEvent.keyDown(screen.getByRole("button"), { key: "ArrowRight" });
+
+    expect(onParentKeyDown).toHaveBeenCalled();
   });
 });

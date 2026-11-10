@@ -26,6 +26,18 @@ export const EditableHeaderCell = forwardRef<HTMLDivElement, IProps>(
   const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>, value: string) => {
     const { key } = e;
     switch (key) {
+      // The data grid doesn't know the header is being edited, so it would treat these as moves to
+      // another cell, ending the edit. Keep them in the input to move the cursor.
+      case "ArrowLeft":
+      case "ArrowRight":
+      case "ArrowUp":
+      case "ArrowDown":
+      case "Home":
+      case "End":
+      case "PageUp":
+      case "PageDown":
+        e.stopPropagation();
+        break;
       case "Escape":
         handleClose(false, value);
         break;
