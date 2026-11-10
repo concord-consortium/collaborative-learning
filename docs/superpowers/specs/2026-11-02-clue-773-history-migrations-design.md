@@ -706,6 +706,7 @@ A change to this design made in a later PR updates this document in that PR.
   `applyPatchesFromManager` takes optional `modelReplacements`, applied after the patches in the
   same action; a failure throws `ModelReplacementError`.
 - *Settled in PR 3:* the legacy bridge replays forward from the tile's last whole-tile add or
-  replace, with no reverse conversion and no fallback.
+  replace, with no reverse conversion. When that fails, it falls back to the undo patches of the
+  next entry that touches the tile, if they put back the legacy tile.
 - *Settled in PR 3:* the wording is "Earlier history isn't available.", and the slider doesn't mark
   the range playback can't reach.
