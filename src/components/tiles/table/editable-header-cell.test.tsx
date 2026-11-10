@@ -2,12 +2,13 @@ import React from "react";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { EditableHeaderCell } from "./editable-header-cell";
 
-function renderCell(name: string, isEditing: boolean, onParentKeyDown?: (e: React.KeyboardEvent) => void) {
+function renderCell(name: string, isEditing: boolean, onParentKeyDown?: (e: React.KeyboardEvent) => void,
+                    onEndHeaderCellEdit = jest.fn()) {
   const column = {
     key: "attr1", name, width: 100,
     appData: {
       editableName: true, isEditing, gridContext: { isColumnSelected: () => true, onSelectColumn: jest.fn() },
-      onBeginHeaderCellEdit: jest.fn(), onHeaderCellEditKeyDown: jest.fn(), onEndHeaderCellEdit: jest.fn()
+      onBeginHeaderCellEdit: jest.fn(), onHeaderCellEditKeyDown: jest.fn(), onEndHeaderCellEdit
     }
   };
   // The parent stands in for the column header cell and the data grid, which both handle keys
@@ -30,6 +31,28 @@ describe("EditableHeaderCell", () => {
     rerender(renderCell("Gripper", true));
 
     expect(screen.getByRole("textbox")).toHaveValue("Gripper");
+  });
+
+  it("saves the typed name on Enter", () => {
+    const onEndHeaderCellEdit = jest.fn();
+    render(renderCell("Servo", true, undefined, onEndHeaderCellEdit));
+    const input = screen.getByRole("textbox");
+    fireEvent.change(input, { target: { value: "Gripper" } });
+
+    fireEvent.keyDown(input, { key: "Enter" });
+
+    expect(onEndHeaderCellEdit).toHaveBeenCalledWith("Gripper");
+  });
+
+  it("discards the typed name on Escape", () => {
+    const onEndHeaderCellEdit = jest.fn();
+    render(renderCell("Servo", true, undefined, onEndHeaderCellEdit));
+    const input = screen.getByRole("textbox");
+    fireEvent.change(input, { target: { value: "Gripper" } });
+
+    fireEvent.keyDown(input, { key: "Escape" });
+
+    expect(onEndHeaderCellEdit).toHaveBeenCalledWith(undefined);
   });
 
   // The data grid moves to another cell on these keys, which would end the edit instead of moving
