@@ -611,8 +611,6 @@ describe("useDocumentSyncToFirebase hook", () => {
     it("attaches a content save sender for an editable document and detaches it on unmount", async () => {
       const getSender = jest.spyOn(senderModule, "getContentSaveSender");
       const detach = jest.spyOn(ContentSaveSender.prototype, "detach");
-      const addListener = jest.spyOn(window, "addEventListener");
-      const removeListener = jest.spyOn(window, "removeEventListener");
       const logDocumentEvent = jest.spyOn(logDocumentEventModule, "logDocumentEvent").mockImplementation(() => null);
       try {
         const first = jest.fn();
@@ -644,18 +642,15 @@ describe("useDocumentSyncToFirebase hook", () => {
         await options.updateTools(["Text"]);
         expect(mockFirestoreDocUpdate).toHaveBeenCalledWith({ tools: ["Text"] });
 
-        options.logEvent?.(LogEventName.CONTENT_SAVE_FALLBACK_START, { unsettledSince: 1 });
+        options.logEvent?.(LogEventName.CONTENT_SAVE_FALLBACK_START, { since: 1 });
         expect(logDocumentEvent).toHaveBeenCalledWith(LogEventName.CONTENT_SAVE_FALLBACK_START,
-          { document, unsettledSince: 1 });
+          { document, since: 1 });
 
-        const pageHideListener = addListener.mock.calls.find(([type]) => (type as string) === "pagehide")?.[1];
-        expect(pageHideListener).toBeDefined();
         unmount();
         expect(detach).toHaveBeenCalledTimes(1);
-        expect(removeListener).toHaveBeenCalledWith("pagehide", pageHideListener);
         expect(mockSetLastEditedNow).toHaveBeenCalledTimes(1);
       } finally {
-        [getSender, detach, addListener, removeListener, logDocumentEvent].forEach(spy => spy.mockRestore());
+        [getSender, detach, logDocumentEvent].forEach(spy => spy.mockRestore());
       }
     });
 
@@ -731,21 +726,6 @@ describe("useDocumentSyncToFirebase hook", () => {
 
       await resolveWrites();
       unmount();
-    });
-
-    it("doesn't listen for pagehide on a group document", () => {
-      const addListener = jest.spyOn(window, "addEventListener");
-      const getSender = jest.spyOn(senderModule, "getContentSaveSender");
-      try {
-        const { mount } = setupSaving({ concurrent: true });
-        const { unmount } = mount();
-        expect(getSender).toHaveBeenCalledTimes(1);
-        expect(addListener.mock.calls.some(([type]) => (type as string) === "pagehide")).toBe(false);
-        unmount();
-      } finally {
-        addListener.mockRestore();
-        getSender.mockRestore();
-      }
     });
 
     it("sets the last edited time when the sender finishes saving after unmount", async () => {

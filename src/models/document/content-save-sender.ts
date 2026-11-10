@@ -377,6 +377,14 @@ export class ContentSaveSender {
     this.write(save);
   }
 
+  private handlePageHideEvent = () => {
+    try {
+      this.handlePageHide();
+    } catch (error) {
+      console.error("Failed to save content on page hide", error);
+    }
+  };
+
   /**
    * Sends the pending snapshot save now, without waiting for the minimum gap, a backoff or the write
    * in flight, since the page may be gone before they end. Changes that haven't committed are left
@@ -429,6 +437,13 @@ export class ContentSaveSender {
 
   private start() {
     this.running = true;
+    // Listened to here rather than by the component, so a page hide also reaches a sender that is
+    // draining after the component unmounted. A group document has other writers, so it saves
+    // through its usual checks.
+    if (!this.document.concurrent) {
+      window.addEventListener("pagehide", this.handlePageHideEvent);
+      this.disposers.push(() => window.removeEventListener("pagehide", this.handlePageHideEvent));
+    }
     const treeManager = getTreeManager(this.document);
     if (treeManager) {
       this.disposers.push(treeManager.addEntryCompletedListener(this.handleEntryCompleted));

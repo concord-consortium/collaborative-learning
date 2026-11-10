@@ -230,15 +230,7 @@ export function useDocumentSyncToFirebase(
         }
       }
     });
-    // A group document has other writers, so it saves through its usual checks.
-    const handlePageHide = () => sender.handlePageHide();
-    if (!document.concurrent) {
-      window.addEventListener("pagehide", handlePageHide);
-    }
-    return () => {
-      window.removeEventListener("pagehide", handlePageHide);
-      sender.detach();
-    };
+    return () => sender.detach();
   }, [enabled, document, firebase, contentPath, user, key, uid, type, updateFirestoreDocumentProp]);
 
   useEffect(() => {

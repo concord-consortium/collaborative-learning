@@ -1544,6 +1544,45 @@ describe("ContentSaveSender", () => {
       expect(contentRef.update).toHaveBeenCalledTimes(1);
     });
 
+    it("saves on the window's page hide while it drains after the last detach", async () => {
+      const { commits, contentRef, document, edit, sender } = track(setup());
+      document.setSavedEnvelope(exactEnvelope);
+      const a = await edit("alpha");
+      commits.commit(a);
+      const b = await edit("bravo");
+      commits.commit(b);
+      expect(contentRef.update).toHaveBeenCalledTimes(1);
+
+      sender.detach();
+      window.dispatchEvent(new Event("pagehide"));
+      expect(contentRef.update).toHaveBeenCalledTimes(2);
+      expect(contentRef.writes[1].values).toMatchObject({ lastHistoryEntryId: b });
+    });
+
+    it("stops listening for the window's page hide once disposed", async () => {
+      const { commits, contentRef, document, edit, sender } = track(setup());
+      document.setSavedEnvelope(exactEnvelope);
+      const a = await edit("alpha");
+      commits.commit(a);
+      const b = await edit("bravo");
+      commits.commit(b);
+      const handlePageHide = jest.spyOn(sender, "handlePageHide");
+      sender.dispose();
+      window.dispatchEvent(new Event("pagehide"));
+      expect(handlePageHide).not.toHaveBeenCalled();
+      expect(contentRef.update).toHaveBeenCalledTimes(1);
+    });
+
+    it("doesn't listen for the window's page hide on a group document", () => {
+      const addListener = jest.spyOn(window, "addEventListener");
+      try {
+        track(setup({}, true));
+        expect(addListener.mock.calls.some(([type]) => (type as string) === "pagehide")).toBe(false);
+      } finally {
+        addListener.mockRestore();
+      }
+    });
+
     it("does nothing on page hide for a group document", async () => {
       const { commits, contentRef, edit, sender } = track(setup({}, true));
       const a = await edit("alpha");
