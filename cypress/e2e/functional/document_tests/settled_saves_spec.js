@@ -42,6 +42,30 @@ function waitForEnvelope(predicate, description, attemptsLeft = 20) {
   });
 }
 
+const saveIndicator = '[data-testid="save-indicator"]';
+
+// Saving can show for less time than a check takes, so the indicator's container is watched for
+// it from now on. The returned record says whether it has shown.
+function watchForSaving() {
+  return cy.get(saveIndicator).first().then($indicator => {
+    const container = $indicator[0].parentElement;
+    const record = { sawSaving: false };
+    const check = () => {
+      if (container.querySelector(saveIndicator)?.textContent.includes("Saving")) record.sawSaving = true;
+    };
+    new MutationObserver(check).observe(container, { childList: true, subtree: true, characterData: true });
+    check();
+    return record;
+  });
+}
+
+// Saved goes back to no text a few seconds after it shows, and a later save shows it again.
+function expectSavedWithoutSaving(record) {
+  cy.get(saveIndicator).should("contain", "Saved").then(() => {
+    expect(record.sawSaving, "the indicator showed Saving").to.equal(false);
+  });
+}
+
 context("Settled saves", function () {
   it("saves an individual document exactly and catches it up on reload", function () {
     visitUnit(5);
@@ -96,15 +120,21 @@ context("Settled saves", function () {
     dataflowToolTile.getDataflowTile().should("exist");
     dataflowToolTile.getCreateNodeButton("generator").click();
     dataflowToolTile.getNode("generator").should("exist");
-
-    // The baseline is taken once the node exists, so adding it can't account for the later entries.
-    // The program ticks once a second, and each tick is an entry.
-    waitForEnvelope(isExact, "is exact").then(first => {
-      cy.wait(3000);
-      waitForEnvelope(
-        e => isExact(e) && exactIndex(e) >= exactIndex(first) + 3,
-        "is exact at least three entries later"
-      );
+    cy.waitForSave();
+    watchForSaving().then(record => {
+      // The baseline is taken once the node exists, so adding it can't account for the later
+      // entries. The program ticks once a second, and each tick is an entry.
+      waitForEnvelope(isExact, "is exact").then(first => {
+        cy.log("the ticks are saved without showing the saving indicator");
+        cy.wait(1500);
+        expectSavedWithoutSaving(record);
+        cy.wait(1500);
+        expectSavedWithoutSaving(record);
+        waitForEnvelope(
+          e => isExact(e) && exactIndex(e) >= exactIndex(first) + 3,
+          "is exact at least three entries later"
+        );
+      });
     });
   });
 });
