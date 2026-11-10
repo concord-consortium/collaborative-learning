@@ -7,7 +7,7 @@ import { nanoid } from "nanoid";
 import { DocumentContentModelType } from "../document/document-content";
 import { kSharedModelEntrySubtreeRegex, kSharedModelMapPath } from "../document/document-paths";
 import { TreeManagerAPI } from "./tree-manager-api";
-import { TreePatchRecordSnapshot } from "./history";
+import { ICreateHistoryEntry, TreePatchRecordSnapshot } from "./history";
 import { Tree } from "./tree";
 import {
   CallEnv, getActionModelName, getActionPath, isActionFromManager,
@@ -30,8 +30,8 @@ export class TreeMonitor {
   private trackedCalls = new Set<{ call: IActionTrackingMiddleware3Call<CallEnv>, env: CallEnv }>();
   private runningCallCountBox = observable.box(0);
   // Calls that have finished but whose tree patch record hasn't reached the manager yet, keyed by
-  // the call's exchange id: whether the call changed the tree.
-  private finishedCalls = new Map<string, boolean>();
+  // the call's exchange id: whether the call changed the tree, and whether it is a background call.
+  private finishedCalls = new Map<string, { hasChanges: boolean; background: boolean }>();
 
   /**
    * Called when the tree changes while monitoring is enabled and no tracked call is running,
@@ -182,7 +182,10 @@ export class TreeMonitor {
         recorder.stop();
 
         if (error === undefined) {
-          self.finishedCalls.set(env.exchangeId, recorder.patches.some(filterChangeCount));
+          self.finishedCalls.set(env.exchangeId, {
+            hasChanges: recorder.patches.some(filterChangeCount),
+            background: !!env.background
+          });
           // recordAction is async
           self.recordAction(call, env).finally(() => self.finishedCalls.delete(env.exchangeId));
         } else if (env.historyEntryId === FAKE_HISTORY_ENTRY_ID) {
@@ -253,7 +256,22 @@ export class TreeMonitor {
    */
   hasCallWithUnrecordedChanges() {
     return this.getRunningCallsWithChanges().length > 0 ||
-      Array.from(this.finishedCalls.values()).some(hasChanges => hasChanges);
+      Array.from(this.finishedCalls.values()).some(({ hasChanges }) => hasChanges);
+  }
+
+  /**
+   * True when some call has unrecorded changes, as in hasCallWithUnrecordedChanges, and every
+   * such call is a background call.
+   */
+  areUnrecordedChangesAllBackground() {
+    const backgroundFlags: boolean[] = [];
+    this.trackedCalls.forEach(({ env }) => {
+      if (env.recorder.patches.length > 0) backgroundFlags.push(!!env.background);
+    });
+    this.finishedCalls.forEach(({ hasChanges, background }) => {
+      if (hasChanges) backgroundFlags.push(background);
+    });
+    return backgroundFlags.length > 0 && backgroundFlags.every(background => background);
   }
 
   /** True when the exchange belongs to a call that has finished but whose record hasn't reached the manager. */
@@ -300,7 +318,7 @@ export class TreeMonitor {
   // stored in the recorder.
   async recordAction(call: IActionTrackingMiddleware3Call<CallEnv>, env: CallEnv) {
     const { recorder, initialSharedModelMap, sharedModelModifications, historyEntryId,
-      exchangeId, undoable } = env;
+      exchangeId, undoable, background, producerTileId } = env;
     if (!isActionFromManager(call)) {
       // We record the start of the action even if it doesn't have any
       // patches. This is useful when an action only modifies the shared
@@ -309,14 +327,20 @@ export class TreeMonitor {
       // If the manager triggered the action then the manager already
       // added the history entry.
       //
-      await this.manager.addHistoryEntry({
+      const entryInfo: ICreateHistoryEntry = {
         id: historyEntryId,
         exchangeId,
         tree: this.tree.treeId,
         model: getActionModelName(call),
         action: getActionPath(call),
         undoable
-      });
+      };
+      // User entries leave the background fields out
+      if (background) {
+        entryInfo.background = true;
+        if (producerTileId !== undefined) entryInfo.producerTileId = producerTileId;
+      }
+      await this.manager.addHistoryEntry(entryInfo);
     }
 
     // Call the shared model notification function if there are changes.

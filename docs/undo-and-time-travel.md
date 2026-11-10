@@ -21,7 +21,26 @@ actions(self => {
 })
 ```
 
-Currently if you add `withoutUndo` to an action and then you call this action from another action, the `withoutUndo` will be ignored. A warning message will be printed in this case describing how we can change the code to handle this. You can see that in [tree-monitor.ts](../src/models/history/tree-monitor.ts#L306)
+Currently if you add `withoutUndo` to an action and then you call this action from another action, the `withoutUndo` will be ignored. A warning message will be printed in this case describing how we can change the code to handle this. You can see that in [without-undo.ts](../src/models/history/without-undo.ts). If ignoring it is what you want, pass `withoutUndo({ unlessChildAction: true })` and no warning is printed.
+
+### asBackground
+
+A background history entry is one produced by code, not by direct user activation: a DataFlow tick, a Simulator step, or any other change a tile makes on its own while it runs. To mark an action's entry as background, call `asBackground()` at the top of the action, the same way as `withoutUndo()`:
+
+```
+actions(self => {
+  tick() {
+    asBackground({ producerTileId: getTileModel(self)?.id });
+    // make some changes to self or its children
+  }
+})
+```
+
+The entry records `background: true` and `producerTileId`, the id of the tile that owns the action. Use `getTileModel(self)?.id` for it. User entries have neither field.
+
+A background entry is never undoable, so `asBackground()` implies `withoutUndo()`; don't call both.
+
+The child-action rule is the same as for `withoutUndo`. When the action is called from another action, its changes belong to the parent's entry, which may hold a person's change, so `asBackground()` is ignored with a warning. The entry is background only if the parent action called `asBackground()` itself. Pass `unlessChildAction: true` to skip the warning when the action is sometimes called as a child on purpose.
 
 ## Grouping Changes
 

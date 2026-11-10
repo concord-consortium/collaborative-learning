@@ -7,6 +7,7 @@ import { registerTileComponentInfo } from "../tiles/tile-component-info";
 import { registerTileContentInfo } from "../tiles/tile-content-info";
 import { TileContentModel } from "../tiles/tile-content";
 import { FAKE_HISTORY_ENTRY_ID, TreeManager } from "./tree-manager";
+import { asBackground } from "./without-undo";
 
 const TestTile = TileContentModel
   .named("TestTile")
@@ -32,7 +33,17 @@ const TestTile = TileContentModel
     }),
     changeNothing() {
       // An action that records an empty patch record
-    }
+    },
+    tickText(value: string) {
+      asBackground({ producerTileId: "t1" });
+      self.text = value;
+    },
+    tickTextLater: flow(function* (value: string, gate: Promise<void>) {
+      asBackground({ producerTileId: "t1" });
+      yield gate;
+      self.text = value;
+      yield gate;
+    })
   }));
 interface TestTileType extends Instance<typeof TestTile> {}
 
@@ -177,6 +188,56 @@ describe("TreeMonitor", () => {
       expect(treeMonitor.hasCallWithUnrecordedChanges()).toBe(true);
       second.resolve();
       await promise;
+    });
+  });
+
+  describe("background calls", () => {
+    it("knows a finished background call's changes are all background until its record reaches the manager", async () => {
+      const { tileContent, treeMonitor } = setupDocument();
+      tileContent.tickText("a");
+      expect(treeMonitor.areUnrecordedChangesAllBackground()).toBe(true);
+
+      await new Promise(resolve => setTimeout(resolve));
+      expect(treeMonitor.areUnrecordedChangesAllBackground()).toBe(false);
+    });
+
+    it("knows a running background flow's changes are all background", async () => {
+      const { tileContent, treeMonitor } = setupDocument();
+      const first = deferred<void>();
+      const second = deferred<void>();
+      let step = 0;
+      const gate = {
+        then: (resolve: () => void) => {
+          (step++ === 0 ? first : second).promise.then(resolve);
+        }
+      } as unknown as Promise<void>;
+
+      const promise = tileContent.tickTextLater("x", gate);
+      first.resolve();
+      await Promise.resolve();
+      await Promise.resolve();
+      expect(treeMonitor.getRunningCallsWithChanges()).toHaveLength(1);
+      expect(treeMonitor.areUnrecordedChangesAllBackground()).toBe(true);
+      second.resolve();
+      await promise;
+    });
+
+    it("doesn't count a user call's changes as background", () => {
+      const { tileContent, treeMonitor } = setupDocument();
+      tileContent.setText("a");
+      expect(treeMonitor.areUnrecordedChangesAllBackground()).toBe(false);
+    });
+
+    it("doesn't count changes as all background when a user call follows a background one", () => {
+      const { tileContent, treeMonitor } = setupDocument();
+      tileContent.tickText("a");
+      tileContent.setText("b");
+      expect(treeMonitor.areUnrecordedChangesAllBackground()).toBe(false);
+    });
+
+    it("is false with nothing pending", () => {
+      const { treeMonitor } = setupDocument();
+      expect(treeMonitor.areUnrecordedChangesAllBackground()).toBe(false);
     });
   });
 
