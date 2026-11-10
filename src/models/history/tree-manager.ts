@@ -240,8 +240,8 @@ export const TreeManager = types
    */
   historyPlaybackFailures: [] as HistoryPlaybackFailure[],
   /**
-   * Whether the document's lastHistoryEntryId is exact for this session. Broken when an entry
-   * is force-completed after its open-entry timeout.
+   * Whether the document's lastHistoryEntryId is exact for this session. See NotExactReason for what
+   * breaks it.
    */
   exactness: new SessionExactness(),
   entryCompletedListeners: new Set<(entry: HistoryEntryType) => void>(),
@@ -389,7 +389,7 @@ export const TreeManager = types
     completeHistoryEntry,
 
     /**
-     * Complete an entry whose exchanges never closed. Records that arrive for it afterwards are
+     * Complete an entry whose exchanges never closed. Records that arrive for it later are
      * kept as new entries, see addTreePatchRecord.
      */
     timeOutEntry(entryId: string) {

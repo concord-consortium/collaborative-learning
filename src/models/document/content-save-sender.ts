@@ -65,7 +65,7 @@ interface IQueuedSave extends IPendingSave {
   lastHistoryEntryId?: string;
   // The Firestore index of the entry the save is stamped with, when it is known.
   index?: number;
-  // Set on an exact or settled save.
+  // Set on a snapshot or settled save.
   exactSince?: string;
   // A group document's save isn't sent before this time.
   notBefore?: number;
@@ -251,7 +251,7 @@ export class ContentSaveSender {
   private disposers: Array<() => void> = [];
   private keptSnapshots = new Map<string, IKeptSnapshot>();
   private pendingSave: IWaitingSave | undefined;
-  // More than one only after a page hide, which doesn't wait for the write in flight.
+  // More than one only after a page hide or the drain timeout, which don't wait for the write in flight.
   private writesInFlight = new Set<IWaitingSave>();
   private writeTimer: ReturnType<typeof setTimeout> | undefined;
   private lastWriteStartedAt: number | undefined;
@@ -259,7 +259,8 @@ export class ContentSaveSender {
   private consecutiveFailures = 0;
   // Counts the content changes. A save covers the changes up to its changeSeq.
   private dirtySeq = 0;
-  // The content change the RTDB content holds: the changeSeq of the last write that succeeded.
+  // The newest content change the RTDB content is known to hold: from this sender's writes, or a group
+  // envelope that reaches the head.
   private savedSeq = 0;
   // The newest content change an intermediate save has written. An exact save of older content
   // would undo changes the RTDB already holds, so it isn't sent.
@@ -333,7 +334,8 @@ export class ContentSaveSender {
 
   /**
    * Whether a completed save covers the latest change. On an individual document that has to be an
-   * exact save, since an intermediate save leaves the next load to catch up from history.
+   * exact save: an intermediate save leaves the envelope without exactThrough, and the next load can't
+   * catch up from it.
    */
   private isLatestChangeSaved() {
     if (this.pendingSave || this.writesInFlight.size > 0) return false;
@@ -352,7 +354,8 @@ export class ContentSaveSender {
     } catch (error) {
       console.error("Failed to send the last content save", error);
     }
-    // A sender attached after this one stops reads the envelope before the write in flight lands.
+    // A sender attached after this one has stopped would read the envelope before this write lands, so
+    // the envelope is recorded as it will be now.
     if (Array.from(this.writesInFlight).some(save => save.kind === "intermediate")) {
       this.recordNotExactEnvelope();
     }
