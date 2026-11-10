@@ -59,9 +59,14 @@ function watchForSaving() {
   });
 }
 
-// Saved goes back to no text a few seconds after it shows, and a later save shows it again.
-function expectSavedWithoutSaving(record) {
-  cy.get(saveIndicator).should("contain", "Saved").then(() => {
+// Saves of background changes leave the indicator alone: it shows the last user change's Saved
+// until that goes back to no text a few seconds later, and never shows Saving.
+function expectNoSavingShown(record) {
+  cy.get(saveIndicator).should($indicators => {
+    $indicators.each((_index, indicator) => {
+      expect(["", "Saved"]).to.include(Cypress.$(indicator).find(".save-indicator-text").text());
+    });
+  }).then(() => {
     expect(record.sawSaving, "the indicator showed Saving").to.equal(false);
   });
 }
@@ -127,9 +132,9 @@ context("Settled saves", function () {
       waitForEnvelope(isExact, "is exact").then(first => {
         cy.log("the ticks are saved without showing the saving indicator");
         cy.wait(1500);
-        expectSavedWithoutSaving(record);
+        expectNoSavingShown(record);
         cy.wait(1500);
-        expectSavedWithoutSaving(record);
+        expectNoSavingShown(record);
         waitForEnvelope(
           e => isExact(e) && exactIndex(e) >= exactIndex(first) + 3,
           "is exact at least three entries later"

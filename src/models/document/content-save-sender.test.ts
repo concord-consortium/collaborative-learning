@@ -300,7 +300,8 @@ describe("ContentSaveSender", () => {
       });
       contentRef.writes[0].resolve();
       await flush();
-      expect(document.saveState).toBe(SaveState.Saved);
+      // the load's catch-up holds no change of the user's, so the indicator stays idle
+      expect(document.saveState).toBe(SaveState.Idle);
       expect(document.savedEnvelope).toEqual(
         { lastHistoryEntryId: "caught-up", exactThrough: { index: 9, since: "e0" } });
     });
@@ -1088,6 +1089,52 @@ describe("ContentSaveSender", () => {
       contentRef.writes[1].resolve();
       await flush();
       expect(document.saveState).toBe(SaveState.Saved);
+    });
+
+    it("doesn't show Saved again for background-only saves once the indicator clears it", async () => {
+      const { commits, contentRef, document, edit, tick } = track(setup());
+      const a = await edit("alpha");
+      commits.commit(a);
+      contentRef.writes[0].resolve();
+      await flush();
+      expect(document.saveState).toBe(SaveState.Saved);
+      // as the save indicator does a while after showing Saved
+      document.setSaveState(SaveState.Idle);
+
+      const setSaveState = jest.spyOn(document, "setSaveState");
+      for (let i = 1; i <= 3; i++) {
+        const id = await tick(`tick-${i}`);
+        commits.commit(id);
+        jest.advanceTimersByTime(kBackgroundSaveGapMs);
+        expect(contentRef.update).toHaveBeenCalledTimes(i + 1);
+        contentRef.lastWrite.resolve();
+        await flush();
+      }
+      expect(setSaveState).not.toHaveBeenCalled();
+      expect(document.saveState).toBe(SaveState.Idle);
+    });
+
+    it("doesn't show Saved again for a group document's background-only changes once the indicator clears it",
+        async () => {
+      const { commits, contentRef, document, edit, tick } = track(setup({}, true));
+      const a = await edit("alpha");
+      commits.commit(a);
+      contentRef.writes[0].resolve();
+      await flush();
+      expect(document.saveState).toBe(SaveState.Saved);
+      document.setSaveState(SaveState.Idle);
+
+      const setSaveState = jest.spyOn(document, "setSaveState");
+      const b = await tick("bravo");
+      commits.commit(b);
+      jest.advanceTimersByTime(kBackgroundSaveGapMs);
+      contentRef.lastWrite.resolve();
+      await flush();
+      // another member's save reaches this client's entry
+      contentRef.fireEnvelope({ lastHistoryEntryId: b, exactThrough: { id: b, index: 2 } });
+      await flush();
+      expect(setSaveState).not.toHaveBeenCalled();
+      expect(document.saveState).toBe(SaveState.Idle);
     });
 
     it("shows Saved once a save covers the last user change while ticks continue", async () => {

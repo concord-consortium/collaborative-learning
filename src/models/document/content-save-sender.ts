@@ -582,9 +582,7 @@ export class ContentSaveSender {
     const envelope = this.envelopeEntry;
     const committed = this.lastCommittedLocal;
     if (!envelope || !committed || envelope.index < committed.index) return;
-    if (committed.changeSeq >= this.lastUserChangeSeq) {
-      this.setSaveState(SaveState.Saved);
-    }
+    this.showSavedIfCovered(committed.changeSeq);
     if (envelope.index > this.reportedIndex) {
       this.reportedIndex = envelope.index;
       this.reportContentSaved(envelope.id);
@@ -640,7 +638,7 @@ export class ContentSaveSender {
     if (this.savedSeq >= this.dirtySeq) return;
     this.savedSeq = this.dirtySeq;
     this.noExactSaveSince = undefined;
-    this.setSaveState(SaveState.Saved);
+    this.showSavedIfCovered(this.dirtySeq);
     this.checkDrained();
   }
 
@@ -992,9 +990,7 @@ export class ContentSaveSender {
     if (isNewest) {
       this.reportWrite(save);
     }
-    if (save.changeSeq >= this.lastUserChangeSeq) {
-      this.setSaveState(SaveState.Saved);
-    } else if (this.document.saveState === SaveState.Retrying) {
+    if (!this.showSavedIfCovered(save.changeSeq) && this.document.saveState === SaveState.Retrying) {
       this.setSaveState(SaveState.Saving);
     }
     this.scheduleWrite();
@@ -1073,6 +1069,20 @@ export class ContentSaveSender {
           this.sentTools = undefined;
         }
       });
+  }
+
+  /**
+   * Shows Saved when the indicator shows the user's changes as saving or retrying, and the content
+   * through changeSeq, which holds the user's last change, is saved. Otherwise a save of background
+   * changes would show Saved again each time the indicator clears it. Returns whether it showed Saved.
+   */
+  private showSavedIfCovered(changeSeq: number) {
+    const { saveState } = this.document;
+    if ((saveState !== SaveState.Saving && saveState !== SaveState.Retrying) || changeSeq < this.lastUserChangeSeq) {
+      return false;
+    }
+    this.setSaveState(SaveState.Saved);
+    return true;
   }
 
   // Each call is a document action, which the tree monitor records, so only call it on a change.
