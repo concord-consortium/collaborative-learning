@@ -108,12 +108,24 @@ function convertsLegacyTile(entry: HistoryEntryType, treeId: string, tilePath: s
       .some(patch => isAtOrUnder(patch.path, tilePath) && isLegacyDataflowPatch(patch)));
 }
 
+// The tile just before `entry`, taken from the entry's undo patches, when they set the whole tile
+// and it holds a legacy program, such as when the entry deletes the legacy tile.
+function getLegacyTileBefore(entry: HistoryEntryType, treeId: string, tilePath: string) {
+  const undoPatches = getEntryPatchesForTree(entry, treeId, HistoryOperation.Undo);
+  const tile: any = rebuildTileJson([undoPatches], tilePath, 0);
+  return isLegacyProgram(tile?.content?.program) ? tile : undefined;
+}
+
 /**
  * Puts a virtual conversion after each tile's last legacy entry. Load entries don't count as
  * legacy entries, although a load entry that converts a legacy tile has legacy patches. When the
  * next entry that touches the tile is a load entry that converts it from legacy, the history
  * records the conversion, and the tile needs no virtual conversion. A load entry from a later
  * schema change doesn't cover it.
+ *
+ * The tile's old JSON is rebuilt from its patches. When that fails, such as when the history
+ * doesn't hold the tile's add, it is taken from the next entry's undo patches if they set the
+ * legacy tile.
  */
 export const legacyDataflowHistoryBridge: IHistoryBridge = {
   findVirtualConversions(history: readonly HistoryEntryType[], treeId: string): IVirtualConversion[] {
@@ -132,15 +144,13 @@ export const legacyDataflowHistoryBridge: IHistoryBridge = {
     const conversions: IVirtualConversion[] = [];
     lastLegacyIndex.forEach((lastLegacy, tileId) => {
       const tilePath = `${kTileMapPath}/${tileId}`;
-      const next = patchesByEntry.findIndex((patches, index) =>
-        index > lastLegacy && patches.some(patch => isAtOrUnder(patch.path, tilePath)));
+      const next = patchesByEntry.findIndex((patches, index) => index > lastLegacy &&
+        patches.some(patch => isAtOrUnder(patch.path, tilePath) || isAbove(patch.path, tilePath)));
       const nextEntry = next >= 0 ? history[next] : undefined;
       if (nextEntry?.isLoadEntry && convertsLegacyTile(nextEntry, treeId, tilePath)) return;
-      conversions.push({
-        path: tilePath,
-        position: lastLegacy + 1,
-        oldJson: rebuildTileJson(patchesByEntry, tilePath, lastLegacy)
-      });
+      const oldJson = rebuildTileJson(patchesByEntry, tilePath, lastLegacy) ??
+        (nextEntry && getLegacyTileBefore(nextEntry, treeId, tilePath));
+      conversions.push({ path: tilePath, position: lastLegacy + 1, oldJson });
     });
     return conversions;
   }

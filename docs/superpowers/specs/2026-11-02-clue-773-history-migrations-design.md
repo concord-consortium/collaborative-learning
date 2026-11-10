@@ -444,8 +444,10 @@ copy (section 2) counts as coming after the stored history.
 - **The old state at the boundary.** The virtual conversion needs the tile's legacy JSON at the
   boundary, and the stored content only has the converted form. The bridge replays the tile's
   patches forward from the last entry that adds or replaces the whole tile, or a model holding it
-  such as the tile map. When there is no such entry, or a patch doesn't apply, the bridge can't
-  rebuild the tile, and playback stops at the boundary (section 7). A reverse conversion was
+  such as the tile map. When there is no such entry, or a patch doesn't apply, it takes the tile
+  from the undo patches of the next entry that touches the tile, when they put back the legacy tile,
+  as when that entry deletes it. Otherwise the bridge can't rebuild the tile, and playback stops at
+  the boundary (section 7). A reverse conversion was
   considered and not built: the forward conversion
   ([convert-legacy-dataflow.ts](../../../src/plugins/dataflow/model/convert-legacy-dataflow.ts))
   loses information (it drops node `data` fields, the output side of connections and the `values`

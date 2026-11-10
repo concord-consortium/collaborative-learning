@@ -77,6 +77,9 @@ const setNodeValue = () => makeEntry([{ op: "replace", path: kNodeValuePath, val
   [{ op: "replace", path: kNodeValuePath, value: 4 }]);
 const moveNode = () => makeEntry([{ op: "replace", path: kNodeXPath, value: 11 }], {}, kTreeId,
   [{ op: "replace", path: kNodeXPath, value: 10 }]);
+// Deletes t1, whose undo puts back `tile`.
+const deleteTile = (tile: any) => makeEntry([{ op: "remove", path: kTilePath }], {}, kTreeId,
+  [{ op: "add", path: kTilePath, value: tile }]);
 
 function findConversions(entries: HistoryEntrySnapshot[]) {
   const history = CDocument.create({ history: entries }).history;
@@ -210,6 +213,20 @@ describe("legacyDataflowHistoryBridge", () => {
     expect(findConversions([addWithNoValue, legacyValue(), currentMove()])[0].oldJson).toBeUndefined();
     const missingParent = makeEntry([{ op: "replace", path: `${kProgramPath}/values/9/currentValues/x`, value: 1 }]);
     expect(findConversions([addLegacyTile(), missingParent, currentMove()])[0].oldJson).toBeUndefined();
+  });
+
+  it("takes the legacy tile from the undo of the next entry when the history doesn't hold its add", () => {
+    const [deleted] = findConversions([setNodeValue(), deleteTile(legacyTileWithNode(5))]);
+    expect([deleted.position, deleted.oldJson]).toEqual([1, legacyTileWithNode(5)]);
+
+    const replaceTileMap = makeEntry([{ op: "replace", path: "/content/tileMap", value: {} }], {}, kTreeId,
+      [{ op: "replace", path: "/content/tileMap", value: { t1: legacyTileWithNode(5) } }]);
+    const [replaced] = findConversions([setNodeValue(), replaceTileMap]);
+    expect([replaced.position, replaced.oldJson]).toEqual([1, legacyTileWithNode(5)]);
+
+    // When the undo puts back a converted tile, the conversion came before the next entry.
+    const convertedTile = convertOldModelJsonAtPath(kTilePath, legacyTileWithNode(5));
+    expect(findConversions([setNodeValue(), deleteTile(convertedTile)])[0].oldJson).toBeUndefined();
   });
 
   it("ignores patches recorded for other trees", () => {
@@ -374,6 +391,20 @@ describe("playback of legacy DataFlow history", () => {
     manager.setChangeDocument(CDocument.create({ history: [loadEntry, setNodeValue()] }));
     manager.setLocalLoadEntry(loadEntry);
     expect(manager.virtualConversions.map(c => [c.path, c.position])).toEqual([[kTilePath, 2]]);
+  });
+
+  it("plays back to the start of a legacy tile with no add entry that was deleted", async () => {
+    const document = createDocument({});
+    const manager = document.treeManagerAPI as Instance<typeof TreeManager>;
+    const history = [setNodeValue(), deleteTile(legacyTileWithNode(5))];
+    manager.setChangeDocument(CDocument.create({ history }));
+    manager.setNumHistoryEntriesApplied(history.length);
+
+    await manager.goToHistoryEntryPosition(0);
+    expect(manager.historyPlaybackFailures).toEqual([]);
+    expect(manager.numHistoryEventsApplied).toBe(0);
+    expect(manager.oldestReachablePosition).toBeUndefined();
+    expect(getNodeValue(document)).toBe(4);
   });
 
   it("stops at the boundary of a tile with no add entry", async () => {
