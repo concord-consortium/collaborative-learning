@@ -68,7 +68,9 @@ so this table doubles as a migration-progress view.
 |---|---|---|---|---|
 | `content` | RTDB | all | `DocumentModel.content` | Yes — own + group |
 | `changeCount` | RTDB | all editable | `DocumentModel.changeCount` | No — local counter |
-| `lastHistoryEntryId` | RTDB | all editable | `DocumentModel.savedLastHistoryEntryId` (volatile) | No — read once |
+| `lastHistoryEntryId` | RTDB | all editable | `DocumentModel.savedEnvelope` (volatile) | No — kept by the client |
+| `exactThrough` | RTDB | all editable | `DocumentModel.savedEnvelope` (volatile) | No — kept by the client |
+| `notExact` | RTDB | individual documents | not surfaced | No |
 | `pubVersion` | RTDB | publications | `DocumentModel.pubVersion` | No |
 | `groupUserConnections` | RTDB | publication | `DocumentModel.groupUserConnections` — **never populated** | No |
 | `lastEditedAt` | RTDB | all editable | not surfaced | No |
@@ -146,10 +148,10 @@ should be aware the field can be stale.
 - **Location:** `documents/{key}.tools`
 - **Applies to:** all editable types
 - **Runtime:** `DocumentMetadataModel.tools`. No `DocumentModel` prop — it is derived from content.
-- **Updated by:** the content sync hook, which recomputes it from `content.tileTypes` (plus `"Sparrow"`
-  when an arrow annotation exists) and calls `updateFirestoreDocumentProp("tools", tools)` in the
-  content-save mutation of `useDocumentSyncToFirebase`
-  ([`use-document-sync-to-firebase.ts`](../../src/hooks/use-document-sync-to-firebase.ts))
+- **Updated by:** `ContentSaveSender` ([`content-save-sender.ts`](../../src/models/document/content-save-sender.ts)),
+  which computes it from the saved content with `getDocumentTools` (each tile type, plus `"Sparrow"`
+  when an arrow annotation exists) and sends it through `updateFirestoreDocumentProp("tools", tools)`
+  only when the list changes
 - **Reactive:** Yes, class-wide, via the Sort Work `onSnapshot`.
 
 Used to filter documents by the tile types they contain.
@@ -485,8 +487,8 @@ for the Firestore sourcing work.
 - **Stores:** RTDB only
 - **Location:** `/{classPath}/users/{uid}/documents/{key}/content` — a JSON **string**, not a tree
 - **Runtime:** `DocumentModel.content` (a `DocumentContentModel` tree)
-- **Updated by:** the content sync `onSnapshot` in `useDocumentSyncToFirebase`
-  ([`use-document-sync-to-firebase.ts`](../../src/hooks/use-document-sync-to-firebase.ts))
+- **Updated by:** `ContentSaveSender` ([`content-save-sender.ts`](../../src/models/document/content-save-sender.ts)),
+  which `useDocumentSyncToFirebase` creates for an editable document
 - **Reactive:** Yes — `db-docs-content-listener` applies remote content to the model for the user's own
   documents and, for students, their group's problem documents; teachers monitor all problem documents.
 
@@ -496,23 +498,56 @@ for the Firestore sourcing work.
 - **Location:** `/{classPath}/users/{uid}/documents/{key}/changeCount`
 - **Applies to:** all editable types
 - **Runtime:** `DocumentModel.changeCount`
-- **Updated by:** `incChangeCount()`, called from *inside* the content-write transform rather than
+- **Updated by:** `incChangeCount()`, called by `ContentSaveSender` as it builds each write rather than
   triggering a write of its own
 - **Reactive:** No. The content listener receives `changeCount` in the payload and discards it, applying
-  only `content`. Two clients viewing the same document will diverge in their counts.
+  only `content` and the history fields below. Two clients viewing the same document will diverge in
+  their counts.
 
 ### `lastHistoryEntryId`
 
 - **Stores:** RTDB only
 - **Location:** `/{classPath}/users/{uid}/documents/{key}/lastHistoryEntryId`
 - **Applies to:** editable documents with history; omitted for fresh documents and pre-feature saves
-- **Runtime:** `DocumentModel.savedLastHistoryEntryId` — **volatile**, not a persisted prop
-- **Updated by:** written conditionally as part of the content-write transform
-- **Reactive:** No — read exactly once at load time.
+- **Runtime:** `DocumentModel.savedEnvelope` — **volatile**, not a persisted prop
+- **Updated by:** every content save that knows an entry
+  ([`content-save-envelope.ts`](../../src/models/document/content-save-envelope.ts))
+- **Reactive:** No. The client keeps `savedEnvelope` as its saves leave the envelope, and the content
+  listener replaces it with the envelope its content came from.
 
-Records which history entry had been applied when a content snapshot was saved, so the history loader can
-detect drift between RTDB content and the Firestore history chain. See `lastHistoryEntry` above for the
-Firestore field with the confusingly similar name.
+The history entry the saved content is stamped with. It is exact only when `exactThrough` names it, and
+then the history loader catches the content up from it and checks it against the Firestore history chain.
+After an intermediate save it is a lower bound: the content can hold later entries. See
+`lastHistoryEntry` above for the Firestore field with the confusingly similar name.
+
+### `exactThrough`
+
+- **Stores:** RTDB only
+- **Location:** `/{classPath}/users/{uid}/documents/{key}/exactThrough`
+- **Applies to:** editable documents with history
+- **Runtime:** `DocumentModel.savedEnvelope.exactThrough` — **volatile**, holding only `index` and
+  `since`, and only when the stored field is trusted
+- **Updated by:** exact saves write it; intermediate saves clear it
+- **Reactive:** No — as `lastHistoryEntryId`.
+
+`{ id, index, contentHash, since }`: the content is exactly the history through entry `id`, at Firestore
+index `index`, and history recreates it from entry `since` (or `"first"`, the start of history).
+`contentHash` is `hashString` of the `content` string. A client that doesn't know the field saves with
+`update()` and leaves it in place, so `readSavedEnvelope` trusts it only while `id` is
+`lastHistoryEntryId` and `contentHash` matches `content`.
+
+### `notExact`
+
+- **Stores:** RTDB only
+- **Location:** `/{classPath}/users/{uid}/documents/{key}/notExact`
+- **Applies to:** individual documents (group documents make no intermediate saves)
+- **Runtime:** not surfaced
+- **Updated by:** intermediate saves write it; exact saves clear it
+- **Reactive:** No
+
+Evidence for debugging why an intermediate save's content may hold more than its `lastHistoryEntryId`
+describes: open entries, running flows, uncommitted entry ids, the reason the session stopped being exact,
+and when the stretch without an exact save began.
 
 ### `pubVersion`
 
@@ -608,8 +643,8 @@ Closing the loop from the other direction: these `DocumentModel` props are not p
 | `comments` | never populated at runtime | Legacy per-tile comments. `setTileComments` exists with no persistence path; real comments live in the Firestore `comments` subcollection. |
 | `groupUserConnections` | dropped in `openDocument` | See above — stored in RTDB but never reaches the model. |
 
-The volatile props (`treeMonitor`, `contentStatus`, `savedLastHistoryEntryId`, `saveState`, …) are
-runtime-only by construction and are not listed here.
+The volatile props (`treeMonitor`, `contentStatus`, `savedEnvelope`, `historyCatchUpPending`, `saveState`,
+…) are runtime-only by construction and are not listed here.
 
 Note also that `DocumentModel.metadata` — the view used to locate Firestore documents — exposes 12 props
 and omits 8, including `contextId`. It is cast to `IDocumentMetadata` despite being structurally

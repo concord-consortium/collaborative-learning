@@ -54,11 +54,19 @@ What follows:
 - Later deliveries skip entries already in local history, so the failed ones are never retried. Newer entries that build on them are applied over content missing their changes, and either fail too or land on the wrong state.
 - Until an apply succeeds, every upload transaction sees a head other than `expectedRemoteHead` and aborts. A member editing alone, with nobody else writing, never gets another delivery, so their later edits stay only in memory.
 - The tree keeps `applyingManagerPatches` set, so its tiles don't resync with shared-model changes until the next apply finishes.
-- The session stops being exact, so this client stops saving content. If the failing entry is in the chain, every member that loads the document fails on it, and no member saves content again.
+- The session stops being exact, so this client stops saving content, and a notice that can't be closed covers the document and asks for a reload. If the failing entry is in the chain, every member that loads the document fails on it, sees a notice asking them to tell their teacher, and no member saves content again.
 
 The failure is logged as `HISTORY_REMOTE_APPLY_FAILED`, which shows how often it happens.
 
 **Needed**: GD-19 should decide what happens to a delivered entry that fails to apply, and to the entries built on it. One direction is to apply and add entries one at a time, recording only those that applied, and to skip or quarantine a failing entry. The [background entries design](background-entries-design.md) already skips a failing patch in a background entry, and treats any apply failure in a user entry as a bug.
+
+## Saved Content at an Entry the History Doesn't Have
+
+Location: `firestore-history-manager-concurrent.ts:doApplyHistoryEntries()` (`saved-id-missing`)
+
+When the entry at the saved content's index isn't the saved entry, the content can't be described by the history, so the session isn't exact. Every later load has the same saved content, so no member's session is exact and no member saves content again. The document still loads and looks right, since entries are applied by index, and members see a notice they can close asking them to tell their teacher. It takes another writer to get here: a rolled-back entry whose content was saved, or the group upload race.
+
+**Needed**: a repair, such as letting a member whose load applied cleanly save its content stamped with the remote head, so later loads start exact again.
 
 ## Test Coverage Gaps
 

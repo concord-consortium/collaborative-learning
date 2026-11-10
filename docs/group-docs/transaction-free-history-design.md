@@ -333,7 +333,7 @@ Group documents are experimental, so it's acceptable that older clients can't re
 
 Once that release is broadly deployed, the migration can begin and set a new `documentSchemaVersion` on each migrated document. Old clients running the pre-deploy release fail loudly with a recognizable error; clients without the pre-deploy would corrupt silently, so the pre-deploy is a hard prerequisite.
 
-This prep is small but has lead time — it must be **deployed and broadly adopted** (not just merged) before this migration starts. It's called out from the [classroom-readiness doc](group-docs-classroom-readiness.md), the [GD-18 settled-state saves](group-docs-completed-work.md#gd-18-settled-state-document-saves-pr-3086--clue-751), and the [GD-19 plan section](group-docs-plan.md#gd-19-transaction-free-history) so it can be scheduled early.
+This prep is small but has lead time — it must be **deployed and broadly adopted** (not just merged) before this migration starts. It's called out from the [classroom-readiness doc](group-docs-classroom-readiness.md) and the [GD-19 plan section](group-docs-plan.md#gd-19-transaction-free-history) so it can be scheduled early.
 
 ### Interaction with the background channel
 

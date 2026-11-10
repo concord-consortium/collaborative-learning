@@ -97,7 +97,7 @@ Note that position `0` corresponds to no entry at all, so a position is not simp
 
 - `TreeManager.currentHistoryEntry` is `history[numHistoryEventsApplied - 1]`.
 - `logCurrentHistoryEvent` logs `historyEventId` alongside `historyIndex`, where the index is the position — so `historyIndex === indexOf(historyEventId) + 1`.
-- `revisionId` and the envelope's `lastHistoryEntryId` name the last entry the saved content includes.
+- `revisionId` names the last entry the document includes. The envelope's `lastHistoryEntryId` does too when its `exactThrough` names it; otherwise it is a lower bound, since an intermediate save's content can hold later entries.
 
 So restoring the moment an id names means seeking to `index + 1`, which is what `FirestoreHistoryManager.moveToHistoryEntryAfterLoad` does for a `studentDocumentHistoryId` link. The `"first"` sentinel that `logDocumentEvent` emits for a change made before the document had any entry is position `0`.
 
@@ -186,7 +186,9 @@ The load entry is not added to the history when the document loads. The TreeMana
 
 Concurrent documents (group and class-wide) are not converted this way. Their snapshot preprocessors convert them as MST loads them, and nothing is recorded.
 
-**A load entry is never applied to an MST tree.** Its patches are separate diffs in each direction rather than paired changes, and the live tree has already loaded the converted models. Undo and redo never reach one because it isn't undoable. Playback gives it no patches and crosses it with model replacements instead (see below). An individual document whose saved content is behind its history applies the missing entries when it loads (`TreeManager.applyEntriesAtLoad`). When the load converted old models, or a missing entry is a load entry, those entries are applied to the document's JSON as stored instead: the pending load entry is undone, the entries are applied with `applyJsonPatches`, and the result is set as the content (`DocumentModel.setContent`), which converts it again and rebuilds the pending load entry.
+**A load entry is never applied to an MST tree.** Its patches are separate diffs in each direction rather than paired changes, and the live tree has already loaded the converted models. Undo and redo never reach one because it isn't undoable. Playback gives it no patches and crosses it with model replacements instead (see below).
+
+An individual document whose envelope has `exactThrough` and is behind its history applies the missing entries, up to 200, when its owner opens it for editing (`TreeManager.applyEntriesAtLoad`). When the load converted old models, or a missing entry is a load entry, those entries are applied to the document's JSON as stored instead: the pending load entry is undone, the entries are applied with `applyJsonPatches`, and the result is set as the content (`DocumentModel.setContent`), which converts it again and rebuilds the pending load entry.
 
 ## Playback across conversions
 
