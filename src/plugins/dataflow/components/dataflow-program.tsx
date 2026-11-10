@@ -15,7 +15,6 @@ import { DocumentContextReact } from "../../../components/document/document-cont
 import { ITileProps } from "../../../components/tiles/tile-component";
 import { ObjectBoundingBox } from "../../../models/annotations/clue-object";
 
-import { recordCase } from "../model/utilities/recording-utilities";
 import { DataflowDropZone } from "./ui/dataflow-drop-zone";
 import { ReteManager } from "../rete/rete-manager";
 import { DeviceChoice, getDeviceConnection } from "../model/device-connection";
@@ -428,7 +427,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       if (tileContent.dataSet.cases.length >= tileContent.maxRecordableCases) {
         tileContent.stopRecording();
       } else {
-        recordCase(tileContent);
+        tileContent.recordTickCase();
       }
     }
     reteManager.updateSharedProgramData();

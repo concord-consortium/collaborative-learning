@@ -420,9 +420,6 @@ export class ReteManager implements INodeServices {
       // Reprocess when connections are changed
       editor.addPipe((context) => {
         if (["noderemoved", "connectioncreated", "connectionremoved"].includes(context.type)) {
-          // FIXME: Any changes to the state caused by these events should be combined
-          // into the history entry with the actual node removal, connection creation or removal
-          // In the meantime we wrap this in an action so it only creates one more history entry
           this.processAfterProgramChange();
         }
         return context;
@@ -1250,11 +1247,6 @@ export class ReteManager implements INodeServices {
     const id = uniqueId();
     const { editor } = this;
     const newPosition = position ?? this.getNewNodePosition();
-    // FIXME: because this is not a single synchronous MST transaction
-    // the nodeValue of the added node is updated by the process call
-    // down below. This means that any readOnly views will try to initialize
-    // the nodeValue. That isn't a problem it is just confusing. The bigger
-    // problem is that this results in two history events so undo is broken.
     this.mstProgram.addNodeSnapshot({
       id,
       name: nodeType,

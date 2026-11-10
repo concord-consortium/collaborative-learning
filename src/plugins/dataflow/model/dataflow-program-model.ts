@@ -11,7 +11,8 @@ import { kMaxNodeValues } from "./utilities/node";
 import { TransformNodeModel } from "../nodes/transform-node";
 import { TimerNodeModel } from "../nodes/timer-node";
 import { ControlNodeModel } from "../nodes/control-node";
-import { withoutUndo } from "../../../models/history/without-undo";
+import { asBackground, withoutUndo } from "../../../models/history/without-undo";
+import { getTileModel } from "../../../models/document/shared-model-document-manager";
 import { uniqueId } from "../../../utilities/js-utils";
 import { BaseNodeModel } from "../nodes/base-node";
 import { getNewIndexedName } from "../nodes/utilities/indexed-name";
@@ -241,6 +242,7 @@ export const DataflowProgramModel = types.
     // This could be generic, but a specific name is used so the recorded event has
     // a useful name.
     tickAndProcess(runner: () => void) {
+      asBackground({ producerTileId: getTileModel(self)?.id });
       runner();
       // We add the new tick after the data and onTick methods have been called
       // this way any changes triggered by user actions will get stored in the
@@ -252,11 +254,11 @@ export const DataflowProgramModel = types.
 
     // This action is called after a change in the Rete diagram.
     // When a node is added, or removed, and a connection is added or removed.
-    // FIXME: this will be recorded as a secondary history entry, so it will
-    // break undo. We don't call the program's processor.process directly so
+    // We don't call the program's processor.process directly so
     // that the rete manager has a chance to update the main processor if
     // the previous main processor has gone away.
     processAfterProgramChange(runner: () => void) {
+      asBackground({ producerTileId: getTileModel(self)?.id });
       runner();
     },
     setProcessor(processor: DataflowProcessor) {
