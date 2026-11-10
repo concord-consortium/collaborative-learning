@@ -293,7 +293,7 @@ exact save like any other. CLUE-760 adds two rules to it:
   content change (`handleContentChanged`), before the change's entry exists. A change made only by
   background calls doesn't set it, and "Saved" shows only when a save covering a user change
   completes. A failed save shows `Retrying` whatever it carried, because content not reaching the
-  database is something the student should know about. *My call.*
+  database is something the student should know about.
 - **Telling the two apart at a content change.** History entries are recorded asynchronously, so
   the change handler can't wait for `document.history`. The tree monitor already tracks the calls
   whose changes no entry holds yet (`getRunningCallsWithChanges`, `hasCallWithUnrecordedChanges`,
@@ -375,11 +375,11 @@ the background check covers them and that clause goes too.
 - The Simulator's `step` is flagged here, not in CLUE-761.
 - `processAfterProgramChange` is background, because it writes only what a tick writes. A follow-up
   entry that changes anything else is grouped into the user's action instead.
+- A failed background-only save still shows `Retrying`.
 
 ## My calls (check these)
 
 - A link marker is added here, as a single point; CLUE-635 adds ranges.
-- A failed background-only save still shows `Retrying`.
 - `producerTileId` is stored now. `producerId` and `runnerSessionId` are not.
 - An "earliest available" stop at the oldest reachable position, with the stops before it
   unavailable.
