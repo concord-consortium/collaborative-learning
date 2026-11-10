@@ -1,6 +1,6 @@
 import { IJsonPatch } from "mobx-state-tree";
 import { kTileMapPath, kTileSubtreePartsRegex } from "../../../models/document/document-paths";
-import { HistoryEntryType } from "../../../models/history/history";
+import { getEntryPatchesForTree, HistoryEntryType, HistoryOperation } from "../../../models/history/history";
 import { IHistoryBridge, IVirtualConversion } from "../../../models/history/history-bridges";
 import { applyJsonPatches, getJsonAtPath, JsonPatchError } from "../../../models/history/json-patch";
 import { getDataflowProgramVersion, STATE_VERSION_RETE_V1 } from "./dataflow-state-versions";
@@ -47,10 +47,6 @@ export function isLegacyDataflowPatch(patch: IJsonPatch): boolean {
   if (nodesIndex < 0 || nodesIndex + 1 >= segments.length) return false;
   if (/^\d+$/.test(segments[nodesIndex + 1])) return true;
   return segments.slice(nodesIndex + 2).some(segment => segment === "inputs" || segment === "outputs");
-}
-
-function getForwardPatches(entry: HistoryEntryType, treeId: string): readonly IJsonPatch[] {
-  return entry.records.filter(record => record.tree === treeId).flatMap(record => record.patches);
 }
 
 function isAtOrUnder(path: string, modelPath: string) {
@@ -103,15 +99,25 @@ function rebuildTileJson(
   return getJsonAtPath(documentJson, tilePath);
 }
 
+// True when a load entry converts the tile from legacy: its forward or inverse patches on the tile
+// include a legacy patch. A conversion of a legacy program with no nodes and no `values` map has
+// a legacy patch only in its inverse, which sets the legacy program id back.
+function convertsLegacyTile(entry: HistoryEntryType, treeId: string, tilePath: string) {
+  return [HistoryOperation.Redo, HistoryOperation.Undo].some(opType =>
+    getEntryPatchesForTree(entry, treeId, opType)
+      .some(patch => isAtOrUnder(patch.path, tilePath) && isLegacyDataflowPatch(patch)));
+}
+
 /**
  * Puts a virtual conversion after each tile's last legacy entry. Load entries don't count as
  * legacy entries, although a load entry that converts a legacy tile has legacy patches. When the
- * next entry that touches the tile is a load entry, the history records the conversion, and the
- * tile needs no virtual conversion.
+ * next entry that touches the tile is a load entry that converts it from legacy, the history
+ * records the conversion, and the tile needs no virtual conversion. A load entry from a later
+ * schema change doesn't cover it.
  */
 export const legacyDataflowHistoryBridge: IHistoryBridge = {
   findVirtualConversions(history: readonly HistoryEntryType[], treeId: string): IVirtualConversion[] {
-    const patchesByEntry = history.map(entry => getForwardPatches(entry, treeId));
+    const patchesByEntry = history.map(entry => getEntryPatchesForTree(entry, treeId, HistoryOperation.Redo));
 
     const lastLegacyIndex = new Map<string, number>();
     patchesByEntry.forEach((patches, index) => {
@@ -128,7 +134,8 @@ export const legacyDataflowHistoryBridge: IHistoryBridge = {
       const tilePath = `${kTileMapPath}/${tileId}`;
       const next = patchesByEntry.findIndex((patches, index) =>
         index > lastLegacy && patches.some(patch => isAtOrUnder(patch.path, tilePath)));
-      if (next >= 0 && history[next].isLoadEntry) return;
+      const nextEntry = next >= 0 ? history[next] : undefined;
+      if (nextEntry?.isLoadEntry && convertsLegacyTile(nextEntry, treeId, tilePath)) return;
       conversions.push({
         path: tilePath,
         position: lastLegacy + 1,

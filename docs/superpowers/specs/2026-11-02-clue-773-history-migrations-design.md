@@ -431,7 +431,9 @@ copy (section 2) counts as coming after the stored history.
   `program/nodes/<n>`, legacy `inputs` / `outputs` connection paths, a program, content or tile
   value holding a legacy program, or the legacy `program/id` set. Load entries don't count: one that
   converts a legacy tile has legacy patches. When the next entry that touches the tile is a load
-  entry, the history records the conversion, and the tile needs no virtual conversion. In the study,
+  entry with a legacy patch on the tile, forward or inverse, the history records the conversion, and
+  the tile needs no virtual conversion. A load entry from a later DataFlow schema change has none,
+  so it doesn't hide the legacy conversion before it. In the study,
   legacy patches outside `setProgram` come only from undo, redo and tile copies, but the check is by
   path, not by action.
 - **A legacy program with no id.** Many legacy tiles were added with a program that has a `values`

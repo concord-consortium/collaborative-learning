@@ -20,6 +20,7 @@ const kTreeId = "doc1";
 const kTilePath = "/content/tileMap/t1";
 const kProgramPath = `${kTilePath}/content/program`;
 const kLegacyProgram = { id: "dataflow@0.1.0", nodes: {}, values: {} };
+const kLegacyProgramIdOnly = { id: "dataflow@0.1.0", nodes: {} };
 
 interface IFixture {
   content: any;
@@ -226,11 +227,26 @@ describe("legacyDataflowHistoryBridge", () => {
     expect(conversions.map(c => c.path)).toEqual(["/content/tileMap/t2"]);
   });
 
+  it("skips a tile whose load entry has a legacy patch only in its inverse", () => {
+    // Converting a legacy program with no nodes and no values map changes only its id.
+    const loadEntry = buildTileLoadEntry({ id: "t1", content: { type: "Dataflow", program: kLegacyProgramIdOnly } });
+    const [record] = loadEntry.records!;
+    expect(record.patches!.some(patch => isLegacyDataflowPatch(patch as IJsonPatch))).toBe(false);
+    expect(record.inversePatches!.some(patch => isLegacyDataflowPatch(patch as IJsonPatch))).toBe(true);
+    expect(findConversions([addLegacyTile(), legacyValue(), loadEntry])).toEqual([]);
+  });
+
+  // A later schema change converts the tile again.
+  const laterLoadEntry = () => makeEntry([{ op: "add", path: `${kTilePath}/content/programZoom`, value: {} }],
+    { isLoadEntry: true, undoable: false });
+
   it("keeps the conversion of a tile that a current entry changes before a later load entry", () => {
-    // A later schema change converts the tile again.
-    const laterLoadEntry = makeEntry([{ op: "add", path: `${kTilePath}/content/programZoom`, value: {} }],
-      { isLoadEntry: true, undoable: false });
-    const conversions = findConversions([addLegacyTile(), legacyValue(), currentMove(), laterLoadEntry]);
+    const conversions = findConversions([addLegacyTile(), legacyValue(), currentMove(), laterLoadEntry()]);
+    expect(conversions.map(c => [c.path, c.position])).toEqual([[kTilePath, 2]]);
+  });
+
+  it("keeps the conversion of a legacy tile whose next entry is a later schema change's load entry", () => {
+    const conversions = findConversions([addLegacyTile(), legacyValue(), laterLoadEntry()]);
     expect(conversions.map(c => [c.path, c.position])).toEqual([[kTilePath, 2]]);
   });
 });
