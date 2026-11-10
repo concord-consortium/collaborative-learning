@@ -28,7 +28,7 @@ function readEnvelope() {
 }
 
 // Whether the envelope's exactThrough describes its id: the content is exactly the history.
-const isExact = envelope => envelope.exactThrough?.id === envelope.lastHistoryEntryId;
+const isExact = envelope => !!envelope?.exactThrough && envelope.exactThrough.id === envelope.lastHistoryEntryId;
 const exactIndex = envelope => envelope.exactThrough.index;
 
 // Polls the envelope until `predicate` holds, with a bounded number of retries.
@@ -93,14 +93,14 @@ context("Settled saves", function () {
     dataflowToolTile.getCreateNodeButton("generator").click();
     dataflowToolTile.getNode("generator").should("exist");
 
+    // The baseline is taken once the node exists, so adding it can't account for the later entries.
+    // The program ticks once a second, and each tick is an entry.
     waitForEnvelope(isExact, "is exact").then(first => {
       cy.wait(3000);
       waitForEnvelope(
-        e => isExact(e) && e.lastHistoryEntryId !== first.lastHistoryEntryId,
-        "is exact at a later entry"
-      ).then(second => {
-        expect(exactIndex(second)).to.be.greaterThan(exactIndex(first));
-      });
+        e => isExact(e) && exactIndex(e) >= exactIndex(first) + 3,
+        "is exact at least three entries later"
+      );
     });
   });
 });
