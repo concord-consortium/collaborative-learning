@@ -28,9 +28,9 @@ const makeDocument = (type = "problem", uid = "7") =>
   createDocumentModel({ type: type as any, key: nanoid(), uid, content: {} });
 
 const addEntry = (document: DocumentModelType, model = "TextContent",
-                  action = "/content/tileMap/t/content/setText", isLoadEntry?: boolean) => {
+                  action = "/content/tileMap/t/content/setText", isLoadEntry?: boolean, background?: boolean) => {
   const entry = HistoryEntry.create({
-    id: nanoid(), tree: document.key, model, action, isLoadEntry, state: "complete"
+    id: nanoid(), tree: document.key, model, action, isLoadEntry, background, state: "complete"
   });
   (document.treeManagerAPI as TreeManagerType).addHistoryEntryAfterApplying(entry);
   return entry;
@@ -68,11 +68,11 @@ describe("ActivityRecorder", () => {
     jest.useRealTimers();
   });
 
-  it("writes nothing for a Simulator or DataFlow tick", async () => {
+  it("writes nothing for a background entry", async () => {
     recorder = new ActivityRecorder(makeStores());
     const doc = makeDocument();
-    const tick = addEntry(doc, "SimulatorTool", "/content/tileMap/s/content/step");
-    const df = addEntry(doc, "DataflowProgram", "/content/tileMap/d/content/program/tickAndProcess");
+    const tick = addEntry(doc, "SimulatorTool", "/content/tileMap/s/content/step", undefined, true);
+    const df = addEntry(doc, "DataflowProgram", "/content/tileMap/d/content/program/tickAndProcess", undefined, true);
     recorder.onLocalEntryUploaded(doc, tick);
     recorder.onLocalEntryUploaded(doc, df);
     recorder.onContentSaved(doc, df.id);
@@ -81,10 +81,20 @@ describe("ActivityRecorder", () => {
     expect(mockSet).not.toHaveBeenCalled();
   });
 
+  it("records an entry by its flag, not its action name", async () => {
+    recorder = new ActivityRecorder(makeStores());
+    const doc = makeDocument();
+    const entry = addEntry(doc, "DataflowProgram", "/content/tileMap/d/content/program/tickAndProcess");
+    recorder.onLocalEntryUploaded(doc, entry);
+    recorder.onContentSaved(doc, entry.id);
+    await flush();
+    expect(mockSet).toHaveBeenCalledTimes(1);
+  });
+
   it("writes nothing for a load entry", async () => {
     recorder = new ActivityRecorder(makeStores());
     const doc = makeDocument();
-    const load = addEntry(doc, "DocumentContent", "/loadContent", true);
+    const load = addEntry(doc, "DocumentContent", "/loadContent", true, true);
     recorder.onLocalEntryUploaded(doc, load);
     recorder.onContentSaved(doc, load.id);
     jest.advanceTimersByTime(kActivitySaveTimeoutMs * 2);
