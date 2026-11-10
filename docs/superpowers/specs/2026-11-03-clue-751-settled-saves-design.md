@@ -59,6 +59,8 @@ found more problems in how saves are sent:
   program at 20 Hz, on individual and group documents.
 - **An individual document's content keeps being saved even when its history can't settle.**
 - **An individual document loaded behind its history catches up when it is opened for editing.**
+- **Playback opens at the newest entry, with content that holds it**, for a teacher's or other
+  viewer's copy of an individual document too.
 - **A tree-manager exchange can't hold an entry open forever.**
 - **Saves are sent one at a time, always newest-wins, with visible failure.**
 - **Group documents make fewer redundant saves**, per the GD-18 design.
@@ -72,7 +74,6 @@ found more problems in how saves are sent:
 - **One save and load mechanism for every document.** CLUE-788 section 3. CLUE-751 writes its rules
   so they carry over (section 2 below).
 - **The race in the group-document upload path.** See "Known gaps". It is left to GD-19.
-- **Starting playback from the saved id.** CLUE-773's follow-up does that.
 - **Timing out running MST flows, and a keep-alive API.** Only tree-manager exchanges time out
   (section 4).
 - **Ordered retries of failed individual-document uploads.** See "Known gaps".
@@ -299,6 +300,24 @@ toolbar that ignores clicks. A gap over the cap doesn't wait.
 
 If an entry fails to apply, the document opens with what applied, and the session is not exact. The
 failure is logged.
+
+**Playback of content behind its history.** Playback builds its copy from the live document and
+used to assume that content held every entry in Firestore. A viewer's copy is never caught up, and
+neither is the owner's before it is opened for editing, so scrubbing back undid entries the content
+never had. Now the playback copy starts where the live document's content actually is, and is moved
+forward to the newest entry before the history viewer shows its controls, so a teacher opening it
+sees the student's latest state. The content's position is:
+
+- after the last entry the catch-up applied, while the content is still the one the catch-up started
+  from;
+- otherwise after the envelope's entry, when the envelope has a trusted `exactThrough`;
+- otherwise unknown, and playback assumes the newest entry, as before. That covers an unmarked
+  envelope, group documents, which follow their history live, and a document this session has
+  recorded entries in.
+
+If an entry fails to apply on the way forward, playback opens at the last position it reached, with
+the failure marked as for any other move. While the copy moves forward, the history viewer says it is
+loading the latest changes.
 
 **Whether a load is exact.** A load is exact when the envelope had a trusted `exactThrough` and any
 missing entries applied cleanly. Then its `since` carries forward. An unmarked envelope at Firestore's last
@@ -556,6 +575,8 @@ document) is written up by CLUE-788.
 - Individual documents apply missing entries when the owner opens them for editing, only from an
   envelope with a trusted `exactThrough`; a failure leaves the session not exact. The caught-up
   content is saved as soon as the sender starts.
+- Playback starts its copy where the live document's content is and moves it forward to the newest
+  entry before showing the slider, so a viewer of content behind its history sees the latest state.
 - The catch-up fetches only the missing entries, using `exactThrough`'s index. A gap of more than 200
   entries isn't fetched, and the session is not exact.
 - A group document whose session stops being exact shows a notice over the document, chosen by the
@@ -640,6 +661,11 @@ These were left to the builder in the design.
 - **Load of converted content:** the missing entries are applied to the stored JSON when the load
   converted old models, or when the gap holds a load entry even though the load converted nothing.
 - **Initial load (group):** an exact envelope's id sets where remote entries start applying.
+- **Playback start:** a copy whose content is behind the newest entry starts at the content's
+  position and is moved to the newest entry before the history counts as loaded; an entry that fails
+  leaves it at the last position reached. The content's position comes from the catch-up while the
+  content is the one it started from, then from a trusted `exactThrough`, and is unknown for an
+  unmarked envelope, a group document, or a document with entries from this session.
 - **Timeout:** an entry whose exchanges stay open past the timeout is force-completed and marked, a
   late record becomes a new entry, and later saves are not exact. An entry that completes in time
   isn't timed out.
