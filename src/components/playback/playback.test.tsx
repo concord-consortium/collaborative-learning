@@ -1,5 +1,5 @@
 import React from "react";
-import { act, render, screen } from "@testing-library/react";
+import { act, fireEvent, render, screen } from "@testing-library/react";
 import { Instance } from "mobx-state-tree";
 import { Firestore } from "../../lib/firestore";
 import { UserContextProvider } from "../../models/stores/user-context-provider";
@@ -8,6 +8,7 @@ import { DocumentContentModel } from "../../models/document/document-content";
 import { ProblemDocument } from "../../models/document/document-types";
 import { CDocument, TreeManager } from "../../models/history/tree-manager";
 import { FirestoreHistoryManager, HistoryStatus } from "../../models/history/firestore-history-manager";
+import { IVirtualConversion, registerHistoryBridge } from "../../models/history/history-bridges";
 import { PlaybackComponent } from "./playback";
 
 // PlaybackComponent renders PlaybackControlComponent once the history has loaded, so the
@@ -33,6 +34,11 @@ jest.mock("../../hooks/document-comment-hooks", () => ({
 jest.mock("../../hooks/use-nav-tab-panel-info", () => ({
   useNavTabPanelInfo: () => ({ setPlaybackTime: jest.fn() })
 }));
+
+// The conversions the test bridge reports, standing in for a legacy tile whose old state can't
+// be rebuilt. A test sets them before building its document.
+let mockVirtualConversions: IVirtualConversion[] = [];
+registerHistoryBridge({ findVirtualConversions: () => mockVirtualConversions });
 
 function setupDocument() {
   const docModel = createDocumentModel({
@@ -131,6 +137,36 @@ describe("PlaybackComponent", () => {
       treeManager.setNumHistoryEntriesApplied(0);
     });
     expect(region).toBeEmptyDOMElement();
+  });
+
+  it("explains why the slider goes no further back than the earliest available stop", async () => {
+    // Entries 1 and 2 are background, and the history before position 3 can't be rebuilt.
+    mockVirtualConversions = [{ position: 3, oldJson: undefined, path: "/content/tileMap/t1" }];
+    const docModel = setupDocument();
+    const treeManager = docModel.treeManagerAPI as Instance<typeof TreeManager>;
+    treeManager.setChangeDocument(CDocument.create({
+      history: [0, 1, 2, 3, 4].map(index => ({
+        id: `entry-${index}`, tree: "test", state: "complete" as const, records: [],
+        ...([1, 2].includes(index) ? { background: true } : {})
+      }))
+    }));
+    treeManager.setNumHistoryEntriesApplied(5);
+    try {
+      render(<PlaybackComponent document={docModel} historyManager={makeHistoryManager()}
+                requestedHistoryId={undefined} />);
+      const region = screen.getByTestId("playback-history-unavailable");
+      expect(region).toBeEmptyDOMElement();
+
+      // Home asks for the initial stop, which is before the earliest available one.
+      await act(async () => {
+        fireEvent.keyDown(screen.getByRole("slider"), { key: "Home", keyCode: 36 });
+      });
+
+      expect(treeManager.numHistoryEventsApplied).toBe(3);
+      expect(region).toHaveTextContent("Earlier history isn't available.");
+    } finally {
+      mockVirtualConversions = [];
+    }
   });
 
   it("says nothing when there is no request error", () => {

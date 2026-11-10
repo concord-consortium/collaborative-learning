@@ -333,16 +333,9 @@ export class PlaybackControlModel {
     return index === undefined ? undefined : this.railLocation(index);
   }
 
-  /**
-   * The oldest position playback can reach. The history bridges know where they can't rebuild
-   * the old state before any seek gets there, and a seek that stops short records where it found
-   * the boundary, so this is the later of the two.
-   */
+  // The oldest position playback can reach, which the tree manager works out.
   get earliestReachablePosition(): number {
-    const unrebuildable = this.treeManager.virtualConversions
-      .filter(conversion => conversion.oldJson === undefined)
-      .map(conversion => conversion.position);
-    return Math.max(this.treeManager.oldestReachablePosition ?? 0, ...unrebuildable);
+    return this.treeManager.earliestReachablePosition;
   }
 
   // The first stop the slider can move onto. The stops before it can't be reached.

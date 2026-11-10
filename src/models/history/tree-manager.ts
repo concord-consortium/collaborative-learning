@@ -356,6 +356,18 @@ export const TreeManager = types
     return self.undoStore;
   },
 
+  /**
+   * The oldest position playback can reach. The history bridges know where they can't rebuild
+   * the old state before any seek gets there, and a seek that stops short records where it found
+   * the boundary, so this is the later of the two. 0 when all of the history can be reached.
+   */
+  get earliestReachablePosition(): number {
+    const unrebuildable = self.virtualConversions
+      .filter(conversion => conversion.oldJson === undefined)
+      .map(conversion => conversion.position);
+    return Math.max(self.oldestReachablePosition ?? 0, ...unrebuildable);
+  },
+
   findHistoryEntryIndex(historyEntryId: string) {
     return self.document.history.findIndex(entry => entry.id === historyEntryId);
   },

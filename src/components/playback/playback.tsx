@@ -41,9 +41,11 @@ export const PlaybackComponent: React.FC<IProps> = observer((props: IProps) => {
       </div>;
 
   const historyEntryRequestError = historyManager?.historyEntryRequestError;
-  const oldestReachablePosition = treeManager?.oldestReachablePosition;
-  const atOldestReachablePosition = oldestReachablePosition !== undefined &&
-    treeManager.numHistoryEventsApplied === oldestReachablePosition;
+  // The slider keeps the reader from going back past this position, so being there is the
+  // moment to say why.
+  const earliestReachablePosition = treeManager?.earliestReachablePosition ?? 0;
+  const atOldestReachablePosition = earliestReachablePosition > 0 &&
+    treeManager.numHistoryEventsApplied === earliestReachablePosition;
 
 return (
     <div className={playbackComponentClass} data-testid="playback-component">
@@ -55,8 +57,8 @@ return (
           role="alert">
         {historyEntryRequestError}
       </div>
-      {/* Rendered from the start for the same reason. A backward seek stops here without a failure
-          because the history before this point can't be rebuilt. */}
+      {/* Rendered from the start for the same reason. The history before this point can't be
+          rebuilt, so the slider goes no further back. */}
       <div className="playback-history-unavailable" data-testid="playback-history-unavailable"
           role="status">
         {atOldestReachablePosition && "Earlier history isn't available."}
