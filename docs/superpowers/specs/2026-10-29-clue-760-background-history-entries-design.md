@@ -1,8 +1,8 @@
 # CLUE-760: Background history entries for DataFlow
 
-Status: design approved, 2026-11-02; updated 2026-11-04 for the CLUE-773 implementation (#3079,
-#3080, #3081). Implementation builds on that stack and merges after it. CLUE-751 is not required
-first; the rough edge it removes is noted in section 4.
+Status: design approved, 2026-11-02; updated 2026-11-04 for the CLUE-773 implementation and
+2026-11-10 for the CLUE-751 implementation. CLUE-773's #3079 and #3080 are on master. CLUE-760 is
+built on CLUE-773's #3081 and CLUE-751's #3086, and merges after both.
 
 ## Why
 
@@ -80,9 +80,9 @@ same flag.
 - **Viewers must not lose live values.** A teacher watching a running program still sees its
   values, at most a few seconds behind.
 - **Playback must not get noticeably worse.** Saving less often can leave the saved content
-  further behind history when a document closes. CLUE-760 narrows that by flushing. The full fix
-  is CLUE-751 plus a later story that changes where playback starts (see "A known risk" in
-  section 4).
+  further behind history. CLUE-751's load catch-up and its saves on the way out cover the owner's
+  document. The full fix is a later story that starts playback from CLUE-751's exact id (see "A
+  known risk" in section 4).
 
 ## Design
 
@@ -110,12 +110,13 @@ entries written before these changes. CLUE-760 adds one optional field:
 GD-20's other fields (`producerId`, `runnerSessionId`) wait for the runner lock. Old clients ignore
 the new fields: MST drops snapshot properties a model doesn't define.
 
-**Not every background entry comes from `asBackground()`.** CLUE-773's conversion entry, which
-records old tiles being converted to the current format at load, is built directly
-(`buildConversionEntry` in [schema-conversion.ts](../../../src/models/history/schema-conversion.ts))
-with `background: true` and no `producerTileId`, because it belongs to the document rather than one
-tile. So `producerTileId` stays optional, and code that reads the flag (playback, the save hook,
-the activity recorder) reads `background` and never assumes a producer.
+**Not every background entry comes from `asBackground()`.** CLUE-773's load entry, which records the
+changes CLUE makes to the stored content while loading it (such as converting old tiles to their
+current format), is built directly (`buildLoadEntry` in
+[schema-conversion.ts](../../../src/models/history/schema-conversion.ts)) with `isLoadEntry: true`,
+`background: true` and no `producerTileId`, because it belongs to the document rather than one tile.
+So `producerTileId` stays optional, and code that reads the flag (playback, the save sender, the
+activity recorder) reads `background` and never assumes a producer.
 
 Shared-model follow-up records join the same entry, so a tick's changes to linked shared models are
 covered by the entry's flag.
@@ -250,40 +251,55 @@ In [playback-control-model.ts](../../../src/components/playback/playback-control
 
 ### 4. Saving
 
-In [use-document-sync-to-firebase.ts](../../../src/hooks/use-document-sync-to-firebase.ts):
+CLUE-751 replaces the save hook's throttle with `ContentSaveSender`
+([content-save-sender.ts](../../../src/models/document/content-save-sender.ts)), and its design
+leaves the background-only rate and indicator rule to CLUE-760. The sender saves the content
+snapshot kept when each local entry completed, once that entry commits, so a tick-only save is an
+exact save like any other. CLUE-760 adds two rules to it:
 
-- **Two rates.** A save goes out within 1 second of a user change, as today. When everything since
-  the last save is background, it goes out within 3 seconds. Each save sends the latest snapshot,
-  so a user change during a slow wait just makes the pending save go out sooner.
-- **The indicator follows user changes only.** A background-only snapshot doesn't set
-  `SaveState.Saving`, and "Saved" shows only when a save covering a user change completes. A failed
-  save shows `Retrying` whatever it carried, because content not reaching the database is something
-  the student should know about. *My call.*
-- **Telling the two apart.** The hook needs to know, when a snapshot arrives, whether its changes
-  came only from background actions. History entries are recorded asynchronously, so it can't wait
-  for `document.history`. The tree monitor knows at `onFinish` whether the call was background. Have
-  it keep a synchronous flag that the snapshot handler reads and clears. Check that `onFinish` runs
-  before MST emits the snapshot.
-- **Flush on the way out.** When the document unmounts or the page hides, send a pending save right
-  away. A slower rate otherwise risks losing the last seconds of values when the student closes the
-  document.
+- **Two rates.** The sender takes the gap per save (`getMinimumGapMs`). A save goes out within 1
+  second of a user change, as today. When every entry the save covers since the last completed save
+  is background, the gap is 3 seconds. An exact save knows the entries it covers, because it is
+  built from a committed entry. The sender always sends the newest save, so a user change during a
+  slow wait just makes the pending save go out sooner. Intermediate saves keep CLUE-751's 5-second
+  cadence.
+- **The indicator follows user changes only.** The sender sets `SaveState.Saving` on every local
+  content change (`handleContentChanged`), before the change's entry exists. A change made only by
+  background calls doesn't set it, and "Saved" shows only when a save covering a user change
+  completes. A failed save shows `Retrying` whatever it carried, because content not reaching the
+  database is something the student should know about. *My call.*
+- **Telling the two apart at a content change.** History entries are recorded asynchronously, so
+  the change handler can't wait for `document.history`. The tree monitor already tracks the calls
+  whose changes no entry holds yet (`getRunningCallsWithChanges`, `hasCallWithUnrecordedChanges`,
+  added by CLUE-751). Have it also answer whether all of those calls are background. Check whether a
+  synchronous tick's call is still tracked when the handler runs, or has moved to the finished
+  calls whose records haven't reached the manager, and cover both.
 
-**A known risk: content behind history.** Playback assumes the saved content includes every entry in
-Firestore. `setNumHistoryEntriesAppliedFromFirestore` ([tree-manager.ts](../../../src/models/history/tree-manager.ts))
-sets the position to the last entry's index + 1. If the content was saved before the last few ticks,
-scrubbing back undoes ticks the content never had, and fails. For example, the inverse of adding a
-tick entry is removing a key that isn't there. This can already happen within today's 1-second
-throttle. A 3-second rate makes the window wider, and flushing on the way out narrows it again, but
-a flush can't be relied on when a tab closes.
+**The way out is CLUE-751's.** When the hook unmounts, the sender keeps going for up to 30 seconds
+until an exact save covers the latest change. On `pagehide`, an individual document sends its newest
+usable committed snapshot at once, skipping the gap. Both apply to the 3-second gap too, so CLUE-760
+adds no flush of its own.
 
-CLUE-760 accepts this risk. Starting playback from the content's `lastHistoryEntryId` doesn't fix it
-yet: that id can be behind the content (the save stamps the latest entry that existed when the
-snapshot was taken, not the snapshot's own entry), and the playback copy doesn't carry it. CLUE-751
-makes the id exact, and a later story then changes where playback starts. CLUE-773 doesn't change
-it: its JSON copy starts from the saved content, as playback does.
+**A known risk: content behind history.** Playback assumes the content it starts from includes every
+entry in Firestore: `setNumHistoryEntriesAppliedFromFirestore`
+([tree-manager.ts](../../../src/models/history/tree-manager.ts)) sets the position to the last entry's
+index + 1. If the content is missing the last few ticks, scrubbing back undoes ticks it never had,
+and fails. For example, the inverse of adding a tick entry is removing a key that isn't there.
 
-CLUE-751 (save only when history is settled) reworks the same hook. Whichever lands second builds on
-the other. A tick-only save is still a save of a settled state, because ticks are synchronous.
+CLUE-751 narrows this but doesn't close it:
+
+- **The owner's document catches up at load.** Loaded from an exact save that is behind its history,
+  it applies the missing entries, up to 200 (`kCatchUpMaxEntries` in
+  [load-catch-up.ts](../../../src/models/history/load-catch-up.ts)). At a 3-second gap and 20 Hz, the
+  usual gap is about 60 entries. Playback builds its copy from the live document, so the owner's
+  playback starts from content that includes every entry.
+- **Another viewer's document doesn't catch up.** A teacher's or researcher's copy of the content
+  can be behind history by up to the save gap, which is now 3 seconds while only ticks change, so
+  their playback can still fail on the last few ticks.
+
+CLUE-760 accepts the remaining risk. CLUE-751 makes the content's `lastHistoryEntryId` exact, and a
+later story starts playback from it. CLUE-773 doesn't change where playback starts: its JSON copy
+starts from the saved content, as playback does.
 
 ### 5. Activity recorder
 
@@ -294,16 +310,17 @@ sees entries this client just wrote, which always carry the flag, so it doesn't 
 Recorded cases stop counting as activity (see section 1). A student who starts a recording and walks
 away no longer shows as active.
 
-So do CLUE-773's conversion entries. They are uploaded through the same path, and `isTickEntry`
-doesn't match them, so today one counts as activity when it is flushed. With a running DataFlow
-tile, the first tick flushes it, so opening an old document logs activity the student didn't cause.
+CLUE-773 already makes the recorder skip load entries (`entry.isLoadEntry`), which a tick can flush
+into history when an old document opens with a running DataFlow tile. Load entries carry
+`background: true`, so the background check covers them and that clause goes too.
 
 ## Related work
 
-- **CLUE-773:** playback across tile format changes: conversion entries, the JSON copy that crosses
-  them, and the legacy DataFlow bridge. It adds the `background` field and the oldest reachable
-  position this design builds on.
-- **CLUE-751 / GD-18:** settled-state saves. Same save hook.
+- **CLUE-773:** playback across tile format changes: load entries, the JSON copy that crosses them,
+  and the legacy DataFlow bridge. It adds the `background` field and the oldest reachable position
+  this design builds on.
+- **CLUE-751 / GD-18:** settled-state saves. Its `ContentSaveSender` takes the background-only gap
+  and indicator rule from section 4, and its load catch-up narrows the content-behind-history risk.
 - **GD-19 / GD-20:** the group-document side of background entries. This change is GD-20's tagging
   phase plus a simple version of its scrubber phase, without the lock or the conflict rule.
 - **CLUE-761:** Simulator history replay.
@@ -343,7 +360,7 @@ tile, the first tick flushes it, so opening an old document logs activity the st
 ## Left to the builder
 
 - The exact legacy rule, checked against the study data as described above.
-- How the tree monitor exposes "this snapshot was background-only" to the save hook.
+- How the tree monitor tells the save sender that a content change was background-only.
 - The migration script's batching, resume and cost estimate.
 - Whether `asBackground()` checks in development that `producerTileId` names a real tile.
 
@@ -358,15 +375,20 @@ tile, the first tick flushes it, so opening an old document logs activity the st
   latest stop appears only when background entries follow the last user change. A comment made
   between ticks, and a link to a tick, each get a stop at their exact position, in history order.
   Following the end applies new background entries. Positions between stops map to the right stop,
-  and so do failure markers. A conversion entry is never a stop. A legacy document whose bridge
+  and so do failure markers. A load entry is never a stop. A legacy document whose bridge
   can't rebuild the old state gets an earliest available stop, and the stops before it can't be
   reached.
 - **Performance:** CLUE-773 measured playback one entry at a time. Here one move between user
-  stops applies every tick in between, and in a document with a conversion each of those entries
-  also moves the JSON copy. Time a move across thousands of ticks in a legacy DataFlow document.
-- **Save hook:** background-only snapshots save at most every 3 seconds and leave the indicator
-  alone. A user change saves within 1 second and shows the indicator. A pending save is flushed on
-  unmount.
-- **Activity recorder:** background entries are skipped, including conversion entries.
+  stops applies every tick in between, and in a document with a load entry or a bridged legacy
+  DataFlow tile each of those entries also moves the JSON copy. Time a move across thousands of ticks in a legacy DataFlow document.
+- **Save sender:** saves covering only background entries are sent at most every 3 seconds, and
+  background-only content changes leave the indicator alone. A user change saves within 1 second
+  and shows the indicator, including one made during a 3-second wait. `pagehide` still sends the
+  newest committed snapshot at once while only ticks are pending. A failed background-only save
+  shows `Retrying`.
+- **Tree monitor:** it reports a content change as background-only when every call holding
+  unrecorded changes is background, whether the call is still running or has finished and its record
+  hasn't reached the manager.
+- **Activity recorder:** background entries are skipped, including load entries.
 - **Cypress:** a document with a running DataFlow tile shows only user stops, and the indicator
   stays still while the program runs with no edits.
