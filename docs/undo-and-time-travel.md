@@ -36,7 +36,7 @@ actions(self => {
 })
 ```
 
-The entry records `background: true` and `producerTileId`, the id of the tile that owns the action. Use `getTileModel(self)?.id` for it. User entries have neither field.
+The entry records `background: true` and `producerTileId`, the id of the tile that owns the action. Use `getTileModel(self)?.id` for it. User entries have neither field. If the action changes a shared model, the changes other tiles make in response join the same entry, so they are background too.
 
 A background entry is never undoable, so `asBackground()` implies `withoutUndo()`; don't call both.
 

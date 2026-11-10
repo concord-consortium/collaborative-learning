@@ -1,13 +1,37 @@
-import { Instance, flow, types, unprotect } from "mobx-state-tree";
+import { Instance, flow, getType, types, unprotect } from "mobx-state-tree";
 import { deferred } from "promise-assist";
 import { createDocumentModel } from "../document/document";
 import { DocumentContentModel } from "../document/document-content";
 import { ProblemDocument } from "../document/document-types";
+import { SharedModel } from "../shared/shared-model";
+import { registerSharedModelInfo } from "../shared/shared-model-registry";
 import { registerTileComponentInfo } from "../tiles/tile-component-info";
 import { registerTileContentInfo } from "../tiles/tile-content-info";
 import { TileContentModel } from "../tiles/tile-content";
 import { FAKE_HISTORY_ENTRY_ID, TreeManager } from "./tree-manager";
 import { asBackground } from "./without-undo";
+
+const TestSharedModel = SharedModel
+  .named("TestSharedModel")
+  .props({
+    type: "TestSharedModel",
+    value: types.maybe(types.string)
+  })
+  .actions(self => ({
+    setValue(value: string) {
+      self.value = value;
+    }
+  }));
+interface TestSharedModelType extends Instance<typeof TestSharedModel> {}
+
+registerSharedModelInfo({
+  type: "TestSharedModel",
+  modelClass: TestSharedModel,
+  hasName: false
+});
+
+// Called by the test tile's updateAfterSharedModelChanges once it has changed the tile
+let onSharedModelUpdate: (() => void) | undefined;
 
 const TestTile = TileContentModel
   .named("TestTile")
@@ -15,7 +39,27 @@ const TestTile = TileContentModel
     type: "TestTile",
     text: types.maybe(types.string),
   })
+  .views(self => ({
+    get sharedModel() {
+      const sharedModel = self.tileEnv?.sharedModelManager?.getTileSharedModels(self)?.[0];
+      return sharedModel && getType(sharedModel) === TestSharedModel
+        ? sharedModel as TestSharedModelType
+        : undefined;
+    }
+  }))
   .actions(self => ({
+    updateAfterSharedModelChanges() {
+      if (!self.sharedModel?.value) return;
+      self.text = `${self.sharedModel.value}-tile`;
+      onSharedModelUpdate?.();
+    },
+    setSharedValue(value: string) {
+      self.sharedModel?.setValue(value);
+    },
+    tickSharedValue(value: string) {
+      asBackground({ producerTileId: "t1" });
+      self.sharedModel?.setValue(value);
+    },
     setText(value: string) {
       self.text = value;
     },
@@ -60,8 +104,13 @@ registerTileComponentInfo({
   tileEltClass: "test-tile"
 });
 
-function setupDocument() {
+function setupDocument(options?: { withSharedModel?: boolean }) {
   const docContent = DocumentContentModel.create({
+    ...(options?.withSharedModel && {
+      sharedModelMap: {
+        "sm1": { sharedModel: { id: "sm1", type: "TestSharedModel" }, tiles: [ "t1" ] }
+      }
+    }),
     tileMap: {
       "t1": { id: "t1", content: { type: "TestTile" } }
     }
@@ -192,7 +241,10 @@ describe("TreeMonitor", () => {
   });
 
   describe("background calls", () => {
-    it("knows a finished background call's changes are all background until its record reaches the manager", async () => {
+    afterEach(() => { onSharedModelUpdate = undefined; });
+
+    it("knows a finished background call's changes are all background until its record reaches the manager",
+        async () => {
       const { tileContent, treeMonitor } = setupDocument();
       tileContent.tickText("a");
       expect(treeMonitor.areUnrecordedChangesAllBackground()).toBe(true);
@@ -233,6 +285,41 @@ describe("TreeMonitor", () => {
       tileContent.tickText("a");
       tileContent.setText("b");
       expect(treeMonitor.areUnrecordedChangesAllBackground()).toBe(false);
+    });
+
+    it("counts a background call's shared model follow-up as background until its records reach the manager",
+        async () => {
+      const { tileContent, treeMonitor, treeManager } = setupDocument({ withSharedModel: true });
+      const duringFollowUp: boolean[] = [];
+      onSharedModelUpdate = () => {
+        duringFollowUp.push(treeMonitor.areUnrecordedChangesAllBackground());
+      };
+
+      tileContent.tickSharedValue("a");
+      expect(treeMonitor.areUnrecordedChangesAllBackground()).toBe(true);
+      await new Promise(resolve => setTimeout(resolve));
+      expect(tileContent.text).toBe("a-tile");
+      expect(duringFollowUp).toEqual([true]);
+      expect(treeMonitor.areUnrecordedChangesAllBackground()).toBe(false);
+
+      const history = treeManager.document.history;
+      expect(history).toHaveLength(1);
+      expect(history[0].background).toBe(true);
+      expect(history[0].records.flatMap(record => record.patches.map(patch => patch.path)))
+        .toContain("/content/tileMap/t1/content/text");
+    });
+
+    it("doesn't count a user call's shared model follow-up as background", async () => {
+      const { tileContent, treeMonitor, treeManager } = setupDocument({ withSharedModel: true });
+      const duringFollowUp: boolean[] = [];
+      onSharedModelUpdate = () => {
+        duringFollowUp.push(treeMonitor.areUnrecordedChangesAllBackground());
+      };
+
+      tileContent.setSharedValue("a");
+      await new Promise(resolve => setTimeout(resolve));
+      expect(duringFollowUp).toEqual([false]);
+      expect(treeManager.document.history[0].background).toBeUndefined();
     });
 
     it("is false with nothing pending", () => {

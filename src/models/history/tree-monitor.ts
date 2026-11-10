@@ -32,6 +32,10 @@ export class TreeMonitor {
   // Calls that have finished but whose tree patch record hasn't reached the manager yet, keyed by
   // the call's exchange id: whether the call changed the tree, and whether it is a background call.
   private finishedCalls = new Map<string, { hasChanges: boolean; background: boolean }>();
+  // History entry ids of background calls whose recordAction is still running, with the number of
+  // such calls. The shared model follow-ups recordAction starts join the entry, so they are
+  // background too.
+  private backgroundEntryIds = new Map<string, number>();
 
   /**
    * Called when the tree changes while monitoring is enabled and no tracked call is running,
@@ -165,6 +169,11 @@ export class TreeMonitor {
           exchangeId,
           undoable: true
         };
+        // A shared model follow-up of a background call joins its entry. Undo and redo use entries of
+        // their own, so they stay user calls.
+        if (isActionFromManager(call) && self.backgroundEntryIds.has(historyEntryId)) {
+          call.env.background = true;
+        }
         self.trackCall(call, call.env);
       },
       onFinish(call, error) {
@@ -186,8 +195,12 @@ export class TreeMonitor {
             hasChanges: recorder.patches.some(filterChangeCount),
             background: !!env.background
           });
+          if (env.background) self.addBackgroundEntryId(env.historyEntryId);
           // recordAction is async
-          self.recordAction(call, env).finally(() => self.finishedCalls.delete(env.exchangeId));
+          self.recordAction(call, env).finally(() => {
+            self.finishedCalls.delete(env.exchangeId);
+            if (env.background) self.removeBackgroundEntryId(env.historyEntryId);
+          });
         } else if (env.historyEntryId === FAKE_HISTORY_ENTRY_ID) {
           // History playback (goToHistoryEntryPosition / replayHistoryToTrees)
           // uses FAKE_HISTORY_ENTRY_ID to mark its own apply calls. It
@@ -277,6 +290,19 @@ export class TreeMonitor {
   /** True when the exchange belongs to a call that has finished but whose record hasn't reached the manager. */
   isFinishedCallExchange(exchangeId: string) {
     return this.finishedCalls.has(exchangeId);
+  }
+
+  private addBackgroundEntryId(historyEntryId: string) {
+    this.backgroundEntryIds.set(historyEntryId, (this.backgroundEntryIds.get(historyEntryId) ?? 0) + 1);
+  }
+
+  private removeBackgroundEntryId(historyEntryId: string) {
+    const count = (this.backgroundEntryIds.get(historyEntryId) ?? 0) - 1;
+    if (count > 0) {
+      this.backgroundEntryIds.set(historyEntryId, count);
+    } else {
+      this.backgroundEntryIds.delete(historyEntryId);
+    }
   }
 
   private trackCall(call: IActionTrackingMiddleware3Call<CallEnv>, env: CallEnv) {
