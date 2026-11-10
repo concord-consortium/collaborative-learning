@@ -2,6 +2,8 @@
 
 How do tiles get into the document? Let me count the ways.
 
+If you are changing the saved format of an existing tile rather than creating one, see [tile-schema-changes.md](./tile-schema-changes.md).
+
 ```mermaid
 flowchart TD
 %%{init: {"flowchart": {"defaultRenderer": "elk"}} }%%

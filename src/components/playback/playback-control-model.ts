@@ -347,11 +347,14 @@ export class PlaybackControlModel {
         // is not where the reader clicked.
         const actual = this.treeManager.numHistoryEventsApplied;
         const blocked = threw || (actual !== undefined && actual !== position);
+        // A backward seek that stops where earlier history can't be rebuilt isn't a failure.
+        const atOldestReachable = !threw && actual !== undefined && position < actual &&
+          actual === this.treeManager.oldestReachablePosition;
         // Once the playback copy is out of step, no move can succeed until the history is
         // reopened, which makes a new copy.
         this.playbackFailureWarning = this.treeManager.jsonCopyOutOfStep
           ? kPlaybackStoppedWarning
-          : blocked ? kPlaybackFailureWarning : null;
+          : blocked && !atOldestReachable ? kPlaybackFailureWarning : null;
         // The stop that was asked for was never reached, so there is nothing left to prefer
         // over wherever the document actually stopped.
         if (blocked) this.requestedStop = undefined;
