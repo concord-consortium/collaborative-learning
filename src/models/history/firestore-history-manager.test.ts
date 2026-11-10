@@ -767,6 +767,15 @@ describe("catchUpAtLoad", () => {
     expect(treeManager.exactness.isExact).toBe(true);
   });
 
+  it("catches up from the envelope it is given instead of the loaded one", async () => {
+    const { treeManager, historyManager } = setupCatchUp(
+      { lastHistoryEntryId: "e5", exactThrough: { index: 5, since: "e2" } }, { id: "e7", index: 7 });
+    await historyManager.catchUpAtLoad({ lastHistoryEntryId: "e7", exactThrough: { index: 7, since: "e3" } });
+    expect(getHistoryEntriesAfter).not.toHaveBeenCalled();
+    expect(treeManager.exactness.exactSince).toBe("e3");
+    expect(treeManager.exactness.isExact).toBe(true);
+  });
+
   it("applies the missing entries and keeps exactSince when the envelope has exactThrough", async () => {
     const { treeManager, tileContent, historyManager, firestore } = setupCatchUp(
       { lastHistoryEntryId: "e5", exactThrough: { index: 5, since: "e2" } },

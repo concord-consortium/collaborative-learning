@@ -1367,11 +1367,10 @@ export class DB {
             throw e;
           }
         })
-        .then(async (document) => {
+        .then((document) => {
+          // An individual document that may be behind its history is handed out read-only, until it
+          // is opened for editing and has caught up (see historyCatchUp).
           documents.add(document);
-          // An individual document isn't handed out until it has caught up to its history, so no
-          // edit can be made before the entries it was missing are applied.
-          await documents.historyCatchUp(document);
           resolve(document);
         })
         .catch((msg) => {

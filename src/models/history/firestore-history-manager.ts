@@ -277,18 +277,18 @@ export class FirestoreHistoryManager implements ICommitSource {
   }
 
   /**
-   * Bring an individual document's loaded content up to the last history entry in Firestore,
-   * applying the entries its loaded envelope is missing, and decide where the session's exact
-   * saves start. Managers that mirror the remote history or don't upload local history skip it, as
-   * does another user's copy of the document, leaving its exactness undecided.
+   * Bring an individual document's content up to the last history entry in Firestore, applying
+   * the entries its envelope is missing, and decide where the session's exact saves start. The
+   * envelope is the one the content came from, which is the loaded one unless the content has
+   * been replaced since. Managers that mirror the remote history or don't upload local history skip
+   * it, as does another user's copy of the document, leaving its exactness undecided.
    * Only an envelope with exactThrough is caught up. The id of one without it can be older than
    * what its content holds, so applying the entries after it could apply some of them twice.
    * Never rejects: anything that keeps the catch-up from finishing leaves the session not exact.
    */
-  async catchUpAtLoad() {
+  async catchUpAtLoad(envelope = this.loadedEnvelope) {
     if (this.syncRemoteHistory || !this.uploadLocalHistory || this.isOtherUsersDocument) return;
     const { exactness } = this.treeManager;
-    const envelope = this.loadedEnvelope;
     const savedId = envelope?.lastHistoryEntryId;
     // Where exact saves start once the content is known to match `contentId`.
     const startAt = (contentId: string) => {

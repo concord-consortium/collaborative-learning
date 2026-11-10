@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React, { useEffect, useRef } from "react";
 import { observer } from "mobx-react";
 import classNames from "classnames";
 import { getSnapshot } from "mobx-state-tree";
@@ -87,7 +87,7 @@ export const EditableDocumentContent = observer(function EditableDocumentContent
   className, contained, mode, isPrimary, document, toolbar, pane, readOnly, showPlayback, fullHeight, sectionClass
 }: IProps) {
   const documentContext = useDocumentContext(document);
-  const { db: { firebase, firestore }, ui, persistentUI, user, appConfig, activityRecorder } = useStores();
+  const { db: { firebase, firestore }, documents, ui, persistentUI, user, appConfig, activityRecorder } = useStores();
   // set by the canvas and used by the toolbar
   const editableTileApiInterfaceRef: EditableTileApiInterfaceRef = useRef(null);
   // Until the document has caught up to its history it can't be edited or saved.
@@ -118,6 +118,11 @@ export const EditableDocumentContent = observer(function EditableDocumentContent
     contained ? "contained-editable-document-content" : "full-screen-editable-document-content",
     {"comment-select" : documentSelectedForComment, "full-height": fullHeight}, className);
 
+  // Opening the document for editing catches it up to its history first.
+  const editable = !readOnly && !document.isPublished;
+  useEffect(() => {
+    if (editable) documents.historyCatchUp(document);
+  }, [editable, documents, document]);
   useDocumentSyncToFirebase(user, firebase, firestore, document, readOnly || historyCatchUpPending,
     (doc, lastHistoryEntryId) => activityRecorder?.onContentSaved(doc, lastHistoryEntryId));
   // Skip the save indicator for non-editable documents and when Firebase sync is disabled

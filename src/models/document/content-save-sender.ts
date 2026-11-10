@@ -454,7 +454,29 @@ export class ContentSaveSender {
       content => content ? onSnapshot(content, this.handleContentChanged) : undefined));
     if (this.document.concurrent && treeManager) {
       this.startGroupSaves(treeManager);
+    } else {
+      this.saveCaughtUpContent();
     }
+  }
+
+  /**
+   * Saves the content as the load caught it up, when no entry has committed since. Otherwise the
+   * RTDB content stays behind its history until the next edit commits, and every later load
+   * catches it up again.
+   */
+  private saveCaughtUpContent() {
+    const treeManager = getTreeManager(this.document);
+    const manager = treeManager?.historyManager;
+    const caughtUpTo = isCommitSource(manager) && !manager.lastCommitted ? manager.caughtUpTo : undefined;
+    const { content } = this.document;
+    const exactSince = treeManager?.exactness.exactSince;
+    if (!caughtUpTo || !content || !treeManager?.exactness.isExact || exactSince === undefined
+        || this.document.savedEnvelope?.lastHistoryEntryId === caughtUpTo.id
+        || getSnapshotBlockers(this.document).length > 0) {
+      return;
+    }
+    this.queueSave(this.createSnapshotSave(caughtUpTo, getSnapshot<DocumentContentSnapshotType>(content),
+      exactSince, this.dirtySeq));
   }
 
   private startGroupSaves(treeManager: TreeManagerType) {

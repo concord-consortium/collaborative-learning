@@ -57,11 +57,6 @@ export const DocumentsModel = types
     getDocument(documentKey: string) {
       return self.all.find((document) => document.key === documentKey);
     },
-    // Resolves once the document has caught up to its Firestore history, or right away when it
-    // has no catch-up to do.
-    historyCatchUp(document: DocumentModelType): Promise<void> {
-      return self.historyCatchUps.get(document) ?? Promise.resolve();
-    },
     byType(type: DocumentType) {
       return self.all.filter((document) => document.type === type);
     },
@@ -195,6 +190,25 @@ export const DocumentsModel = types
     }
   }))
   .actions(self => ({
+    /**
+     * Starts the document's catch-up to its Firestore history the first time it is asked for, and
+     * resolves once the catch-up has finished. Resolves right away when the document has nothing to
+     * catch up. Only a document opened for editing asks, so listed documents open without waiting.
+     */
+    historyCatchUp(document: DocumentModelType): Promise<void> {
+      let catchUp = self.historyCatchUps.get(document);
+      if (!catchUp) {
+        const manager = (document.treeManagerAPI as TreeManagerType | undefined)?.historyManager;
+        if (!document.historyCatchUpPending || !(manager instanceof FirestoreHistoryManager)) {
+          return Promise.resolve();
+        }
+        // The content listener may have replaced the loaded content, along with its envelope.
+        catchUp = manager.catchUpAtLoad(document.savedEnvelope)
+          .finally(() => document.setHistoryCatchUpPending(false));
+        self.historyCatchUps.set(document, catchUp);
+      }
+      return catchUp;
+    },
     setAppConfig(appConfig: AppConfigModelType) {
       self.appConfig = appConfig;
     },
@@ -294,10 +308,9 @@ export const DocumentsModel = types
           const manager = new FirestoreHistoryManager(historyManagerArgs);
           treeManager.setHistoryManager(manager);
           // A publication's content isn't edited after it is published, so it has nothing to catch up.
+          // The catch-up starts once the document is opened for editing (see historyCatchUp).
           if (!manager.isOtherUsersDocument && !document.isPublished) {
             document.setHistoryCatchUpPending(true);
-            self.historyCatchUps.set(document,
-              manager.catchUpAtLoad().finally(() => document.setHistoryCatchUpPending(false)));
           }
         }
 

@@ -25,7 +25,6 @@ import { createSingleTileContent } from "../utilities/test-utils";
 import * as UrlParams from "../utilities/url-params";
 import { Logger } from "./logger";
 import { LogEventName } from "./logger-types";
-import { when } from "mobx";
 import { deferred } from "promise-assist";
 import { hashString } from "../utilities/js-utils";
 import { FirestoreHistoryManager } from "../models/history/firestore-history-manager";
@@ -1004,25 +1003,28 @@ describe("db", () => {
       stores.documents.setUserContextProvider({ userContext: { uid: currentUid } } as any);
     }
 
-    it("waits for the owner's history catch-up of an individual document before resolving", async () => {
+    it("opens the owner's individual document read-only, and catches it up once it is asked to", async () => {
       stubRtdb({ createdAt: 1, properties: {} }, { changeCount: 0, lastHistoryEntryId: "e7" });
       setUpHistoryManagers("u1");
       const catchUp = deferred<void>();
-      jest.spyOn(FirestoreHistoryManager.prototype, "catchUpAtLoad").mockReturnValue(catchUp.promise);
+      const catchUpSpy = jest.spyOn(FirestoreHistoryManager.prototype, "catchUpAtLoad")
+        .mockReturnValue(catchUp.promise);
 
-      let opened = false;
-      const openPromise = db.openDocument({ documentKey: "c1", type: "problem", userId: "u1",
-        firestoreMetadata: { uid: "u1", type: "problem", key: "c1" } } as any)
-        .then(openedDoc => { opened = true; return openedDoc; });
-      await when(() => !!stores.documents.getDocument("c1"));
-      const added = stores.documents.getDocument("c1")!;
+      const doc = await db.openDocument({ documentKey: "c1", type: "problem", userId: "u1",
+        firestoreMetadata: { uid: "u1", type: "problem", key: "c1" } } as any);
+      expect(catchUpSpy).not.toHaveBeenCalled();
+      expect(doc.historyCatchUpPending).toBe(true);
+
+      let caughtUp = false;
+      const first = stores.documents.historyCatchUp(doc).then(() => { caughtUp = true; });
+      const second = stores.documents.historyCatchUp(doc);
+      expect(catchUpSpy).toHaveBeenCalledTimes(1);
+      expect(catchUpSpy).toHaveBeenCalledWith(doc.savedEnvelope);
       await new Promise(process.nextTick);
-      expect(opened).toBe(false);
-      expect(added.historyCatchUpPending).toBe(true);
+      expect(caughtUp).toBe(false);
 
       catchUp.resolve();
-      const doc = await openPromise;
-      expect(doc).toBe(added);
+      await Promise.all([first, second]);
       expect(doc.historyCatchUpPending).toBe(false);
     });
 

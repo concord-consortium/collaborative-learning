@@ -1,6 +1,7 @@
 import firebase from "firebase/app";
 import { autorun, IReactionDisposer } from "mobx";
 import { DocumentModelType } from "../../models/document/document";
+import { readSavedEnvelope } from "../../models/document/content-save-envelope";
 import { LearningLogDocument, PersonalDocument, ProblemDocument } from "../../models/document/document-types";
 import { DB } from "../db";
 import { DBDocument } from "../db-types";
@@ -28,6 +29,8 @@ class DocumentMonitor {
       const updatedDoc: DBDocument = snapshot.val();
       const updatedContent = this.db.parseDocumentContent(updatedDoc);
       this.document?.setContent(updatedContent || {});
+      // The content now comes from this envelope, so a sender made for the document later reads it.
+      this.document?.setSavedEnvelope(readSavedEnvelope(updatedDoc));
     }
   };
 

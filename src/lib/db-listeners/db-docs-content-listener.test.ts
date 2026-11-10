@@ -1,5 +1,6 @@
 import { IObservableArray, observable, runInAction } from "mobx";
 import { LearningLogDocument, PersonalDocument } from "../../models/document/document-types";
+import { hashString } from "../../utilities/js-utils";
 import { DBDocumentsContentListener } from "./db-docs-content-listener";
 
 describe("DBDocumentsContentListener (personal documents)", () => {
@@ -13,7 +14,7 @@ describe("DBDocumentsContentListener (personal documents)", () => {
   let db: any;
 
   const makeDoc = (key: string, uid: string, type: string = PersonalDocument) =>
-    ({ key, uid, type, setGroupIdOfUserOwner: jest.fn(), setContent: jest.fn() });
+    ({ key, uid, type, setGroupIdOfUserOwner: jest.fn(), setContent: jest.fn(), setSavedEnvelope: jest.fn() });
 
   const makeRef = (path: string) => {
     if (!refsByPath[path]) {
@@ -76,6 +77,27 @@ describe("DBDocumentsContentListener (personal documents)", () => {
 
     expect(db.parseDocumentContent).toHaveBeenCalledWith({ content: { rowMap: { r1: {} } } });
     expect(doc.setContent).toHaveBeenCalledWith({ rowMap: { r1: {} } });
+
+    listener.stop();
+  });
+
+  it("records the envelope the remote content came from", () => {
+    const listener = new DBDocumentsContentListener(db);
+    listener.start();
+
+    const doc = makeDoc("p1", "student-1");
+    runInAction(() => docs.push(doc));
+
+    const content = JSON.stringify({ rowMap: {} });
+    const exactThrough = { id: "e5", index: 5, contentHash: hashString(content), since: "e2" };
+    const path = documentPath("student-1", "p1");
+    handlersByPath[path]({ val: () => ({ content, lastHistoryEntryId: "e5", exactThrough }) });
+    expect(doc.setSavedEnvelope).toHaveBeenLastCalledWith(
+      { lastHistoryEntryId: "e5", exactThrough: { index: 5, since: "e2" } });
+
+    handlersByPath[path]({ val: () => ({ content: JSON.stringify({ rowMap: { r1: {} } }), lastHistoryEntryId: "e6",
+      exactThrough }) });
+    expect(doc.setSavedEnvelope).toHaveBeenLastCalledWith({ lastHistoryEntryId: "e6" });
 
     listener.stop();
   });

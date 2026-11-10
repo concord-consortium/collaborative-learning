@@ -270,6 +270,47 @@ describe("ContentSaveSender", () => {
     return context;
   }
 
+  describe("saving caught-up content", () => {
+    // A sender made for the document after the load caught it up.
+    function setupCaughtUp(prepare: (context: ReturnType<typeof setup>) => void) {
+      const context = setup();
+      context.sender.dispose();
+      context.commits.caughtUpTo = { id: "caught-up", index: 9 };
+      context.document.setSavedEnvelope({ lastHistoryEntryId: "loaded", exactThrough: { index: 7, since: "e0" } });
+      prepare(context);
+      const { document, contentRef } = context;
+      return track({ ...context,
+        sender: getContentSaveSender(document, { contentRef, updateTools: () => Promise.resolve() }) });
+    }
+
+    it("saves the content the load caught up, stamped with the last entry it applied", async () => {
+      const { contentRef, document } = setupCaughtUp(() => undefined);
+      expect(contentRef.update).toHaveBeenCalledTimes(1);
+      expect(contentRef.writes[0].values).toMatchObject({
+        lastHistoryEntryId: "caught-up", exactThrough: { id: "caught-up", index: 9, since: "e0" }
+      });
+      contentRef.writes[0].resolve();
+      await flush();
+      expect(document.saveState).toBe(SaveState.Saved);
+      expect(document.savedEnvelope).toEqual(
+        { lastHistoryEntryId: "caught-up", exactThrough: { index: 9, since: "e0" } });
+    });
+
+    it("doesn't save caught-up content the envelope already holds, or once an entry has committed", () => {
+      const saved = setupCaughtUp(({ document }) =>
+        document.setSavedEnvelope({ lastHistoryEntryId: "caught-up", exactThrough: { index: 9, since: "e0" } }));
+      expect(saved.contentRef.update).not.toHaveBeenCalled();
+      const committed = setupCaughtUp(({ commits }) => { commits.lastCommitted = { id: "later", index: 10 }; });
+      expect(committed.contentRef.update).not.toHaveBeenCalled();
+    });
+
+    it("doesn't save caught-up content once the session isn't exact", () => {
+      const { contentRef } = setupCaughtUp(({ treeManager }) =>
+        treeManager.exactness.markNotExact("catch-up-apply-failed"));
+      expect(contentRef.update).not.toHaveBeenCalled();
+    });
+  });
+
   describe("snapshot saving", () => {
     it("saves the snapshot taken when an entry completed, once that entry commits", async () => {
       const { commits, contentRef, edit } = track(setup());
