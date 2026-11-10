@@ -1,6 +1,6 @@
 # CLUE-773: History playback across tile schema changes
 
-Status: PRs 1 and 2 merged; PR 3 (legacy DataFlow bridge) in review, 2026-11-09.
+Status: implemented (PRs 1-3).
 
 ## Why
 
