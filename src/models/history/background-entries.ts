@@ -12,9 +12,11 @@ interface ILegacyEntryShape {
 const kBackgroundActionSuffixes = ["/tickAndProcess", "/processAfterProgramChange"];
 const kSimulatorStepAction = /^\/content\/tileMap\/[^/]+\/content\/step$/;
 const kSetProgramSuffix = "/setProgram";
-// A tick-driven setProgram rewrites only the running values of program nodes.
+// A tick-driven setProgram rewrites the running values of program nodes, and may also refresh the
+// demo output of nodes.
 const kRunningValuesPath =
   /^\/content\/tileMap\/[^/]+\/content\/program\/values\/\d+\/(currentValues|recentValues)(\/|$)/;
+const kDemoOutputPath = /^\/content\/tileMap\/[^/]+\/content\/program\/nodes\/[^/]+\/data\/demoOutput(\/|$)/;
 
 export function isLegacyBackgroundEntry(entry: ILegacyEntryShape): boolean {
   const action = entry.action;
@@ -23,8 +25,10 @@ export function isLegacyBackgroundEntry(entry: ILegacyEntryShape): boolean {
   if (kSimulatorStepAction.test(action)) return true;
   if (action.endsWith(kSetProgramSuffix)) {
     const patches = entry.records.flatMap(record => record.patches);
-    return patches.length > 0 &&
-      patches.every(patch => patch.op === "replace" && kRunningValuesPath.test(patch.path));
+    // demoOutput alone is not enough: at least one running-values patch must be present.
+    return patches.some(patch => patch.op === "replace" && kRunningValuesPath.test(patch.path)) &&
+      patches.every(patch => patch.op === "replace" &&
+        (kRunningValuesPath.test(patch.path) || kDemoOutputPath.test(patch.path)));
   }
   return false;
 }
@@ -39,6 +43,8 @@ const valuesReplaces = [
   { op: "replace", path: `${kValues}/3489/recentValues/nodeValue` },
   { op: "replace", path: `${kValues}/3490/currentValues/nodeValue` }
 ];
+const demoPath = "/content/tileMap/t1/content/program/nodes/3489/data/demoOutput/tilt";
+const demoReplace = { op: "replace", path: demoPath };
 const rec = (patches: Array<{ op: string; path: string }>) => ({ patches });
 
 export const kLegacyBackgroundRuleCases: Array<{ name: string; entry: ILegacyEntryShape; expected: boolean }> = [
@@ -57,6 +63,12 @@ export const kLegacyBackgroundRuleCases: Array<{ name: string; entry: ILegacyEnt
     ])] } },
   { name: "setProgram adding a node", expected: false,
     entry: { action: kSetProgram, records: [rec([{ op: "add", path: `${kValues}/3491` }])] } },
+  { name: "values and demoOutput setProgram", expected: true,
+    entry: { action: kSetProgram, records: [rec([valuesReplaces[0], demoReplace])] } },
+  { name: "demoOutput-only setProgram", expected: false,
+    entry: { action: kSetProgram, records: [rec([demoReplace])] } },
+  { name: "setProgram adding demoOutput", expected: false,
+    entry: { action: kSetProgram, records: [rec([valuesReplaces[0], { op: "add", path: demoPath }])] } },
   { name: "setProgram with no patches", expected: false,
     entry: { action: kSetProgram, records: [] } },
   { name: "text edit", expected: false,
