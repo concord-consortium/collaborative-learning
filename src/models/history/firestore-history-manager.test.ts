@@ -773,7 +773,7 @@ describe("catchUpAtLoad", () => {
       { id: "e7", index: 7 });
     getHistoryEntriesAfter.mockResolvedValue([entryDoc(6, "e5"), entryDoc(7, "e6")]);
     await historyManager.catchUpAtLoad();
-    expect(getHistoryEntriesAfter).toHaveBeenCalledWith(firestore, documentPath, 5);
+    expect(getHistoryEntriesAfter).toHaveBeenCalledWith(firestore, documentPath, 5, 7);
     expect(tileContent.text).toBe("e7");
     expect(historyManager.caughtUpTo).toEqual({ id: "e7", index: 7 });
     expect(treeManager.document.history.length).toBe(0);

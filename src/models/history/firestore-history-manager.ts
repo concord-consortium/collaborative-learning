@@ -326,10 +326,9 @@ export class FirestoreHistoryManager implements ICommitSource {
           return;
         case "fetch": {
           const gap = lastEntryIndex - plan.afterIndex;
-          const docs = await getHistoryEntriesAfter(this.firestore, documentPath, plan.afterIndex);
-          // Stop at the last entry read, since that is the entry the next local entry chains after.
-          const { entries } = takeContiguousEntries(
-            docs.filter(doc => doc.index <= lastEntryIndex), savedId!, plan.afterIndex);
+          // Stops at the last entry read, since that is the entry the next local entry chains after.
+          const docs = await getHistoryEntriesAfter(this.firestore, documentPath, plan.afterIndex, lastEntryIndex);
+          const { entries } = takeContiguousEntries(docs, savedId!, plan.afterIndex);
           applying = true;
           const { applied, error } = await this.treeManager.applyEntriesAtLoad(entries.map(doc => doc.entry));
           const lastApplied = entries[applied - 1];

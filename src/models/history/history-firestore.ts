@@ -79,12 +79,14 @@ export function loadHistory(
 }
 
 /**
- * Read, in one query, every history entry whose index is greater than `afterIndex`.
+ * Read, in one query, every history entry whose index is greater than `afterIndex` and no greater
+ * than `throughIndex`.
  */
-export async function getHistoryEntriesAfter(firestore: Firestore, documentPath: string, afterIndex: number)
-    : Promise<IFirestoreHistoryEntryDoc[]> {
+export async function getHistoryEntriesAfter(firestore: Firestore, documentPath: string, afterIndex: number,
+    throughIndex: number): Promise<IFirestoreHistoryEntryDoc[]> {
   const querySnapshot = await firestore.collection(`${documentPath}/history`)
     .where("index", ">", afterIndex)
+    .where("index", "<=", throughIndex)
     .orderBy("index")
     .get();
   return querySnapshot.docs.map(doc => {
