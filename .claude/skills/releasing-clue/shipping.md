@@ -28,6 +28,15 @@ Follow the recorded order:
 - **`after`:** don't deploy yet. Deploy it once Release Production has succeeded and
   `deployed-version.ts` shows production serving the tag.
 
+## Migration scripts [approve]
+
+Run each migration script in the release (`scripts/migrations/`, listed under `migrations` in the
+deploy report) at its recorded timing, by the same rules as above. The developer runs them against
+production, from the tag's checkout. For each one, give them the commands from the script's header:
+a dry run first, then, once its report looks right, the run that writes. Record what each run
+changed or skipped in the release record. A script that skips documents still being edited needs a
+second run later; add it to the follow-ups.
+
 ## Release Production [approve]
 
 ```bash
@@ -95,6 +104,7 @@ Check each of these before calling the release finished, and report any that are
 - [ ] Production and staging serve the tag (`deployed-version.ts`)
 - [ ] GitHub release promoted: Latest, not a pre-release
 - [ ] Production Firebase has what the deploy-timing decisions called for, `after` parts included
+- [ ] Each migration script in the release has been run against production at its timing
 - [ ] Release story Done; Jira version (and the previous one) released
 - [ ] #clue: "now live" reply in the pre-announcement's thread
 - [ ] #releases: announcement with the GitHub release link and notes

@@ -95,9 +95,10 @@ See [tiles.md](tiles.md) for detailed tile documentation.
 
 **Deploy timing**: A PR that changes the Firebase functions (`functions-v1/`, `functions-v2/`,
 `authoring-api/`, a `shared/` file they compile, or `shared/`'s package files), the rules (`firestore.rules`,
-`database.rules.json`) or the indexes (`firestore.indexes.json`) needs a Deploy timing callout in
-its description: for each part it touches, `before`, `with` or `after` the client release, and
-why. The `Deploy Timing` check enforces it; the format is in "Deploy timing" in
+`database.rules.json`), the indexes (`firestore.indexes.json`) or a migration script
+(`scripts/migrations/`, for scripts that change data in Firestore or the Realtime Database) needs a
+Deploy timing callout in its description: for each part it touches, `before`, `with` or `after` the
+client release, and why. For a migration, the timing is when to run it. The `Deploy Timing` check enforces it; the format is in "Deploy timing" in
 [docs/deploy.md](docs/deploy.md). **Never decide the timing yourself — ask the developer.** Whether
 a deploy is safe ahead of the client often depends on things the diff doesn't show. Give a
 recommendation for each part with your reasoning, covering both directions: the new client against

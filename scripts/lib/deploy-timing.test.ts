@@ -49,13 +49,19 @@ describe("deployablesTouched", () => {
     expect(deployablesTouched(["shared/client-only.ts"], kFunctionsSources)).toEqual([]);
     expect(deployablesTouched(["shared/package-lock.json"], kFunctionsSources)).toEqual(["functions"]);
   });
+  it("counts a migration script, but not its tests or docs, or other scripts", () => {
+    expect(deployablesTouched(["scripts/migrations/fix-history.ts"], kFunctionsSources)).toEqual(["migrations"]);
+    expect(deployablesTouched(["scripts/migrations/lib/batch.ts"], kFunctionsSources)).toEqual(["migrations"]);
+    const files = ["scripts/migrations/fix-history.test.ts", "scripts/migrations/README.md", "scripts/report.ts"];
+    expect(deployablesTouched(files, kFunctionsSources)).toEqual([]);
+  });
   it("ignores tests, docs and client code", () => {
     const files = ["functions-v2/test/utils.test.ts", "functions-v2/README.md", "src/components/app.tsx"];
     expect(deployablesTouched(files, kFunctionsSources)).toEqual([]);
   });
   it("reports several deployables in a fixed order", () => {
-    const files = ["firestore.indexes.json", "functions-v2/src/index.ts", "firestore.rules"];
-    expect(deployablesTouched(files, kFunctionsSources)).toEqual(["functions", "rules", "indexes"]);
+    const files = ["scripts/migrations/a.ts", "firestore.indexes.json", "functions-v2/src/index.ts", "firestore.rules"];
+    expect(deployablesTouched(files, kFunctionsSources)).toEqual(["functions", "rules", "indexes", "migrations"]);
   });
 });
 
@@ -106,6 +112,11 @@ describe("parseDeployTiming", () => {
   it("requires the heading to be the callout's first line", () => {
     const body = "> [!IMPORTANT]\n> Some other note\n> **Deploy timing**\n> - **functions: with** — why";
     expect(parseDeployTiming(body).found).toBe(false);
+  });
+  it("reads a migrations entry", () => {
+    const body = "> [!WARNING]\n> **Deploy timing**\n> - **migrations: after** — needs the new client first";
+    expect(parseDeployTiming(body).entries).toEqual(
+      [{ deployable: "migrations", timing: "after", rationale: "needs the new client first" }]);
   });
   it("stops at the end of the callout", () => {
     const body = "> [!NOTE]\n> **Deploy timing**\n> - **rules: before** — why\n\n> - **functions: with** — later quote";

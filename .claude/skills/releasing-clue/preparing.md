@@ -132,8 +132,9 @@ background timer within the session, or a reminder in the developer's self-DM fo
 
 ## Deploy timing
 
-Every PR that touches functions, rules or indexes should carry a Deploy timing callout (see
-"Deploy timing" in `docs/deploy.md`). Roll them up:
+Every PR that touches functions, rules, indexes or migration scripts (`scripts/migrations/`) should
+carry a Deploy timing callout (see "Deploy timing" in `docs/deploy.md`). For a migration, the
+timing is when to run it. Roll them up:
 
 ```bash
 npx --prefix scripts tsx scripts/release-deploy-report.ts --unlinked-prs <scratchpad>/unlinked-prs.json
