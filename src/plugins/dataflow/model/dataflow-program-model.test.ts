@@ -1,4 +1,4 @@
-import { getSnapshot, Instance } from "mobx-state-tree";
+import { applyPatch, getSnapshot, Instance } from "mobx-state-tree";
 import { ConnectionModel, DataflowNodeModel, DataflowProgramModel } from "./dataflow-program-model";
 import { DataflowContentModelType, kDataflowTileType } from "./dataflow-content";
 import { IControlNodeModel } from "../nodes/control-node";
@@ -249,5 +249,31 @@ describe("DataflowProgramModel.resetRunningState", () => {
     expect(numberNode.value).toBe(7);
     expect(control.controlOperator).toBe("Hold 0");
     expect(control.waitDuration).toBe(4);
+  });
+});
+
+describe("DataflowProgramModel.getConnectionWrapper", () => {
+  const connectionSnapshot = { id: "c1", source: "a", sourceOutput: "value", target: "b", targetInput: "num1" };
+
+  it("returns the same wrapper while its connection is unchanged", () => {
+    const program = DataflowProgramModel.create();
+    program.addConnection(ConnectionModel.create(connectionSnapshot));
+    expect(program.getConnectionWrapper("c1")).toBe(program.getConnectionWrapper("c1"));
+  });
+
+  // Undo and history playback remove a connection and put it back by applying patches, which
+  // bypasses removeConnection, so the connection that comes back is a new MST instance with the
+  // same id.
+  it("makes a new wrapper when the connection with its id is replaced", () => {
+    const program = DataflowProgramModel.create();
+    program.addConnection(ConnectionModel.create(connectionSnapshot));
+    const first = program.getConnectionWrapper("c1");
+
+    applyPatch(program, { op: "remove", path: "/connections/c1" });
+    applyPatch(program, { op: "add", path: "/connections/c1", value: connectionSnapshot });
+
+    const second = program.getConnectionWrapper("c1");
+    expect(second).not.toBe(first);
+    expect(second?.model).toBe(program.connections.get("c1"));
   });
 });

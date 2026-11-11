@@ -1467,6 +1467,7 @@ export class ReteManager implements INodeServices {
     for (const [id] of area.nodeViews) {
       if (!snapshot.nodes[id]) {
         (editor.reteNodesMap[id] as IBaseNode)?.dispose();
+        delete editor.reteNodesMap[id];
         await editor.emit({ type: 'noderemoved', data: { id } as any });
       }
     }
