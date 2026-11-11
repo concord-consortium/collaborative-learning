@@ -43,6 +43,24 @@ to in your local repo, so run `git fetch --tags` first. It exits non-zero if any
 the Deploy timing callouts of every PR in a release. See "Deploy timing" in
 [docs/deploy.md](../docs/deploy.md) for what they read, and each script's header for its options.
 
+## Repairing history entries stored out of order
+
+`fix-out-of-order-history.ts` finds stored histories in which an entry that changes a tile comes
+before the entry that creates the tile, which makes history playback fail at the start of the
+document. It moves each such entry to just after the entry that creates its tile, by rewriting the
+`index` and `previousEntryId` fields of the entries in between. It is a dry run unless `--apply`
+is given, and writes a report to `scripts/output/`:
+
+```shell
+npx --prefix scripts tsx scripts/fix-out-of-order-history.ts --root authed/learn_concord_org
+npx --prefix scripts tsx scripts/fix-out-of-order-history.ts --root authed/learn_concord_org --apply
+```
+
+By default it checks only documents whose `tools` include `Dataflow`, the tile known to have left
+such histories. Its header lists the other options and the cases it skips. See
+[docs/history-framework/open-entry.md](../docs/history-framework/open-entry.md) for how these
+histories came about.
+
 ## Running scripts that connect with the portal
 
 You need to first get the portal admin api token.
