@@ -31,7 +31,7 @@ export function fitNodeRadius(boundingBox?: { height: number, width: number } | 
   return Math.max(kSmallAnnotationNodeRadius, Math.min(maxRadius, halfSmallestSide));
 }
 
-export const kMaxStemHitWidth = 11;
+const kMaxStemHitWidth = 11;
 const kMinStemHitWidth = 3;
 
 /**
@@ -70,6 +70,17 @@ const shortArcPeakScale = 1;
 const longArcPeakScale = .5;
 const shortArcLength = 100;
 const longArcLength = 300;
+
+/**
+ * How far from the line between its endpoints a new label is placed, at the least.
+ *
+ * The offset is otherwise a fraction of the arrow's length, which leaves almost nothing for a short
+ * one: between two adjacent table rows it works out at 11px, so the label lands on top of both
+ * endpoints and the rows they mark. Half a label chip plus an endpoint's radius clears all three.
+ * Screen pixels, so a zoomed tile gets the same clearance as an unzoomed one.
+ */
+const kMinPeakOffset = 24;
+
 export function getDefaultPeak(shape: ArrowShape, sourceX: number, sourceY: number, targetX: number, targetY: number) {
   const dx = targetX - sourceX;
   const dy = targetY - sourceY;
@@ -93,8 +104,9 @@ export function getDefaultPeak(shape: ArrowShape, sourceX: number, sourceY: numb
       : arcLength >= longArcLength ? longArcPeakScale
       : (arcLength - shortArcLength) / (longArcLength - shortArcLength)
         * (longArcPeakScale - shortArcPeakScale) + shortArcPeakScale;
-    const peakDx = Math.cos(perpendicularAngle) * arcLength * peakPercent;
-    const peakDy = Math.sin(perpendicularAngle) * arcLength * peakPercent;
+    const peakOffset = Math.max(kMinPeakOffset, arcLength * peakPercent);
+    const peakDx = Math.cos(perpendicularAngle) * peakOffset;
+    const peakDy = Math.sin(perpendicularAngle) * peakOffset;
     const peakX = mx + peakDx;
     const peakY = my + peakDy;
     return {

@@ -1,6 +1,6 @@
 import classNames from "classnames";
 import { observer } from "mobx-react";
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 
 import { AnnotationNode } from "./annotation-node";
 import {
@@ -9,7 +9,7 @@ import {
 import { AnnotationArrow } from "./annotation-arrow";
 import { boundDelta } from "../../models/annotations/annotation-utils";
 import {
-  IArrowAnnotation, kArrowAnnotationTextHeight, kArrowAnnotationTextWidth
+  IArrowAnnotation, ITextSize, kArrowAnnotationTextHeight, kArrowAnnotationTextWidth
 } from "../../models/annotations/arrow-annotation";
 import { IClueObject } from "../../models/annotations/clue-object";
 import { distanceBetweenPoints } from "../../utilities/math-utils";
@@ -103,12 +103,22 @@ export const ArrowAnnotationComponent = observer(
     const [editingText, setEditingText] = useState(false);
     const [tempText, setTempText] = useState(arrow.text ?? "");
     const [hoveringStem, setHoveringStem] = useState(false);
-    const inputRef = useRef<HTMLInputElement|null>(null);
+    const textChipRef = useRef<HTMLElement|null>(null);
+    const [textSize, setTextSize] = useState<ITextSize|undefined>();
+
+    useLayoutEffect(() => {
+      // The document clamp needs the chip's rendered size, which only the DOM knows.
+      const chip = textChipRef.current;
+      if (!chip) return;
+      const { offsetHeight: height, offsetWidth: width } = chip;
+      setTextSize(previous => previous?.height === height && previous?.width === width
+        ? previous : { height, width });
+    }, [arrow.text, editingText, readOnly, tempText]);
 
     useEffect(() => {
       // Focus on the text input when we start editing
       if (editingText && !readOnly) {
-        inputRef.current?.focus();
+        textChipRef.current?.focus();
       }
     }, [editingText, readOnly]);
     useEffect(() => {
@@ -142,7 +152,7 @@ export const ArrowAnnotationComponent = observer(
       textMinXOffset, textMaxXOffset, textMinYOffset, textMaxYOffset
     } = arrow.getPoints(
       documentLeft, documentRight, documentTop, documentBottom, dragOffsets,
-      sourceBB, sourceViewTransform, targetBB, targetViewTransform, sourceTileSize
+      sourceBB, sourceViewTransform, targetBB, targetViewTransform, sourceTileSize, textSize
     );
     const missingData = sourceX === undefined || sourceY === undefined || textCenterX === undefined
       || textCenterY === undefined || targetX === undefined || targetY === undefined;
@@ -249,7 +259,8 @@ export const ArrowAnnotationComponent = observer(
             const currentDragOffsets = determineDragOffsets(_dragType, e2.clientX, e2.clientY, e.clientX, e.clientY);
             const { textCenterX: tcX, textCenterY: tcY, textOriginX: toX, textOriginY: toY }
               = arrow.getPoints(documentLeft, documentRight, documentTop, documentBottom,
-                  currentDragOffsets, sourceBB, sourceViewTransform, targetBB, targetViewTransform);
+                  currentDragOffsets, sourceBB, sourceViewTransform, targetBB, targetViewTransform,
+                  undefined, textSize);
             if (tcX !== undefined && tcY !== undefined) {
               arrow.setTextOffset(tcX - toX, tcY - toY);
             }
@@ -347,7 +358,7 @@ export const ArrowAnnotationComponent = observer(
                   onBlur={handleBlur}
                   onChange={handleChange}
                   onKeyDown={handleKeyDown}
-                  ref={inputRef}
+                  ref={element => { textChipRef.current = element; }}
                   style={{ width: `calc(${tempText.length}ch + 2ch)`}}
                   type="text"
                   value={tempText}
@@ -357,6 +368,7 @@ export const ArrowAnnotationComponent = observer(
                   className={textButtonClasses}
                   onClick={e => handleTextClick(e)}
                   onMouseDown={e => handleMouseDown(e, "text")}
+                  ref={element => { textChipRef.current = element; }}
                 >
                   {displayText || "Add text"}
                 </button>

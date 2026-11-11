@@ -1,6 +1,7 @@
 import {
-  fitNodeRadius, fitStemHitWidth, kAnnotationNodeDefaultRadius, kMaxStemHitWidth, kSmallAnnotationNodeRadius
+  fitNodeRadius, fitStemHitWidth, getDefaultPeak, kAnnotationNodeDefaultRadius, kSmallAnnotationNodeRadius
 } from "./annotation-utilities";
+import { ArrowShape } from "../../models/annotations/arrow-annotation";
 
 // Sparrows attach to objects of wildly different sizes across nine tile types, and only graph and
 // numberline declare a node size of their own. These are the sizes the rest actually report.
@@ -37,10 +38,39 @@ describe("fitStemHitWidth", () => {
   });
 
   it("gives a long sparrow the full band", () => {
-    expect(fitStemHitWidth(300)).toBe(kMaxStemHitWidth);
+    // The width the stylesheet used to apply to every sparrow, long or short.
+    expect(fitStemHitWidth(300)).toBe(11);
   });
 
   it("keeps a band wide enough to hit when the endpoints nearly coincide", () => {
     expect(fitStemHitWidth(0)).toBe(3);
+  });
+});
+
+describe("getDefaultPeak", () => {
+  // A sparrow between two cells one table row apart: 22px, straight down. The floor it lands on is
+  // half a label chip plus an endpoint's radius, which is 24px.
+  const adjacentRows = () => getDefaultPeak(ArrowShape.curved, 100, 100, 100, 122);
+
+  it("holds a new label clear of endpoints that are only a table row apart", () => {
+    const { peakDx, peakDy } = adjacentRows();
+    expect(Math.hypot(peakDx, peakDy)).toBeCloseTo(24);
+  });
+
+  it("puts that label beside the arrow rather than along it", () => {
+    // Perpendicular to a vertical arrow, so all of the offset is horizontal.
+    const { peakDx, peakDy } = adjacentRows();
+    expect(Math.abs(peakDx)).toBeCloseTo(24);
+    expect(peakDy).toBeCloseTo(0);
+  });
+
+  it("still scales with length once the arrow is long enough to need no floor", () => {
+    const { peakDx, peakDy } = getDefaultPeak(ArrowShape.curved, 0, 0, 0, 200);
+    expect(Math.hypot(peakDx, peakDy)).toBeCloseTo(100);
+  });
+
+  it("leaves a straight sparrow's label on the line", () => {
+    expect(getDefaultPeak(ArrowShape.straight, 100, 100, 100, 122))
+      .toEqual({ peakX: 100, peakY: 111, peakDx: 0, peakDy: 0 });
   });
 });
