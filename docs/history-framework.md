@@ -2,6 +2,8 @@
 
 The history framework in CLUE is used for recording changes to documents to support undo/redo and time traveling.
 
+More docs about the framework, including parts that are planned but not built yet, are in [history-framework/](history-framework/README.md).
+
 The framework is based on MobX State Tree (MST). It is intended to support iframe based tile implementations. With iframe based tiles there will be multiple MST trees that need to coordinate with each other. However, we do not currently have any iframe tiles, so this capability of the system hasn't been tested yet.
 
 The main parts of the system are:
