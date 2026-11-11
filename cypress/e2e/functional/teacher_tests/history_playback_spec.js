@@ -1,18 +1,51 @@
 import ClueCanvas from "../../../support/elements/common/cCanvas";
 import TableToolTile from "../../../support/elements/tile/TableToolTile";
 import DrawToolTile from "../../../support/elements/tile/DrawToolTile";
+import DataflowToolTile from "../../../support/elements/tile/DataflowToolTile";
 
 let clueCanvas = new ClueCanvas;
 let tableToolTile = new TableToolTile;
 let drawToolTile = new DrawToolTile;
+let dataflowToolTile = new DataflowToolTile;
 
 const queryParams = `${Cypress.config("qaUnitTeacher6")}`;
 const studentQueryParams = `${Cypress.config("clueTestqaUnitStudent5")}`;
+// A unit whose DataFlow settings restrict the Live Output types, so a new DataFlow tile stores them.
+const liveOutputUnitQueryParams =
+  "/?appMode=qa&fakeClass=5&fakeUser=teacher:6&problem=1.1&unit=./demo/units/qa-moth-plot/content.json";
+
+const playbackDocument = '[data-test="subtab-workspaces"] .editable-document-content .canvas .document-content';
+const playbackDataflowTile = `${playbackDocument} .dataflow-tool-tile`;
+const dataflowNodes = ".dataflow-tool-tile .node";
+const playbackDataflowNodes = `${playbackDocument} ${dataflowNodes}`;
+const playbackSliderHandle = '[data-testid="playback-slider"] .rc-slider-handle';
 
 function moveSliderTo(percent) {
   cy.get('.rc-slider-horizontal').then($slider => {
     const width = $slider.width();
     cy.wrap($slider).click(width * percent / 100, 0);
+  });
+}
+
+const kArrowLeft = { key: "ArrowLeft", keyCode: 37, which: 37 };
+const kArrowRight = { key: "ArrowRight", keyCode: 39, which: 39 };
+
+// Moves the playback slider one history entry. This sends the key without the click that `type`
+// makes first, since a click on the slider can move it.
+function stepPlayback(arrow) {
+  cy.get(playbackSliderHandle).trigger("keydown", arrow);
+}
+
+// Steps playback one history entry at a time, in the direction of `arrow`, until the playback
+// document shows `count` DataFlow blocks. The blocks render asynchronously, so each step gets a
+// moment to settle before the count is read.
+function stepUntilDataflowNodes(arrow, count, stepsLeft = 60) {
+  cy.wait(500);
+  cy.get(playbackDocument).then($document => {
+    if ($document.find(dataflowNodes).length === count) return;
+    if (stepsLeft === 0) throw new Error(`playback never showed ${count} DataFlow blocks`);
+    stepPlayback(arrow);
+    stepUntilDataflowNodes(arrow, count, stepsLeft - 1);
   });
 }
 
@@ -79,6 +112,39 @@ context('History Playback', () => {
     cy.get('[data-testid="playback-play-button"]').click();
     cy.wait(2000);
     cy.get('[data-test="subtab-workspaces"] .editable-document-content .canvas .document-content .drawing-tool .drawing-layer line').should('be.visible');
+
+    cy.log('verify DataFlow blocks reappear when playback moves forward past them');
+    cy.get('.toolbar .tool.toggleplayback').click(); //close playback controls
+    clueCanvas.addTile('dataflow');
+    // Let the program tick before adding blocks. A block added before the program's first tick gets
+    // a tick entry whose history patches playback can't apply.
+    cy.wait(2500);
+    dataflowToolTile.getCreateNodeButton("number").click();
+    dataflowToolTile.getCreateNodeButton("number").click();
+    dataflowToolTile.getCreateNodeButton("number").click();
+    cy.wait(4000);
+    cy.get('.toolbar .tool.toggleplayback').click(); //open playback controls
+    cy.get(playbackDataflowNodes).should('have.length', 3);
+    // Step back from the end first: while playback is at the end it follows the entries the running
+    // program keeps adding.
+    stepPlayback(kArrowLeft);
+    // Moving back removes the blocks while the tile stays. Moving forward puts them back as new
+    // instances with the old ids, one at a time.
+    stepUntilDataflowNodes(kArrowLeft, 0);
+    cy.get(playbackDataflowTile).should('exist');
+    stepUntilDataflowNodes(kArrowRight, 1);
+    stepUntilDataflowNodes(kArrowRight, 2);
+    stepUntilDataflowNodes(kArrowRight, 3);
+
+    cy.log('verify playback reaches the start of a document with a DataFlow tile in a unit with Live Output options');
+    beforeTest(liveOutputUnitQueryParams);
+    clueCanvas.addTile('dataflow');
+    cy.wait(4000);
+    cy.get('.toolbar .tool.toggleplayback').click(); //open playback controls
+    cy.get(playbackDataflowTile).should('exist');
+    cy.get('.rc-slider-horizontal').click('left');
+    cy.get(playbackDataflowTile).should('not.exist');
+    cy.get('[data-testid="playback-failure-warning"]').should('not.exist');
   });
 
   it("verify table tile history", () => {
