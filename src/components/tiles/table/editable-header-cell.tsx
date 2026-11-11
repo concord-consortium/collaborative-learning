@@ -1,4 +1,4 @@
-import React, { forwardRef, useState } from "react";
+import React, { forwardRef } from "react";
 import { TColumn, THeaderRendererProps } from "./table-types";
 import { HeaderCellInput } from "./header-cell-input";
 
@@ -16,7 +16,6 @@ export const EditableHeaderCell = forwardRef<HTMLDivElement, IProps>(
     gridContext, editableName, isEditing,
     onBeginHeaderCellEdit, onHeaderCellEditKeyDown, onEndHeaderCellEdit
   } = appData || {};
-  const [nameValue, setNameValue] = useState(editableName ? name as string : "");
   const handleClick = () => {
     if (gridContext?.isColumnSelected(column.key)) {
       editableName && !isEditing && onBeginHeaderCellEdit?.();
@@ -24,24 +23,33 @@ export const EditableHeaderCell = forwardRef<HTMLDivElement, IProps>(
       !isEditing && gridContext?.onSelectColumn(column.key);
     }
   };
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>, value: string) => {
     const { key } = e;
     switch (key) {
+      // The data grid doesn't know the header is being edited, so it would treat these as moves to
+      // another cell, ending the edit. Keep them in the input to move the cursor.
+      case "ArrowLeft":
+      case "ArrowRight":
+      case "ArrowUp":
+      case "ArrowDown":
+      case "Home":
+      case "End":
+      case "PageUp":
+      case "PageDown":
+        e.stopPropagation();
+        break;
       case "Escape":
-        handleClose(false);
+        handleClose(false, value);
         break;
       case "Enter":
       case "Tab":
-        handleClose(true);
+        handleClose(true, value);
         onHeaderCellEditKeyDown?.(e);
         break;
     }
   };
-  const handleChange = (value: string) => {
-    setNameValue(value);
-  };
-  const handleClose = (accept: boolean) => {
-    onEndHeaderCellEdit?.(accept ? nameValue : undefined);
+  const handleClose = (accept: boolean, value: string) => {
+    onEndHeaderCellEdit?.(accept ? value : undefined);
   };
   const ehcStyle: React.CSSProperties = { height: height-2 };
   const style: React.CSSProperties = { width: calcColumn.width, ...ehcStyle };
@@ -63,8 +71,8 @@ export const EditableHeaderCell = forwardRef<HTMLDivElement, IProps>(
   return (
     <div className="editable-header-cell" onClick={handleClick} style={ehcStyle}>
       {isEditing
-        ? <HeaderCellInput style={style} inputStyle={inputStyle} value={nameValue}
-            onKeyDown={handleKeyDown} onChange={handleChange} onClose={handleClose} />
+        ? <HeaderCellInput style={style} inputStyle={inputStyle} initialValue={editableName ? name as string : ""}
+            ariaLabel="Column name" onKeyDown={handleKeyDown} onClose={handleClose} />
         : (
           <div
             ref={ref}

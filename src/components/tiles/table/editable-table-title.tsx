@@ -26,31 +26,29 @@ export const EditableTableTitle: React.FC<IProps> = observer(function EditableTa
   // when the title changes without re-rendering the entire TableTool
   const title = model.computedTitle;
   const [isEditing, setIsEditing] = useState(false);
-  const [editingTitle, setEditingTitle] = useState(title);
 
   const titleTextRef = useRestoreFocusOnEditExit(isEditing);
 
   const handleClick = () => {
     if (!readOnly && !isEditing) {
       onBeginEdit?.();
-      setEditingTitle(title);
       setIsEditing(true);
     }
   };
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>, value: string) => {
     const { key } = e;
     switch (key) {
       case "Escape":
-        handleClose(false);
+        handleClose(false, value);
         break;
       case "Enter":
       case "Tab":
-        handleClose(true);
+        handleClose(true, value);
         break;
     }
   };
-  const handleClose = (accept: boolean) => {
-    const trimTitle = editingTitle?.trim();
+  const handleClose = (accept: boolean, value: string) => {
+    const trimTitle = value.trim();
     onEndEdit?.(accept && trimTitle ? trimTitle : undefined);
     setIsEditing(false);
   };
@@ -61,8 +59,8 @@ export const EditableTableTitle: React.FC<IProps> = observer(function EditableTa
   return (
     <div className={classes} style={style} onClick={handleClick}>
       {isEditing
-        ? <HeaderCellInput style={style} value={editingTitle || ""}
-            onKeyDown={handleKeyDown} onChange={setEditingTitle} onClose={handleClose} />
+        ? <HeaderCellInput style={style} initialValue={title || ""} ariaLabel="Table title"
+            onKeyDown={handleKeyDown} onClose={handleClose} />
         : <EditableTitleButton ref={titleTextRef} className="editable-table-title-text"
             title={title} readOnly={readOnly} onActivate={handleClick} />}
     </div>

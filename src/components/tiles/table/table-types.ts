@@ -55,7 +55,7 @@ export interface TColumnAppData {
   hasData?: boolean;
 
   onBeginHeaderCellEdit: () => boolean | undefined;
-  onHeaderCellEditKeyDown: (e: React.KeyboardEvent<HTMLDivElement>) => void;
+  onHeaderCellEditKeyDown: (e: React.KeyboardEvent<HTMLInputElement>) => void;
   onEndHeaderCellEdit: (value?: string) => void;
   onShowExpressionsDialog?: (attrId?: string) => void;
   onRemoveColumn?: (attrId: string) => void;
