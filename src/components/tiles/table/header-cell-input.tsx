@@ -14,7 +14,7 @@ interface IProps {
   initialValue: string;
   /** What the input edits, such as "Column name". Screen readers announce it with the value. */
   ariaLabel: string;
-  onKeyDown: (e: React.KeyboardEvent<HTMLDivElement>, value: string) => void;
+  onKeyDown: (e: React.KeyboardEvent<HTMLInputElement>, value: string) => void;
   onClose: (accept: boolean, value: string) => void;
 }
 export const HeaderCellInput: React.FC<IProps> = ({

@@ -23,7 +23,7 @@ export const EditableHeaderCell = forwardRef<HTMLDivElement, IProps>(
       !isEditing && gridContext?.onSelectColumn(column.key);
     }
   };
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>, value: string) => {
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>, value: string) => {
     const { key } = e;
     switch (key) {
       // The data grid doesn't know the header is being edited, so it would treat these as moves to

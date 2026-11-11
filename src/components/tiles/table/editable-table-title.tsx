@@ -35,7 +35,7 @@ export const EditableTableTitle: React.FC<IProps> = observer(function EditableTa
       setIsEditing(true);
     }
   };
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>, value: string) => {
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>, value: string) => {
     const { key } = e;
     switch (key) {
       case "Escape":
