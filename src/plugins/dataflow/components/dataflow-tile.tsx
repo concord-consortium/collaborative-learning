@@ -7,8 +7,8 @@ import { BaseComponent } from "../../../components/base";
 import { ITileModel } from "../../../models/tiles/tile-model";
 import { ITileProps } from "../../../components/tiles/tile-component";
 import { EditableTileTitle } from "../../../components/tiles/editable-tile-title";
-import { DataflowContentModelType } from "../model/dataflow-content";
-import { resolveAllowedOutputTypes, warnUnknownLiveOutputSettings } from "../model/utilities/node";
+import { DataflowContentModelType, getUnitOutputConfig } from "../model/dataflow-content";
+import { warnUnknownLiveOutputSettings } from "../model/utilities/node";
 import { measureText } from "../../../components/tiles/hooks/use-measure-text";
 import { defaultTileTitleFont } from "../../../components/constants";
 import { TileTitleArea } from "../../../components/tiles/tile-title-area";
@@ -70,15 +70,20 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
   // Mirror the unit's resolved Live Output config onto the tile content so the snapshot-only AI
   // summarizer (chat tutor + aiEvaluation) sees the same set the node dropdown enforces. Editable
   // tiles only; setOutputConfig stores only non-default values and is idempotent.
+  //
+  // Changing the document on mount is not a good pattern, and new code should not copy it. The
+  // change is recorded as its own history entry at whatever moment React mounts the tile. When that
+  // is while the entry that added the tile is still open, the change completes first and lands
+  // before the tile's creation in history, and history playback then fails at the start of the
+  // document. New and copied tiles now get the config when they are created (defaultDataflowContent
+  // and updateDataflowContentForCopy), so this records nothing for them. It is kept so that
+  // existing tiles pick up a unit's changed config the next time they are opened for editing. The
+  // open entry in docs/history-framework/open-entry.md is the planned replacement.
   private mirrorUnitOutputConfig() {
     const { appConfig } = this.stores;
-    const servoInputMode = appConfig.getSetting("servoInputMode", "dataflow");
-    const liveOutputTypes = appConfig.getSetting("liveOutputTypes", "dataflow");
-    warnUnknownLiveOutputSettings(servoInputMode, liveOutputTypes);
-    this.getContent().setOutputConfig({
-      servoInputMode: servoInputMode === "proportion" ? "proportion" : undefined,
-      allowedOutputTypes: resolveAllowedOutputTypes(liveOutputTypes),
-    });
+    warnUnknownLiveOutputSettings(
+      appConfig.getSetting("servoInputMode", "dataflow"), appConfig.getSetting("liveOutputTypes", "dataflow"));
+    this.getContent().setOutputConfig(getUnitOutputConfig(appConfig));
   }
 
   public componentWillUnmount() {
