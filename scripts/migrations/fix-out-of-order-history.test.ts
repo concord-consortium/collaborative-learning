@@ -2,7 +2,7 @@ import { FieldValue } from "firebase-admin/firestore";
 import {
   IStoredEntry, planHistoryRepair, repairDocumentHistory, tilePathInfo, toStoredEntry
 } from "./fix-out-of-order-history";
-import { applyJsonPatches } from "../src/models/history/json-patch";
+import { applyJsonPatches } from "../../src/models/history/json-patch";
 
 const tile = "T1";
 const tilePath = `/content/tileMap/${tile}`;

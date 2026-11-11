@@ -22,8 +22,8 @@
 //
 // Usage (from the repository root; dry run unless --apply is given):
 //
-//   npx --prefix scripts tsx scripts/fix-out-of-order-history.ts --root authed/learn_concord_org
-//   npx --prefix scripts tsx scripts/fix-out-of-order-history.ts --root authed/learn_concord_org --apply
+//   npx --prefix scripts tsx scripts/migrations/fix-out-of-order-history.ts --root authed/learn_concord_org
+//   npx --prefix scripts tsx scripts/migrations/fix-out-of-order-history.ts --root authed/learn_concord_org --apply
 //
 // Options:
 //   --root <path>         Firestore root that holds the `documents` collection, e.g. authed/learn_concord_org,
@@ -414,7 +414,7 @@ async function main() {
   // import.meta-using script-utils module.
   const admin = (await import("firebase-admin")).default;
   const fs = await import("fs");
-  const { getScriptRootFilePath } = await import("./lib/script-utils.js");
+  const { getScriptRootFilePath } = await import("../lib/script-utils.js");
   const options = parseArgs(process.argv.slice(2));
   admin.initializeApp({ credential: admin.credential.cert(getScriptRootFilePath("serviceAccountKey.json")) });
   const results = await repairHistories(admin.firestore(), options);

@@ -46,9 +46,9 @@ mount.
   non-undoable entry when the config differs. For new and copied tiles the config already matches,
   so nothing is recorded. This is the pattern the open entry replaces. Don't copy it.
 - **Histories stored before this change** can still have the Live Output entry ahead of the
-  tile's creation. `scripts/fix-out-of-order-history.ts` repairs them by moving each such entry to
-  just after the entry that creates its tile. See its header for how it decides what is safe to
-  move.
+  tile's creation. `scripts/migrations/fix-out-of-order-history.ts` repairs them by moving each
+  such entry to just after the entry that creates its tile. See its header for how it decides what
+  is safe to move.
 - **Load entries** (see "Load entries" in [history-framework.md](../history-framework.md)) record
   the schema conversions CLUE makes when it loads old content. They aren't open entries; see below.
 

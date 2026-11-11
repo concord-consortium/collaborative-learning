@@ -43,17 +43,25 @@ to in your local repo, so run `git fetch --tags` first. It exits non-zero if any
 the Deploy timing callouts of every PR in a release. See "Deploy timing" in
 [docs/deploy.md](../docs/deploy.md) for what they read, and each script's header for its options.
 
-## Repairing history entries stored out of order
+## Migration scripts
 
-`fix-out-of-order-history.ts` finds stored histories in which an entry that changes a tile comes
-before the entry that creates the tile, which makes history playback fail at the start of the
-document. It moves each such entry to just after the entry that creates its tile, by rewriting the
-`index` and `previousEntryId` fields of the entries in between. It is a dry run unless `--apply`
-is given, and writes a report to `scripts/output/`:
+Scripts that change data in Firestore or the Realtime Database go in `migrations/`. They are run by
+hand around a release, so a PR that adds or changes one needs a Deploy timing entry saying whether
+to run it before, with or after the client release, and the `Deploy Timing` check enforces that.
+See "Deploy timing" in [docs/deploy.md](../docs/deploy.md). Scripts that only read or report stay
+in this folder. Give a migration script a dry run by default, and a flag that makes it write.
+
+### Repairing history entries stored out of order
+
+`migrations/fix-out-of-order-history.ts` finds stored histories in which an entry that changes a
+tile comes before the entry that creates the tile, which makes history playback fail at the start
+of the document. It moves each such entry to just after the entry that creates its tile, by
+rewriting the `index` and `previousEntryId` fields of the entries in between. It is a dry run
+unless `--apply` is given, and writes a report to `scripts/output/`:
 
 ```shell
-npx --prefix scripts tsx scripts/fix-out-of-order-history.ts --root authed/learn_concord_org
-npx --prefix scripts tsx scripts/fix-out-of-order-history.ts --root authed/learn_concord_org --apply
+npx --prefix scripts tsx scripts/migrations/fix-out-of-order-history.ts --root authed/learn_concord_org
+npx --prefix scripts tsx scripts/migrations/fix-out-of-order-history.ts --root authed/learn_concord_org --apply
 ```
 
 By default it checks only documents whose `tools` include `Dataflow`, the tile known to have left
