@@ -65,6 +65,13 @@ describe("DataflowContentModel", () => {
       expect(getSnapshot(dcm).outputConfig).toEqual(unitOutputConfig);
     });
 
+    it("sets outputConfig for a unit that changes only one of the Live Output settings", () => {
+      expect(getUnitOutputConfig(appConfigWith({ servoInputMode: "proportion" })))
+        .toEqual({ servoInputMode: "proportion" });
+      expect(getUnitOutputConfig(appConfigWith({ liveOutputTypes: ["Servo"] })))
+        .toEqual({ allowedOutputTypes: ["Servo"] });
+    });
+
     it("leaves outputConfig unset for a unit with the default Live Output settings", () => {
       expect(defaultDataflowContent({ appConfig: appConfigWith({}) }).outputConfig).toBeUndefined();
     });
