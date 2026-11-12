@@ -1491,8 +1491,8 @@ export class ReteManager implements INodeServices {
 
     // A view is also redrawn when its id is still there but its MST model was replaced. History
     // playback can remove a node or connection and put it back with the same id within one seek,
-    // and undo can too. The view would otherwise keep reading the removed model. These are worked
-    // out before the first await, while the program still matches the snapshot.
+    // and undo can too. A view left drawn from the removed model would keep reading it. These are
+    // worked out before the first await, while the program still matches the snapshot.
     const removedNodeIds = new Set([...area.nodeViews.keys()].filter(id => {
       const node = mstProgram.nodes.get(id);
       return !node || this.drawnNodeModels.get(id) !== node.data;
