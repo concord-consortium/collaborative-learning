@@ -5,7 +5,7 @@ import { structures } from "rete-structures";
 import { ConnectionPlugin, Presets as ConnectionPresets } from "rete-connection-plugin";
 import { Presets, ReactPlugin } from "rete-react-plugin";
 import { AreaExtensions, AreaPlugin } from "rete-area-plugin";
-import { onPatch, onSnapshot } from "mobx-state-tree";
+import { getSnapshot, onPatch, onSnapshot } from "mobx-state-tree";
 import { autorun, observable, reaction, runInAction } from "mobx";
 
 import { IStores } from "../../../models/stores/stores";
@@ -1463,15 +1463,31 @@ export class ReteManager implements INodeServices {
     // TODO: handle undo/redo events too
     if (!this.readOnly) return;
 
-    this.snapshotDisposer = onSnapshot(this.mstProgram, this.updateProgramEditor);
+    this.snapshotDisposer = onSnapshot(this.mstProgram, this.queueProgramEditorUpdate);
   }
 
-  private updateProgramEditor = async (snapshot: DataflowProgramSnapshotOut) => {
+  // Updates run one at a time. The program can change twice in one task, as playback's rollback
+  // does, and two updates running together would each find a view missing and draw it, or draw a
+  // node the other has just found removed. Each update reads the program when it starts, so a
+  // queued one draws the latest state.
+  private programEditorUpdates = Promise.resolve();
+
+  private queueProgramEditorUpdate = () => {
+    const update = this.programEditorUpdates.then(() => this.updateProgramEditor());
+    // A failed update doesn't stop the ones queued after it.
+    this.programEditorUpdates = update.catch(() => undefined);
+    return update;
+  };
+
+  private updateProgramEditor = async () => {
+    if (this.disposed) return;
+
     // When sending removed events we have to hack the types because we don't want to
     // track down an instance of the node or connection that was deleted. The area
     // plugin only cares about the id.
 
     const { editor, area, mstProgram } = this;
+    const snapshot: DataflowProgramSnapshotOut = getSnapshot(mstProgram);
 
     // A view is also redrawn when its id is still there but its MST model was replaced. History
     // playback can remove a node or connection and put it back with the same id within one seek,

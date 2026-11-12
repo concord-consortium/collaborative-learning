@@ -98,6 +98,32 @@ describe("ReteManager read-only view", () => {
     ]);
   });
 
+  // Playback's rollback, for one, changes the program twice in one task, so the second update starts
+  // before the first has finished.
+  it("draws the program's final state when two changes arrive before the first update finishes", async () => {
+    const { doc, program, manager } = await openReadOnlyProgram();
+    managers.push(manager);
+    const errors = jest.spyOn(console, "error").mockImplementation(() => undefined);
+    const unhandled: unknown[] = [];
+    const onUnhandled = (reason: unknown) => unhandled.push(reason);
+    process.on("unhandledRejection", onUnhandled);
+
+    const added = { op: "add" as const, path: "/content/program/nodes/num2",
+      value: { id: "num2", name: "Number 2", x: 0, y: 100, data: { type: "Number", value: 2 } } };
+    applyPatch(doc, added);
+    applyPatch(doc, { op: "remove", path: "/content/program/nodes/num2" });
+    applyPatch(doc, { op: "replace", path: "/content/program/nodes/num/x", value: 50 });
+    await settle();
+    await settle();
+    process.off("unhandledRejection", onUnhandled);
+
+    expect(unhandled).toEqual([]);
+    expect(errors).not.toHaveBeenCalled();
+    expect([...manager.area.nodeViews.keys()].sort()).toEqual(["math", "num"]);
+    expect(manager.area.nodeViews.get("num")!.position.x).toBe(50);
+    expect(program.nodes.get("num2")).toBeUndefined();
+  });
+
   it("leaves views alone when a change keeps the same models", async () => {
     const { doc, manager, events } = await openReadOnlyProgram();
     managers.push(manager);
