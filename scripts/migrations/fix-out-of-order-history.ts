@@ -358,7 +358,8 @@ export async function repairDocumentHistory(db: Firestore, docRef: DocumentRefer
   };
   if (plan.skipped || plan.writes.length === 0) return result;
 
-  const newest = Math.max(...entries.map(entry => entry.created ?? 0));
+  // Not Math.max(...): a long history has more entries than a call can take as arguments.
+  const newest = entries.reduce((max, entry) => Math.max(max, entry.created ?? 0), 0);
   if (now - newest < minIdleMinutes * 60 * 1000) {
     return { ...result, skipped: `the history changed less than ${minIdleMinutes} minutes ago` };
   }
@@ -405,7 +406,14 @@ export async function repairHistories(db: Firestore, options: IRepairOptions) {
 
   const results: IDocumentResult[] = [];
   for (const ref of refs) {
-    const result = await repairDocumentHistory(db, ref, options);
+    let result: IDocumentResult;
+    try {
+      result = await repairDocumentHistory(db, ref, options);
+    } catch (error) {
+      // One document that fails is skipped, so the run still checks the rest and writes its report.
+      const message = error instanceof Error ? error.message : String(error);
+      result = { path: ref.path, entries: 0, moves: [], writes: 0, skipped: `failed: ${message}` };
+    }
     results.push(result);
     if (result.moves.length || result.skipped) {
       const moved = result.moves.map(move => `${move.action} -> after ${move.afterAction}`).join("; ");

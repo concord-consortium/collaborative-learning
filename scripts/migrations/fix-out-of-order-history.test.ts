@@ -380,6 +380,17 @@ describe("repairDocumentHistory", () => {
     expect(result.moves).toHaveLength(1);
   });
 
+  it("checks a history with more entries than a call can take as arguments", async () => {
+    const docs = [stored(setOutputConfig("A", 0)), stored(addTile("B", 1, "A"))];
+    for (let i = 0; i < 130000; i++) {
+      docs.push(stored(tick(`T${i}`, i + 2, docs[docs.length - 1].id)));
+    }
+    const { db, docRef } = makeDb(docs);
+    const result = await repairDocumentHistory(db, docRef);
+    expect(result).toEqual(expect.objectContaining({ entries: 130002, writes: 3, skipped: undefined }));
+    expect(result.moves).toHaveLength(1);
+  });
+
   it("skips a document whose history changed recently", async () => {
     const docs = [stored(setOutputConfig("A", 0)), stored(addTile("B", 1, "A"), minutesAgo(5))];
     const { db, docRef, isCommitted } = makeDb(docs);
@@ -390,13 +401,19 @@ describe("repairDocumentHistory", () => {
 });
 
 describe("repairHistories", () => {
-  // The documents under authed/p, each with a history that needs no repair. `calls` records the
-  // query on the documents collection.
-  function makeDb(ids: string[]) {
+  // The documents under authed/p, each with a history that needs no repair, except that the
+  // `unreadable` ones can't be loaded. `calls` records the query on the documents collection.
+  function makeDb(ids: string[], unreadable: string[] = []) {
     const calls: string[] = [];
+    const failingHistory: any = {
+      orderBy: () => failingHistory, limit: () => failingHistory,
+      get: () => Promise.reject(new Error("deadline exceeded"))
+    };
     const ref = (id: string) => {
       const path = `authed/p/documents/${id}`;
-      return { path, collection: () => historyCollection(path, [stored(addTile("A", 0))]).collection };
+      const history = unreadable.includes(id)
+        ? failingHistory : historyCollection(path, [stored(addTile("A", 0))]).collection;
+      return { path, collection: () => history };
     };
     const documents: any = {
       doc: ref,
@@ -409,12 +426,12 @@ describe("repairHistories", () => {
     };
     return { db, calls };
   }
-  async function run(ids: string[], args: string[]) {
-    const { db, calls } = makeDb(ids);
+  async function run(ids: string[], args: string[], unreadable: string[] = []) {
+    const { db, calls } = makeDb(ids, unreadable);
     const log: string[] = [];
     const results = await repairHistories(db, { ...parseArgs(["--root", "authed/p", ...args]),
       log: message => log.push(message) });
-    return { calls, log, paths: results.map(result => result.path) };
+    return { calls, log, results, paths: results.map(result => result.path) };
   }
 
   it("checks the documents with a DataFlow tile by default, loading only their ids", async () => {
@@ -441,6 +458,13 @@ describe("repairHistories", () => {
     const { calls, paths } = await run(["D1", "D2", "D3"], ["--doc", "d1", "--doc", "d2"]);
     expect(calls).toEqual(["collection authed/p/documents"]);
     expect(paths).toEqual(["authed/p/documents/d1", "authed/p/documents/d2"]);
+  });
+
+  it("skips a document that fails and checks the rest", async () => {
+    const { log, results } = await run(["D1", "D2", "D3"], [], ["D2"]);
+    expect(results.map(result => result.skipped)).toEqual([undefined, "failed: deadline exceeded", undefined]);
+    expect(log).toContain("authed/p/documents/D2: skipped: failed: deadline exceeded");
+    expect(log[log.length - 1]).toBe("0 documents to repair, 1 skipped, 3 checked");
   });
 
   it("checks no more than --limit documents", async () => {
