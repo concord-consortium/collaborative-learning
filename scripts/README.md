@@ -45,29 +45,20 @@ the Deploy timing callouts of every PR in a release. See "Deploy timing" in
 
 ## Migration scripts
 
-Scripts that change data in Firestore or the Realtime Database go in `migrations/`. They are run by
-hand around a release, so a PR that adds or changes one needs a Deploy timing entry saying whether
-to run it before, with or after the client release, and the `Deploy Timing` check enforces that.
-See "Deploy timing" in [docs/deploy.md](../docs/deploy.md). Scripts that only read or report stay
-in this folder. Give a migration script a dry run by default, and a flag that makes it write.
+New scripts that change data in Firestore or the Realtime Database go in `migrations/`. They are
+run by hand around a release, so a PR that adds or changes one needs a Deploy timing entry saying
+whether to run it before, with or after the client release, and the `Deploy Timing` check enforces
+that. See "Deploy timing" in [docs/deploy.md](../docs/deploy.md). Give a migration script a dry run
+by default, and a flag that makes it write. Scripts that only read or report stay in this folder, and
+so do older scripts that change data, such as `backfill-group-document-axes.ts` and those in
+`metadata-repair/`.
 
 ### Repairing history entries stored out of order
 
-`migrations/fix-out-of-order-history.ts` finds stored histories in which an entry that changes a
-tile comes before the entry that creates the tile, which makes history playback fail at the start
-of the document. It moves each such entry to just after the entry that creates its tile, by
-rewriting the `index` and `previousEntryId` fields of the entries in between. It is a dry run
-unless `--apply` is given, and writes a report to `scripts/output/`:
-
-```shell
-npx --prefix scripts tsx scripts/migrations/fix-out-of-order-history.ts --root authed/learn_concord_org
-npx --prefix scripts tsx scripts/migrations/fix-out-of-order-history.ts --root authed/learn_concord_org --apply
-```
-
-By default it checks only documents whose `tools` include `Dataflow`, the tile known to have left
-such histories. Its header lists the other options and the cases it skips. See
-[docs/history-framework/open-entry.md](../docs/history-framework/open-entry.md) for how these
-histories came about.
+`migrations/fix-out-of-order-history.ts` moves history entries stored ahead of the entry that
+creates their tile, which make history playback fail at the start of a document. Its header has
+the commands and options, and the cases it skips. For a full repair, run it with `--any-tile-type`,
+trying it first on a subset with `--limit` or `--doc`.
 
 ## Running scripts that connect with the portal
 

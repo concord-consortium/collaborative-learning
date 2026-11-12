@@ -37,7 +37,10 @@
 //                         demo/<name> or qa/<uid>. Required.
 //   --doc <id>            Check only this document (repeatable).
 //   --tile-type <type>    Check only documents whose `tools` include this tile type. Default: Dataflow.
-//   --any-tile-type       Check every document under the root.
+//                         `tools` lists the tile types in the current content, so this misses a
+//                         document whose DataFlow tile was deleted after the entries were stored.
+//   --any-tile-type       Check every document under the root. This reads every document's
+//                         history; try it on a subset first, with --limit or --doc.
 //   --limit <n>           Stop after checking this many documents.
 //   --min-idle-minutes <n> Skip a document whose newest entry is younger than this. Default: 60.
 //   --apply               Write the changes. Without it, the script only reports them.
