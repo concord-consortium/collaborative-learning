@@ -25,25 +25,25 @@ function makeDocument(content: any, extra: Record<string, any> = {}) {
   return { document, manager };
 }
 
-describe("load entry", () => {
+describe("conversion entry", () => {
   afterEach(() => jest.restoreAllMocks());
 
-  it("converts an old tile at load and keeps a pending load entry", () => {
+  it("converts an old tile at load and keeps a pending conversion entry", () => {
     const { document, manager } = makeDocument(oldContent());
     const tile = document.content!.tileMap.get("t1")!.content as VersionedTestTileType;
     expect(tile.version).toBe("2");
     expect(tile.label).toBe("c");
-    const entry = manager.pendingLoadEntry!;
+    const entry = manager.pendingConversionEntry!;
     expect(entry).toBeDefined();
-    expect(entry.isLoadEntry).toBe(true);
+    expect(entry.isConversionEntry).toBe(true);
     expect(entry.background).toBe(true);
     expect(entry.undoable).toBe(false);
     expect(manager.document.history.length).toBe(0);
   });
 
-  it("load entry patches round-trip between the stored JSON and the MST snapshot", () => {
+  it("conversion entry patches round-trip between the stored JSON and the MST snapshot", () => {
     const { document, manager } = makeDocument(oldContent());
-    const entry = HistoryEntry.create(manager.pendingLoadEntry!);
+    const entry = HistoryEntry.create(manager.pendingConversionEntry!);
     const docJson: any = toJsonValue(getSnapshot(document));
     const converted = cloneDeep(docJson);
 
@@ -58,14 +58,14 @@ describe("load entry", () => {
     const { manager } = makeDocument({
       tileMap: { t1: { id: "t1", content: { type: "VersionedTestTile", version: "2", label: "x" } } }
     });
-    expect(manager.pendingLoadEntry).toBeUndefined();
+    expect(manager.pendingConversionEntry).toBeUndefined();
   });
 
   it("records nothing for a concurrent document", () => {
     const { document, manager } = makeDocument(oldContent(), { concurrent: true });
     const tile = document.content!.tileMap.get("t1")!.content as VersionedTestTileType;
     expect(tile.version).toBe("2");
-    expect(manager.pendingLoadEntry).toBeUndefined();
+    expect(manager.pendingConversionEntry).toBeUndefined();
   });
 
   describe("a tile its converter declines", () => {
@@ -79,28 +79,28 @@ describe("load entry", () => {
 
     it("records nothing and loads the stored JSON, at load and at every later load", async () => {
       const { document, manager } = makeDocument({ tileMap: { t3: newerTileJson() } });
-      expect(manager.pendingLoadEntry).toBeUndefined();
+      expect(manager.pendingConversionEntry).toBeUndefined();
       expect(toJsonValue(getSnapshot(getNewerTile(document)))).toEqual(newerTileJson().content);
 
       document.setContent({ tileMap: { t3: newerTileJson() } } as any);
-      expect(manager.pendingLoadEntry).toBeUndefined();
+      expect(manager.pendingConversionEntry).toBeUndefined();
       expect(toJsonValue(getSnapshot(getNewerTile(document)))).toEqual(newerTileJson().content);
 
       document.treeMonitor!.enableMonitoring();
       getNewerTile(document).setLabel("m");
       await expectEntryToBeComplete(manager, 1);
-      expect(manager.document.history.map(e => e.isLoadEntry)).toEqual([undefined]);
+      expect(manager.document.history.map(e => e.isConversionEntry)).toEqual([undefined]);
       document.treeMonitor!.disableMonitoring();
 
       const reloaded = makeDocument(toJsonValue(getSnapshot(document.content!)));
-      expect(reloaded.manager.pendingLoadEntry).toBeUndefined();
+      expect(reloaded.manager.pendingConversionEntry).toBeUndefined();
       expect(getNewerTile(reloaded.document).version).toBe("3");
       expect(getNewerTile(reloaded.document).label).toBe("m");
     });
 
     it("leaves it out of the entry for the tiles the converter accepts", () => {
       const { document, manager } = makeDocument({ tileMap: { ...oldContent().tileMap, t3: newerTileJson() } });
-      const patches = manager.pendingLoadEntry!.records![0].patches!;
+      const patches = manager.pendingConversionEntry!.records![0].patches!;
       expect(patches.length).toBeGreaterThan(0);
       expect(patches.every(p => p.path.startsWith("/content/tileMap/t1/"))).toBe(true);
       expect(getNewerTile(document).version).toBe("3");
@@ -119,7 +119,7 @@ describe("load entry", () => {
 
     expect(warnSpy).toHaveBeenCalledTimes(1);
     expect(warnSpy.mock.calls[0][0]).toMatch(/\/content\/tileMap\/t1\b.*"9".*"2"/);
-    expect(manager.pendingLoadEntry).toBeDefined();
+    expect(manager.pendingConversionEntry).toBeDefined();
   });
 
   it("records nothing when content is an MST instance", () => {
@@ -127,7 +127,7 @@ describe("load entry", () => {
     const convertSpy = jest.spyOn(schemaConversion, "convertContentJson");
     const { manager } = makeDocument(content);
     expect(convertSpy).not.toHaveBeenCalled();
-    expect(manager.pendingLoadEntry).toBeUndefined();
+    expect(manager.pendingConversionEntry).toBeUndefined();
   });
 
   it("includes converted shared models in the same entry", () => {
@@ -137,8 +137,8 @@ describe("load entry", () => {
         sm1: { sharedModel: { id: "sm1", type: "VersionedTestSharedModel", val: "x" }, tiles: [] }
       }
     });
-    const patches = manager.pendingLoadEntry!.records![0].patches!;
-    expect(manager.pendingLoadEntry!.records!.length).toBe(1);
+    const patches = manager.pendingConversionEntry!.records![0].patches!;
+    expect(manager.pendingConversionEntry!.records!.length).toBe(1);
     expect(patches.some(p => p.path.startsWith("/content/sharedModelMap/sm1/sharedModel/"))).toBe(true);
     expect(patches.some(p => p.path.startsWith("/content/tileMap/t1/"))).toBe(true);
   });
@@ -149,7 +149,7 @@ describe("load entry", () => {
 
     // The ids the pending entry's forward patches give when applied to the stored JSON.
     const entryItemIds = (manager: Instance<typeof TreeManager>, storedContent: any) => {
-      const entry = HistoryEntry.create(manager.pendingLoadEntry!);
+      const entry = HistoryEntry.create(manager.pendingConversionEntry!);
       const docJson: any = { content: cloneDeep(storedContent) };
       applyJsonPatches(docJson, entry.records[0].getPatches(HistoryOperation.Redo));
       return docJson.content.tileMap.t1.content.items.map((item: any) => item.id);
@@ -169,7 +169,7 @@ describe("load entry", () => {
       const { document, manager } = makeDocument({
         tileMap: { t1: { id: "t1", content: { type: "VersionedTestTile", version: "2", label: "x" } } }
       });
-      expect(manager.pendingLoadEntry).toBeUndefined();
+      expect(manager.pendingConversionEntry).toBeUndefined();
 
       document.setContent(oldContent() as any);
 
@@ -178,13 +178,13 @@ describe("load entry", () => {
 
     it("clears the pending entry when the new content is current", () => {
       const { document, manager } = makeDocument(oldContent());
-      expect(manager.pendingLoadEntry).toBeDefined();
+      expect(manager.pendingConversionEntry).toBeDefined();
 
       document.setContent({
         tileMap: { t1: { id: "t1", content: { type: "VersionedTestTile", version: "2", label: "y" } } }
       } as any);
 
-      expect(manager.pendingLoadEntry).toBeUndefined();
+      expect(manager.pendingConversionEntry).toBeUndefined();
       expect((document.content!.tileMap.get("t1")!.content as VersionedTestTileType).label).toBe("y");
     });
 
@@ -195,7 +195,7 @@ describe("load entry", () => {
 
       const tile = document.content!.tileMap.get("t1")!.content as VersionedTestTileType;
       expect(tile.version).toBe("2");
-      expect(manager.pendingLoadEntry).toBeUndefined();
+      expect(manager.pendingConversionEntry).toBeUndefined();
     });
 
     it("logs an error when old content replaces a monitored document's content, and not otherwise", () => {
@@ -233,7 +233,7 @@ describe("load entry", () => {
     });
   });
 
-  it("flushes the load entry before the first local entry that changes the content, outside the undo stack",
+  it("flushes the conversion entry before the first local entry that changes the content, outside the undo stack",
       async () => {
     const { document, manager } = makeDocument(oldContent());
     const historyManager = { onHistoryEntryCompleted: jest.fn() };
@@ -244,10 +244,10 @@ describe("load entry", () => {
     tile.setLabel("x");
     await expectEntryToBeComplete(manager, 2);
 
-    expect(manager.document.history.map(e => e.isLoadEntry)).toEqual([true, undefined]);
+    expect(manager.document.history.map(e => e.isConversionEntry)).toEqual([true, undefined]);
     expect(historyManager.onHistoryEntryCompleted.mock.calls.map(c => c[2])).toEqual([0, 1]);
     expect(manager.undoStore.undoLevels).toBe(1);
-    expect(manager.pendingLoadEntry).toBeUndefined();
+    expect(manager.pendingConversionEntry).toBeUndefined();
   });
 
   it("counts a patch at exactly /content as changing the content", () => {
@@ -260,21 +260,21 @@ describe("load entry", () => {
     expect(entryChangesContent(entryAt("/title"))).toBe(false);
   });
 
-  it("keeps the load entry pending until an entry changes the content", async () => {
+  it("keeps the conversion entry pending until an entry changes the content", async () => {
     const { document, manager } = makeDocument(oldContent());
     document.treeMonitor!.enableMonitoring();
 
     document.setTitle("Renamed");
     await expectEntryToBeComplete(manager, 1);
 
-    expect(manager.document.history.map(e => e.isLoadEntry)).toEqual([undefined]);
-    expect(manager.pendingLoadEntry).toBeDefined();
+    expect(manager.document.history.map(e => e.isConversionEntry)).toEqual([undefined]);
+    expect(manager.pendingConversionEntry).toBeDefined();
 
     const tile = document.content!.tileMap.get("t1")!.content as VersionedTestTileType;
     tile.setLabel("x");
     await expectEntryToBeComplete(manager, 3);
 
-    expect(manager.document.history.map(e => e.isLoadEntry)).toEqual([undefined, true, undefined]);
-    expect(manager.pendingLoadEntry).toBeUndefined();
+    expect(manager.document.history.map(e => e.isConversionEntry)).toEqual([undefined, true, undefined]);
+    expect(manager.pendingConversionEntry).toBeUndefined();
   });
 });

@@ -30,14 +30,13 @@ the old paths and values, new entries would use the new ones, and nothing in bet
 format changed. Playback would stop with the failure banner at the first old entry that touches a
 changed part of the tile, and a patch-applying service would fail the same way.
 
-To prevent that, a load that converts old tiles or shared models makes a **load entry**, which is
-added to the history with the first change after the load (except in concurrent documents; see
-"Concurrent documents" below). A load entry records the changes CLUE made to the stored content
-while loading it. Today those are schema conversions. Its patches take each converted model from
+To prevent that, a load that converts old tiles or shared models records the conversion as a
+**conversion entry**, which is added to the history with the first change after the load (except in
+concurrent documents; see "Concurrent documents" below). Its patches take each converted model from
 its old JSON to its converted JSON, and back. They come from a generic diff, so you write nothing
-for them. The entry is flagged `isLoadEntry` and `background`, and it is never undoable. Playback
-applies it like any other entry to a plain JSON copy of the document, so it can cross the change in
-either direction. It never applies it to a live MST tree.
+for them. The entry is flagged `isConversionEntry` and `background`, and it is never undoable.
+Playback applies it like any other entry to a plain JSON copy of the document, so it can cross the
+change in either direction. It never applies it to a live MST tree.
 
 For this to work you tell the system which version your type's JSON is at, and how to convert an
 older one. Everything else is done for you.
@@ -119,7 +118,7 @@ older one. Everything else is done for you.
    [tree-manager-conversion.test.ts](../src/models/history/tree-manager-conversion.test.ts), which
    uses the test-only tile and shared model types in
    [schema-conversion-test-types.ts](../src/models/history/schema-conversion-test-types.ts). Start
-   from an old-format document with old-format history. Load it so the load entry is
+   from an old-format document with old-format history. Load it so the conversion entry is
    recorded, add new-format entries, then scrub backward to the start and forward to the end.
    Check that there are no playback failures, that the JSON copy equals a plain replay of the stored
    entries at each position, and that each MST tile equals its JSON run through `convertSnapshot`
@@ -137,8 +136,8 @@ older one. Everything else is done for you.
 
 Playback only does extra work for a document when:
 
-- its history has a load entry;
-- its live copy converted old content and holds that load entry until it saves; or
+- its history has a conversion entry;
+- its live copy converted old content and holds that conversion entry until it saves; or
 - a registered history bridge finds a conversion its history never recorded.
 
 A bridge ([history-bridges.ts](../src/models/history/history-bridges.ts)) finds conversions that
@@ -219,7 +218,7 @@ With the mechanism above, removing it needs only:
 - a version bump in the DataFlow state (a new `STATE_VERSION_CURRENT`), and
 - a `convertSnapshot` step that drops `content.programZoom` from older tiles.
 
-The recorded load entry removes the field from the converted tile. Old `/programZoom/...`
+The recorded conversion entry removes the field from the converted tile. Old `/programZoom/...`
 patches still apply to the JSON copy, which holds the old format at those positions, and playback
 replaces the old tile through the conversion, so the MST model never sees a `programZoom` patch.
 `programZoom` is still in the model; this section only describes what removing it would take.
@@ -227,32 +226,31 @@ replaces the old tile through the conversion, so the MST model never sees a `pro
 ## Concurrent documents
 
 Concurrent documents are the ones with the `concurrent` flag: group documents, and class-wide
-collaborative documents such as the driving-question board. They don't record load entries yet,
-and `convertStoredContent` in `document.ts` skips them on purpose. The concurrent history manager
-applies every incoming entry's patches straight to each client's live document, not to a playback
-copy. A load entry recorded there would therefore be applied to every other client's live document,
-and then saved. A client released before concurrent documents learn to handle load entries has no
-way to refuse one.
+collaborative documents such as the driving-question board. They don't record conversion entries
+yet, and `convertStoredContent` in `document.ts` skips them on purpose. The concurrent history
+manager applies every incoming entry's patches straight to each client's live document, not to a
+playback copy. A conversion entry recorded there would therefore be applied to every other client's
+live document, and then saved. A client released before concurrent documents learn to handle
+conversion entries has no way to refuse one.
 
-Until they record load entries, a schema change breaks playback of a concurrent document across
-the conversion unless a history bridge covers it. The history bridges and the JSON copy apply to
-concurrent documents like any other, so legacy DataFlow history in a concurrent document plays
-back across the conversion. Two problems
-are unsolved for them. Clients converting the same old document at the same time each make their
-own load entry. A tab still running an older release can't apply a newer conversion's entries and
-would keep writing old-format ones.
+Until they record conversion entries, a schema change breaks playback of a concurrent document
+across the conversion unless a history bridge covers it. The history bridges and the JSON copy apply
+to concurrent documents like any other, so legacy DataFlow history in a concurrent document plays
+back across the conversion. Two problems are unsolved for them. Clients converting the same old
+document at the same time each make their own conversion entry. A tab still running an older
+release can't apply a newer conversion's entries and would keep writing old-format ones.
 
-The plan has two steps. First, a client of a concurrent document that receives a load entry doesn't
-apply it, stops editing, and asks for a reload. Then concurrent documents record load entries and
-merge them with concurrent edits, and the stop narrows to conversions whose version the client
-doesn't know. The check can only stop clients that already have it, so the first step has to ship
-at least one release before the second, so that tabs old enough to lack it are unlikely to still be
-open.
+The plan has two steps. First, a client of a concurrent document that receives a conversion entry
+doesn't apply it, stops editing, and asks for a reload. Then concurrent documents record conversion
+entries and merge them with concurrent edits, and the stop narrows to conversions whose version the
+client doesn't know. The check can only stop clients that already have it, so the first step has to
+ship at least one release before the second, so that tabs old enough to lack it are unlikely to
+still be open.
 
 ## Known limit
 
 Playback starts from the document's saved content. If that content was saved before its last few
 entries reached history, the starting state is wrong, and this affects playback across a conversion
-the same way it affects playback without one. The history that reaches the load entry may also be
-incomplete in that window: if playback is opened after the converted content is saved but before
-the load entry is written, the entry isn't there yet.
+the same way it affects playback without one. The history that reaches the conversion entry may
+also be incomplete in that window: if playback is opened after the converted content is saved but
+before the conversion entry is written, the entry isn't there yet.

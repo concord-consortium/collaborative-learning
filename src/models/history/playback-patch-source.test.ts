@@ -28,11 +28,11 @@ const oldTile = (id: string, text = "hello") =>
 const currentTile = (id: string) => ({ id, content: { type: "PlaybackTestTile" } });
 
 type PatchSpec = Partial<IJsonPatch> & { path: string };
-function makeEntry(patches: PatchSpec[], inversePatches: PatchSpec[] = [], isLoadEntry = false) {
+function makeEntry(patches: PatchSpec[], inversePatches: PatchSpec[] = [], isConversionEntry = false) {
   const toPatches = (list: PatchSpec[]) => list.map(p => ({ op: "replace" as const, ...p }));
   return HistoryEntry.create({
     id: nanoid(), created: Date.now(), tree: kTreeId, model: "DocumentContent", action: "/test",
-    undoable: true, isLoadEntry, state: "complete", triggeringBatchIds: [],
+    undoable: true, isConversionEntry, state: "complete", triggeringBatchIds: [],
     records: [{
       tree: kTreeId, action: "/test", patches: toPatches(patches), inversePatches: toPatches(inversePatches)
     }]
@@ -59,18 +59,18 @@ describe("createOldModelPatchSource", () => {
     expect((replacements[0].value as any).content.version).toBe("2");
   });
 
-  it("delegates other trees and gives load entries no patches", () => {
+  it("delegates other trees and gives conversion entries no patches", () => {
     const copy = makeCopy({ tileMap: { t1: oldTile("t1") } });
     const entry = makeEntry([t1Text("a")]);
-    const loadEntry = makeEntry([t1Text("a")], [t1Text("b")], true);
+    const conversionEntry = makeEntry([t1Text("a")], [t1Text("b")], true);
     const source = createOldModelPatchSource({ copy, treeId: "other", oldPaths: new Set([t1Path]) });
     expect(source.getPatches(entry, kTreeId, HistoryOperation.Redo))
       .toEqual(defaultPatchSource.getPatches(entry, kTreeId, HistoryOperation.Redo));
     expect(source.getModelReplacements(kTreeId)).toEqual([]);
-    // With no old paths, only the load-entry check keeps the load entry's patches out.
+    // With no old paths, only the conversion-entry check keeps the conversion entry's patches out.
     const ownSource = createOldModelPatchSource({ copy, treeId: kTreeId, oldPaths: new Set() });
-    expect(ownSource.getPatches(loadEntry, kTreeId, HistoryOperation.Redo)).toEqual([]);
-    expect(ownSource.getPatches(loadEntry, kTreeId, HistoryOperation.Undo)).toEqual([]);
+    expect(ownSource.getPatches(conversionEntry, kTreeId, HistoryOperation.Redo)).toEqual([]);
+    expect(ownSource.getPatches(conversionEntry, kTreeId, HistoryOperation.Undo)).toEqual([]);
   });
 
   it("converts an add of a whole old tile using its state at the target", () => {
@@ -173,13 +173,13 @@ describe("createOldModelPatchSource", () => {
 });
 
 describe("defaultPatchSource", () => {
-  it("applies a recorded entry's patches and never a load entry's", () => {
+  it("applies a recorded entry's patches and never a conversion entry's", () => {
     const patch = { path: "/content/tileMap/t1/content/text", value: "a" };
     expect(defaultPatchSource.getPatches(makeEntry([patch]), kTreeId, HistoryOperation.Redo))
       .toEqual([{ op: "replace", ...patch }]);
-    const loadEntry = makeEntry([patch], [patch], true);
-    expect(defaultPatchSource.getPatches(loadEntry, kTreeId, HistoryOperation.Redo)).toEqual([]);
-    expect(defaultPatchSource.getPatches(loadEntry, kTreeId, HistoryOperation.Undo)).toEqual([]);
+    const conversionEntry = makeEntry([patch], [patch], true);
+    expect(defaultPatchSource.getPatches(conversionEntry, kTreeId, HistoryOperation.Redo)).toEqual([]);
+    expect(defaultPatchSource.getPatches(conversionEntry, kTreeId, HistoryOperation.Undo)).toEqual([]);
   });
 });
 

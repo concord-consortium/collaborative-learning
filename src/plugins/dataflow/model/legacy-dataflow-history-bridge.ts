@@ -7,7 +7,7 @@ import { getDataflowProgramVersion, STATE_VERSION_RETE_V1 } from "./dataflow-sta
 
 /**
  * Legacy DataFlow tiles (see `getDataflowProgramVersion`) were converted to the current format
- * without a load entry: before load entries were recorded, or in a concurrent document, which
+ * without a conversion entry: before conversion entries were recorded, or in a concurrent document, which
  * doesn't record them yet. Their history goes straight from legacy entries to current ones. This
  * bridge finds that boundary for each tile and rebuilds the legacy tile there, so playback can
  * cross it.
@@ -98,7 +98,7 @@ function rebuildTileJson(
   return getJsonAtPath(documentJson, tilePath);
 }
 
-// True when a load entry converts the tile from legacy: its forward or inverse patches on the tile
+// True when a conversion entry converts the tile from legacy: its forward or inverse patches on the tile
 // include a legacy patch. A conversion of a legacy program with no nodes and no `values` map has
 // a legacy patch only in its inverse, which sets the legacy program id back.
 function convertsLegacyTile(entry: HistoryEntryType, treeId: string, tilePath: string) {
@@ -116,10 +116,10 @@ function getLegacyTileBefore(entry: HistoryEntryType, treeId: string, tilePath: 
 }
 
 /**
- * Puts a virtual conversion after each tile's last legacy entry. Load entries don't count as
- * legacy entries, although a load entry that converts a legacy tile has legacy patches. When the
- * next entry that touches the tile is a load entry that converts it from legacy, the history
- * records the conversion, and the tile needs no virtual conversion. A load entry from a later
+ * Puts a virtual conversion after each tile's last legacy entry. Conversion entries don't count as
+ * legacy entries, although a conversion entry that converts a legacy tile has legacy patches. When the
+ * next entry that touches the tile is a conversion entry that converts it from legacy, the history
+ * records the conversion, and the tile needs no virtual conversion. A conversion entry from a later
  * schema change doesn't cover it.
  *
  * The tile's old JSON is rebuilt from its patches. When that fails, such as when the history
@@ -132,7 +132,7 @@ export const legacyDataflowHistoryBridge: IHistoryBridge = {
 
     const lastLegacyIndex = new Map<string, number>();
     patchesByEntry.forEach((patches, index) => {
-      if (history[index].isLoadEntry) return;
+      if (history[index].isConversionEntry) return;
       patches.forEach(patch => {
         if (!isLegacyDataflowPatch(patch)) return;
         const tileId = getTileId(patch.path);
@@ -146,7 +146,7 @@ export const legacyDataflowHistoryBridge: IHistoryBridge = {
       const next = patchesByEntry.findIndex((patches, index) => index > lastLegacy &&
         patches.some(patch => isAtOrUnder(patch.path, tilePath) || isAbove(patch.path, tilePath)));
       const nextEntry = next >= 0 ? history[next] : undefined;
-      if (nextEntry?.isLoadEntry && convertsLegacyTile(nextEntry, treeId, tilePath)) return;
+      if (nextEntry?.isConversionEntry && convertsLegacyTile(nextEntry, treeId, tilePath)) return;
       const oldJson = rebuildTileJson(patchesByEntry, tilePath, lastLegacy) ??
         (nextEntry && getLegacyTileBefore(nextEntry, treeId, tilePath));
       conversions.push({ path: tilePath, position: lastLegacy + 1, oldJson });

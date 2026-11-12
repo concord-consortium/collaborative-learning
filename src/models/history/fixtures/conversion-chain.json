@@ -19,7 +19,7 @@
             "label": "x",
             "items": [
               {
-                "id": "hjR_DVUQiCYwfKsv",
+                "id": "AVMKGg40BBol2KEn",
                 "value": "a"
               }
             ]
@@ -40,7 +40,7 @@
       "model": "Test",
       "action": "/oldAction",
       "undoable": true,
-      "created": 1793812929404,
+      "created": 1794489676245,
       "records": [
         {
           "tree": "doc1",
@@ -70,7 +70,7 @@
       "model": "Test",
       "action": "/oldAction",
       "undoable": true,
-      "created": 1793812929404,
+      "created": 1794489676245,
       "records": [
         {
           "tree": "doc1",
@@ -100,7 +100,7 @@
       "model": "Test",
       "action": "/oldAction",
       "undoable": true,
-      "created": 1793812929404,
+      "created": 1794489676245,
       "records": [
         {
           "tree": "doc1",
@@ -126,21 +126,21 @@
       "triggeringBatchIds": []
     },
     {
-      "id": "miHBoBsr84mphe4m1asan",
+      "id": "RlKLxBQYP2BX_p9ELiWxz",
       "tree": "doc1",
       "model": "DocumentContent",
-      "action": "/loadContent",
+      "action": "/convertContent",
       "undoable": false,
-      "created": 1793812929415,
+      "created": 1794489676256,
       "records": [
         {
           "tree": "doc1",
-          "action": "/loadContent",
+          "action": "/convertContent",
           "patches": [
             {
               "op": "add",
               "path": "/content/tileMap/t1/content/items/0/id",
-              "value": "hjR_DVUQiCYwfKsv"
+              "value": "AVMKGg40BBol2KEn"
             },
             {
               "op": "remove",
@@ -189,16 +189,16 @@
       ],
       "state": "complete",
       "triggeringBatchIds": [],
-      "isLoadEntry": true,
+      "isConversionEntry": true,
       "background": true
     },
     {
-      "id": "onO0aGiy4MS7q8pQ7Czax",
+      "id": "0njHzl1vrBvhiwxUWIvwK",
       "tree": "doc1",
       "model": "VersionedTestTile",
       "action": "/content/tileMap/t1/content/setLabel",
       "undoable": true,
-      "created": 1793812929423,
+      "created": 1794489676259,
       "records": [
         {
           "tree": "doc1",
