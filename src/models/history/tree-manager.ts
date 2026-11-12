@@ -196,7 +196,9 @@ interface IMainDocument extends TreeAPI {
   key: string;
   uid: string;
   metadata: IDocumentMetadata;
-  // Replaces the content with stored content, converting its old models.
+  /**
+   * Replaces the content with stored content, converting its old models.
+   */
   setContent(content: any): void;
 }
 
@@ -257,9 +259,13 @@ export const TreeManager = types
   exactness: new SessionExactness(),
   entryCompletedListeners: new Set<(entry: HistoryEntryType) => void>(),
   logger: undefined as TreeManagerLogger | undefined,
-  // One timer per entry that still has open exchanges.
+  /**
+   * One timer per entry that still has open exchanges.
+   */
   openEntryTimers: new Map<string, ReturnType<typeof setTimeout>>(),
-  // Entries that were force-completed, so records that arrive for them later can be recognized.
+  /**
+   * Entries that were force-completed, so records that arrive for them later can be recognized.
+   */
   timedOutEntries: new Map<string, { model?: string }>(),
   /**
    * Set when the JSON copy can't get back to the trees' position after a failed move. The copy

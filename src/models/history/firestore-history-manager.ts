@@ -45,11 +45,13 @@ export interface IFirestoreHistoryManagerArgs {
   treeManager: TreeManagerType;
   uploadLocalHistory: boolean;
   syncRemoteHistory: boolean;
-  // History fields recorded alongside the document content at save time (from the RTDB
-  // envelope). When the envelope has exactThrough, catchUpAtLoad applies the entries after its
-  // lastHistoryEntryId. When the Firestore history first loads, we verify its lastHistoryEntryId
-  // is present in the history. If not, the content reflects entries that never made it to the
-  // history chain — drift. Undefined skips the check.
+  /**
+   * History fields recorded alongside the document content at save time (from the RTDB
+   * envelope). When the envelope has exactThrough, catchUpAtLoad applies the entries after its
+   * lastHistoryEntryId. When the Firestore history first loads, we verify its lastHistoryEntryId
+   * is present in the history. If not, the content reflects entries that never made it to the
+   * history chain — drift. Undefined skips the check.
+   */
   loadedEnvelope?: ISavedEnvelope;
   // Invoked once if the loaded Firestore history doesn't contain the loaded envelope's
   // lastHistoryEntryId. The owner decides how to react — typically by
@@ -59,11 +61,15 @@ export interface IFirestoreHistoryManagerArgs {
   // Invoked once for each local entry after Firestore has accepted its upload. Not invoked for an entry
   // whose upload fails or that is rolled back before it is uploaded.
   onLocalEntryUploaded?: (entry: HistoryEntryType) => void;
-  // Logs an event about the document, such as a load catch-up that couldn't finish.
+  /**
+   * Logs an event about the document, such as a load catch-up that couldn't finish.
+   */
   logEvent?: TreeManagerLogger;
-  // For playback: the last history entry the content holds, when that can be older than the newest
-  // entry in Firestore. Once the history loads, the content is moved forward from there to the
-  // newest entry. Undefined means the content holds every entry.
+  /**
+   * For playback: the last history entry the content holds, when that can be older than the newest
+   * entry in Firestore. Once the history loads, the content is moved forward from there to the
+   * newest entry. Undefined means the content holds every entry.
+   */
   contentEntryId?: string;
 }
 
@@ -91,17 +97,27 @@ export class FirestoreHistoryManager implements ICommitSource {
   // Why a requested history entry could not be shown, for the playback UI to
   // display. Undefined when no request has failed.
   historyEntryRequestError = undefined as string | undefined;
-  // This session's newest committed local entry.
+  /**
+   * This session's newest committed local entry.
+   */
   lastCommitted: ICommittedEntry | undefined = undefined;
-  // The last Firestore entry catchUpAtLoad applied to the loaded content, when it applied any.
+  /**
+   * The last Firestore entry catchUpAtLoad applied to the loaded content, when it applied any.
+   */
   caughtUpTo: ICommittedEntry | undefined = undefined;
-  // The envelope whose content catchUpAtLoad applied the entries through caughtUpTo to.
+  /**
+   * The envelope whose content catchUpAtLoad applied the entries through caughtUpTo to.
+   */
   caughtUpFrom: ISavedEnvelope | undefined = undefined;
   contentEntryId: string | undefined;
-  // True until the content has been moved from contentEntryId to the newest entry.
+  /**
+   * True until the content has been moved from contentEntryId to the newest entry.
+   */
   catchingUpToNewest: boolean;
   private commitListeners = new Set<ICommitListener>();
-  // The local entries recorded for upload that haven't been reported committed, in chain order.
+  /**
+   * The local entries recorded for upload that haven't been reported committed, in chain order.
+   */
   private uncommitted: Array<ICommittedEntry & { uploaded: boolean }> = [];
 
   constructor({
@@ -419,7 +435,9 @@ export class FirestoreHistoryManager implements ICommitSource {
     this.commitUploadedPrefix();
   }
 
-  // An entry is committed once it and every earlier entry from this session have uploaded.
+  /**
+   * An entry is committed once it and every earlier entry from this session have uploaded.
+   */
   private commitUploadedPrefix() {
     const count = this.uncommitted.findIndex(recorded => !recorded.uploaded);
     const committed = this.uncommitted.splice(0, count < 0 ? this.uncommitted.length : count);
@@ -437,7 +455,9 @@ export class FirestoreHistoryManager implements ICommitSource {
     this.catchingUpToNewest = value;
   }
 
-  // The status of loading the history, leaving out the move to the newest entry.
+  /**
+   * The status of loading the history, leaving out the move to the newest entry.
+   */
   private getLoadStatus() : HistoryStatus {
     if (this.historyError) {
       return HistoryStatus.HISTORY_ERROR;

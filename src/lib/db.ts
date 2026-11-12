@@ -200,7 +200,9 @@ export class DB {
 
   private authStateUnsubscribe?: firebase.Unsubscribe;
   private documentFetchPromiseMap = new Map<string, Promise<DocumentModelType>>();
-  // The documents this session created, which have no history in Firestore to catch up to.
+  /**
+   * The documents this session created, which have no history in Firestore to catch up to.
+   */
   private createdDocumentKeys = new Set<string>();
   private canonicalResolvePromiseMap = new Map<string, Promise<IResolvedCanonicalDocument>>();
   private groupDocumentDisposer?: IReactionDisposer;
