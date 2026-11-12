@@ -217,4 +217,75 @@ describe("getUnitSummary", () => {
         expect(successSpy).toHaveBeenCalledTimes(1);
       });
   });
+
+  describe("classSummaryPrompts", () => {
+    function promptsBody(args: {unit?: unknown, investigation?: unknown, problem?: unknown}) {
+      return {
+        config: {classSummaryPrompts: args.unit},
+        investigations: [{
+          ordinal: 1,
+          config: {classSummaryPrompts: args.investigation},
+          problems: [
+            {ordinal: 1, title: "Problem 1.1", config: {classSummaryPrompts: args.problem}},
+            {ordinal: 2, title: "Problem 1.2"},
+          ],
+        }],
+      };
+    }
+
+    it("returns the unit's prompts for a problem that authors none", async () => {
+      jest.spyOn(global, "fetch").mockResolvedValue(
+        jsonResponse(promptsBody({unit: {replaceStudentPrompt: "unit"}})));
+      const result = await getUnitSummary("cs-unit-only");
+      expect(result?.classSummaryPrompts.byProblemOrdinal["1.2"])
+        .toEqual({replaceStudentPrompt: "unit"});
+    });
+
+    // Matches ConfigurationManager.getProp: the nearest level supplies the whole property, so the
+    // unit's replaceStudentPrompt is gone, not merged in alongside the problem's addition.
+    it("lets a problem's prompts replace the unit's outright", async () => {
+      jest.spyOn(global, "fetch").mockResolvedValue(jsonResponse(promptsBody({
+        unit: {replaceStudentPrompt: "unit", appendToStudentPrompt: "unit extra"},
+        problem: {appendToStudentPrompt: "problem extra"},
+      })));
+      const result = await getUnitSummary("cs-problem-wins");
+      expect(result?.classSummaryPrompts.byProblemOrdinal["1.1"])
+        .toEqual({appendToStudentPrompt: "problem extra"});
+    });
+
+    it("prefers an investigation's prompts over the unit's", async () => {
+      jest.spyOn(global, "fetch").mockResolvedValue(jsonResponse(promptsBody({
+        unit: {replaceStudentPrompt: "unit"},
+        investigation: {replaceStudentPrompt: "investigation"},
+      })));
+      const result = await getUnitSummary("cs-investigation");
+      expect(result?.classSummaryPrompts.byProblemOrdinal["1.1"])
+        .toEqual({replaceStudentPrompt: "investigation"});
+    });
+
+    it("exposes the unit's prompts for a class with no current problem", async () => {
+      jest.spyOn(global, "fetch").mockResolvedValue(
+        jsonResponse(promptsBody({unit: {replaceStudentPrompt: "unit"}})));
+      const result = await getUnitSummary("cs-unit-fallback");
+      expect(result?.classSummaryPrompts.unit).toEqual({replaceStudentPrompt: "unit"});
+    });
+
+    it("leaves the lookup empty for a unit that authors no prompts at all", async () => {
+      jest.spyOn(global, "fetch").mockResolvedValue(jsonResponse(contentJsonFixture()));
+      const result = await getUnitSummary("cs-none");
+      expect(result?.classSummaryPrompts).toEqual({unit: undefined, byProblemOrdinal: {}});
+    });
+
+    // A typo in one authored prompt must not cost the unit its curriculum context, which is what
+    // throwing here would do -- parseContent's caller turns any throw into "no summary at all".
+    it("ignores a malformed prompts block without discarding the rest of the unit", async () => {
+      jest.spyOn(global, "fetch").mockResolvedValue(jsonResponse({
+        ...contentJsonFixture(),
+        config: {aiUnitSummary: summaryFixture(), classSummaryPrompts: {replaceStudentPrompt: 42}},
+      }));
+      const result = await getUnitSummary("cs-malformed");
+      expect(result?.summary).toBeDefined();
+      expect(result?.classSummaryPrompts.unit).toBeUndefined();
+    });
+  });
 });
