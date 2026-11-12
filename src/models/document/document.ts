@@ -149,10 +149,14 @@ export const DocumentModel = Tree.named("Document")
     contentErrorMessage: undefined as string | undefined,
     showPlaybackControls: false,
     commentsManager: undefined as DocumentCommentsManager | undefined,
-    // The history fields of the RTDB envelope, as far as this client knows: the one the content was
-    // loaded from, until a content save writes a new one. The loaded id is used once at history-load
-    // time to detect drift between the loaded content and the Firestore history chain. Undefined for
-    // pre-feature saves or fresh docs with no prior history, until a save.
+    // The history fields of the RTDB envelope the content was loaded with. Set once at load and never
+    // changed, so the history manager reads the same value whenever it is built. The content listener
+    // can replace an individual document's content later, so this isn't always where the current
+    // content came from. Undefined for pre-feature saves and fresh docs with no prior history.
+    loadedEnvelope: undefined as ISavedEnvelope | undefined,
+    // The history fields of the RTDB envelope as far as this client knows: the loaded one, until the
+    // content listener replaces the content or one of this client's saves lands. Other members' saves
+    // of a group document don't update it.
     savedEnvelope: undefined as ISavedEnvelope | undefined,
     // True while an individual document is being caught up to its Firestore history at load. The
     // document can't be edited until then.
@@ -163,9 +167,6 @@ export const DocumentModel = Tree.named("Document")
     // This is needed for the tree monitor and manager
     get treeId() {
       return self.key;
-    },
-    get savedLastHistoryEntryId(): string | undefined {
-      return self.savedEnvelope?.lastHistoryEntryId;
     },
     get isProblem() {
       return (self.type === ProblemDocument) || (self.type === ProblemPublication);
@@ -375,6 +376,11 @@ export const DocumentModel = Tree.named("Document")
       self.contentStatus = ContentStatus.Error;
       self.invalidContent = content;
       self.contentErrorMessage = message;
+    },
+
+    // Ignored once an envelope is set, since the loaded envelope doesn't change.
+    setLoadedEnvelope(envelope: ISavedEnvelope | undefined) {
+      if (self.loadedEnvelope === undefined) self.loadedEnvelope = envelope;
     },
 
     setSavedEnvelope(envelope: ISavedEnvelope | undefined) {

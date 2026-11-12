@@ -594,6 +594,12 @@ document) is written up by CLUE-788.
 - CLUE-751 lands before CLUE-760.
 - The upload race is a known gap left to GD-19. Drift repair is left to CLUE-788.
 - The group-docs folder is updated in this PR, and the GD-18 design is retired.
+- The document keeps two envelopes. `loadedEnvelope` is the one its content was loaded with, set once
+  and never changed, which the drift check and the group-document load read. This keeps CLUE-693's
+  decision that the loaded id isn't changed by this client's saves, and lets the history manager read
+  it whenever it is built. `savedEnvelope` is the RTDB envelope as this client knows it, updated by its
+  saves and by the content listener; the catch-up, the sender and playback read it, and a sender made
+  later for the same document starts from it. `savedLastHistoryEntryId` is removed.
 
 ## My calls (check these)
 

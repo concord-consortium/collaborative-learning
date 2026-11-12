@@ -1359,6 +1359,7 @@ export class DB {
             // with no prior history.
             const envelope = readSavedEnvelope(document);
             if (envelope) {
+              docModel.setLoadedEnvelope(envelope);
               docModel.setSavedEnvelope(envelope);
             }
             return docModel;

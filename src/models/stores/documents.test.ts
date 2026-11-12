@@ -291,7 +291,7 @@ describe("documents model", () => {
     });
   });
 
-  it("passes uploaded entries of each document to the activity recorder", () => {
+  function createHistoryDocuments() {
     const firestore = {
       doc: jest.fn(() => ({
         get: jest.fn(async () => ({ exists: true })),
@@ -302,14 +302,31 @@ describe("documents model", () => {
       })),
       getFullPath: jest.fn((path: string) => path)
     } as unknown as Firestore;
-    const recorder = { onLocalEntryUploaded: jest.fn() };
     const docs = DocumentsModel.create({});
     docs.setFirestore(firestore);
     docs.setUserContextProvider({ userContext: { uid: "1" } } as unknown as UserContextProvider);
-    docs.setActivityRecorder(recorder as unknown as ActivityRecorder);
     const groupDocument = createDocumentModel({
       type: AxesDocument, uid: "group_2000_3", key: "test-group", createdAt: 1, content: {}, concurrent: true
     });
+    return { docs, groupDocument };
+  }
+
+  it("gives the history manager the envelope the document was loaded with, not a later one", () => {
+    const { docs, groupDocument } = createHistoryDocuments();
+    const loaded = { lastHistoryEntryId: "e5", exactThrough: { index: 5, since: "e2" } };
+    groupDocument.setLoadedEnvelope(loaded);
+    groupDocument.setLoadedEnvelope({ lastHistoryEntryId: "e6" });
+    groupDocument.setSavedEnvelope({ lastHistoryEntryId: "e6", exactThrough: { index: 6, since: "e2" } });
+    docs.add(groupDocument);
+
+    const historyManager = (groupDocument.treeManagerAPI as TreeManagerType).historyManager as FirestoreHistoryManager;
+    expect(historyManager.loadedEnvelope).toBe(loaded);
+  });
+
+  it("passes uploaded entries of each document to the activity recorder", () => {
+    const { docs, groupDocument } = createHistoryDocuments();
+    const recorder = { onLocalEntryUploaded: jest.fn() };
+    docs.setActivityRecorder(recorder as unknown as ActivityRecorder);
     docs.add(document);
     docs.add(groupDocument);
 

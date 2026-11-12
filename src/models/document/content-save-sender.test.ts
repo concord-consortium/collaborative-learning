@@ -723,8 +723,9 @@ describe("ContentSaveSender", () => {
         { lastHistoryEntryId: b, exactThrough: { index: 2, since: "e0" } });
     });
 
-    it("records the envelope each newest write leaves in the RTDB", async () => {
+    it("records the envelope each newest write leaves in the RTDB, leaving the loaded envelope alone", async () => {
       const { commits, contentRef, document, edit } = track(setup());
+      document.setLoadedEnvelope({ lastHistoryEntryId: "loaded" });
       document.setSavedEnvelope({ lastHistoryEntryId: "loaded" });
       const a = await edit("alpha");
       commits.commit(a);
@@ -739,6 +740,7 @@ describe("ContentSaveSender", () => {
       contentRef.writes[1].resolve();
       await flush();
       expect(document.savedEnvelope).toEqual({ lastHistoryEntryId: a });
+      expect(document.loadedEnvelope).toEqual({ lastHistoryEntryId: "loaded" });
     });
 
     it("records an intermediate save's envelope without exactThrough, or without an entry, as it leaves them",

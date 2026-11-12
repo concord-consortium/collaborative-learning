@@ -985,7 +985,7 @@ describe("db", () => {
       expect(doc.kind).toBe("group");
     });
 
-    it("builds the saved envelope from the envelope's history fields", async () => {
+    it("builds the loaded and saved envelopes from the envelope's history fields", async () => {
       const content = JSON.stringify({ tileMap: {} });
       stubRtdb({ createdAt: 1, properties: {} }, {
         content, changeCount: 0, lastHistoryEntryId: "e7",
@@ -993,9 +993,9 @@ describe("db", () => {
       });
       const doc = await db.openDocument({ documentKey: "s1", type: "problem", userId: "u1",
         firestoreMetadata: { uid: "u1", type: "problem", key: "s1" } } as any);
-      expect(doc.savedEnvelope).toEqual(
-        { lastHistoryEntryId: "e7", exactThrough: { index: 7, since: "e2" } });
-      expect(doc.savedLastHistoryEntryId).toBe("e7");
+      const expected = { lastHistoryEntryId: "e7", exactThrough: { index: 7, since: "e2" } };
+      expect(doc.loadedEnvelope).toEqual(expected);
+      expect(doc.savedEnvelope).toEqual(expected);
     });
 
     it("builds a saved envelope without exactThrough from an envelope with only an entry id", async () => {
