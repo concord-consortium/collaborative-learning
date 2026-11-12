@@ -36,6 +36,7 @@ describe("conversion entry", () => {
     const entry = manager.pendingConversionEntry!;
     expect(entry).toBeDefined();
     expect(entry.isConversionEntry).toBe(true);
+    expect(entry.action).toBe("/convertContent");
     expect(entry.background).toBe(true);
     expect(entry.undoable).toBe(false);
     expect(manager.document.history.length).toBe(0);
