@@ -47,10 +47,13 @@ const kSummary: IUnitSummary = {
   ],
 };
 
-function unitSummaryResult(): IUnitSummaryFetchResult {
+function unitSummaryResult(
+  classSummaryPrompts: IUnitSummaryFetchResult["classSummaryPrompts"] = {byProblemOrdinal: {}}
+): IUnitSummaryFetchResult {
   return {
     summary: kSummary,
     liveProblems: [{ordinal: "1.1", title: "Problem 1.1"}, {ordinal: "1.2", title: "Problem 1.2"}],
+    classSummaryPrompts,
   };
 }
 
@@ -165,7 +168,7 @@ describe("onClassDataDocWritten", () => {
           {ordinal: "1.2", title: "Problem 1.2", problemHash: "h2"},
         ],
       };
-      mockGetUnitSummary.mockResolvedValue({summary: staleSummary, liveProblems: unitSummaryResult().liveProblems});
+      mockGetUnitSummary.mockResolvedValue({...unitSummaryResult(), summary: staleSummary});
       mockInvoke
         .mockResolvedValueOnce(invokeResponse("student chunk summary"))
         .mockResolvedValueOnce(invokeResponse("teacher chunk summary"));
@@ -192,7 +195,7 @@ describe("onClassDataDocWritten", () => {
         {ordinal: "1.2", priorKnowledge: "knows things", problemDigest: "digest two"},
       ],
     };
-    mockGetUnitSummary.mockResolvedValue({summary: unsafeSummary, liveProblems: unitSummaryResult().liveProblems});
+    mockGetUnitSummary.mockResolvedValue({...unitSummaryResult(), summary: unsafeSummary});
     mockInvoke.mockResolvedValueOnce(invokeResponse("student chunk summary"));
 
     await writeAndTrigger({

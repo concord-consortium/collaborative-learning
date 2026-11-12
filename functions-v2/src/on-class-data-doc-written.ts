@@ -65,9 +65,9 @@ async function summarizeChunk(
 ): Promise<SummarizeResult> {
   const capRole = role.charAt(0).toUpperCase() + role.slice(1);
   const contextPrefix = unitContext ? `${unitContextSection(unitContext)}\n\n` : "";
-  const instruction = role === "teacher"
-    ? summarizeTeacherContentPrompt
-    : buildSummaryPrompt(summarizeStudentContentInstruction, summaryCue, prompts);
+  const instruction = role === "teacher" ?
+    summarizeTeacherContentPrompt :
+    buildSummaryPrompt(summarizeStudentContentInstruction, summaryCue, prompts);
   const messages = [
     new SystemMessage(withCurriculumInstructions(systemPrompt, "the class")),
     new HumanMessage(`${contextPrefix}${capRole} work part ${chunkIndex + 1} of ${totalChunks}:
@@ -101,9 +101,9 @@ async function combineSummaries(
   // deliberately not carried over: it is written to be applied to student work, and this call is
   // given summaries of it.
   const addition = prompts?.appendToStudentPrompt?.trim();
-  const combineInstruction = addition
-    ? `${combineSummariesPrompt}${addition}\n\n`
-    : combineSummariesPrompt;
+  const combineInstruction = addition ?
+    `${combineSummariesPrompt}${addition}\n\n` :
+    combineSummariesPrompt;
 
   const messages = [
     new SystemMessage(withCurriculumInstructions(systemPrompt, "the class")),
