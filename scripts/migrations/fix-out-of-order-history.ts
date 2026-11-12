@@ -327,28 +327,30 @@ interface IRepairOptions {
   apply?: boolean;
   now?: number;
   log?: (message: string) => void;
+  // The number of history entries loaded per query. Tests set it to check paging on short histories.
+  pageSize?: number;
 }
 
 const kPageSize = 2000;
 
-async function loadHistory(docRef: DocumentReference) {
+async function loadHistory(docRef: DocumentReference, pageSize: number) {
   const entries: IStoredEntry[] = [];
   let last: QueryDocumentSnapshot | undefined;
   for (;;) {
-    let query = docRef.collection("history").orderBy("index").limit(kPageSize);
+    let query = docRef.collection("history").orderBy("index").limit(pageSize);
     if (last) query = query.startAfter(last);
     const page = await query.get();
     page.docs.forEach(doc => entries.push(toStoredEntry(doc)));
-    if (page.size < kPageSize) return entries;
+    if (page.size < pageSize) return entries;
     last = page.docs[page.docs.length - 1];
   }
 }
 
 /** Checks, and with `apply` repairs, the history of one document. */
 export async function repairDocumentHistory(db: Firestore, docRef: DocumentReference,
-    { apply = false, minIdleMinutes = 60, now = Date.now() }: Partial<IRepairOptions> = {}
+    { apply = false, minIdleMinutes = 60, now = Date.now(), pageSize = kPageSize }: Partial<IRepairOptions> = {}
 ): Promise<IDocumentResult> {
-  const entries = await loadHistory(docRef);
+  const entries = await loadHistory(docRef, pageSize);
   const plan = planHistoryRepair(entries);
   const result: IDocumentResult = {
     path: docRef.path, entries: entries.length, moves: plan.moves, writes: plan.writes.length,

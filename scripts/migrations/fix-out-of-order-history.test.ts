@@ -1,6 +1,6 @@
 import { FieldValue } from "firebase-admin/firestore";
 import {
-  IStoredEntry, parseArgs, planHistoryRepair, repairDocumentHistory, tilePathInfo, toStoredEntry
+  IStoredEntry, parseArgs, planHistoryRepair, repairDocumentHistory, repairHistories, tilePathInfo, toStoredEntry
 } from "./fix-out-of-order-history";
 import { applyJsonPatches } from "../../src/models/history/json-patch";
 
@@ -270,30 +270,46 @@ describe("toStoredEntry", () => {
   });
 });
 
-describe("repairDocumentHistory", () => {
-  const minutesAgo = (minutes: number) => ({ toMillis: () => Date.now() - minutes * 60 * 1000 });
-  const stored = (entry: IStoredEntry, created = minutesAgo(120)) => ({
-    id: entry.docId,
-    get: (field: string) => ({
-      index: entry.index, previousEntryId: entry.previousEntryId, created,
-      entry: JSON.stringify({ id: entry.docId, action: entry.action, records: entry.records })
-    } as Record<string, any>)[field]
-  });
+const minutesAgo = (minutes: number) => ({ toMillis: () => Date.now() - minutes * 60 * 1000 });
+// A stored history document, as Firestore returns it.
+const stored = (entry: IStoredEntry, created = minutesAgo(120)) => ({
+  id: entry.docId,
+  get: (field: string) => ({
+    index: entry.index, previousEntryId: entry.previousEntryId, created,
+    entry: JSON.stringify({ id: entry.docId, action: entry.action, records: entry.records })
+  } as Record<string, any>)[field]
+});
 
+// A document's history collection, which serves `historyDocs` a page at a time as Firestore does for
+// `limit` and `startAfter`. `pages` records the size of each page served.
+function historyCollection(path: string, historyDocs: any[]) {
+  const pages: number[] = [];
+  const position = new Map(historyDocs.map((doc, i) => [doc, i]));
+  const query = (limit: number, from: number): any => ({
+    orderBy: () => query(limit, from),
+    limit: (n: number) => query(n, from),
+    startAfter: (doc: any) => query(limit, position.get(doc)! + 1),
+    get: () => {
+      const docs = historyDocs.slice(from, from + limit);
+      pages.push(docs.length);
+      return Promise.resolve({ docs, size: docs.length });
+    }
+  });
+  const collection = { ...query(Infinity, 0), doc: (id: string) => ({ path: `${path}/history/${id}` }) };
+  return { collection, pages };
+}
+
+describe("repairDocumentHistory", () => {
   // `newestId` is the newest entry the transaction finds, which is the loaded one unless a test
   // stores another in the meantime.
   function makeDb(historyDocs: any[], metadata: Record<string, any> = {},
       newestId = historyDocs[historyDocs.length - 1].id) {
     const updates: { path: string; fields: any }[] = [];
     let committed = false;
-    const query: any = {
-      orderBy: () => query, limit: () => query, startAfter: () => query,
-      get: () => Promise.resolve({ docs: historyDocs, size: historyDocs.length }),
-      doc: (id: string) => ({ path: `authed/p/documents/D1/history/${id}` })
-    };
+    const { collection, pages } = historyCollection("authed/p/documents/D1", historyDocs);
     const docRef: any = {
       path: "authed/p/documents/D1",
-      collection: () => query
+      collection: () => collection
     };
     const db: any = {
       runTransaction: async (run: (transaction: any) => Promise<any>) => {
@@ -309,7 +325,7 @@ describe("repairDocumentHistory", () => {
         return result;
       }
     };
-    return { db, docRef, updates, isCommitted: () => committed };
+    return { db, docRef, updates, pages, isCommitted: () => committed };
   }
 
   const outOfOrder = () =>
@@ -356,12 +372,81 @@ describe("repairDocumentHistory", () => {
     expect(isCommitted()).toBe(false);
   });
 
+  it("loads a history longer than one page", async () => {
+    const { db, docRef, pages } = makeDb(outOfOrder());
+    const result = await repairDocumentHistory(db, docRef, { pageSize: 2 });
+    expect(pages).toEqual([2, 1]);
+    expect(result.entries).toBe(3);
+    expect(result.moves).toHaveLength(1);
+  });
+
   it("skips a document whose history changed recently", async () => {
     const docs = [stored(setOutputConfig("A", 0)), stored(addTile("B", 1, "A"), minutesAgo(5))];
     const { db, docRef, isCommitted } = makeDb(docs);
     const result = await repairDocumentHistory(db, docRef, { apply: true });
     expect(result.skipped).toMatch(/60 minutes/);
     expect(isCommitted()).toBe(false);
+  });
+});
+
+describe("repairHistories", () => {
+  // The documents under authed/p, each with a history that needs no repair. `calls` records the
+  // query on the documents collection.
+  function makeDb(ids: string[]) {
+    const calls: string[] = [];
+    const ref = (id: string) => {
+      const path = `authed/p/documents/${id}`;
+      return { path, collection: () => historyCollection(path, [stored(addTile("A", 0))]).collection };
+    };
+    const documents: any = {
+      doc: ref,
+      where: (...args: string[]) => { calls.push(`where ${args.join(" ")}`); return documents; },
+      select: (...fields: string[]) => { calls.push(`select(${fields.join(", ")})`); return documents; },
+      get: () => { calls.push("get"); return Promise.resolve({ docs: ids.map(id => ({ ref: ref(id) })) }); }
+    };
+    const db: any = {
+      collection: (path: string) => { calls.push(`collection ${path}`); return documents; }
+    };
+    return { db, calls };
+  }
+  async function run(ids: string[], args: string[]) {
+    const { db, calls } = makeDb(ids);
+    const log: string[] = [];
+    const results = await repairHistories(db, { ...parseArgs(["--root", "authed/p", ...args]),
+      log: message => log.push(message) });
+    return { calls, log, paths: results.map(result => result.path) };
+  }
+
+  it("checks the documents with a DataFlow tile by default, loading only their ids", async () => {
+    const { calls, log, paths } = await run(["D1", "D2"], []);
+    expect(calls).toEqual(
+      ["collection authed/p/documents", "where tools array-contains Dataflow", "select()", "get"]);
+    expect(paths).toEqual(["authed/p/documents/D1", "authed/p/documents/D2"]);
+    expect(log[0]).toBe("checking 2 documents under authed/p (dry run)");
+    expect(log[log.length - 1]).toBe("0 documents to repair, 0 skipped, 2 checked");
+  });
+
+  it("checks the documents with the --tile-type tile", async () => {
+    const { calls } = await run(["D1"], ["--tile-type", "Simulator"]);
+    expect(calls).toContain("where tools array-contains Simulator");
+  });
+
+  it("checks every document with --any-tile-type", async () => {
+    const { calls, paths } = await run(["D1", "D2"], ["--any-tile-type"]);
+    expect(calls).toEqual(["collection authed/p/documents", "select()", "get"]);
+    expect(paths).toHaveLength(2);
+  });
+
+  it("checks only the --doc documents, without a query", async () => {
+    const { calls, paths } = await run(["D1", "D2", "D3"], ["--doc", "d1", "--doc", "d2"]);
+    expect(calls).toEqual(["collection authed/p/documents"]);
+    expect(paths).toEqual(["authed/p/documents/d1", "authed/p/documents/d2"]);
+  });
+
+  it("checks no more than --limit documents", async () => {
+    const { paths, log } = await run(["D1", "D2", "D3"], ["--limit", "2"]);
+    expect(paths).toEqual(["authed/p/documents/D1", "authed/p/documents/D2"]);
+    expect(log[0]).toBe("checking 2 documents under authed/p (dry run)");
   });
 });
 
