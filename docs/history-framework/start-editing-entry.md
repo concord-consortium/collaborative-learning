@@ -39,7 +39,7 @@ config on mount.
   `mirrorUnitOutputConfig` in `dataflow-tile.tsx` calls `setOutputConfig`, which records a
   non-undoable entry when the config differs. For new and copied tiles the config already matches,
   so nothing is recorded. This is the pattern the start editing entry replaces. Don't copy it.
-- **Histories already stored** can have the Live Output entry ahead of the
+- **Histories from earlier versions of CLUE** can have the Live Output entry ahead of the
   tile's creation. `scripts/migrations/fix-out-of-order-history.ts` repairs them by moving each
   such entry to just after the entry that creates its tile. See its header for how it decides what
   is safe to move.
@@ -52,7 +52,9 @@ config on mount.
 ### What the start editing entry records
 
 - **A session marker.** The entry is recorded every time a document is opened for editing, even
-  when nothing changes. It is not undoable.
+  when nothing changes. Switching back to a document after working in another one counts as
+  opening it: switching to another document is how the user stops editing this one. It is not
+  undoable. The extra Firestore write per open is small enough not to matter.
 - **Changes tiles make on open.** The document calls a hook on each tile's content, inside one
   action, and records what the hooks change as the start editing entry. A tile's content reaches
   the unit configuration through `getAppConfig(self)`, as the Simulator's content already does.
@@ -65,24 +67,33 @@ A tile created during the session sets the same state when it is created, inside
 adds it (as `defaultContent` and `updateContentForCopy` do for DataFlow today). The start editing
 entry only covers the tiles that were in the document when it was opened.
 
-Nothing records the end of a session. The user can close the window before CLUE has a chance to
-write anything, so a closing entry would be missing too often to rely on.
+A session ends when the user switches to another document or closes the window. Nothing records
+the end: the user can close the window before CLUE has a chance to write anything, so a closing
+entry would be missing too often to rely on.
+
+### Playback
+
+Every start editing entry is a stop on the playback slider, even one that changes nothing, so
+whoever reviews the history can see where each session began. Playback shows that the user started
+editing there, either with a marker on the slider or with a message shown while the entry is the
+current stop. Which of the two is not settled.
 
 ### How it differs from a load entry
 
 | | Load entry | Start editing entry |
 |---|---|---|
 | Records | Schema conversions of stored content | Changes CLUE makes on open, in the current schema, and drift |
-| Recorded when | Loading converted something, and the user then changes the content | Every time the document is opened for editing |
-| Playback | Skips its patches; converts the models itself | Applies it like any other entry |
+| Recorded when | Loading converted something, and the user then changes the content | Every time the document is opened for editing, including switching back to it |
+| Playback | Skips its patches; converts the models itself | Applies it like any other entry, and shows where the session started |
 | Undoable | No | No |
 
 The two stay separate entries because playback treats them differently. When both are recorded,
 the load entry comes first: it turns the stored content into the current schema, and the start
 editing entry's patches are in that schema. The load entry is only uploaded with the next change
-that changes the content. A start editing entry that changes nothing is dropped today, and the load
-entry isn't uploaded before it, so `completeHistoryEntry` in `tree-manager.ts` has to keep the
-entry and upload the load entry ahead of it.
+that changes the content. If start editing entries were added without changing the history system,
+an entry that changes nothing would be dropped, and the load wouldn't be uploaded before it.
+So `completeHistoryEntry` in `tree-manager.ts` has to be updated to keep the entry and upload the
+load entry ahead of it.
 
 ### Drift
 
@@ -91,8 +102,8 @@ There are two kinds, and they belong in different entries:
 
 - **The content doesn't match the end of the history**, for example after a change made with no
   entry open, or entries a previous session couldn't upload. The patch from the history's end
-  state to the content is a real change that playback has to apply, so it belongs in the open
-  entry. Measuring it needs the history's end state, which an individual document only has by
+  state to the content is a real change that playback has to apply, so it belongs in the start
+  editing entry. Measuring it needs the history's end state, which an individual document only has by
   replaying its history at load. Today a document's saved content records the id of the last entry
   it includes, and group documents check that the id is in the history, but nothing measures the
   difference.
@@ -104,11 +115,6 @@ There are two kinds, and they belong in different entries:
 
 ### Open questions
 
-- **What counts as an open?** Once per document per page load, or each time the user switches back
-  to the document? Switching remounts the tiles today.
-- **Volume.** An entry for every open, changed or not, is one more Firestore write per open.
-- **Playback stops.** Should a start editing entry with no changes be a stop on the playback slider?
-  It is useful as a marker, but nothing on screen changes there.
 - **Group documents.** Each editor records their own start editing entry; how they interleave with
   the other editors' entries needs working out with the group-document history design.
 - **Out-of-order entries in general.** The start editing entry removes one source of them. Any entry
