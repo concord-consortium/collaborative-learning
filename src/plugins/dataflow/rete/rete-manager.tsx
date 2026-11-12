@@ -88,6 +88,8 @@ export const kDefaultNodeHeight = 120;
 // why this bounds placement only.
 export const kTallestNodeHeight = 200;
 
+export const kProgramEditorUpdateFailed = "DataFlow: updating the read-only program view failed";
+
 export class ReteManager implements INodeServices {
   public editor: NodeEditorMST;
   public engine = new DataflowEngine<Schemes>();
@@ -1473,10 +1475,10 @@ export class ReteManager implements INodeServices {
   private programEditorUpdates = Promise.resolve();
 
   private queueProgramEditorUpdate = () => {
-    const update = this.programEditorUpdates.then(() => this.updateProgramEditor());
-    // A failed update doesn't stop the ones queued after it.
-    this.programEditorUpdates = update.catch(() => undefined);
-    return update;
+    // A failed update is logged, and doesn't stop the ones queued after it.
+    this.programEditorUpdates = this.programEditorUpdates
+      .then(() => this.updateProgramEditor())
+      .catch(error => console.error(kProgramEditorUpdateFailed, error));
   };
 
   private updateProgramEditor = async () => {

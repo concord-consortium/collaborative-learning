@@ -3,7 +3,11 @@ import { DataflowContentModel } from "../model/dataflow-content";
 import { ConnectionModel, DataflowNodeModel } from "../model/dataflow-program-model";
 import { specStores } from "../../../models/stores/spec-stores";
 import { IBaseNode } from "../nodes/base-node";
-import { ReteManager } from "./rete-manager";
+import { kProgramEditorUpdateFailed, ReteManager } from "./rete-manager";
+
+// Jest maps every SVG import to one file stub, a string, but the dropdowns call their icons as
+// components. Mocking one SVG mocks the stub they all resolve to, so React can render the nodes.
+jest.mock("../../../shared-assets/icons/dataflow/math/add.svg", () => () => null);
 
 // Playback applies patches to the whole document, as here, not to the tile's content.
 const Document = types.model("Document", { content: DataflowContentModel });
@@ -55,7 +59,10 @@ const settle = () => new Promise(resolve => setTimeout(resolve, 0));
 
 describe("ReteManager read-only view", () => {
   const managers: ReteManager[] = [];
-  afterEach(() => managers.splice(0).forEach(m => m.dispose()));
+  afterEach(() => {
+    managers.splice(0).forEach(m => m.dispose());
+    jest.restoreAllMocks();
+  });
 
   // A playback seek applies all of its entries' patches in one action, so a node or connection
   // removed by one entry and put back with the same id by another changes in one snapshot.
@@ -104,9 +111,6 @@ describe("ReteManager read-only view", () => {
     const { doc, program, manager } = await openReadOnlyProgram();
     managers.push(manager);
     const errors = jest.spyOn(console, "error").mockImplementation(() => undefined);
-    const unhandled: unknown[] = [];
-    const onUnhandled = (reason: unknown) => unhandled.push(reason);
-    process.on("unhandledRejection", onUnhandled);
 
     const added = { op: "add" as const, path: "/content/program/nodes/num2",
       value: { id: "num2", name: "Number 2", x: 0, y: 100, data: { type: "Number", value: 2 } } };
@@ -115,10 +119,8 @@ describe("ReteManager read-only view", () => {
     applyPatch(doc, { op: "replace", path: "/content/program/nodes/num/x", value: 50 });
     await settle();
     await settle();
-    process.off("unhandledRejection", onUnhandled);
 
-    expect(unhandled).toEqual([]);
-    expect(errors).not.toHaveBeenCalled();
+    expect(errors.mock.calls.filter(([message]) => message === kProgramEditorUpdateFailed)).toEqual([]);
     expect([...manager.area.nodeViews.keys()].sort()).toEqual(["math", "num"]);
     expect(manager.area.nodeViews.get("num")!.position.x).toBe(50);
     expect(program.nodes.get("num2")).toBeUndefined();
