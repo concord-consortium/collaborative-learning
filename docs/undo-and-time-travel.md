@@ -27,13 +27,15 @@ Currently if you add `withoutUndo` to an action and then you call this action fr
 
 A change a tile makes to its content from a component's mount, such as copying settings from the
 unit configuration, is recorded as a history entry of its own at whatever moment the component
-mounts. When that is while the entry that added the tile is still open, the change is stored
-before the tile's creation, and history playback fails at the start of the document.
+mounts. It can be stored before the entry that added the tile, which makes history playback fail at
+the start of the document (see "Ordering of history entries" in
+[history-framework.md](history-framework.md)).
 
 Set such state when the tile is created instead: read the unit configuration in the tile's
-`defaultContent`, which receives `appConfig`, and in `updateContentForCopy` for tiles copied in
-from another document. A tile that needs to refresh the state each time its document is opened
-has no good place for that yet; see [history-framework/open-entry.md](history-framework/open-entry.md).
+`defaultContent` and `updateContentForCopy`, which both receive `appConfig`. `updateContentForCopy`
+runs for every copy, in the same document or from another one. A tile that needs to refresh the
+state each time its document is opened has no good place for that yet; see
+[history-framework/start-editing-entry.md](history-framework/start-editing-entry.md).
 
 ## Grouping Changes
 
