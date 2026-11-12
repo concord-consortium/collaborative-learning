@@ -79,7 +79,7 @@ function convertStoredContent(content: unknown, concurrent?: boolean) {
 }
 
 /**
- * Builds the conversion entry that records the conversion of `originalContent`'s old models into the
+ * Builds the conversion entry for `originalContent`'s old models, which are converted into the
  * document's content, or undefined when nothing was converted.
  */
 function buildDocumentConversionEntry(document: IAnyStateTreeNode, treeId: string, originalContent: unknown,

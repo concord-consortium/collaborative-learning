@@ -118,11 +118,10 @@ function moveJsonCopy(copy: JsonHistoryCopy, history: readonly HistoryEntryType[
  * history `position`.
  *
  * The playback document is a copy of the live document, which converted its old models when it
- * loaded. The conversion entry that records the conversion is uploaded with the next change to the
- * content, so until then only the live document has it, and it is handed to playback as
- * `localConversionEntry`. The history from Firestore doesn't hold it, and its entries expect those
- * models as they are stored, before conversion. So the conversion entry is undone here, which puts them
- * back in their stored form.
+ * loaded. Its conversion entry is uploaded with the next change to the content, so until then only
+ * the live document has it, and it is handed to playback as `localConversionEntry`. The history
+ * from Firestore doesn't hold it, and its entries expect those models as they are stored, before
+ * conversion. So the conversion entry is undone here, which puts them back in their stored form.
  *
  * Once the history holds the conversion entry before `position`, the document's JSON already matches
  * the history there, and it is returned unchanged. `documentJson` is changed in place.

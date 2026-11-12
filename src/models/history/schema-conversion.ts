@@ -175,9 +175,8 @@ const kConversionEntryModel = "DocumentContent";
 const kMaxEntryBytes = 1048576;
 
 /**
- * Builds the conversion entry, which records the conversion of old models to their current format
- * as the patches that turn the stored JSON into the converted JSON. It is flagged
- * `isConversionEntry` and is not undoable.
+ * Builds the conversion entry: the patches that turn the stored JSON of old models into their
+ * converted JSON. It is flagged `isConversionEntry` and is not undoable.
  */
 export function buildConversionEntry(
   treeId: string, changes: { path: string; before: unknown; after: unknown }[]
