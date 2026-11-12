@@ -11,7 +11,7 @@ import { autorun, observable, reaction, runInAction } from "mobx";
 import { IStores } from "../../../models/stores/stores";
 import { DataflowContentModelType } from "../model/dataflow-content";
 import {
-  DataflowProgramModelType, DataflowProgramSnapshotOut, IConnectionModel
+  ConnectionModelWrapper, DataflowProgramModelType, DataflowProgramSnapshotOut, IConnectionModel
 } from "../model/dataflow-program-model";
 import { AreaExtra, Schemes } from "../nodes/rete-scheme";
 import { programNeedsDevice } from "../utilities/program-needs-device";
@@ -103,6 +103,10 @@ export class ReteManager implements INodeServices {
   private arrowPanDisposer: (() => void) | undefined;
   public selectionState = observable({ nodeIds: [] as string[] });
   private snapshotDisposer: () => void | undefined;
+  // The MST model each node view and connection view was drawn from, by id. See
+  // updateProgramEditor.
+  private drawnNodeModels = new Map<string, unknown>();
+  private drawnConnectionModels = new Map<string, unknown>();
   public inTick = false;
   public disposed = false;
   public setupComplete: Promise<void>;
@@ -353,6 +357,19 @@ export class ReteManager implements INodeServices {
       // Tracked so dispose() cancels it — the tile can unmount inside this window.
       this.fitTimeout = window.setTimeout(() => this.fitContent(), 100);
     }
+
+    editor.addPipe(context => {
+      if (context.type === "nodecreated") {
+        this.drawnNodeModels.set(context.data.id, (context.data as IBaseNode).model);
+      } else if (context.type === "noderemoved") {
+        this.drawnNodeModels.delete(context.data.id);
+      } else if (context.type === "connectioncreated") {
+        this.drawnConnectionModels.set(context.data.id, (context.data as ConnectionModelWrapper).model);
+      } else if (context.type === "connectionremoved") {
+        this.drawnConnectionModels.delete(context.data.id);
+      }
+      return context;
+    });
 
     // Notify after the area, connection, and render plugins have been configured
     await this.notifyAboutExistingObjects();
@@ -1454,22 +1471,32 @@ export class ReteManager implements INodeServices {
     // track down an instance of the node or connection that was deleted. The area
     // plugin only cares about the id.
 
-    const { editor, area } = this;
+    const { editor, area, mstProgram } = this;
+
+    // A view is also redrawn when its id is still there but its MST model was replaced. History
+    // playback can remove a node or connection and put it back with the same id within one seek,
+    // and undo can too. The view would otherwise keep reading the removed model. These are worked
+    // out before the first await, while the program still matches the snapshot.
+    const removedNodeIds = new Set([...area.nodeViews.keys()].filter(id => {
+      const node = mstProgram.nodes.get(id);
+      return !node || this.drawnNodeModels.get(id) !== node.data;
+    }));
+    const removedConnectionIds = [...area.connectionViews.keys()].filter(id => {
+      const connection = mstProgram.connections.get(id);
+      return !connection || this.drawnConnectionModels.get(id) !== connection
+        || removedNodeIds.has(connection.source) || removedNodeIds.has(connection.target);
+    });
 
     // Process connections that were deleted
-    for (const [id] of area.connectionViews) {
-      if (!snapshot.connections[id]) {
-        await editor.emit({ type: 'connectionremoved', data: { id } as any });
-      }
+    for (const id of removedConnectionIds) {
+      await editor.emit({ type: 'connectionremoved', data: { id } as any });
     }
 
     // Process nodes that were deleted
-    for (const [id] of area.nodeViews) {
-      if (!snapshot.nodes[id]) {
-        (editor.reteNodesMap[id] as IBaseNode)?.dispose();
-        delete editor.reteNodesMap[id];
-        await editor.emit({ type: 'noderemoved', data: { id } as any });
-      }
+    for (const id of removedNodeIds) {
+      (editor.reteNodesMap[id] as IBaseNode)?.dispose();
+      delete editor.reteNodesMap[id];
+      await editor.emit({ type: 'noderemoved', data: { id } as any });
     }
 
     // Process nodes that were added
