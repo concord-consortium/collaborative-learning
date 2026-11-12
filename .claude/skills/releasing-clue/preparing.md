@@ -191,6 +191,9 @@ is being prepared:
 - with the commands in "Staging Firebase" (cutting.md), using that checkout as `<worktree>`;
 - then read each one back, as above, and compare it with that checkout.
 
+A migration script marked `before` runs now too, but not with those commands: "Migration scripts"
+in shipping.md says how, and what each timing means for a script.
+
 That leaves only `with` and `after` parts for release time.
 
 Also record the deploy **order**. The default is indexes (wait until they show Enabled), then

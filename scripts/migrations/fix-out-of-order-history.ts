@@ -47,6 +47,8 @@
 //
 // It writes a JSON report to scripts/output/. It needs scripts/serviceAccountKey.json (see
 // scripts/README.md), and authenticates as a service account, so the Firestore rules don't apply.
+// Run it against staging first, by swapping in the staging key as "Local Setup" in
+// scripts/README.md describes.
 
 import type { DocumentReference, DocumentSnapshot, Firestore, QueryDocumentSnapshot } from "firebase-admin/firestore";
 

@@ -31,11 +31,22 @@ Follow the recorded order:
 ## Migration scripts [approve]
 
 Run each migration script in the release (`scripts/migrations/`, listed under `migrations` in the
-deploy report) at its recorded timing, by the same rules as above. The developer runs them against
-production, from the tag's checkout. For each one, give them the commands from the script's header:
-a dry run first, then, once its report looks right, the run that writes. Record what each run
-changed or skipped in the release record. A script that skips documents still being edited needs a
-second run later; add it to the follow-ups.
+deploy report) at its recorded timing. For a script, the timing says when to run it relative to
+Release Production:
+- **`before`:** run it while the release is being prepared (preparing.md), from the worktree
+  detached at `origin/master` that the `before` deploys use. The tag doesn't exist yet. If it has
+  already run against production, it doesn't run again at release time.
+- **`with`:** run it immediately before Release Production, from the tag's checkout, and start the
+  release right after.
+- **`after`:** run it once Release Production has succeeded and `deployed-version.ts` shows
+  production serving the tag, from the tag's checkout.
+
+Every script runs against staging first, then production, and on each a dry run comes first, then,
+once its report looks right, the run that writes. The developer runs them. For each one, give them
+the commands from the script's header. Scripts read `scripts/serviceAccountKey.json`, so to target
+staging the developer swaps in `scripts/serviceAccountKey.staging.json` for those runs ("Local
+Setup" in `scripts/README.md`). Record what each run changed or skipped in the release record. A
+script that skips documents still being edited needs a second run later; add it to the follow-ups.
 
 ## Release Production [approve]
 
