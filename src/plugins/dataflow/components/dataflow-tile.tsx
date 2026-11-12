@@ -74,9 +74,10 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
   // Don't copy this pattern: a change made on mount is recorded as an entry of its own and can be
   // stored ahead of the entry that added the tile (see "Don't change the document when a tile
   // mounts" in docs/undo-and-time-travel.md). New and copied tiles get the config when they are
-  // created, so this records nothing for them. It stays so that tiles that didn't, such as existing
-  // and authored tiles, pick up the unit's current config when they are opened for editing. The start
-  // editing entry in docs/history-framework/start-editing-entry.md is the planned replacement.
+  // created, so for them this sets the value the config already has, and records nothing. The code
+  // stays so that existing tiles pick up the unit's current config when they are opened for
+  // editing. The start editing entry in docs/history-framework/start-editing-entry.md is the
+  // planned replacement for it.
   private mirrorUnitOutputConfig() {
     const { appConfig } = this.stores;
     warnUnknownLiveOutputSettings(
