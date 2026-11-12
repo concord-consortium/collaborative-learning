@@ -95,6 +95,11 @@ an entry that changes nothing would be dropped, and the load wouldn't be uploade
 So `completeHistoryEntry` in `tree-manager.ts` has to be updated to keep the entry and upload the
 load entry ahead of it.
 
+The converted content has to be saved along with the load entry. Content is saved when its snapshot
+changes, so a start editing entry that changes nothing doesn't save it. The load entry would then
+be in the history while the stored content is still unconverted, and the next load would convert
+it again and record a second load entry for the same conversion.
+
 ### Drift
 
 The saved content **drifts** from history when it holds a change that no history entry records.
