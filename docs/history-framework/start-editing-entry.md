@@ -43,8 +43,9 @@ config on mount.
   tile's creation. `scripts/migrations/fix-out-of-order-history.ts` repairs them by moving each
   such entry to just after the entry that creates its tile. See its header for how it decides what
   is safe to move.
-- **Load entries** (see "Load entries" in [history-framework.md](../history-framework.md)) record
-  the schema conversions CLUE makes when it loads old content. They aren't start editing entries;
+- **Conversion entries** (see "Conversion entries" in
+  [history-framework.md](../history-framework.md)) record the schema conversions CLUE makes when it
+  loads old content. They aren't start editing entries;
   see below.
 
 ## Planned design
@@ -78,9 +79,9 @@ whoever reviews the history can see where each session began. Playback shows tha
 editing there, either with a marker on the slider or with a message shown while the entry is the
 current stop. Which of the two is not settled.
 
-### How it differs from a load entry
+### How it differs from a conversion entry
 
-| | Load entry | Start editing entry |
+| | Conversion entry | Start editing entry |
 |---|---|---|
 | Records | Schema conversions of stored content | Changes CLUE makes on open, in the current schema, and drift |
 | Recorded when | Loading converted something, and the user then changes the content | Every time the document is opened for editing, including switching back to it |
@@ -88,17 +89,17 @@ current stop. Which of the two is not settled.
 | Undoable | No | No |
 
 The two stay separate entries because playback treats them differently. When both are recorded,
-the load entry comes first: it turns the stored content into the current schema, and the start
-editing entry's patches are in that schema. The load entry is only uploaded with the next change
-that changes the content. If start editing entries were added without changing the history system,
-an entry that changes nothing would be dropped, and the load wouldn't be uploaded before it.
-So `completeHistoryEntry` in `tree-manager.ts` has to be updated to keep the entry and upload the
-load entry ahead of it.
+the conversion entry comes first: it turns the stored content into the current schema, and the
+start editing entry's patches are in that schema. The conversion entry is only uploaded with the
+next change that changes the content. If start editing entries were added without changing the
+history system, an entry that changes nothing would be dropped, and the conversion entry wouldn't be
+uploaded before it. So `completeHistoryEntry` in `tree-manager.ts` has to be updated to keep the
+entry and upload the conversion entry ahead of it.
 
-The converted content has to be saved along with the load entry. Content is saved when its snapshot
-changes, so a start editing entry that changes nothing doesn't save it. The load entry would then
-be in the history while the stored content is still unconverted, and the next load would convert
-it again and record a second load entry for the same conversion.
+The converted content has to be saved along with the conversion entry. Content is saved when its
+snapshot changes, so a start editing entry that changes nothing doesn't save it. The conversion
+entry would then be in the history while the stored content is still unconverted, and the next load
+would convert it again and record a second conversion entry for the same conversion.
 
 ### Drift
 
@@ -114,7 +115,7 @@ There are two kinds, and they belong in different entries:
   difference.
 - **Snapshot pre-processors change the content as it loads.** These behave like schema
   conversions. If playback runs the same pre-processors when it builds tiles from patches, these
-  changes belong with the load entry, and playback skips them. Whether it does needs checking
+  changes belong with the conversion entry, and playback skips them. Whether it does needs checking
   before this part is designed: applying such a change twice is harmless for a `replace` but not
   for an `add` into an array.
 

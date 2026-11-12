@@ -93,7 +93,7 @@ const oldTile = (id: string, text: string, items: string[] = []) => ({
 
 /**
  * Creates a document from old content, gives it old history ending at that content, then makes
- * an edit, which records the load entry and the edit. The document ends at the last entry.
+ * an edit, which records the conversion entry and the edit. The document ends at the last entry.
  */
 async function setupConvertedDocument(content: any, oldEntries: HistoryEntrySnapshot[]) {
   const document = createDocumentModel({ uid: "1", type: ProblemDocument, key: kTreeId, content });
@@ -136,12 +136,12 @@ const t1OldEntries = () => [
 ];
 const t1Content = () => ({ tileMap: { t1: oldTile("t1", "c", ["a"]) } });
 
-describe("playback across a load entry", () => {
+describe("playback across a conversion entry", () => {
   beforeEach(() => {
     jest.restoreAllMocks();
   });
 
-  it("crosses the load entry backward and forward", async () => {
+  it("crosses the conversion entry backward and forward", async () => {
     const { document, manager, endJson, replay, copyJson } =
       await setupConvertedDocument(t1Content(), t1OldEntries());
     expect(getTile(document, "t1").label).toBe("x");
@@ -256,8 +256,8 @@ describe("playback across a load entry", () => {
     ];
     const { document, manager } = await setupConvertedDocument(t1Content(), oldEntries);
 
-    // t3 is added, edited and removed inside each move, and no move after the first crosses the load
-    // entry, so only the patches' values show that t3 is old.
+    // t3 is added, edited and removed inside each move, and no move after the first crosses the
+    // conversion entry, so only the patches' values show that t3 is old.
     for (const position of [3, 0, 3]) {
       await manager.goToHistoryEntryPosition(position);
       expect(manager.numHistoryEventsApplied).toBe(position);
@@ -580,7 +580,7 @@ describe("playback across a load entry", () => {
     expect(warnSpy).not.toHaveBeenCalledWith(expect.stringContaining("inconsistent state"));
   });
 
-  it("never builds a JSON copy for a history without a load entry", async () => {
+  it("never builds a JSON copy for a history without a conversion entry", async () => {
     const tilePath = "/content/tileMap/t1/content/text";
     const docContent = DocumentContentModel.create({
       sharedModelMap: { sm1: { sharedModel: { id: "sm1", type: "TestSharedModel" }, tiles: ["t1"] } },
@@ -603,15 +603,15 @@ describe("playback across a load entry", () => {
     expect(manager.jsonHistoryCopy).toBeUndefined();
   });
 
-  it("scans a shorter or replaced history again for a load entry", () => {
+  it("scans a shorter or replaced history again for a conversion entry", () => {
     const document = createDocumentModel({ uid: "1", type: ProblemDocument, key: kTreeId, content: t1Content() });
     const manager = document.treeManagerAPI as Instance<typeof TreeManager>;
     const plainEntry = () => makeEntry([replaceRecord(`${t1Path}/content/text`, "a", "b")]);
-    const loadEntry: HistoryEntrySnapshot = { ...makeEntry([]), isLoadEntry: true };
+    const conversionEntry: HistoryEntrySnapshot = { ...makeEntry([]), isConversionEntry: true };
 
     manager.setChangeDocument(CDocument.create({ history: [plainEntry(), plainEntry()] }));
     expect(manager.needsJsonCopy).toBe(false);
-    applySnapshot(manager.document, { history: [loadEntry] });
+    applySnapshot(manager.document, { history: [conversionEntry] });
     expect(manager.needsJsonCopy).toBe(true);
     manager.setChangeDocument(CDocument.create({ history: [plainEntry(), plainEntry(), plainEntry()] }));
     expect(manager.needsJsonCopy).toBe(false);
@@ -725,7 +725,7 @@ describe("playback across a load entry", () => {
       expect(manager.historyPlaybackFailures).toEqual([]);
     });
 
-    it("finds the virtual conversions again when the history, the bridges or the local load entry change",
+    it("finds the virtual conversions again when the history, the bridges or the local conversion entry change",
         () => {
       const { manager } = setupVirtualConversionDocument(undefined);
       const atPosition = (position: number) => [{ path: t1Path, position, oldJson: undefined }];
@@ -739,7 +739,7 @@ describe("playback across a load entry", () => {
           HistoryEntry.create(makeEntry([replaceRecord(`${t1Path}/content/label`, "x", "y")]))),
         () => manager.setChangeDocument(CDocument.create({ history: getSnapshot(manager.document.history) })),
         () => registerHistoryBridge({ findVirtualConversions: () => [] }),
-        () => manager.setLocalLoadEntry({ ...makeEntry([]), isLoadEntry: true })
+        () => manager.setLocalConversionEntry({ ...makeEntry([]), isConversionEntry: true })
       ];
       changes.forEach((change, i) => {
         virtualConversions = atPosition(3 + i);
@@ -751,23 +751,23 @@ describe("playback across a load entry", () => {
   });
 });
 
-describe("playback with a local load entry", () => {
+describe("playback with a local conversion entry", () => {
   beforeEach(() => {
     jest.restoreAllMocks();
   });
 
   /**
    * A playback document made the way the canvas makes one: a snapshot of a live document that
-   * converted old stored content, which hands over its pending load entry. The history is what
+   * converted old stored content, which hands over its pending conversion entry. The history is what
    * Firestore holds, which doesn't include that entry.
    */
   function setupPlaybackOfOldContent(content: any, history: HistoryEntrySnapshot[]) {
     const liveDocument = createDocumentModel({ uid: "1", type: ProblemDocument, key: kTreeId, content });
     const liveManager = liveDocument.treeManagerAPI as Instance<typeof TreeManager>;
-    expect(liveManager.pendingLoadEntry).toBeDefined();
+    expect(liveManager.pendingConversionEntry).toBeDefined();
     const document = createDocumentModel(getSnapshot(liveDocument));
     const manager = document.treeManagerAPI as Instance<typeof TreeManager>;
-    manager.setLocalLoadEntry(liveManager.pendingLoadEntry);
+    manager.setLocalConversionEntry(liveManager.pendingConversionEntry);
     manager.setChangeDocument(CDocument.create({ history }));
     manager.setNumHistoryEntriesApplied(history.length);
     return { document, manager };
@@ -785,7 +785,7 @@ describe("playback with a local load entry", () => {
     expect(manager.historyPlaybackFailures).toEqual([]);
   });
 
-  it("plays back a student's load entry and edit that arrive after the hand-off", async () => {
+  it("plays back a student's conversion entry and edit that arrive after the hand-off", async () => {
     const oldEntries = t1OldEntries();
     const { document, manager } = setupPlaybackOfOldContent(t1Content(), oldEntries);
     const student = await setupConvertedDocument(t1Content(), oldEntries);
@@ -814,10 +814,10 @@ describe("playback with a local load entry", () => {
     expect(manager.historyPlaybackFailures).toEqual([]);
   });
 
-  it("doesn't undo a local load entry that the history already holds before the start", async () => {
+  it("doesn't undo a local conversion entry that the history already holds before the start", async () => {
     const { document, manager, replay, copyJson } = await setupConvertedDocument(t1Content(), t1OldEntries());
     // The owner's entry was handed over while pending, and uploaded before playback started.
-    manager.setLocalLoadEntry(getSnapshot(manager.document.history[3]));
+    manager.setLocalConversionEntry(getSnapshot(manager.document.history[3]));
 
     for (const [position, label] of [[4, "c"], [0, "a"], [5, "x"]] as const) {
       await manager.goToHistoryEntryPosition(position);
@@ -860,14 +860,14 @@ describe("dumb rebuild of a chain recorded by the current code", () => {
       async () => {
     const { manager, endJson } = await setupConvertedDocument({ tileMap: { t1: storedTile() } }, oldEntries());
     const entries: IStoredEntry[] = JSON.parse(JSON.stringify(getSnapshot(manager.document.history)));
-    const loadEntryIndex = entries.findIndex(entry => entry.isLoadEntry);
-    expect(loadEntryIndex).toBe(3);
+    const conversionEntryIndex = entries.findIndex(entry => entry.isConversionEntry);
+    expect(conversionEntryIndex).toBe(3);
     expect(endJson.content.tileMap.t1.content.items).toHaveLength(1);
 
     const { positions, end } = rebuildBackAndForth(endJson, entries);
     expect(positions[0].content.tileMap.t1).toEqual(oldTile("t1", "a"));
-    expect(positions[loadEntryIndex].content.tileMap.t1).toEqual(storedTile());
-    expect(positions[loadEntryIndex + 1].content.tileMap.t1.content.version).toBe("2");
+    expect(positions[conversionEntryIndex].content.tileMap.t1).toEqual(storedTile());
+    expect(positions[conversionEntryIndex + 1].content.tileMap.t1.content.version).toBe("2");
     expect(end).toEqual(endJson);
   });
 });

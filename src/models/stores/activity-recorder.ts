@@ -82,8 +82,8 @@ export class ActivityRecorder {
   }
 
   onLocalEntryUploaded(document: DocumentModelType, entry: HistoryEntryType) {
-    // A load entry records CLUE's own changes at load, which a tick can flush.
-    if (!this.isEnabled || isTickEntry(entry) || entry.isLoadEntry) return;
+    // A conversion entry records CLUE's own conversion of old content, which a tick can flush.
+    if (!this.isEnabled || isTickEntry(entry) || entry.isConversionEntry) return;
     if (!this.listening) {
       window.addEventListener("pagehide", this.handlePageHide);
       this.listening = true;

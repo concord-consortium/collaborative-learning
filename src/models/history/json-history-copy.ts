@@ -22,7 +22,7 @@ interface ICopyConversion extends IVirtualConversion {
 
 /**
  * A plain JSON copy of a document that history playback keeps beside the MST trees. Every entry
- * a move crosses, load entries included, is applied to the copy, and so is every virtual
+ * a move crosses, conversion entries included, is applied to the copy, and so is every virtual
  * conversion, so it can say where the move has to stop and which models are old there. It never
  * touches an MST tree.
  */

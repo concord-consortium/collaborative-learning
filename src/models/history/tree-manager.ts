@@ -82,8 +82,8 @@ function getEntriesBetween(history: readonly HistoryEntryType[], from: number, t
 /**
  * Moves the JSON copy toward `target` and builds the patch source for the move. A model is
  * treated as old when it is old in the copy at either end of the move, when a patch in the move
- * carries an old version of it, or when a load entry or a virtual conversion in the move changes
- * it. The patches catch an old model that is absent at both ends. The load-entry and
+ * carries an old version of it, or when a conversion entry or a virtual conversion in the move changes
+ * it. The patches catch an old model that is absent at both ends. The conversion-entry and
  * virtual-conversion checks are backstops: a model either one converts is old at the end of the
  * move before the conversion, or was added in the move with an old value. The copy can stop short
  * of `target`; the source covers only the entries up to where it stopped.
@@ -99,10 +99,10 @@ function moveJsonCopy(copy: JsonHistoryCopy, history: readonly HistoryEntryType[
 
   const entries = getEntriesBetween(history, start, moved.position);
   const patches = getAllPatches(entries, treeId);
-  const loadEntryPaths = collectModelPaths(entries.filter(entry => entry.isLoadEntry), treeId);
+  const conversionEntryPaths = collectModelPaths(entries.filter(entry => entry.isConversionEntry), treeId);
   const oldPaths = new Set([...collectModelPaths(entries, treeId)].filter(path =>
     oldAtStart.has(path) || copy.needsConversion(path) ||
-    hasOldValue(patches, path) || loadEntryPaths.has(path)));
+    hasOldValue(patches, path) || conversionEntryPaths.has(path)));
   // A move crosses a virtual conversion (see IVirtualConversion.position) when its lower end is
   // below the conversion's position and its upper end is at or above it.
   const low = Math.min(start, moved.position);
@@ -118,26 +118,25 @@ function moveJsonCopy(copy: JsonHistoryCopy, history: readonly HistoryEntryType[
  * history `position`.
  *
  * The playback document is a copy of the live document, which converted its old models when it
- * loaded. The load entry that records the conversion is uploaded with the next change to the
- * content, so until then only the live document has it, and it is handed to playback as
- * `localLoadEntry`. The history from Firestore doesn't hold it, and its entries expect those
- * models as they are stored, before conversion. So the load entry is undone here, which puts them
- * back in their stored form.
+ * loaded. Its conversion entry is uploaded with the next change to the content, so until then only
+ * the live document has it, and it is handed to playback as `localConversionEntry`. The history
+ * from Firestore doesn't hold it, and its entries expect those models as they are stored, before
+ * conversion. So the conversion entry is undone here, which puts them back in their stored form.
  *
- * Once the history holds the load entry before `position`, the document's JSON already matches
+ * Once the history holds the conversion entry before `position`, the document's JSON already matches
  * the history there, and it is returned unchanged. `documentJson` is changed in place.
  */
 function getJsonCopyStart(documentJson: object, treeId: string, history: readonly HistoryEntryType[],
-    position: number, localLoadEntry: HistoryEntrySnapshot | undefined) {
-  if (!localLoadEntry) return documentJson;
-  const index = history.findIndex(entry => entry.id === localLoadEntry.id);
+    position: number, localConversionEntry: HistoryEntrySnapshot | undefined) {
+  if (!localConversionEntry) return documentJson;
+  const index = history.findIndex(entry => entry.id === localConversionEntry.id);
   if (index >= 0 && index < position) return documentJson;
   try {
     applyJsonPatches(documentJson,
-      getEntryPatchesForTree(HistoryEntry.create(localLoadEntry), treeId, HistoryOperation.Undo));
+      getEntryPatchesForTree(HistoryEntry.create(localConversionEntry), treeId, HistoryOperation.Undo));
   } catch (e) {
     // The copy starts converted, so playback stops at the first old entry that doesn't apply to it.
-    console.error("Could not undo the local load entry in the playback JSON copy:", e);
+    console.error("Could not undo the local conversion entry in the playback JSON copy:", e);
   }
   return documentJson;
 }
@@ -218,16 +217,16 @@ export const TreeManager = types
    */
   jsonCopyOutOfStep: false,
   /**
-   * The load entry for the content as loaded or last set, kept out of the history until it
+   * The conversion entry for the content as loaded or last set, kept out of the history until it
    * is flushed (see completeHistoryEntry).
    */
-  pendingLoadEntry: undefined as HistoryEntrySnapshot | undefined,
+  pendingConversionEntry: undefined as HistoryEntrySnapshot | undefined,
   /**
-   * A load entry that the live document has not uploaded yet, handed to a playback copy. It stays
+   * A conversion entry that the live document has not uploaded yet, handed to a playback copy. It stays
    * out of the copy's history, which comes from Firestore. The JSON copy starts with it undone (see
    * getJsonCopyStart), so it holds the stored content that the history reaches.
    */
-  localLoadEntry: undefined as HistoryEntrySnapshot | undefined,
+  localConversionEntry: undefined as HistoryEntrySnapshot | undefined,
   /**
    * A JSON copy of the main document that playback keeps at the current position when
    * `needsJsonCopy` is true. It is built on the first move that needs it.
@@ -245,11 +244,11 @@ export const TreeManager = types
   // shorter history is scanned again.
   let scannedHistory: unknown;
   let scannedLength = 0;
-  let hasLoadEntry = false;
+  let hasConversionEntry = false;
   // Finding virtual conversions runs every registered bridge, so the result is kept until the key
   // changes.
   let virtualKey: {
-    history: unknown; length: number; treeId: string; bridgeCount: number; localLoadEntry: unknown
+    history: unknown; length: number; treeId: string; bridgeCount: number; localConversionEntry: unknown
   } | undefined;
   let virtualConversions = kNoVirtualConversions;
 
@@ -258,15 +257,15 @@ export const TreeManager = types
     const treeId = self.mainDocument?.key;
     if (bridges.length === 0 || treeId === undefined) return kNoVirtualConversions;
     const history = self.document.history;
-    const { localLoadEntry } = self;
+    const { localConversionEntry } = self;
     if (virtualKey?.history !== history || virtualKey.length !== history.length ||
         virtualKey.treeId !== treeId || virtualKey.bridgeCount !== bridges.length ||
-        virtualKey.localLoadEntry !== localLoadEntry) {
-      virtualKey = { history, length: history.length, treeId, bridgeCount: bridges.length, localLoadEntry };
-      // A local load entry that the history doesn't hold yet comes after it, so the bridges see
+        virtualKey.localConversionEntry !== localConversionEntry) {
+      virtualKey = { history, length: history.length, treeId, bridgeCount: bridges.length, localConversionEntry };
+      // A local conversion entry that the history doesn't hold yet comes after it, so the bridges see
       // the conversion it records.
-      const bridgeHistory = localLoadEntry && !history.some(entry => entry.id === localLoadEntry.id)
-        ? [...history, HistoryEntry.create(localLoadEntry)]
+      const bridgeHistory = localConversionEntry && !history.some(entry => entry.id === localConversionEntry.id)
+        ? [...history, HistoryEntry.create(localConversionEntry)]
         : history;
       virtualConversions = bridges.flatMap(bridge => bridge.findVirtualConversions(bridgeHistory, treeId));
     }
@@ -284,21 +283,21 @@ export const TreeManager = types
 
     /**
      * True when playback needs a JSON copy of the document: when the history holds a
-     * load entry, a local load entry was handed over, or a history bridge finds a conversion it
+     * conversion entry, a local conversion entry was handed over, or a history bridge finds a conversion it
      * never recorded.
      */
     get needsJsonCopy() {
-      if (self.localLoadEntry) return true;
+      if (self.localConversionEntry) return true;
       const history = self.document.history;
       if (scannedHistory !== history || history.length < scannedLength) {
         scannedHistory = history;
         scannedLength = 0;
-        hasLoadEntry = false;
+        hasConversionEntry = false;
       }
-      for (; scannedLength < history.length && !hasLoadEntry; scannedLength++) {
-        hasLoadEntry = !!history[scannedLength].isLoadEntry;
+      for (; scannedLength < history.length && !hasConversionEntry; scannedLength++) {
+        hasConversionEntry = !!history[scannedLength].isConversionEntry;
       }
-      return hasLoadEntry || getVirtualConversions().length > 0;
+      return hasConversionEntry || getVirtualConversions().length > 0;
     }
   };
 })
@@ -343,14 +342,14 @@ export const TreeManager = types
     }
 
     // Content is saved only when it changes, so flushing before a metadata-only entry (a title
-    // change) would pair the load entry with old content, and the next load would convert it again
+    // change) would pair the conversion entry with old content, and the next load would convert it again
     // with new ids. The entry isn't undoable, so it skips the undo store and leaves revisionId alone.
-    if (self.pendingLoadEntry && entryChangesContent(snapshot)) {
-      const loadEntryIndex = self.document.history.length;
-      self.document.history.push(self.pendingLoadEntry);
-      self.pendingLoadEntry = undefined;
+    if (self.pendingConversionEntry && entryChangesContent(snapshot)) {
+      const conversionEntryIndex = self.document.history.length;
+      self.document.history.push(self.pendingConversionEntry);
+      self.pendingConversionEntry = undefined;
       self.historyManager?.onHistoryEntryCompleted(
-        self.document, self.document.history[loadEntryIndex], loadEntryIndex);
+        self.document, self.document.history[conversionEntryIndex], conversionEntryIndex);
     }
 
     // Save the index in the local history. This is used to figure out
@@ -395,12 +394,12 @@ export const TreeManager = types
       self.document.history.push(entry);
     },
 
-    setPendingLoadEntry(entry: HistoryEntrySnapshot | undefined) {
-      self.pendingLoadEntry = entry;
+    setPendingConversionEntry(entry: HistoryEntrySnapshot | undefined) {
+      self.pendingConversionEntry = entry;
     },
 
-    setLocalLoadEntry(entry: HistoryEntrySnapshot | undefined) {
-      self.localLoadEntry = entry;
+    setLocalConversionEntry(entry: HistoryEntrySnapshot | undefined) {
+      self.localConversionEntry = entry;
     },
 
     setChangeDocument(cDoc: CDocumentType) {
@@ -735,7 +734,7 @@ export const TreeManager = types
       if (!copy) {
         const { key } = self.mainDocument;
         const documentJson: object = toJsonValue(getSnapshot(self.mainDocument as unknown as IAnyStateTreeNode));
-        const startJson = getJsonCopyStart(documentJson, key, history, initialPosition, self.localLoadEntry);
+        const startJson = getJsonCopyStart(documentJson, key, history, initialPosition, self.localConversionEntry);
         copy = self.jsonHistoryCopy = new JsonHistoryCopy(key, startJson, initialPosition);
       }
       const virtualConversions = self.virtualConversions;

@@ -3,9 +3,9 @@
 How CLUE records the changes to a document, and uses them for undo, redo and history playback.
 
 [history-framework.md](../history-framework.md) is the overview of the framework: its models, how
-an entry is recorded, how undo and playback apply entries, load entries, playback across schema
-conversions, and how history is stored in Firestore. It is one large document. New
-topics go in this folder, and sections of the overview can move here as they grow.
+an entry is recorded, how undo and playback apply entries, conversion entries, playback across
+schema conversions, and how history is stored in Firestore. It is one large document. New topics go
+in this folder, and sections of the overview can move here as they grow.
 
 Each doc in this folder describes one part of the history system. It says at the top whether that
 part is built, and it is kept up to date as the work lands, rather than replaced by a separate

@@ -701,7 +701,7 @@ describe("history playback failure handling", () => {
   });
 
   // An entry whose inverse patches don't pair one-to-one with its patches,
-  // as in a load entry, whose two directions are separate diffs. Its one
+  // as in a conversion entry, whose two directions are separate diffs. Its one
   // inverse patch undoes nothing the forward patches change.
   const unpairedEntry = {
     ...mixedPatchesEntry,
