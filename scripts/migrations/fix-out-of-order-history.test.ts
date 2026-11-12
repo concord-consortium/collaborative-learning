@@ -1,6 +1,6 @@
 import { FieldValue } from "firebase-admin/firestore";
 import {
-  IStoredEntry, planHistoryRepair, repairDocumentHistory, tilePathInfo, toStoredEntry
+  IStoredEntry, parseArgs, planHistoryRepair, repairDocumentHistory, tilePathInfo, toStoredEntry
 } from "./fix-out-of-order-history";
 import { applyJsonPatches } from "../../src/models/history/json-patch";
 
@@ -365,3 +365,16 @@ describe("repairDocumentHistory", () => {
   });
 });
 
+describe("parseArgs", () => {
+  it("uses the defaults", () => {
+    expect(parseArgs(["--root", "authed/p"])).toEqual(expect.objectContaining(
+      { root: "authed/p", tileType: "Dataflow", limit: undefined, minIdleMinutes: 60, apply: false }));
+  });
+
+  it("refuses a number option that isn't a number of 0 or more", () => {
+    expect(() => parseArgs(["--root", "authed/p", "--min-idle-minutes", "6O"])).toThrow(/--min-idle-minutes/);
+    expect(() => parseArgs(["--root", "authed/p", "--min-idle-minutes", "-5"])).toThrow(/--min-idle-minutes/);
+    expect(() => parseArgs(["--root", "authed/p", "--limit", "abc"])).toThrow(/--limit/);
+    expect(parseArgs(["--root", "authed/p", "--min-idle-minutes", "0"]).minIdleMinutes).toBe(0);
+  });
+});

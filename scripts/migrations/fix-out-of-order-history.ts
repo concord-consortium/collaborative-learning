@@ -395,7 +395,7 @@ export async function repairHistories(db: Firestore, options: IRepairOptions) {
     const query = tileType ? documents.where("tools", "array-contains", tileType) : documents;
     refs = (await query.select().get()).docs.map(doc => doc.ref);
   }
-  if (limit) refs = refs.slice(0, limit);
+  if (limit !== undefined) refs = refs.slice(0, limit);
   log(`checking ${refs.length} documents under ${root}${options.apply ? "" : " (dry run)"}`);
 
   const results: IDocumentResult[] = [];
@@ -413,22 +413,28 @@ export async function repairHistories(db: Firestore, options: IRepairOptions) {
   return results;
 }
 
-function parseArgs(argv: string[]): IRepairOptions {
+export function parseArgs(argv: string[]): IRepairOptions {
   const value = (name: string) => {
     const i = argv.indexOf(name);
     return i >= 0 ? argv[i + 1] : undefined;
   };
+  // A value that isn't a number would quietly turn a check off (`x < NaN` is false), so refuse it.
+  const count = (name: string) => {
+    const text = value(name);
+    if (text === undefined) return undefined;
+    const n = Number(text);
+    if (!Number.isFinite(n) || n < 0) throw new Error(`${name} needs a number of 0 or more, not "${text}"`);
+    return n;
+  };
   const root = value("--root");
   if (!root) throw new Error("--root is required, e.g. --root authed/learn_concord_org");
   const docIds = argv.flatMap((arg, i) => arg === "--doc" && argv[i + 1] ? [argv[i + 1]] : []);
-  const limit = value("--limit");
-  const minIdle = value("--min-idle-minutes");
   return {
     root,
     docIds,
     tileType: argv.includes("--any-tile-type") ? undefined : (value("--tile-type") ?? "Dataflow"),
-    limit: limit ? Number(limit) : undefined,
-    minIdleMinutes: minIdle ? Number(minIdle) : 60,
+    limit: count("--limit"),
+    minIdleMinutes: count("--min-idle-minutes") ?? 60,
     apply: argv.includes("--apply")
   };
 }
