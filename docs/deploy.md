@@ -45,8 +45,9 @@ deployed or run, and why, in a callout like this:
 
 For a migration script, the timing says when to run it. A script that repairs data the released
 client keeps producing is `after`: run before the release, it would miss whatever the released
-client writes until then. Put a script in `scripts/migrations/` when it changes data in Firestore or
-the Realtime Database; scripts that only read or report stay in `scripts/`.
+client writes until then. A PR has one `migrations` entry for all of its migration scripts; if they
+need different timings, give the latest and say in the reason when to run each. "Migration scripts"
+in [scripts/README.md](../scripts/README.md) says which scripts go in `scripts/migrations/`.
 
 `before` is the usual timing, so make a change `before` wherever it can be. `before` doesn't mean
 the part has to go out right away; it means it is safe to deploy early. Preparing a release usually
