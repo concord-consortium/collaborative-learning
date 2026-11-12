@@ -71,13 +71,9 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
   // summarizer (chat tutor + aiEvaluation) sees the same set the node dropdown enforces. Editable
   // tiles only; setOutputConfig stores only non-default values and is idempotent.
   //
-  // Don't copy this pattern: a change made on mount is recorded as an entry of its own and can be
-  // stored ahead of the entry that added the tile (see "Don't change the document when a tile
-  // mounts" in docs/undo-and-time-travel.md). New and copied tiles get the config when they are
-  // created, so for them this sets the value the config already has, and records nothing. The code
-  // stays so that existing tiles pick up the unit's current config when they are opened for
-  // editing. The start editing entry in docs/history-framework/start-editing-entry.md is the
-  // planned replacement for it.
+  // It stays so existing tiles pick up the unit's current config when they are opened for editing.
+  // Don't copy this pattern; see "Don't change the document when a tile mounts" in
+  // docs/undo-and-time-travel.md and docs/history-framework/start-editing-entry.md.
   private mirrorUnitOutputConfig() {
     const { appConfig } = this.stores;
     warnUnknownLiveOutputSettings(
