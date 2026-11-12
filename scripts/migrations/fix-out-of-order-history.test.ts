@@ -8,8 +8,8 @@ const tile = "T1";
 const tilePath = `/content/tileMap/${tile}`;
 const outputConfig = { servoInputMode: "proportion", allowedOutputTypes: ["Servo"] };
 
-// The entries a DataFlow tile used to leave when the unit set Live Output options: the mirror on
-// mount completed while the entry that added the tile was still open, so it was stored first.
+// The entry a DataFlow tile's Live Output mirror on mount could store ahead of the entry that added
+// the tile, in a unit with Live Output settings.
 function setOutputConfig(docId: string, index: number, previousEntryId?: string): IStoredEntry {
   return {
     docId, index, previousEntryId, action: `${tilePath}/content/setOutputConfig`,
@@ -37,6 +37,23 @@ function addTile(docId: string, index: number, previousEntryId?: string, tileId 
     }]
   };
 }
+// An entry with the given patches, and inverse patches that remove what they add.
+function change(docId: string, index: number, previousEntryId: string | undefined, paths: string[]): IStoredEntry {
+  return {
+    docId, index, previousEntryId,
+    records: [{
+      patches: paths.map(path => ({ op: "add", path, value: 1 })),
+      inversePatches: paths.map(path => ({ op: "remove", path }))
+    }]
+  };
+}
+const wholeTileMap = (docId: string, index: number, previousEntryId: string, tileIds: string[]): IStoredEntry => ({
+  docId, index, previousEntryId,
+  records: [{
+    patches: [{ op: "replace", path: "/content/tileMap", value: Object.fromEntries(tileIds.map(id => [id, {}])) }],
+    inversePatches: []
+  }]
+});
 function tick(docId: string, index: number, previousEntryId?: string, tickIndex = 0): IStoredEntry {
   return {
     docId, index, previousEntryId, action: `${tilePath}/content/program/tickAndProcess`,
@@ -92,7 +109,7 @@ describe("planHistoryRepair", () => {
     expect(plan.lastEntry).toBeUndefined();
   });
 
-  it("leaves a history that replays from end to start, which the stored order doesn't", () => {
+  it("leaves a history that replays to the end and back, which the stored order doesn't", () => {
     const entries = [setOutputConfig("A", 0), addTile("B", 1, "A"), tick("C", 2, "B")];
     expect(() => replay(entries)).toThrow();
     const repaired = applyPlan(entries);
@@ -146,6 +163,66 @@ describe("planHistoryRepair", () => {
     expect(plan.skipped).toMatch(/outside that tile/);
   });
 
+  it("moves an entry with several changes to the tile once", () => {
+    const entries = [
+      change("A", 0, undefined, [`${tilePath}/content/a`, `${tilePath}/content/b`]), addTile("B", 1, "A")
+    ];
+    const plan = planHistoryRepair(entries);
+    expect(plan.moves).toHaveLength(1);
+    expect(applyPlan(entries).map(entry => entry.docId)).toEqual(["B", "A"]);
+  });
+
+  it("skips an entry whose inverse patches reach outside the tile", () => {
+    const entry = setOutputConfig("A", 0);
+    entry.records[0].inversePatches!.push({ op: "remove", path: "/content/rowOrder/0" });
+    expect(planHistoryRepair([entry, addTile("B", 1, "A")]).skipped).toMatch(/outside that tile/);
+  });
+
+  it("skips an entry that also changes the whole tile", () => {
+    const entry = setOutputConfig("A", 0);
+    entry.records[0].inversePatches!.push({ op: "remove", path: tilePath });
+    expect(planHistoryRepair([entry, addTile("B", 1, "A")]).skipped).toMatch(/outside that tile/);
+  });
+
+  it("skips an entry that also changes a tile from the starting content", () => {
+    // T0 is never created, so B's later change to it depends on A's.
+    const entries = [
+      change("A", 0, undefined, ["/content/tileMap/T0/content/x", `${tilePath}/content/x`]),
+      change("B", 1, "A", ["/content/tileMap/T0/content/y"]),
+      addTile("C", 2, "B")
+    ];
+    const plan = planHistoryRepair(entries);
+    expect(plan.writes).toEqual([]);
+    expect(plan.skipped).toMatch(/no later entry creates/);
+  });
+
+  it("skips an entry that changes tiles different entries create", () => {
+    // Moving A after D would put it after C, which changes T1 after A did.
+    const entries = [
+      change("A", 0, undefined, [`${tilePath}/content/items/0`, "/content/tileMap/T2/content/items/0"]),
+      addTile("B", 1, "A"),
+      change("C", 2, "B", [`${tilePath}/content/items/1`]),
+      addTile("D", 3, "C", "T2")
+    ];
+    const plan = planHistoryRepair(entries);
+    expect(plan.writes).toEqual([]);
+    expect(plan.skipped).toMatch(/different entries create/);
+  });
+
+  it("skips a whole tile map that leaves out a tile an entry waits on", () => {
+    // T1 is in the starting content, B removes it with the whole map, and C adds a new tile T1. A's
+    // change belongs to the old T1, so it must not be moved after C.
+    const entries = [setOutputConfig("A", 0), wholeTileMap("B", 1, "A", []), addTile("C", 2, "B")];
+    const plan = planHistoryRepair(entries);
+    expect(plan.writes).toEqual([]);
+    expect(plan.skipped).toMatch(/whole tile map/);
+  });
+
+  it("skips a whole tile map that holds a tile an entry waits on", () => {
+    const plan = planHistoryRepair([setOutputConfig("A", 0), wholeTileMap("B", 1, "A", [tile])]);
+    expect(plan.skipped).toMatch(/whole tile map/);
+  });
+
   it("skips a span whose entries share an index", () => {
     const plan = planHistoryRepair([setOutputConfig("A", 0), addTile("B", 0, "A")]);
     expect(plan.writes).toEqual([]);
@@ -156,6 +233,12 @@ describe("planHistoryRepair", () => {
     const plan = planHistoryRepair([setOutputConfig("A", 0), addTile("B", 1, "X")]);
     expect(plan.writes).toEqual([]);
     expect(plan.skipped).toMatch(/previousEntryId/);
+  });
+
+  it("skips a history whose chain breaks at the entry after the span", () => {
+    const plan = planHistoryRepair([setOutputConfig("A", 0), addTile("B", 1, "A"), tick("C", 2, "X")]);
+    expect(plan.writes).toEqual([]);
+    expect(plan.skipped).toMatch(/entry C has previousEntryId X/);
   });
 });
 
@@ -251,6 +334,13 @@ describe("repairDocumentHistory", () => {
       { path: "authed/p/documents/D1", fields: { lastHistoryEntry: { id: "A", index: 1 } } });
   });
 
+  it("leaves lastHistoryEntry alone on a document that doesn't have one", async () => {
+    const docs = [setOutputConfig("A", 0), addTile("B", 1, "A")].map(e => stored(e));
+    const { db, docRef, updates } = makeDb(docs);
+    await repairDocumentHistory(db, docRef, { apply: true });
+    expect(updates.map(update => update.path)).not.toContain("authed/p/documents/D1");
+  });
+
   it("skips a document whose history changed recently", async () => {
     const docs = [stored(setOutputConfig("A", 0)), stored(addTile("B", 1, "A"), minutesAgo(5))];
     const { db, docRef, isCommitted } = makeDb(docs);
@@ -259,3 +349,4 @@ describe("repairDocumentHistory", () => {
     expect(isCommitted()).toBe(false);
   });
 });
+

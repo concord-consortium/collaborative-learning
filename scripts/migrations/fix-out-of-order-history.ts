@@ -1,24 +1,28 @@
 // Repairs stored document histories in which an entry that changes a tile comes before the entry
-// that creates the tile.
+// that creates the tile. Playback can't move back past such a tile's creation, and a plain
+// JSON-patch replay from the start can't apply the change. The known source is the DataFlow tile's
+// Live Output mirror on mount, whose entry could complete while the entry adding the tile was still
+// recording. See docs/history-framework/start-editing-entry.md.
 //
-// A history entry gets its place in history when it completes, not when it starts. An entry can stay
-// open while it waits on something slower than a microtask, and an entry made meanwhile can complete
-// first. When the open entry is the one that adds a tile, and the other entry changes that tile, the
-// stored history has the change before the tile exists. Replaying it fails: playback can't undo past
-// the tile's creation, and a plain JSON-patch replay from the start can't apply the change.
+// For each such entry, the script moves it to just after the entry that creates its tile. The
+// entries keep their ids and content. Within the span from the first moved entry to the last entry
+// that creates one of their tiles, the entries swap their `index` values to match the new order and
+// get `previousEntryId`s that follow it, as does the entry after the span. A document's
+// `lastHistoryEntry`, when it has one, is updated when the span ends the history.
 //
-// The known source is the DataFlow tile, which used to set its Live Output config when it mounted,
-// while the entry that added it was still open. See docs/history-framework/open-entry.md.
+// The script skips the whole document, and says why, when it can't make the change safely:
+// - an entry that changes a tile before its creation also changes a tile no later entry creates, or
+//   something outside the tiles it waits on, so an entry between its old and new places could
+//   depend on it;
+// - an entry changes tiles that different entries create;
+// - a change replaces the whole tile map while an entry waits on a tile;
+// - entries in the span share an index, or the stored `previousEntryId` chain doesn't follow the
+//   index order there;
+// - the history changed recently enough that someone may still be editing it.
 //
-// For each such entry, the script moves it to just after the entry that creates its tile. It only
-// moves an entry whose patches and inverse patches all lie inside tiles that the creating entry adds,
-// so nothing between the two old positions can depend on it. The entries keep their ids and
-// content. Within the span from the first moved entry to the creating entry, the entries swap their
-// `index` values to match the new order and get `previousEntryId`s that follow it, as does the entry
-// after the span. A document's `lastHistoryEntry`, when it has one, is updated when the span ends
-// the history. The script skips a document, and says why, when it can't make the change safely:
-// entries in the span share an index, the stored `previousEntryId` chain doesn't follow the index
-// order there, or the history changed recently enough that someone may still be editing it.
+// An editor left open on a document across a repair keeps its own copy of the history. When the
+// reordered span ends the history, the next entry it stores names the old last entry as its
+// `previousEntryId`. Its `index` is still right, and playback orders entries by `index`.
 //
 // Usage (from the repository root; dry run unless --apply is given):
 //
@@ -120,10 +124,10 @@ function tileMapKeys(patch: IPatch): string[] | undefined {
   return undefined;
 }
 
-const lastOf = <T>(list?: T[]) => list?.[list.length - 1];
 const allPatches = (entry: IStoredEntry) =>
   entry.records.flatMap(record => [...(record.patches ?? []), ...(record.inversePatches ?? [])]);
 const forwardPatches = (entry: IStoredEntry) => entry.records.flatMap(record => record.patches ?? []);
+const skip = (skipped: string): IRepairPlan => ({ moves: [], writes: [], skipped });
 
 /**
  * Finds the entries that change a tile before the entry that creates it, and plans the writes that
@@ -137,21 +141,21 @@ export function planHistoryRepair(entries: IStoredEntry[]): IRepairPlan {
   const waiting = new Map<string, number[]>();
   // For each entry that waits on a creation, the tiles it waits on and the entries that create them.
   const waits = new Map<number, { tiles: Set<string>; creators: Map<string, number> }>();
-  // Entries waiting on a tile that a whole-tile-map change then holds.
-  const unsafe = new Set<number>();
 
-  entries.forEach((entry, i) => {
+  for (const [i, entry] of entries.entries()) {
     for (const patch of forwardPatches(entry)) {
       const keys = tileMapKeys(patch);
       if (keys) {
+        // A whole tile map can create, keep or remove a waiting tile, and a tile it leaves out can
+        // come back later with the same id, so the script can't tell which tile a waiting entry
+        // changed.
+        if (waiting.size > 0) {
+          const [tileId, [waitingEntry]] = [...waiting.entries()][0];
+          return skip(`entry ${entry.docId} replaces the whole tile map while entry ` +
+            `${entries[waitingEntry].docId} waits on tile ${tileId}, so it can't tell which tile that entry changed`);
+        }
         const present = new Set(keys);
         for (const tileId of [...exists.keys(), ...keys]) exists.set(tileId, present.has(tileId));
-        // A whole tile map that holds a waiting tile may create it, but as part of a change this
-        // script can't move entries past safely.
-        for (const tileId of keys) {
-          waiting.get(tileId)?.forEach(w => unsafe.add(w));
-          waiting.delete(tileId);
-        }
         continue;
       }
       const info = tilePathInfo(patch.path);
@@ -166,7 +170,7 @@ export function planHistoryRepair(entries: IStoredEntry[]): IRepairPlan {
         }
         waiting.delete(info.tileId);
         exists.set(info.tileId, patch.op !== "remove");
-      } else if (exists.get(info.tileId) !== true && lastOf(waiting.get(info.tileId)) !== i) {
+      } else if (exists.get(info.tileId) !== true) {
         // A tile that hasn't been seen may exist in the starting content; it only counts as missing
         // if a later entry creates it, which is checked when the waits are resolved.
         const list = waiting.get(info.tileId) ?? [];
@@ -177,7 +181,7 @@ export function planHistoryRepair(entries: IStoredEntry[]): IRepairPlan {
         waits.set(i, wait);
       }
     }
-  });
+  }
 
   // Entries whose tiles are all created later. A tile that is never created was in the starting
   // content, so an entry that waits only on such tiles is fine where it is.
@@ -185,9 +189,11 @@ export function planHistoryRepair(entries: IStoredEntry[]): IRepairPlan {
   for (const [i, wait] of waits) {
     const created = [...wait.tiles].filter(tileId => wait.creators.has(tileId));
     if (created.length === 0) continue;
-    if (unsafe.has(i) || created.length !== wait.tiles.size) {
-      return { moves: [], writes: [], skipped: `entry ${entries[i].docId} changes a tile before ` +
-        `it is created, but also changes other tiles in a way this script can't reorder safely` };
+    const { docId } = entries[i];
+    // Moving the entry would pass the later changes to the tiles it changes that already exist.
+    if (created.length !== wait.tiles.size) {
+      return skip(`entry ${docId} changes a tile before it is created, and also a tile that no ` +
+        `later entry creates, so it can't be moved safely`);
     }
     // Every patch, forward and inverse, must lie inside the tiles it waits on, so no entry between
     // its old and new positions can depend on it.
@@ -196,10 +202,17 @@ export function planHistoryRepair(entries: IStoredEntry[]): IRepairPlan {
       return !info || !info.inside || !wait.tiles.has(info.tileId);
     });
     if (outside) {
-      return { moves: [], writes: [], skipped: `entry ${entries[i].docId} changes a tile before it is ` +
-        `created, and also changes something outside that tile, so it can't be moved safely` };
+      return skip(`entry ${docId} changes a tile before it is created, and also changes something ` +
+        `outside that tile, so it can't be moved safely`);
     }
-    moves.push({ from: i, to: Math.max(...wait.creators.values()), tiles: created });
+    // Moving it after the last of several creations would pass the changes made to the tiles
+    // created earlier, which can depend on it.
+    const creators = new Set(wait.creators.values());
+    if (creators.size > 1) {
+      return skip(`entry ${docId} changes tiles that different entries create, so it can't be ` +
+        `moved after all of them safely`);
+    }
+    moves.push({ from: i, to: [...creators][0], tiles: created });
   }
   if (moves.length === 0) return { moves: [], writes: [] };
 
@@ -223,13 +236,13 @@ export function planHistoryRepair(entries: IStoredEntry[]): IRepairPlan {
   // gets a new previousEntryId, so the chain checks include it.
   const spanIndexes = entries.slice(start, end + 1).map(entry => entry.index);
   if (new Set(spanIndexes).size !== spanIndexes.length) {
-    return { moves: [], writes: [], skipped: "entries in the span to reorder share an index" };
+    return skip("entries in the span to reorder share an index");
   }
   for (let i = start; i <= Math.min(end + 1, entries.length - 1); i++) {
     const expected = i > 0 ? entries[i - 1].docId : undefined;
     if (i > 0 && entries[i].previousEntryId !== expected) {
-      return { moves: [], writes: [], skipped: `entry ${entries[i].docId} has previousEntryId ` +
-        `${entries[i].previousEntryId}, not ${expected}, so the chain doesn't follow the index order` };
+      return skip(`entry ${entries[i].docId} has previousEntryId ${entries[i].previousEntryId}, ` +
+        `not ${expected}, so the chain doesn't follow the index order`);
     }
   }
 
