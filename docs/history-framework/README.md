@@ -4,7 +4,7 @@ How CLUE records the changes to a document, and uses them for undo, redo and his
 
 [history-framework.md](../history-framework.md) is the overview of the framework: its models, how
 an entry is recorded, how undo and playback apply entries, load entries, playback across schema
-conversions, and how history is stored in Firestore. It is still a single large document. New
+conversions, and how history is stored in Firestore. It is one large document. New
 topics go in this folder, and sections of the overview can move here as they grow.
 
 Each doc in this folder describes one part of the history system. It says at the top whether that
@@ -14,10 +14,10 @@ what CLUE does today, so the doc stays accurate at every stage.
 
 ## Docs
 
-- [open-entry.md](open-entry.md) — The entry recorded when a document is opened for editing: a
-  session marker that also holds the changes CLUE makes on open and the content's drift from
-  history. Status: not built. Also covers what CLUE does today instead, and the script that
-  repairs histories with entries stored ahead of their tile's creation.
+- [start-editing-entry.md](start-editing-entry.md) — The entry recorded when a document is opened
+  for editing: a session marker that also holds the changes CLUE makes on open and the content's
+  drift from history. Status: not built. Also covers what CLUE does today instead, and the script
+  that repairs histories with entries stored ahead of their tile's creation.
 
 ## Related docs
 

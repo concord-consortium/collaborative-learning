@@ -1,38 +1,32 @@
-# Open entries
+# Start editing entries
 
-**Status: not built.** This doc describes the open entry as it is planned, and what CLUE does
-today in its place. Update it as the work lands: move each part from "Planned design" to "How it
-works" when it is built, and remove the parts of "What CLUE does today" it replaces.
+**Status: not built.** This doc describes the start editing entry as it is planned, and what CLUE
+does today in its place. Update it as the work lands: move each part from "Planned design" to "How
+it works" when it is built, and remove the parts of "What CLUE does today" it replaces.
 
-An **open entry** is the history entry recorded when a document is opened for editing. It marks
-the start of each editing session, so a teacher or student reviewing the history can see where
+A **start editing entry** is the history entry recorded when a document is opened for editing. It
+marks the start of each editing session, so a teacher or student reviewing the history can see where
 one session ends and the next begins. It also holds the changes CLUE makes to the content when it
-opens a document, so those changes have a place in history instead of slipping into whatever
-entry happens to be open.
+opens a document, so those changes have a place in history instead of landing wherever an entry of
+their own happens to complete.
 
 ## Why it is needed
 
 Some state in a tile depends on where the document is opened, not on what the user did. The
 DataFlow tile's Live Output config (`outputConfig`) is the example: it comes from the unit's
-`settings.dataflow` options, and the tile stores a copy so the AI summarizer, which only sees the
+`settings.dataflow` settings, and the tile stores a copy so the AI summarizer, which only sees the
 document's snapshot, knows which outputs the unit allows. A document can outlive the unit
 configuration it was made with, so the copy has to be refreshed when the document is edited
 again. Refreshing it is a change to the content, and every change to the content needs a history
 entry, or replaying history no longer recreates the content.
 
 There is no good place for that change today. Opening a document isn't recorded, so a change made
-on open is recorded as an entry of its own at whatever moment the code runs. When that is during
-another entry, the change can land in the wrong place in history:
-
-- A history entry gets its place in history when it completes, not when it starts.
-- An entry can stay open while it waits on something slower than a microtask, such as a
-  shared-model update.
-- A change made meanwhile completes first, so it is stored before the open entry.
-
-If the open entry is the one that adds a tile, the stored history has a change to the tile before
-the tile exists. Playback can't move back past the tile's creation, and a plain JSON-patch replay
-of the history fails. This is what the DataFlow tile did when it set its Live Output config on
-mount.
+on open is recorded as an entry of its own at whatever moment the code runs. When another entry is
+still open then, the change completes first and is stored ahead of it (see "Ordering of history
+entries" in [history-framework.md](../history-framework.md)). If that entry is the one that adds the
+tile, the stored history changes the tile before it exists, and neither playback nor a plain
+JSON-patch replay can get past it. This is what the DataFlow tile did when it set its Live Output
+config on mount.
 
 ## What CLUE does today
 
@@ -44,38 +38,39 @@ mount.
 - **Existing tiles** pick up a changed unit config when they mount in an editable view:
   `mirrorUnitOutputConfig` in `dataflow-tile.tsx` calls `setOutputConfig`, which records a
   non-undoable entry when the config differs. For new and copied tiles the config already matches,
-  so nothing is recorded. This is the pattern the open entry replaces. Don't copy it.
-- **Histories stored before this change** can still have the Live Output entry ahead of the
+  so nothing is recorded. This is the pattern the start editing entry replaces. Don't copy it.
+- **Histories already stored** can have the Live Output entry ahead of the
   tile's creation. `scripts/migrations/fix-out-of-order-history.ts` repairs them by moving each
   such entry to just after the entry that creates its tile. See its header for how it decides what
   is safe to move.
 - **Load entries** (see "Load entries" in [history-framework.md](../history-framework.md)) record
-  the schema conversions CLUE makes when it loads old content. They aren't open entries; see below.
+  the schema conversions CLUE makes when it loads old content. They aren't start editing entries;
+  see below.
 
 ## Planned design
 
-### What the open entry records
+### What the start editing entry records
 
 - **A session marker.** The entry is recorded every time a document is opened for editing, even
   when nothing changes. It is not undoable.
 - **Changes tiles make on open.** The document calls a hook on each tile's content, inside one
-  action, and records what the hooks change as the open entry. A tile reaches the unit
-  configuration through `getAppConfig(self)`, as `defaultContent` and `getMaxTilesOfType` already
-  do. The hook runs from the model, not from a React mount, so it doesn't depend on when the tile
+  action, and records what the hooks change as the start editing entry. A tile's content reaches
+  the unit configuration through `getAppConfig(self)`, as the Simulator's content already does.
+  The hook runs from the model, not from a React mount, so it doesn't depend on when the tile
   renders. The name and signature are not settled; `onOpenForEditing` is a working name.
 - **Drift.** When the content doesn't match where the history ends, the patches that take the
   history's end state to the content. See "Drift" below.
 
 A tile created during the session sets the same state when it is created, inside the action that
-adds it (as `defaultContent` and `updateContentForCopy` do for DataFlow today). The open entry only
-covers the tiles that were in the document when it was opened.
+adds it (as `defaultContent` and `updateContentForCopy` do for DataFlow today). The start editing
+entry only covers the tiles that were in the document when it was opened.
 
 Nothing records the end of a session. The user can close the window before CLUE has a chance to
 write anything, so a closing entry would be missing too often to rely on.
 
 ### How it differs from a load entry
 
-| | Load entry | Open entry |
+| | Load entry | Start editing entry |
 |---|---|---|
 | Records | Schema conversions of stored content | Changes CLUE makes on open, in the current schema, and drift |
 | Recorded when | Loading converted something, and the user then changes the content | Every time the document is opened for editing |
@@ -83,9 +78,11 @@ write anything, so a closing entry would be missing too often to rely on.
 | Undoable | No | No |
 
 The two stay separate entries because playback treats them differently. When both are recorded,
-the load entry comes first: it turns the stored content into the current schema, and the open
-entry's patches are in that schema. The load entry is only uploaded with the next change, and the
-open entry is that change, so they always reach Firestore together.
+the load entry comes first: it turns the stored content into the current schema, and the start
+editing entry's patches are in that schema. The load entry is only uploaded with the next change
+that changes the content. A start editing entry that changes nothing is dropped today, and the load
+entry isn't uploaded before it, so `completeHistoryEntry` in `tree-manager.ts` has to keep the
+entry and upload the load entry ahead of it.
 
 ### Drift
 
@@ -110,11 +107,11 @@ There are two kinds, and they belong in different entries:
 - **What counts as an open?** Once per document per page load, or each time the user switches back
   to the document? Switching remounts the tiles today.
 - **Volume.** An entry for every open, changed or not, is one more Firestore write per open.
-- **Playback stops.** Should an open entry with no changes be a stop on the playback slider? It is
-  useful as a marker, but nothing on screen changes there.
-- **Group documents.** Each editor records their own open entry; how they interleave with the other
-  editors' entries needs working out with the group-document history design.
-- **Out-of-order entries in general.** The open entry removes one source of them. Any entry that
-  waits on a slow exchange can still complete after an entry that depends on it. Tracking when an
-  entry starts as well as when it ends, and holding back an entry that depends on an open one, is
+- **Playback stops.** Should a start editing entry with no changes be a stop on the playback slider?
+  It is useful as a marker, but nothing on screen changes there.
+- **Group documents.** Each editor records their own start editing entry; how they interleave with
+  the other editors' entries needs working out with the group-document history design.
+- **Out-of-order entries in general.** The start editing entry removes one source of them. Any entry
+  that waits on a slow exchange can still complete after an entry that depends on it. Tracking when
+  an entry starts as well as when it ends, and holding back an entry that depends on an open one, is
   the likely direction, but it isn't designed yet.
