@@ -246,7 +246,8 @@ describe("legacyDataflowHistoryBridge", () => {
 
   it("skips a tile whose conversion entry has a legacy patch only in its inverse", () => {
     // Converting a legacy program with no nodes and no values map changes only its id.
-    const conversionEntry = buildTileConversionEntry({ id: "t1", content: { type: "Dataflow", program: kLegacyProgramIdOnly } });
+    const conversionEntry = buildTileConversionEntry(
+      { id: "t1", content: { type: "Dataflow", program: kLegacyProgramIdOnly } });
     const [record] = conversionEntry.records!;
     expect(record.patches!.some(patch => isLegacyDataflowPatch(patch as IJsonPatch))).toBe(false);
     expect(record.inversePatches!.some(patch => isLegacyDataflowPatch(patch as IJsonPatch))).toBe(true);
