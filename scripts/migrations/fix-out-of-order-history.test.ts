@@ -377,4 +377,16 @@ describe("parseArgs", () => {
     expect(() => parseArgs(["--root", "authed/p", "--limit", "abc"])).toThrow(/--limit/);
     expect(parseArgs(["--root", "authed/p", "--min-idle-minutes", "0"]).minIdleMinutes).toBe(0);
   });
+
+  it("refuses an option that is missing its value", () => {
+    expect(() => parseArgs(["--root", "authed/p", "--apply", "--limit"])).toThrow(/--limit needs a value/);
+    expect(() => parseArgs(["--root", "authed/p", "--limit", "--apply"])).toThrow(/--limit needs a value/);
+    expect(() => parseArgs(["--root", "authed/p", "--tile-type"])).toThrow(/--tile-type needs a value/);
+    expect(() => parseArgs(["--root", "authed/p", "--doc", "d1", "--doc"])).toThrow(/--doc needs a value/);
+    expect(() => parseArgs(["--root", "--apply"])).toThrow(/--root needs a value/);
+  });
+
+  it("collects each --doc", () => {
+    expect(parseArgs(["--root", "authed/p", "--doc", "d1", "--doc", "d2"]).docIds).toEqual(["d1", "d2"]);
+  });
 });

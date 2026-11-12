@@ -417,9 +417,16 @@ export async function repairHistories(db: Firestore, options: IRepairOptions) {
 }
 
 export function parseArgs(argv: string[]): IRepairOptions {
+  // An option that takes a value must have one. Otherwise `--limit` at the end of the command would
+  // mean no limit at all.
+  const operand = (i: number) => {
+    const text = argv[i + 1];
+    if (text === undefined || text.startsWith("--")) throw new Error(`${argv[i]} needs a value`);
+    return text;
+  };
   const value = (name: string) => {
     const i = argv.indexOf(name);
-    return i >= 0 ? argv[i + 1] : undefined;
+    return i >= 0 ? operand(i) : undefined;
   };
   // A value that isn't a number would quietly turn a check off (`x < NaN` is false), so refuse it.
   const count = (name: string) => {
@@ -431,7 +438,7 @@ export function parseArgs(argv: string[]): IRepairOptions {
   };
   const root = value("--root");
   if (!root) throw new Error("--root is required, e.g. --root authed/learn_concord_org");
-  const docIds = argv.flatMap((arg, i) => arg === "--doc" && argv[i + 1] ? [argv[i + 1]] : []);
+  const docIds = argv.flatMap((arg, i) => arg === "--doc" ? [operand(i)] : []);
   return {
     root,
     docIds,
