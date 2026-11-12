@@ -1,5 +1,6 @@
 import {
-  DataflowContentModel, defaultDataflowContent, kDataflowDefaultHeight, kDataflowTileType
+  DataflowContentModel, defaultDataflowContent, kDataflowDefaultHeight, kDataflowTileType,
+  updateDataflowContentForCopy
 } from "./model/dataflow-content";
 import { registerTileComponentInfo } from "../../models/tiles/tile-component-info";
 import { registerTileContentInfo } from "../../models/tiles/tile-content-info";
@@ -47,6 +48,7 @@ registerTileContentInfo({
   metadataClass: TileMetadataModel,
   defaultHeight: kDataflowDefaultHeight,
   defaultContent: defaultDataflowContent,
+  updateContentForCopy: updateDataflowContentForCopy,
   isDataProvider: true,
   tileSnapshotPreProcessor,
   schemaVersion: {

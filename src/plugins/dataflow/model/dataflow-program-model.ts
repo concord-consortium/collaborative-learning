@@ -187,8 +187,11 @@ export const DataflowProgramModel = types.
       const connection = self.connections.get(id);
       if (!connection) return undefined;
 
+      // Undo and history playback remove a connection and put it back by applying patches, which
+      // skips removeConnection and creates a new MST instance with the same id. A cached wrapper
+      // bound to the removed instance is stale.
       const existingWrapper = self._connectionWrappers[id];
-      if (existingWrapper) return existingWrapper;
+      if (existingWrapper?.model === connection) return existingWrapper;
 
       const newWrapper = new ConnectionModelWrapper(connection);
       self._connectionWrappers[id] = newWrapper;

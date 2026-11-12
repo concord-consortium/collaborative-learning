@@ -1,7 +1,7 @@
 import { applyPatch, applySnapshot, getSnapshot, IJsonPatch, onPatch, unprotect } from "mobx-state-tree";
 import {
   defaultDataflowContent, DEFAULT_PROGRAM_ZOOM, DataflowContentModel, DataflowContentModelSnapshotIn,
-  DataflowContentModelType, kDataflowTableTileType
+  DataflowContentModelType, getUnitOutputConfig, kDataflowTableTileType, updateDataflowContentForCopy
 } from "./dataflow-content";
 import { newDataRate, newZoom } from "./dataflow-content-test-constants";
 import dataflowThreeNode from "../test-docs/dataflow-1-three-node.json";
@@ -54,6 +54,50 @@ describe("DataflowContentModel", () => {
     expect(defaultDataflowContent().programDataRate).toBe(DEFAULT_DATA_RATE);
     expect(defaultDataflowContent({ appConfig: appConfigWith({ defaultSamplingRate: 1234 }) })
       .programDataRate).toBe(DEFAULT_DATA_RATE);
+  });
+
+  describe("Live Output config", () => {
+    const liveOutputSettings = { servoInputMode: "proportion", liveOutputTypes: ["Servo"] };
+    const unitOutputConfig = { servoInputMode: "proportion", allowedOutputTypes: ["Servo"] };
+
+    it("sets outputConfig when the tile is created", () => {
+      const dcm = defaultDataflowContent({ appConfig: appConfigWith(liveOutputSettings) });
+      expect(getSnapshot(dcm).outputConfig).toEqual(unitOutputConfig);
+    });
+
+    it("sets outputConfig for a unit that changes only one of the Live Output settings", () => {
+      expect(getUnitOutputConfig(appConfigWith({ servoInputMode: "proportion" })))
+        .toEqual({ servoInputMode: "proportion" });
+      expect(getUnitOutputConfig(appConfigWith({ liveOutputTypes: ["Servo"] })))
+        .toEqual({ allowedOutputTypes: ["Servo"] });
+    });
+
+    it("leaves outputConfig unset for a unit with the default Live Output settings", () => {
+      expect(defaultDataflowContent({ appConfig: appConfigWith({}) }).outputConfig).toBeUndefined();
+    });
+
+    // The editable tile mirrors the unit config on mount. A tile created with the config already set
+    // must not change then, or the change is recorded in a history entry of its own.
+    it("does not change a new tile when the unit config is mirrored onto it", () => {
+      const appConfig = appConfigWith(liveOutputSettings);
+      const dcm = defaultDataflowContent({ appConfig });
+      const patches: IJsonPatch[] = [];
+      onPatch(dcm, patch => patches.push(patch));
+      dcm.setOutputConfig(getUnitOutputConfig(appConfig));
+      expect(patches).toEqual([]);
+    });
+
+    it("gives a copied tile the config of the unit it is copied into", () => {
+      const source = { type: "Dataflow", outputConfig: { allowedOutputTypes: ["Fan"] } };
+      expect(updateDataflowContentForCopy(source, true, appConfigWith(liveOutputSettings)))
+        .toEqual({ type: "Dataflow", outputConfig: unitOutputConfig });
+      expect(updateDataflowContentForCopy(source, true, appConfigWith({}))).toEqual({ type: "Dataflow" });
+    });
+
+    it("leaves a copied tile's config alone when there is no unit config", () => {
+      const source = { type: "Dataflow", outputConfig: { allowedOutputTypes: ["Fan"] } };
+      expect(updateDataflowContentForCopy(source, true, undefined)).toBe(source);
+    });
   });
 
   it("should handle basic changes", () => {
