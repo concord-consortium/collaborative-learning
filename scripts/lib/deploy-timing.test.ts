@@ -52,7 +52,10 @@ describe("deployablesTouched", () => {
   it("counts a migration script, but not its tests or docs, or other scripts", () => {
     expect(deployablesTouched(["scripts/migrations/fix-history.ts"], kFunctionsSources)).toEqual(["migrations"]);
     expect(deployablesTouched(["scripts/migrations/lib/batch.ts"], kFunctionsSources)).toEqual(["migrations"]);
-    const files = ["scripts/migrations/fix-history.test.ts", "scripts/migrations/README.md", "scripts/report.ts"];
+    const files = [
+      "scripts/migrations/fix-history.test.ts", "scripts/migrations/README.md", "scripts/report.ts",
+      "scripts/migrations-old/fix.ts"
+    ];
     expect(deployablesTouched(files, kFunctionsSources)).toEqual([]);
   });
   it("ignores tests, docs and client code", () => {
