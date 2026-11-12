@@ -8,7 +8,9 @@
 // entries keep their ids and content. Within the span from the first moved entry to the last entry
 // that creates one of their tiles, the entries swap their `index` values to match the new order and
 // get `previousEntryId`s that follow it, as does the entry after the span. A document's
-// `lastHistoryEntry`, when it has one, is updated when the span ends the history.
+// `lastHistoryEntry`, when it has one, is updated when the span ends the history. The writes run in
+// one transaction per document, which gives up if a new entry has been stored since the history was
+// loaded.
 //
 // The script skips the whole document, and says why, when it can't make the change safely:
 // - an entry that changes a tile before its creation also changes a tile no later entry creates, or
@@ -18,7 +20,8 @@
 // - a change replaces the whole tile map while an entry waits on a tile;
 // - entries in the span share an index, or the stored `previousEntryId` chain doesn't follow the
 //   index order there;
-// - the history changed recently enough that someone may still be editing it.
+// - the history changed recently enough that someone may still be editing it, or changed while the
+//   script was checking it.
 //
 // An editor left open on a document across a repair keeps its own copy of the history. When the
 // reordered span ends the history, the next entry it stores names the old last entry as its
@@ -356,21 +359,29 @@ export async function repairDocumentHistory(db: Firestore, docRef: DocumentRefer
   }
   if (!apply) return result;
 
-  // One batch per document, so its history is never left half reordered.
+  // One transaction per document, so its history is never left half reordered. It reads the newest
+  // entry and the metadata again first: an entry stored since the history was loaded would follow
+  // the old order, and for a group document it moves `lastHistoryEntry` on.
   const { FieldValue } = await import("firebase-admin/firestore");
-  const batch = db.batch();
-  for (const { docId, index, previousEntryId } of plan.writes) {
-    const fields: Record<string, unknown> = {};
-    if (index !== undefined) fields.index = index;
-    if (previousEntryId !== undefined) fields.previousEntryId = previousEntryId ?? FieldValue.delete();
-    batch.update(docRef.collection("history").doc(docId), fields);
-  }
-  if (plan.lastEntry) {
-    const metadata = await docRef.get();
-    if (metadata.get("lastHistoryEntry")) batch.update(docRef, { lastHistoryEntry: plan.lastEntry });
-  }
-  await batch.commit();
-  return result;
+  const loadedNewest = entries[entries.length - 1].docId;
+  const changed = await db.runTransaction(async transaction => {
+    const [newestEntry, metadata] = await Promise.all([
+      transaction.get(docRef.collection("history").orderBy("index", "desc").limit(1)),
+      transaction.get(docRef)
+    ]);
+    if (newestEntry.docs[0]?.id !== loadedNewest) return true;
+    for (const { docId, index, previousEntryId } of plan.writes) {
+      const fields: Record<string, unknown> = {};
+      if (index !== undefined) fields.index = index;
+      if (previousEntryId !== undefined) fields.previousEntryId = previousEntryId ?? FieldValue.delete();
+      transaction.update(docRef.collection("history").doc(docId), fields);
+    }
+    if (plan.lastEntry && metadata.get("lastHistoryEntry")) {
+      transaction.update(docRef, { lastHistoryEntry: plan.lastEntry });
+    }
+    return false;
+  });
+  return changed ? { ...result, skipped: "the history changed while the script was checking it" } : result;
 }
 
 /** Checks, and with `apply` repairs, the histories of the documents under a root. */

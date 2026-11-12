@@ -280,26 +280,34 @@ describe("repairDocumentHistory", () => {
     } as Record<string, any>)[field]
   });
 
-  function makeDb(historyDocs: any[], metadata: Record<string, any> = {}) {
+  // `newestId` is the newest entry the transaction finds, which is the loaded one unless a test
+  // stores another in the meantime.
+  function makeDb(historyDocs: any[], metadata: Record<string, any> = {},
+      newestId = historyDocs[historyDocs.length - 1].id) {
     const updates: { path: string; fields: any }[] = [];
     let committed = false;
+    const query: any = {
+      orderBy: () => query, limit: () => query, startAfter: () => query,
+      get: () => Promise.resolve({ docs: historyDocs, size: historyDocs.length }),
+      doc: (id: string) => ({ path: `authed/p/documents/D1/history/${id}` })
+    };
     const docRef: any = {
       path: "authed/p/documents/D1",
-      get: () => Promise.resolve({ get: (field: string) => metadata[field] }),
-      collection: () => {
-        const query: any = {
-          orderBy: () => query, limit: () => query, startAfter: () => query,
-          get: () => Promise.resolve({ docs: historyDocs, size: historyDocs.length }),
-          doc: (id: string) => ({ path: `authed/p/documents/D1/history/${id}` })
-        };
-        return query;
-      }
+      collection: () => query
     };
     const db: any = {
-      batch: () => ({
-        update: (ref: any, fields: any) => { updates.push({ path: ref.path, fields }); },
-        commit: () => { committed = true; return Promise.resolve(); }
-      })
+      runTransaction: async (run: (transaction: any) => Promise<any>) => {
+        const pending: typeof updates = [];
+        const result = await run({
+          get: (ref: any) => Promise.resolve(ref === docRef
+            ? { get: (field: string) => metadata[field] }
+            : { docs: [{ id: newestId }] }),
+          update: (ref: any, fields: any) => { pending.push({ path: ref.path, fields }); }
+        });
+        updates.push(...pending);
+        committed = pending.length > 0;
+        return result;
+      }
     };
     return { db, docRef, updates, isCommitted: () => committed };
   }
@@ -315,7 +323,7 @@ describe("repairDocumentHistory", () => {
     expect(isCommitted()).toBe(false);
   });
 
-  it("writes the new order in one batch, removing the new first entry's previousEntryId", async () => {
+  it("writes the new order in one transaction, removing the new first entry's previousEntryId", async () => {
     const { db, docRef, updates, isCommitted } = makeDb(outOfOrder());
     await repairDocumentHistory(db, docRef, { apply: true });
     expect(isCommitted()).toBe(true);
@@ -339,6 +347,13 @@ describe("repairDocumentHistory", () => {
     const { db, docRef, updates } = makeDb(docs);
     await repairDocumentHistory(db, docRef, { apply: true });
     expect(updates.map(update => update.path)).not.toContain("authed/p/documents/D1");
+  });
+
+  it("gives up when an entry was stored after the history was loaded", async () => {
+    const { db, docRef, isCommitted } = makeDb(outOfOrder(), {}, "D");
+    const result = await repairDocumentHistory(db, docRef, { apply: true });
+    expect(result.skipped).toMatch(/changed while the script was checking it/);
+    expect(isCommitted()).toBe(false);
   });
 
   it("skips a document whose history changed recently", async () => {
