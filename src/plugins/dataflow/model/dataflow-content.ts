@@ -583,7 +583,6 @@ export const DataflowContentModel = TileContentModel
       self.programDataRate = dataRate;
     },
     setOutputConfig(config?: IDataflowOutputConfig) {
-      // Store only non-default values; a default config clears the field so default units carry nothing.
       const next = normalizeOutputConfig(config);
       // Idempotent — avoid churning the doc when the resolved config hasn't changed.
       if (JSON.stringify(self.outputConfig) === JSON.stringify(next)) return;

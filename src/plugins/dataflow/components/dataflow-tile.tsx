@@ -71,14 +71,12 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
   // summarizer (chat tutor + aiEvaluation) sees the same set the node dropdown enforces. Editable
   // tiles only; setOutputConfig stores only non-default values and is idempotent.
   //
-  // Changing the document on mount is not a good pattern, and new code should not copy it. The
-  // change is recorded as its own history entry at whatever moment React mounts the tile. When that
-  // is while the entry that added the tile is still open, the change completes first and lands
-  // before the tile's creation in history, and history playback then fails at the start of the
-  // document. New and copied tiles now get the config when they are created (defaultDataflowContent
-  // and updateDataflowContentForCopy), so this records nothing for them. It is kept so that
-  // existing tiles pick up a unit's changed config the next time they are opened for editing. The
-  // open entry in docs/history-framework/open-entry.md is the planned replacement.
+  // Don't copy this pattern: a change made on mount is recorded as an entry of its own and can be
+  // stored ahead of the entry that added the tile (see "Don't change the document when a tile
+  // mounts" in docs/undo-and-time-travel.md). New and copied tiles get the config when they are
+  // created, so this records nothing for them. It stays so that tiles that didn't, such as existing
+  // and authored tiles, pick up the unit's current config when they are opened for editing. The start
+  // editing entry in docs/history-framework/start-editing-entry.md is the planned replacement.
   private mirrorUnitOutputConfig() {
     const { appConfig } = this.stores;
     warnUnknownLiveOutputSettings(

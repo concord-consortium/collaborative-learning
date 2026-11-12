@@ -136,7 +136,7 @@ context('History Playback', () => {
     stepUntilDataflowNodes(kArrowRight, 2);
     stepUntilDataflowNodes(kArrowRight, 3);
 
-    cy.log('verify playback reaches the start of a document with a DataFlow tile in a unit with Live Output options');
+    cy.log('verify playback reaches the start of a document with a DataFlow tile in a unit with Live Output settings');
     beforeTest(liveOutputUnitQueryParams);
     clueCanvas.addTile('dataflow');
     cy.wait(4000);
