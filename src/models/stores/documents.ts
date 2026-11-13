@@ -217,7 +217,7 @@ export const DocumentsModel = types
      * still empty, so it can be edited at once, and its exact saves start from the beginning of its
      * history.
      */
-    startNewDocumentHistory(document: DocumentModelType) {
+    markNewDocumentCaughtUp(document: DocumentModelType) {
       if (!document.historyCatchUpPending) return;
       (document.treeManagerAPI as TreeManagerType).exactness.startAt(kHistoryStart);
       document.setHistoryCatchUpPending(false);

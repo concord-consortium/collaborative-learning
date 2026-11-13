@@ -33,7 +33,7 @@ conversions" in [history-framework.md](../history-framework.md)).
 An individual document whose envelope has `exactThrough` and is behind its history applies the
 missing entries, up to 200, when its owner opens it for editing (`TreeManager.applyEntriesAtLoad`).
 A document this session created has no history in Firestore yet, so it opens caught up instead
-(`DocumentsModel.startNewDocumentHistory`).
+(`DocumentsModel.markNewDocumentCaughtUp`).
 
 The missing entries were recorded against the models as they were stored, not as this load converted
 them, and one of them can be a load entry, which is never applied to an MST tree. So they are

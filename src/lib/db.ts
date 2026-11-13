@@ -1374,11 +1374,12 @@ export class DB {
           }
         })
         .then((document) => {
-          // An individual document that may be behind its history is handed out read-only, until it
-          // is opened for editing and has caught up (see historyCatchUp).
+          // documents.add marks an individual document as behind its history, so it can't be edited or
+          // saved until it has caught up (see historyCatchUp). A document this session just created has
+          // no history yet.
           documents.add(document);
           if (this.createdDocumentKeys.has(documentKey)) {
-            documents.startNewDocumentHistory(document);
+            documents.markNewDocumentCaughtUp(document);
           }
           resolve(document);
         })
