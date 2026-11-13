@@ -519,10 +519,12 @@ for the Firestore sourcing work.
   replaces it with the envelope its content came from. Other members' saves of a group document don't
   reach it.
 
-The history entry the saved content is stamped with. It is exact only when `exactThrough` names it, and
-then the history loader catches the content up from it and checks it against the Firestore history chain.
-After an intermediate save it is a lower bound: the content can hold later entries. See
-`lastHistoryEntry` above for the Firestore field with the confusingly similar name.
+The history entry the saved content is stamped with. It is exact only when `exactThrough` names it,
+and then the history loader catches the content up from it and checks it against the Firestore
+history chain. Otherwise it is only evidence for debugging, and says nothing reliable about which
+entries the content holds: after an intermediate save the content can hold later entries, and after
+a load catch-up that stopped short it lacks the entries that were skipped. See `lastHistoryEntry`
+above for the Firestore field with the confusingly similar name.
 
 ### `exactThrough`
 

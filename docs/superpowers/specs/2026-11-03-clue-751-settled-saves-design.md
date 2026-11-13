@@ -144,15 +144,21 @@ optional fields next to `lastHistoryEntryId`:
 The save uses `update()`, which merges fields, so each save clears the other kind's field: an exact
 save writes `notExact: null`, and an intermediate save writes `exactThrough: null`.
 
-**Every save is stamped.** An intermediate save stamps the last entry from this session that has
-committed, or, when none has, the last entry the load caught up to, or else the loaded envelope's id. So every id ever written is in Firestore, and
-is a lower bound on what the content holds.
+**What an intermediate save is stamped with.** It stamps the last entry from this session that has
+committed, or, when none has, the last entry the load caught up to, or else the loaded envelope's
+id. With none of those, it has no stamp. The stamp says nothing reliable about the rest of the
+content: the content can hold entries after it that hadn't committed, and after a catch-up that
+stopped short, it lacks the entries the catch-up skipped, although this session's entries chain
+after them. A loaded id can also be one Firestore doesn't have (`saved-id-missing`). So
+`lastHistoryEntryId` is exact when `exactThrough` is trusted, and otherwise unknown, kept as
+evidence for debugging.
 
 **What readers can rely on:**
 
 | Reader asks | Uses |
 |---|---|
-| "Is entry X saved?" (activity recorder, drift check, CLUE-773's conversion entry order) | `lastHistoryEntryId` from any save. It is always a lower bound. |
+| "Has this session's entry X been saved?" (activity recorder) | The id this client's own save was stamped with, compared only with this session's entries, which all of its saves hold. |
+| "Is the saved id in Firestore?" (drift check, group documents only) | `lastHistoryEntryId` from any save. Group documents make no intermediate saves. |
 | "Is the content exactly the state at X?" (playback start, group-document load, GD-19's `tips`) | `lastHistoryEntryId` only when `exactThrough` is trusted, and only back to its `since`. Otherwise fall back as for an old envelope. |
 
 ### 2. Snapshot saving
@@ -240,11 +246,11 @@ documents already do at load. This restores edits that reached history but not t
 user sees their last few seconds of work come back, and it keeps the next entry's `previousEntryId`
 and the content in agreement.
 
-Only an envelope with a trusted `exactThrough` is caught up. An unmarked envelope's id is only a lower bound: an
-intermediate save's content can already hold entries that hadn't committed when it was stamped, and
-older envelopes under-claim the same way. Applying the entries after that id could apply some of them
-twice. So an unmarked envelope whose id isn't the last entry opens with the content as saved, the
-session is not exact, and the gap is logged.
+Only an envelope with a trusted `exactThrough` is caught up. An unmarked envelope's id doesn't say
+what its content holds: an intermediate save's content can already hold entries that hadn't
+committed when it was stamped, and older envelopes under-claim the same way. Applying the entries
+after that id could apply some of them twice. So an unmarked envelope whose id isn't the last entry
+opens with the content as saved, the session is not exact, and the gap is logged.
 
 The catch-up runs only for documents the current user owns, and not for publications. Only the owner
 edits and saves an individual document, so other viewers (teachers, other students, exemplars) open
@@ -263,8 +269,11 @@ new document showed the spinner for the Firestore query that finds its last entr
 copy tiles into it ignored clicks meanwhile.
 
 While a document isn't open for editing, the RTDB content listener can replace its content with what
-the RTDB holds. It records the envelope that content came from in the document's `savedEnvelope`, and
-the catch-up starts from that envelope rather than the one first loaded.
+the RTDB holds. It records the envelope that content came from in the document's `savedEnvelope`,
+and the catch-up starts from that envelope rather than the one first loaded. The listener can also
+replace the content while the catch-up reads Firestore, if the user leaves the document and saves it
+from another tab or device in that time. The catch-up then applies nothing, and the session isn't
+exact (`catch-up-content-replaced`).
 
 As soon as the sender starts after a catch-up that applied entries, it saves the caught-up content,
 stamped with the last entry applied, unless an entry has committed since or a snapshot couldn't be
@@ -447,8 +456,8 @@ log is the lasting record for metrics and debugging.
 
 ### 7. The activity recorder
 
-- It keeps receiving `onContentSaved` with the stamped id, from exact and intermediate saves. The id
-  is a lower bound, which is all it needs.
+- It keeps receiving `onContentSaved` with the stamped id, from exact and intermediate saves. It
+  only compares the id with this session's own entries, which every save this client makes holds.
 - On group documents it also learns about saves from the envelope listener. The stale-check means an
   active editor often skips its save because another member made it, and without this the editor's
   recorder would fall back to the 30-second timeout for every change.

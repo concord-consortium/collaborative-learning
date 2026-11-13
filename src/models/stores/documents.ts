@@ -203,9 +203,10 @@ export const DocumentsModel = types
         if (!document.historyCatchUpPending || !(manager instanceof FirestoreHistoryManager)) {
           return Promise.resolve();
         }
-        // The content listener may have replaced the loaded content, along with its envelope. This
-        // client hasn't changed the envelope: its sender doesn't save while the catch-up is pending.
-        catchUp = manager.catchUpAtLoad(document.savedEnvelope)
+        // The content listener may have replaced the loaded content, along with its envelope, before
+        // or during the catch-up. This client doesn't change the envelope: its sender doesn't save
+        // while the catch-up is pending.
+        catchUp = manager.catchUpAtLoad(() => document.savedEnvelope)
           .finally(() => document.setHistoryCatchUpPending(false));
         self.historyCatchUps.set(document, catchUp);
       }

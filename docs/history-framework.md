@@ -99,7 +99,7 @@ Note that position `0` corresponds to no entry at all, so a position is not simp
 
 - `TreeManager.currentHistoryEntry` is `history[numHistoryEventsApplied - 1]`.
 - `logCurrentHistoryEvent` logs `historyEventId` alongside `historyIndex`, where the index is the position — so `historyIndex === indexOf(historyEventId) + 1`.
-- `revisionId` names the last entry the document includes. The envelope's `lastHistoryEntryId` does too when its `exactThrough` names it; otherwise it is a lower bound, since an intermediate save's content can hold later entries.
+- `revisionId` names the last entry the document includes. The envelope's `lastHistoryEntryId` does too when its `exactThrough` names it; otherwise it doesn't say which entries the content holds (see [content-saves.md](history-framework/content-saves.md)).
 
 So restoring the moment an id names means seeking to `index + 1`, which is what `FirestoreHistoryManager.moveToHistoryEntryAfterLoad` does for a `studentDocumentHistoryId` link. The `"first"` sentinel that `logDocumentEvent` emits for a change made before the document had any entry is position `0`.
 

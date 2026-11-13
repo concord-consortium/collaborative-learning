@@ -311,17 +311,20 @@ export class FirestoreHistoryManager implements ICommitSource {
 
   /**
    * Bring an individual document's content up to the last history entry in Firestore, applying
-   * the entries its envelope is missing, and decide where the session's exact saves start. The
-   * envelope is the one the content came from, which is the loaded one unless the content has
-   * been replaced since. Managers that mirror the remote history or don't upload local history skip
-   * it, as does another user's copy of the document, leaving its exactness undecided.
+   * the entries its envelope is missing, and decide where the session's exact saves start.
+   * `currentEnvelope` returns the envelope of the content the document holds now, which is the
+   * loaded one unless the content listener has replaced the content since. Managers that mirror the
+   * remote history or don't upload local history skip it, as does another user's copy of the
+   * document, leaving its exactness undecided.
    * Only an envelope with exactThrough is caught up. The id of one without it can be older than
    * what its content holds, so applying the entries after it could apply some of them twice.
-   * Never rejects: anything that keeps the catch-up from finishing leaves the session not exact.
+   * Never rejects: anything that keeps the catch-up from finishing leaves the session not exact,
+   * including the content being replaced while the catch-up reads Firestore.
    */
-  async catchUpAtLoad(envelope = this.loadedEnvelope) {
+  async catchUpAtLoad(currentEnvelope: () => ISavedEnvelope | undefined) {
     if (this.syncRemoteHistory || !this.uploadLocalHistory || this.isOtherUsersDocument) return;
     const { exactness } = this.treeManager;
+    const envelope = currentEnvelope();
     const savedId = envelope?.lastHistoryEntryId;
     // Where exact saves start once the content is known to match `contentId`.
     const startAt = (contentId: string) => {
@@ -338,6 +341,10 @@ export class FirestoreHistoryManager implements ICommitSource {
       await this.environmentAndMetadataDocReadyPromise;
       if (this.isOtherUsersDocument) return;
       const { documentPath, lastEntryIndex, lastEntryId } = await this.getFirestoreHistoryInfo();
+      if (currentEnvelope() !== envelope) {
+        incomplete("catch-up-content-replaced");
+        return;
+      }
       const last = { id: lastEntryId, index: lastEntryIndex };
       const saved = { id: savedId, index: envelope?.exactThrough?.index };
       const plan = planCatchUp(saved, last);
@@ -361,6 +368,10 @@ export class FirestoreHistoryManager implements ICommitSource {
           const gap = lastEntryIndex - plan.afterIndex;
           // Stops at the last entry read, since that is the entry the next local entry chains after.
           const docs = await getHistoryEntriesAfter(this.firestore, documentPath, plan.afterIndex, lastEntryIndex);
+          if (currentEnvelope() !== envelope) {
+            incomplete("catch-up-content-replaced", { gap });
+            return;
+          }
           const { entries } = takeContiguousEntries(docs, savedId!, plan.afterIndex);
           applying = true;
           const { applied, error } = this.treeManager.applyEntriesAtLoad(entries.map(doc => doc.entry));

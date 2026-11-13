@@ -68,8 +68,8 @@ interface IIntermediateSaveArgs {
 }
 
 /**
- * The envelope fields of a save whose content may hold more than its entry describes. The entry,
- * when there is one, is a lower bound on what the content holds.
+ * The envelope fields of a save whose content may not match its entry. The entry, when there is one,
+ * is only evidence: the content can hold later entries, and can lack earlier ones.
  */
 export function buildIntermediateSave({ content, changeCount, entry, evidence }: IIntermediateSaveArgs)
     : Record<string, unknown> {

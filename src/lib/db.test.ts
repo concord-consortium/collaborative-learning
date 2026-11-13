@@ -1031,7 +1031,7 @@ describe("db", () => {
       const first = stores.documents.historyCatchUp(doc).then(() => { caughtUp = true; });
       const second = stores.documents.historyCatchUp(doc);
       expect(catchUpSpy).toHaveBeenCalledTimes(1);
-      expect(catchUpSpy).toHaveBeenCalledWith(doc.savedEnvelope);
+      expect(catchUpSpy.mock.calls[0][0]()).toBe(doc.savedEnvelope);
       await new Promise(process.nextTick);
       expect(caughtUp).toBe(false);
 

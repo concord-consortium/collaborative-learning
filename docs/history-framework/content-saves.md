@@ -21,8 +21,10 @@ already in Firestore. It writes the envelope's `lastHistoryEntryId` and `exactTh
 An **intermediate save** holds content that may not match any entry in Firestore, for example
 because an entry is still open or hasn't uploaded. It clears `exactThrough` and writes `notExact`,
 which holds evidence for debugging: open entries, running flows, uncommitted entry ids, and why the
-session stopped being exact. Its `lastHistoryEntryId` is a lower bound, since the content can hold
-later entries. Only individual documents make intermediate saves.
+session stopped being exact. Its `lastHistoryEntryId` is the last entry this session had committed,
+or else the last entry the load caught up to, or the loaded id. That says nothing reliable about the
+rest of the content: the content can hold later entries, and after a catch-up that stopped short, it
+lacks the entries the catch-up skipped. Only individual documents make intermediate saves.
 
 A client that doesn't know `exactThrough` saves with `update()` and leaves it in place, so a load
 trusts it only while its `id` is the envelope's `lastHistoryEntryId` and its `contentHash` matches
@@ -87,8 +89,9 @@ editing. See "Catching up at load" in [load-entries.md](load-entries.md). Until 
 finishes, the document shows a spinner in place of its toolbar and content. A document that is only
 listed or viewed never queries Firestore for its history, and its toolbar keeps the tools that don't
 change it, such as Edit. The catch-up starts from the document's current envelope, which the content
-listener replaces along with the content. As soon as the sender starts, it saves the caught-up
-content, so the stored content isn't left behind its history.
+listener replaces along with the content. If the listener replaces the content while the catch-up
+reads Firestore, the catch-up applies nothing and the session isn't exact. As soon as the sender
+starts, it saves the caught-up content, so the stored content isn't left behind its history.
 
 An envelope without `exactThrough` can hold entries after its `lastHistoryEntryId`, so applying the
 entries after that id could apply some of them twice. When such an envelope is behind its history,
