@@ -35,7 +35,7 @@ When the envelope's `exactThrough` is trusted, the initial load of a group docum
 
 ## When a session stops being exact
 
-A group document whose session stops being exact makes no more content saves from this client. A failed apply marks the session not exact before the manager's `applying` flag clears, since the sender checks for a settled save as soon as it does. The sender logs `CONTENT_SAVE_GROUP_STOPPED` once, and a failed apply also logs `HISTORY_REMOTE_APPLY_FAILED`.
+A group document whose session stops being exact makes no more content saves from this client. A failed apply marks the session not exact before the manager's `applying` flag clears, since the sender checks for a settled save as soon as it does. The sender logs `CONTENT_SAVE_CONCURRENT_STOPPED` once, and a failed apply also logs `HISTORY_REMOTE_APPLY_FAILED`.
 
 The document then shows a notice over its content and toolbar, chosen by the reason, with the reason as a code for reports ([save-stopped-notice.ts](../../src/models/document/save-stopped-notice.ts)):
 

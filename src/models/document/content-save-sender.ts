@@ -16,8 +16,8 @@ export const kRetryingAfterFailures = 3;
 export const kIntermediateSaveIntervalMs = 5000;
 // The most uncommitted entry ids an intermediate save's evidence lists, keeping the newest.
 export const kMaxEvidenceEntryIds = 20;
-// The most time a group document's save waits, at random, before checking the envelope again.
-export const kGroupSaveJitterMs = 200;
+// The most time a concurrent document's save waits, at random, before checking the envelope again.
+export const kConcurrentSaveJitterMs = 200;
 // The most time a sender keeps saving after it is detached.
 export const kSenderUnmountLimitMs = 30000;
 // The most usable snapshots kept for entries waiting to commit. Older ones are dropped.
@@ -35,7 +35,7 @@ export interface IContentRef {
 }
 
 // A snapshot save holds the content kept when a local entry completed, and a settled save holds a
-// group document's current content once its history settles. Both are exact saves.
+// concurrent document's current content once its history settles. Both are exact saves.
 export type SaveKind = "snapshot" | "intermediate" | "settled";
 
 export interface IPendingSave {
@@ -54,7 +54,7 @@ export interface IContentSaveSenderOptions {
   logEvent?: (event: LogEventName, params: Record<string, unknown>) => void;
   // The least time between the start of the previous write and the start of this save's write.
   getMinimumGapMs?: (save: IPendingSave) => number;
-  // Picks a group document save's wait, between 0 and 1. Math.random when unset.
+  // Picks a concurrent document save's wait, between 0 and 1. Math.random when unset.
   random?: () => number;
   // Called when the sender stops after it was detached, once its last save has been sent.
   onDrained?: () => void;
@@ -67,7 +67,7 @@ interface IQueuedSave extends IPendingSave {
   index?: number;
   // Set on a snapshot or settled save.
   exactSince?: string;
-  // A group document's save isn't sent before this time.
+  // A concurrent document's save isn't sent before this time.
   notBefore?: number;
   buildValues(changeCount: number): Record<string, unknown>;
   // Set on an intermediate save.
@@ -94,8 +94,8 @@ interface IUsableSnapshot {
 }
 type IKeptSnapshot = IUsableSnapshot | { usable: false; changeSeq: number };
 
-// The state of a group document's history manager that the sender reads.
-interface IGroupHistoryState {
+// The state of a concurrent document's history manager that the sender reads.
+interface IConcurrentHistoryState {
   readonly applying: boolean;
   readonly isHistorySettled: boolean;
   // The last entry on the shared chain, and its Firestore index when it is known.
@@ -103,24 +103,24 @@ interface IGroupHistoryState {
   readonly expectedRemoteHeadIndex: number | undefined;
 }
 
-// The envelope children a group document listens to.
+// The envelope children a concurrent document listens to.
 const kEnvelopeFields = ["lastHistoryEntryId", "exactThrough"] as const;
 type EnvelopeValues = Partial<Record<typeof kEnvelopeFields[number], unknown>>;
 
 const getTreeManager = (document: DocumentModelType) =>
   document.treeManagerAPI as TreeManagerType | undefined;
 
-function getGroupHistoryState(document: DocumentModelType) {
+function getConcurrentHistoryState(document: DocumentModelType) {
   if (!document.concurrent) return undefined;
-  return getTreeManager(document)?.historyManager as Partial<IGroupHistoryState> | undefined;
+  return getTreeManager(document)?.historyManager as Partial<IConcurrentHistoryState> | undefined;
 }
 
 function isApplyingRemoteEntries(document: DocumentModelType) {
-  return !!getGroupHistoryState(document)?.applying;
+  return !!getConcurrentHistoryState(document)?.applying;
 }
 
 /**
- * Whether the content change being reported was made by this user rather than by a group
+ * Whether the content change being reported was made by this user rather than by a concurrent
  * document's apply of remote entries. The apply's calls run with the fake history entry id, and a
  * call is still running when the content reports its change.
  */
@@ -215,8 +215,9 @@ const sameTools = (a: string[], b: string[]) =>
 // One sender for each document, see getContentSaveSender.
 const senders = new WeakMap<DocumentModelType, ContentSaveSender>();
 
-// The group document sessions whose stop has been logged, so a later sender doesn't log it again.
-const groupSessionsLoggedAsStopped = new WeakSet<SessionExactness>();
+// The concurrent document sessions whose stop has been logged, so a later sender doesn't log it
+// again.
+const concurrentSessionsLoggedAsStopped = new WeakSet<SessionExactness>();
 
 interface IFallbackEpisode {
   startedAt: number;
@@ -232,9 +233,9 @@ interface IFallbackEpisode {
  * to intermediate saves of its current content, which clear exactThrough and record why. Each
  * such stretch is logged once when its first intermediate save is sent, and once when it ends.
  *
- * A group document also saves its current content, stamped with the head of the shared chain,
+ * A concurrent document also saves its current content, stamped with the head of the shared chain,
  * whenever its history settles past what the envelope holds, since an idle member has no entries
- * of its own to save. Other members save the same envelope, so a group save waits a random time
+ * of its own to save. Other members save the same envelope, so its save waits a random time
  * and is dropped if the envelope already reaches its entry, before and after that wait. A save by
  * another member that covers this client's committed changes shows them as saved.
  *
@@ -259,8 +260,8 @@ export class ContentSaveSender {
   private consecutiveFailures = 0;
   // Counts the content changes. A save covers the changes up to its changeSeq.
   private dirtySeq = 0;
-  // The newest content change the RTDB content is known to hold: from this sender's writes, or a group
-  // envelope that reaches the head.
+  // The newest content change the RTDB content is known to hold: from this sender's writes, or a
+  // concurrent document's envelope that reaches the head.
   private savedSeq = 0;
   // The newest content change an intermediate save has written. An exact save of older content
   // would undo changes the RTDB already holds, so it isn't sent.
@@ -275,12 +276,12 @@ export class ContentSaveSender {
   private sentTools: string[] | undefined;
   // This client's newest committed local entry, with the content change its snapshot was taken at.
   private lastCommittedLocal: { index: number; changeSeq: number } | undefined;
-  // The newest entry a group document's envelope has been seen to hold.
+  // The newest entry a concurrent document's envelope has been seen to hold.
   private envelopeEntry: ICommittedEntry | undefined;
   private envelopeValues: EnvelopeValues = {};
   private envelopeCheckScheduled = false;
   private stopEnvelopeListener: (() => void) | undefined;
-  // The index of the newest entry reported to onContentSaved on a group document.
+  // The index of the newest entry reported to onContentSaved on a concurrent document.
   private reportedIndex = -1;
   private settledCheckScheduled = false;
 
@@ -397,7 +398,7 @@ export class ContentSaveSender {
    * in flight, since the page may be gone before they end. Changes that haven't committed are left
    * for the next load to catch up from history, so no intermediate save is made, unless the
    * document already relies on intermediate saves and no snapshot save covers the latest change. Then
-   * an intermediate save is sent instead. A group document saves through its usual checks.
+   * an intermediate save is sent instead. A concurrent document saves through its usual checks.
    */
   handlePageHide() {
     if (!this.running || this.document.concurrent) return;
@@ -445,7 +446,7 @@ export class ContentSaveSender {
   private start() {
     this.running = true;
     // Listened to here rather than by the component, so a page hide also reaches a sender that is
-    // draining after the component unmounted. A group document has other writers, so it saves
+    // draining after the component unmounted. A concurrent document has other writers, so it saves
     // through its usual checks.
     if (!this.document.concurrent) {
       window.addEventListener("pagehide", this.handlePageHideEvent);
@@ -460,7 +461,7 @@ export class ContentSaveSender {
     this.disposers.push(subscribeToCurrent(() => this.document.content,
       content => content ? onSnapshot(content, this.handleContentChanged) : undefined));
     if (this.document.concurrent && treeManager) {
-      this.startGroupSaves(treeManager);
+      this.startConcurrentSaves(treeManager);
     } else {
       this.saveCaughtUpContent();
     }
@@ -486,21 +487,21 @@ export class ContentSaveSender {
       exactSince, this.dirtySeq));
   }
 
-  private startGroupSaves(treeManager: TreeManagerType) {
+  private startConcurrentSaves(treeManager: TreeManagerType) {
     const { lastHistoryEntryId, exactThrough } = this.document.savedEnvelope ?? {};
     if (lastHistoryEntryId && exactThrough) {
       this.advanceEnvelopeEntry({ id: lastHistoryEntryId, index: exactThrough.index });
     }
     this.listenToEnvelope();
     this.disposers.push(() => this.stopEnvelopeListener?.());
-    // A group document makes no intermediate saves, so this client saves no more content.
+    // A concurrent document makes no intermediate saves, so this client saves no more content.
     this.disposers.push(reaction(() => treeManager.exactness.notExactReason, reason => {
-      if (!reason || groupSessionsLoggedAsStopped.has(treeManager.exactness)) return;
-      groupSessionsLoggedAsStopped.add(treeManager.exactness);
-      this.logEvent(LogEventName.CONTENT_SAVE_GROUP_STOPPED, { reason });
+      if (!reason || concurrentSessionsLoggedAsStopped.has(treeManager.exactness)) return;
+      concurrentSessionsLoggedAsStopped.add(treeManager.exactness);
+      this.logEvent(LogEventName.CONTENT_SAVE_CONCURRENT_STOPPED, { reason });
     }, { fireImmediately: true }));
     this.disposers.push(reaction(() => {
-      const manager = getGroupHistoryState(this.document);
+      const manager = getConcurrentHistoryState(this.document);
       return [manager?.isHistorySettled, manager?.applying, manager?.expectedRemoteHead,
         manager?.expectedRemoteHeadIndex, getOpenEntries(this.document).length,
         this.document.treeMonitor?.runningCallCount, treeManager.exactness.isExact];
@@ -605,7 +606,7 @@ export class ContentSaveSender {
    * client's already reaches it. Once the envelope reaches the head, it holds this content.
    */
   private checkSettledState() {
-    const manager = getGroupHistoryState(this.document);
+    const manager = getConcurrentHistoryState(this.document);
     if (!this.running || !manager?.isHistorySettled) return;
     // Every local entry has committed or been rolled back, so no kept snapshot will be saved.
     this.keptSnapshots.clear();
@@ -856,15 +857,15 @@ export class ContentSaveSender {
     return save.kind !== "intermediate" && save.changeSeq < this.getIntermediateContentSeq();
   }
 
-  // Replaces any save that hasn't been sent yet. A group save keeps the wait of the save it replaces,
-  // so commits that come faster than the jitter don't keep putting the save off.
+  // Replaces any save that hasn't been sent yet. A concurrent document's save keeps the wait of the
+  // save it replaces, so commits that come faster than the jitter don't keep putting the save off.
   private queueSave(save: IWaitingSave) {
     if (this.document.concurrent && "buildValues" in save) {
       const replaced = this.pendingSave;
       save.notBefore = replaced && !this.writesInFlight.has(replaced) && "buildValues" in replaced
           && replaced.notBefore !== undefined
         ? replaced.notBefore
-        : Date.now() + (this.options.random ?? Math.random)() * kGroupSaveJitterMs;
+        : Date.now() + (this.options.random ?? Math.random)() * kConcurrentSaveJitterMs;
     }
     this.pendingSave = save;
     this.scheduleWrite();

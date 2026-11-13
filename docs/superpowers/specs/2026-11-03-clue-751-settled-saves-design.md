@@ -468,7 +468,7 @@ log is the lasting record for metrics and debugging.
 A group document makes no intermediate saves, so once its session isn't exact this client saves no
 more content. Other members who are still exact keep saving, but a member working alone sees `Saving`
 for the rest of the session. Logs aren't watched routinely, so the user is told, and a report is how
-these bugs come to light. The sender logs `CONTENT_SAVE_GROUP_STOPPED` with the reason once per
+these bugs come to light. The sender logs `CONTENT_SAVE_CONCURRENT_STOPPED` with the reason once per
 session, and the document shows a notice over its content and toolbar, with the reason as a code for
 reports. Every reason is a bug, so the notice shouldn't come up often.
 
@@ -657,7 +657,7 @@ These were left to the builder in the design.
 - "From the beginning of history" is `since: "first"` (`kHistoryStart`).
 - The log events are `HISTORY_ENTRY_TIMED_OUT`, `HISTORY_LOAD_CATCH_UP_INCOMPLETE`,
   `HISTORY_REMOTE_APPLY_FAILED`, `CONTENT_SAVE_FALLBACK_START`, `CONTENT_SAVE_FALLBACK_END` and
-  `CONTENT_SAVE_GROUP_STOPPED`.
+  `CONTENT_SAVE_CONCURRENT_STOPPED`.
 - Retries wait 1 second, doubling to at most 30 seconds, and the indicator shows `Retrying` from the
   third consecutive failure. A successful write starts the count again.
 

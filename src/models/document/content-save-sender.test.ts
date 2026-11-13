@@ -11,7 +11,7 @@ import { LogEventName } from "../../lib/logger-types";
 import { hashString } from "../../utilities/js-utils";
 import {
   collectNotExactEvidence, ContentSaveSender, getContentSaveSender, IContentRef, IContentSaveSenderOptions,
-  kGroupSaveJitterMs, kIntermediateSaveIntervalMs, kMaxEvidenceEntryIds, kMaxRetryDelayMs, kMaxUsableSnapshots,
+  kConcurrentSaveJitterMs, kIntermediateSaveIntervalMs, kMaxEvidenceEntryIds, kMaxRetryDelayMs, kMaxUsableSnapshots,
   kMinimumSaveGapMs, kSenderUnmountLimitMs
 } from "./content-save-sender";
 import { createDocumentModel, DocumentModelType, SaveState } from "./document";
@@ -55,8 +55,9 @@ registerTileComponentInfo({
   tileEltClass: "test-tile"
 });
 
-// Reports commits only when a test says so. Like a group document's history manager, it is settled
-// while no completed local entry waits to commit, no upload runs and no remote entries are applied.
+// Reports commits only when a test says so. Like a concurrent document's history manager, it is
+// settled while no completed local entry waits to commit, no upload runs and no remote entries are
+// applied.
 class StubCommitSource implements IHistoryManager, ICommitSource {
   lastCommitted: ICommittedEntry | undefined = undefined;
   caughtUpTo: ICommittedEntry | undefined = undefined;
@@ -197,7 +198,7 @@ function setup(overrides?: Partial<IContentSaveSenderOptions>, concurrent = fals
   const updateTools = jest.fn((tools: string[]) => Promise.resolve());
   const onContentSaved = jest.fn();
   const beforeWrite = jest.fn();
-  // A group save waits no jitter unless a test sets random.
+  // A concurrent document's save waits no jitter unless a test sets random.
   const sender = getContentSaveSender(document,
     { contentRef, updateTools, onContentSaved, beforeWrite, random: () => 0, ...overrides });
 
@@ -597,7 +598,7 @@ describe("ContentSaveSender", () => {
       expect(contentRef.update).not.toHaveBeenCalled();
     });
 
-    it("skips a snapshot taken while a group document applied remote entries", async () => {
+    it("skips a snapshot taken while a concurrent document applied remote entries", async () => {
       const { commits, contentRef, edit } = track(setup({}, true));
       commits.setApplying(true);
       const a = await edit("alpha");
@@ -961,7 +962,7 @@ describe("ContentSaveSender", () => {
       expect(document.saveState).toBe(SaveState.Saved);
     });
 
-    it("doesn't show Saving for the changes a group document's apply makes", async () => {
+    it("doesn't show Saving for the changes a concurrent document's apply makes", async () => {
       const { commits, document } = track(setup({}, true));
       commits.setApplying(true);
       document.applyPatchesFromManager(FAKE_HISTORY_ENTRY_ID, "exchange", [
@@ -973,7 +974,7 @@ describe("ContentSaveSender", () => {
       expect(document.saveState).toBe(SaveState.Idle);
     });
 
-    it("shows Saving for a local edit made while a group document applies remote entries", async () => {
+    it("shows Saving for a local edit made while a concurrent document applies remote entries", async () => {
       const { commits, contentRef, document, edit } = track(setup({}, true));
       commits.setApplying(true);
       document.applyPatchesFromManager(FAKE_HISTORY_ENTRY_ID, "exchange", [
@@ -1271,7 +1272,7 @@ describe("ContentSaveSender", () => {
       expect(collectNotExactEvidence(document, ids, 0).uncommittedEntryIds).toEqual(ids.slice(5));
     });
 
-    it("never makes an intermediate save on a group document", async () => {
+    it("never makes an intermediate save on a concurrent document", async () => {
       const { contentRef, edit, openEntry, treeManager } = track(setup({}, true));
       openEntry("open");
       treeManager.exactness.markNotExact("unrecorded-change");
@@ -1319,13 +1320,15 @@ describe("ContentSaveSender", () => {
     });
   });
 
-  describe("group documents", () => {
+  describe("concurrent documents", () => {
     it("logs once when the session stops being exact, even for a later sender", () => {
       const logEvent = jest.fn();
       const { contentRef, document, sender, treeManager } = track(setup({ logEvent }, true));
       treeManager.exactness.markNotExact("unrecorded-change");
       treeManager.exactness.markNotExact("timed-out-entry");
-      expect(logEvent.mock.calls).toEqual([[LogEventName.CONTENT_SAVE_GROUP_STOPPED, { reason: "unrecorded-change" }]]);
+      expect(logEvent.mock.calls).toEqual([
+        [LogEventName.CONTENT_SAVE_CONCURRENT_STOPPED, { reason: "unrecorded-change" }]
+      ]);
 
       sender.dispose();
       track({ sender: getContentSaveSender(document, { contentRef, updateTools: () => Promise.resolve(), logEvent }) });
@@ -1445,7 +1448,7 @@ describe("ContentSaveSender", () => {
       const { commits, contentRef } = track(setup({ random: () => 0.5 }, true));
       commits.setRemoteHead("r8", 8);
       await flush();
-      jest.advanceTimersByTime(kGroupSaveJitterMs / 2 - 1);
+      jest.advanceTimersByTime(kConcurrentSaveJitterMs / 2 - 1);
       expect(contentRef.update).not.toHaveBeenCalled();
       jest.advanceTimersByTime(1);
       expect(contentRef.update).toHaveBeenCalledTimes(1);
@@ -1469,7 +1472,7 @@ describe("ContentSaveSender", () => {
       for (let i = 1; i <= 4; i++) {
         commits.commit(await edit(`tick-${i}`));
         await flush();
-        jest.advanceTimersByTime(kGroupSaveJitterMs / 4);
+        jest.advanceTimersByTime(kConcurrentSaveJitterMs / 4);
       }
       expect(contentRef.update).toHaveBeenCalledTimes(1);
       expect(textOf(contentRef.writes[0].values)).toBe("tick-4");
@@ -1482,7 +1485,7 @@ describe("ContentSaveSender", () => {
       const a = await edit("alpha");
       commits.commit(a);
       await flush();
-      jest.advanceTimersByTime(kGroupSaveJitterMs / 2);
+      jest.advanceTimersByTime(kConcurrentSaveJitterMs / 2);
       expect(contentRef.update).toHaveBeenCalledTimes(1);
       expect(contentRef.writes[0].values).toMatchObject({ lastHistoryEntryId: a, exactThrough: { index: 1 } });
     });
@@ -1491,7 +1494,7 @@ describe("ContentSaveSender", () => {
       const { commits, contentRef, edit } = track(setup({ random: () => 0.5 }, true));
       const a = await edit("alpha");
       commits.commit(a);
-      jest.advanceTimersByTime(kGroupSaveJitterMs / 2 - 1);
+      jest.advanceTimersByTime(kConcurrentSaveJitterMs / 2 - 1);
       expect(contentRef.update).not.toHaveBeenCalled();
       jest.advanceTimersByTime(1);
       expect(contentRef.update).toHaveBeenCalledTimes(1);
@@ -1557,7 +1560,7 @@ describe("ContentSaveSender", () => {
       await flush();
       expect(document.saveState).toBe(SaveState.Saved);
       expect(onContentSaved).toHaveBeenCalledWith(document, "r3");
-      jest.advanceTimersByTime(kGroupSaveJitterMs);
+      jest.advanceTimersByTime(kConcurrentSaveJitterMs);
       await flush();
       expect(contentRef.update).not.toHaveBeenCalled();
 
@@ -1590,10 +1593,10 @@ describe("ContentSaveSender", () => {
       await flush();
 
       // The winner saves the head before this client's settled save is sent.
-      jest.advanceTimersByTime(kGroupSaveJitterMs / 4);
+      jest.advanceTimersByTime(kConcurrentSaveJitterMs / 4);
       contentRef.fireEnvelope({ lastHistoryEntryId: "r1", exactThrough: { id: "r1", index: 1 } });
       await flush();
-      jest.advanceTimersByTime(kGroupSaveJitterMs);
+      jest.advanceTimersByTime(kConcurrentSaveJitterMs);
       await flush();
       expect(contentRef.update).not.toHaveBeenCalled();
       expect(document.saveState).toBe(SaveState.Saved);
@@ -1695,7 +1698,7 @@ describe("ContentSaveSender", () => {
       expect(contentRef.update).toHaveBeenCalledTimes(1);
     });
 
-    it("doesn't listen for the window's page hide on a group document", () => {
+    it("doesn't listen for the window's page hide on a concurrent document", () => {
       const addListener = jest.spyOn(window, "addEventListener");
       try {
         track(setup({}, true));
@@ -1705,7 +1708,7 @@ describe("ContentSaveSender", () => {
       }
     });
 
-    it("does nothing on page hide for a group document", async () => {
+    it("does nothing on page hide for a concurrent document", async () => {
       const { commits, contentRef, edit, sender } = track(setup({}, true));
       const a = await edit("alpha");
       commits.commit(a);
@@ -2022,7 +2025,7 @@ describe("ContentSaveSender", () => {
       expect(textOf(contentRef.writes[1].values)).toBe("bravo");
     });
 
-    it("stops 30 seconds after detach on a group document without an intermediate save", async () => {
+    it("stops 30 seconds after detach on a concurrent document without an intermediate save", async () => {
       const { commits, contentRef, edit, sender } = track(setup({}, true));
       const a = await edit("alpha");
       const b = await edit("bravo");
@@ -2071,7 +2074,7 @@ describe("ContentSaveSender", () => {
       expect(contentRef.writes[2].values).toMatchObject({ lastHistoryEntryId: c });
     });
 
-    it("disposes a group document's drain once its latest change is saved", async () => {
+    it("disposes a concurrent document's drain once its latest change is saved", async () => {
       // by its own save
       const own = track(setup({}, true));
       const a = await own.edit("alpha");
@@ -2090,7 +2093,7 @@ describe("ContentSaveSender", () => {
       other.sender.detach();
       other.contentRef.fireEnvelope({ lastHistoryEntryId: b, exactThrough: { id: b, index: 1 } });
       await flush();
-      jest.advanceTimersByTime(kGroupSaveJitterMs);
+      jest.advanceTimersByTime(kConcurrentSaveJitterMs);
       expect(other.contentRef.update).not.toHaveBeenCalled();
       const replaced = track({ sender: getContentSaveSender(other.document,
         { contentRef: other.contentRef, updateTools: () => Promise.resolve() }) }).sender;
