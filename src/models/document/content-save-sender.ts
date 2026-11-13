@@ -856,10 +856,15 @@ export class ContentSaveSender {
     return save.kind !== "intermediate" && save.changeSeq < this.getIntermediateContentSeq();
   }
 
-  // Replaces any save that hasn't been sent yet.
+  // Replaces any save that hasn't been sent yet. A group save keeps the wait of the save it replaces,
+  // so commits that come faster than the jitter don't keep putting the save off.
   private queueSave(save: IWaitingSave) {
     if (this.document.concurrent && "buildValues" in save) {
-      save.notBefore = Date.now() + (this.options.random ?? Math.random)() * kGroupSaveJitterMs;
+      const replaced = this.pendingSave;
+      save.notBefore = replaced && !this.writesInFlight.has(replaced) && "buildValues" in replaced
+          && replaced.notBefore !== undefined
+        ? replaced.notBefore
+        : Date.now() + (this.options.random ?? Math.random)() * kGroupSaveJitterMs;
     }
     this.pendingSave = save;
     this.scheduleWrite();

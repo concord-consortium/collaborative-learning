@@ -1464,6 +1464,17 @@ describe("ContentSaveSender", () => {
       expect(contentRef.update).toHaveBeenCalledTimes(1);
     });
 
+    it("keeps a waiting save's jitter when a newer commit replaces it", async () => {
+      const { commits, contentRef, edit } = track(setup({ random: () => 1 }, true));
+      for (let i = 1; i <= 4; i++) {
+        commits.commit(await edit(`tick-${i}`));
+        await flush();
+        jest.advanceTimersByTime(kGroupSaveJitterMs / 4);
+      }
+      expect(contentRef.update).toHaveBeenCalledTimes(1);
+      expect(textOf(contentRef.writes[0].values)).toBe("tick-4");
+    });
+
     it("doesn't replace a commit's save with a settled save at the same index", async () => {
       // The commit's save waits half the jitter. A settled save queued in its place would wait it all.
       const random = jest.fn().mockReturnValueOnce(0.5).mockReturnValue(1);

@@ -8,8 +8,10 @@ const textToolTile = new TextToolTile;
 const dataflowToolTile = new DataflowToolTile;
 const sortWork = new SortedWork;
 
-function visitUnit(studentId) {
-  const queryParams = `${Cypress.config("qaUnitStudent5")}`.replace("student:5", `student:${studentId}`);
+function visitUnit(studentId, groupId = 5) {
+  const queryParams = `${Cypress.config("qaUnitStudent5")}`
+    .replace("student:5", `student:${studentId}`)
+    .replace("qaGroup=5", `qaGroup=${groupId}`);
   cy.visit(queryParams, {
     onBeforeLoad(win) {
       win.localStorage.setItem("debug", "document");
@@ -119,6 +121,31 @@ context("Settled saves", function () {
       waitForEnvelope(
         e => isExact(e) && exactIndex(e) >= exactIndex(first) + 3,
         "is exact at least three entries later"
+      );
+    });
+  });
+
+  it("keeps saving a group document exactly while a DataFlow program runs every 50 ms", function () {
+    // The student is alone in the group, so this client is the one making the entries.
+    visitUnit(51, 51);
+    cy.get("[data-test=document-file-menu-header]").click();
+    cy.get("[data-test=list-item-icon-open-group-doc]").click();
+    cy.window().its("currentDocument.concurrent").should("eq", true);
+
+    cy.log("a program with a generator ticks every 50 ms");
+    clueCanvas.addTile("dataflow");
+    dataflowToolTile.getDataflowTile().should("exist");
+    dataflowToolTile.getCreateNodeButton("generator").click();
+    dataflowToolTile.getNode("generator").should("exist");
+    dataflowToolTile.selectSamplingRate("50 ms");
+
+    // Each tick is an entry, so 3 seconds make about 60. A history that never settled would stop
+    // the saves, and a save put off by every commit would fall far behind.
+    waitForEnvelope(isExact, "is exact").then(first => {
+      cy.wait(3000);
+      waitForEnvelope(
+        e => isExact(e) && exactIndex(e) >= exactIndex(first) + 30,
+        "is exact at least 30 entries later"
       );
     });
   });
