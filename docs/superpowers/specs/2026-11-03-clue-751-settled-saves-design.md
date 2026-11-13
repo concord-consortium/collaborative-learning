@@ -547,8 +547,11 @@ attempted.
   [group-docs-jira-mapping.md](../../group-docs/group-docs-jira-mapping.md), and
   [group-docs-implementation-todos.md](../../group-docs/group-docs-implementation-todos.md) (remote
   entries that fail to apply, and saved content at an entry the history doesn't have).
-- Describe the catch-up and the envelope's id in [history-framework.md](../../history-framework.md),
-  and the envelope fields in [metadata-fields.md](../../document-metadata/metadata-fields.md).
+- Describe the envelope's id and where playback starts in
+  [history-framework.md](../../history-framework.md), the catch-up in
+  [history-framework/load-entries.md](../../history-framework/load-entries.md), which also takes over
+  the overview's "Load entries" section, and the envelope fields in
+  [metadata-fields.md](../../document-metadata/metadata-fields.md).
 
 The work CLUE-751 leaves for later (out-of-order entries, drift entries, one mechanism for every
 document) is written up by CLUE-788.
