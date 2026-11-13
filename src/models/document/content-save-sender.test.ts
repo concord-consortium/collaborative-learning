@@ -9,10 +9,10 @@ import { registerTileContentInfo } from "../tiles/tile-content-info";
 import { TileContentModel } from "../tiles/tile-content";
 import { LogEventName } from "../../lib/logger-types";
 import { hashString } from "../../utilities/js-utils";
+import { collectNotExactEvidence, kMaxEvidenceEntryIds } from "./content-save-checks";
 import {
-  collectNotExactEvidence, ContentSaveSender, getContentSaveSender, IContentRef, IContentSaveSenderOptions,
-  kConcurrentSaveJitterMs, kIntermediateSaveIntervalMs, kMaxEvidenceEntryIds, kMaxRetryDelayMs, kMaxUsableSnapshots,
-  kMinimumSaveGapMs, kSenderUnmountLimitMs
+  ContentSaveSender, getContentSaveSender, IContentRef, IContentSaveSenderOptions, kConcurrentSaveJitterMs,
+  kIntermediateSaveIntervalMs, kMaxRetryDelayMs, kMaxUsableSnapshots, kMinimumSaveGapMs, kSenderUnmountLimitMs
 } from "./content-save-sender";
 import { createDocumentModel, DocumentModelType, SaveState } from "./document";
 import { DocumentContentModel } from "./document-content";
