@@ -2,7 +2,7 @@
 
 **Status: built.** What group documents add to how a document's content is saved. Read [content-saves.md](../history-framework/content-saves.md) first: it covers exact saves, the snapshot taken when an entry completes, sending, and when a session stops being exact, which apply to group documents too. This doc covers the rest. Keep it up to date as either changes.
 
-A group document has several writers, and its history holds every canonical entry, so it doesn't need intermediate saves to keep anyone's work. It saves only canonical state at a known position, from a settled history, and other members save in place of one that can't. The commit and settled signals come from `FirestoreHistoryManagerConcurrent` in [firestore-history-manager-concurrent.ts](../../src/models/history/firestore-history-manager-concurrent.ts).
+A group document has several writers, and its history holds every canonical entry, so it doesn't need intermediate saves to keep anyone's work. It saves only canonical state at a known position, from a settled history, and other members save in place of one that can't. The commit and settled signals come from `FirestoreHistoryManagerConcurrent` in [firestore-history-manager-concurrent.ts](../../src/models/history/firestore-history-manager-concurrent.ts), and the saves are made by `ConcurrentContentSaveSender` in [concurrent-content-save-sender.ts](../../src/models/document/concurrent-content-save-sender.ts).
 
 ## Only committed, canonical state is saved
 

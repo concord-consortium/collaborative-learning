@@ -3,11 +3,16 @@
 **Status: built.** This doc describes how a document's content is saved to the realtime database,
 and how each save records the history entry it holds. Keep it up to date as either changes.
 
-A document's content is saved by `ContentSaveSender` in
-[content-save-sender.ts](../../src/models/document/content-save-sender.ts). Each save writes the
-content with an envelope that names the history entry the content holds, and says whether the
-content is exactly the document's state at that entry. A load uses the envelope to decide where its
-history starts, and whether it can catch the content up to the history.
+A document's content is saved by a `ContentSaveSender`
+([content-save-sender.ts](../../src/models/document/content-save-sender.ts)), which
+`getContentSaveSender` makes for the document. An individual document gets an
+`IndividualContentSaveSender`
+([individual-content-save-sender.ts](../../src/models/document/individual-content-save-sender.ts)),
+and a group or class-wide document a `ConcurrentContentSaveSender`
+([concurrent-content-save-sender.ts](../../src/models/document/concurrent-content-save-sender.ts)).
+Each save writes the content with an envelope that names the history entry the content holds, and
+says whether the content is exactly the document's state at that entry. A load uses the envelope to
+decide where its history starts, and whether it can catch the content up to the history.
 
 This doc covers what every document does, and what individual documents add.
 [group-doc-content-saves.md](../group-docs/group-doc-content-saves.md) covers what group documents

@@ -5,8 +5,8 @@ import { UseMutationOptions } from "react-query";
 import firebase from "firebase/app";
 import { Firebase } from "../lib/firebase";
 import { Firestore } from "../lib/firestore";
-import * as senderModule from "../models/document/content-save-sender";
-import { ContentSaveSender } from "../models/document/content-save-sender";
+import { ContentSaveSender, kMinimumSaveGapMs } from "../models/document/content-save-sender";
+import * as senderModule from "../models/document/get-content-save-sender";
 import { DocumentModel, createDocumentModel } from "../models/document/document";
 import {
   LearningLogDocument, PersonalDocument, PlanningDocument, ProblemDocument, ProblemPublication
@@ -755,7 +755,7 @@ describe("useDocumentSyncToFirebase hook", () => {
       expect(mockSetLastEditedNow).not.toHaveBeenCalled();
 
       commits.commit(await addTile());
-      jest.advanceTimersByTime(senderModule.kMinimumSaveGapMs);
+      jest.advanceTimersByTime(kMinimumSaveGapMs);
       expect(contentUpdate).toHaveBeenCalledTimes(2);
       await resolveWrites();
       expect(mockSetLastEditedOnDisconnect).toHaveBeenCalledTimes(1);

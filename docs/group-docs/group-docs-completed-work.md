@@ -57,7 +57,7 @@ Design and out-of-scope items: [merge-independent-forks-design.md](../superpower
 
 ## GD-18: Settled-state document saves (PR #3086 / CLUE-751)
 
-Every content save records whether its `lastHistoryEntryId` is exact: the saved content is the document's state at that entry, and the entry is already in Firestore. Group documents save only from a settled history, so their saved content is canonical state at a known position, and an idle member can save once its history is settled. A group document whose session stops being exact stops saving and shows a notice over the document. Individual documents also make intermediate saves when no exact save has been possible for a while, and catch up to their history when opened for editing. The same `ContentSaveSender` saves both.
+Every content save records whether its `lastHistoryEntryId` is exact: the saved content is the document's state at that entry, and the entry is already in Firestore. Group documents save only from a settled history, so their saved content is canonical state at a known position, and an idle member can save once its history is settled. A group document whose session stops being exact stops saving and shows a notice over the document. Individual documents also make intermediate saves when no exact save has been possible for a while, and catch up to their history when opened for editing. Both are saved by subclasses of the same `ContentSaveSender`.
 
 How it works: [content-saves.md](../history-framework/content-saves.md) for every document, and [group-doc-content-saves.md](group-doc-content-saves.md) for what group documents add.
 

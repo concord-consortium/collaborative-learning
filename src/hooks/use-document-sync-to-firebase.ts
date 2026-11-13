@@ -10,7 +10,7 @@ import { isPublishedType, LearningLogDocument, LearningLogPublication, PersonalD
         } from "../models/document/document-types";
 import { UserModelType } from "../models/stores/user";
 import { Firestore } from "src/lib/firestore";
-import { getContentSaveSender } from "../models/document/content-save-sender";
+import { getContentSaveSender } from "../models/document/get-content-save-sender";
 import { logDocumentEvent } from "../models/document/log-document-event";
 
 // Kept for each document, since its content save sender can outlive the hook and be attached again.
