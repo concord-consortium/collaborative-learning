@@ -305,34 +305,35 @@ describe("documents model", () => {
     const docs = DocumentsModel.create({});
     docs.setFirestore(firestore);
     docs.setUserContextProvider({ userContext: { uid: "1" } } as unknown as UserContextProvider);
-    const groupDocument = createDocumentModel({
+    const concurrentDocument = createDocumentModel({
       type: AxesDocument, uid: "group_2000_3", key: "test-group", createdAt: 1, content: {}, concurrent: true
     });
-    return { docs, groupDocument };
+    return { docs, concurrentDocument };
   }
 
   it("gives the history manager the envelope the document was loaded with, not a later one", () => {
-    const { docs, groupDocument } = createHistoryDocuments();
+    const { docs, concurrentDocument } = createHistoryDocuments();
     const loaded = { lastHistoryEntryId: "e5", exactThrough: { index: 5, since: "e2" } };
-    groupDocument.setLoadedEnvelope(loaded);
-    groupDocument.setLoadedEnvelope({ lastHistoryEntryId: "e6" });
-    groupDocument.setSavedEnvelope({ lastHistoryEntryId: "e6", exactThrough: { index: 6, since: "e2" } });
-    docs.add(groupDocument);
+    concurrentDocument.setLoadedEnvelope(loaded);
+    concurrentDocument.setLoadedEnvelope({ lastHistoryEntryId: "e6" });
+    concurrentDocument.setSavedEnvelope({ lastHistoryEntryId: "e6", exactThrough: { index: 6, since: "e2" } });
+    docs.add(concurrentDocument);
 
-    const historyManager = (groupDocument.treeManagerAPI as TreeManagerType).historyManager as FirestoreHistoryManager;
+    const historyManager =
+      (concurrentDocument.treeManagerAPI as TreeManagerType).historyManager as FirestoreHistoryManager;
     expect(historyManager.loadedEnvelope).toBe(loaded);
   });
 
   it("passes uploaded entries of each document to the activity recorder", () => {
-    const { docs, groupDocument } = createHistoryDocuments();
+    const { docs, concurrentDocument } = createHistoryDocuments();
     const recorder = { onLocalEntryUploaded: jest.fn() };
     docs.setActivityRecorder(recorder as unknown as ActivityRecorder);
     docs.add(document);
-    docs.add(groupDocument);
+    docs.add(concurrentDocument);
 
-    [document, groupDocument].forEach((doc, i) => {
+    [document, concurrentDocument].forEach((doc, i) => {
       const historyManager = (doc.treeManagerAPI as TreeManagerType).historyManager as FirestoreHistoryManager;
-      expect(historyManager instanceof FirestoreHistoryManagerConcurrent).toBe(doc === groupDocument);
+      expect(historyManager instanceof FirestoreHistoryManagerConcurrent).toBe(doc === concurrentDocument);
       const entry = HistoryEntry.create({ id: `e${i}`, tree: doc.key });
       historyManager.onLocalEntryUploaded?.(entry);
       expect(recorder.onLocalEntryUploaded).toHaveBeenLastCalledWith(doc, entry);

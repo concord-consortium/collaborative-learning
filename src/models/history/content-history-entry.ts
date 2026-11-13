@@ -8,7 +8,7 @@ import { TreeManagerType } from "./tree-manager";
  * up, and neither is the owner's until it is opened for editing.
  *
  * Returns undefined when the content holds every entry this client knows of, or when its entry
- * can't be known: for a group document, which follows its history live, for a document this
+ * can't be known: for a concurrent document, which follows its history live, for a document this
  * session has recorded entries in, and for content from an envelope without exactThrough.
  */
 export function getContentHistoryEntryId(document: DocumentModelType): string | undefined {

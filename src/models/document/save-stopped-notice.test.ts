@@ -21,7 +21,7 @@ describe("getSaveStoppedNotice", () => {
     expect(getSaveStoppedNotice("initial-apply-failed")?.message).toContain("tell your teacher");
   });
 
-  it("shows nothing for a reason that doesn't happen on a group document", () => {
+  it("shows nothing for a reason that doesn't happen on a concurrent document", () => {
     expect(getSaveStoppedNotice("catch-up-hole")).toBeUndefined();
   });
 });

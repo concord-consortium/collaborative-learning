@@ -1,8 +1,8 @@
 import { NotExactReason } from "../history/session-exactness";
 
 /**
- * What a group document shows over its content once the session stops being exact. A group
- * document makes no intermediate saves, so from then on this client saves no content.
+ * What a concurrent document shows over its content once the session stops being exact. A
+ * concurrent document makes no intermediate saves, so from then on this client saves no content.
  */
 export interface ISaveStoppedNotice {
   // Whether the user can close the notice and keep working. One that can't also makes the
@@ -16,10 +16,10 @@ export interface ISaveStoppedNotice {
 const kTellTeacher = "Please tell your teacher.";
 
 /**
- * The notice for a reason a group document's session stopped being exact, or undefined for a
- * reason that doesn't happen on a group document. `repeated` is whether a change with no history
- * entry already stopped this document's saving in this tab a short time ago, so reloading didn't
- * help.
+ * The notice for a reason a concurrent document's session stopped being exact, or undefined for a
+ * reason that doesn't happen on a concurrent document. `repeated` is whether a change with no
+ * history entry already stopped this document's saving in this tab a short time ago, so reloading
+ * didn't help.
  */
 export function getSaveStoppedNotice(reason: NotExactReason, repeated = false): ISaveStoppedNotice | undefined {
   switch (reason) {
@@ -47,7 +47,7 @@ export function getSaveStoppedNotice(reason: NotExactReason, repeated = false): 
     case "remote-apply-failed":
       return {
         dismissible: false, offerReload: true,
-        message: "This document is out of step with your group's changes. Reload the page to keep working."
+        message: "This document is out of step with other people's changes. Reload the page to keep working."
       };
     // Every load has the same saved content, so reloading doesn't help, but the work is recorded.
     case "saved-id-missing":

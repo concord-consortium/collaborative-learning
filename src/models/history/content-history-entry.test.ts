@@ -40,7 +40,7 @@ describe("getContentHistoryEntryId", () => {
     expect(getContentHistoryEntryId(setup().document)).toBe("e1");
   });
 
-  it("isn't known for an unmarked envelope, a group document, or a document with entries from this session",
+  it("isn't known for an unmarked envelope, a concurrent document, or a document with entries from this session",
       () => {
     expect(getContentHistoryEntryId(setup({ envelope: { lastHistoryEntryId: "e1" } }).document)).toBeUndefined();
     expect(getContentHistoryEntryId(setup({ envelope: null }).document)).toBeUndefined();

@@ -15,7 +15,7 @@ export interface ISaveStoppedNoticeState {
 }
 
 /**
- * The notice a group document shows once its session stops being exact, until it is dismissed.
+ * The notice a concurrent document shows once its session stops being exact, until it is dismissed.
  * Call it from an observer, so the notice appears when the session stops being exact.
  */
 export function useSaveStoppedNotice(document: DocumentModelType): ISaveStoppedNoticeState | undefined {

@@ -161,7 +161,7 @@ export const DocumentModel = Tree.named("Document")
     /**
      * The history fields of the RTDB envelope as far as this client knows: the loaded one, until the
      * content listener replaces the content or one of this client's saves lands. Other members' saves
-     * of a group document don't update it.
+     * of a concurrent document don't update it.
      */
     savedEnvelope: undefined as ISavedEnvelope | undefined,
     /**
