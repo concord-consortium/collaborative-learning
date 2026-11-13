@@ -38,7 +38,7 @@ export const useColumnExtensions = ({
         !readOnly && setColumnEditingName(column);
         return undefined;
       },
-      onHeaderCellEditKeyDown: (e: React.KeyboardEvent<HTMLDivElement>) => {
+      onHeaderCellEditKeyDown: (e: React.KeyboardEvent<HTMLInputElement>) => {
         switch (e.key) {
           case "Tab": {
             const nextColumnToEdit = !e.shiftKey

@@ -2,6 +2,8 @@
 
 The history framework in CLUE is used for recording changes to documents to support undo/redo and time traveling.
 
+More docs about the framework, including parts that are planned but not built yet, are in [history-framework/](history-framework/README.md).
+
 The framework is based on MobX State Tree (MST). It is intended to support iframe based tile implementations. With iframe based tiles there will be multiple MST trees that need to coordinate with each other. However, we do not currently have any iframe tiles, so this capability of the system hasn't been tested yet.
 
 The main parts of the system are:
@@ -344,6 +346,8 @@ When a document is being edited it does not load all of the previous history ent
 ### Ordering of history entries
 
 Locally the history entries are ordered in the `TreeManager.document.history`.  When a user wants to replay the history all of the history entries are downloaded from Firestore ordered by an `index` field on the history entry. These downloaded history entries are set as the `TreeManager.document.history`.
+
+An entry is added to `TreeManager.document.history` when it completes, not when it starts. While it is recording it is *open*, and it stays open across the awaited steps of recording it, such as a shared-model update. An entry made in the meantime completes first, so it comes first in history. If the open entry adds a tile and the other entry changes that tile, the history has the change before the tile exists, and playback can't move back past the tile's creation. [history-framework/start-editing-entry.md](history-framework/start-editing-entry.md) describes how CLUE hit this, and the script that repairs such histories.
 
 In addition to the `index` field the history entries in Firestore include a `previousEntryId`, which could help if entries get out of order and we need to figure out what happened. The Firestore entries also include a `created` server timestamp which would be useful for debugging issues.
 
