@@ -879,7 +879,9 @@ describe("entry completion, open-entry timeout and late records", () => {
       expect(manager.document.history.length).toBe(1);
     });
 
-    it("accepts a late record whose patches target a tile that was deleted", () => {
+    it("stores a late record even when its patches target a tile deleted since", () => {
+      // The entry made from it fails to apply anywhere else. See "Known gaps" in
+      // docs/history-framework/content-saves.md.
       const { manager } = openStuckEntry();
       jest.spyOn(console, "error").mockImplementation(() => null);
       jest.advanceTimersByTime(kOpenEntryTimeoutMs);

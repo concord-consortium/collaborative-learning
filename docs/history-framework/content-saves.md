@@ -115,6 +115,11 @@ intermediate save over it loses nothing. The client tracks that envelope in the 
 - A patch made outside an action while a flow is suspended isn't detected either, since the
   suspended flow counts as a tracked call. MST protection should make such a patch impossible, so
   one would mean something bypassed it.
+- A record that arrives after its entry timed out becomes an entry of its own, added after any
+  entries recorded in the meantime. If one of those deleted the tile the record changes, the new
+  entry fails wherever it is applied later: in playback, in a catch-up, or on another group
+  member's client. The session that recorded it is already not exact, so it makes no exact saves
+  past that entry.
 
 ## Related docs
 
