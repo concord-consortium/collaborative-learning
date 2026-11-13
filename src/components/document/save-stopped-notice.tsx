@@ -61,7 +61,7 @@ export const SaveStoppedNotice: React.FC<IProps> = ({ state: { reason, notice, d
     <div className="save-stopped-notice" ref={noticeRef} data-testid="save-stopped-notice">
       <div className="save-stopped-notice-panel" ref={panelRef} tabIndex={-1} role="alertdialog"
           aria-labelledby={titleId} aria-describedby={messageId}>
-        <div className="save-stopped-notice-title" id={titleId}>Saving stopped</div>
+        <div className="save-stopped-notice-title" id={titleId}>{notice.title}</div>
         <p id={messageId}>{notice.message}</p>
         <p className="save-stopped-notice-code">Code: {reason}</p>
         <div className="save-stopped-notice-buttons">

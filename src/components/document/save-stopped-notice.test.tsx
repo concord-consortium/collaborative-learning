@@ -69,6 +69,8 @@ describe("SaveStoppedNotice", () => {
   it("lets the user close a notice for a document that still looks right", async () => {
     const { stop } = setup();
     stop("timed-out-entry");
+    expect(screen.getByRole("alertdialog", { name: "Saving problem" }))
+      .toHaveAccessibleDescription(/Changes you make from now on should still be saved/);
     expect(screen.getByText("Under the notice").inert).toBeFalsy();
     await userEvent.click(screen.getByRole("button", { name: "Close" }));
     expect(screen.queryByTestId("save-stopped-notice")).toBeNull();

@@ -39,7 +39,7 @@ A group document whose session stops being exact makes no more content saves fro
 
 The document then shows a notice over its content and toolbar, chosen by the reason, with the reason as a code for reports ([save-stopped-notice.ts](../../src/models/document/save-stopped-notice.ts)):
 
-- An entry that stayed open for 30 seconds: the document looks right, so the notice can be closed and suggests reloading, which starts an exact session.
+- An entry that stayed open for 30 seconds: the document looks right, and later changes still reach history, so the notice can be closed. It says the change may not have been saved correctly, since a part of it that arrives late can fail to apply, and suggests reloading to check, which also starts an exact session.
 - A change with no entry: later edits that build on it may not load, so the notice can't be closed, the document is read-only, and it asks for a reload. A second one in the same tab within 10 minutes means the reload didn't help, so it asks the user to tell their teacher instead.
 - An entry that fails to apply at load: every load fails the same way, so the notice can't be closed and asks the user to tell their teacher.
 - Another member's entry that fails to apply: the notice can't be closed and asks for a reload, which helps when this tab's own changes caused it.
@@ -50,6 +50,6 @@ A notice that can't be closed makes the document under it inert. Closing and reo
 ## Known gaps
 
 - A remote entry that always fails to apply stops a group document's content saves, and every member that loads the document fails on it. Watch for `HISTORY_REMOTE_APPLY_FAILED`. See [Remote Entries That Fail to Apply Stay in History](group-docs-implementation-todos.md#remote-entries-that-fail-to-apply-stay-in-history).
-- Saved content at an entry the history doesn't have stops every later session's saves, since no load is exact. Nothing repairs it yet.
+- Saved content at an entry the history doesn't have stops every later session's saves, since no load is exact. It is only detected at load: the check compares the history with the envelope the document loaded from, so a session that is already open doesn't notice an envelope that breaks while it works. Such a session stays exact, and its first save past the broken envelope's index repairs it. Once every open session has loaded from the broken envelope, nothing repairs it.
 - The group upload race, and the initial-load race for a group envelope without a trusted `exactThrough`, are listed under [GD-22](group-docs-plan.md#gd-22-reliability-and-robustness).
 - The known gaps in [content-saves.md](../history-framework/content-saves.md#known-gaps) apply to group documents too.

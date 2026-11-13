@@ -478,7 +478,7 @@ the store. The notice depends on what the user would see and whether reloading h
 
 | Reason | What breaks | Notice |
 |---|---|---|
-| An entry stayed open for 30 seconds (`timed-out-entry`) | Nothing visible: the entry's records reach history, and a late record becomes a new entry. | Can be closed; suggests reloading. |
+| An entry stayed open for 30 seconds (`timed-out-entry`) | Nothing visible: the entry's records reach history, and a late record becomes a new entry. | Can be closed; says the change may not have been saved correctly but later changes should be, and suggests reloading to check. |
 | A change with no entry (`unrecorded-change`) | The change is only on this screen. Later entries that build on it can fail to apply at load, for every member. | Can't be closed, and the document is read-only; asks for a reload. A second one for the same document in the same tab within 10 minutes (`sessionStorage`) means the reload didn't help, so it asks the user to tell their teacher instead. |
 | An entry fails to apply at load (`initial-apply-failed`) | Every load fails the same way, and edits made now chain after the failing entry. | Can't be closed; asks the user to tell their teacher. |
 | Another member's entry fails to apply (`remote-apply-failed`) | This screen is missing the entry. A reload helps when this tab's own changes caused the failure; otherwise the reload ends in `initial-apply-failed`. | Can't be closed; asks for a reload. |

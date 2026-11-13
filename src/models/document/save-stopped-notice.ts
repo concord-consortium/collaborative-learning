@@ -10,10 +10,12 @@ export interface ISaveStoppedNotice {
   dismissible: boolean;
   // Whether reloading the page is likely to start saving again. A new session starts exact.
   offerReload: boolean;
+  title: string;
   message: string;
 }
 
 const kTellTeacher = "Please tell your teacher.";
+const kSavingStopped = "Saving stopped";
 
 /**
  * The notice for a reason a concurrent document's session stopped being exact, or undefined for a
@@ -23,37 +25,45 @@ const kTellTeacher = "Please tell your teacher.";
  */
 export function getSaveStoppedNotice(reason: NotExactReason, repeated = false): ISaveStoppedNotice | undefined {
   switch (reason) {
-    // The entry's changes reached history, so the document looks right everywhere.
+    // The entry's changes reached history, but a part that arrived late is saved as an entry of its
+    // own, which can fail to apply. Later changes still reach history, so loads include them.
     case "timed-out-entry":
       return {
-        dismissible: true, offerReload: true,
-        message: "This document has stopped saving. Your work so far is kept. Reload the page to start saving again."
+        dismissible: true, offerReload: true, title: "Saving problem",
+        message: "One of your changes took too long to save, so it may not have been saved correctly. " +
+          "Changes you make from now on should still be saved. We recommend reloading the page to check."
       };
     // The change is only on this screen, and later edits that build on it may not load.
     case "unrecorded-change":
       return repeated
-        ? { dismissible: false, offerReload: false,
-            message: `This document can't be saved right now. ${kTellTeacher}` }
-        : { dismissible: false, offerReload: true,
+        ? { dismissible: false, offerReload: false, title: kSavingStopped,
+            message: `This document has stopped saving again. Reloading is unlikely to help. ${kTellTeacher}` }
+        : { dismissible: false, offerReload: true, title: kSavingStopped,
             message: "This document has stopped saving. Reload the page to keep working. " +
               "Your most recent change may be lost." };
-    // Every load fails on the same entry, so reloading doesn't help.
+    // Every load from the same saved content fails on the same entry, so reloading helps only once
+    // another member, who applied the entry when it was made, has saved past it.
     case "initial-apply-failed":
       return {
-        dismissible: false, offerReload: false,
-        message: `This document couldn't be opened completely, and changes made now wouldn't be kept. ${kTellTeacher}`
+        dismissible: false, offerReload: false, title: kSavingStopped,
+        message: "This document couldn't be opened completely, so edits won't be saved. " +
+          `Reloading is unlikely to help. ${kTellTeacher}`
       };
     // The failure may have come from this tab's own changes, which a reload clears.
     case "remote-apply-failed":
       return {
-        dismissible: false, offerReload: true,
+        dismissible: false, offerReload: true, title: kSavingStopped,
         message: "This document is out of step with other people's changes. Reload the page to keep working."
       };
-    // Every load has the same saved content, so reloading doesn't help, but the work is recorded.
+    // Every load has the same saved content, so reloading doesn't help. Changes still reach history,
+    // but no session that loads the document saves its content again, so each load replays more
+    // history, and an entry in it that fails to apply would lose the work after it.
     case "saved-id-missing":
       return {
-        dismissible: true, offerReload: false,
-        message: `This document is having trouble saving. Your work is still being kept. ${kTellTeacher}`
+        dismissible: true, offerReload: false, title: "Saving problem",
+        message: "Your changes are still being saved, but this document has a problem that needs to be fixed. " +
+          "Until it is, the document may get slower to open, and your recent work could be lost. " +
+          `Reloading won't fix it. ${kTellTeacher}`
       };
     default:
       return undefined;
