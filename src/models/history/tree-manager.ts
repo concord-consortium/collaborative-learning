@@ -731,8 +731,8 @@ export const TreeManager = types
     const entry = self.findActiveHistoryEntry(historyEntryId);
     const timedOutEntry = self.timedOutEntries.get(historyEntryId);
     if (!entry && timedOutEntry) {
-      // The entry this record belongs to was force-completed. The record is only stored, never
-      // applied, so it is kept as an entry of its own in case it has changes worth recording.
+      // The entry this record belongs to was force-completed, so the record is kept as an entry of
+      // its own.
       if (treePatchRecord.patches.length > 0) {
         const lateEntry = HistoryEntry.create({
           id: nanoid(),
