@@ -145,7 +145,7 @@ Reproduction scripts and observed behavior for each case live in [test-scripts/s
 
 ### GD-18: Settled-State Document Saves
 
-Done. Group documents save only from a settled history, and every content save records whether its `lastHistoryEntryId` is exact. See [completed work](group-docs-completed-work.md#gd-18-settled-state-document-saves-pr-3086--clue-751). Prerequisite for GD-19.
+Done. Group documents save only from a settled history, and every content save records whether its `lastHistoryEntryId` is exact. See [completed work](group-docs-completed-work.md#gd-18-settled-state-document-saves-pr-3086--clue-751), and [group-doc-content-saves.md](group-doc-content-saves.md) for how it works. Prerequisite for GD-19.
 
 ### GD-19: Transaction-Free History
 

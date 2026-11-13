@@ -3,9 +3,9 @@
 **Status**: Early draft — partial design, several open questions remain
 **Date**: 2026-04-28
 **Author**: Scott Cytacki (with Claude)
-**Related**: [group-docs-plan.md](group-docs-plan.md), [group-docs-current-state.md](group-docs-current-state.md), [background-entries-design.md](background-entries-design.md), [GD-18 settled-state document saves](group-docs-completed-work.md#gd-18-settled-state-document-saves-pr-3086--clue-751), GD-6 / CLUE-485, CLUE-379
+**Related**: [group-docs-plan.md](group-docs-plan.md), [group-docs-current-state.md](group-docs-current-state.md), [background-entries-design.md](background-entries-design.md), [GD-18 settled-state document saves](group-doc-content-saves.md), GD-6 / CLUE-485, CLUE-379
 
-**Prerequisite**: [GD-18 settled-state document saves](group-docs-completed-work.md#gd-18-settled-state-document-saves-pr-3086--clue-751) (done) — this design assumes the saved doc reflects canonical state at a known canonical position. GD-18 lands that invariant for saves marked `settled: true`; envelopes saved before it lack the mark.
+**Prerequisite**: [GD-18 settled-state document saves](group-doc-content-saves.md) (done) — this design assumes the saved doc reflects canonical state at a known canonical position. GD-18 lands that invariant for exact saves, which carry a trusted `exactThrough`; envelopes saved before it, and intermediate saves, lack it.
 
 ## Summary
 
@@ -151,7 +151,7 @@ type HistoryEntry = {
 
 The existing `HistoryEntry` model already has most of these. The new field is `parents` (replacing `previousEntryId`).
 
-An entry's *scope* (the set of MST paths its patches touch) is needed for conflict detection but is fully derivable from the patches, so it is not stored in Firestore. Today's `getEntryScopeKeys` in [`src/models/history/entry-scopes.ts`](../../../src/models/history/entry-scopes.ts) computes scope keys from a `HistoryEntrySnapshot`; the new design reuses it. If profiling later shows recomputation is hot, caching scope on the in-memory entry (computed lazily on first access) is a straightforward local-only optimization — no protocol change.
+An entry's *scope* (the set of MST paths its patches touch) is needed for conflict detection but is fully derivable from the patches, so it is not stored in Firestore. Today's `getEntryScopeKeys` in [`src/models/history/entry-scopes.ts`](../../src/models/history/entry-scopes.ts) computes scope keys from a `HistoryEntrySnapshot`; the new design reuses it. If profiling later shows recomputation is hot, caching scope on the in-memory entry (computed lazily on first access) is a straightforward local-only optimization — no protocol change.
 
 ### Receive-side state machine
 
@@ -250,7 +250,7 @@ When a client opens a document, it:
 2. Loads canonical entries from Firestore that come after the saved tips, ordered by `serverTimestamp`.
 3. For each entry in canonical order: applies via the receive-side state machine (treating each as a delivered remote).
 
-The saved-doc invariant — established by the [GD-18 settled-state saves](group-docs-completed-work.md#gd-18-settled-state-document-saves-pr-3086--clue-751) — is that the doc reflects canonical state at the recorded `tips`. Without that invariant, late-comer loads can diverge from canonical (see § Why the prerequisite is needed below).
+The saved-doc invariant — established by the [GD-18 settled-state saves](group-doc-content-saves.md) — is that the doc reflects canonical state at the recorded `tips`. Without that invariant, late-comer loads can diverge from canonical (see § Why the prerequisite is needed below).
 
 Performance concern: for a long-lived document with many entries between saved tips and current head, this is O(N) work on every open; needs measurement. Mitigations are out of scope here; the known one is server-side periodic snapshots of the canonical state.
 

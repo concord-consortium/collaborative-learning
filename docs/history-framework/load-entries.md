@@ -74,6 +74,8 @@ be edited until it is opened, which adds up when a user has many documents.
 
 ## Related docs
 
+- [content-saves.md](content-saves.md) — How content saves record the entry they hold, including
+  `exactThrough`, which the catch-up starts from.
 - [start-editing-entry.md](start-editing-entry.md) — The planned entry recorded when a document is
   opened for editing, and how it differs from a load entry.
 - [tile-schema-changes.md](../tile-schema-changes.md) — How to change a tile's or shared model's

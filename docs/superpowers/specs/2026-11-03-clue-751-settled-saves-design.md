@@ -532,10 +532,15 @@ attempted.
 
 ### Docs in the same PR
 
-- Add a GD-18 section to [group-docs-completed-work.md](../../group-docs/group-docs-completed-work.md),
-  in the style of its GD-6 section: the PR and CLUE-751 in the heading, what landed described on its
-  own terms, and links to the code. It doesn't link to this spec. What CLUE-751 left out goes in
-  group-docs-plan.md (GD-22's upload race) and in the docs CLUE-788 writes, not in a link to here.
+- Describe how content saves work in two reference docs, neither of which links to this spec:
+  [history-framework/content-saves.md](../../history-framework/content-saves.md) for every document,
+  and [group-doc-content-saves.md](../../group-docs/group-doc-content-saves.md) for what group
+  documents add. What CLUE-751 left out goes in their known gaps, in group-docs-plan.md (GD-22's
+  upload race) and in the docs CLUE-788 writes, not in a link to here.
+- Add a short GD-18 section to
+  [group-docs-completed-work.md](../../group-docs/group-docs-completed-work.md), in the style of its
+  other sections: the PR and CLUE-751 in the heading, what landed in a paragraph, and links to the two
+  reference docs.
 - Mark GD-18 done in [group-docs-plan.md](../../group-docs/group-docs-plan.md) and the folder
   [README](../../group-docs/README.md). Add the upload race to GD-22.
 - Update [group-docs-current-state.md](../../group-docs/group-docs-current-state.md) where it describes
