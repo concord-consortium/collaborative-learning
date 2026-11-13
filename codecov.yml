@@ -1,0 +1,17 @@
+coverage:
+  status:
+    project:
+      default:
+        target: auto
+        threshold: 0.2%
+
+flag_management:
+  individual_flags:
+    # Cypress suites that not every commit uploads. A commit with no upload for one of
+    # these reuses its last coverage instead of counting it as missing.
+    - name: cypress
+      carryforward: true
+    - name: cypress-regression
+      carryforward: true
+    - name: cypress-smoke
+      carryforward: true
