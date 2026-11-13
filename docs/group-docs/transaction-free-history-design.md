@@ -254,12 +254,26 @@ The saved-doc invariant — established by the [GD-18 settled-state saves](group
 
 Performance concern: for a long-lived document with many entries between saved tips and current head, this is O(N) work on every open; needs measurement. Mitigations are out of scope here; the known one is server-side periodic snapshots of the canonical state.
 
+### Content saves that order entries by index
+
+GD-18's group content saves compare positions by the Firestore `index` the upload transaction assigns. Without the transaction, entries have no contiguous index, so each of these needs another way to tell whether one position is at or past another: by `(serverTimestamp, id)`, or by comparing frontiers. Either way it has to wait for the winner/loser decisions that make a position canonical.
+
+- **A save's stamp.** A settled save is stamped with `expectedRemoteHead` and its index (`expectedRemoteHeadIndex`), and the envelope stores the index in `exactThrough.index`. `tips` replace both.
+- **The stale-check.** Before a group save, the sender skips it when the envelope's `exactThrough.index` is at or past the save's index (see [Stale-check and jitter](group-doc-content-saves.md#stale-check-and-jitter)).
+- **The envelope listener.** It moves the sender's view of the envelope only to a later index, and tells the activity recorder a change is saved once the envelope's index reaches this client's newest committed entry (`ICommittedEntry.index`).
+- **The sender's queue.** Waiting and in-flight saves are compared by index, to drop a save the envelope has already reached and to skip one already in flight.
+- **The initial load from an exact envelope.** It starts from the envelope's id and index and applies the entries after it. § Initial document load above replaces this with loading the entries after the saved tips.
+
+An `exactThrough` written by GD-18 names a single entry, so an old group envelope can be read as a single tip.
+
+Individual documents keep their index: they have one writer and no transaction, the client assigns the index, and their load catch-up reads entries by index range.
+
 ### Why the prerequisite is needed
 
 Without the saved-doc-reflects-canonical invariant, the following anomaly is possible:
 
 - B locally writes b1 with parent P. b1 is the loser in a conflict with a1 (T_a1 < T_b1).
-- Before B's listener delivers a1, B saves the doc (today's code saves on every model change). Saved-doc state = P + b1.
+- Before B's listener delivers a1, B saves the doc (before GD-18, group documents saved on every model change). Saved-doc state = P + b1.
 - B's tab closes before the conflict resolves locally.
 - D opens the document. D loads saved-doc state P + b1, but canonical state is P + a1 (b1 lost).
 - D doesn't know b1 is in the loaded state. D applies canonical entries since saved tips and reaches some inconsistent state.
