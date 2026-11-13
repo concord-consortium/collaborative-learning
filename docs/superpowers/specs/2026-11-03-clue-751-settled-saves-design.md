@@ -347,13 +347,15 @@ individual documents; snapshot pre-processor changes on group documents, and oth
 changes on any document, are not detected (see "Known gaps").
 
 **Catching up converted content.** The entries a load is missing were recorded against the stored
-format, so they can't be applied to converted content. When the load converted old models, or a
-missing entry is a load entry, the catch-up applies them to the stored JSON instead: it undoes the
-pending load entry, applies the entries as JSON patches, each all or nothing, and sets the result as
-the content, which converts it again and rebuilds the pending load entry. A load entry among the
-missing entries is applied like any other: it is one a session made at load and uploaded with the
-edit after it, before its content save failed. Entries after it are in the current format, and the
-result needs no conversion.
+format, so they can't be applied to converted content. The catch-up applies them to the stored JSON
+whether or not the load converted anything: it undoes the pending load entry, if there is one,
+applies the entries as JSON patches, each all or nothing, and sets the result as the content, which
+converts any old models again and rebuilds the pending load entry. The document isn't monitored
+until its catch-up finishes, so setting the content records no entry. If setting the content fails,
+the content stays as loaded, no entries count as applied, and the session is not exact. A load entry
+among the missing entries is applied like any other: it is one a session made at load and uploaded
+with the edit after it, before its content save failed. Entries after it are in the current format,
+and the result needs no conversion.
 
 ### 4. Open-entry timeout
 
@@ -600,6 +602,11 @@ document) is written up by CLUE-788.
   it whenever it is built. `savedEnvelope` is the RTDB envelope as this client knows it, updated by its
   saves and by the content listener; the catch-up, the sender and playback read it, and a sender made
   later for the same document starts from it. `savedLastHistoryEntryId` is removed.
+- The catch-up always applies the missing entries to the stored JSON, not to the live MST tree. One
+  path handles converted content, load entries and plain gaps alike. It runs after the document is
+  created, not before, so the catch-up stays lazy and also covers content the content listener
+  replaced. The stored JSON isn't kept on the document for it: it is rebuilt by undoing the pending
+  load entry.
 
 ## My calls (check these)
 
@@ -672,6 +679,7 @@ These were left to the builder in the design.
   be the owner gets no catch-up. The sender saves the caught-up content when it starts.
 - **Load of converted content:** the missing entries are applied to the stored JSON when the load
   converted old models, or when the gap holds a load entry even though the load converted nothing.
+  Content the entries reach that can't be set leaves the content as loaded, with nothing applied.
 - **Initial load (group):** an exact envelope's id sets where remote entries start applying.
 - **Playback start:** a copy whose content is behind the newest entry starts at the content's
   position and is moved to the newest entry before the history counts as loaded; an entry that fails

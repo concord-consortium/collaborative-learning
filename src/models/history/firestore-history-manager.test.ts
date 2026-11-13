@@ -76,7 +76,7 @@ function setupDocument(initialContent? : DocumentContentSnapshotType) {
   const treeManager = docModel.treeManagerAPI as Instance<typeof TreeManager>;
   const undoStore = treeManager.undoStore;
 
-  return {docContent, tileContent, treeManager, undoStore};
+  return {docModel, docContent, tileContent, treeManager, undoStore};
 }
 
 const makeFirestoreMock = (docExists = true) => {
@@ -789,7 +789,9 @@ describe("catchUpAtLoad", () => {
 
   function setupCatchUp(loadedEnvelope: ISavedEnvelope | undefined, lastHistoryEntry: LastHistoryEntry,
       options: { uploadLocalHistory?: boolean, firestore?: Firestore, uid?: string } = {}) {
-    const { treeManager, tileContent } = setupDocument();
+    const { docModel, treeManager, tileContent } = setupDocument();
+    // A document catches up before it is opened for editing, so it isn't monitored yet.
+    docModel.treeMonitor!.disableMonitoring();
     const setCalled = deferred<void>();
     const set = jest.fn(() => {
       setCalled.resolve();
@@ -812,7 +814,7 @@ describe("catchUpAtLoad", () => {
       loadedEnvelope,
       logEvent
     });
-    return { treeManager, tileContent, historyManager, firestore, set, setCalled, logEvent };
+    return { docModel, treeManager, tileContent, historyManager, firestore, set, setCalled, logEvent };
   }
 
   it("reads nothing more when the envelope is at Firestore's last entry", async () => {
@@ -966,7 +968,7 @@ describe("catchUpAtLoad", () => {
       { lastHistoryEntryId: "e5", exactThrough: { index: 5, since: "e2" } },
       { id: "e7", index: 7 });
     getHistoryEntriesAfter.mockResolvedValue([entryDoc(6, "e5"), entryDoc(7, "e6")]);
-    jest.spyOn(treeManager, "applyEntriesAtLoad").mockRejectedValue(new Error("boom"));
+    jest.spyOn(treeManager, "applyEntriesAtLoad").mockImplementation(() => { throw new Error("boom"); });
     await historyManager.catchUpAtLoad();
     expect(treeManager.exactness.notExactReason).toBe("catch-up-apply-failed");
     expect(logEvent).toHaveBeenCalledWith(LogEventName.HISTORY_LOAD_CATCH_UP_INCOMPLETE,
@@ -1031,13 +1033,14 @@ describe("catchUpAtLoad", () => {
   });
 
   it("chains the next local entry after Firestore's last entry", async () => {
-    const { treeManager, tileContent, historyManager, set, setCalled } = setupCatchUp(
+    const { docModel, treeManager, tileContent, historyManager, set, setCalled } = setupCatchUp(
       { lastHistoryEntryId: "e5", exactThrough: { index: 5, since: "e2" } },
       { id: "e7", index: 7 });
     getHistoryEntriesAfter.mockResolvedValue([entryDoc(6, "e5"), entryDoc(7, "e6")]);
     treeManager.setHistoryManager(historyManager);
     await historyManager.catchUpAtLoad();
 
+    docModel.treeMonitor!.enableMonitoring();
     tileContent.setText("local");
     await setCalled.promise;
 

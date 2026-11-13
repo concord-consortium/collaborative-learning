@@ -906,13 +906,20 @@ describe("entry completion, open-entry timeout and late records", () => {
 });
 
 describe("applying entries at load", () => {
-  it("applies entries at load without adding them to history", async () => {
-    const { tileContent, manager } = setupDocument();
+  // A document catches up before it is opened for editing, so it isn't monitored yet.
+  function setupLoadedDocument() {
+    const setup = setupDocument();
+    setup.docModel.treeMonitor!.disableMonitoring();
+    return setup;
+  }
+
+  it("applies entries at load without adding them to history", () => {
+    const { tileContent, manager } = setupLoadedDocument();
     const entries = [makeRealHistoryEntry(updateFlag), makeRealHistoryEntry(action1)];
     const listener = jest.fn();
     manager.addEntryCompletedListener(listener);
 
-    const result = await manager.applyEntriesAtLoad(entries);
+    const result = manager.applyEntriesAtLoad(entries);
 
     expect(result).toEqual({ applied: 2 });
     expect(tileContent.flag).toBe(true);
@@ -922,42 +929,49 @@ describe("applying entries at load", () => {
     expect(manager.exactness.notExactReason).toBeUndefined();
   });
 
-  it("stops at the first entry that fails to apply and reports how many applied", async () => {
-    const { tileContent, manager } = setupDocument();
+  it("stops at the first entry that fails to apply and reports how many applied", () => {
+    const { tileContent, manager } = setupLoadedDocument();
     const entries = [
       makeRealHistoryEntry(action1), makeRealHistoryEntry(failingEntry), makeRealHistoryEntry(action2)
     ];
 
-    const result = await manager.applyEntriesAtLoad(entries);
+    const result = manager.applyEntriesAtLoad(entries);
 
     expect(result.applied).toBe(1);
     expect(result.error).toEqual(expect.any(String));
     expect(tileContent.actionText).toBe("action 1");
   });
 
-  it("reports an entry that can't be created and leaves the trees able to apply", async () => {
-    const { tileContent, manager } = setupDocument();
+  it("reports an entry that can't be created, keeping the entries before it", () => {
+    const { tileContent, manager } = setupLoadedDocument();
     const entries = [makeRealHistoryEntry(action1), undefined as any];
 
-    const result = await manager.applyEntriesAtLoad(entries);
+    const result = manager.applyEntriesAtLoad(entries);
+
     expect(result.applied).toBe(1);
     expect(result.error).toEqual(expect.any(String));
-
-    const next = await manager.applyEntriesAtLoad([makeRealHistoryEntry(action2)]);
-    expect(next).toEqual({ applied: 1 });
-    expect(tileContent.actionText).toBe("action 2");
-    tileContent.setActionText("edited");
-    expect(tileContent.actionText).toBe("edited");
+    expect(tileContent.actionText).toBe("action 1");
   });
 
-  it("treats a record for an unknown tree as a failure", async () => {
-    const { tileContent, manager } = setupDocument();
+  it("treats a record for an unknown tree as a failure", () => {
+    const { tileContent, manager } = setupLoadedDocument();
     const unknownTree = makeRealHistoryEntry(action2);
     unknownTree.records![0].tree = "no-such-tree";
 
-    const result = await manager.applyEntriesAtLoad([makeRealHistoryEntry(action1), unknownTree]);
+    const result = manager.applyEntriesAtLoad([makeRealHistoryEntry(action1), unknownTree]);
 
     expect(result).toEqual({ applied: 1, error: "Unknown tree 'no-such-tree'" });
     expect(tileContent.actionText).toBe("action 1");
+  });
+
+  it("leaves the content as loaded, with nothing applied, when the content they reach can't be set", () => {
+    const { tileContent, manager } = setupLoadedDocument();
+    const invalidText = makeRealHistoryEntry(action1);
+    (invalidText.records![0].patches[0] as { value: unknown }).value = 42;
+
+    const result = manager.applyEntriesAtLoad([makeRealHistoryEntry(action1), invalidText]);
+
+    expect(result).toEqual({ applied: 0, error: expect.any(String) });
+    expect(tileContent.actionText).toBeUndefined();
   });
 });
