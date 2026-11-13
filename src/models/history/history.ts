@@ -26,6 +26,8 @@ export interface ICreateHistoryEntry {
   model: string;
   action: string;
   undoable: boolean;
+  background?: boolean;
+  producerTileId?: string;
 }
 
 export type HistoryEntrySource = "local" | "remote" | "revert";
@@ -74,6 +76,11 @@ export const HistoryEntry = types.model("HistoryEntry", {
    * True on entries that the user did not cause directly.
    */
   background: types.maybe(types.boolean),
+  /**
+   * The id of the tile whose action produced a background entry, set by asBackground(). Absent
+   * on user entries and on background entries that belong to the document, such as load entries.
+   */
+  producerTileId: types.maybe(types.string),
 })
 .volatile(self => ({
   // The value of the map should be the name of the exchange. This is useful

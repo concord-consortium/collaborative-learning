@@ -73,8 +73,10 @@ launched from the portal or standalone (`appMode` `authed`). A change counts onc
 uploaded and a content save covering it has succeeded, or 30 seconds after the upload if no such save
 is confirmed; a change still waiting when the page closes is written then. A change whose history
 upload fails, or that is rolled back after a conflicting edit in a group or class document, is never
-recorded. The steps a running Simulator or DataFlow tile records on its own (`SimulatorTool`
-`.../step`, `DataflowProgram` `.../tickAndProcess`) do not count. Each tab writes at most every 5
+recorded. Any entry flagged `background` does not count. Those are the entries code produces on its
+own: DataFlow ticks, the recompute after a DataFlow program edit, the cases a running DataFlow
+recording captures, Simulator steps and the load entry. A recorded DataFlow case is therefore not
+counted as student activity, even though the recording is started by the student. Each tab writes at most every 5
 seconds; a student with several tabs open can write more often. The Firestore rule limits a student to
 their own document, their own class and portal, their launch offering's key and the server's clock.
 Only a researcher token for the class can read them. Nothing deletes them.

@@ -16,7 +16,7 @@ import { ProblemDocument } from "../document/document-types";
 import { when } from "mobx";
 import { CDocument, TreeManager } from "./tree-manager";
 import { HistoryEntry, HistoryEntrySnapshot } from "./history";
-import { withoutUndo } from "./without-undo";
+import { asBackground, withoutUndo } from "./without-undo";
 import { expectEntryToBeComplete } from "./undo-store-test-utils";
 // way to get a writable reference to libDebug
 const libDebug = require("../../lib/debug");
@@ -123,6 +123,31 @@ const TestTile = TileContentModel
     }),
     setChildValue(_value: string) {
       self.child?.setValueWithoutUndo(_value);
+    },
+    setText(value: string) {
+      self.text = value;
+    },
+    tickText(value: string) {
+      asBackground({ producerTileId: "t1" });
+      self.text = value;
+    },
+    tickTextUnlessChildAction(value: string) {
+      asBackground({ producerTileId: "t1", unlessChildAction: true });
+      self.text = value;
+    },
+    tickSharedValue(value: string) {
+      asBackground({ producerTileId: "t1" });
+      self.sharedModel?.setValue(value);
+    }
+  }))
+  .actions(self => ({
+    setTextThenTick(value: string) {
+      self.flag = true;
+      self.tickText(value);
+    },
+    setTextThenTickUnlessChildAction(value: string) {
+      self.flag = true;
+      self.tickTextUnlessChildAction(value);
     }
   }));
 interface TestTileType extends Instance<typeof TestTile> {}
@@ -630,6 +655,72 @@ it("will print a warning and still add the action to the undo list if any child 
       triggeringBatchIds: []
     }
   ]);
+});
+
+describe("asBackground", () => {
+  it("records an asBackground action as a background entry that isn't undoable", async () => {
+    const {tileContent, manager, undoStore} = setupDocument();
+    tileContent.tickText("a");
+    await expectEntryToBeComplete(manager, 1);
+
+    const entry = manager.document.history.at(-1)!;
+    expect(entry.background).toBe(true);
+    expect(entry.producerTileId).toBe("t1");
+    expect(entry.undoable).toBe(false);
+    expect(undoStore.canUndo).toBe(false);
+  });
+
+  it("records a user entry with no background fields", async () => {
+    const {tileContent, manager} = setupDocument();
+    tileContent.setText("a");
+    await expectEntryToBeComplete(manager, 1);
+
+    // The stored form of an entry is its JSON, which leaves out unset fields
+    const stored = JSON.parse(JSON.stringify(getSnapshot(manager.document.history.at(-1)!)));
+    expect(stored).not.toHaveProperty("background");
+    expect(stored).not.toHaveProperty("producerTileId");
+  });
+
+  it("keeps a background action called from a user action as one user entry and warns", async () => {
+    const {tileContent, manager, undoStore} = setupDocument();
+    await jestSpyConsole("warn", spy => {
+      tileContent.setTextThenTick("a");
+      expect(spy).toHaveBeenCalledTimes(1);
+    });
+    await expectEntryToBeComplete(manager, 1);
+
+    const entry = manager.document.history.at(-1)!;
+    expect(entry.action).toBe("/content/tileMap/t1/content/setTextThenTick");
+    expect(entry.background).toBeUndefined();
+    expect(entry.producerTileId).toBeUndefined();
+    expect(entry.undoable).toBe(true);
+    expect(undoStore.canUndo).toBe(true);
+  });
+
+  it("keeps quiet about unlessChildAction and records a user entry", async () => {
+    const {tileContent, manager} = setupDocument();
+    await jestSpyConsole("warn", spy => {
+      tileContent.setTextThenTickUnlessChildAction("a");
+      expect(spy).not.toHaveBeenCalled();
+    });
+    await expectEntryToBeComplete(manager, 1);
+
+    const entry = manager.document.history.at(-1)!;
+    expect(entry.background).toBeUndefined();
+    expect(entry.undoable).toBe(true);
+  });
+
+  it("keeps a background entry's shared model changes in the same entry", async () => {
+    const {tileContent, manager} = setupDocument();
+    tileContent.tickSharedValue("something");
+    await expectEntryToBeComplete(manager, 1);
+
+    const entry = manager.document.history.at(-1)!;
+    expect(entry.background).toBe(true);
+    const patchPaths = entry.records.flatMap(record => record.patches.map(patch => patch.path));
+    expect(patchPaths).toContain("/content/sharedModelMap/sm1/sharedModel/value");
+    expect(patchPaths).toContain("/content/tileMap/t1/content/text");
+  });
 });
 
 it("changes to volatile properties are not undoable", async () => {

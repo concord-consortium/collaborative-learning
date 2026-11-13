@@ -3,7 +3,8 @@ import { types, Instance, getType, addDisposer, getSnapshot } from "mobx-state-t
 import { VariableSnapshot, VariableType } from "@concord-consortium/diagram-view";
 
 import { kPotentiometerServoKey } from "../../../../shared/simulations/potentiometer-servo/potentiometer-servo";
-import { withoutUndo } from "../../../models/history/without-undo";
+import { asBackground } from "../../../models/history/without-undo";
+import { getTileModel } from "../../../models/document/shared-model-document-manager";
 import { ITileExportOptions } from "../../../models/tiles/tile-content-info";
 import { ITileContentModel, TileContentModel } from "../../../models/tiles/tile-content";
 import { getAppConfig } from "../../../models/tiles/tile-environment";
@@ -200,7 +201,7 @@ export const SimulatorContentModel = TileContentModel
       // nothing to do here
     },
     step() {
-      withoutUndo();
+      asBackground({ producerTileId: getTileModel(self)?.id });
 
       // Update all variables that have specified values
       for (const [name, values] of Object.entries(self.simulationData.values)) {

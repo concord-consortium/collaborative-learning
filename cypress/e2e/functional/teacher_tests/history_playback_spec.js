@@ -1,10 +1,12 @@
 import ClueCanvas from "../../../support/elements/common/cCanvas";
 import TableToolTile from "../../../support/elements/tile/TableToolTile";
 import DrawToolTile from "../../../support/elements/tile/DrawToolTile";
+import DataflowToolTile from "../../../support/elements/tile/DataflowToolTile";
 
 let clueCanvas = new ClueCanvas;
 let tableToolTile = new TableToolTile;
 let drawToolTile = new DrawToolTile;
+let dataflowToolTile = new DataflowToolTile;
 
 const queryParams = `${Cypress.config("qaUnitTeacher6")}`;
 const studentQueryParams = `${Cypress.config("clueTestqaUnitStudent5")}`;
@@ -79,6 +81,26 @@ context('History Playback', () => {
     cy.get('[data-testid="playback-play-button"]').click();
     cy.wait(2000);
     cy.get('[data-test="subtab-workspaces"] .editable-document-content .canvas .document-content .drawing-tool .drawing-layer line').should('be.visible');
+
+    cy.log('verify the slider stops only at user changes while a DataFlow program ticks');
+    cy.get('.toolbar .tool.toggleplayback').click(); //close playback controls
+    clueCanvas.addTile('dataflow');
+    dataflowToolTile.getDataflowTile().should('exist');
+    dataflowToolTile.getCreateNodeButton('generator').click();
+    dataflowToolTile.getNode('generator').should('exist');
+    // The program ticks once a second, and each tick is a history entry.
+    cy.wait(4000);
+    cy.get('.toolbar .tool.toggleplayback').click(); //open playback controls
+    // At the latest stop the time readout shows the index of the last history entry.
+    cy.get('[data-testid="playback-time-info"]').should($timeInfo => {
+      const match = /\((\d+)\)/.exec($timeInfo.text());
+      expect(match, 'history index in the time readout').to.not.equal(null);
+      expect(Number(match[1]) + 1, 'history entries').to.be.greaterThan(6);
+    });
+    // The stops are the initial one, the drawing tile, its line, the DataFlow tile, the generator
+    // and the latest entry, so the last stop's index is 5. Allow one more.
+    cy.get('[data-testid="playback-slider"] .rc-slider-handle').invoke('attr', 'aria-valuemax')
+      .then(Number).should('be.at.most', 6);
   });
 
   it("verify table tile history", () => {

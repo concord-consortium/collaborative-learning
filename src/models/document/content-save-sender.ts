@@ -11,6 +11,8 @@ import { DocumentModelType, SaveState } from "./document";
 import { DocumentContentModelType, DocumentContentSnapshotType } from "./document-content";
 
 export const kMinimumSaveGapMs = 1000;
+// The gap before a save when no change since the last completed save was made by the user.
+export const kBackgroundSaveGapMs = 3000;
 export const kMaxRetryDelayMs = 30000;
 export const kRetryingAfterFailures = 3;
 export const kIntermediateSaveIntervalMs = 5000;
@@ -226,7 +228,9 @@ interface IFallbackEpisode {
 /**
  * Saves a document's content to its RTDB envelope. A snapshot is taken when each local history
  * entry completes and is saved, marked with exactThrough, once that entry has committed. Only one write is
- * in flight at a time, and each write sends the newest save waiting by then.
+ * in flight at a time, and each write sends the newest save waiting by then. A write starts at
+ * least 1 second after the previous one, or 3 seconds while every unsaved change was made by
+ * background calls, such as a running program's ticks. Those changes don't show as saving.
  *
  * An individual document that has had unsaved changes and no exact save for 5 seconds falls back
  * to intermediate saves of its current content, which clear exactThrough and record why. Each
@@ -259,6 +263,9 @@ export class ContentSaveSender {
   private consecutiveFailures = 0;
   // Counts the content changes. A save covers the changes up to its changeSeq.
   private dirtySeq = 0;
+  // The newest content change made by the user, rather than only by background calls. The save
+  // indicator follows these changes, and saves holding only background changes wait longer.
+  private lastUserChangeSeq = 0;
   // The newest content change the RTDB content is known to hold: from this sender's writes, or a group
   // envelope that reaches the head.
   private savedSeq = 0;
@@ -575,9 +582,7 @@ export class ContentSaveSender {
     const envelope = this.envelopeEntry;
     const committed = this.lastCommittedLocal;
     if (!envelope || !committed || envelope.index < committed.index) return;
-    if (committed.changeSeq >= this.dirtySeq) {
-      this.setSaveState(SaveState.Saved);
-    }
+    this.showSavedIfCovered(committed.changeSeq);
     if (envelope.index > this.reportedIndex) {
       this.reportedIndex = envelope.index;
       this.reportContentSaved(envelope.id);
@@ -633,7 +638,7 @@ export class ContentSaveSender {
     if (this.savedSeq >= this.dirtySeq) return;
     this.savedSeq = this.dirtySeq;
     this.noExactSaveSince = undefined;
-    this.setSaveState(SaveState.Saved);
+    this.showSavedIfCovered(this.dirtySeq);
     this.checkDrained();
   }
 
@@ -732,12 +737,16 @@ export class ContentSaveSender {
 
   private handleContentChanged = () => {
     if (!isLocalChange(this.document)) return;
+    const background = !!this.document.treeMonitor?.areUnrecordedChangesAllBackground();
     this.dirtySeq++;
     if (this.noExactSaveSince === undefined) {
       this.noExactSaveSince = Date.now();
     }
-    if (this.consecutiveFailures < kRetryingAfterFailures) {
-      this.setSaveState(SaveState.Saving);
+    if (!background) {
+      this.lastUserChangeSeq = this.dirtySeq;
+      if (this.consecutiveFailures < kRetryingAfterFailures) {
+        this.setSaveState(SaveState.Saving);
+      }
     }
     this.scheduleIntermediateSave();
   };
@@ -890,7 +899,8 @@ export class ContentSaveSender {
   private getWriteReadyAt(save: IWaitingSave) {
     let readyAt = 0;
     if (this.lastWriteStartedAt !== undefined) {
-      const gap = this.options.getMinimumGapMs?.(save) ?? kMinimumSaveGapMs;
+      const gap = this.options.getMinimumGapMs?.(save)
+        ?? (this.lastUserChangeSeq > this.savedSeq ? kMinimumSaveGapMs : kBackgroundSaveGapMs);
       readyAt = this.lastWriteStartedAt + gap;
     }
     if (this.consecutiveFailures > 0 && this.lastFailureAt !== undefined) {
@@ -980,9 +990,7 @@ export class ContentSaveSender {
     if (isNewest) {
       this.reportWrite(save);
     }
-    if (save.changeSeq >= this.dirtySeq) {
-      this.setSaveState(SaveState.Saved);
-    } else if (this.document.saveState === SaveState.Retrying) {
+    if (!this.showSavedIfCovered(save.changeSeq) && this.document.saveState === SaveState.Retrying) {
       this.setSaveState(SaveState.Saving);
     }
     this.scheduleWrite();
@@ -1061,6 +1069,20 @@ export class ContentSaveSender {
           this.sentTools = undefined;
         }
       });
+  }
+
+  /**
+   * Shows Saved when the indicator shows the user's changes as saving or retrying, and the content
+   * through changeSeq, which holds the user's last change, is saved. Otherwise a save of background
+   * changes would show Saved again each time the indicator clears it. Returns whether it showed Saved.
+   */
+  private showSavedIfCovered(changeSeq: number) {
+    const { saveState } = this.document;
+    if ((saveState !== SaveState.Saving && saveState !== SaveState.Retrying) || changeSeq < this.lastUserChangeSeq) {
+      return false;
+    }
+    this.setSaveState(SaveState.Saved);
+    return true;
   }
 
   // Each call is a document action, which the tree monitor records, so only call it on a change.

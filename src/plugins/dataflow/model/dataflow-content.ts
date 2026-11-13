@@ -25,7 +25,7 @@ import { SharedProgramData, SharedProgramDataType } from "../../shared-program-d
 
 import { uniqueId } from "../../../utilities/js-utils";
 import { getTileContentById, getTileModelById } from "../../../utilities/mst-utils";
-import { withoutUndo } from "../../../models/history/without-undo";
+import { asBackground, withoutUndo } from "../../../models/history/without-undo";
 import { IDataflowOutputConfig } from "../../../../shared/ai-summarizer/ai-summarizer-types";
 import { getTileModel } from "../../../models/tiles/tile-model";
 import { IClueTileObject } from "../../../models/annotations/clue-object";
@@ -730,6 +730,13 @@ export const DataflowContentModel = TileContentModel
      * the table first if needed. See showCaptureInTable for `addTable`. */
     recordSingleSample(addTable: () => void) {
       self.showCaptureInTable(addTable);
+      recordCase(self as DataflowContentModelType);
+    },
+    /** Appends the program's current values to the table as the next point of a running
+     * recording. The point is produced by the program's tick, not by the student, so it is
+     * recorded as background. */
+    recordTickCase() {
+      asBackground({ producerTileId: getTileModel(self)?.id });
       recordCase(self as DataflowContentModelType);
     },
   }));

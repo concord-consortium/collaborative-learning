@@ -4,6 +4,7 @@ import { deferred } from "promise-assist";
 import { ICommitListener, ICommitSource, ICommittedEntry } from "../history/history-commits";
 import { buildLoadEntry } from "../history/schema-conversion";
 import { FAKE_HISTORY_ENTRY_ID, IHistoryManager, TreeManagerType } from "../history/tree-manager";
+import { asBackground } from "../history/without-undo";
 import { registerTileComponentInfo } from "../tiles/tile-component-info";
 import { registerTileContentInfo } from "../tiles/tile-content-info";
 import { TileContentModel } from "../tiles/tile-content";
@@ -11,8 +12,8 @@ import { LogEventName } from "../../lib/logger-types";
 import { hashString } from "../../utilities/js-utils";
 import {
   collectNotExactEvidence, ContentSaveSender, getContentSaveSender, IContentRef, IContentSaveSenderOptions,
-  kGroupSaveJitterMs, kIntermediateSaveIntervalMs, kMaxEvidenceEntryIds, kMaxRetryDelayMs, kMaxUsableSnapshots,
-  kMinimumSaveGapMs, kSenderUnmountLimitMs
+  kBackgroundSaveGapMs, kGroupSaveJitterMs, kIntermediateSaveIntervalMs, kMaxEvidenceEntryIds, kMaxRetryDelayMs,
+  kMaxUsableSnapshots, kMinimumSaveGapMs, kSenderUnmountLimitMs
 } from "./content-save-sender";
 import { createDocumentModel, DocumentModelType, SaveState } from "./document";
 import { DocumentContentModel } from "./document-content";
@@ -26,6 +27,11 @@ const TestTile = TileContentModel
   })
   .actions(self => ({
     setText(value: string) {
+      self.text = value;
+    },
+    // Like a tick of a running program
+    tickText(value: string) {
+      asBackground({ producerTileId: "t1" });
       self.text = value;
     },
     setTextLater: flow(function* (value: string, gate: Promise<void>) {
@@ -201,16 +207,19 @@ function setup(overrides?: Partial<IContentSaveSenderOptions>, concurrent = fals
   const sender = getContentSaveSender(document,
     { contentRef, updateTools, onContentSaved, beforeWrite, random: () => 0, ...overrides });
 
-  // Makes an edit and returns the id of the entry that recorded it.
-  async function edit(text: string) {
+  // Makes a change and returns the id of the entry that recorded it.
+  async function record(change: () => void) {
     const ids: string[] = [];
     const remove = treeManager.addEntryCompletedListener(entry => { ids.push(entry.id); });
-    tile.setText(text);
+    change();
     await flush();
     remove();
     expect(ids).toHaveLength(1);
     return ids[0];
   }
+  const edit = (text: string) => record(() => tile.setText(text));
+  // A background change, recorded in a background entry.
+  const tick = (text: string) => record(() => tile.tickText(text));
 
   // Opens an entry that stays open until the returned function is called.
   function openEntry(id: string) {
@@ -236,7 +245,7 @@ function setup(overrides?: Partial<IContentSaveSenderOptions>, concurrent = fals
   }
 
   return { document, treeManager, commits, tile, contentRef, updateTools, onContentSaved, beforeWrite,
-    sender, edit, openEntry, applyRemote };
+    sender, edit, tick, openEntry, applyRemote };
 }
 
 // A gate a flow waits on twice: the first wait ends at `first`, the second at `second`.
@@ -291,7 +300,8 @@ describe("ContentSaveSender", () => {
       });
       contentRef.writes[0].resolve();
       await flush();
-      expect(document.saveState).toBe(SaveState.Saved);
+      // the load's catch-up holds no change of the user's, so the indicator stays idle
+      expect(document.saveState).toBe(SaveState.Idle);
       expect(document.savedEnvelope).toEqual(
         { lastHistoryEntryId: "caught-up", exactThrough: { index: 9, since: "e0" } });
     });
@@ -1019,6 +1029,179 @@ describe("ContentSaveSender", () => {
       contentRef.writes[2].resolve();
       await flush();
       expect(onContentSaved.mock.calls).toEqual([[document, a], [document, b]]);
+    });
+  });
+
+  describe("background changes", () => {
+    it("waits 3 seconds between saves that hold only background changes", async () => {
+      const { commits, contentRef, tick } = track(setup());
+      const a = await tick("alpha");
+      commits.commit(a);
+      expect(contentRef.update).toHaveBeenCalledTimes(1);
+      contentRef.writes[0].resolve();
+      await flush();
+
+      const b = await tick("bravo");
+      commits.commit(b);
+      jest.advanceTimersByTime(100);
+      const c = await tick("charlie");
+      commits.commit(c);
+      jest.advanceTimersByTime(kBackgroundSaveGapMs - 101);
+      expect(contentRef.update).toHaveBeenCalledTimes(1);
+      jest.advanceTimersByTime(1);
+      expect(contentRef.update).toHaveBeenCalledTimes(2);
+      expect(contentRef.writes[1].values.lastHistoryEntryId).toBe(c);
+      expect(textOf(contentRef.writes[1].values)).toBe("charlie");
+    });
+
+    it("sends a user change within 1 second during a background wait", async () => {
+      const { commits, contentRef, edit, tick } = track(setup());
+      const a = await tick("alpha");
+      commits.commit(a);
+      contentRef.writes[0].resolve();
+      await flush();
+
+      const b = await tick("bravo");
+      commits.commit(b);
+      jest.advanceTimersByTime(500);
+      const c = await edit("charlie");
+      commits.commit(c);
+      jest.advanceTimersByTime(kMinimumSaveGapMs - 501);
+      expect(contentRef.update).toHaveBeenCalledTimes(1);
+      jest.advanceTimersByTime(1);
+      expect(contentRef.update).toHaveBeenCalledTimes(2);
+      expect(contentRef.writes[1].values.lastHistoryEntryId).toBe(c);
+      expect(textOf(contentRef.writes[1].values)).toBe("charlie");
+    });
+
+    it("leaves the indicator alone for background changes", async () => {
+      const { commits, contentRef, document, edit, tick } = track(setup());
+      const a = await edit("alpha");
+      commits.commit(a);
+      contentRef.writes[0].resolve();
+      await flush();
+      expect(document.saveState).toBe(SaveState.Saved);
+
+      const b = await tick("bravo");
+      expect(document.saveState).toBe(SaveState.Saved);
+      commits.commit(b);
+      jest.advanceTimersByTime(kBackgroundSaveGapMs);
+      expect(contentRef.update).toHaveBeenCalledTimes(2);
+      expect(document.saveState).toBe(SaveState.Saved);
+      contentRef.writes[1].resolve();
+      await flush();
+      expect(document.saveState).toBe(SaveState.Saved);
+    });
+
+    it("doesn't show Saved again for background-only saves once the indicator clears it", async () => {
+      const { commits, contentRef, document, edit, tick } = track(setup());
+      const a = await edit("alpha");
+      commits.commit(a);
+      contentRef.writes[0].resolve();
+      await flush();
+      expect(document.saveState).toBe(SaveState.Saved);
+      // as the save indicator does a while after showing Saved
+      document.setSaveState(SaveState.Idle);
+
+      const setSaveState = jest.spyOn(document, "setSaveState");
+      for (let i = 1; i <= 3; i++) {
+        const id = await tick(`tick-${i}`);
+        commits.commit(id);
+        jest.advanceTimersByTime(kBackgroundSaveGapMs);
+        expect(contentRef.update).toHaveBeenCalledTimes(i + 1);
+        contentRef.lastWrite.resolve();
+        await flush();
+      }
+      expect(setSaveState).not.toHaveBeenCalled();
+      expect(document.saveState).toBe(SaveState.Idle);
+    });
+
+    it("doesn't show Saved again for a group document's background-only changes once the indicator clears it",
+        async () => {
+      const { commits, contentRef, document, edit, tick } = track(setup({}, true));
+      const a = await edit("alpha");
+      commits.commit(a);
+      contentRef.writes[0].resolve();
+      await flush();
+      expect(document.saveState).toBe(SaveState.Saved);
+      document.setSaveState(SaveState.Idle);
+
+      const setSaveState = jest.spyOn(document, "setSaveState");
+      const b = await tick("bravo");
+      commits.commit(b);
+      jest.advanceTimersByTime(kBackgroundSaveGapMs);
+      contentRef.lastWrite.resolve();
+      await flush();
+      // another member's save reaches this client's entry
+      contentRef.fireEnvelope({ lastHistoryEntryId: b, exactThrough: { id: b, index: 2 } });
+      await flush();
+      expect(setSaveState).not.toHaveBeenCalled();
+      expect(document.saveState).toBe(SaveState.Idle);
+    });
+
+    it("shows Saved once a save covers the last user change while ticks continue", async () => {
+      const { commits, contentRef, document, edit, tick } = track(setup());
+      const a = await edit("alpha");
+      expect(document.saveState).toBe(SaveState.Saving);
+      await tick("bravo");
+      commits.commit(a);
+      expect(textOf(contentRef.writes[0].values)).toBe("alpha");
+      contentRef.writes[0].resolve();
+      await flush();
+      expect(document.saveState).toBe(SaveState.Saved);
+    });
+
+    it("shows Retrying when background-only saves keep failing, and Saved when one succeeds", async () => {
+      const { commits, contentRef, document, edit, tick } = track(setup());
+      const a = await edit("alpha");
+      commits.commit(a);
+      contentRef.writes[0].resolve();
+      await flush();
+
+      await jestSpyConsole("warn", async () => {
+        const b = await tick("bravo");
+        commits.commit(b);
+        jest.advanceTimersByTime(kBackgroundSaveGapMs);
+        expect(contentRef.update).toHaveBeenCalledTimes(2);
+        contentRef.writes[1].reject(new Error("offline"));
+        await flush();
+        expect(document.saveState).toBe(SaveState.Saved);
+        jest.advanceTimersByTime(kMaxRetryDelayMs);
+        contentRef.writes[2].reject(new Error("offline"));
+        await flush();
+        expect(document.saveState).toBe(SaveState.Saved);
+        jest.advanceTimersByTime(kMaxRetryDelayMs);
+        contentRef.writes[3].reject(new Error("offline"));
+        await flush();
+        expect(document.saveState).toBe(SaveState.Retrying);
+
+        jest.advanceTimersByTime(kMaxRetryDelayMs);
+        expect(contentRef.update).toHaveBeenCalledTimes(5);
+        expect(contentRef.writes[4].values.lastHistoryEntryId).toBe(b);
+        contentRef.writes[4].resolve();
+        await flush();
+        expect(document.saveState).toBe(SaveState.Saved);
+      });
+    });
+
+    it("sends the newest committed snapshot at once on pagehide while only background changes wait",
+        async () => {
+      const { commits, contentRef, document, tick } = track(setup());
+      document.setSavedEnvelope({ lastHistoryEntryId: "loaded", exactThrough: { index: 7, since: "loaded" } });
+      const a = await tick("alpha");
+      commits.commit(a);
+      contentRef.writes[0].resolve();
+      await flush();
+      const b = await tick("bravo");
+      commits.commit(b);
+      jest.advanceTimersByTime(200);
+      await tick("charlie");
+      expect(contentRef.update).toHaveBeenCalledTimes(1);
+
+      window.dispatchEvent(new Event("pagehide"));
+      expect(contentRef.update).toHaveBeenCalledTimes(2);
+      expect(contentRef.writes[1].values).toMatchObject({ lastHistoryEntryId: b, exactThrough: { id: b } });
+      expect(textOf(contentRef.writes[1].values)).toBe("bravo");
     });
   });
 
@@ -1931,7 +2114,8 @@ describe("ContentSaveSender", () => {
       await flush();
 
       commits.commit(a);
-      jest.advanceTimersByTime(kMinimumSaveGapMs);
+      // the intermediate save already holds the user's change, so the exact save waits the longer gap
+      jest.advanceTimersByTime(kBackgroundSaveGapMs);
       expect(contentRef.update).toHaveBeenCalledTimes(2);
       expect(contentRef.writes[1].values).toMatchObject({ lastHistoryEntryId: a, exactThrough: { id: a } });
     });

@@ -6,7 +6,9 @@ import { DocumentContentModel } from "../../models/document/document-content";
 import { ProblemDocument } from "../../models/document/document-types";
 import { CDocument, TreeManager } from "../../models/history/tree-manager";
 import { HistoryEntry } from "../../models/history/history";
-import { PlaybackControlComponent } from "./playback-control";
+import { IVirtualConversion, registerHistoryBridge } from "../../models/history/history-bridges";
+import { kSeekProgressDelayMs, PlaybackControlComponent } from "./playback-control";
+import { PlaybackControlModel } from "./playback-control-model";
 
 // The slider is the subject of these tests, so everything the component pulls
 // from stores and Firestore hooks is stubbed; only the TreeManager is real.
@@ -38,11 +40,17 @@ jest.mock("../../hooks/use-nav-tab-panel-info", () => ({
   useNavTabPanelInfo: () => ({ setPlaybackTime: mockSetPlaybackTime })
 }));
 
+// The conversions the test bridge reports, standing in for a legacy tile whose old state can't
+// be rebuilt. A test sets them before building its document.
+let mockVirtualConversions: IVirtualConversion[] = [];
+registerHistoryBridge({ findVirtualConversions: () => mockVirtualConversions });
+
 // Entry N is created N minutes after this, so entries stay in a known time order.
 const historyStart = new Date("2026-02-25T09:00:00").getTime();
 const entryCreated = (index: number) => new Date(historyStart + index * 60 * 1000);
 
-function setupTreeManager(entryCount: number) {
+// backgroundIndexes are the entries produced by code rather than by a person.
+function setupTreeManager(entryCount: number, backgroundIndexes: number[] = []) {
   const docModel = createDocumentModel({
     uid: "1",
     type: ProblemDocument,
@@ -61,7 +69,8 @@ function setupTreeManager(entryCount: number) {
     undoable: true,
     state: "complete" as const,
     created: entryCreated(index),
-    records: []
+    records: [],
+    ...(backgroundIndexes.includes(index) ? { background: true } : {})
   }));
   treeManager.setChangeDocument(CDocument.create({ history }));
   treeManager.setNumHistoryEntriesApplied(entryCount);
@@ -169,5 +178,139 @@ describe("PlaybackControlComponent", () => {
     const timeInfo = screen.getByTestId("playback-time-info").textContent;
     expect(timeInfo).toContain("(1)");
     expect(timeInfo).toContain("9:01 am");
+  });
+
+  describe("link marker", () => {
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+
+    it("marks the point a link asked for and goes back to it when clicked", async () => {
+      const goToLink = jest.spyOn(PlaybackControlModel.prototype, "goToLink");
+      // Entries 1 and 2 are background, so the link to entry 2 has a stop of its own.
+      const treeManager = setupTreeManager(4, [1, 2]);
+      render(<PlaybackControlComponent treeManager={treeManager} requestedHistoryId="entry-2" />);
+      await act(async () => { await treeManager.goToHistoryEntryPosition(0); });
+
+      const marker = screen.getByRole("button", { name: "Linked point in history" });
+      await act(async () => { fireEvent.click(marker); });
+
+      expect(goToLink).toHaveBeenCalledTimes(1);
+      expect(treeManager.numHistoryEventsApplied).toBe(3);
+      // The stops are [initial, entry 0, link, entry 3].
+      expect(sliderValue()).toBe("2");
+    });
+
+    it("moves the link marker when a new link arrives for the open document", async () => {
+      // Entries 1 to 4 are background. The link to entry 2 has its own stop, and the link to
+      // entry 0 shares the stop of that change.
+      const treeManager = setupTreeManager(6, [1, 2, 3, 4]);
+      const { container, rerender } =
+        render(<PlaybackControlComponent treeManager={treeManager} requestedHistoryId="entry-2" />);
+      const markerLeft = () =>
+        (container.querySelector(".link-marker") as HTMLElement | null)?.style.left;
+      // The stops are [initial, entry 0, link, entry 5].
+      expect(markerLeft()).toMatch(/^calc\(66\.66\d*% - 10px\)$/);
+
+      rerender(<PlaybackControlComponent treeManager={treeManager} requestedHistoryId="entry-0" />);
+
+      // The stops are [initial, entry 0, entry 5].
+      expect(markerLeft()).toBe("calc(50% - 10px)");
+      await act(async () => {
+        fireEvent.click(screen.getByRole("button", { name: "Linked point in history" }));
+      });
+      expect(treeManager.numHistoryEventsApplied).toBe(1);
+    });
+
+    it("has no link marker without a link", () => {
+      const treeManager = setupTreeManager(3);
+      render(<PlaybackControlComponent treeManager={treeManager} requestedHistoryId={undefined} />);
+
+      expect(screen.queryByRole("button", { name: "Linked point in history" })).toBeNull();
+    });
+  });
+
+  describe("unavailable range", () => {
+    afterEach(() => {
+      mockVirtualConversions = [];
+    });
+
+    it("shades the stops before the earliest available one", () => {
+      mockVirtualConversions = [{ position: 3, oldJson: undefined, path: "/content/tileMap/t1" }];
+      const treeManager = setupTreeManager(5, [1, 2]);
+      render(<PlaybackControlComponent treeManager={treeManager} requestedHistoryId={undefined} />);
+
+      // The stops are [initial, entry 0, earliest, entry 3, entry 4].
+      expect(screen.getByTestId("playback-unavailable-range").style.width).toBe("50%");
+    });
+
+    it("shades nothing when all of the history is available", () => {
+      const treeManager = setupTreeManager(5, [1, 2]);
+      render(<PlaybackControlComponent treeManager={treeManager} requestedHistoryId={undefined} />);
+
+      expect(screen.queryByTestId("playback-unavailable-range")).toBeNull();
+    });
+  });
+
+  describe("progress for a slow move", () => {
+    // Only setTimeout is faked: the component's delay is a timer, and the seek rides on
+    // microtasks and nextTick that must keep running.
+    beforeEach(() => {
+      jest.useFakeTimers({
+        doNotFake: [
+          "Date", "hrtime", "nextTick", "performance", "queueMicrotask",
+          "requestAnimationFrame", "cancelAnimationFrame", "requestIdleCallback", "cancelIdleCallback",
+          "setImmediate", "clearImmediate", "setInterval", "clearInterval"
+        ]
+      });
+    });
+    afterEach(() => {
+      jest.useRealTimers();
+    });
+
+    it("shows the progress indicator only after a seek has run for 300 ms", async () => {
+      expect(kSeekProgressDelayMs).toBe(300);
+      const treeManager = setupTreeManager(5);
+      let finishSeek: () => void = () => undefined;
+      jest.spyOn(treeManager, "goToHistoryEntryPosition")
+        .mockImplementation(() => new Promise<void>(resolve => { finishSeek = resolve; }));
+      render(<PlaybackControlComponent treeManager={treeManager} requestedHistoryId={undefined} />);
+      const status = screen.getByTestId("playback-seek-status");
+      const sliderContainer = screen.getByTestId("playback-slider");
+      expect(status.getAttribute("role")).toBe("status");
+      expect(status.textContent).toBe("");
+
+      // One arrow key press asks for the stop before the current one.
+      act(() => { fireEvent.keyDown(screen.getByRole("slider"), { key: "ArrowLeft", keyCode: 37 }); });
+
+      act(() => { jest.advanceTimersByTime(kSeekProgressDelayMs - 1); });
+      expect(screen.queryByTestId("playback-seek-progress")).toBeNull();
+      expect(sliderContainer.getAttribute("aria-busy")).not.toBe("true");
+      expect(status.textContent).toBe("");
+
+      act(() => { jest.advanceTimersByTime(1); });
+      expect(screen.getByTestId("playback-seek-progress")).toBeInTheDocument();
+      expect(sliderContainer.getAttribute("aria-busy")).toBe("true");
+      expect(status.textContent).toBe("Loading this point in the history…");
+
+      await act(async () => { finishSeek(); });
+      expect(screen.queryByTestId("playback-seek-progress")).toBeNull();
+      expect(sliderContainer.getAttribute("aria-busy")).not.toBe("true");
+      expect(status.textContent).toBe("");
+    });
+
+    it("never shows the progress indicator for a seek that settles within the delay", async () => {
+      const treeManager = setupTreeManager(5);
+      let finishSeek: () => void = () => undefined;
+      jest.spyOn(treeManager, "goToHistoryEntryPosition")
+        .mockImplementation(() => new Promise<void>(resolve => { finishSeek = resolve; }));
+      render(<PlaybackControlComponent treeManager={treeManager} requestedHistoryId={undefined} />);
+
+      act(() => { fireEvent.keyDown(screen.getByRole("slider"), { key: "ArrowLeft", keyCode: 37 }); });
+      await act(async () => { finishSeek(); });
+      act(() => { jest.advanceTimersByTime(kSeekProgressDelayMs * 2); });
+
+      expect(screen.queryByTestId("playback-seek-progress")).toBeNull();
+    });
   });
 });

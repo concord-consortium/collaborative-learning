@@ -12,9 +12,13 @@ import PauseButton from "../../clue/assets/icons/playback/pause-button.svg";
 import { useDocumentComments, useDocumentCommentsAtSimplifiedPath } from "../../hooks/document-comment-hooks";
 import { useNavTabPanelInfo } from "../../hooks/use-nav-tab-panel-info";
 import { CommentMarker } from "./comment-marker";
+import { LinkMarker } from "./link-marker";
 import { PlaybackControlModel } from "./playback-control-model";
 
 import "./playback-control.scss";
+
+// A move that settles within this long needs no explanation, and showing one would only flash.
+export const kSeekProgressDelayMs = 300;
 
 export interface IMarkerProps {
   id: number;
@@ -24,7 +28,8 @@ export interface IMarkerProps {
 interface IProps {
   treeManager: Instance<typeof TreeManager>;
   // Set when a link asked for a particular entry of this document. The document is about to
-  // be sent there, so the reader is not following the end of its history.
+  // be sent there, so the reader is not following the end of its history. The slider keeps a
+  // marker on that entry.
   requestedHistoryId: string | undefined;
 }
 
@@ -40,8 +45,24 @@ export const PlaybackControlComponent: React.FC<IProps> = observer((props: IProp
   const [markers, setMarkers] = useState<IMarkerProps[]>([]);
 
   const [model] = useState(() =>
-    new PlaybackControlModel(treeManager, requestedHistoryId ? undefined : "end"));
+    new PlaybackControlModel(treeManager, requestedHistoryId ? undefined : "end", requestedHistoryId));
   useEffect(() => () => model.dispose(), [model]);
+  // A later link into the same document doesn't remount the control, so its id is passed on.
+  useEffect(() => {
+    model.setRequestedHistoryId(requestedHistoryId);
+  }, [model, requestedHistoryId]);
+
+  // Only a seek that has run for a while is reported as loading.
+  const [showSeekProgress, setShowSeekProgress] = useState(false);
+  const seekInProgress = model.seekInProgress;
+  useEffect(() => {
+    if (!seekInProgress) {
+      setShowSeekProgress(false);
+      return;
+    }
+    const timer = setTimeout(() => setShowSeekProgress(true), kSeekProgressDelayMs);
+    return () => clearTimeout(timer);
+  }, [seekInProgress]);
 
   // The chat panel filters itself to the moment on screen. Deriving that from the current
   // stop covers every way the document can move, including seeks the slider did not start.
@@ -156,7 +177,8 @@ export const PlaybackControlComponent: React.FC<IProps> = observer((props: IProp
 
     return (
       <>
-        <div className="slider-container" ref={sliderContainerRef} data-testid="playback-slider">
+        <div className="slider-container" ref={sliderContainerRef} data-testid="playback-slider"
+            aria-busy={showSeekProgress}>
           <Slider
             min={0}
             max={model.lastStopIndex}
@@ -198,6 +220,28 @@ export const PlaybackControlComponent: React.FC<IProps> = observer((props: IProp
             />;
           })
         }
+      </div>
+    );
+  };
+
+  const renderLinkMarker = () => {
+    const linkLocation = model.linkLocation;
+    if (linkLocation === undefined) return null;
+    return (
+      <div className="link-marker-container" data-testid="link-marker">
+        <LinkMarker location={linkLocation} activeNavTab={activeNavTab} onClick={model.goToLink} />
+      </div>
+    );
+  };
+
+  // The stops before the earliest available one can't be reached. The shading sits behind the
+  // rail and lets clicks through to it, and the model keeps the thumb off those stops.
+  const renderUnavailableRange = () => {
+    if (model.earliestStopIndex <= 0) return null;
+    return (
+      <div className="playback-unavailable-range-container">
+        <div className="playback-unavailable-range" data-testid="playback-unavailable-range"
+            style={{ width: `${model.unavailableLocation}%` }} />
       </div>
     );
   };
@@ -263,11 +307,20 @@ export const PlaybackControlComponent: React.FC<IProps> = observer((props: IProp
           addMarkerSelected={addMarkerButtonSelected} onAddMarkerSelected={handleAddMarkerButtonSelected}/> */}
       <div className={sliderComponentClass}>
         {renderMarkerComponent()}
+        {renderUnavailableRange()}
         {renderCommentMarkers()}
+        {renderLinkMarker()}
         {renderPlaybackFailureMarkers()}
         {renderSliderContainer()}
       </div>
       {renderTimeInfo()}
+      {/* Rendered whether or not there is anything to say, so screen readers announce the
+          change. */}
+      <div className="playback-seek-status" data-testid="playback-seek-status" role="status">
+        {showSeekProgress && <span className="playback-seek-progress" data-testid="playback-seek-progress"
+            aria-hidden="true" />}
+        {showSeekProgress && <span className="playback-seek-message">Loading this point in the history…</span>}
+      </div>
       {model.playbackFailureWarning && !model.selectedFailure &&
         <div className="playback-failure-warning" data-testid="playback-failure-warning">
           {model.playbackFailureWarning}
