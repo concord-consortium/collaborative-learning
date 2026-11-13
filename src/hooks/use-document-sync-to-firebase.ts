@@ -208,7 +208,7 @@ export function useDocumentSyncToFirebase(
   useEffect(() => {
     if (!enabled) return;
     const sender = getContentSaveSender(document, {
-      contentRef: firebase.ref(contentPath),
+      rtdbEnvelopeRef: firebase.ref(contentPath),
       updateTools: tools => updateFirestoreDocumentProp("tools", tools),
       beforeWrite: () => {
         if (!disconnectHandlersByDocument.has(document)) {

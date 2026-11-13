@@ -66,7 +66,7 @@ export class ConcurrentContentSaveSender extends ContentSaveSender {
     }, this.scheduleSettledCheck, { fireImmediately: true, equals: comparer.structural }));
   }
 
-  protected handleContentRefChanged() {
+  protected handleRtdbEnvelopeRefChanged() {
     this.listenToEnvelope();
   }
 
@@ -118,9 +118,9 @@ export class ConcurrentContentSaveSender extends ContentSaveSender {
   private listenToEnvelope() {
     this.stopEnvelopeListener?.();
     this.envelopeValues = {};
-    const { contentRef } = this.options;
+    const { rtdbEnvelopeRef } = this.options;
     const removers = kEnvelopeFields.map(field => {
-      const ref = contentRef.child(field);
+      const ref = rtdbEnvelopeRef.child(field);
       const callback = (snapshot: { val(): unknown }) => {
         this.envelopeValues[field] = snapshot.val();
         // The fields of one update are reported one at a time, so they are read together.

@@ -23,7 +23,7 @@ export interface IValueRef {
 }
 
 // The parts of the RTDB reference to the document's content envelope that the sender uses.
-export interface IContentRef {
+export interface IRtdbEnvelopeRef {
   update(values: Record<string, unknown>): Promise<unknown>;
   child(path: string): IValueRef;
 }
@@ -39,7 +39,7 @@ export interface IPendingSave {
 }
 
 export interface IContentSaveSenderOptions {
-  contentRef: IContentRef;
+  rtdbEnvelopeRef: IRtdbEnvelopeRef;
   updateTools: (tools: string[]) => Promise<unknown>;
   // Called before each content write.
   beforeWrite?: () => void;
@@ -153,7 +153,7 @@ export abstract class ContentSaveSender {
   }
 
   attach(options: IContentSaveSenderOptions) {
-    const contentRefChanged = options.contentRef !== this.options.contentRef;
+    const rtdbEnvelopeRefChanged = options.rtdbEnvelopeRef !== this.options.rtdbEnvelopeRef;
     this.options = options;
     if (!this.running) {
       this.attachments = 1;
@@ -162,13 +162,13 @@ export abstract class ContentSaveSender {
     }
     this.attachments++;
     this.clearDrainTimer();
-    if (contentRefChanged) {
-      this.handleContentRefChanged();
+    if (rtdbEnvelopeRefChanged) {
+      this.handleRtdbEnvelopeRefChanged();
     }
   }
 
-  // Called when an attachment made while the sender runs brings a new content reference.
-  protected handleContentRefChanged() {}
+  // Called when an attachment made while the sender runs brings a new envelope reference.
+  protected handleRtdbEnvelopeRefChanged() {}
 
   // Once nothing is attached, the sender keeps saving until it has nothing left to save.
   detach() {
@@ -442,7 +442,7 @@ export abstract class ContentSaveSender {
     }
     let result: Promise<unknown>;
     try {
-      result = this.options.contentRef.update(save.buildValues(this.document.incChangeCount()));
+      result = this.options.rtdbEnvelopeRef.update(save.buildValues(this.document.incChangeCount()));
     } catch (error) {
       result = Promise.reject(error);
     }

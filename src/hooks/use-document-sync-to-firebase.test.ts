@@ -623,7 +623,7 @@ describe("useDocumentSyncToFirebase hook", () => {
         const [senderDocument, options] = getSender.mock.calls[0];
         expect(senderDocument).toBe(document);
         expect(mockRef).toHaveBeenCalledWith(`${user.id}/content/${document.key}`);
-        expect(options.contentRef).toBe(mockRef.mock.results[0].value);
+        expect(options.rtdbEnvelopeRef).toBe(mockRef.mock.results[0].value);
 
         // the disconnect handlers are set up before the first write only
         options.beforeWrite?.();

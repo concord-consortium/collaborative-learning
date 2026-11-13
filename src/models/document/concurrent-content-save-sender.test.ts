@@ -14,7 +14,7 @@ describe("ConcurrentContentSaveSender", () => {
   describe("saving", () => {
     it("logs once when the session stops being exact, even for a later sender", () => {
       const logEvent = jest.fn();
-      const { contentRef, document, sender, treeManager } = track(setup({ logEvent }, true));
+      const { rtdbEnvelopeRef, document, sender, treeManager } = track(setup({ logEvent }, true));
       treeManager.exactness.markNotExact("unrecorded-change");
       treeManager.exactness.markNotExact("timed-out-entry");
       expect(logEvent.mock.calls).toEqual([
@@ -22,15 +22,17 @@ describe("ConcurrentContentSaveSender", () => {
       ]);
 
       sender.dispose();
-      track({ sender: getContentSaveSender(document, { contentRef, updateTools: () => Promise.resolve(), logEvent }) });
+      track({
+        sender: getContentSaveSender(document, { rtdbEnvelopeRef, updateTools: () => Promise.resolve(), logEvent })
+      });
       expect(logEvent).toHaveBeenCalledTimes(1);
     });
 
     it("saves the current state, stamped with the remote head, when an idle member settles", async () => {
-      const { applyRemote, contentRef, document, onContentSaved } = track(setup({}, true));
+      const { applyRemote, rtdbEnvelopeRef, document, onContentSaved } = track(setup({}, true));
       await applyRemote("r9", "remote");
-      expect(contentRef.update).toHaveBeenCalledTimes(1);
-      const { values } = contentRef.writes[0];
+      expect(rtdbEnvelopeRef.update).toHaveBeenCalledTimes(1);
+      const { values } = rtdbEnvelopeRef.writes[0];
       expect(values).toMatchObject({
         lastHistoryEntryId: "r9",
         exactThrough: { id: "r9", index: 1, contentHash: hashString(values.content), since: "e0" },
@@ -38,17 +40,17 @@ describe("ConcurrentContentSaveSender", () => {
       });
       expect(textOf(values)).toBe("remote");
 
-      contentRef.writes[0].resolve();
+      rtdbEnvelopeRef.writes[0].resolve();
       await flush();
       expect(onContentSaved).toHaveBeenCalledWith(document, "r9");
       // nothing newer to save
       jest.advanceTimersByTime(10000);
       await flush();
-      expect(contentRef.update).toHaveBeenCalledTimes(1);
+      expect(rtdbEnvelopeRef.update).toHaveBeenCalledTimes(1);
     });
 
     it("doesn't save while the queue has entries, an upload or apply runs, or an entry is open", async () => {
-      const { commits, contentRef, edit, openEntry, tile, treeManager } = track(setup({}, true));
+      const { commits, rtdbEnvelopeRef, edit, openEntry, tile, treeManager } = track(setup({}, true));
       commits.setUploading(true);
       commits.setRemoteHead("r1", 1);
       await flush();
@@ -62,15 +64,15 @@ describe("ConcurrentContentSaveSender", () => {
       closeEntry();
       await flush();
       expect(commits.uncommitted).toEqual([a]);
-      expect(contentRef.update).not.toHaveBeenCalled();
+      expect(rtdbEnvelopeRef.update).not.toHaveBeenCalled();
 
       // The snapshot of a isn't usable, so the settled state is saved once a commits.
       commits.commit(a);
       await flush();
-      expect(contentRef.update).toHaveBeenCalledTimes(1);
-      expect(contentRef.writes[0].values).toMatchObject({ lastHistoryEntryId: a, exactThrough: { index: 2 } });
-      expect(textOf(contentRef.writes[0].values)).toBe("alpha");
-      contentRef.writes[0].resolve();
+      expect(rtdbEnvelopeRef.update).toHaveBeenCalledTimes(1);
+      expect(rtdbEnvelopeRef.writes[0].values).toMatchObject({ lastHistoryEntryId: a, exactThrough: { index: 2 } });
+      expect(textOf(rtdbEnvelopeRef.writes[0].values)).toBe("alpha");
+      rtdbEnvelopeRef.writes[0].resolve();
       await flush();
       jest.advanceTimersByTime(kMinimumSaveGapMs);
 
@@ -88,135 +90,135 @@ describe("ConcurrentContentSaveSender", () => {
       expect(commits.uncommitted).toHaveLength(1);
       jest.advanceTimersByTime(10000);
       await flush();
-      expect(contentRef.update).toHaveBeenCalledTimes(1);
+      expect(rtdbEnvelopeRef.update).toHaveBeenCalledTimes(1);
 
       // The flow's own snapshot is saved once it commits, and nothing once the session isn't exact.
       commits.commit(...commits.uncommitted);
-      expect(contentRef.update).toHaveBeenCalledTimes(2);
-      contentRef.writes[1].resolve();
+      expect(rtdbEnvelopeRef.update).toHaveBeenCalledTimes(2);
+      rtdbEnvelopeRef.writes[1].resolve();
       await flush();
       treeManager.exactness.markNotExact("unrecorded-change");
       commits.advanceRemoteHead("r9");
       jest.advanceTimersByTime(10000);
       await flush();
-      expect(contentRef.update).toHaveBeenCalledTimes(2);
+      expect(rtdbEnvelopeRef.update).toHaveBeenCalledTimes(2);
     });
 
     it("treats an envelope whose exactThrough names another id as behind", async () => {
-      const { commits, contentRef } = track(setup({}, true));
+      const { commits, rtdbEnvelopeRef } = track(setup({}, true));
       // A client that doesn't know exactThrough stamped its own id over a save at index 9.
-      contentRef.fireEnvelope({ lastHistoryEntryId: "other", exactThrough: { id: "r9", index: 9 } });
+      rtdbEnvelopeRef.fireEnvelope({ lastHistoryEntryId: "other", exactThrough: { id: "r9", index: 9 } });
       await flush();
       commits.setRemoteHead("r4", 4);
       await flush();
-      expect(contentRef.update).toHaveBeenCalledTimes(1);
+      expect(rtdbEnvelopeRef.update).toHaveBeenCalledTimes(1);
     });
 
     it("skips a save when the envelope is already at or past its index", async () => {
-      const { commits, contentRef } = track(setup({}, true));
+      const { commits, rtdbEnvelopeRef } = track(setup({}, true));
       // An envelope without exactThrough counts as behind.
-      contentRef.fireEnvelope({ lastHistoryEntryId: "old", exactThrough: null });
+      rtdbEnvelopeRef.fireEnvelope({ lastHistoryEntryId: "old", exactThrough: null });
       await flush();
       commits.setRemoteHead("r4", 4);
       await flush();
-      expect(contentRef.update).toHaveBeenCalledTimes(1);
-      contentRef.writes[0].resolve();
+      expect(rtdbEnvelopeRef.update).toHaveBeenCalledTimes(1);
+      rtdbEnvelopeRef.writes[0].resolve();
       await flush();
 
-      contentRef.fireEnvelope({ lastHistoryEntryId: "r9", exactThrough: { id: "r9", index: 9 } });
+      rtdbEnvelopeRef.fireEnvelope({ lastHistoryEntryId: "r9", exactThrough: { id: "r9", index: 9 } });
       await flush();
       commits.setRemoteHead("r9", 9);
       await flush();
-      contentRef.fireEnvelope({ lastHistoryEntryId: "r12", exactThrough: { id: "r12", index: 12 } });
+      rtdbEnvelopeRef.fireEnvelope({ lastHistoryEntryId: "r12", exactThrough: { id: "r12", index: 12 } });
       await flush();
       commits.setRemoteHead("r10", 10);
       jest.advanceTimersByTime(10000);
       await flush();
-      expect(contentRef.update).toHaveBeenCalledTimes(1);
+      expect(rtdbEnvelopeRef.update).toHaveBeenCalledTimes(1);
     });
 
     it("re-checks the envelope after the jitter and skips if another member saved meanwhile", async () => {
-      const { commits, contentRef } = track(setup({ random: () => 0.5 }, true));
+      const { commits, rtdbEnvelopeRef } = track(setup({ random: () => 0.5 }, true));
       commits.setRemoteHead("r8", 8);
       await flush();
       jest.advanceTimersByTime(kConcurrentSaveJitterMs / 2 - 1);
-      expect(contentRef.update).not.toHaveBeenCalled();
+      expect(rtdbEnvelopeRef.update).not.toHaveBeenCalled();
       jest.advanceTimersByTime(1);
-      expect(contentRef.update).toHaveBeenCalledTimes(1);
-      expect(contentRef.writes[0].values.lastHistoryEntryId).toBe("r8");
-      contentRef.writes[0].resolve();
+      expect(rtdbEnvelopeRef.update).toHaveBeenCalledTimes(1);
+      expect(rtdbEnvelopeRef.writes[0].values.lastHistoryEntryId).toBe("r8");
+      rtdbEnvelopeRef.writes[0].resolve();
       await flush();
       jest.advanceTimersByTime(kMinimumSaveGapMs);
 
       commits.setRemoteHead("r9", 9);
       await flush();
       jest.advanceTimersByTime(50);
-      contentRef.fireEnvelope({ lastHistoryEntryId: "r9", exactThrough: { id: "r9", index: 9 } });
+      rtdbEnvelopeRef.fireEnvelope({ lastHistoryEntryId: "r9", exactThrough: { id: "r9", index: 9 } });
       await flush();
       jest.advanceTimersByTime(10000);
       await flush();
-      expect(contentRef.update).toHaveBeenCalledTimes(1);
+      expect(rtdbEnvelopeRef.update).toHaveBeenCalledTimes(1);
     });
 
     it("keeps a waiting save's jitter when a newer commit replaces it", async () => {
-      const { commits, contentRef, edit } = track(setup({ random: () => 1 }, true));
+      const { commits, rtdbEnvelopeRef, edit } = track(setup({ random: () => 1 }, true));
       for (let i = 1; i <= 4; i++) {
         commits.commit(await edit(`tick-${i}`));
         await flush();
         jest.advanceTimersByTime(kConcurrentSaveJitterMs / 4);
       }
-      expect(contentRef.update).toHaveBeenCalledTimes(1);
-      expect(textOf(contentRef.writes[0].values)).toBe("tick-4");
+      expect(rtdbEnvelopeRef.update).toHaveBeenCalledTimes(1);
+      expect(textOf(rtdbEnvelopeRef.writes[0].values)).toBe("tick-4");
     });
 
     it("doesn't replace a commit's save with a settled save at the same index", async () => {
       // The commit's save waits half the jitter. A settled save queued in its place would wait it all.
       const random = jest.fn().mockReturnValueOnce(0.5).mockReturnValue(1);
-      const { commits, contentRef, edit } = track(setup({ random }, true));
+      const { commits, rtdbEnvelopeRef, edit } = track(setup({ random }, true));
       const a = await edit("alpha");
       commits.commit(a);
       await flush();
       jest.advanceTimersByTime(kConcurrentSaveJitterMs / 2);
-      expect(contentRef.update).toHaveBeenCalledTimes(1);
-      expect(contentRef.writes[0].values).toMatchObject({ lastHistoryEntryId: a, exactThrough: { index: 1 } });
+      expect(rtdbEnvelopeRef.update).toHaveBeenCalledTimes(1);
+      expect(rtdbEnvelopeRef.writes[0].values).toMatchObject({ lastHistoryEntryId: a, exactThrough: { index: 1 } });
     });
 
     it("stamps a snapshot save with the committed entry and stale-checks it too", async () => {
-      const { commits, contentRef, edit } = track(setup({ random: () => 0.5 }, true));
+      const { commits, rtdbEnvelopeRef, edit } = track(setup({ random: () => 0.5 }, true));
       const a = await edit("alpha");
       commits.commit(a);
       jest.advanceTimersByTime(kConcurrentSaveJitterMs / 2 - 1);
-      expect(contentRef.update).not.toHaveBeenCalled();
+      expect(rtdbEnvelopeRef.update).not.toHaveBeenCalled();
       jest.advanceTimersByTime(1);
-      expect(contentRef.update).toHaveBeenCalledTimes(1);
-      expect(contentRef.writes[0].values).toMatchObject({
+      expect(rtdbEnvelopeRef.update).toHaveBeenCalledTimes(1);
+      expect(rtdbEnvelopeRef.writes[0].values).toMatchObject({
         lastHistoryEntryId: a, exactThrough: { index: 1, since: "e0" }
       });
-      expect(textOf(contentRef.writes[0].values)).toBe("alpha");
-      contentRef.writes[0].resolve();
+      expect(textOf(rtdbEnvelopeRef.writes[0].values)).toBe("alpha");
+      rtdbEnvelopeRef.writes[0].resolve();
       await flush();
       jest.advanceTimersByTime(kMinimumSaveGapMs);
 
       const b = await edit("bravo");
       commits.commit(b);
       jest.advanceTimersByTime(50);
-      contentRef.fireEnvelope({ lastHistoryEntryId: b, exactThrough: { id: b, index: 2 } });
+      rtdbEnvelopeRef.fireEnvelope({ lastHistoryEntryId: b, exactThrough: { id: b, index: 2 } });
       await flush();
       jest.advanceTimersByTime(10000);
       await flush();
-      expect(contentRef.update).toHaveBeenCalledTimes(1);
+      expect(rtdbEnvelopeRef.update).toHaveBeenCalledTimes(1);
     });
 
     it("never saves a snapshot voided by a remote entry, and resumes after the next commit", async () => {
-      const { applyRemote, commits, contentRef, edit } = track(setup({}, true));
+      const { applyRemote, commits, rtdbEnvelopeRef, edit } = track(setup({}, true));
       const ids: string[] = [];
       for (let i = 1; i <= 5; i++) {
         ids.push(await edit(`tick-${i}`));
       }
       commits.commit(ids[0]);
-      expect(contentRef.update).toHaveBeenCalledTimes(1);
-      expect(textOf(contentRef.writes[0].values)).toBe("tick-1");
-      contentRef.writes[0].resolve();
+      expect(rtdbEnvelopeRef.update).toHaveBeenCalledTimes(1);
+      expect(textOf(rtdbEnvelopeRef.writes[0].values)).toBe("tick-1");
+      rtdbEnvelopeRef.writes[0].resolve();
       await flush();
 
       await applyRemote("r", "remote");
@@ -224,42 +226,42 @@ describe("ConcurrentContentSaveSender", () => {
       commits.commit(...ids.slice(1));
       jest.advanceTimersByTime(10000);
       await flush();
-      expect(contentRef.update).toHaveBeenCalledTimes(1);
+      expect(rtdbEnvelopeRef.update).toHaveBeenCalledTimes(1);
 
       commits.commit(e6);
       jest.advanceTimersByTime(kMinimumSaveGapMs);
       await flush();
-      expect(contentRef.update).toHaveBeenCalledTimes(2);
-      expect(contentRef.writes[1].values).toMatchObject({
+      expect(rtdbEnvelopeRef.update).toHaveBeenCalledTimes(2);
+      expect(rtdbEnvelopeRef.writes[1].values).toMatchObject({
         lastHistoryEntryId: e6, exactThrough: { id: e6, index: 7 }
       });
-      expect(textOf(contentRef.writes[1].values)).toBe("tick-6");
-      contentRef.writes[1].resolve();
+      expect(textOf(rtdbEnvelopeRef.writes[1].values)).toBe("tick-6");
+      rtdbEnvelopeRef.writes[1].resolve();
       await flush();
       jest.advanceTimersByTime(10000);
       await flush();
-      expect(contentRef.update).toHaveBeenCalledTimes(2);
+      expect(rtdbEnvelopeRef.update).toHaveBeenCalledTimes(2);
     });
 
     it("shows Saved and reports the id when another member's save covers this client's change", async () => {
-      const { commits, contentRef, document, edit, onContentSaved } =
+      const { commits, rtdbEnvelopeRef, document, edit, onContentSaved } =
         track(setup({ random: () => 0.5 }, true));
       const a = await edit("alpha");
       commits.commit(a);
       expect(document.saveState).toBe(SaveState.Saving);
-      contentRef.fireEnvelope({ lastHistoryEntryId: "r3", exactThrough: { id: "r3", index: 3 } });
+      rtdbEnvelopeRef.fireEnvelope({ lastHistoryEntryId: "r3", exactThrough: { id: "r3", index: 3 } });
       await flush();
       expect(document.saveState).toBe(SaveState.Saved);
       expect(onContentSaved).toHaveBeenCalledWith(document, "r3");
       jest.advanceTimersByTime(kConcurrentSaveJitterMs);
       await flush();
-      expect(contentRef.update).not.toHaveBeenCalled();
+      expect(rtdbEnvelopeRef.update).not.toHaveBeenCalled();
 
       // A newer change keeps it Saving, while the committed change is still reported.
       const b = await edit("bravo");
       commits.commit(b);
       await edit("charlie");
-      contentRef.fireEnvelope({ lastHistoryEntryId: "r6", exactThrough: { id: "r6", index: 6 } });
+      rtdbEnvelopeRef.fireEnvelope({ lastHistoryEntryId: "r6", exactThrough: { id: "r6", index: 6 } });
       await flush();
       expect(document.saveState).toBe(SaveState.Saving);
       expect(onContentSaved.mock.calls).toEqual([[document, "r3"], [document, "r6"]]);
@@ -267,7 +269,7 @@ describe("ConcurrentContentSaveSender", () => {
 
     it("shows Saved once the envelope reaches the head after a rollback undid this client's change",
         async () => {
-      const { commits, contentRef, document, edit, sender } = track(setup({ random: () => 0.5 }, true));
+      const { commits, rtdbEnvelopeRef, document, edit, sender } = track(setup({ random: () => 0.5 }, true));
       const a = await edit("alpha");
       expect(document.saveState).toBe(SaveState.Saving);
 
@@ -285,44 +287,44 @@ describe("ConcurrentContentSaveSender", () => {
 
       // The winner saves the head before this client's settled save is sent.
       jest.advanceTimersByTime(kConcurrentSaveJitterMs / 4);
-      contentRef.fireEnvelope({ lastHistoryEntryId: "r1", exactThrough: { id: "r1", index: 1 } });
+      rtdbEnvelopeRef.fireEnvelope({ lastHistoryEntryId: "r1", exactThrough: { id: "r1", index: 1 } });
       await flush();
       jest.advanceTimersByTime(kConcurrentSaveJitterMs);
       await flush();
-      expect(contentRef.update).not.toHaveBeenCalled();
+      expect(rtdbEnvelopeRef.update).not.toHaveBeenCalled();
       expect(document.saveState).toBe(SaveState.Saved);
       expect((sender as unknown as { keptSnapshots: Map<string, unknown> }).keptSnapshots.size).toBe(0);
     });
 
     it("ignores the envelope of its own write while that write is in flight", async () => {
-      const { commits, contentRef, document, edit } = track(setup({}, true));
+      const { commits, rtdbEnvelopeRef, document, edit } = track(setup({}, true));
       const a = await edit("alpha");
       commits.commit(a);
-      expect(contentRef.update).toHaveBeenCalledTimes(1);
+      expect(rtdbEnvelopeRef.update).toHaveBeenCalledTimes(1);
       // The RTDB raises local events for a write before the server accepts it.
-      contentRef.fireEnvelope({ lastHistoryEntryId: a, exactThrough: { id: a, index: 1 } });
+      rtdbEnvelopeRef.fireEnvelope({ lastHistoryEntryId: a, exactThrough: { id: a, index: 1 } });
       await flush();
       expect(document.saveState).toBe(SaveState.Saving);
 
       await jestSpyConsole("warn", async () => {
-        contentRef.writes[0].reject(new Error("denied"));
+        rtdbEnvelopeRef.writes[0].reject(new Error("denied"));
         await flush();
       });
       jest.advanceTimersByTime(1000);
-      expect(contentRef.update).toHaveBeenCalledTimes(2);
-      expect(contentRef.writes[1].values.lastHistoryEntryId).toBe(a);
+      expect(rtdbEnvelopeRef.update).toHaveBeenCalledTimes(2);
+      expect(rtdbEnvelopeRef.writes[1].values.lastHistoryEntryId).toBe(a);
     });
   });
 
   describe("intermediate saves", () => {
     it("never makes an intermediate save on a concurrent document", async () => {
-      const { contentRef, edit, openEntry, treeManager } = track(setup({}, true));
+      const { rtdbEnvelopeRef, edit, openEntry, treeManager } = track(setup({}, true));
       openEntry("open");
       treeManager.exactness.markNotExact("unrecorded-change");
       await edit("alpha");
       jest.advanceTimersByTime(5 * kIntermediateSaveIntervalMs);
       await flush();
-      expect(contentRef.update).not.toHaveBeenCalled();
+      expect(rtdbEnvelopeRef.update).not.toHaveBeenCalled();
     });
   });
 
@@ -338,13 +340,13 @@ describe("ConcurrentContentSaveSender", () => {
     });
 
     it("does nothing on page hide for a concurrent document", async () => {
-      const { commits, contentRef, edit } = track(setup({}, true));
+      const { commits, rtdbEnvelopeRef, edit } = track(setup({}, true));
       const a = await edit("alpha");
       commits.commit(a);
       const b = await edit("bravo");
       commits.commit(b);
       window.dispatchEvent(new Event("pagehide"));
-      expect(contentRef.update).toHaveBeenCalledTimes(1);
+      expect(rtdbEnvelopeRef.update).toHaveBeenCalledTimes(1);
     });
   });
 });

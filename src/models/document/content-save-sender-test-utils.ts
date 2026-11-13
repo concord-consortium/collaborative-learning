@@ -7,7 +7,7 @@ import { registerTileComponentInfo } from "../tiles/tile-component-info";
 import { registerTileContentInfo } from "../tiles/tile-content-info";
 import { TileContentModel } from "../tiles/tile-content";
 import { ConcurrentContentSaveSender } from "./concurrent-content-save-sender";
-import { ContentSaveSender, IContentRef, IContentSaveSenderOptions } from "./content-save-sender";
+import { ContentSaveSender, IRtdbEnvelopeRef, IContentSaveSenderOptions } from "./content-save-sender";
 import { getContentSaveSender } from "./get-content-save-sender";
 import { IndividualContentSaveSender } from "./individual-content-save-sender";
 import { createDocumentModel, DocumentModelType } from "./document";
@@ -134,7 +134,7 @@ interface IFakeWrite {
   reject: (error: unknown) => void;
 }
 
-export class FakeContentRef implements IContentRef {
+export class FakeRtdbEnvelopeRef implements IRtdbEnvelopeRef {
   writes: IFakeWrite[] = [];
   update = jest.fn((values: Record<string, any>) => {
     const { promise, resolve, reject } = deferred<void>();
@@ -191,13 +191,13 @@ export function setup<Concurrent extends boolean = false>(overrides?: Partial<IC
   treeManager.exactness.startAt("e0");
   const tile = document.content!.tileMap.get("t1")!.content as TestTileType;
 
-  const contentRef = new FakeContentRef();
+  const rtdbEnvelopeRef = new FakeRtdbEnvelopeRef();
   const updateTools = jest.fn((tools: string[]) => Promise.resolve());
   const onContentSaved = jest.fn();
   const beforeWrite = jest.fn();
   // A concurrent document's save waits no jitter unless a test sets random.
   const sender = getContentSaveSender(document,
-    { contentRef, updateTools, onContentSaved, beforeWrite, random: () => 0, ...overrides }
+    { rtdbEnvelopeRef, updateTools, onContentSaved, beforeWrite, random: () => 0, ...overrides }
   ) as Concurrent extends true ? ConcurrentContentSaveSender : IndividualContentSaveSender;
 
   // Makes an edit and returns the id of the entry that recorded it.
@@ -234,7 +234,7 @@ export function setup<Concurrent extends boolean = false>(overrides?: Partial<IC
     await flush();
   }
 
-  return { document, treeManager, commits, tile, contentRef, updateTools, onContentSaved, beforeWrite,
+  return { document, treeManager, commits, tile, rtdbEnvelopeRef, updateTools, onContentSaved, beforeWrite,
     sender, edit, openEntry, applyRemote };
 }
 
