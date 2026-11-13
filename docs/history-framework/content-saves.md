@@ -91,9 +91,11 @@ save has been possible for 5 seconds. Each stretch of intermediate saves is logg
 **Catching up when the document is opened for editing.** An individual document whose envelope has
 `exactThrough` and is behind its history applies the missing entries when its owner opens it for
 editing. See "Catching up at load" in [load-entries.md](load-entries.md). Until the catch-up
-finishes, the document shows a spinner in place of its toolbar and content. A document that is only
-listed or viewed never queries Firestore for its history, and its toolbar keeps the tools that don't
-change it, such as Edit. The catch-up starts from the document's current envelope, which the content
+finishes, the document shows a spinner in place of its toolbar and content. A document shown
+read-only in the workspace's comparison pane catches up and shows the spinner too, since that pane
+has the workspace's editing toolbar. A document that is only listed or viewed elsewhere never
+queries Firestore for its history. Its toolbar's tools don't change it, so its Edit tool still opens
+it for editing. The catch-up starts from the document's current envelope, which the content
 listener replaces along with the content. If the listener replaces the content while the catch-up
 reads Firestore, the catch-up applies nothing and the session isn't exact. As soon as the sender
 starts, it saves the caught-up content, so the stored content isn't left behind its history.

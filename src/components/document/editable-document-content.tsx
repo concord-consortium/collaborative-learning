@@ -81,11 +81,18 @@ export interface IProps {
   toolbar?: IToolbarModel;
   pane?: "left" | "right";
   readOnly?: boolean;
+  /**
+   * Shown in one of the workspace's panes, where documents are opened for editing. Such a document
+   * catches up to its history before it is shown even when this view of it is read-only, since it
+   * may still get the workspace's editing toolbar.
+   */
+  inWorkspace?: boolean;
   fullHeight?: boolean
   sectionClass?: string;
 }
 export const EditableDocumentContent = observer(function EditableDocumentContent({
-  className, contained, mode, isPrimary, document, toolbar, pane, readOnly, showPlayback, fullHeight, sectionClass
+  className, contained, mode, isPrimary, document, toolbar, pane, readOnly, inWorkspace, showPlayback, fullHeight,
+  sectionClass
 }: IProps) {
   const documentContext = useDocumentContext(document);
   const { db: { firebase, firestore }, documents, ui, persistentUI, user, appConfig, activityRecorder } = useStores();
@@ -123,15 +130,15 @@ export const EditableDocumentContent = observer(function EditableDocumentContent
     contained ? "contained-editable-document-content" : "full-screen-editable-document-content",
     {"comment-select" : documentSelectedForComment, "full-height": fullHeight}, className);
 
-  // Opening the document for editing catches it up to its history first. Until then it shows a
-  // spinner rather than a document whose toolbar ignores clicks.
-  const editable = !readOnly && !document.isPublished;
+  // Opening the document for editing, or in the workspace, catches it up to its history first. Until
+  // then it shows a spinner rather than a document whose toolbar ignores clicks.
+  const catchesUp = (!readOnly || !!inWorkspace) && !document.isPublished;
   useEffect(() => {
-    if (editable) documents.historyCatchUp(document);
-  }, [editable, documents, document]);
+    if (catchesUp) documents.historyCatchUp(document);
+  }, [catchesUp, documents, document]);
   useDocumentSyncToFirebase(user, firebase, firestore, document, readOnly || historyCatchUpPending,
     (doc, lastHistoryEntryId) => activityRecorder?.onContentSaved(doc, lastHistoryEntryId));
-  if (editable && historyCatchUpPending) {
+  if (catchesUp && historyCatchUpPending) {
     return (
       <div className={editableDocContentClass} data-focus-document={document.key}>
         <div className="history-catch-up-spinner" role="status" aria-label="Loading the document"

@@ -210,6 +210,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
           document={document}
           toolbar={toolbar}
           readOnly={readOnly}
+          inWorkspace={true}
           sectionClass={sectionClass}
         />
         {DEBUG_HISTORY_VIEW && this.stores.persistentUI.showHistoryView && (

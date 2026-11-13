@@ -260,8 +260,9 @@ It runs when the owner opens the document for editing, not when the document is 
 other-documents listener loads every personal document and learning log when the app starts, so a
 catch-up at load would query Firestore for each one. An owned document is loaded marked as not
 caught up, and its catch-up starts when it is opened for editing, or before tiles are copied into it.
-While it isn't caught up, its toolbar keeps the tools that don't change it (Edit among them), so it can
-still be viewed and opened for editing.
+A document shown in the workspace catches up too, even read-only in the comparison pane, since that
+pane shows the workspace's editing toolbar. Elsewhere a document is shown read-only with a toolbar
+whose tools don't change it, so it can still be viewed, and its Edit tool opens it for editing.
 
 A document this session created skips the catch-up. Its history in Firestore is still empty, so it
 opens caught up and exact from the beginning of its history (`since: "first"`). Without this, every
@@ -308,8 +309,8 @@ way:
 
 Opening the document for editing waits for the catch-up: one more query.
 Applying entries after the user has started editing would collide with their new entries, so a
-document opened for editing shows a spinner in place of its toolbar and content until the catch-up
-finishes, and its 4-up corner stays read-only. Showing the document read-only meanwhile would leave a
+document opened for editing, or shown in the workspace's comparison pane, shows a spinner in place of
+its toolbar and content until the catch-up finishes, and its 4-up corner stays read-only. Showing the document read-only meanwhile would leave a
 toolbar that ignores clicks. A gap over the cap doesn't wait.
 
 If an entry fails to apply, the document opens with what applied, and the session is not exact. The
