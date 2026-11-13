@@ -1,10 +1,11 @@
 /**
  * Which separately deployed parts of CLUE a change touches, and whether its PR description says
  * when each part can be deployed relative to the client release, and why. See "Deploy timing" in
- * docs/deploy.md for the format this reads.
+ * docs/deploy.md for the format this reads. Migration scripts count as a part: they are run
+ * against the databases separately from the client release, so they need a timing too.
  */
 
-export const kDeployables = ["functions", "rules", "indexes"] as const;
+export const kDeployables = ["functions", "rules", "indexes", "migrations"] as const;
 export type Deployable = typeof kDeployables[number];
 
 export const kTimings = ["before", "with", "after"] as const;
@@ -19,6 +20,8 @@ export const kFunctionsCodebases = [
 
 const kRulesFiles = ["firestore.rules", "database.rules.json"];
 const kIndexesFiles = ["firestore.indexes.json"];
+/** Scripts that change the data in Firestore or the Realtime Database, run by hand around a release. */
+export const kMigrationsDir = "scripts/migrations";
 /** shared/ has its own dependencies, which the functions build installs. */
 const kSharedDependencyFiles = ["shared/package.json", "shared/package-lock.json"];
 
@@ -39,6 +42,7 @@ export function deployablesTouched(changedFiles: string[], functionsSources: Set
     if (kRulesFiles.includes(file)) touched.add("rules");
     if (kIndexesFiles.includes(file)) touched.add("indexes");
     if (isNotDeployed(file)) continue;
+    if (file.startsWith(`${kMigrationsDir}/`)) touched.add("migrations");
     const inCodebase = kFunctionsCodebases.some(({ dir }) => file.startsWith(`${dir}/`));
     if (inCodebase || functionsSources.has(file) || kSharedDependencyFiles.includes(file)) {
       touched.add("functions");

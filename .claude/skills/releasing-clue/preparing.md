@@ -134,8 +134,9 @@ background timer within the session, or a reminder in the developer's self-DM fo
 
 ## Deploy timing
 
-Every PR that touches functions, rules or indexes should carry a Deploy timing callout (see
-"Deploy timing" in `docs/deploy.md`). Roll them up:
+Every PR that touches functions, rules, indexes or migration scripts (`scripts/migrations/`) should
+carry a Deploy timing callout (see "Deploy timing" in `docs/deploy.md`). For a migration, the
+timing is when to run it. Roll them up:
 
 ```bash
 npx --prefix scripts tsx scripts/release-deploy-report.ts --unlinked-prs <scratchpad>/unlinked-prs.json
@@ -191,6 +192,9 @@ is being prepared:
   unpushed or unmerged work;
 - with the commands in "Staging Firebase" (cutting.md), using that checkout as `<worktree>`;
 - then read each one back, as above, and compare it with that checkout.
+
+A migration script marked `before` runs now too, but not with those commands: "Migration scripts"
+in shipping.md says how, and what each timing means for a script.
 
 That leaves only `with` and `after` parts for release time.
 
