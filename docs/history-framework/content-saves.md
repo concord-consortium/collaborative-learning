@@ -97,7 +97,10 @@ has the workspace's editing toolbar. A document that is only listed or viewed el
 queries Firestore for its history. Its toolbar's tools don't change it, so its Edit tool still opens
 it for editing. The catch-up starts from the document's current envelope, which the content
 listener replaces along with the content. If the listener replaces the content while the catch-up
-reads Firestore, the catch-up applies nothing and the session isn't exact. As soon as the sender
+reads Firestore, the catch-up applies nothing and the session isn't exact. If it replaces the content
+of a document that has already caught up with different content, for example older content when
+the caught-up content was never saved, the session starts over: the document is marked as not
+caught up again, and the next open for editing catches it up from the new content's envelope. As soon as the sender
 starts, it saves the caught-up content, so the stored content isn't left behind its history.
 
 An envelope without `exactThrough` can hold entries after its `lastHistoryEntryId`, so applying the

@@ -179,6 +179,16 @@ export class FirestoreHistoryManager implements ICommitSource {
     this.commitListeners.forEach(listener => listener.onUncommittedVoided(reason));
   }
 
+  /**
+   * Forgets the catch-up and this session's commits, for content that replaced the content they
+   * describe. The next catch-up starts from the new content's envelope.
+   */
+  forgetCatchUp() {
+    this.caughtUpTo = undefined;
+    this.caughtUpFrom = undefined;
+    runInAction(() => { this.lastCommitted = undefined; });
+  }
+
   setHistoryEntryRequestError(message: string | undefined) {
     this.historyEntryRequestError = message;
   }

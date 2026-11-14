@@ -25,4 +25,16 @@ describe("SessionExactness", () => {
     e.startAt("entry-9");
     expect(e.exactSince).toBe("entry-5");
   });
+
+  it("starts over when restarted, whatever the earlier session decided", () => {
+    const e = new SessionExactness();
+    e.startAt("entry-5");
+    e.markNotExact("timed-out-entry");
+    e.restart();
+    expect(e.exactSince).toBeUndefined();
+    expect(e.notExactReason).toBeUndefined();
+    e.startAt("entry-9");
+    expect(e.isExact).toBe(true);
+    expect(e.exactSince).toBe("entry-9");
+  });
 });

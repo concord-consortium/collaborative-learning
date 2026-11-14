@@ -1,4 +1,6 @@
 import { IObservableArray, observable, runInAction } from "mobx";
+import { getSnapshot } from "mobx-state-tree";
+import { createDocumentModel } from "../../models/document/document";
 import { LearningLogDocument, PersonalDocument } from "../../models/document/document-types";
 import { hashString } from "../../utilities/js-utils";
 import { DBDocumentsContentListener } from "./db-docs-content-listener";
@@ -189,5 +191,25 @@ describe("DBDocumentsContentListener (personal documents)", () => {
     listener.stop();
 
     expect(refsByPath[path].off).toHaveBeenCalledWith("value", expect.any(Function));
+  });
+
+  // A document's catch-up and exact saves were worked out for the content it held.
+  it("starts a document's catch-up over only when its content is replaced with different content", () => {
+    const restartHistoryCatchUp = jest.fn();
+    db.stores.documents.restartHistoryCatchUp = restartHistoryCatchUp;
+    const listener = new DBDocumentsContentListener(db);
+    listener.start();
+
+    const doc = createDocumentModel({ type: PersonalDocument, uid: "student-1", key: "p1", content: {} });
+    runInAction(() => docs.push(doc));
+    const path = documentPath("student-1", "p1");
+
+    handlersByPath[path]({ val: () => ({ content: getSnapshot(doc.content!) }) });
+    expect(restartHistoryCatchUp).not.toHaveBeenCalled();
+
+    handlersByPath[path]({ val: () => ({ content: { rowMap: { r1: { id: "r1" } }, rowOrder: ["r1"] } }) });
+    expect(restartHistoryCatchUp).toHaveBeenCalledWith(doc);
+
+    listener.stop();
   });
 });

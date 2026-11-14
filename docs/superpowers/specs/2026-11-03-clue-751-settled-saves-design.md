@@ -281,6 +281,13 @@ stamped with the last entry applied, unless an entry has committed since or a sn
 used then. Otherwise the RTDB content would stay behind its history until the next edit committed,
 and the content listener would bring that older content back once the document closed.
 
+The caught-up content isn't always saved: a snapshot can't be used while the load's conversion is
+pending, and the workspace's read-only comparison pane has no sender. So when the listener replaces
+a caught-up document's content with different content, the session starts over. The document is
+marked as not caught up, its exactness and catch-up are forgotten, and the next open for editing
+catches it up from the new content's envelope. Content the listener brings back unchanged, such as
+this client's own save, leaves the session alone.
+
 The catch-up never loads the whole history. DataFlow and Simulator documents can have very large
 histories, and today an individual load reads only the last entry (`getLastHistoryEntry`, a
 `limit(1)` query on `index` descending, via `getFirestoreHistoryInfo`). The catch-up keeps it that

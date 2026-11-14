@@ -213,6 +213,25 @@ export const DocumentsModel = types
       return catchUp;
     },
     /**
+     * Starts the catch-up over for an individual document whose content the content listener has
+     * replaced with different content. The session's exactness and catch-up were worked out for the
+     * content that was replaced, so saving from them could stamp the new content with entries it
+     * doesn't hold. The document catches up again from the new content's envelope when it is next
+     * opened for editing. A catch-up that is still running notices the replacement itself.
+     */
+    restartHistoryCatchUp(document: DocumentModelType) {
+      const treeManager = document.treeManagerAPI as TreeManagerType | undefined;
+      const manager = treeManager?.historyManager;
+      if (document.historyCatchUpPending || document.concurrent || document.isPublished
+          || !(manager instanceof FirestoreHistoryManager) || manager.isOtherUsersDocument) {
+        return;
+      }
+      self.historyCatchUps.delete(document);
+      treeManager!.exactness.restart();
+      manager.forgetCatchUp();
+      document.setHistoryCatchUpPending(true);
+    },
+    /**
      * Marks a document this session has just created as caught up. Its history in Firestore is
      * still empty, so it can be edited at once, and its exact saves start from the beginning of its
      * history.

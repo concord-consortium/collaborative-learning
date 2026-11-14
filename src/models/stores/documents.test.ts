@@ -334,6 +334,46 @@ describe("documents model", () => {
     expect(concurrentDocument.contentStatus).toBe(ContentStatus.Valid);
   });
 
+  describe("restartHistoryCatchUp", () => {
+    function caughtUpDocument() {
+      const { docs } = createHistoryDocuments();
+      docs.add(personalDocument);
+      const treeManager = personalDocument.treeManagerAPI as TreeManagerType;
+      const manager = treeManager.historyManager as FirestoreHistoryManager;
+      const catchUpAtLoad = jest.spyOn(manager, "catchUpAtLoad").mockImplementation(async () => {
+        manager.caughtUpTo = { id: "e7", index: 7 };
+        treeManager.exactness.startAt("e2");
+      });
+      return { docs, treeManager, manager, catchUpAtLoad };
+    }
+
+    it("catches a document up again once the content it caught up has been replaced", async () => {
+      const { docs, treeManager, manager, catchUpAtLoad } = caughtUpDocument();
+      await docs.historyCatchUp(personalDocument);
+      expect(personalDocument.historyCatchUpPending).toBe(false);
+
+      docs.restartHistoryCatchUp(personalDocument);
+      expect(personalDocument.historyCatchUpPending).toBe(true);
+      expect(treeManager.exactness.exactSince).toBeUndefined();
+      expect(manager.caughtUpTo).toBeUndefined();
+
+      await docs.historyCatchUp(personalDocument);
+      expect(catchUpAtLoad).toHaveBeenCalledTimes(2);
+      expect(personalDocument.historyCatchUpPending).toBe(false);
+    });
+
+    // A running catch-up compares the envelope it started from with the current one itself.
+    it("leaves a document that hasn't finished catching up alone", () => {
+      const { docs, catchUpAtLoad } = caughtUpDocument();
+      catchUpAtLoad.mockReturnValue(new Promise(() => undefined));
+      docs.historyCatchUp(personalDocument);
+
+      docs.restartHistoryCatchUp(personalDocument);
+      docs.historyCatchUp(personalDocument);
+      expect(catchUpAtLoad).toHaveBeenCalledTimes(1);
+    });
+  });
+
   it("passes uploaded entries of each document to the activity recorder", () => {
     const { docs, concurrentDocument } = createHistoryDocuments();
     const recorder = { onLocalEntryUploaded: jest.fn() };

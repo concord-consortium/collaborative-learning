@@ -21,7 +21,8 @@ export class SessionExactness {
       exactSince: observable,
       notExactReason: observable,
       startAt: action,
-      markNotExact: action
+      markNotExact: action,
+      restart: action
     });
   }
 
@@ -39,5 +40,11 @@ export class SessionExactness {
   markNotExact(reason: NotExactReason) {
     if (this.notExactReason) return;
     this.notExactReason = reason;
+  }
+
+  // Starts a new session, for content that replaced the content this one was worked out for.
+  restart() {
+    this.exactSince = undefined;
+    this.notExactReason = undefined;
   }
 }
