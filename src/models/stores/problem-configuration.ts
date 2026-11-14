@@ -1,4 +1,5 @@
 import { Instance, SnapshotIn, types } from "mobx-state-tree";
+import { IClassSummaryPrompts } from "../../../shared/class-summary-prompts";
 import { IAuthoredDocumentContent } from "../document/document-content-import-types";
 import { StampModel } from "../../plugins/drawing/model/stamp";
 import { ToolbarButtonModel } from "../tiles/toolbar-button";
@@ -52,4 +53,9 @@ export interface ProblemConfiguration {
   // load time and only shows up as resolveStartView's console warning. Kept as a separate value so
   // toggling the switch off preserves the author's choice.
   fixedStartTab?: ENavTab;
+  // Overrides for the prompt that summarizes student work for the teacher's Class Summary in the
+  // Sort Work tab. Read server-side out of published content.json, not through this app, so the
+  // authoring caveats are in docs/unit-configuration.md. Like every config property the nearest
+  // level supplies the whole value: a problem-level block replaces the unit's outright.
+  classSummaryPrompts?: IClassSummaryPrompts;
 }

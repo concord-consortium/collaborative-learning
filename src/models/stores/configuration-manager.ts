@@ -72,6 +72,12 @@ export class ConfigurationManager implements UnitConfiguration {
     return this.getProp<UC["chatTutorPrompts"]>("chatTutorPrompts");
   }
 
+  // Nothing on the client reads this -- the summary is generated server-side -- but every
+  // UnitConfiguration property needs its accessor here, and this is the resolution the server copies.
+  get classSummaryPrompts(){
+    return this.getProp<UC["classSummaryPrompts"]>("classSummaryPrompts");
+  }
+
   get chatTutorProvider(){
     return this.getProp<UC["chatTutorProvider"]>("chatTutorProvider");
   }

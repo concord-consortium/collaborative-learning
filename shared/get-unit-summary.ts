@@ -5,12 +5,21 @@
 // Always fetches the main branch, even for a class on a branch-preview deploy -- see
 // docs/unit-summary-consumers.md for why that's accepted.
 import {mainBranchUnitJsonUrl} from "./unit-url";
+import {IClassSummaryPrompts, parseClassSummaryPrompts} from "./class-summary-prompts";
 import {ILiveProblem} from "./unit-summary-slice";
 import {IUnitSummary} from "./unit-summary-types";
+
+export interface IClassSummaryPromptsByLevel {
+  /** The unit's own prompts, for a class that has no current problem. */
+  unit?: IClassSummaryPrompts;
+  /** Already resolved problem -> investigation -> unit, so a caller just looks up its ordinal. */
+  byProblemOrdinal: Record<string, IClassSummaryPrompts>;
+}
 
 export interface IUnitSummaryFetchResult {
   summary?: IUnitSummary;
   liveProblems: ILiveProblem[];
+  classSummaryPrompts: IClassSummaryPromptsByLevel;
 }
 
 // A unit evaluated repeatedly in a short window (Ideas runs per evaluation, not per unit) doesn't
@@ -83,7 +92,11 @@ function parseContent(content: unknown): IUnitSummaryFetchResult {
   const investigations = record.investigations;
   if (!Array.isArray(investigations)) throw new Error("investigations is not an array");
 
+  const config = asRecord(record.config);
+  const unitPrompts = parseClassSummaryPrompts(config?.classSummaryPrompts);
+
   const liveProblems: ILiveProblem[] = [];
+  const byProblemOrdinal: Record<string, IClassSummaryPrompts> = {};
   for (const investigation of investigations) {
     const investigationRecord = asRecord(investigation);
     if (!investigationRecord) throw new Error("an investigation is not an object");
@@ -93,21 +106,30 @@ function parseContent(content: unknown): IUnitSummaryFetchResult {
       throw new Error("an investigation's problems is not an array");
     }
 
+    const investigationPrompts =
+      parseClassSummaryPrompts(asRecord(investigationRecord.config)?.classSummaryPrompts);
+
     for (const problem of problems ?? []) {
       const problemRecord = asRecord(problem);
       if (!problemRecord) throw new Error("a problem is not an object");
+      const ordinal = `${investigationRecord.ordinal}.${problemRecord.ordinal}`;
       // Matches the assembler's problem.title ?? "" (assemble-unit.ts): a missing title must
       // become "", not the string "undefined", or an untitled problem would disagree with the
       // manifest and fail the prefix check for no reason.
-      liveProblems.push({
-        ordinal: `${investigationRecord.ordinal}.${problemRecord.ordinal}`,
-        title: String(problemRecord.title ?? ""),
-      });
+      liveProblems.push({ordinal, title: String(problemRecord.title ?? "")});
+
+      // Nearest level wins outright, as ConfigurationManager.getProp does for the client.
+      const prompts = parseClassSummaryPrompts(asRecord(problemRecord.config)?.classSummaryPrompts)
+        ?? investigationPrompts ?? unitPrompts;
+      if (prompts) byProblemOrdinal[ordinal] = prompts;
     }
   }
 
-  const config = asRecord(record.config);
-  return {summary: config?.aiUnitSummary as IUnitSummary | undefined, liveProblems};
+  return {
+    summary: config?.aiUnitSummary as IUnitSummary | undefined,
+    liveProblems,
+    classSummaryPrompts: {unit: unitPrompts, byProblemOrdinal},
+  };
 }
 
 /**
