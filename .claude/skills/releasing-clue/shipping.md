@@ -8,6 +8,11 @@ Read the tester's replies in the handover thread. Report to the developer what t
 they found, and anything they asked. Bugs they found become stories for the next version, unless
 the developer decides otherwise. The developer confirms the release goes ahead.
 
+Release Production waits for the tester's confirmation that they tested the tag on the staging
+portal. Approving stories on the branch build doesn't count. Say whether the replies include that
+confirmation; if they don't, the developer decides whether to go ahead without it, and if they do,
+propose a reply in the handover thread saying so **[approve]**.
+
 A show-stopper means a patch release (`X.Y.1` cut from the release branch), which this skill
 doesn't cover yet (SKILL.md). Leave this version's tag and pre-release as they are, work out the
 patch with the developer, and record the steps.
@@ -18,7 +23,8 @@ Deploy what the deploy-timing decisions call for, with the same commands as stag
 and `--project collaborative-learning-ec215`. Compare production's deployed params first,
 for each codebase with the tag's `<codebase>/.env.collaborative-learning-ec215`. Production and
 staging can differ. Check `gcloud auth print-access-token` first: the login may have expired since
-preparation, and the rules read needs it.
+preparation, and the rules read needs it. Check it again before the read-backs after the deploys:
+it has expired within a day of the last login.
 
 Follow the recorded order:
 - **`before`:** compare production's deployed copy with the tag ("Firebase deployables" in
@@ -61,8 +67,9 @@ gh run watch <id> --exit-status
 Find the run id as for Release Staging (cutting.md): repeat the `gh run list` until it prints an
 id created after `<dispatched>`, never the newest run from before it.
 
-Check the log as for staging: OIDC, and four `copy:` lines, to `index.html`, `editor/index.html`,
-`authoring/index.html` and `authoring-iframe/index.html`. Then
+Check the log as for staging: OIDC, four `copy:` lines, to `index.html`, `editor/index.html`,
+`authoring/index.html` and `authoring-iframe/index.html`, and the tag's commit as Rollbar's
+`version`. Then
 `deployed-version.ts`: production and staging should both show the tag's commit.
 
 ## GitHub release [approve]
@@ -84,7 +91,9 @@ Check the release list shows it as Latest, with no Pre-release badge.
   `PUT /rest/api/3/version/<id>` with `{"released": true, "releaseDate": "YYYY-MM-DD"}`.
   `/version/<id>/unresolvedIssueCount` shows what's still open; read it after closing the release
   story, which otherwise counts as open. Unlike the Jira UI, the API doesn't make you move
-  unresolved issues. Leave a story whose code shipped on this version.
+  unresolved issues. Leave a story whose code shipped on this version. An open story nobody
+  triaged may be a clone of one in the release, since cloning keeps the fix version: look at its
+  comments and creation time, and ask the developer where it goes.
 - **Earlier versions:** check that the previous version is marked released too.
 
 ## Announcements [approve]
@@ -95,6 +104,8 @@ Check the release list shows it as Latest, with no Pre-release badge.
   the `slack` release notes, converted to standard markdown and with the same sections flattened as
   in the pre-announcement (preparing.md).
   Every CLUE release is announced here, separately from #clue.
+- **A slipped release:** if the timing the pre-announcement gave passes before the release, propose
+  a reply in its thread with the new timing **[approve]**, so projects aren't left waiting.
 - **Open stories:** nudge the owners of stories still open on the version, in the latest
   release-status post's thread. A scheduled message works for someone in another timezone; it is
   gated like any other message.
