@@ -318,7 +318,8 @@ Opening the document for editing waits for the catch-up: one more query.
 Applying entries after the user has started editing would collide with their new entries, so a
 document opened for editing, or shown in the workspace's comparison pane, shows a spinner in place of
 its toolbar and content until the catch-up finishes, and its 4-up corner stays read-only. Showing the document read-only meanwhile would leave a
-toolbar that ignores clicks. A gap over the cap doesn't wait.
+toolbar that ignores clicks. A gap over the cap doesn't wait. Only the content waits: the title bar
+stays usable, and its visibility, title and properties are saved while the catch-up runs.
 
 If an entry fails to apply, the document opens with what applied, and the session is not exact. The
 failure is logged.

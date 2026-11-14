@@ -61,10 +61,13 @@ export function useDocumentSyncToFirebase(
     console.warn("useDocumentSyncToFirebase monitoring another user's document?!?");
 
   const commonSyncEnabled = !disableFirebaseSync && contentStatus === ContentStatus.Valid;
+  // Until the document has caught up to its history its content isn't monitored or saved. Its
+  // metadata, such as its visibility and title, can still change and is saved.
+  const contentReadOnly = readOnly || document.historyCatchUpPending;
 
   useEffect(() => {
     // Tree monitoring should be disabled if the document status is error
-    if (!readOnly && contentStatus === ContentStatus.Valid) {
+    if (!contentReadOnly && contentStatus === ContentStatus.Valid) {
       // enable history tracking on this document
       if (document.treeMonitor) {
         document.treeMonitor.enableMonitoring();
@@ -80,12 +83,12 @@ export function useDocumentSyncToFirebase(
           document.treeMonitor.disableMonitoring();
         }
         // Remove the online status listener
-        if (!readOnly && commonSyncEnabled) {
+        if (commonSyncEnabled) {
           firebase.onlineStatusRef.off('value', handlePresenceChange);
         }
       };
     }
-  }, [readOnly, contentStatus, document.treeMonitor, firebase, handlePresenceChange, commonSyncEnabled]);
+  }, [contentReadOnly, contentStatus, document.treeMonitor, firebase, handlePresenceChange, commonSyncEnabled]);
 
   if (!readOnly && DEBUG_DOCUMENT) {
     // provide the document to the console so developers can inspect its content
@@ -199,7 +202,7 @@ export function useDocumentSyncToFirebase(
   });
 
   // sync content for editable document types
-  const enabled = commonSyncEnabled && !readOnly && !!document.content && !isPublishedType(type);
+  const enabled = commonSyncEnabled && !contentReadOnly && !!document.content && !isPublishedType(type);
 
   // The sender may still be saving after this unmounts, so it calls the newest callback.
   const onContentSavedRef = useRef(onContentSaved);

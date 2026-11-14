@@ -6,6 +6,7 @@ import { ProblemDocument } from "../../models/document/document-types";
 import { ToolbarModel } from "../../models/stores/problem-configuration";
 import { specStores } from "../../models/stores/spec-stores";
 import { EditableDocumentContent } from "./editable-document-content";
+import { useDocumentSyncToFirebase } from "../../hooks/use-document-sync-to-firebase";
 
 // Keep the render tree to what decides between the spinner and the document.
 jest.mock("../../hooks/use-document-sync-to-firebase", () => ({
@@ -52,6 +53,13 @@ describe("EditableDocumentContent", () => {
     expect(historyCatchUp).toHaveBeenCalledWith(document);
     expect(screen.getByTestId("history-catch-up-spinner")).toBeInTheDocument();
     expect(screen.queryByTestId("document-toolbar")).toBeNull();
+  });
+
+  // The hook waits for the catch-up to save content, but metadata such as visibility saves meanwhile.
+  it("doesn't make the sync read-only while the document catches up", () => {
+    const { document } = setup({ inWorkspace: true });
+    expect(useDocumentSyncToFirebase).toHaveBeenLastCalledWith(expect.anything(), expect.anything(),
+      expect.anything(), document, undefined, expect.any(Function));
   });
 
   it("shows a read-only document outside the workspace without catching it up", () => {

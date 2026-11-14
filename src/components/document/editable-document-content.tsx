@@ -136,7 +136,7 @@ export const EditableDocumentContent = observer(function EditableDocumentContent
   useEffect(() => {
     if (catchesUp) documents.historyCatchUp(document);
   }, [catchesUp, documents, document]);
-  useDocumentSyncToFirebase(user, firebase, firestore, document, readOnly || historyCatchUpPending,
+  useDocumentSyncToFirebase(user, firebase, firestore, document, readOnly,
     (doc, lastHistoryEntryId) => activityRecorder?.onContentSaved(doc, lastHistoryEntryId));
   if (catchesUp && historyCatchUpPending) {
     return (

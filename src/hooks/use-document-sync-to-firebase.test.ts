@@ -674,6 +674,32 @@ describe("useDocumentSyncToFirebase hook", () => {
       }
     });
 
+    it("syncs metadata while the document catches up, and saves content once it has", () => {
+      const getSender = jest.spyOn(senderModule, "getContentSaveSender");
+      try {
+        const { user, fb, firestore, document } = specArgs(PersonalDocument, "xyz");
+        document.setHistoryCatchUpPending(true);
+        const { rerender } = renderHook(() => useDocumentSyncToFirebase(user, fb, firestore, document));
+        expect(getSender).not.toHaveBeenCalled();
+        expect(mockOnlineStatusListenerOn).not.toHaveBeenCalled();
+
+        document.setVisibility("public");
+        document.setTitle("New Title");
+        document.setProperty("foo", "bar");
+        jest.runAllTimers();
+        expect(mockUpdate).toHaveBeenCalledWith({ visibility: "public" });
+        expect(mockUpdate).toHaveBeenCalledWith({ title: "New Title" });
+        expect(mockUpdate).toHaveBeenCalledWith({ foo: "bar" });
+
+        document.setHistoryCatchUpPending(false);
+        rerender();
+        expect(getSender).toHaveBeenCalledTimes(1);
+        expect(mockOnlineStatusListenerOn).toHaveBeenCalledTimes(1);
+      } finally {
+        getSender.mockRestore();
+      }
+    });
+
     // A document whose content writes wait until a test resolves them, with a stub commit source.
     function setupSaving(documentOverrides?: Partial<SnapshotIn<typeof DocumentModel>>) {
       const writes: Array<{ values: Record<string, any>, resolve: () => void }> = [];
