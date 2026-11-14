@@ -43,7 +43,7 @@ The document then shows a notice over its content and toolbar, chosen by the rea
 - A change with no entry: later edits that build on it may not load, so the notice can't be closed, the document is read-only, and it asks for a reload. A second one in the same tab within 10 minutes means the reload didn't help, so it asks the user to tell their teacher instead.
 - An entry that fails to apply at load: every load fails the same way, so the notice can't be closed and asks the user to tell their teacher.
 - Another member's entry that fails to apply: the notice can't be closed and asks for a reload, which helps when this tab's own changes caused it.
-- Saved content at an entry the history doesn't have: the document looks right but no load saves again, so the notice can be closed and asks the user to tell their teacher.
+- Saved content at an entry the history doesn't have: the document looks right but no load saves again, so the notice can be closed and asks the user to tell their teacher. It is found either by the load's check of the entry at the saved index, or by the drift check when the saved id isn't in the history at all. For a group document the drift check stops the saves this way rather than showing the content error.
 
 A notice that can't be closed makes the document under it inert. Closing and reopening the document doesn't start a new session, since the document model stays in the store, so only a reload does.
 

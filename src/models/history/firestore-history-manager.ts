@@ -615,7 +615,8 @@ export class FirestoreHistoryManager implements ICommitSource {
    * loaded content reflects edits that never made it to the history chain —
    * drift. On mismatch, invoke onContentDrift so the owner can surface
    * the DocumentError UI instead of leaving potentially-corrupted content
-   * visible to the user.
+   * visible to the user. A group document's owner stops its saves instead,
+   * since its history holds every change.
    *
    * Skipped when no saved id is available (pre-feature envelopes, fresh
    * documents with no prior history).

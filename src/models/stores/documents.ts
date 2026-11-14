@@ -315,6 +315,9 @@ export const DocumentsModel = types
         };
         if (document.concurrent) {
           historyManagerArgs.syncRemoteHistory = true;
+          // A group document's history holds every change, so the document stays usable. Its saves
+          // stop instead, and the user is asked to report it (see save-stopped-notice.ts).
+          historyManagerArgs.onContentDrift = () => treeManager.exactness.markNotExact("saved-id-missing");
           const manager = new FirestoreHistoryManagerConcurrent(historyManagerArgs);
           treeManager.setHistoryManager(manager);
         } else {

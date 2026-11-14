@@ -1,4 +1,4 @@
-import { createDocumentModel, DocumentModelType } from "../document/document";
+import { ContentStatus, createDocumentModel, DocumentModelType } from "../document/document";
 import {
   AxesDocument, DocumentType, LearningLogDocument, PersonalDocument, PlanningDocument, ProblemDocument
 } from "../document/document-types";
@@ -322,6 +322,16 @@ describe("documents model", () => {
     const historyManager =
       (concurrentDocument.treeManagerAPI as TreeManagerType).historyManager as FirestoreHistoryManager;
     expect(historyManager.loadedEnvelope).toBe(loaded);
+  });
+
+  it("stops a group document's saves when its saved entry isn't in its history, leaving it usable", () => {
+    const { docs, concurrentDocument } = createHistoryDocuments();
+    docs.add(concurrentDocument);
+
+    const treeManager = concurrentDocument.treeManagerAPI as TreeManagerType;
+    (treeManager.historyManager as FirestoreHistoryManager).onContentDrift?.("drift");
+    expect(treeManager.exactness.notExactReason).toBe("saved-id-missing");
+    expect(concurrentDocument.contentStatus).toBe(ContentStatus.Valid);
   });
 
   it("passes uploaded entries of each document to the activity recorder", () => {
