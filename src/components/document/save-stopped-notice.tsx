@@ -19,13 +19,14 @@ export interface ISaveStoppedNoticeState {
  * Call it from an observer, so the notice appears when the session stops being exact.
  */
 export function useSaveStoppedNotice(document: DocumentModelType): ISaveStoppedNoticeState | undefined {
-  const [dismissedReason, setDismissedReason] = useState<NotExactReason>();
+  // The component can be kept when its pane shows another document, so a dismissal names its document.
+  const [dismissed, setDismissed] = useState<{ document: DocumentModelType, reason: NotExactReason }>();
   const treeManager = document.treeManagerAPI as TreeManagerType | undefined;
   const reason = document.concurrent ? treeManager?.exactness.notExactReason : undefined;
-  if (!reason || reason === dismissedReason) return undefined;
+  if (!reason || (dismissed?.document === document && dismissed.reason === reason)) return undefined;
   const repeated = reason === "unrecorded-change" && isRepeatedUnrecordedChange(document.key);
   const notice = getSaveStoppedNotice(reason, repeated);
-  return notice && { reason, notice, dismiss: () => setDismissedReason(reason) };
+  return notice && { reason, notice, dismiss: () => setDismissed({ document, reason }) };
 }
 
 interface IProps {

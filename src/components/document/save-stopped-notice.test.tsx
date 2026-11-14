@@ -75,4 +75,27 @@ describe("SaveStoppedNotice", () => {
     await userEvent.click(screen.getByRole("button", { name: "Close" }));
     expect(screen.queryByTestId("save-stopped-notice")).toBeNull();
   });
+
+  // The workspace keeps the component when its pane changes to another document.
+  it("shows a notice closed on one document again for the next document in the same place", async () => {
+    const makeStoppedDocument = (key: string) => {
+      const document = createDocumentModel({
+        uid: "1", type: ProblemDocument, key, concurrent: true, content: DocumentContentModel.create({}) as any
+      });
+      const { exactness } = document.treeManagerAPI as TreeManagerType;
+      exactness.startAt("e0");
+      exactness.markNotExact("timed-out-entry");
+      return document;
+    };
+    const first = makeStoppedDocument("doc-1");
+    const second = makeStoppedDocument("doc-2");
+    const { rerender } = render(<Harness document={first} />);
+    await userEvent.click(screen.getByRole("button", { name: "Close" }));
+    expect(screen.queryByTestId("save-stopped-notice")).toBeNull();
+
+    rerender(<Harness document={second} />);
+    expect(screen.getByTestId("save-stopped-notice")).toBeInTheDocument();
+    rerender(<Harness document={first} />);
+    expect(screen.queryByTestId("save-stopped-notice")).toBeNull();
+  });
 });
