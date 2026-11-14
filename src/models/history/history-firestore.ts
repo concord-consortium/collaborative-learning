@@ -32,6 +32,8 @@ export async function getLastHistoryEntry(firestore: Firestore, documentPath: st
 }
 
 export interface IFirestoreHistoryEntryDoc {
+  /** The Firestore document id, which is the history entry's id. */
+  id: string;
   index: number;
   entry: HistoryEntrySnapshot;
   previousEntryId?: string;
@@ -62,6 +64,7 @@ export function loadHistory(
       const history = querySnapshot.docs.map(doc => {
         const data = doc.data();
         return {
+          id: doc.id,
           index: data.index,
           previousEntryId: data.previousEntryId,
           entry: data.entry ? JSON.parse(data.entry) as HistoryEntrySnapshot : undefined
@@ -73,6 +76,28 @@ export function loadHistory(
       handleLoadedHistory([], error);
     }
   );
+}
+
+/**
+ * Read, in one query, every history entry whose index is greater than `afterIndex` and no greater
+ * than `throughIndex`.
+ */
+export async function getHistoryEntriesAfter(firestore: Firestore, documentPath: string, afterIndex: number,
+    throughIndex: number): Promise<IFirestoreHistoryEntryDoc[]> {
+  const querySnapshot = await firestore.collection(`${documentPath}/history`)
+    .where("index", ">", afterIndex)
+    .where("index", "<=", throughIndex)
+    .orderBy("index")
+    .get();
+  return querySnapshot.docs.map(doc => {
+    const data = doc.data();
+    return {
+      id: doc.id,
+      index: data.index,
+      previousEntryId: data.previousEntryId,
+      entry: data.entry ? JSON.parse(data.entry) as HistoryEntrySnapshot : undefined
+    } as IFirestoreHistoryEntryDoc;
+  });
 }
 
 /**

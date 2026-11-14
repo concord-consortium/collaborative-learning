@@ -29,7 +29,7 @@ Where things stand today: a running DataFlow tile in a group document is a block
 
 Three plan items in dependency order:
 
-- **Settled-state document saves** ([GD-18](group-docs-plan.md#gd-18-settled-state-document-saves)) — saves the document only when the receive-side state machine is settled, so saves reflect canonical state. Prerequisite for the next item.
+- **Settled-state document saves** ([GD-18](group-docs-plan.md#gd-18-settled-state-document-saves)) — done: the document is saved only when the receive-side state machine is settled, so saves reflect canonical state. Prerequisite for the next item.
 - **Transaction-free history** ([GD-19](group-docs-plan.md#gd-19-transaction-free-history)) — replaces the per-document Firestore transaction with a multi-parent DAG, removing the write-rate choke point DataFlow's tick rate hits.
 - **Background entries** ([GD-20](group-docs-plan.md#gd-20-background-entries-dataflow)) — adds a background flag and runner lock so DataFlow's tick changes flow through history without conflicting with user edits.
 

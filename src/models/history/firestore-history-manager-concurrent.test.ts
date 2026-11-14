@@ -1,10 +1,14 @@
+import { reaction, when } from "mobx";
 import { applyPatch, IJsonPatch, Instance, types } from "mobx-state-tree";
 import { Firestore } from "../../lib/firestore";
+import { LogEventName } from "../../lib/logger-types";
 import { UserContextProvider } from "../stores/user-context-provider";
 import { TreeManager } from "./tree-manager";
 import { HistoryEntry, HistoryEntrySnapshot } from "./history";
 import { IFirestoreHistoryEntryDoc, getLastHistoryEntry as _getLastHistoryEntry } from "./history-firestore";
 import { FirestoreHistoryManagerConcurrent } from "./firestore-history-manager-concurrent";
+import { IFirestoreHistoryManagerArgs } from "./firestore-history-manager";
+import { ICommittedEntry } from "./history-commits";
 
 jest.mock("./history-firestore");
 const getLastHistoryEntry = jest.mocked(_getLastHistoryEntry);
@@ -141,6 +145,11 @@ async function setupDocMergeManager(firestoreOpts: FirestoreMockOptions = {}) {
 interface FirestoreMockOptions {
   // Value returned for metadata.lastHistoryEntry inside the transaction.
   txMetadataLastHistoryEntry?: { id: string; index: number } | null;
+  // When given, each transaction waits for it before running its body.
+  transactionGate?: Promise<void>;
+  // How many times each transaction runs its body, as Firestore does on contention. Each run reads
+  // the next value of txMetadataLastHistoryEntries.
+  txMetadataLastHistoryEntries?: Array<{ id: string; index: number } | null>;
 }
 
 interface FirestoreMockCapture {
@@ -177,21 +186,23 @@ function makeFirestoreMock(opts: FirestoreMockOptions = {}): {
     documentRef: jest.fn((...parts: string[]) => makeDocRef(...parts)),
     timestamp: jest.fn(() => new Date()),
     runTransaction: jest.fn(async (fn: (tx: any) => Promise<void>) => {
-      const tx = {
-        get: jest.fn(async () => ({
-          exists: true,
-          data: () => ({
-            lastHistoryEntry: opts.txMetadataLastHistoryEntry ?? null,
+      await opts.transactionGate;
+      const attempts = opts.txMetadataLastHistoryEntries ?? [opts.txMetadataLastHistoryEntry ?? null];
+      for (const lastHistoryEntry of attempts) {
+        const tx = {
+          get: jest.fn(async () => ({
+            exists: true,
+            data: () => ({ lastHistoryEntry }),
+          })),
+          set: jest.fn((ref: any, data: any) => {
+            capture.transactionSetCalls.push({ ref, data });
           }),
-        })),
-        set: jest.fn((ref: any, data: any) => {
-          capture.transactionSetCalls.push({ ref, data });
-        }),
-        update: jest.fn((ref: any, data: any) => {
-          capture.transactionUpdateCalls.push({ ref, data });
-        }),
-      };
-      await fn(tx);
+          update: jest.fn((ref: any, data: any) => {
+            capture.transactionUpdateCalls.push({ ref, data });
+          }),
+        };
+        await fn(tx);
+      }
     }),
   } as unknown as Firestore;
   return { firestore, capture };
@@ -207,7 +218,8 @@ function makeUserContextProviderMock(): UserContextProvider {
 // waitUntilEnvironmentAndMetadataDocReady and an initial
 // last-history-entry load (which writes to expectedRemoteHead). We
 // await both here so each test starts in a deterministic state.
-async function setupManager(firestoreOpts: FirestoreMockOptions = {}) {
+async function setupManager(firestoreOpts: FirestoreMockOptions = {},
+                            managerArgs: Partial<IFirestoreHistoryManagerArgs> = {}) {
   const treeId = "main";
   const manager = TreeManager.create({ document: {}, undoStore: {} });
   const tree = ArrayTestTree.create({ key: treeId, uid: "test-user" });
@@ -223,6 +235,7 @@ async function setupManager(firestoreOpts: FirestoreMockOptions = {}) {
     treeManager: manager,
     uploadLocalHistory: true,
     syncRemoteHistory: false,
+    ...managerArgs,
   });
 
   await historyManager.environmentAndMetadataDocReadyPromise;
@@ -260,7 +273,7 @@ function makeWrapperDoc(
   previousEntryId: string | undefined,
   entry: HistoryEntrySnapshot,
 ): IFirestoreHistoryEntryDoc {
-  return { index, previousEntryId, entry };
+  return { id: entry.id ?? `e${index}`, index, previousEntryId, entry };
 }
 
 describe("FirestoreHistoryManagerConcurrent", () => {
@@ -1098,6 +1111,293 @@ describe("FirestoreHistoryManagerConcurrent", () => {
       expect(historyManager.completedHistoryEntryQueue).toHaveLength(0);
       expect(firestoreCapture.transactionSetCalls).toEqual([]);
       expect(onLocalEntryUploaded).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("commits, voids and the settled state", () => {
+    const flushMicrotasks = async () => {
+      for (let i = 0; i < 10; i++) await Promise.resolve();
+    };
+    const colorEntry = (id: string, color: string, previousColor: string) => makeEntrySnapshot(
+      id,
+      "main",
+      [{ op: "replace", path: "/items/0/color", value: color }],
+      [{ op: "replace", path: "/items/0/color", value: previousColor }],
+    );
+    const queueEntry = (manager: Instance<typeof TreeManager>, historyManager: FirestoreHistoryManagerConcurrent,
+                        id: string) => {
+      const entry = HistoryEntry.create(colorEntry(id, "red", "white"));
+      manager.addHistoryEntryAfterApplying(entry);
+      historyManager.completedHistoryEntryQueue.push(entry);
+      return entry;
+    };
+    const makeListener = () => ({ onCommitted: jest.fn(), onUncommittedVoided: jest.fn() });
+
+    it("reports each entry once, with the index of the attempt that commits, when the transaction reruns",
+        async () => {
+      getLastHistoryEntry.mockResolvedValue({ id: "r4", index: 4 });
+      const { manager, historyManager } = await setupManager({
+        txMetadataLastHistoryEntries: [{ id: "r4", index: 3 }, { id: "r4", index: 4 }],
+      });
+      const listener = makeListener();
+      historyManager.addCommitListener(listener);
+      queueEntry(manager, historyManager, "L1");
+
+      await historyManager.uploadQueuedHistoryEntries();
+
+      expect(listener.onCommitted.mock.calls).toEqual([[[{ id: "L1", index: 5 }]]]);
+      expect(historyManager.expectedRemoteHeadIndex).toBe(5);
+    });
+
+    it("reports each entry of a committed transaction with its Firestore index", async () => {
+      getLastHistoryEntry.mockResolvedValue({ id: "r4", index: 4 });
+      const { manager, historyManager } = await setupManager({
+        txMetadataLastHistoryEntry: { id: "r4", index: 4 },
+      });
+      expect(historyManager.expectedRemoteHeadIndex).toBe(4);
+      const listener = makeListener();
+      historyManager.addCommitListener(listener);
+      queueEntry(manager, historyManager, "L1");
+      queueEntry(manager, historyManager, "L2");
+
+      await historyManager.uploadQueuedHistoryEntries();
+
+      const committed: ICommittedEntry[] = [{ id: "L1", index: 5 }, { id: "L2", index: 6 }];
+      expect(listener.onCommitted.mock.calls).toEqual([[committed]]);
+      expect(historyManager.lastCommitted).toEqual({ id: "L2", index: 6 });
+      expect(historyManager.expectedRemoteHead).toBe("L2");
+      expect(historyManager.expectedRemoteHeadIndex).toBe(6);
+    });
+
+    it("reports nothing committed when the transaction is aborted by a moved head", async () => {
+      getLastHistoryEntry.mockResolvedValue({ id: "r0", index: 0 });
+      const { manager, historyManager } = await setupManager({
+        txMetadataLastHistoryEntry: { id: "R1", index: 1 },
+      });
+      const listener = makeListener();
+      historyManager.addCommitListener(listener);
+      queueEntry(manager, historyManager, "L1");
+
+      await historyManager.uploadQueuedHistoryEntries();
+
+      expect(listener.onCommitted).not.toHaveBeenCalled();
+      expect(historyManager.lastCommitted).toBeUndefined();
+      expect(historyManager.expectedRemoteHead).toBe("r0");
+      expect(historyManager.expectedRemoteHeadIndex).toBe(0);
+    });
+
+    it("voids uncommitted snapshots before applying a remote entry", async () => {
+      getLastHistoryEntry.mockResolvedValue({ id: "r0", index: 0 });
+      const { manager, tree, historyManager } = await setupManager();
+      tree.setItems([Item.create({ id: "a" }), Item.create({ id: "b" })]);
+      applyPatch(tree, { op: "replace", path: "/items/0/color", value: "red" });
+      queueEntry(manager, historyManager, "L1");
+
+      const events: string[] = [];
+      historyManager.addCommitListener({
+        onCommitted: () => events.push("committed"),
+        onUncommittedVoided: reason => events.push(`voided: ${reason}`),
+      });
+      const originalApply = tree.applyPatchesFromManager;
+      tree.applyPatchesFromManager = jest.fn((h, e, patches) => {
+        events.push("patches");
+        return originalApply.call(tree, h, e, patches);
+      }) as any;
+
+      // R1 conflicts with L1, so L1 is rolled back before R1 is applied.
+      const r1wrap = makeWrapperDoc(1, "r0", makeEntrySnapshot(
+        "R1", "main",
+        [{ op: "remove", path: "/items/0" }],
+        [{ op: "add", path: "/items/0", value: { id: "a", color: "white" } }],
+      ));
+      await historyManager.applyHistoryEntries([r1wrap]);
+
+      expect(events).toEqual(["voided: remote-entry", "patches", "patches"]);
+      expect(historyManager.expectedRemoteHead).toBe("R1");
+      expect(historyManager.expectedRemoteHeadIndex).toBe(1);
+
+      // A delivery with nothing new voids nothing.
+      await historyManager.applyHistoryEntries([r1wrap]);
+      expect(events).toEqual(["voided: remote-entry", "patches", "patches"]);
+    });
+
+    it("is settled only with an empty queue, no upload, no apply, and nothing buffered", async () => {
+      let releaseTransaction!: () => void;
+      const transactionGate = new Promise<void>(resolve => { releaseTransaction = resolve; });
+      const { manager, tree, historyManager } = await setupManager({ transactionGate });
+      tree.setItems([Item.create({ id: "a" })]);
+      const settledValues: boolean[] = [];
+      const dispose = reaction(() => historyManager.isHistorySettled, settled => settledValues.push(settled));
+      expect(historyManager.isHistorySettled).toBe(true);
+
+      // A local entry waiting on its upload transaction.
+      const l1 = HistoryEntry.create(colorEntry("L1", "red", "white"));
+      manager.addHistoryEntryAfterApplying(l1);
+      historyManager.onHistoryEntryCompleted(manager.document, l1, 0);
+      await flushMicrotasks();
+      expect(historyManager.uploadInProgress).toBe(true);
+      expect(settledValues).toEqual([false]);
+      releaseTransaction();
+      await when(() => historyManager.isHistorySettled);
+      expect(historyManager.completedHistoryEntryQueue).toHaveLength(0);
+      expect(settledValues).toEqual([false, true]);
+
+      // A remote entry being applied.
+      let releaseApply!: () => void;
+      const applyGate = new Promise<void>(resolve => { releaseApply = resolve; });
+      const originalApply = tree.applyPatchesFromManager;
+      tree.applyPatchesFromManager = jest.fn(async (h, e, patches) => {
+        await applyGate;
+        return originalApply.call(tree, h, e, patches);
+      }) as any;
+      const applied = historyManager.applyHistoryEntries([makeWrapperDoc(1, "L1", colorEntry("R1", "blue", "red"))]);
+      await flushMicrotasks();
+      expect(historyManager.applying).toBe(true);
+      expect(historyManager.isHistorySettled).toBe(false);
+      releaseApply();
+      await applied;
+      expect(historyManager.isHistorySettled).toBe(true);
+      expect(settledValues).toEqual([false, true, false, true]);
+
+      // A delivery buffered while downloads are paused.
+      historyManager.pauseDownloads();
+      historyManager.syncRemoteFirestoreHistory([makeWrapperDoc(2, "R1", colorEntry("R2", "green", "blue"))]);
+      expect(historyManager.isHistorySettled).toBe(false);
+      historyManager.resumeDownloads();
+      await historyManager.applyInProgress;
+      expect(historyManager.isHistorySettled).toBe(true);
+      expect(tree.items[0].color).toBe("green");
+      dispose();
+    });
+  });
+
+  describe("initial load", () => {
+    const colorEntry = (id: string, color: string) => makeEntrySnapshot(
+      id,
+      "main",
+      [{ op: "replace", path: "/items/0/color", value: color }],
+      [{ op: "replace", path: "/items/0/color", value: "white" }],
+    );
+    const flushApplies = async (historyManager: FirestoreHistoryManagerConcurrent) => {
+      await historyManager.applyInProgress;
+      for (let i = 0; i < 10; i++) await Promise.resolve();
+    };
+
+    it("starts from an exact envelope's id without querying Firestore for the last entry", async () => {
+      const { manager, tree, historyManager } = await setupManager({}, {
+        loadedEnvelope: { lastHistoryEntryId: "e5", exactThrough: { index: 5, since: "e2" } },
+      });
+      expect(getLastHistoryEntry).not.toHaveBeenCalled();
+      expect(historyManager.expectedRemoteHead).toBe("e5");
+      expect(historyManager.expectedRemoteHeadIndex).toBe(5);
+      expect(manager.exactness.exactSince).toBe("e2");
+
+      // The content as saved at e5.
+      tree.setItems([Item.create({ id: "a", color: "e5" })]);
+      await historyManager.applyHistoryEntries([
+        makeWrapperDoc(4, "e3", colorEntry("e4", "e4")),
+        makeWrapperDoc(5, "e4", colorEntry("e5", "e5")),
+        makeWrapperDoc(6, "e5", colorEntry("e6", "e6")),
+      ]);
+
+      expect(manager.document.history.map(e => e.id)).toEqual(["e6"]);
+      expect(tree.items[0].color).toBe("e6");
+      expect(historyManager.expectedRemoteHead).toBe("e6");
+      expect(historyManager.expectedRemoteHeadIndex).toBe(6);
+    });
+
+    it("skips entries up to an exact envelope's index when its id isn't in the history", async () => {
+      const { manager, tree, historyManager } = await setupManager({}, {
+        loadedEnvelope: { lastHistoryEntryId: "e5", exactThrough: { index: 5, since: "e2" } },
+      });
+      tree.setItems([Item.create({ id: "a", color: "e5" })]);
+
+      // Another entry sits at e5's index.
+      await historyManager.applyHistoryEntries([
+        makeWrapperDoc(4, "e3", colorEntry("e4", "e4")),
+        makeWrapperDoc(5, "e4", colorEntry("x5", "x5")),
+        makeWrapperDoc(6, "x5", colorEntry("e6", "e6")),
+      ]);
+
+      expect(manager.document.history.map(e => e.id)).toEqual(["e6"]);
+      expect(tree.items[0].color).toBe("e6");
+      expect(manager.exactness.isExact).toBe(false);
+      expect(manager.exactness.notExactReason).toBe("saved-id-missing");
+    });
+
+    it("queries Firestore for the last entry when the envelope has no exactThrough", async () => {
+      getLastHistoryEntry.mockResolvedValue({ id: "e7", index: 7 });
+      const { manager, historyManager } = await setupManager({}, {
+        loadedEnvelope: { lastHistoryEntryId: "e5" },
+      });
+      expect(getLastHistoryEntry).toHaveBeenCalledTimes(1);
+      expect(historyManager.expectedRemoteHead).toBe("e7");
+      expect(historyManager.expectedRemoteHeadIndex).toBe(7);
+      expect(manager.exactness.exactSince).toBe("e7");
+    });
+
+    it("leaves the session not exact when the initial apply fails", async () => {
+      const consoleError = jest.spyOn(console, "error").mockImplementation(() => undefined);
+      const logEvent = jest.fn();
+      const { manager, tree, historyManager } = await setupManager({}, { logEvent });
+      tree.setItems([Item.create({ id: "a" })]);
+      tree.applyPatchesFromManager = jest.fn(async () => { throw new Error("boom"); }) as any;
+
+      historyManager.syncRemoteFirestoreHistory([makeWrapperDoc(0, undefined, colorEntry("e0", "red"))]);
+      await flushApplies(historyManager);
+
+      expect(manager.exactness.isExact).toBe(false);
+      expect(manager.exactness.notExactReason).toBe("initial-apply-failed");
+      expect(consoleError).toHaveBeenCalledWith("Could not apply remote history entries", expect.any(Error));
+      expect(logEvent).toHaveBeenCalledWith(LogEventName.HISTORY_REMOTE_APPLY_FAILED, {
+        reason: "initial-apply-failed", entryCount: 1, lastEntryId: "e0", lastEntryIndex: 0, error: "Error: boom"
+      });
+      expect(historyManager.applying).toBe(false);
+      expect(historyManager.isHistorySettled).toBe(true);
+      consoleError.mockRestore();
+    });
+
+    it("leaves the session not exact when a later apply fails", async () => {
+      const consoleError = jest.spyOn(console, "error").mockImplementation(() => undefined);
+      const logEvent = jest.fn();
+      const { manager, tree, historyManager } = await setupManager({}, { logEvent });
+      tree.setItems([Item.create({ id: "a" })]);
+
+      historyManager.syncRemoteFirestoreHistory([makeWrapperDoc(0, undefined, colorEntry("e0", "red"))]);
+      await flushApplies(historyManager);
+      expect(manager.exactness.isExact).toBe(true);
+      tree.applyPatchesFromManager = jest.fn(async () => { throw new Error("boom"); }) as any;
+      historyManager.syncRemoteFirestoreHistory([
+        makeWrapperDoc(0, undefined, colorEntry("e0", "red")),
+        makeWrapperDoc(1, "e0", colorEntry("e1", "blue")),
+      ]);
+      await flushApplies(historyManager);
+
+      expect(manager.exactness.isExact).toBe(false);
+      expect(manager.exactness.notExactReason).toBe("remote-apply-failed");
+      expect(consoleError).toHaveBeenCalledWith("Could not apply remote history entries", expect.any(Error));
+      expect(logEvent).toHaveBeenCalledWith(LogEventName.HISTORY_REMOTE_APPLY_FAILED, {
+        reason: "remote-apply-failed", entryCount: 2, lastEntryId: "e1", lastEntryIndex: 1, error: "Error: boom"
+      });
+      consoleError.mockRestore();
+    });
+
+    it("is already not exact when a failed apply stops applying", async () => {
+      const consoleError = jest.spyOn(console, "error").mockImplementation(() => undefined);
+      const { manager, tree, historyManager } = await setupManager({});
+      tree.setItems([Item.create({ id: "a" })]);
+      tree.applyPatchesFromManager = jest.fn(async () => { throw new Error("boom"); }) as any;
+      // The content save sender checks for a settled save as soon as applying clears.
+      const exactWhenApplyingCleared: boolean[] = [];
+      const dispose = reaction(() => historyManager.applying,
+        applying => { if (!applying) exactWhenApplyingCleared.push(manager.exactness.isExact); });
+
+      historyManager.syncRemoteFirestoreHistory([makeWrapperDoc(0, undefined, colorEntry("e0", "red"))]);
+      await flushApplies(historyManager);
+
+      expect(exactWhenApplyingCleared).toEqual([false]);
+      dispose();
+      consoleError.mockRestore();
     });
   });
 });

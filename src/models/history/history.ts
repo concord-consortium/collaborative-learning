@@ -59,6 +59,15 @@ export const HistoryEntry = types.model("HistoryEntry", {
    */
   uid: types.maybe(types.string),
   /**
+   * Set when the entry was force-completed because one of its exchanges never closed. Its records
+   * may be missing patches that arrive later.
+   */
+  timedOut: types.maybe(types.boolean),
+  /**
+   * Set on an entry made from a record that arrived after the entry it belongs to had timed out.
+   */
+  lateRecordForEntryId: types.maybe(types.string),
+  /**
    * True on a load entry: the entry that records the changes CLUE made to the stored content
    * while loading it, when a document loads or its content is replaced, such as converting old
    * tiles and shared models to their current format. It is never applied to a live document or

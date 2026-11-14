@@ -1,4 +1,4 @@
-import { createDocumentModel, DocumentModelType } from "../document/document";
+import { ContentStatus, createDocumentModel, DocumentModelType } from "../document/document";
 import {
   AxesDocument, DocumentType, LearningLogDocument, PersonalDocument, PlanningDocument, ProblemDocument
 } from "../document/document-types";
@@ -291,7 +291,7 @@ describe("documents model", () => {
     });
   });
 
-  it("passes uploaded entries of each document to the activity recorder", () => {
+  function createHistoryDocuments() {
     const firestore = {
       doc: jest.fn(() => ({
         get: jest.fn(async () => ({ exists: true })),
@@ -302,20 +302,88 @@ describe("documents model", () => {
       })),
       getFullPath: jest.fn((path: string) => path)
     } as unknown as Firestore;
-    const recorder = { onLocalEntryUploaded: jest.fn() };
     const docs = DocumentsModel.create({});
     docs.setFirestore(firestore);
     docs.setUserContextProvider({ userContext: { uid: "1" } } as unknown as UserContextProvider);
-    docs.setActivityRecorder(recorder as unknown as ActivityRecorder);
-    const groupDocument = createDocumentModel({
+    const concurrentDocument = createDocumentModel({
       type: AxesDocument, uid: "group_2000_3", key: "test-group", createdAt: 1, content: {}, concurrent: true
     });
-    docs.add(document);
-    docs.add(groupDocument);
+    return { docs, concurrentDocument };
+  }
 
-    [document, groupDocument].forEach((doc, i) => {
+  it("gives the history manager the envelope the document was loaded with, not a later one", () => {
+    const { docs, concurrentDocument } = createHistoryDocuments();
+    const loaded = { lastHistoryEntryId: "e5", exactThrough: { index: 5, since: "e2" } };
+    concurrentDocument.setLoadedEnvelope(loaded);
+    concurrentDocument.setLoadedEnvelope({ lastHistoryEntryId: "e6" });
+    concurrentDocument.setSavedEnvelope({ lastHistoryEntryId: "e6", exactThrough: { index: 6, since: "e2" } });
+    docs.add(concurrentDocument);
+
+    const historyManager =
+      (concurrentDocument.treeManagerAPI as TreeManagerType).historyManager as FirestoreHistoryManager;
+    expect(historyManager.loadedEnvelope).toBe(loaded);
+  });
+
+  it("stops a group document's saves when its saved entry isn't in its history, leaving it usable", () => {
+    const { docs, concurrentDocument } = createHistoryDocuments();
+    docs.add(concurrentDocument);
+
+    const treeManager = concurrentDocument.treeManagerAPI as TreeManagerType;
+    (treeManager.historyManager as FirestoreHistoryManager).onContentDrift?.("drift");
+    expect(treeManager.exactness.notExactReason).toBe("saved-id-missing");
+    expect(concurrentDocument.contentStatus).toBe(ContentStatus.Valid);
+  });
+
+  describe("restartHistoryCatchUp", () => {
+    function caughtUpDocument() {
+      const { docs } = createHistoryDocuments();
+      docs.add(personalDocument);
+      const treeManager = personalDocument.treeManagerAPI as TreeManagerType;
+      const manager = treeManager.historyManager as FirestoreHistoryManager;
+      const catchUpAtLoad = jest.spyOn(manager, "catchUpAtLoad").mockImplementation(async () => {
+        manager.caughtUpTo = { id: "e7", index: 7 };
+        treeManager.exactness.startAt("e2");
+      });
+      return { docs, treeManager, manager, catchUpAtLoad };
+    }
+
+    it("catches a document up again once the content it caught up has been replaced", async () => {
+      const { docs, treeManager, manager, catchUpAtLoad } = caughtUpDocument();
+      await docs.historyCatchUp(personalDocument);
+      expect(personalDocument.historyCatchUpPending).toBe(false);
+
+      docs.restartHistoryCatchUp(personalDocument);
+      expect(personalDocument.historyCatchUpPending).toBe(true);
+      expect(treeManager.exactness.exactSince).toBeUndefined();
+      expect(manager.caughtUpTo).toBeUndefined();
+
+      await docs.historyCatchUp(personalDocument);
+      expect(catchUpAtLoad).toHaveBeenCalledTimes(2);
+      expect(personalDocument.historyCatchUpPending).toBe(false);
+    });
+
+    // A running catch-up compares the envelope it started from with the current one itself.
+    it("leaves a document that hasn't finished catching up alone", () => {
+      const { docs, catchUpAtLoad } = caughtUpDocument();
+      catchUpAtLoad.mockReturnValue(new Promise(() => undefined));
+      docs.historyCatchUp(personalDocument);
+
+      docs.restartHistoryCatchUp(personalDocument);
+      docs.historyCatchUp(personalDocument);
+      expect(catchUpAtLoad).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  it("passes uploaded entries of each document to the activity recorder", () => {
+    const { docs, concurrentDocument } = createHistoryDocuments();
+    const recorder = { onLocalEntryUploaded: jest.fn() };
+    docs.setActivityRecorder(recorder as unknown as ActivityRecorder);
+    docs.add(document);
+    docs.add(concurrentDocument);
+
+    [document, concurrentDocument].forEach((doc, i) => {
       const historyManager = (doc.treeManagerAPI as TreeManagerType).historyManager as FirestoreHistoryManager;
-      expect(historyManager instanceof FirestoreHistoryManagerConcurrent).toBe(doc === groupDocument);
+      expect(historyManager instanceof FirestoreHistoryManagerConcurrent).toBe(doc === concurrentDocument);
       const entry = HistoryEntry.create({ id: `e${i}`, tree: doc.key });
       historyManager.onLocalEntryUploaded?.(entry);
       expect(recorder.onLocalEntryUploaded).toHaveBeenLastCalledWith(doc, entry);

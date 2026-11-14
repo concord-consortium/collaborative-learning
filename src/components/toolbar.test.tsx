@@ -165,6 +165,28 @@ describe("ToolbarComponent", () => {
     });
   });
 
+  // A document shown outside the workspace catches up only once its Edit tool opens it for editing.
+  // A document in the workspace shows a spinner in place of its toolbar until it has caught up.
+  it("keeps its tools enabled while the document is catching up to its history", () => {
+    const pendingDocument = createDocumentModel({
+      uid: "1", type: "problem", key: "pending", createdAt: 0, content: {}
+    });
+    pendingDocument.setHistoryCatchUpPending(true);
+    const viewConfig: IToolbarModelSnapshot = [
+      { id: "edit", title: "Edit", iconId: "icon-edit-tool", isDefault: false, isTileTool: false },
+      { id: "fourUp", title: "Four Up", iconId: "icon-4up-view-tool", isDefault: false, isTileTool: false }
+    ];
+    render(
+      <ModalProvider>
+        <Provider stores={stores}>
+          <ToolbarComponent toolbarModel={ToolbarModel.create(viewConfig)} document={pendingDocument}/>
+        </Provider>
+      </ModalProvider>
+    );
+    expect(screen.getByTestId("tool-edit")).not.toHaveAttribute("aria-disabled");
+    expect(screen.getByTestId("tool-fourup")).not.toHaveAttribute("aria-disabled");
+  });
+
   // A section toolbar has no document of its own, and the primary workspace document it copies
   // into is not available for a window after load. Buttons must report that accurately: a click
   // on a button whose action cannot run is discarded without feedback.
@@ -188,7 +210,8 @@ describe("ToolbarComponent", () => {
     // "none": no primary document key at all, as on first load.
     // "keyOnly": a key has been chosen but the document has not finished loading into the store.
     // "loaded": the document is available and can actually be copied into.
-    type PrimaryState = "none" | "keyOnly" | "loaded";
+    // "pending": the document is loaded but still catching up to its history.
+    type PrimaryState = "none" | "keyOnly" | "loaded" | "pending";
 
     const renderSectionToolbar = (primary: PrimaryState) => {
       const testStores = specStores();
@@ -205,8 +228,11 @@ describe("ToolbarComponent", () => {
         const primaryDocument = createDocumentModel({
           type: ProblemDocument, uid: "1", key: "primary-doc", createdAt: 1, content: {}
         });
-        if (primary === "loaded") {
+        if (primary === "loaded" || primary === "pending") {
           testStores.documents.add(primaryDocument);
+        }
+        if (primary === "pending") {
+          primaryDocument.setHistoryCatchUpPending(true);
         }
         // setPrimaryDocument logs a document event, which needs logger context to resolve the user
         Logger.initializeLogger(testStores);
@@ -235,6 +261,11 @@ describe("ToolbarComponent", () => {
     it("enables Copy to Workspace once the primary document is loaded", () => {
       renderSectionToolbar("loaded");
       expect(screen.getByTestId("tool-copytoworkspace")).not.toHaveAttribute("aria-disabled");
+    });
+
+    it("disables Copy to Workspace while the primary document is catching up to its history", () => {
+      renderSectionToolbar("pending");
+      expect(screen.getByTestId("tool-copytoworkspace")).toHaveAttribute("aria-disabled", "true");
     });
 
     it("leaves Copy to Document enabled, since it does not copy to the primary document", () => {

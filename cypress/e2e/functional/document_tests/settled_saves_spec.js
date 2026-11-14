@@ -1,0 +1,152 @@
+import ClueCanvas from '../../../support/elements/common/cCanvas';
+import TextToolTile from '../../../support/elements/tile/TextToolTile';
+import DataflowToolTile from '../../../support/elements/tile/DataflowToolTile';
+import SortedWork from '../../../support/elements/common/SortedWork';
+
+const clueCanvas = new ClueCanvas;
+const textToolTile = new TextToolTile;
+const dataflowToolTile = new DataflowToolTile;
+const sortWork = new SortedWork;
+
+function visitUnit(studentId, groupId = 5) {
+  const queryParams = `${Cypress.config("qaUnitStudent5")}`
+    .replace("student:5", `student:${studentId}`)
+    .replace("qaGroup=5", `qaGroup=${groupId}`);
+  cy.visit(queryParams, {
+    onBeforeLoad(win) {
+      win.localStorage.setItem("debug", "document");
+    }
+  });
+  cy.waitForLoad();
+  cy.window().its("currentDocument").should("exist");
+}
+
+// Returns the RTDB node that holds the current document's content and its save envelope.
+function getEnvelopeRef(win) {
+  const { firebase } = win.stores.db;
+  return firebase.ref(firebase.getDocumentPaths(win.stores.user, win.currentDocument).content);
+}
+
+function readEnvelope() {
+  return cy.window().then(win => getEnvelopeRef(win).once("value")).then(snapshot => snapshot.val());
+}
+
+// Whether the envelope's exactThrough describes its id: the content is exactly the history.
+const isExact = envelope => !!envelope?.exactThrough && envelope.exactThrough.id === envelope.lastHistoryEntryId;
+const exactIndex = envelope => envelope.exactThrough.index;
+
+// Polls the envelope until `predicate` holds, with a bounded number of retries.
+function waitForEnvelope(predicate, description, attemptsLeft = 20) {
+  return readEnvelope().then(envelope => {
+    if (predicate(envelope)) return cy.wrap(envelope);
+    expect(attemptsLeft, `envelope ${description}: ${JSON.stringify({ ...envelope, content: undefined })}`)
+      .to.be.greaterThan(0);
+    cy.wait(500);
+    return waitForEnvelope(predicate, description, attemptsLeft - 1);
+  });
+}
+
+context("Settled saves", function () {
+  it("saves an individual document exactly, opens its history at the newest entry, and catches it up on reload",
+      function () {
+    visitUnit(5);
+
+    cy.log("a burst of edits ends in an exact save");
+    clueCanvas.addTile("text");
+    textToolTile.verifyTextTileIsEditable();
+    textToolTile.enterText("first burst of edits");
+    cy.waitForSave();
+    waitForEnvelope(isExact, "is exact").then(e1 => {
+      expect(e1.lastHistoryEntryId).to.be.a("string");
+      expect(e1.exactThrough.index).to.be.a("number");
+      expect(e1.exactThrough.contentHash).to.be.a("number");
+      expect(e1.exactThrough.since).to.be.a("string");
+      expect(e1.notExact).to.equal(undefined);
+
+      cy.log("one more edit is saved");
+      const lastEdit = " and one last edit";
+      textToolTile.enterAdditionalText(lastEdit);
+      cy.waitForSave();
+      waitForEnvelope(e => isExact(e) && exactIndex(e) > exactIndex(e1), "holds the last edit")
+        .then(e2 => {
+          cy.log("put the older envelope back so the document is behind its history");
+          cy.window().then(win => getEnvelopeRef(win).set(e1));
+
+          cy.log("a teacher's history of the document opens at the last edit");
+          cy.visit(Cypress.config("qaUnitTeacher6"));
+          cy.waitForLoad();
+          cy.openTopTab("sort-work");
+          cy.get(".section-header-arrow").click({ multiple: true });
+          sortWork.getSortWorkItem().contains("Student 5").click();
+          const teacherTextTile = () => cy.get(".resource-and-chat-panel .text-tool");
+          teacherTextTile().should("contain", "first burst of edits").and("not.contain", lastEdit);
+          cy.get(".resource-and-chat-panel .toolbar .tool.toggleplayback:visible").click();
+          cy.get('[data-testid="playback-slider"]').should("be.visible");
+          teacherTextTile().should("contain", lastEdit);
+          cy.get('[data-testid="playback-play-button"]').should("have.class", "disabled");
+
+          visitUnit(5);
+
+          cy.log("the load applies the history entries after the envelope");
+          textToolTile.getTextTile().last().should("contain", lastEdit);
+
+          cy.log("the next save is exact");
+          // The tile mounts once the catch-up finishes, and a text editor that was just mounted
+          // drops keystrokes for a moment (see TextToolTile.enterText).
+          textToolTile.verifyTextTileIsEditable();
+          cy.wait(500);
+          textToolTile.enterAdditionalText(" after the reload");
+          cy.waitForSave();
+          waitForEnvelope(
+            e => isExact(e) && exactIndex(e) > exactIndex(e2),
+            "is exact past the last edit"
+          );
+        });
+    });
+  });
+
+  it("keeps saving exactly while a DataFlow program runs", function () {
+    visitUnit(6);
+
+    cy.log("a program with a generator ticks");
+    clueCanvas.addTile("dataflow");
+    dataflowToolTile.getDataflowTile().should("exist");
+    dataflowToolTile.getCreateNodeButton("generator").click();
+    dataflowToolTile.getNode("generator").should("exist");
+
+    // The baseline is taken once the node exists, so adding it can't account for the later entries.
+    // The program ticks once a second, and each tick is an entry.
+    waitForEnvelope(isExact, "is exact").then(first => {
+      cy.wait(3000);
+      waitForEnvelope(
+        e => isExact(e) && exactIndex(e) >= exactIndex(first) + 3,
+        "is exact at least three entries later"
+      );
+    });
+  });
+
+  it("keeps saving a group document exactly while a DataFlow program runs every 50 ms", function () {
+    // The student is alone in the group, so this client is the one making the entries.
+    visitUnit(51, 51);
+    cy.get("[data-test=document-file-menu-header]").click();
+    cy.get("[data-test=list-item-icon-open-group-doc]").click();
+    cy.window().its("currentDocument.concurrent").should("eq", true);
+
+    cy.log("a program with a generator ticks every 50 ms");
+    clueCanvas.addTile("dataflow");
+    dataflowToolTile.getDataflowTile().should("exist");
+    dataflowToolTile.getCreateNodeButton("generator").click();
+    dataflowToolTile.getNode("generator").should("exist");
+    dataflowToolTile.selectSamplingRate("50 ms");
+
+    // Each tick is an entry, so 3 seconds make about 60. A history that never settled would stop
+    // the saves, and a save put off by every commit would fall far behind.
+    waitForEnvelope(isExact, "is exact").then(first => {
+      cy.wait(3000);
+      waitForEnvelope(
+        e => isExact(e) && exactIndex(e) >= exactIndex(first) + 30,
+        "is exact at least 30 entries later"
+      );
+    });
+  });
+});

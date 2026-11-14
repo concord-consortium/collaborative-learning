@@ -12,6 +12,7 @@ import {
   DBUserStar, DBOfferingUserProblemDocument, DBOtherDocument, IDocumentProperties, DBOtherPublication, DBSupport
 } from "./db-types";
 import { DocumentModelType, createDocumentModel, isVisibilityType } from "../models/document/document";
+import { readSavedEnvelope } from "../models/document/content-save-envelope";
 import {
   DocumentType, LearningLogDocument, LearningLogPublication, OtherDocumentType, OtherPublicationType,
   PersonalDocument, PersonalPublication, PlanningDocument, ProblemDocument, ProblemOrPlanningDocumentType,
@@ -199,6 +200,10 @@ export class DB {
 
   private authStateUnsubscribe?: firebase.Unsubscribe;
   private documentFetchPromiseMap = new Map<string, Promise<DocumentModelType>>();
+  /**
+   * The documents this session created, which have no history in Firestore to catch up to.
+   */
+  private createdDocumentKeys = new Set<string>();
   private canonicalResolvePromiseMap = new Map<string, Promise<IResolvedCanonicalDocument>>();
   private groupDocumentDisposer?: IReactionDisposer;
 
@@ -805,6 +810,7 @@ export class DB {
       const documentPath = this.firebase.getUserDocumentPath(user, undefined, owner);
       const documentRef = this.firebase.ref(documentPath).push();
       const documentKey = documentRef.key!;
+      this.createdDocumentKeys.add(documentKey);
       const metadataPath = this.firebase.getUserDocumentMetadataPath(user, documentKey, owner);
       const metadataRef = this.firebase.ref(metadataPath);
       const version = "1.0";
@@ -1350,11 +1356,13 @@ export class DB {
               concurrent,
               kind,
             });
-            // Stash the envelope's lastHistoryEntryId for the drift check that
-            // runs once the Firestore history loads. Skipped (undefined) for
-            // pre-feature saves and fresh docs with no prior history.
-            if (typeof document.lastHistoryEntryId === "string") {
-              docModel.setSavedLastHistoryEntryId(document.lastHistoryEntryId);
+            // Stash the envelope's history fields for the history catch-up and drift check that
+            // run once the Firestore history is read. Skipped for pre-feature saves and fresh docs
+            // with no prior history.
+            const envelope = readSavedEnvelope(document);
+            if (envelope) {
+              docModel.setLoadedEnvelope(envelope);
+              docModel.setSavedEnvelope(envelope);
             }
             return docModel;
           } catch (e) {
@@ -1366,7 +1374,13 @@ export class DB {
           }
         })
         .then((document) => {
+          // documents.add marks an individual document as behind its history, so it can't be edited or
+          // saved until it has caught up (see historyCatchUp). A document this session just created has
+          // no history yet.
           documents.add(document);
+          if (this.createdDocumentKeys.has(documentKey)) {
+            documents.markNewDocumentCaughtUp(document);
+          }
           resolve(document);
         })
         .catch((msg) => {

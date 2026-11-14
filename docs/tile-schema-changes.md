@@ -37,7 +37,8 @@ while loading it. Today those are schema conversions. Its patches take each conv
 its old JSON to its converted JSON, and back. They come from a generic diff, so you write nothing
 for them. The entry is flagged `isLoadEntry` and `background`, and it is never undoable. Playback
 applies it like any other entry to a plain JSON copy of the document, so it can cross the change in
-either direction. It never applies it to a live MST tree.
+either direction. It never applies it to a live MST tree. See
+[history-framework/load-entries.md](history-framework/load-entries.md).
 
 For this to work you tell the system which version your type's JSON is at, and how to convert an
 older one. Everything else is done for you.
