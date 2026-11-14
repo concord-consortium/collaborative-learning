@@ -9,6 +9,8 @@ import "./annotation-arrow.scss";
 interface IAnnotationArrowProps {
   className?: string;
   shape: ArrowShape;
+  /** Width of the band around the stem that accepts a click. Omit to draw the stem at its CSS width. */
+  hitStrokeWidth?: number;
   hideArrowhead?: boolean;
   peakX: number;
   peakY: number;
@@ -20,7 +22,8 @@ interface IAnnotationArrowProps {
   onClick?: (event: MouseEvent) => void;
 }
 export function AnnotationArrow({
-  className, shape, hideArrowhead, peakX, peakY, setHovering, sourceX, sourceY, targetX, targetY, onClick
+  className, shape, hitStrokeWidth, hideArrowhead, peakX, peakY, setHovering,
+  sourceX, sourceY, targetX, targetY, onClick
 }: IAnnotationArrowProps) {
 
   const { path, arrowheadAngle } = useMemo(() => {
@@ -33,10 +36,12 @@ export function AnnotationArrow({
 
   return (
     <g className={classNames("arrow", className)}>
+      {/* The width is an inline style because a stroke-width attribute loses to the stylesheet. */}
       <path
         className="arrow-stem"
         d={path}
         fill="none"
+        style={hitStrokeWidth !== undefined ? { strokeWidth: hitStrokeWidth } : undefined}
         onMouseEnter={e => setHovering?.(true)}
         onMouseLeave={e => setHovering?.(false)}
         onClick={onClick}

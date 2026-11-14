@@ -42,8 +42,15 @@ function applyViewTransform(x: number, y: number, transform?: { offsetX: number;
 export const kArrowAnnotationTextWidth = 150;
 export const kArrowAnnotationTextHeight = 50;
 const kArrowAnnotationTextMargin = 15;
+// Fallbacks for a label whose chip has not been measured: they infer it from the fixed box it is
+// centered in, so they only hold for text that happens to fill that box.
 export const kTextHorizontalMargin = kArrowAnnotationTextMargin + kArrowAnnotationTextWidth / 4;
 export const kTextVerticalMargin = kArrowAnnotationTextMargin + kArrowAnnotationTextHeight / 2;
+
+export interface ITextSize {
+  height: number;
+  width: number;
+}
 
 export interface IArrowAnnotationDragOffsets {
   sourceDragOffsetX: number;
@@ -138,7 +145,8 @@ export const ArrowAnnotation = types
     dragOffsets: IArrowAnnotationDragOffsets,
     sourceBB?: ObjectBoundingBox|null, sourceViewTransform?: { offsetX: number; offsetY: number; scale: number },
     targetBB?: ObjectBoundingBox|null, targetViewTransform?: { offsetX: number; offsetY: number; scale: number },
-    sourceTileSize?: ITileSize
+    sourceTileSize?: ITileSize,
+    textSize?: ITextSize
   ) {
     const defaultObj = {
       sourceX: undefined, sourceY: undefined, targetX: undefined, targetY: undefined,
@@ -240,16 +248,19 @@ export const ArrowAnnotation = types
       textCenterY = textOriginY + textDyOffset * yRatio;
     }
 
-    // Finally, it is constrained to be within the document bounding box
-    const textMinXOffset = documentLeft + kTextHorizontalMargin - textOriginX;
-    const textMaxXOffset = documentRight - kTextHorizontalMargin - textOriginX;
-    const textMinYOffset = documentTop + kTextVerticalMargin - textOriginY;
-    const textMaxYOffset = documentBottom - kTextVerticalMargin - textOriginY;
+    // Finally, it is constrained to be within the document bounding box, by a margin measured from
+    // the chip the reader can see. Taken from the box the chip sits in, the same drag would end
+    // somewhere different depending on how much text was typed.
+    const textMarginX = textSize ? kArrowAnnotationTextMargin + textSize.width / 2 : kTextHorizontalMargin;
+    const textMarginY = textSize ? kArrowAnnotationTextMargin + textSize.height / 2 : kTextVerticalMargin;
 
-    textCenterX = Math.max(documentLeft + kTextHorizontalMargin,
-      Math.min(documentRight - kTextHorizontalMargin, textCenterX));
-    textCenterY = Math.max(documentTop + kTextVerticalMargin,
-      Math.min(documentBottom - kTextVerticalMargin, textCenterY));
+    const textMinXOffset = documentLeft + textMarginX - textOriginX;
+    const textMaxXOffset = documentRight - textMarginX - textOriginX;
+    const textMinYOffset = documentTop + textMarginY - textOriginY;
+    const textMaxYOffset = documentBottom - textMarginY - textOriginY;
+
+    textCenterX = Math.max(documentLeft + textMarginX, Math.min(documentRight - textMarginX, textCenterX));
+    textCenterY = Math.max(documentTop + textMarginY, Math.min(documentBottom - textMarginY, textCenterY));
 
     // If this is a straight arrow, text is constrained to be on the line.
     if (self.shape === ArrowShape.straight) {

@@ -17,6 +17,33 @@ export interface ITileSize {
 }
 
 /**
+ * How large an endpoint's drag handle may be when its tile has not declared a size for it.
+ *
+ * A handle wider than the object it marks covers whatever sits beside that object, invisibly: a
+ * geometry point's bounding box is 14px and a table row is 22px, so a single fixed radius swallows
+ * a point's neighbors and a row's label. The floor is the radius graph and numberline already pass
+ * by hand for their own small points.
+ */
+export function fitNodeRadius(boundingBox?: { height: number, width: number } | null) {
+  const maxRadius = kAnnotationNodeDefaultRadius / 2;
+  if (!boundingBox) return maxRadius;
+  const halfSmallestSide = Math.min(boundingBox.width, boundingBox.height) / 2;
+  return Math.max(kSmallAnnotationNodeRadius, Math.min(maxRadius, halfSmallestSide));
+}
+
+const kMaxStemHitWidth = 11;
+const kMinStemHitWidth = 3;
+
+/**
+ * How wide the invisible band around a sparrow's stem that accepts a click may be. Full width on a
+ * long sparrow; narrowed on a short one, where an 11px band between endpoints 22px apart is a blob
+ * covering both of them and anything drawn between.
+ */
+export function fitStemHitWidth(endpointSeparation: number) {
+  return Math.max(kMinStemHitWidth, Math.min(kMaxStemHitWidth, endpointSeparation / 3));
+}
+
+/**
  * Find the point on the line from source to target that is closest to the input point.
  * @param source - The start point of the line.
  * @param target - The end point of the line.
@@ -43,6 +70,17 @@ const shortArcPeakScale = 1;
 const longArcPeakScale = .5;
 const shortArcLength = 100;
 const longArcLength = 300;
+
+/**
+ * How far from the line between its endpoints a new label is placed, at the least.
+ *
+ * The offset is otherwise a fraction of the arrow's length, which leaves almost nothing for a short
+ * one: between two adjacent table rows it works out at 11px, so the label lands on top of both
+ * endpoints and the rows they mark. Half a label chip plus an endpoint's radius clears all three.
+ * Screen pixels, so a zoomed tile gets the same clearance as an unzoomed one.
+ */
+const kMinPeakOffset = 24;
+
 export function getDefaultPeak(shape: ArrowShape, sourceX: number, sourceY: number, targetX: number, targetY: number) {
   const dx = targetX - sourceX;
   const dy = targetY - sourceY;
@@ -66,8 +104,9 @@ export function getDefaultPeak(shape: ArrowShape, sourceX: number, sourceY: numb
       : arcLength >= longArcLength ? longArcPeakScale
       : (arcLength - shortArcLength) / (longArcLength - shortArcLength)
         * (longArcPeakScale - shortArcPeakScale) + shortArcPeakScale;
-    const peakDx = Math.cos(perpendicularAngle) * arcLength * peakPercent;
-    const peakDy = Math.sin(perpendicularAngle) * arcLength * peakPercent;
+    const peakOffset = Math.max(kMinPeakOffset, arcLength * peakPercent);
+    const peakDx = Math.cos(perpendicularAngle) * peakOffset;
+    const peakDy = Math.sin(perpendicularAngle) * peakOffset;
     const peakX = mx + peakDx;
     const peakY = my + peakDy;
     return {

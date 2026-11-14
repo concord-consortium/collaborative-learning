@@ -1,15 +1,18 @@
 import classNames from "classnames";
 import { observer } from "mobx-react";
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 
 import { AnnotationNode } from "./annotation-node";
-import { getSparrowCurve, getSparrowStraight, ITileSize, kAnnotationNodeDefaultRadius } from "./annotation-utilities";
+import {
+  fitNodeRadius, fitStemHitWidth, getSparrowCurve, getSparrowStraight, ITileSize, kAnnotationNodeDefaultRadius
+} from "./annotation-utilities";
 import { AnnotationArrow } from "./annotation-arrow";
 import { boundDelta } from "../../models/annotations/annotation-utils";
 import {
-  IArrowAnnotation, kArrowAnnotationTextHeight, kArrowAnnotationTextWidth
+  IArrowAnnotation, ITextSize, kArrowAnnotationTextHeight, kArrowAnnotationTextWidth
 } from "../../models/annotations/arrow-annotation";
 import { IClueObject } from "../../models/annotations/clue-object";
+import { distanceBetweenPoints } from "../../utilities/math-utils";
 
 import SparrowDeleteButton from "../../assets/icons/annotations/sparrow-delete-button.svg";
 
@@ -30,7 +33,9 @@ interface IDragHandleProps {
 function DragHandle({
   centerRadius, draggingHandle, dragTarget, handleMouseDown, highlightRadius, startX, startY
 }: IDragHandleProps) {
-  const halfHeight = highlightRadius ?? kAnnotationNodeDefaultRadius;
+  // The hit square matches the circle AnnotationNode draws, which halves the same constant.
+  // A larger one covers neighboring objects, and their labels, invisibly.
+  const halfHeight = highlightRadius ?? kAnnotationNodeDefaultRadius / 2;
   return (
     <g
       className={classNames("drag-handle", { dragging: draggingHandle })}
@@ -98,12 +103,29 @@ export const ArrowAnnotationComponent = observer(
     const [editingText, setEditingText] = useState(false);
     const [tempText, setTempText] = useState(arrow.text ?? "");
     const [hoveringStem, setHoveringStem] = useState(false);
-    const inputRef = useRef<HTMLInputElement|null>(null);
+    const textChipRef = useRef<HTMLElement|null>(null);
+    const [textSize, setTextSize] = useState<ITextSize|undefined>();
+
+    // The document clamp needs the chip's rendered size, which only the DOM knows. Measured after
+    // every commit rather than on a dependency list: the chip first exists on whichever render the
+    // bounding boxes arrive, and nothing in this component changes to announce that. A chip inside a
+    // hidden layer measures zero, which is not a size worth clamping to. The equality check ends the
+    // update chain the lint rule warns about: an unchanged size returns the same object and React
+    // bails out of the re-render.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    useLayoutEffect(() => {
+      const chip = textChipRef.current;
+      if (!chip) return;
+      const { offsetHeight: height, offsetWidth: width } = chip;
+      if (!height || !width) return;
+      setTextSize(previous => previous?.height === height && previous?.width === width
+        ? previous : { height, width });
+    });
 
     useEffect(() => {
       // Focus on the text input when we start editing
       if (editingText && !readOnly) {
-        inputRef.current?.focus();
+        textChipRef.current?.focus();
       }
     }, [editingText, readOnly]);
     useEffect(() => {
@@ -137,7 +159,7 @@ export const ArrowAnnotationComponent = observer(
       textMinXOffset, textMaxXOffset, textMinYOffset, textMaxYOffset
     } = arrow.getPoints(
       documentLeft, documentRight, documentTop, documentBottom, dragOffsets,
-      sourceBB, sourceViewTransform, targetBB, targetViewTransform, sourceTileSize
+      sourceBB, sourceViewTransform, targetBB, targetViewTransform, sourceTileSize, textSize
     );
     const missingData = sourceX === undefined || sourceY === undefined || textCenterX === undefined
       || textCenterY === undefined || targetX === undefined || targetY === undefined;
@@ -244,7 +266,8 @@ export const ArrowAnnotationComponent = observer(
             const currentDragOffsets = determineDragOffsets(_dragType, e2.clientX, e2.clientY, e.clientX, e.clientY);
             const { textCenterX: tcX, textCenterY: tcY, textOriginX: toX, textOriginY: toY }
               = arrow.getPoints(documentLeft, documentRight, documentTop, documentBottom,
-                  currentDragOffsets, sourceBB, sourceViewTransform, targetBB, targetViewTransform);
+                  currentDragOffsets, sourceBB, sourceViewTransform, targetBB, targetViewTransform,
+                  undefined, textSize);
             if (tcX !== undefined && tcY !== undefined) {
               arrow.setTextOffset(tcX - toX, tcY - toY);
             }
@@ -268,8 +291,12 @@ export const ArrowAnnotationComponent = observer(
       window.addEventListener("mouseup", handleMouseUp);
     }
 
+    // A tile may declare how big its nodes are; the rest get one that fits the object being marked.
     const sourceNodeRadii = getObjectNodeRadii(arrow.sourceObject);
     const targetNodeRadii = getObjectNodeRadii(arrow.targetObject);
+    const sourceHighlightRadius = sourceNodeRadii?.highlightRadius ?? fitNodeRadius(sourceBB);
+    const targetHighlightRadius = targetNodeRadii?.highlightRadius ?? fitNodeRadius(targetBB);
+    const stemHitWidth = fitStemHitWidth(distanceBetweenPoints([sourceX, sourceY], [targetX, targetY]));
 
     const displayText = arrow.text?.trim();
     const hasText = !!displayText;
@@ -282,6 +309,7 @@ export const ArrowAnnotationComponent = observer(
           <AnnotationArrow
             className="background-arrow"
             shape={arrow.shape}
+            hitStrokeWidth={stemHitWidth}
             hideArrowhead={true}
             peakX={textCenterX} peakY={textCenterY}
             setHovering={setHoveringStem}
@@ -318,7 +346,7 @@ export const ArrowAnnotationComponent = observer(
                   onBlur={handleBlur}
                   onChange={handleChange}
                   onKeyDown={handleKeyDown}
-                  ref={inputRef}
+                  ref={element => { textChipRef.current = element; }}
                   style={{ width: `calc(${tempText.length}ch + 2ch)`}}
                   type="text"
                   value={tempText}
@@ -328,6 +356,7 @@ export const ArrowAnnotationComponent = observer(
                   className={textButtonClasses}
                   onClick={e => handleTextClick(e)}
                   onMouseDown={e => handleMouseDown(e, "text")}
+                  ref={element => { textChipRef.current = element; }}
                 >
                   {displayText || "Add text"}
                 </button>
@@ -335,21 +364,24 @@ export const ArrowAnnotationComponent = observer(
             }
           </div>
         </foreignObject>
+        {/* Painted last so an endpoint is never lost under a label that happens to cover it. The
+            handles are sized to the object they mark, so what they take from a label is a disc at
+            each end rather than the whole chip. */}
         <DragHandle
-          centerRadius={sourceNodeRadii?.centerRadius}
+          centerRadius={sourceNodeRadii?.centerRadius ?? sourceHighlightRadius / 2}
           draggingHandle={draggingSource}
           dragTarget="source"
           handleMouseDown={handleMouseDown}
-          highlightRadius={sourceNodeRadii?.highlightRadius}
+          highlightRadius={sourceHighlightRadius}
           startX={sourceX}
           startY={sourceY}
         />
         <DragHandle
-          centerRadius={targetNodeRadii?.centerRadius}
+          centerRadius={targetNodeRadii?.centerRadius ?? targetHighlightRadius / 2}
           draggingHandle={draggingTarget}
           dragTarget="target"
           handleMouseDown={handleMouseDown}
-          highlightRadius={targetNodeRadii?.highlightRadius}
+          highlightRadius={targetHighlightRadius}
           startX={targetX}
           startY={targetY}
         />
