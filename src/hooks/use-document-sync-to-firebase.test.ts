@@ -5,8 +5,8 @@ import { UseMutationOptions } from "react-query";
 import firebase from "firebase/app";
 import { Firebase } from "../lib/firebase";
 import { Firestore } from "../lib/firestore";
-import * as senderModule from "../models/document/content-save-sender";
-import { ContentSaveSender } from "../models/document/content-save-sender";
+import { ContentSaveSender, kMinimumSaveGapMs } from "../models/document/content-save-sender";
+import * as senderModule from "../models/document/get-content-save-sender";
 import { DocumentModel, createDocumentModel } from "../models/document/document";
 import {
   LearningLogDocument, PersonalDocument, PlanningDocument, ProblemDocument, ProblemPublication
@@ -623,7 +623,7 @@ describe("useDocumentSyncToFirebase hook", () => {
         const [senderDocument, options] = getSender.mock.calls[0];
         expect(senderDocument).toBe(document);
         expect(mockRef).toHaveBeenCalledWith(`${user.id}/content/${document.key}`);
-        expect(options.contentRef).toBe(mockRef.mock.results[0].value);
+        expect(options.rtdbEnvelopeRef).toBe(mockRef.mock.results[0].value);
 
         // the disconnect handlers are set up before the first write only
         options.beforeWrite?.();
@@ -670,6 +670,32 @@ describe("useDocumentSyncToFirebase hook", () => {
         expect(getSender).not.toHaveBeenCalled();
       } finally {
         delete (window as any).DISABLE_FIREBASE_SYNC;
+        getSender.mockRestore();
+      }
+    });
+
+    it("syncs metadata while the document catches up, and saves content once it has", () => {
+      const getSender = jest.spyOn(senderModule, "getContentSaveSender");
+      try {
+        const { user, fb, firestore, document } = specArgs(PersonalDocument, "xyz");
+        document.setHistoryCatchUpPending(true);
+        const { rerender } = renderHook(() => useDocumentSyncToFirebase(user, fb, firestore, document));
+        expect(getSender).not.toHaveBeenCalled();
+        expect(mockOnlineStatusListenerOn).not.toHaveBeenCalled();
+
+        document.setVisibility("public");
+        document.setTitle("New Title");
+        document.setProperty("foo", "bar");
+        jest.runAllTimers();
+        expect(mockUpdate).toHaveBeenCalledWith({ visibility: "public" });
+        expect(mockUpdate).toHaveBeenCalledWith({ title: "New Title" });
+        expect(mockUpdate).toHaveBeenCalledWith({ foo: "bar" });
+
+        document.setHistoryCatchUpPending(false);
+        rerender();
+        expect(getSender).toHaveBeenCalledTimes(1);
+        expect(mockOnlineStatusListenerOn).toHaveBeenCalledTimes(1);
+      } finally {
         getSender.mockRestore();
       }
     });
@@ -755,7 +781,7 @@ describe("useDocumentSyncToFirebase hook", () => {
       expect(mockSetLastEditedNow).not.toHaveBeenCalled();
 
       commits.commit(await addTile());
-      jest.advanceTimersByTime(senderModule.kMinimumSaveGapMs);
+      jest.advanceTimersByTime(kMinimumSaveGapMs);
       expect(contentUpdate).toHaveBeenCalledTimes(2);
       await resolveWrites();
       expect(mockSetLastEditedOnDisconnect).toHaveBeenCalledTimes(1);

@@ -38,18 +38,23 @@ export class NodeEditorMST extends NodeEditor<Schemes> {
       return undefined as unknown as Schemes['Node'];
     }
 
-    const existingReteNode = this.reteNodesMap[id];
-    if (existingReteNode) {
-      return existingReteNode;
-    } else {
-      const reteNode = this.createReteNodeFromNodeModel(id, mstNode.data);
-      if (reteNode) {
-        this.reteNodesMap[id] = reteNode;
-      }
-      // We have to hack this to make the types happy, this is a bug
-      // in the Rete type system
-      return reteNode as unknown as Schemes['Node'];
+    // Undo and history playback remove a node and put it back by applying patches, which creates a
+    // new MST instance with the same id. A cached Rete node bound to the removed instance is stale.
+    const existingReteNode = this.reteNodesMap[id] as IBaseNode | undefined;
+    if (existingReteNode?.model === mstNode.data) {
+      return existingReteNode as unknown as Schemes['Node'];
     }
+    existingReteNode?.dispose();
+
+    const reteNode = this.createReteNodeFromNodeModel(id, mstNode.data);
+    if (reteNode) {
+      this.reteNodesMap[id] = reteNode;
+    } else {
+      delete this.reteNodesMap[id];
+    }
+    // We have to hack this to make the types happy, this is a bug
+    // in the Rete type system
+    return reteNode as unknown as Schemes['Node'];
   }
 
   /**

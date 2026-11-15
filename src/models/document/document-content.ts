@@ -25,6 +25,7 @@ import {
 } from "../shared/shared-data-set";
 import { IClueObjectSnapshot } from "../annotations/clue-object";
 import { isRowListSnapshotIn, isRowListSnapshotOut } from "./row-list";
+import { getAppConfig } from "../tiles/tile-environment";
 
 
 export interface ITileCopyPosition {
@@ -398,7 +399,7 @@ export const DocumentContentModel = DocumentContentModelWithHighlights.named("Do
 
       // Handle any special logic needed when copying
       if (typeInfo?.updateContentForCopy) {
-        newTile.content = typeInfo.updateContentForCopy(newTile.content, isCrossingDocuments);
+        newTile.content = typeInfo.updateContentForCopy(newTile.content, isCrossingDocuments, getAppConfig(self));
       }
 
       // Save the updated tile so we can add it to the document

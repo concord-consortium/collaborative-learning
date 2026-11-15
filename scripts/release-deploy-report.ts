@@ -2,7 +2,8 @@
 
 /**
  * For the PRs in a release, report when the functions, rules and indexes they change can be
- * deployed relative to the client release, from each PR's Deploy timing callout (see
+ * deployed, and when the migration scripts they change can be run, relative to the client release,
+ * from each PR's Deploy timing callout (see
  * "Deploy timing" in docs/deploy.md). Each part can deploy no earlier than its strictest PR allows;
  * PRs that touch a part without a callout entry are listed by author, so they can be asked.
  *
@@ -155,7 +156,7 @@ async function main() {
   }
 
   const touchingCount = prs.filter(pr => pr.touched.length).length;
-  console.log(`Checked ${prs.length} PRs; ${touchingCount} change functions, rules or indexes.\n`);
+  console.log(`Checked ${prs.length} PRs; ${touchingCount} change functions, rules, indexes or migrations.\n`);
   if (!rollup.length) console.log("Nothing to deploy besides the client.");
   for (const part of rollup) {
     const notes = [

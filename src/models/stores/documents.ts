@@ -17,6 +17,7 @@ import { logDocumentEvent } from "../document/log-document-event";
 import { TreeManagerLogger, TreeManagerType } from "../history/tree-manager";
 import { FirestoreHistoryManager, IFirestoreHistoryManagerArgs } from "../history/firestore-history-manager";
 import { FirestoreHistoryManagerConcurrent } from "../history/firestore-history-manager-concurrent";
+import { kHistoryStart } from "../history/session-exactness";
 import { UserContextProvider } from "./user-context-provider";
 import type { ActivityRecorder } from "./activity-recorder";
 
@@ -202,12 +203,43 @@ export const DocumentsModel = types
         if (!document.historyCatchUpPending || !(manager instanceof FirestoreHistoryManager)) {
           return Promise.resolve();
         }
-        // The content listener may have replaced the loaded content, along with its envelope.
-        catchUp = manager.catchUpAtLoad(document.savedEnvelope)
+        // The content listener may have replaced the loaded content, along with its envelope, before
+        // or during the catch-up. This client doesn't change the envelope: its sender doesn't save
+        // while the catch-up is pending.
+        catchUp = manager.catchUpAtLoad(() => document.savedEnvelope)
           .finally(() => document.setHistoryCatchUpPending(false));
         self.historyCatchUps.set(document, catchUp);
       }
       return catchUp;
+    },
+    /**
+     * Starts the catch-up over for an individual document whose content the content listener has
+     * replaced with different content. The session's exactness and catch-up were worked out for the
+     * content that was replaced, so saving from them could stamp the new content with entries it
+     * doesn't hold. The document catches up again from the new content's envelope when it is next
+     * opened for editing. A catch-up that is still running notices the replacement itself.
+     */
+    restartHistoryCatchUp(document: DocumentModelType) {
+      const treeManager = document.treeManagerAPI as TreeManagerType | undefined;
+      const manager = treeManager?.historyManager;
+      if (document.historyCatchUpPending || document.concurrent || document.isPublished
+          || !(manager instanceof FirestoreHistoryManager) || manager.isOtherUsersDocument) {
+        return;
+      }
+      self.historyCatchUps.delete(document);
+      treeManager!.exactness.restart();
+      manager.forgetCatchUp();
+      document.setHistoryCatchUpPending(true);
+    },
+    /**
+     * Marks a document this session has just created as caught up. Its history in Firestore is
+     * still empty, so it can be edited at once, and its exact saves start from the beginning of its
+     * history.
+     */
+    markNewDocumentCaughtUp(document: DocumentModelType) {
+      if (!document.historyCatchUpPending) return;
+      (document.treeManagerAPI as TreeManagerType).exactness.startAt(kHistoryStart);
+      document.setHistoryCatchUpPending(false);
     },
     setAppConfig(appConfig: AppConfigModelType) {
       self.appConfig = appConfig;
@@ -291,7 +323,7 @@ export const DocumentsModel = types
           treeManager,
           uploadLocalHistory: true,
           syncRemoteHistory: false,
-          loadedEnvelope: document.savedEnvelope,
+          loadedEnvelope: document.loadedEnvelope,
           onContentDrift: (message) => {
             const content = document.content;
             const snapshot = content && getSnapshot(content);
@@ -302,6 +334,9 @@ export const DocumentsModel = types
         };
         if (document.concurrent) {
           historyManagerArgs.syncRemoteHistory = true;
+          // A group document's history holds every change, so the document stays usable. Its saves
+          // stop instead, and the user is asked to report it (see save-stopped-notice.ts).
+          historyManagerArgs.onContentDrift = () => treeManager.exactness.markNotExact("saved-id-missing");
           const manager = new FirestoreHistoryManagerConcurrent(historyManagerArgs);
           treeManager.setHistoryManager(manager);
         } else {

@@ -91,6 +91,7 @@ class Canvas {
     // and when the document finally opens it can change the UI in a way the
     // tests don't expect.
     this.getPersonalDocTitle().should('contain', title);
+    cy.waitForDocumentCatchUp();
   }
 
   openDocumentWithTitle(subTab, title) {
@@ -102,6 +103,7 @@ class Canvas {
     cy.get('[data-test=list-item-icon-open-workspace]').click();
     cy.get(subTabSelector).click();
     cy.get(titlesSelector).contains(title).click();
+    cy.waitForDocumentCatchUp();
   }
 
   openDocumentWithTitleWithoutTabs(title) {
@@ -111,6 +113,7 @@ class Canvas {
     this.openFileMenu();
     cy.get('[data-test=list-item-icon-open-workspace]').click();
     cy.get(titlesSelector).contains(title).click();
+    cy.waitForDocumentCatchUp();
   }
 
   editTitlewithPencil(title) {

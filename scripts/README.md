@@ -7,6 +7,12 @@ For most scripts here you'll need Firebase credentials. You can get this by goin
 
 From that page if you click "Generate a new private key", it will download a json file. You should rename this file `serviceAccountKey.json` and move it to the the scripts folder.
 
+That key is for production. Get a key for staging the same way from
+<https://console.firebase.google.com/u/0/project/collaborative-learning-staging/settings/serviceaccounts/adminsdk>
+and save it as `serviceAccountKey.staging.json` in the scripts folder. Scripts read
+`serviceAccountKey.json`, so to run one against staging, move the production key aside, copy the
+staging key to `serviceAccountKey.json`, and put the production key back when you are done.
+
 Install the scripts' dependencies first with `npm ci` in this directory (or
 `npm --prefix scripts ci` from the repository root). Most scripts can be run from this directory
 using `npx tsx <script filename>`. The release scripts below are run from the repository root as
@@ -42,6 +48,24 @@ to in your local repo, so run `git fetch --tags` first. It exits non-zero if any
 `check-deploy-timing.ts` is the `Deploy Timing` PR check, and `release-deploy-report.ts` rolls up
 the Deploy timing callouts of every PR in a release. See "Deploy timing" in
 [docs/deploy.md](../docs/deploy.md) for what they read, and each script's header for its options.
+
+## Migration scripts
+
+New scripts that change data in Firestore or the Realtime Database go in `migrations/`. They are
+run by hand around a release, so a PR that adds or changes one needs a Deploy timing entry saying
+whether to run it before, with or after the client release, and the `Deploy Timing` check enforces
+that. See "Deploy timing" in [docs/deploy.md](../docs/deploy.md). Give a migration script a dry run
+by default, and a flag that makes it write. Run it against staging before production, a dry run
+and then the run that writes, with the staging key from "Local Setup" above. Scripts that only read or report stay in this folder, and
+so do older scripts that change data, such as `backfill-group-document-axes.ts` and those in
+`metadata-repair/`.
+
+### Repairing history entries stored out of order
+
+`migrations/fix-out-of-order-history.ts` moves history entries stored ahead of the entry that
+creates their tile, which make history playback fail at the start of a document. Its header has
+the commands and options, and the cases it skips. For a full repair, run it with `--any-tile-type`,
+trying it first on a subset with `--limit` or `--doc`.
 
 ## Running scripts that connect with the portal
 

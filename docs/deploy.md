@@ -17,9 +17,10 @@ See [deploy-setup.md in starter-projects](https://github.com/concord-consortium/
 ## Deploy timing
 
 The Firebase functions, the Firestore and Realtime Database rules, and the Firestore indexes are
-deployed separately from the CLUE client, and usually not at the same moment. So every PR that
-changes one of them says in its description when each part can be deployed, and why, in a
-callout like this:
+deployed separately from the CLUE client, and usually not at the same moment. Migration scripts,
+which change the data in Firestore or the Realtime Database, are run by hand, also separately from
+the client. So every PR that changes one of them says in its description when each part can be
+deployed or run, and why, in a callout like this:
 
 ```markdown
 > [!IMPORTANT]
@@ -35,11 +36,18 @@ callout like this:
 | functions | `functions-v1/`, `functions-v2/`, `authoring-api/`, any `shared/` file a function compiles, and `shared/package.json` and `shared/package-lock.json` |
 | rules | `firestore.rules`, `database.rules.json` |
 | indexes | `firestore.indexes.json` |
+| migrations | any file in `scripts/migrations/` |
 
 - **before**: safe to deploy any time from merge until the client release. The currently released
   client keeps working with it.
 - **with**: deploy just before or just after the client release, but not long before it.
 - **after**: needs the new client released first.
+
+For a migration script, the timing says when to run it. A script that repairs data the released
+client keeps producing is `after`: run before the release, it would miss whatever the released
+client writes until then. A PR has one `migrations` entry for all of its migration scripts; if they
+need different timings, give the latest and say in the reason when to run each. "Migration scripts"
+in [scripts/README.md](../scripts/README.md) says which scripts go in `scripts/migrations/`.
 
 `before` is the usual timing, so make a change `before` wherever it can be. `before` doesn't mean
 the part has to go out right away; it means it is safe to deploy early. Preparing a release usually

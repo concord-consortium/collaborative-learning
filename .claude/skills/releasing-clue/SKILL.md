@@ -28,7 +28,7 @@ These actions are gated, marked **[approve]** in the phase files:
 | git | creating branches or tags, `npm version`, commits, pushes |
 | GitHub | releases, workflow runs, opening PRs, PR titles, bodies, labels or comments, merging |
 | Portal | any write to a portal: clients, reports, resources, assignments |
-| Firebase | deploying functions, rules or indexes to any project |
+| Firebase | deploying functions, rules or indexes to any project; running a migration script that writes |
 | Google Cloud | any `gcloud` or `firebase` command that creates, updates or deletes something: probe deploys, function deletes, Cloud Run service or env changes, in any project |
 
 For each gated action:

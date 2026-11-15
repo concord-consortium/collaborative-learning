@@ -85,9 +85,10 @@ export interface ITileContentInfo {
    * If supplied, this function is called when a tile is being copied.
    * This allows tiles to handle any special logic needed beyond the standard updates of IDs.
    * For example, the Question tile uses this to ensure it's locked when copied across documents.
+   * `appConfig` is the configuration of the unit the tile is copied into, when there is one.
    * Returns the updated content.
    */
-  updateContentForCopy?: (content: any, acrossDocuments: boolean) => any;
+  updateContentForCopy?: (content: any, acrossDocuments: boolean, appConfig?: AppConfigModelType) => any;
 }
 
 const gTileContentInfoMap: Record<string, ITileContentInfo> = {};

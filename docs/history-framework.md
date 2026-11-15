@@ -2,6 +2,8 @@
 
 The history framework in CLUE is used for recording changes to documents to support undo/redo and time traveling.
 
+More docs about the framework, including parts that are planned but not built yet, are in [history-framework/](history-framework/README.md).
+
 The framework is based on MobX State Tree (MST). It is intended to support iframe based tile implementations. With iframe based tiles there will be multiple MST trees that need to coordinate with each other. However, we do not currently have any iframe tiles, so this capability of the system hasn't been tested yet.
 
 The main parts of the system are:
@@ -97,9 +99,11 @@ Note that position `0` corresponds to no entry at all, so a position is not simp
 
 - `TreeManager.currentHistoryEntry` is `history[numHistoryEventsApplied - 1]`.
 - `logCurrentHistoryEvent` logs `historyEventId` alongside `historyIndex`, where the index is the position — so `historyIndex === indexOf(historyEventId) + 1`.
-- `revisionId` names the last entry the document includes. The envelope's `lastHistoryEntryId` does too when its `exactThrough` names it; otherwise it is a lower bound, since an intermediate save's content can hold later entries.
+- `revisionId` names the last entry the document includes. The envelope's `lastHistoryEntryId` does too when its `exactThrough` names it; otherwise it doesn't say which entries the content holds (see [content-saves.md](history-framework/content-saves.md)).
 
 So restoring the moment an id names means seeking to `index + 1`, which is what `FirestoreHistoryManager.moveToHistoryEntryAfterLoad` does for a `studentDocumentHistoryId` link. The `"first"` sentinel that `logDocumentEvent` emits for a change made before the document had any entry is position `0`.
+
+**Where playback starts.** Playback's copy of the document starts at the newest entry in Firestore. An individual document's content can be behind that: another user's copy is never caught up, and neither is the owner's until it is opened for editing (see "Catching up at load" in [history-framework/load-entries.md](history-framework/load-entries.md)). So the canvas gives the copy's history manager the last entry the live content holds (`getContentHistoryEntryId` in `content-history-entry.ts`). That is the last entry the catch-up applied, while the content is still the one it applied them to, or else the envelope's `lastHistoryEntryId` when it has `exactThrough`. It isn't known for an envelope without `exactThrough`, for a group document, which follows its history live, or once the session has recorded entries, and then the copy starts at the newest entry as before. Once the history loads, the manager seeks the copy from the content's position to the newest entry, and reports `HISTORY_CATCHING_UP` until the seek finishes, so the slider appears only with content that holds every entry. A seek that stops on an entry that doesn't apply leaves playback where it stopped, with the failure marked.
 
 Be aware that a log event's `documentHistoryId` is the last *completed* entry when the event was written, and history entries complete asynchronously (`TreeMonitor.recordAction` awaits the manager before `completeHistoryEntry` appends). So for a tile that logs from `onTileAction` — which MST calls before the action mutates state — the id names the entry *before* the change being logged, while a tile that logs after its edits have settled (the text tile logs on blur) names the entry the change created. Seeking to `index + 1` restores the document as it stood when the event was logged in both cases; it cannot recover a change whose entry did not exist yet.
 
@@ -180,15 +184,7 @@ sequenceDiagram
 
 ## Load entries
 
-A tile or shared model type can register a schema version and a converter (`ISchemaVersionInfo`). When a document is loaded, `createDocumentModel` converts its old tiles and shared models before MST sees them (`convertContentJson` in `schema-conversion.ts`), and records the conversion as a **load entry**: a history entry with `isLoadEntry: true`. Its patches turn each converted model's stored JSON into its converted JSON, and its inverse patches turn it back. It is not undoable. For how to change a tile's schema, see [tile-schema-changes.md](tile-schema-changes.md).
-
-The load entry is not added to the history when the document loads. The TreeManager holds it as `pendingLoadEntry` and adds it just before the first entry that changes the content (`completeHistoryEntry`), so it is saved along with the converted content it describes. A document that is only viewed never adds one. If the content is replaced before then (`DocumentModel.setContent`), the pending entry is rebuilt from the new content.
-
-Concurrent documents (group and class-wide) are not converted this way. Their snapshot preprocessors convert them as MST loads them, and nothing is recorded.
-
-**A load entry is never applied to an MST tree.** Its patches are separate diffs in each direction rather than paired changes, and the live tree has already loaded the converted models. Undo and redo never reach one because it isn't undoable. Playback gives it no patches and crosses it with model replacements instead (see below).
-
-An individual document whose envelope has `exactThrough` and is behind its history applies the missing entries, up to 200, when its owner opens it for editing (`TreeManager.applyEntriesAtLoad`). When the load converted old models, or a missing entry is a load entry, those entries are applied to the document's JSON as stored instead: the pending load entry is undone, the entries are applied with `applyJsonPatches`, and the result is set as the content (`DocumentModel.setContent`), which converts it again and rebuilds the pending load entry.
+When a document loads, CLUE converts its old tiles and shared models to their current schema, and records the conversion as a **load entry**: a history entry with `isLoadEntry: true`, which is never undoable and never applied to an MST tree. An individual document opened for editing also catches up to its history then, applying the entries its saved content is missing. Both are described in [history-framework/load-entries.md](history-framework/load-entries.md).
 
 ## Playback across conversions
 
@@ -329,6 +325,8 @@ When a document is being edited it does not load all of the previous history ent
 ### Ordering of history entries
 
 Locally the history entries are ordered in the `TreeManager.document.history`.  When a user wants to replay the history all of the history entries are downloaded from Firestore ordered by an `index` field on the history entry. These downloaded history entries are set as the `TreeManager.document.history`.
+
+An entry is added to `TreeManager.document.history` when it completes, not when it starts. While it is recording it is *open*, and it stays open across the awaited steps of recording it, such as a shared-model update. An entry made in the meantime completes first, so it comes first in history. If the open entry adds a tile and the other entry changes that tile, the history has the change before the tile exists, and playback can't move back past the tile's creation. [history-framework/start-editing-entry.md](history-framework/start-editing-entry.md) describes how CLUE hit this, and the script that repairs such histories.
 
 In addition to the `index` field the history entries in Firestore include a `previousEntryId`, which could help if entries get out of order and we need to figure out what happened. The Firestore entries also include a `created` server timestamp which would be useful for debugging issues.
 

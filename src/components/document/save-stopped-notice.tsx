@@ -15,17 +15,18 @@ export interface ISaveStoppedNoticeState {
 }
 
 /**
- * The notice a group document shows once its session stops being exact, until it is dismissed.
+ * The notice a concurrent document shows once its session stops being exact, until it is dismissed.
  * Call it from an observer, so the notice appears when the session stops being exact.
  */
 export function useSaveStoppedNotice(document: DocumentModelType): ISaveStoppedNoticeState | undefined {
-  const [dismissedReason, setDismissedReason] = useState<NotExactReason>();
+  // The component can be kept when its pane shows another document, so a dismissal names its document.
+  const [dismissed, setDismissed] = useState<{ document: DocumentModelType, reason: NotExactReason }>();
   const treeManager = document.treeManagerAPI as TreeManagerType | undefined;
   const reason = document.concurrent ? treeManager?.exactness.notExactReason : undefined;
-  if (!reason || reason === dismissedReason) return undefined;
+  if (!reason || (dismissed?.document === document && dismissed.reason === reason)) return undefined;
   const repeated = reason === "unrecorded-change" && isRepeatedUnrecordedChange(document.key);
   const notice = getSaveStoppedNotice(reason, repeated);
-  return notice && { reason, notice, dismiss: () => setDismissedReason(reason) };
+  return notice && { reason, notice, dismiss: () => setDismissed({ document, reason }) };
 }
 
 interface IProps {
@@ -61,7 +62,7 @@ export const SaveStoppedNotice: React.FC<IProps> = ({ state: { reason, notice, d
     <div className="save-stopped-notice" ref={noticeRef} data-testid="save-stopped-notice">
       <div className="save-stopped-notice-panel" ref={panelRef} tabIndex={-1} role="alertdialog"
           aria-labelledby={titleId} aria-describedby={messageId}>
-        <div className="save-stopped-notice-title" id={titleId}>Saving stopped</div>
+        <div className="save-stopped-notice-title" id={titleId}>{notice.title}</div>
         <p id={messageId}>{notice.message}</p>
         <p className="save-stopped-notice-code">Code: {reason}</p>
         <div className="save-stopped-notice-buttons">

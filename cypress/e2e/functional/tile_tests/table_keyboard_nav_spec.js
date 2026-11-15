@@ -175,12 +175,11 @@ context('Table Tile Keyboard Navigation', function () {
     cy.focused().closest('.primary-workspace .rdg').should('exist');
 
     // -------------------------------------------------------------------------
-    // Header rename Escape exits edit mode.
+    // Header rename: cursor keys stay in the editor, and Escape exits edit mode.
     // createHeaderEscapeHandler returns "handled" when the rename input is
     // focused, so the rename editor closes without exiting the trap.
     // (Done last because the post-rename trap state breaks Tab assertions.)
     // -------------------------------------------------------------------------
-    cy.log('Header rename: Escape exits edit mode without changing the column name');
     // Reset state from the previous Tab-cycle assertions: click a body cell
     // to return focus to a known state, then the matching helper-style
     // pattern (click + click) reliably opens rename mode.
@@ -194,6 +193,25 @@ context('Table Tile Keyboard Navigation', function () {
       cy.get('.primary-workspace .column-header-cell .editable-header-cell .header-name').eq(0).click();
       cy.get('.primary-workspace .column-header-cell .editable-header-cell .header-name').eq(0).click();
       cy.get('.primary-workspace .column-header-cell .editable-header-cell input').should('exist').focus();
+
+      cy.log('Header rename: arrow keys and End move the cursor instead of leaving the editor');
+      // The editor opens with the whole name selected; ArrowLeft collapses the
+      // selection to the start.
+      cy.realPress('ArrowLeft');
+      cy.get('.primary-workspace .column-header-cell .editable-header-cell input')
+        .should('be.focused')
+        .should(($input) => {
+          expect($input[0].selectionStart).to.equal(0);
+          expect($input[0].selectionEnd).to.equal(0);
+        });
+      cy.realPress('End');
+      cy.get('.primary-workspace .column-header-cell .editable-header-cell input')
+        .should('be.focused')
+        .should(($input) => {
+          expect($input[0].selectionStart).to.equal(originalName.length);
+        });
+
+      cy.log('Header rename: Escape exits edit mode without changing the column name');
       cy.realPress('Escape');
       cy.get('.primary-workspace .column-header-cell .editable-header-cell input').should('not.exist');
       cy.get('.primary-workspace .column-header-cell .editable-header-cell .header-name')

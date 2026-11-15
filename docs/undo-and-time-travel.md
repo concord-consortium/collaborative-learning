@@ -42,6 +42,20 @@ A background entry is never undoable, so `asBackground()` implies `withoutUndo()
 
 The child-action rule is the same as for `withoutUndo`. When the action is called from another action, its changes belong to the parent's entry, which may hold a person's change, so `asBackground()` is ignored with a warning. The entry is background only if the parent action called `asBackground()` itself. Pass `unlessChildAction: true` to skip the warning when the action is sometimes called as a child on purpose.
 
+## Don't change the document when a tile mounts
+
+A change a tile makes to its content from a component's mount, such as copying settings from the
+unit configuration, is recorded as a history entry of its own at whatever moment the component
+mounts. It can be stored before the entry that added the tile, which makes history playback fail at
+the start of the document (see "Ordering of history entries" in
+[history-framework.md](history-framework.md)).
+
+Set such state when the tile is created instead: read the unit configuration in the tile's
+`defaultContent` and `updateContentForCopy`, which both receive `appConfig`. `updateContentForCopy`
+runs for every copy, in the same document or from another one. A tile that needs to refresh the
+state each time its document is opened has no good place for that yet; see
+[history-framework/start-editing-entry.md](history-framework/start-editing-entry.md).
+
 ## Grouping Changes
 
 You will want to group changes into a single entry in some cases. Otherwise a user will have to undo multiple times when they'd expect to only undo once.

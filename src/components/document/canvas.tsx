@@ -17,6 +17,7 @@ import { transformCurriculumImageUrl } from "../../models/tiles/image/image-impo
 import { TreeManagerType } from "../../models/history/tree-manager";
 import { ObjectBoundingBox } from "../../models/annotations/clue-object";
 import { FirestoreHistoryManager } from "../../models/history/firestore-history-manager";
+import { getContentHistoryEntryId } from "../../models/history/content-history-entry";
 import { PlaybackComponent } from "../playback/playback";
 import {
   ITileApiInterface, TileApiInterfaceContext, EditableTileApiInterfaceRefContext, AddTilesContext, TileApiInterface
@@ -400,7 +401,9 @@ class _CanvasComponent extends BaseComponent<IProps, IState> {
         userContextProvider: this.stores.userContextProvider,
         treeManager,
         uploadLocalHistory: false,
-        syncRemoteHistory: true
+        syncRemoteHistory: true,
+        // The live document's content can be behind its history, so playback moves the copy forward.
+        contentEntryId: getContentHistoryEntryId(this.props.document)
       });
       treeManager.setHistoryManager(this.historyManager);
 

@@ -59,6 +59,8 @@ found more problems in how saves are sent:
   program at 20 Hz, on individual and group documents.
 - **An individual document's content keeps being saved even when its history can't settle.**
 - **An individual document loaded behind its history catches up when it is opened for editing.**
+- **Playback opens at the newest entry, with content that holds it**, for a teacher's or other
+  viewer's copy of an individual document too.
 - **A tree-manager exchange can't hold an entry open forever.**
 - **Saves are sent one at a time, always newest-wins, with visible failure.**
 - **Group documents make fewer redundant saves**, per the GD-18 design.
@@ -72,7 +74,6 @@ found more problems in how saves are sent:
 - **One save and load mechanism for every document.** CLUE-788 section 3. CLUE-751 writes its rules
   so they carry over (section 2 below).
 - **The race in the group-document upload path.** See "Known gaps". It is left to GD-19.
-- **Starting playback from the saved id.** CLUE-773's follow-up does that.
 - **Timing out running MST flows, and a keep-alive API.** Only tree-manager exchanges time out
   (section 4).
 - **Ordered retries of failed individual-document uploads.** See "Known gaps".
@@ -143,15 +144,21 @@ optional fields next to `lastHistoryEntryId`:
 The save uses `update()`, which merges fields, so each save clears the other kind's field: an exact
 save writes `notExact: null`, and an intermediate save writes `exactThrough: null`.
 
-**Every save is stamped.** An intermediate save stamps the last entry from this session that has
-committed, or, when none has, the last entry the load caught up to, or else the loaded envelope's id. So every id ever written is in Firestore, and
-is a lower bound on what the content holds.
+**What an intermediate save is stamped with.** It stamps the last entry from this session that has
+committed, or, when none has, the last entry the load caught up to, or else the loaded envelope's
+id. With none of those, it has no stamp. The stamp says nothing reliable about the rest of the
+content: the content can hold entries after it that hadn't committed, and after a catch-up that
+stopped short, it lacks the entries the catch-up skipped, although this session's entries chain
+after them. A loaded id can also be one Firestore doesn't have (`saved-id-missing`). So
+`lastHistoryEntryId` is exact when `exactThrough` is trusted, and otherwise unknown, kept as
+evidence for debugging.
 
 **What readers can rely on:**
 
 | Reader asks | Uses |
 |---|---|
-| "Is entry X saved?" (activity recorder, drift check, CLUE-773's conversion entry order) | `lastHistoryEntryId` from any save. It is always a lower bound. |
+| "Has this session's entry X been saved?" (activity recorder) | The id this client's own save was stamped with, compared only with this session's entries, which all of its saves hold. |
+| "Is the saved id in Firestore?" (drift check, group documents only) | `lastHistoryEntryId` from any save. Group documents make no intermediate saves. |
 | "Is the content exactly the state at X?" (playback start, group-document load, GD-19's `tips`) | `lastHistoryEntryId` only when `exactThrough` is trusted, and only back to its `since`. Otherwise fall back as for an old envelope. |
 
 ### 2. Snapshot saving
@@ -239,11 +246,11 @@ documents already do at load. This restores edits that reached history but not t
 user sees their last few seconds of work come back, and it keeps the next entry's `previousEntryId`
 and the content in agreement.
 
-Only an envelope with a trusted `exactThrough` is caught up. An unmarked envelope's id is only a lower bound: an
-intermediate save's content can already hold entries that hadn't committed when it was stamped, and
-older envelopes under-claim the same way. Applying the entries after that id could apply some of them
-twice. So an unmarked envelope whose id isn't the last entry opens with the content as saved, the
-session is not exact, and the gap is logged.
+Only an envelope with a trusted `exactThrough` is caught up. An unmarked envelope's id doesn't say
+what its content holds: an intermediate save's content can already hold entries that hadn't
+committed when it was stamped, and older envelopes under-claim the same way. Applying the entries
+after that id could apply some of them twice. So an unmarked envelope whose id isn't the last entry
+opens with the content as saved, the session is not exact, and the gap is logged.
 
 The catch-up runs only for documents the current user owns, and not for publications. Only the owner
 edits and saves an individual document, so other viewers (teachers, other students, exemplars) open
@@ -253,17 +260,33 @@ It runs when the owner opens the document for editing, not when the document is 
 other-documents listener loads every personal document and learning log when the app starts, so a
 catch-up at load would query Firestore for each one. An owned document is loaded marked as not
 caught up, and its catch-up starts when it is opened for editing, or before tiles are copied into it.
-While it isn't caught up, its toolbar keeps the tools that don't change it (Edit among them), so it can
-still be viewed and opened for editing.
+A document shown in the workspace catches up too, even read-only in the comparison pane, since that
+pane shows the workspace's editing toolbar. Elsewhere a document is shown read-only with a toolbar
+whose tools don't change it, so it can still be viewed, and its Edit tool opens it for editing.
+
+A document this session created skips the catch-up. Its history in Firestore is still empty, so it
+opens caught up and exact from the beginning of its history (`since: "first"`). Without this, every
+new document showed the spinner for the Firestore query that finds its last entry, and the tools that
+copy tiles into it ignored clicks meanwhile.
 
 While a document isn't open for editing, the RTDB content listener can replace its content with what
-the RTDB holds. It records the envelope that content came from in the document's `savedEnvelope`, and
-the catch-up starts from that envelope rather than the one first loaded.
+the RTDB holds. It records the envelope that content came from in the document's `savedEnvelope`,
+and the catch-up starts from that envelope rather than the one first loaded. The listener can also
+replace the content while the catch-up reads Firestore, if the user leaves the document and saves it
+from another tab or device in that time. The catch-up then applies nothing, and the session isn't
+exact (`catch-up-content-replaced`).
 
 As soon as the sender starts after a catch-up that applied entries, it saves the caught-up content,
 stamped with the last entry applied, unless an entry has committed since or a snapshot couldn't be
 used then. Otherwise the RTDB content would stay behind its history until the next edit committed,
 and the content listener would bring that older content back once the document closed.
+
+The caught-up content isn't always saved: a snapshot can't be used while the load's conversion is
+pending, and the workspace's read-only comparison pane has no sender. So when the listener replaces
+a caught-up document's content with different content, the session starts over. The document is
+marked as not caught up, its exactness and catch-up are forgotten, and the next open for editing
+catches it up from the new content's envelope. Content the listener brings back unchanged, such as
+this client's own save, leaves the session alone.
 
 The catch-up never loads the whole history. DataFlow and Simulator documents can have very large
 histories, and today an individual load reads only the last entry (`getLastHistoryEntry`, a
@@ -293,12 +316,31 @@ way:
 
 Opening the document for editing waits for the catch-up: one more query.
 Applying entries after the user has started editing would collide with their new entries, so a
-document opened for editing shows a spinner in place of its toolbar and content until the catch-up
-finishes, and its 4-up corner stays read-only. Showing the document read-only meanwhile would leave a
-toolbar that ignores clicks. A gap over the cap doesn't wait.
+document opened for editing, or shown in the workspace's comparison pane, shows a spinner in place of
+its toolbar and content until the catch-up finishes, and its 4-up corner stays read-only. Showing the document read-only meanwhile would leave a
+toolbar that ignores clicks. A gap over the cap doesn't wait. Only the content waits: the title bar
+stays usable, and its visibility, title and properties are saved while the catch-up runs.
 
 If an entry fails to apply, the document opens with what applied, and the session is not exact. The
 failure is logged.
+
+**Playback of content behind its history.** Playback builds its copy from the live document and
+used to assume that content held every entry in Firestore. A viewer's copy is never caught up, and
+neither is the owner's before it is opened for editing, so scrubbing back undid entries the content
+never had. Now the playback copy starts where the live document's content actually is, and is moved
+forward to the newest entry before the history viewer shows its controls, so a teacher opening it
+sees the student's latest state. The content's position is:
+
+- after the last entry the catch-up applied, while the content is still the one the catch-up started
+  from;
+- otherwise after the envelope's entry, when the envelope has a trusted `exactThrough`;
+- otherwise unknown, and playback assumes the newest entry, as before. That covers an unmarked
+  envelope, group documents, which follow their history live, and a document this session has
+  recorded entries in.
+
+If an entry fails to apply on the way forward, playback opens at the last position it reached, with
+the failure marked as for any other move. While the copy moves forward, the history viewer says it is
+loading the latest changes.
 
 **Whether a load is exact.** A load is exact when the envelope had a trusted `exactThrough` and any
 missing entries applied cleanly. Then its `since` carries forward. An unmarked envelope at Firestore's last
@@ -323,13 +365,15 @@ individual documents; snapshot pre-processor changes on group documents, and oth
 changes on any document, are not detected (see "Known gaps").
 
 **Catching up converted content.** The entries a load is missing were recorded against the stored
-format, so they can't be applied to converted content. When the load converted old models, or a
-missing entry is a load entry, the catch-up applies them to the stored JSON instead: it undoes the
-pending load entry, applies the entries as JSON patches, each all or nothing, and sets the result as
-the content, which converts it again and rebuilds the pending load entry. A load entry among the
-missing entries is applied like any other: it is one a session made at load and uploaded with the
-edit after it, before its content save failed. Entries after it are in the current format, and the
-result needs no conversion.
+format, so they can't be applied to converted content. The catch-up applies them to the stored JSON
+whether or not the load converted anything: it undoes the pending load entry, if there is one,
+applies the entries as JSON patches, each all or nothing, and sets the result as the content, which
+converts any old models again and rebuilds the pending load entry. The document isn't monitored
+until its catch-up finishes, so setting the content records no entry. If setting the content fails,
+the content stays as loaded, no entries count as applied, and the session is not exact. A load entry
+among the missing entries is applied like any other: it is one a session made at load and uploaded
+with the edit after it, before its content save failed. Entries after it are in the current format,
+and the result needs no conversion.
 
 ### 4. Open-entry timeout
 
@@ -421,8 +465,8 @@ log is the lasting record for metrics and debugging.
 
 ### 7. The activity recorder
 
-- It keeps receiving `onContentSaved` with the stamped id, from exact and intermediate saves. The id
-  is a lower bound, which is all it needs.
+- It keeps receiving `onContentSaved` with the stamped id, from exact and intermediate saves. It
+  only compares the id with this session's own entries, which every save this client makes holds.
 - On group documents it also learns about saves from the envelope listener. The stale-check means an
   active editor often skips its save because another member made it, and without this the editor's
   recorder would fall back to the 30-second timeout for every change.
@@ -433,7 +477,7 @@ log is the lasting record for metrics and debugging.
 A group document makes no intermediate saves, so once its session isn't exact this client saves no
 more content. Other members who are still exact keep saving, but a member working alone sees `Saving`
 for the rest of the session. Logs aren't watched routinely, so the user is told, and a report is how
-these bugs come to light. The sender logs `CONTENT_SAVE_GROUP_STOPPED` with the reason once per
+these bugs come to light. The sender logs `CONTENT_SAVE_CONCURRENT_STOPPED` with the reason once per
 session, and the document shows a notice over its content and toolbar, with the reason as a code for
 reports. Every reason is a bug, so the notice shouldn't come up often.
 
@@ -443,7 +487,7 @@ the store. The notice depends on what the user would see and whether reloading h
 
 | Reason | What breaks | Notice |
 |---|---|---|
-| An entry stayed open for 30 seconds (`timed-out-entry`) | Nothing visible: the entry's records reach history, and a late record becomes a new entry. | Can be closed; suggests reloading. |
+| An entry stayed open for 30 seconds (`timed-out-entry`) | Nothing visible: the entry's records reach history, and a late record becomes a new entry. | Can be closed; says the change may not have been saved correctly but later changes should be, and suggests reloading to check. |
 | A change with no entry (`unrecorded-change`) | The change is only on this screen. Later entries that build on it can fail to apply at load, for every member. | Can't be closed, and the document is read-only; asks for a reload. A second one for the same document in the same tab within 10 minutes (`sessionStorage`) means the reload didn't help, so it asks the user to tell their teacher instead. |
 | An entry fails to apply at load (`initial-apply-failed`) | Every load fails the same way, and edits made now chain after the failing entry. | Can't be closed; asks the user to tell their teacher. |
 | Another member's entry fails to apply (`remote-apply-failed`) | This screen is missing the entry. A reload helps when this tab's own changes caused the failure; otherwise the reload ends in `initial-apply-failed`. | Can't be closed; asks for a reload. |
@@ -506,10 +550,15 @@ attempted.
 
 ### Docs in the same PR
 
-- Add a GD-18 section to [group-docs-completed-work.md](../../group-docs/group-docs-completed-work.md),
-  in the style of its GD-6 section: the PR and CLUE-751 in the heading, what landed described on its
-  own terms, and links to the code. It doesn't link to this spec. What CLUE-751 left out goes in
-  group-docs-plan.md (GD-22's upload race) and in the docs CLUE-788 writes, not in a link to here.
+- Describe how content saves work in two reference docs, neither of which links to this spec:
+  [history-framework/content-saves.md](../../history-framework/content-saves.md) for every document,
+  and [group-doc-content-saves.md](../../group-docs/group-doc-content-saves.md) for what group
+  documents add. What CLUE-751 left out goes in their known gaps, in group-docs-plan.md (GD-22's
+  upload race) and in the docs CLUE-788 writes, not in a link to here.
+- Add a short GD-18 section to
+  [group-docs-completed-work.md](../../group-docs/group-docs-completed-work.md), in the style of its
+  other sections: the PR and CLUE-751 in the heading, what landed in a paragraph, and links to the two
+  reference docs.
 - Mark GD-18 done in [group-docs-plan.md](../../group-docs/group-docs-plan.md) and the folder
   [README](../../group-docs/README.md). Add the upload race to GD-22.
 - Update [group-docs-current-state.md](../../group-docs/group-docs-current-state.md) where it describes
@@ -521,8 +570,11 @@ attempted.
   [group-docs-jira-mapping.md](../../group-docs/group-docs-jira-mapping.md), and
   [group-docs-implementation-todos.md](../../group-docs/group-docs-implementation-todos.md) (remote
   entries that fail to apply, and saved content at an entry the history doesn't have).
-- Describe the catch-up and the envelope's id in [history-framework.md](../../history-framework.md),
-  and the envelope fields in [metadata-fields.md](../../document-metadata/metadata-fields.md).
+- Describe the envelope's id and where playback starts in
+  [history-framework.md](../../history-framework.md), the catch-up in
+  [history-framework/load-entries.md](../../history-framework/load-entries.md), which also takes over
+  the overview's "Load entries" section, and the envelope fields in
+  [metadata-fields.md](../../document-metadata/metadata-fields.md).
 
 The work CLUE-751 leaves for later (out-of-order entries, drift entries, one mechanism for every
 document) is written up by CLUE-788.
@@ -556,6 +608,8 @@ document) is written up by CLUE-788.
 - Individual documents apply missing entries when the owner opens them for editing, only from an
   envelope with a trusted `exactThrough`; a failure leaves the session not exact. The caught-up
   content is saved as soon as the sender starts.
+- Playback starts its copy where the live document's content is and moves it forward to the newest
+  entry before showing the slider, so a viewer of content behind its history sees the latest state.
 - The catch-up fetches only the missing entries, using `exactThrough`'s index. A gap of more than 200
   entries isn't fetched, and the session is not exact.
 - A group document whose session stops being exact shows a notice over the document, chosen by the
@@ -568,6 +622,17 @@ document) is written up by CLUE-788.
 - CLUE-751 lands before CLUE-760.
 - The upload race is a known gap left to GD-19. Drift repair is left to CLUE-788.
 - The group-docs folder is updated in this PR, and the GD-18 design is retired.
+- The document keeps two envelopes. `loadedEnvelope` is the one its content was loaded with, set once
+  and never changed, which the drift check and the group-document load read. This keeps CLUE-693's
+  decision that the loaded id isn't changed by this client's saves, and lets the history manager read
+  it whenever it is built. `savedEnvelope` is the RTDB envelope as this client knows it, updated by its
+  saves and by the content listener; the catch-up, the sender and playback read it, and a sender made
+  later for the same document starts from it. `savedLastHistoryEntryId` is removed.
+- The catch-up always applies the missing entries to the stored JSON, not to the live MST tree. One
+  path handles converted content, load entries and plain gaps alike. It runs after the document is
+  created, not before, so the catch-up stays lazy and also covers content the content listener
+  replaced. The stored JSON isn't kept on the document for it: it is rebuilt by undoing the pending
+  load entry.
 
 ## My calls (check these)
 
@@ -601,7 +666,7 @@ These were left to the builder in the design.
 - "From the beginning of history" is `since: "first"` (`kHistoryStart`).
 - The log events are `HISTORY_ENTRY_TIMED_OUT`, `HISTORY_LOAD_CATCH_UP_INCOMPLETE`,
   `HISTORY_REMOTE_APPLY_FAILED`, `CONTENT_SAVE_FALLBACK_START`, `CONTENT_SAVE_FALLBACK_END` and
-  `CONTENT_SAVE_GROUP_STOPPED`.
+  `CONTENT_SAVE_CONCURRENT_STOPPED`.
 - Retries wait 1 second, doubling to at most 30 seconds, and the indicator shows `Retrying` from the
   third consecutive failure. A successful write starts the count again.
 
@@ -634,12 +699,19 @@ These were left to the builder in the design.
   unmarked envelope behind Firestore applies nothing and is not exact; a failed apply opens with what
   applied and is not exact, and an error thrown while applying counts as an apply failure. Only the gap
   is fetched, bounded by the last entry, and nothing is fetched when the envelope is at the last entry.
+  A document this session created opens caught up and exact from the start, without a catch-up.
   A gap over 200 entries isn't fetched, is logged, and leaves the session not exact. A hole in the
   indexes or a broken `previousEntryId` chain stops the apply at the hole. A user who turns out not to
   be the owner gets no catch-up. The sender saves the caught-up content when it starts.
 - **Load of converted content:** the missing entries are applied to the stored JSON when the load
   converted old models, or when the gap holds a load entry even though the load converted nothing.
+  Content the entries reach that can't be set leaves the content as loaded, with nothing applied.
 - **Initial load (group):** an exact envelope's id sets where remote entries start applying.
+- **Playback start:** a copy whose content is behind the newest entry starts at the content's
+  position and is moved to the newest entry before the history counts as loaded; an entry that fails
+  leaves it at the last position reached. The content's position comes from the catch-up while the
+  content is the one it started from, then from a trusted `exactThrough`, and is unknown for an
+  unmarked envelope, a group document, or a document with entries from this session.
 - **Timeout:** an entry whose exchanges stay open past the timeout is force-completed and marked, a
   late record becomes a new entry, and later saves are not exact. An entry that completes in time
   isn't timed out.

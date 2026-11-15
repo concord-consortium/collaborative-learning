@@ -509,24 +509,30 @@ for the Firestore sourcing work.
 - **Stores:** RTDB only
 - **Location:** `/{classPath}/users/{uid}/documents/{key}/lastHistoryEntryId`
 - **Applies to:** editable documents with history; omitted for fresh documents and pre-feature saves
-- **Runtime:** `DocumentModel.savedEnvelope` — **volatile**, not a persisted prop
+- **Runtime:** `DocumentModel.loadedEnvelope` and `DocumentModel.savedEnvelope` — both **volatile**, not
+  persisted props
 - **Updated by:** every content save that knows an entry
   ([`content-save-envelope.ts`](../../src/models/document/content-save-envelope.ts))
-- **Reactive:** No. The client keeps `savedEnvelope` as its saves leave the envelope, and the content
-  listener replaces it with the envelope its content came from.
+- **Reactive:** No. `loadedEnvelope` is the envelope the content was loaded with, set once; the history
+  manager's drift check and the group-document load read it. `savedEnvelope` is the envelope as this
+  client knows it: the client updates it as its saves leave the envelope, and the content listener
+  replaces it with the envelope its content came from. Other members' saves of a group document don't
+  reach it.
 
-The history entry the saved content is stamped with. It is exact only when `exactThrough` names it, and
-then the history loader catches the content up from it and checks it against the Firestore history chain.
-After an intermediate save it is a lower bound: the content can hold later entries. See
-`lastHistoryEntry` above for the Firestore field with the confusingly similar name.
+The history entry the saved content is stamped with. It is exact only when `exactThrough` names it,
+and then the history loader catches the content up from it and checks it against the Firestore
+history chain. Otherwise it is only evidence for debugging, and says nothing reliable about which
+entries the content holds: after an intermediate save the content can hold later entries, and after
+a load catch-up that stopped short it lacks the entries that were skipped. See `lastHistoryEntry`
+above for the Firestore field with the confusingly similar name.
 
 ### `exactThrough`
 
 - **Stores:** RTDB only
 - **Location:** `/{classPath}/users/{uid}/documents/{key}/exactThrough`
 - **Applies to:** editable documents with history
-- **Runtime:** `DocumentModel.savedEnvelope.exactThrough` — **volatile**, holding only `index` and
-  `since`, and only when the stored field is trusted
+- **Runtime:** `exactThrough` on `DocumentModel.loadedEnvelope` and `DocumentModel.savedEnvelope` —
+  **volatile**, holding only `index` and `since`, and only when the stored field is trusted
 - **Updated by:** exact saves write it; intermediate saves clear it
 - **Reactive:** No — as `lastHistoryEntryId`.
 

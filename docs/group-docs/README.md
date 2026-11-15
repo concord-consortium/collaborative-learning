@@ -12,6 +12,7 @@ Documentation for CLUE's group-document feature: multiple users collaborating on
 
 - [group-docs-current-state.md](group-docs-current-state.md) — What works today, what doesn't, and known severe issues for users testing the feature.
 - [group-docs-completed-work.md](group-docs-completed-work.md) — Completed group-document work in landing order: GD-1 through GD-6, GD-9, GD-18, and the CLUE-483 UI disruption testing pass.
+- [group-doc-content-saves.md](group-doc-content-saves.md) — How a group document's content is saved: only from a settled history, with the stale-check and jitter, and the notice shown when a member stops saving. Builds on [content-saves.md](../history-framework/content-saves.md).
 - [group-docs-implementation-todos.md](group-docs-implementation-todos.md) — Internal code TODOs in the legacy concurrent history manager. Most are subsumed by GD-19; referenced from GD-22.
 
 ## Design specs

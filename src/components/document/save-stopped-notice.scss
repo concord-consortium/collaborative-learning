@@ -18,6 +18,8 @@
     border: solid 2px $workspace-teal;
     border-radius: 8px;
     outline: none;
+    // So the message and code can be copied into a report.
+    user-select: text;
 
     &:focus-visible {
       box-shadow: 0 0 0 3px $focus-ring-color;

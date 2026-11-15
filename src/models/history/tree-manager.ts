@@ -146,10 +146,10 @@ function getJsonCopyStart(documentJson: object, treeId: string, history: readonl
 
 /**
  * Applies entries a load is missing to the document's JSON as it was stored, before the load
- * converted its old models, and returns the content they reach. The entries were recorded against
+ * converted any old models, and returns the content they reach. The entries were recorded against
  * the stored models, and a load entry among them converts those models itself, so neither fits
- * the converted MST content. Entries are applied one at a time, each all or nothing, and
- * application stops at the first one that fails.
+ * converted MST content. Entries are applied one at a time, each all or nothing, and application
+ * stops at the first one that fails.
  */
 function applyEntriesToStoredJson(documentJson: any, treeId: string,
     pendingLoadEntry: HistoryEntrySnapshot | undefined, snapshots: HistoryEntrySnapshot[]) {
@@ -196,7 +196,9 @@ interface IMainDocument extends TreeAPI {
   key: string;
   uid: string;
   metadata: IDocumentMetadata;
-  // Replaces the content with stored content, converting its old models.
+  /**
+   * Replaces the content with stored content, converting its old models.
+   */
   setContent(content: any): void;
 }
 
@@ -257,9 +259,13 @@ export const TreeManager = types
   exactness: new SessionExactness(),
   entryCompletedListeners: new Set<(entry: HistoryEntryType) => void>(),
   logger: undefined as TreeManagerLogger | undefined,
-  // One timer per entry that still has open exchanges.
+  /**
+   * One timer per entry that still has open exchanges.
+   */
   openEntryTimers: new Map<string, ReturnType<typeof setTimeout>>(),
-  // Entries that were force-completed, so records that arrive for them later can be recognized.
+  /**
+   * Entries that were force-completed, so records that arrive for them later can be recognized.
+   */
   timedOutEntries: new Map<string, { model?: string }>(),
   /**
    * Set when the JSON copy can't get back to the trees' position after a failed move. The copy
@@ -737,8 +743,8 @@ export const TreeManager = types
     const entry = self.findActiveHistoryEntry(historyEntryId);
     const timedOutEntry = self.timedOutEntries.get(historyEntryId);
     if (!entry && timedOutEntry) {
-      // The entry this record belongs to was force-completed. The record is only stored, never
-      // applied, so it is kept as an entry of its own in case it has changes worth recording.
+      // The entry this record belongs to was force-completed, so the record is kept as an entry of
+      // its own.
       if (treePatchRecord.patches.length > 0) {
         const lateEntry = HistoryEntry.create({
           id: nanoid(),
@@ -849,66 +855,32 @@ export const TreeManager = types
   /**
    * Apply entries that were saved after the content was last saved, when a document loads.
    *
-   * The entries are applied one at a time, and application stops at the first one that
-   * fails. They aren't added to `document.history` or reported as completed: they are
-   * already in Firestore.
+   * The entries are applied to the document's stored JSON (see applyEntriesToStoredJson), and the
+   * document's content is set to the result, which converts any old models and rebuilds the
+   * pending load entry from it. They aren't added to `document.history` or reported as completed:
+   * they are already in Firestore. The document mustn't be monitored, or setting its content
+   * would record the change as a new entry.
    *
-   * An entry that fails may be partly applied and isn't counted in `applied`, so a caller
-   * must treat any `error` as leaving the content not exact.
-   *
-   * When the load converted old models, or an entry is a load entry, the entries are applied to
-   * the stored JSON instead (see applyEntriesToStoredJson), and the document's content is set to
-   * the result, which converts it again and rebuilds the pending load entry from it.
+   * Application stops at the first entry that fails, and a caller must treat any `error` as
+   * leaving the content not exact. When setting the content fails, the content is left as it
+   * was loaded and no entries count as applied.
    */
-  applyEntriesAtLoad: flow(function* applyEntriesAtLoad(snapshots: HistoryEntrySnapshot[]) {
+  applyEntriesAtLoad(snapshots: HistoryEntrySnapshot[]): { applied: number, error?: string } {
     const { mainDocument, pendingLoadEntry } = self;
-    if (mainDocument && (pendingLoadEntry || snapshots.some(snapshot => snapshot?.isLoadEntry))) {
-      const documentJson = toJsonValue(getSnapshot(mainDocument as unknown as IAnyStateTreeNode));
-      const stored = applyEntriesToStoredJson(documentJson, mainDocument.key, pendingLoadEntry, snapshots);
-      if (stored.applied > 0) {
+    if (!mainDocument) return { applied: 0, error: "No document" };
+    const documentJson = toJsonValue(getSnapshot(mainDocument as unknown as IAnyStateTreeNode));
+    const stored = applyEntriesToStoredJson(documentJson, mainDocument.key, pendingLoadEntry, snapshots);
+    if (stored.applied > 0) {
+      try {
         mainDocument.setContent(stored.content);
+      } catch (e) {
+        return { applied: 0, error: e instanceof Error ? e.message : String(e) };
       }
-      return stored.error === undefined
-        ? { applied: stored.applied }
-        : { applied: stored.applied, error: stored.error };
     }
-
-    const trees = Object.values(self.trees);
-    // FAKE ids keep what the trees do while applying out of the history.
-    yield Promise.all(trees.map(tree => {
-      return tree.startApplyingPatchesFromManager(FAKE_HISTORY_ENTRY_ID, FAKE_EXCHANGE_ID);
-    }));
-
-    let applied = 0;
-    let error: string | undefined;
-    try {
-      for (const snapshot of snapshots) {
-        try {
-          const treePatches: Record<string, IJsonPatch[]> = {};
-          HistoryEntry.create(snapshot).records.forEach(record => {
-            (treePatches[record.tree] ??= []).push(...record.getPatches(HistoryOperation.Redo));
-          });
-          const applyPromises = Object.entries(treePatches).map(([treeId, patches]) => {
-            const tree = self.trees[treeId];
-            if (!tree) throw new Error(`Unknown tree '${treeId}'`);
-            return patches.length > 0
-              ? tree.applyPatchesFromManager(FAKE_HISTORY_ENTRY_ID, FAKE_EXCHANGE_ID, patches)
-              : undefined;
-          });
-          yield Promise.all(applyPromises);
-        } catch (e) {
-          error = e instanceof Error ? e.message : String(e);
-          break;
-        }
-        applied++;
-      }
-    } finally {
-      yield Promise.all(trees.map(tree => {
-        return tree.finishApplyingPatchesFromManager(FAKE_HISTORY_ENTRY_ID, FAKE_EXCHANGE_ID);
-      }));
-    }
-    return error === undefined ? { applied } : { applied, error };
-  }),
+    return stored.error === undefined
+      ? { applied: stored.applied }
+      : { applied: stored.applied, error: stored.error };
+  },
 
   goToHistoryEntryPosition: flow(function* goToHistoryEntryPosition(
                                       newHistoryPosition: number) {

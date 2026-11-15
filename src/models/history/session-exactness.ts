@@ -5,7 +5,7 @@ export const kHistoryStart = "first";
 
 export type NotExactReason = "unrecorded-change" | "timed-out-entry" | "catch-up-apply-failed"
   | "catch-up-hole" | "catch-up-gap-too-large" | "saved-id-missing" | "initial-apply-failed"
-  | "remote-apply-failed" | "history-unavailable" | "unmarked-envelope-gap";
+  | "remote-apply-failed" | "history-unavailable" | "unmarked-envelope-gap" | "catch-up-content-replaced";
 
 /**
  * Tracks whether a document's lastHistoryEntryId is exact for this editing session: the content
@@ -21,7 +21,8 @@ export class SessionExactness {
       exactSince: observable,
       notExactReason: observable,
       startAt: action,
-      markNotExact: action
+      markNotExact: action,
+      restart: action
     });
   }
 
@@ -39,5 +40,11 @@ export class SessionExactness {
   markNotExact(reason: NotExactReason) {
     if (this.notExactReason) return;
     this.notExactReason = reason;
+  }
+
+  // Starts a new session, for content that replaced the content this one was worked out for.
+  restart() {
+    this.exactSince = undefined;
+    this.notExactReason = undefined;
   }
 }

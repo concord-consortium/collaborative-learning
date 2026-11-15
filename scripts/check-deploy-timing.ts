@@ -2,8 +2,9 @@
 
 /**
  * Check that a change touching separately deployed parts of CLUE (functions, Firestore/RTDB rules,
- * Firestore indexes) has a Deploy timing callout in its PR description, saying for each part whether
- * it can be deployed before, with, or after the client release, and why. Run by
+ * Firestore indexes, migration scripts) has a Deploy timing callout in its PR description, saying
+ * for each part whether it can be deployed (or, for a migration, run) before, with, or after the
+ * client release, and why. Run by
  * .github/workflows/deploy-timing.yml; see "Deploy timing" in docs/deploy.md.
  *
  * Usage (from the repository root):
@@ -63,7 +64,7 @@ function main() {
   }
 
   if (touched.length === 0) {
-    console.log("This change doesn't touch functions, rules or indexes; no Deploy timing callout needed.");
+    console.log("This change doesn't touch functions, rules, indexes or migrations; no Deploy timing callout needed.");
     process.exit(0);
   }
   console.log(`This change touches: ${touched.join(", ")}.`);
@@ -89,9 +90,9 @@ Add this to the PR description, with one entry per part and a reason for each:
 > **Deploy timing**
 ${touched.map(deployable => `> - **${deployable}: <before|with|after>** — <why>`).join("\n")}
 
-  before  (preferred) safe to deploy any time from merge until the client release;
-          the released client keeps working with it
-  with    deploy just before or just after the client release
+  before  (preferred) safe to deploy (or run, for migrations) any time from merge until the
+          client release; the released client keeps working with it
+  with    deploy or run just before or just after the client release
   after   needs the new client released first
 Think about both directions: the new client against the currently deployed part, and the
 currently released client against the new part. See ${kDocsUrl}`);

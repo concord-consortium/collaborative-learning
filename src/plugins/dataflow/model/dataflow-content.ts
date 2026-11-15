@@ -8,7 +8,8 @@ import stringify from "json-stringify-pretty-compact";
 import { Transform } from "rete-area-plugin/_types/area";
 
 import { DataflowProgramModel, DataflowProgramModelType } from "./dataflow-program-model";
-import { DEFAULT_DATA_RATE, ProgramDataRates } from "./utilities/node";
+import { DEFAULT_DATA_RATE, ProgramDataRates, resolveAllowedOutputTypes } from "./utilities/node";
+import { AppConfigModelType } from "../../../models/stores/app-config-model";
 import { SharedVariables, SharedVariablesType } from "../../shared-variables/shared-variables";
 import { isInputVariable, isOutputVariable } from "../../shared-variables/simulations/simulation-utilities";
 import { IDefaultContentOptions, ITileExportOptions } from "../../../models/tiles/tile-content-info";
@@ -52,7 +53,40 @@ export function defaultDataflowContent(options?: IDefaultContentOptions): Datafl
       `expected one of ${ProgramDataRates.map(r => r.val).join(", ")}.`);
   }
   const programDataRate = isKnownRate ? configuredRate as number : DEFAULT_DATA_RATE;
-  return DataflowContentModel.create({ programDataRate });
+  // Set the Live Output config here, inside the action that adds the tile, so it is recorded with
+  // the tile's creation. See mirrorUnitOutputConfig in dataflow-tile.tsx.
+  const outputConfig = getUnitOutputConfig(options?.appConfig);
+  return DataflowContentModel.create({ programDataRate, outputConfig });
+}
+
+// A config the tile stores only when it differs from the default; the default is stored as nothing.
+function normalizeOutputConfig(config?: IDataflowOutputConfig) {
+  return config && (config.servoInputMode || config.allowedOutputTypes?.length) ? config : undefined;
+}
+
+/**
+ * The unit's Live Output settings, resolved to the config the tile stores (see the `outputConfig`
+ * prop): undefined when the unit uses the defaults.
+ */
+export function getUnitOutputConfig(appConfig?: AppConfigModelType): IDataflowOutputConfig | undefined {
+  const servoInputMode = appConfig?.getSetting("servoInputMode", "dataflow");
+  const liveOutputTypes = appConfig?.getSetting("liveOutputTypes", "dataflow");
+  return normalizeOutputConfig({
+    servoInputMode: servoInputMode === "proportion" ? "proportion" : undefined,
+    allowedOutputTypes: resolveAllowedOutputTypes(liveOutputTypes),
+  });
+}
+
+/**
+ * A copied tile takes the Live Output config of the unit it is copied into, set inside the copy's
+ * action so it is recorded with the copy. Without a unit config, the copy keeps the source's.
+ */
+export function updateDataflowContentForCopy(content: any, _acrossDocuments: boolean,
+    appConfig?: AppConfigModelType) {
+  if (!appConfig || !content || typeof content !== "object") return content;
+  const { outputConfig: _, ...rest } = content;
+  const outputConfig = getUnitOutputConfig(appConfig);
+  return outputConfig ? { ...rest, outputConfig } : rest;
 }
 
 export const kDataflowDefaultHeight = 480;
@@ -549,8 +583,7 @@ export const DataflowContentModel = TileContentModel
       self.programDataRate = dataRate;
     },
     setOutputConfig(config?: IDataflowOutputConfig) {
-      // Store only non-default values; a default config clears the field so default units carry nothing.
-      const next = config && (config.servoInputMode || config.allowedOutputTypes?.length) ? config : undefined;
+      const next = normalizeOutputConfig(config);
       // Idempotent — avoid churning the doc when the resolved config hasn't changed.
       if (JSON.stringify(self.outputConfig) === JSON.stringify(next)) return;
       // This mirrors unit config on tile mount, not a user edit, so keep it off the undo stack.

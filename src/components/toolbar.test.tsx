@@ -1,4 +1,4 @@
-import { act, fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { Provider } from "mobx-react";
 import { getSnapshot } from "mobx-state-tree";
@@ -165,35 +165,16 @@ describe("ToolbarComponent", () => {
     });
   });
 
-  // Edits made before the document has caught up to its history would be recorded nowhere.
-  it("disables its tools while the document is catching up to its history", () => {
-    const pendingDocument = createDocumentModel({
-      uid: "1", type: "problem", key: "pending", createdAt: 0, content: {}
-    });
-    pendingDocument.setHistoryCatchUpPending(true);
-    render(
-      <ModalProvider>
-        <Provider stores={stores}>
-          <ToolbarComponent toolbarModel={ToolbarModel.create(config)} document={pendingDocument}/>
-        </Provider>
-      </ModalProvider>
-    );
-    expect(screen.getByTestId("tool-text")).toHaveAttribute("aria-disabled", "true");
-    expect(screen.getByTestId("tool-select")).toHaveAttribute("aria-disabled", "true");
-
-    act(() => pendingDocument.setHistoryCatchUpPending(false));
-    expect(screen.getByTestId("tool-text")).not.toHaveAttribute("aria-disabled");
-    expect(screen.getByTestId("tool-select")).not.toHaveAttribute("aria-disabled");
-  });
-
   // A document shown outside the workspace catches up only once its Edit tool opens it for editing.
-  it("keeps the tools that don't change the document enabled while it is catching up", () => {
+  // A document in the workspace shows a spinner in place of its toolbar until it has caught up.
+  it("keeps its tools enabled while the document is catching up to its history", () => {
     const pendingDocument = createDocumentModel({
       uid: "1", type: "problem", key: "pending", createdAt: 0, content: {}
     });
     pendingDocument.setHistoryCatchUpPending(true);
     const viewConfig: IToolbarModelSnapshot = [
-      { id: "edit", title: "Edit", iconId: "icon-edit-tool", isDefault: false, isTileTool: false }
+      { id: "edit", title: "Edit", iconId: "icon-edit-tool", isDefault: false, isTileTool: false },
+      { id: "fourUp", title: "Four Up", iconId: "icon-4up-view-tool", isDefault: false, isTileTool: false }
     ];
     render(
       <ModalProvider>
@@ -203,6 +184,7 @@ describe("ToolbarComponent", () => {
       </ModalProvider>
     );
     expect(screen.getByTestId("tool-edit")).not.toHaveAttribute("aria-disabled");
+    expect(screen.getByTestId("tool-fourup")).not.toHaveAttribute("aria-disabled");
   });
 
   // A section toolbar has no document of its own, and the primary workspace document it copies
