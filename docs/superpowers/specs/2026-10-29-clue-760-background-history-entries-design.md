@@ -1,8 +1,8 @@
 # CLUE-760: Background history entries for DataFlow
 
 Status: design approved, 2026-11-02; updated 2026-11-04 and 2026-11-10 for the CLUE-773 and
-CLUE-751 implementations. The updates are awaiting review. CLUE-773 is on master. CLUE-760 builds on
-CLUE-751 (#3086) and merges after it.
+CLUE-751 implementations, and 2026-11-15 to match what #3074 builds. The updates are awaiting
+review. CLUE-773 is on master. CLUE-760 builds on CLUE-751 (#3086) and merges after it.
 
 ## Why
 
@@ -127,25 +127,38 @@ activity recorder) reads `background` and never assumes a producer.
 Shared-model follow-up records join the same entry, so a tick's changes to linked shared models are
 covered by the entry's flag.
 
+**Entries built from another entry.** When an entry times out before all its records arrive, a
+record that arrives late becomes an entry of its own (`lateRecordForEntryId`). It keeps the
+timed-out entry's `background` and `producerTileId`, so a late record of a tick is background too.
+Revert entries, which a group document's rollback appends, don't copy `background` or
+`producerTileId`. DataFlow in group documents is out of scope here; what a revert of a background
+entry should carry belongs with the group-docs conflict rule.
+
 **What gets flagged in CLUE-760:**
 
-- **`DataflowProgram.tickAndProcess`** ([dataflow-program-model.ts](../../../src/plugins/dataflow/model/dataflow-program-model.ts)).
-  Today it doesn't call `withoutUndo()`, so each tick is undoable. `asBackground()` fixes that too.
+- **`DataflowProgram.tickAndProcess`**
+  ([dataflow-program-model.ts](../../../src/plugins/dataflow/model/dataflow-program-model.ts)).
+  Before CLUE-760 it didn't call `withoutUndo()`, so each tick was undoable. `asBackground()` fixes
+  that too.
 - **Recorded cases.** While recording, every interval also calls `recordCase`
   ([recording-utilities.ts](../../../src/plugins/dataflow/model/utilities/recording-utilities.ts)).
   It calls the dataset's `addCanonicalCases` directly, so the root action is a generic dataset
-  action that user edits also use. Wrap it in a DataFlow content action that calls `asBackground()`.
-  Recorded cases are produced by code, so they are background, even though starting the recording
-  was a user change. Starting, stopping and clearing a recording stay user changes.
-- **`SimulatorTool.step`** ([simulator-content.ts](../../../src/plugins/simulator/model/simulator-content.ts)).
+  action that user edits also use. A DataFlow content action, `recordTickCase()`, wraps it and
+  calls `asBackground()`. Recorded cases are produced by code, so they are background, even though
+  starting the recording was a user change. Starting, stopping and clearing a recording stay user
+  changes, and so does a single sample the student records by hand (`recordSingleSample()`).
+- **`SimulatorTool.step`**
+  ([simulator-content.ts](../../../src/plugins/simulator/model/simulator-content.ts)).
   The activity recorder already ignores it as a tick. Once the recorder reads the flag instead, the
   Simulator has to set it, or every step would start counting as student activity. This overlaps
   CLUE-761.
 
-- **`DataflowProgram.processAfterProgramChange`** ([rete-manager.tsx](../../../src/plugins/dataflow/rete/rete-manager.tsx)).
-  It runs when the tile loads, and again as a separate entry after a block is added or removed or a
-  connection changes, to recompute values. Without the flag it would add a user stop each time the
-  document is opened, and a second stop after each block or connection edit.
+- **`DataflowProgram.processAfterProgramChange`**
+  ([dataflow-program-model.ts](../../../src/plugins/dataflow/model/dataflow-program-model.ts)).
+  `rete-manager.tsx` calls it. It runs when the tile loads, and again as a separate entry after a
+  block is added or removed or a connection changes, to recompute values. Without the flag it would
+  add a user stop each time the document is opened, and a second stop after each block or
+  connection edit.
 
   The usual fix for a follow-up entry like this is to group it into the user's action, so one
   change makes one entry. That is preferred over making an action not undoable, because a
@@ -179,44 +192,58 @@ left to later stories.
 
 Entries written before this change have no `background` field. CLUE-760 handles them in two steps:
 
-1. **At read time.** One function, `isLegacyBackgroundEntry(entry)`, decides whether an entry with
-   no `background` field was a tick. Playback uses `entry.background ?? isLegacyBackgroundEntry(entry)`,
-   so the change can be tried on old documents as soon as it ships.
+1. **At read time.** One function, `isLegacyBackgroundEntry(entry)`
+   ([background-entries.ts](../../../src/models/history/background-entries.ts)), decides whether an
+   entry with no `background` field was produced by code. Playback calls `isBackgroundEntry(entry)`,
+   which returns the stored flag when there is one and otherwise the rule's answer, so the change
+   can be tried on old documents as soon as it ships. Playback reads every entry each time the
+   history grows, so `isBackgroundEntry` keeps the rule's answer per entry in a `WeakMap`.
 2. **A one-off migration**, run in each environment after the new code is deployed. It applies the
-   same function to stored entries and writes `background: true` into the stored entry JSON. It lives
-   in [scripts/](../../../scripts/) beside the other Firestore scripts.
+   same rule to stored entries and writes `background: true` into the stored entry JSON. It lives
+   in [scripts/](../../../scripts/) beside the other Firestore scripts. The script is not in #3074:
+   it comes in a later PR, with its Firestore index and deploy timing.
 
-The release after the migration has run removes the read-time call. The function then lives only in
-the script. Both steps sharing one function means they can't disagree.
+The release after the migration has run removes the read-time call. The rule then lives only in the
+script. `kLegacyBackgroundRuleCases` in background-entries.ts is a table of cases that the script's
+tests are to reuse, so the two can't disagree.
 
-**The rule.** `isTickEntry` in the activity recorder is the starting point, but it matches on
+**The rule.** `isTickEntry` in the activity recorder was the starting point, but it matches on
 `model`, and **older entries have no `model` field**. In a 2024 document from the
-`clue-dataflow-behavior` study, no entry has one. The rule
-has to work from the action path and the patches:
+`clue-dataflow-behavior` study, no entry has one. The rule works from the action path and the
+patches:
 
 - **DataFlow ticks:** `tickAndProcess` actions.
-- **DataFlow recomputes:** `processAfterProgramChange` actions, which section 1 flags from now on.
-  Without this, an old document has a user stop for each time it was opened and a second one
-  after each block or connection edit.
+- **DataFlow recomputes:** `processAfterProgramChange` actions, which section 1 flags. Without
+  this, an old document has a user stop for each time it was opened and a second one after each
+  block or connection edit.
 - **Legacy DataFlow (before about May 2024):** ticks were recorded as `setProgram`, which also
-  recorded every user change to the program. A `setProgram` record counts as a tick only if every
-  patch is a `replace` of `program/values/<n>/currentValues/...` or
-  `program/values/<n>/recentValues/...`. Possibly `program/nodes/<n>/data/demoOutput` too: it
-  changes 366 times in that document, and it looks tick-driven. That needs checking. Any other
-  patch (moving, adding or removing a node, changing a setting) makes it a user change.
+  recorded every user change to the program. A `setProgram` entry counts as a tick only if every
+  patch is a `replace` of `program/values/<n>/currentValues/...`,
+  `program/values/<n>/recentValues/...` or `program/nodes/<n>/data/demoOutput/...`, and at least
+  one is a running-values (`currentValues` or `recentValues`) replace. A `demoOutput` replace on
+  its own isn't enough. Any other patch (moving, adding or removing a node, changing a setting)
+  makes it a user change, and so does a `setProgram` entry with no patches.
 - **Simulator:** `step` actions on a Simulator tile.
 
 The legacy DataFlow history bridge has `isLegacyDataflowPatch`
 ([legacy-dataflow-history-bridge.ts](../../../src/plugins/dataflow/model/legacy-dataflow-history-bridge.ts)).
 It answers a different question, whether a patch is in the legacy format, so it can't be the tick
-rule: a legacy node move is legacy but not a tick. Share its parsing of tile and `program/values`
-paths rather than duplicating it.
+rule: a legacy node move is legacy but not a tick. The design asked the rule to share the bridge's
+parsing of tile and `program/values` paths. The rule has its own path regexes instead: it is
+temporary, and it moves into the migration script.
 
-Check the rule against the study data before writing it. For each candidate rule, count how many
-entries it flags and look at a sample of entries it flags and doesn't flag, across several years.
-Old DataFlow recordings (`addCanonicalCases` on a DataFlow tile's dataset) may not be
-distinguishable from user edits to the dataset. If they can't be told apart, leave them as user
-entries.
+The rule was checked against the `clue-dataflow-behavior` study data, 6.86M entries in 2,900
+documents from 2022 to 2026 (the counts are in #3074's description):
+
+- `demoOutput` replaces turn up only in old `setProgram` entries, never in a tick entry. Most hold
+  only running values and `demoOutput` and are flagged. A few dozen hold only `demoOutput`, and the
+  rest also hold a person's edits; both stay user entries. That is why `demoOutput` counts only
+  alongside a running-values replace.
+- Every unflagged `setProgram` entry carries a structural or node-property change.
+- About 18k unflagged `setProgram` entries hold only `add` patches on running values. They may be
+  ticks that add a new value. The rule leaves them as user entries for now.
+- The rule doesn't try to tell old DataFlow recordings (`addCanonicalCases` on a DataFlow tile's
+  dataset) apart from user edits to the dataset, so they all stay user entries.
 
 **The migration script:**
 
@@ -228,8 +255,8 @@ entries.
   before the release that removes the read-time call.
 - A developer with the production service-account key runs it against production.
 - It must run before any future script that rewrites legacy DataFlow patches into the current
-  format, such as the follow-up that stores legacy DataFlow load entries. The rule recognizes legacy ticks by their legacy paths,
-  so it can't find them once those paths are rewritten.
+  format, such as the follow-up that stores legacy DataFlow load entries. The rule recognizes legacy
+  ticks by their legacy paths, so it can't find them once those paths are rewritten.
 
 ### 3. Playback
 
@@ -249,34 +276,64 @@ In [playback-control-model.ts](../../../src/components/playback/playback-control
   - A **comment** keeps today's stop: the document after the entry just before it, which is what
     its author was looking at. While a program runs, that is usually a background entry between two
     user stops. Comments already have markers.
-  - A **link** into a history entry (`studentDocumentHistoryId`) gets a stop at that entry, and a
-    marker, if the entry has no stop already. Today a link to a background entry would land between
-    stops, and the reader couldn't get back to it after moving the slider. The marker works like
-    the comment markers. The point is that a reader can look around the history and come back to
-    the place the link pointed to. CLUE-635 (highlight a range of entries from a link) builds on
-    this.
+  - A **link** into a history entry (`studentDocumentHistoryId`) always gets a marker, on the stop
+    that shows the document right after that entry. The link gets a stop of its own there only
+    when none of the document's own stops (a user, latest or earliest stop) is at that position.
+    Without it, a link to a background entry would land between stops, and the reader couldn't get
+    back to it after moving the slider. The marker works like the comment markers, and clicking it
+    goes back to the link's stop. The point is that a reader can look around the history and come
+    back to the place the link pointed to. CLUE-635 (highlight a range of entries from a link)
+    builds on this.
+  - **A new link while playback is open** moves the marker, and the link's stop, to the new entry.
+    The document is about to be sent there, so, as when playback opens from a link, the reader
+    stops following the end: the new link's stop appearing past them doesn't pull them back.
 - **Stops stay in history order.** A comment or link stop sits between the user stops around it,
   so Play and the slider never move backward through history.
 - **Play** steps from stop to stop at the current 500 ms.
 - **Following the end.** While a viewer is at the end, new background entries keep arriving and
-  move the latest stop rather than adding stops. The follow-end reaction must apply them, so it has
-  to watch the history length, not only `lastStopIndex`.
+  move the latest stop rather than adding stops. The follow-end reaction applies them, so it
+  watches the history length, not only `lastStopIndex`.
 - **Positions between stops.** A seek that stops on a failing entry can leave the document between
   two stops. The thumb shows the stop before that position. A failure marker goes on the stop that
   playback couldn't reach.
-- **An "earliest available" stop.** Playback has an oldest position it can reach, for a legacy
-  tile whose old state its history bridge can't rebuild (`oldestReachablePosition` in
-  [tree-manager.ts](../../../src/models/history/tree-manager.ts)), and says "Earlier history isn't
-  available." there instead of the failure banner. The slider doesn't mark the range before it
-  yet; CLUE-773 left that to this rework. The bridge's boundary is a tile's last legacy entry, often
-  a tick, so that position usually falls between two user stops, and "the stop before" would be a
-  stop playback can't reach. So, mirroring the latest stop:
-  - the oldest reachable position gets its own stop, unless a stop is already there;
-  - the stops before it are shown as unavailable, and the slider can't move onto them.
-
-  The bridges find their conversions from the history alone, so the slider can know the boundary
-  before any seek reaches it, rather than only after `oldestReachablePosition` is set. How
-  "unavailable" looks is left to the builder.
+- **An "earliest available" stop.** Playback can't go back past a legacy tile's conversion when
+  the tile's history bridge can't rebuild its old state. `TreeManager.earliestReachablePosition`
+  ([tree-manager.ts](../../../src/models/history/tree-manager.ts)) is the earliest position
+  playback can reach: the later of `seekBoundaryPosition`, which a seek sets when it stops at a
+  conversion it can't cross, and the positions of the bridges' conversions that can't be rebuilt.
+  (The JSON copy's own view of that boundary is `JsonHistoryCopy.boundaryPosition`.) The bridges
+  find their conversions from the history alone, so the slider knows the boundary before any seek
+  reaches it. Playback says "Earlier history isn't available." there instead of the failure
+  banner. The bridge's boundary is a tile's last legacy entry, often a tick, so that position
+  usually falls between two user stops, and "the stop before" would be a stop playback can't
+  reach. So, mirroring the latest stop:
+  - the earliest reachable position gets its own `earliest` stop, unless a stop is already there;
+  - the rail before that stop is shaded with stripes to show it is unavailable, and the slider
+    can't move onto the stops there: a request for one goes to the earliest stop instead.
+- **Showing that a seek is running.** A move between two user stops applies every tick in between,
+  and in a document with a load entry or a bridged legacy DataFlow tile each of those entries also
+  moves the JSON copy. Measured in jsdom on the study data, a move across 4,366 entries took
+  2.2–3.5 s, and one across the largest gap, 24,834 entries, took 37–41 s. So the control
+  ([playback-control.tsx](../../../src/components/playback/playback-control.tsx)) shows that a seek
+  is running: a spinner beside the time readout, `aria-busy` on the slider, and a status region
+  that says "Loading this point in the history…". It shows once a seek has run for 300 ms
+  (`kSeekProgressDelayMs`), so a quick seek doesn't flash it. A seek applies its entries without
+  yielding, so the browser can't run that timer or paint during it. For a seek across at least 100
+  entries (`kLongSeekEntryCount`, about 300 ms in Chrome), the model
+  ([playback-control-model.ts](../../../src/components/playback/playback-control-model.ts)) sets
+  `longSeekInProgress` and waits for the browser to paint (`waitForPaint`) before it starts the
+  seek, so the indicator shows at once. Splitting a seek into chunks that yield to the browser is
+  left to a follow-up story.
+- **Finding conversions as the history grows.** The history grows on every tick while playback is
+  open, and the tree manager finds the virtual conversions again each time. A bridge can implement
+  the optional `IHistoryBridge` method
+  `appendChangesConversions(history, previousLength, treeId, conversions)`
+  ([history-bridges.ts](../../../src/models/history/history-bridges.ts)). When the history has
+  only grown, the tree manager keeps that bridge's earlier result while this returns false, instead
+  of scanning the whole history again. The legacy DataFlow bridge returns true only when an
+  appended entry has a legacy patch, or is the first entry after a conversion to touch its tile,
+  which decides whether the history records that conversion. It keeps a summary of each entry
+  (the tiles its patches touch, and the tiles with legacy patches) in a `WeakMap`.
 
 ### 4. Saving
 
@@ -284,25 +341,42 @@ CLUE-751 replaces the save hook's throttle with `ContentSaveSender`
 ([content-save-sender.ts](../../../src/models/document/content-save-sender.ts)), and its design
 leaves the background-only rate and indicator rule to CLUE-760. The sender saves the content
 snapshot kept when each local entry completed, once that entry commits, so a tick-only save is an
-exact save like any other. CLUE-760 adds two rules to it:
+exact save like any other. The sender is split into the base `ContentSaveSender` and two
+subclasses, `IndividualContentSaveSender` and `ConcurrentContentSaveSender` (group documents), each
+in its own file. CLUE-760's rules live in the base class:
 
-- **Two rates.** The sender takes the gap per save (`getMinimumGapMs`). A save goes out within 1
-  second of a user change, as today. When every entry the save covers since the last completed save
-  is background, the gap is 3 seconds. An exact save knows the entries it covers, because it is
-  built from a committed entry. The sender always sends the newest save, so a user change during a
-  slow wait just makes the pending save go out sooner. Intermediate saves keep CLUE-751's 5-second
-  cadence.
+- **Two rates.** The sender counts local content changes (`dirtySeq`), and remembers the last one
+  a user made (`lastUserChangeSeq`) and the newest one a completed save covers (`savedSeq`). The
+  gap before the next write is 1 second (`kMinimumSaveGapMs`) while a user change is unsaved
+  (`lastUserChangeSeq > savedSeq`), and 3 seconds (`kBackgroundSaveGapMs`) otherwise. So the rule
+  counts content changes, not history entries. The sender always sends the newest save, so a user
+  change during a 3-second wait just makes the pending save go out sooner. Intermediate saves keep
+  CLUE-751's 5-second cadence. The `getMinimumGapMs` option replaces this rule, but only tests
+  set it.
 - **The indicator follows user changes only.** The sender sets `SaveState.Saving` on every local
   content change (`handleContentChanged`), before the change's entry exists. A change made only by
-  background calls doesn't set it, and "Saved" shows only when a save covering a user change
-  completes. A failed save shows `Retrying` whatever it carried, because content not reaching the
-  database is something the student should know about.
+  background calls doesn't set it. `Saved` shows only when it resolves `Saving` or `Retrying`, once
+  a save covers the last user change: this client's write, another member's save, or a settled
+  envelope. The indicator clears `Saved` after a few seconds, and later background-only saves don't
+  show it again. A failed save shows `Retrying` after three failures in a row
+  (`kRetryingAfterFailures`), whatever it carried, because content not reaching the database is
+  something the student should know about. The next successful save then shows `Saved`.
 - **Telling the two apart at a content change.** History entries are recorded asynchronously, so
   the change handler can't wait for `document.history`. The tree monitor already tracks the calls
   whose changes no entry holds yet (`getRunningCallsWithChanges`, `hasCallWithUnrecordedChanges`,
-  added by CLUE-751). Have it also answer whether all of those calls are background. Check whether a
-  synchronous tick's call is still tracked when the handler runs, or has moved to the finished
-  calls whose records haven't reached the manager, and cover both.
+  added by CLUE-751). `TreeMonitor.areUnrecordedChangesAllBackground()` answers whether all of
+  those calls are background. It checks both the running calls with changes and the finished calls
+  whose records haven't reached the manager, so a synchronous tick counts whichever it is when the
+  handler runs. A background call's shared-model follow-up counts as background too.
+
+Some saves follow from these rules without a person's change:
+
+- **The load catch-up save doesn't show `Saved`.** The save that catches a document up at load
+  holds no change made in this session, so the indicator stays idle.
+- **A group document's settled save of other members' changes waits 3 seconds.** A member whose
+  client saves the settled document after other members' changes has no unsaved change of their
+  own, so the save takes the background gap. The member who made a change still saves it within 1
+  second.
 
 **The way out is CLUE-751's.** When the hook unmounts, the sender keeps going for up to 30 seconds
 until an exact save covers the latest change. On `pagehide`, an individual document sends its newest
@@ -346,8 +420,9 @@ the background check covers them and that clause goes too.
 ## Related work
 
 - **CLUE-773** (merged): playback across tile format changes: load entries, the JSON copy that
-  crosses them, and the legacy DataFlow bridge. It added the `background` field and the oldest
-  reachable position this design builds on, and its design lists the playback failures that remain.
+  crosses them, and the legacy DataFlow bridge. It added the `background` field and the seek
+  boundary (`seekBoundaryPosition`) this design builds on, and its design lists the playback
+  failures that remain.
 - **CLUE-751 / GD-18:** settled-state saves. Its `ContentSaveSender` takes the background-only gap
   and indicator rule from section 4, and its load catch-up narrows the content-behind-history risk.
 - **GD-19 / GD-20:** the group-document side of background entries. This change is GD-20's tagging
@@ -367,8 +442,9 @@ the background check covers them and that clause goes too.
   user activation". It is not "hide in the viewer".
 - Old entries are handled both at read time and by a migration. The read-time code is removed the
   release after the migration.
-- Background-only saves go out every 3 seconds, and user changes keep the 1-second throttle. The
-  saving indicator ignores background-only saves.
+- The save gap is 1 second while a user change is unsaved and 3 seconds otherwise, counted in
+  content changes, in the base `ContentSaveSender`. The saving indicator ignores background-only
+  saves.
 - The slider hides background entries and keeps stops evenly spaced. Play steps from stop to stop.
 - A user stop shows the document right after the change, with a "latest" stop at the end.
 - Comments and links get their own stops, with markers, at their exact positions.
@@ -378,46 +454,72 @@ the background check covers them and that clause goes too.
 - The Simulator's `step` is flagged here, not in CLUE-761.
 - `processAfterProgramChange` is background, because it writes only what a tick writes. A follow-up
   entry that changes anything else is grouped into the user's action instead.
-- A failed background-only save still shows `Retrying`.
-- A link marker is added here, as a single point; CLUE-635 adds ranges.
-- `producerTileId` is stored now. `producerId` and `runnerSessionId` are not.
-- An "earliest available" stop at the oldest reachable position, with the stops before it
-  unavailable.
+- A failed background-only save still shows `Retrying`, after three failures in a row like any
+  other save.
+- The tree monitor tells the save sender a content change was background-only
+  (`areUnrecordedChangesAllBackground()`), checking both running calls and finished calls whose
+  records haven't reached the manager.
+- The legacy rule is the one in section 2, checked against the study data. `demoOutput` replaces
+  count only alongside a running-values replace. The rule has its own path regexes rather than
+  sharing the legacy bridge's parsing, since it is temporary and moves into the migration script.
+- A link marker is added here, as a single point; CLUE-635 adds ranges. The marker always shows,
+  and follows a new link while playback is open.
+- `producerTileId` is stored. `producerId` and `runnerSessionId` are not. Nothing checks that
+  `producerTileId` names a real tile.
+- An "earliest available" stop at the earliest reachable position, with the rail before it shaded
+  with stripes and its stops unreachable.
+- Playback shows when a seek is running, after 300 ms or at once for a seek across at least 100
+  entries. Splitting seeks so they yield is left to a follow-up story.
+- Revert entries don't copy `background` or `producerTileId`; that waits for the group-docs work.
 
 ## Left to the builder
 
-- The exact legacy rule, checked against the study data as described above.
-- How the tree monitor tells the save sender that a content change was background-only.
-- The migration script's batching, resume and cost estimate.
-- Whether `asBackground()` checks in development that `producerTileId` names a real tile.
+- The migration script's batching, resume and cost estimate. The script comes in a later PR.
 
 ## Testing
 
-- **Tree monitor:** an action calling `asBackground()` records `background: true` and its
-  `producerTileId`, and isn't undoable. A child action calling it warns and records a user entry.
-  Shared-model follow-up records stay in the flagged entry.
+- **History framework** (`undo-store.test.ts`): an action calling `asBackground()` records
+  `background: true` and its `producerTileId`, and isn't undoable. A child action calling it warns
+  and records a user entry. Shared-model follow-up records stay in the flagged entry.
 - **DataFlow:** after adding a block, removing one, and adding and removing a connection, the
   `processAfterProgramChange` entry is background, and every patch in it is under a block's
   `tickEntries` or is a demo output's `tilt`. A new write elsewhere fails the test, which is the
   signal to group that change into the user's action instead. Undoing a connection edit takes one
   undo.
-- **Legacy rule:** cases from real entry shapes: `tickAndProcess`, values-only `setProgram`,
-  `setProgram` with a node move, Simulator `step`, and an entry with no `model`.
+- **Legacy rule:** `kLegacyBackgroundRuleCases`, a table of cases from real entry shapes that the
+  migration script's tests will reuse: `tickAndProcess`, `processAfterProgramChange`, Simulator
+  `step`, values-only `setProgram`, `setProgram` with a node move or adding a node, `setProgram`
+  with values and `demoOutput`, with only `demoOutput`, or adding `demoOutput`, `setProgram` with
+  no patches, and a text edit. The rule reads only the action and patches, so there is no case for
+  an entry with no `model`. A stored flag wins over the rule.
 - **Playback model:** stops skip background entries. A user stop lands right after its entry. The
   latest stop appears only when background entries follow the last user change. A comment made
   between ticks, and a link to a tick, each get a stop at their exact position, in history order.
   Following the end applies new background entries. Positions between stops map to the right stop,
   and so do failure markers. A load entry is never a stop. A legacy document whose bridge
   can't rebuild the old state gets an earliest available stop, and the stops before it can't be
-  reached.
-- **Performance:** playback across load entries was measured one entry at a time (CLUE-773). Here one move between user
-  stops applies every tick in between, and in a document with a load entry or a bridged legacy
-  DataFlow tile each of those entries also moves the JSON copy. Time a move across thousands of ticks in a legacy DataFlow document.
-- **Save sender:** saves covering only background entries are sent at most every 3 seconds, and
-  background-only content changes leave the indicator alone. A user change saves within 1 second
-  and shows the indicator, including one made during a 3-second wait. `pagehide` still sends the
-  newest committed snapshot at once while only ticks are pending. A failed background-only save
-  shows `Retrying`.
+  reached. A link to a user entry puts the marker on that entry's stop, and a new link moves the
+  link stop and marker and stops following the end. A seek across at least 100 entries is reported
+  as long and lets the browser paint before it starts.
+- **Playback components:** the progress indicator's 300 ms delay, `aria-busy` and status text; the
+  link marker and clicking it; the shaded range; "Earlier history isn't available." at the
+  earliest stop.
+- **Performance:** playback across load entries was measured one entry at a time (CLUE-773). Here
+  one move between user stops applies every tick in between, and in a document with a load entry
+  or a bridged legacy DataFlow tile each of those entries also moves the JSON copy. Moves across
+  thousands of ticks in study documents were timed in jsdom (see "Showing that a seek is running"
+  in section 3), which is why the progress indicator is built.
+- **Save sender** (the base sender's rules in `content-save-sender.test.ts`, with the individual
+  and concurrent cases in `individual-content-save-sender.test.ts` and
+  `concurrent-content-save-sender.test.ts`): saves holding only background changes are sent at
+  most every 3 seconds, and background-only content changes leave the indicator alone. A user
+  change saves within 1 second and shows the indicator, including one made during a 3-second
+  wait. `Saved` isn't shown again for background-only saves, and shows once a save covers the last
+  user change while ticks continue. `pagehide` still sends the newest committed snapshot at once
+  while only ticks are pending. A background-only save that keeps failing shows `Retrying`, and
+  the next success shows `Saved`. In a group document, another member's save that covers only
+  background changes doesn't show `Saved` again, and one that covers the last user change while a
+  tick waits to commit does.
 - **Tree monitor:** it reports a content change as background-only when every call holding
   unrecorded changes is background, whether the call is still running or has finished and its record
   hasn't reached the manager.
