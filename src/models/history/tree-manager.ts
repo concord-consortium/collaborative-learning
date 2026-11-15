@@ -146,18 +146,18 @@ function getJsonCopyStart(documentJson: object, treeId: string, history: readonl
 /**
  * Applies entries a load is missing to the document's JSON as it was stored, before the load
  * converted any old models, and returns the content they reach. The entries were recorded against
- * the stored models, and a load entry among them converts those models itself, so neither fits
- * converted MST content. Entries are applied one at a time, each all or nothing, and application
- * stops at the first one that fails.
+ * the stored models, and a conversion entry among them converts those models itself, so neither
+ * fits converted MST content. Entries are applied one at a time, each all or nothing, and
+ * application stops at the first one that fails.
  */
 function applyEntriesToStoredJson(documentJson: any, treeId: string,
-    pendingLoadEntry: HistoryEntrySnapshot | undefined, snapshots: HistoryEntrySnapshot[]) {
+    pendingConversionEntry: HistoryEntrySnapshot | undefined, snapshots: HistoryEntrySnapshot[]) {
   let applied = 0;
   let error: string | undefined;
   try {
-    if (pendingLoadEntry) {
+    if (pendingConversionEntry) {
       applyJsonPatches(documentJson,
-        getEntryPatchesForTree(HistoryEntry.create(pendingLoadEntry), treeId, HistoryOperation.Undo));
+        getEntryPatchesForTree(HistoryEntry.create(pendingConversionEntry), treeId, HistoryOperation.Undo));
     }
     for (const snapshot of snapshots) {
       const entry = HistoryEntry.create(snapshot);
@@ -843,20 +843,20 @@ export const TreeManager = types
    * Apply entries that were saved after the content was last saved, when a document loads.
    *
    * The entries are applied to the document's stored JSON (see applyEntriesToStoredJson), and the
-   * document's content is set to the result, which converts any old models and rebuilds the
-   * pending load entry from it. They aren't added to `document.history` or reported as completed:
-   * they are already in Firestore. The document mustn't be monitored, or setting its content
-   * would record the change as a new entry.
+   * document's content is set to the result, which converts any old models and rebuilds the pending
+   * conversion entry from it. They aren't added to `document.history` or reported as completed:
+   * they are already in Firestore. The document mustn't be monitored, or setting its content would
+   * record the change as a new entry.
    *
    * Application stops at the first entry that fails, and a caller must treat any `error` as
    * leaving the content not exact. When setting the content fails, the content is left as it
    * was loaded and no entries count as applied.
    */
   applyEntriesAtLoad(snapshots: HistoryEntrySnapshot[]): { applied: number, error?: string } {
-    const { mainDocument, pendingLoadEntry } = self;
+    const { mainDocument, pendingConversionEntry } = self;
     if (!mainDocument) return { applied: 0, error: "No document" };
     const documentJson = toJsonValue(getSnapshot(mainDocument as unknown as IAnyStateTreeNode));
-    const stored = applyEntriesToStoredJson(documentJson, mainDocument.key, pendingLoadEntry, snapshots);
+    const stored = applyEntriesToStoredJson(documentJson, mainDocument.key, pendingConversionEntry, snapshots);
     if (stored.applied > 0) {
       try {
         mainDocument.setContent(stored.content);

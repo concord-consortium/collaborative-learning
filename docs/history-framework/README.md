@@ -18,9 +18,9 @@ what CLUE does today, so the doc stays accurate at every stage.
 - [content-saves.md](content-saves.md) — How a document's content is saved, and how each save
   records the history entry it holds and whether it is exact. Status: built. What group documents
   add is in [group-doc-content-saves.md](../group-docs/group-doc-content-saves.md).
-- [load-entries.md](load-entries.md) — The entry that records the schema conversions CLUE makes
-  when it loads old content, and how a document opened for editing catches up to its history.
-  Status: built.
+- [conversion-entries.md](conversion-entries.md) — The entry that records the schema conversions
+  CLUE makes when it loads old content, and how a document opened for editing catches up to its
+  history. Status: built.
 - [start-editing-entry.md](start-editing-entry.md) — The entry recorded when a document is opened
   for editing: a session marker that also holds the changes CLUE makes on open and the content's
   drift from history. Status: not built. Also covers what CLUE does today instead, and the script
