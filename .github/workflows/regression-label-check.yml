@@ -1,0 +1,35 @@
+name: Regression Label Check
+# Codecov's client checks wait for every CI Regression upload, so a client change without the
+# `run regression` label would otherwise show no coverage result at all.
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, labeled, unlabeled, ready_for_review]
+permissions:
+  contents: read
+  pull-requests: read
+jobs:
+  regression-label:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Require a regression label on client changes
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+          PR: ${{ github.event.pull_request.number }}
+          LABELS: ${{ toJSON(github.event.pull_request.labels.*.name) }}
+          # The `client` paths in codecov.yml, plus the Cypress specs.
+          CLIENT_PATHS: "src/ shared/ authoring-api/src/helpers/ cypress/"
+        run: |
+          files=$(gh api --paginate "repos/$GH_REPO/pulls/$PR/files" --jq '.[] | .filename, (.previous_filename // empty)')
+          changed=$(grep -E "^($(tr ' ' '|' <<< "$CLIENT_PATHS"))" <<< "$files" || true)
+          if [ -z "$changed" ]; then
+            echo "No client files changed; no regression label needed."
+            exit 0
+          fi
+          if jq -e 'index("run regression") or index("skip regression")' <<< "$LABELS" > /dev/null; then
+            echo "Client files changed and the PR is labeled."
+            exit 0
+          fi
+          echo "::error::Client files changed. Add the 'run regression' label, or 'skip regression' if the change does not need the suite."
+          head -20 <<< "$changed"
+          exit 1

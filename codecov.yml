@@ -1,17 +1,29 @@
 coverage:
   status:
     project:
-      default:
+      client:
         target: auto
         threshold: 0.2%
+        # shared/ and the authoring-api helper are here because the client imports them.
+        paths: &client_paths ["src/", "shared/", "authoring-api/src/helpers/"]
+        # Naming the flags makes the status wait for cypress-regression's after_n_builds,
+        # and leaves out the nightly `cypress` flag.
+        flags: &client_flags [jest, cypress-smoke, cypress-regression]
+      scripts:
+        target: auto
+        threshold: 0.2%
+        paths: &scripts_paths ["scripts/"]
+        flags: &scripts_flags [jest]
+    patch:
+      client:
+        paths: *client_paths
+        flags: *client_flags
+      scripts:
+        paths: *scripts_paths
+        flags: *scripts_flags
 
 flag_management:
   individual_flags:
-    # Cypress suites that not every commit uploads. A commit with no upload for one of
-    # these reuses its last coverage instead of counting it as missing.
-    - name: cypress
-      carryforward: true
+    # One upload per container in ci-regression.yml's matrix.
     - name: cypress-regression
-      carryforward: true
-    - name: cypress-smoke
-      carryforward: true
+      after_n_builds: 15

@@ -53,7 +53,7 @@ A per-flag split (Jest vs. Cypress) does not work either: new code covered only 
 - **R8.** A Jest test fails when:
   - `after_n_builds` stops matching the number of containers in `ci-regression.yml`'s matrix;
   - the label check's folder list stops matching the `client` paths plus `cypress/`;
-  - a status names a flag no workflow uploads.
+  - a status names a flag no workflow uploads, or names the nightly `cypress` flag.
 - **R9.** `.claude/skills/releasing-clue/preparing.md` no longer says to ignore Codecov. It names the `client` and `scripts` checks and the label check, and does not restate the threshold.
 - **R10.** Verified on this PR:
   - Pushed without a label: the label check fails, `codecov/project/scripts` and `codecov/patch/scripts` post, and no `client` check posts.

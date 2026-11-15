@@ -3,6 +3,16 @@ import path from "path";
 
 const kRoot = path.resolve(__dirname, "../..");
 const kWorkflows = path.join(kRoot, ".github/workflows");
+const read = (file: string) => fs.readFileSync(path.join(kRoot, file), "utf8");
+
+const capture = (text: string, pattern: RegExp) => {
+  const match = text.match(pattern);
+  expect(match).not.toBeNull();
+  return match?.[1] ?? "";
+};
+const list = (text: string) => text.split(",").map(item => item.trim().replace(/^"|"$/g, ""));
+
+const kCodecov = read("codecov.yml");
 
 const uploadedFlags = () => {
   const flags = new Set<string>();
@@ -17,18 +27,23 @@ const uploadedFlags = () => {
   return flags;
 };
 
-const carriedForwardFlags = () => {
-  const text = fs.readFileSync(path.join(kRoot, "codecov.yml"), "utf8");
-  const matches = [...text.matchAll(/- name: (\S+)\s+carryforward: true/g)];
-  // Codecov also reads carryforward from `default_rules` and a top-level `flags:` key; fail rather than miss one.
-  expect(text.split("carryforward:").length - 1).toBe(matches.length);
-  return new Set(matches.map(m => m[1]));
-};
-
 describe("codecov.yml", () => {
-  it("carries forward every uploaded flag except jest, and nothing else", () => {
-    const uploaded = uploadedFlags();
-    const expected = [...uploaded].filter(f => f !== "jest").sort();
-    expect([...carriedForwardFlags()].sort()).toEqual(expected);
+  it("waits for one cypress-regression upload per CI Regression container", () => {
+    const containers = list(capture(read(".github/workflows/ci-regression.yml"), /^\s+container: \[(.*)\]/m));
+    const builds = Number(capture(kCodecov, /name: cypress-regression\s+after_n_builds: (\d+)/));
+    expect(builds).toBe(containers.length);
+  });
+
+  it("has the label check guard the client paths plus the Cypress specs", () => {
+    const clientPaths = list(capture(kCodecov, /paths: &client_paths \[(.*)\]/));
+    const labelPaths = capture(read(".github/workflows/regression-label-check.yml"), /CLIENT_PATHS: "(.*)"/).split(" ");
+    expect(labelPaths).toEqual([...clientPaths, "cypress/"]);
+  });
+
+  it("names only flags that a workflow uploads, leaving out the nightly cypress flag", () => {
+    const statusFlags = [/flags: &client_flags \[(.*)\]/, /flags: &scripts_flags \[(.*)\]/]
+      .flatMap(pattern => list(capture(kCodecov, pattern)));
+    expect([...uploadedFlags()]).toEqual(expect.arrayContaining(statusFlags));
+    expect(statusFlags).not.toContain("cypress");
   });
 });

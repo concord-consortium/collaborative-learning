@@ -78,7 +78,7 @@ jobs:
           # The `client` paths in codecov.yml, plus the Cypress specs.
           CLIENT_PATHS: "src/ shared/ authoring-api/src/helpers/ cypress/"
         run: |
-          files=$(gh api --paginate "repos/$GH_REPO/pulls/$PR/files" --jq '.[].filename')
+          files=$(gh api --paginate "repos/$GH_REPO/pulls/$PR/files" --jq '.[] | .filename, (.previous_filename // empty)')
           changed=$(grep -E "^($(tr ' ' '|' <<< "$CLIENT_PATHS"))" <<< "$files" || true)
           if [ -z "$changed" ]; then
             echo "No client files changed; no regression label needed."
@@ -97,6 +97,7 @@ Why this shape:
 - **The file list is fetched on its own line.** Actions runs `bash -eo pipefail`, so in a single pipeline the `|| true` that tolerates "no client files" would also swallow a failed `gh api` call and pass the check.
 - **Labels come from the event payload,** which carries the PR's current labels on every listed event type, including `labeled` and `unlabeled`.
 - **The API file list, not `gh pr diff`,** since the diff endpoint refuses very large diffs; the files endpoint lists up to 3000.
+- **A renamed file counts by both paths** (`previous_filename`), so moving a file out of a client folder still needs a label.
 
 Run as Actions runs it (`bash --noprofile --norc -eo pipefail`) against real PRs: #3091 with no labels exits 1 with the error; with `run regression` or `skip regression` exits 0; scripts/docs-only #3078 with no labels exits 0; a nonexistent PR exits 1 on the `gh` 404.
 
@@ -145,15 +146,16 @@ describe("codecov.yml", () => {
     expect(labelPaths).toEqual([...clientPaths, "cypress/"]);
   });
 
-  it("names only flags that a workflow uploads", () => {
+  it("names only flags that a workflow uploads, leaving out the nightly cypress flag", () => {
     const statusFlags = [/flags: &client_flags \[(.*)\]/, /flags: &scripts_flags \[(.*)\]/]
       .flatMap(pattern => list(capture(kCodecov, pattern)));
     expect([...uploadedFlags()]).toEqual(expect.arrayContaining(statusFlags));
+    expect(statusFlags).not.toContain("cypress");
   });
 });
 ```
 
-Built in the worktree as throwaway code: all three pass, `eslint` (both configs) and `tsc` are clean, and each of these mutations fails exactly one test: `after_n_builds: 14`; a 16th matrix container; a `functions-v2/` client path; `shared/` dropped from `CLIENT_PATHS`; `cypress/` dropped from it; `cypress-smoke` renamed in `ci.yml`; an unknown flag in a status; an upload step with `token:` before `flags:`. Every `capture` asserts its match, so none of the comparisons can pass on an empty list.
+Built in the worktree as throwaway code: all three pass, `eslint` (both configs) and `tsc` are clean, and each of these mutations fails exactly one test: `after_n_builds: 14`; a 16th matrix container; a `functions-v2/` client path; `shared/` dropped from `CLIENT_PATHS`; `cypress/` dropped from it; `cypress-smoke` renamed in `ci.yml`; an unknown flag in a status; `cypress` added to `client_flags`; an upload step with `token:` before `flags:`. Every `capture` asserts its match, so none of the comparisons can pass on an empty list.
 
 **Check before committing** (R6, R8):
 
