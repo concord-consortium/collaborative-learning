@@ -157,7 +157,8 @@ result, in the same action as the move's other patches.
 If an entry doesn't apply to the JSON copy, or `convertSnapshot` throws, playback stops there and
 shows the failure banner. A bridge's conversion that playback can't cross backward is different:
 playback stops there without the banner and says "Earlier history isn't available." See "History
-bridges" in [history-framework.md](./history-framework.md) for when that happens.
+bridges" in [history-framework/conversion-entries.md](history-framework/conversion-entries.md) for
+when that happens.
 
 ## Ids
 
@@ -190,14 +191,15 @@ must keep the ids that tiles refer to, for example a DataSet's attribute and cas
 tile replaced at an old position points at objects that no longer exist in the shared model.
 
 An object added to an old shared model during a playback move, such as a new attribute, doesn't
-exist until the end of the move, when the model replacement adds it. Other models' MST references
-to it can be set before then and resolve when read afterward. But MST runs an added object's
+exist until the end of the move, when the model replacement adds it. Other models' MST references to
+it can be set before then and resolve when read afterward. But MST runs an added object's
 `afterCreate` and `afterAttach` hooks when a later patch in the move goes into it, and a hook that
 runs then sees those references missing. For example, `CategorySet.afterAttach` would skip the
 listener that clears its cached categories. Before giving a shared model a `schemaVersion`, check
 the hooks of the models that refer into it, and make them tolerate a reference that resolves later,
-for instance by reading it in a view or a reaction instead of once in the hook. See "Old models
-and model replacements" in [history-framework.md](history-framework.md).
+for instance by reading it in a view or a reaction instead of once in the hook. See "Old models and
+model replacements" in
+[history-framework/conversion-entries.md](history-framework/conversion-entries.md).
 
 ## Performance
 
