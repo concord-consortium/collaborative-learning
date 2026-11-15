@@ -1,0 +1,226 @@
+# Implementation Plan: Add a codecov.yml so PRs stop failing codecov/project on noise
+
+**Jira**: https://concord-consortium.atlassian.net/browse/CLUE-756
+**Requirements Spec**: [requirements.md](requirements.md)
+**Status**: **In Development**
+
+## Implementation Plan
+
+The branch already holds the first version (carryforward). These steps replace it, then verify on the open PR. No dependency, lockfile or app-source change.
+
+### Split the Codecov checks and require a regression label on client changes
+
+**Summary**: R1 to R8. The config, the label check, and the test that keeps them in step go in one commit, because the test reads all three.
+
+**Files affected**:
+- `codecov.yml`: replaced
+- `.github/workflows/regression-label-check.yml` (new)
+- `src/test/codecov-config.test.ts`: rewritten
+
+**Estimated diff size**: ~120 lines
+
+```yaml
+coverage:
+  status:
+    project:
+      client:
+        target: auto
+        threshold: 0.2%
+        # shared/ and the authoring-api helper are here because the client imports them.
+        paths: &client_paths ["src/", "shared/", "authoring-api/src/helpers/"]
+        # Naming the flags makes the status wait for cypress-regression's after_n_builds,
+        # and leaves out the nightly `cypress` flag.
+        flags: &client_flags [jest, cypress-smoke, cypress-regression]
+      scripts:
+        target: auto
+        threshold: 0.2%
+        paths: &scripts_paths ["scripts/"]
+        flags: &scripts_flags [jest]
+    patch:
+      client:
+        paths: *client_paths
+        flags: *client_flags
+      scripts:
+        paths: *scripts_paths
+        flags: *scripts_flags
+
+flag_management:
+  individual_flags:
+    # One upload per container in ci-regression.yml's matrix.
+    - name: cypress-regression
+      after_n_builds: 15
+```
+
+The anchors keep each path and flag list in one place; the validator expands them (`Valid!`, with the patch statuses showing the same lists as the project ones).
+
+`.github/workflows/regression-label-check.yml`:
+
+```yaml
+name: Regression Label Check
+# Codecov's client checks wait for every CI Regression upload, so a client change without the
+# `run regression` label would otherwise show no coverage result at all.
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, labeled, unlabeled, ready_for_review]
+permissions:
+  contents: read
+  pull-requests: read
+jobs:
+  regression-label:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Require a regression label on client changes
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+          PR: ${{ github.event.pull_request.number }}
+          LABELS: ${{ toJSON(github.event.pull_request.labels.*.name) }}
+          # The `client` paths in codecov.yml, plus the Cypress specs.
+          CLIENT_PATHS: "src/ shared/ authoring-api/src/helpers/ cypress/"
+        run: |
+          files=$(gh api --paginate "repos/$GH_REPO/pulls/$PR/files" --jq '.[].filename')
+          changed=$(grep -E "^($(tr ' ' '|' <<< "$CLIENT_PATHS"))" <<< "$files" || true)
+          if [ -z "$changed" ]; then
+            echo "No client files changed; no regression label needed."
+            exit 0
+          fi
+          if jq -e 'index("run regression") or index("skip regression")' <<< "$LABELS" > /dev/null; then
+            echo "Client files changed and the PR is labeled."
+            exit 0
+          fi
+          echo "::error::Client files changed. Add the 'run regression' label, or 'skip regression' if the change does not need the suite."
+          head -20 <<< "$changed"
+          exit 1
+```
+
+Why this shape:
+- **The file list is fetched on its own line.** Actions runs `bash -eo pipefail`, so in a single pipeline the `|| true` that tolerates "no client files" would also swallow a failed `gh api` call and pass the check.
+- **Labels come from the event payload,** which carries the PR's current labels on every listed event type, including `labeled` and `unlabeled`.
+- **The API file list, not `gh pr diff`,** since the diff endpoint refuses very large diffs; the files endpoint lists up to 3000.
+
+Run as Actions runs it (`bash --noprofile --norc -eo pipefail`) against real PRs: #3091 with no labels exits 1 with the error; with `run regression` or `skip regression` exits 0; scripts/docs-only #3078 with no labels exits 0; a nonexistent PR exits 1 on the `gh` 404.
+
+`src/test/codecov-config.test.ts` reads the files as text, so no YAML parser dependency is added:
+
+```ts
+import fs from "fs";
+import path from "path";
+
+const kRoot = path.resolve(__dirname, "../..");
+const kWorkflows = path.join(kRoot, ".github/workflows");
+const read = (file: string) => fs.readFileSync(path.join(kRoot, file), "utf8");
+
+const capture = (text: string, pattern: RegExp) => {
+  const match = text.match(pattern);
+  expect(match).not.toBeNull();
+  return match?.[1] ?? "";
+};
+const list = (text: string) => text.split(",").map(item => item.trim().replace(/^"|"$/g, ""));
+
+const kCodecov = read("codecov.yml");
+
+const uploadedFlags = () => {
+  const flags = new Set<string>();
+  for (const file of fs.readdirSync(kWorkflows).filter(f => /\.ya?ml$/.test(f))) {
+    const text = fs.readFileSync(path.join(kWorkflows, file), "utf8");
+    const uploads = text.split("uses: codecov/codecov-action@").length - 1;
+    const matches = [...text.matchAll(/uses: codecov\/codecov-action@\S+\s+with:\s+flags: (\S+)/g)];
+    // The regex needs `flags:` as the first key under `with:`; fail rather than skip an upload it cannot read.
+    expect({ file, uploads: matches.length }).toEqual({ file, uploads });
+    matches.forEach(m => flags.add(m[1]));
+  }
+  return flags;
+};
+
+describe("codecov.yml", () => {
+  it("waits for one cypress-regression upload per CI Regression container", () => {
+    const containers = list(capture(read(".github/workflows/ci-regression.yml"), /^\s+container: \[(.*)\]/m));
+    const builds = Number(capture(kCodecov, /name: cypress-regression\s+after_n_builds: (\d+)/));
+    expect(builds).toBe(containers.length);
+  });
+
+  it("has the label check guard the client paths plus the Cypress specs", () => {
+    const clientPaths = list(capture(kCodecov, /paths: &client_paths \[(.*)\]/));
+    const labelPaths = capture(read(".github/workflows/regression-label-check.yml"), /CLIENT_PATHS: "(.*)"/).split(" ");
+    expect(labelPaths).toEqual([...clientPaths, "cypress/"]);
+  });
+
+  it("names only flags that a workflow uploads", () => {
+    const statusFlags = [/flags: &client_flags \[(.*)\]/, /flags: &scripts_flags \[(.*)\]/]
+      .flatMap(pattern => list(capture(kCodecov, pattern)));
+    expect([...uploadedFlags()]).toEqual(expect.arrayContaining(statusFlags));
+  });
+});
+```
+
+Built in the worktree as throwaway code: all three pass, `eslint` (both configs) and `tsc` are clean, and each of these mutations fails exactly one test: `after_n_builds: 14`; a 16th matrix container; a `functions-v2/` client path; `shared/` dropped from `CLIENT_PATHS`; `cypress/` dropped from it; `cypress-smoke` renamed in `ci.yml`; an unknown flag in a status; an upload step with `token:` before `flags:`. Every `capture` asserts its match, so none of the comparisons can pass on an empty list.
+
+**Check before committing** (R6, R8):
+
+```bash
+curl -s -X POST --data-binary @codecov.yml https://codecov.io/validate | head -1   # Valid!
+npm test -- src/test/codecov-config.test.ts
+```
+
+---
+
+### Describe the new checks in release prep
+
+**Summary**: R9.
+
+**Files affected**:
+- `.claude/skills/releasing-clue/preparing.md`: the **Codecov** bullet under "Other rules"
+
+**Estimated diff size**: 6 lines
+
+Before:
+
+```markdown
+- **Codecov:** `codecov.yml` sets how far project coverage may drop and carries the Cypress
+  flags forward for PRs that skip a suite, so a red `codecov/project` or `codecov/patch` is
+  worth a look before calling a PR ready.
+```
+
+After:
+
+```markdown
+- **Codecov:** `codecov.yml` splits coverage into `client` and `scripts` checks. The `client`
+  checks post only once every CI Regression upload has arrived, so they are missing on a PR
+  without `run regression` or with a failed container; the Regression Label Check flags a client
+  change that has neither `run regression` nor `skip regression`. A red Codecov check is worth a
+  look before calling a PR ready.
+```
+
+---
+
+### Verify on the PR
+
+**Summary**: R10. Not a commit.
+
+Push both commits together, with the PR still unlabeled. Once `CI Base` finishes:
+
+```bash
+HEAD_SHA=$(gh pr view --json headRefOid -q .headRefOid)
+gh api "repos/concord-consortium/collaborative-learning/commits/$HEAD_SHA/check-runs?per_page=100" \
+  --jq '.check_runs[] | select(.name|test("codecov|Regression Label")) | [.name,.conclusion,.output.title] | @tsv'
+```
+
+Pass when the label check has failed, `codecov/project/scripts` and `codecov/patch/scripts` are present, and no `client` check is. Then add `run regression` (which `regression-label.yml` turns into a rerun of `CI Regression`) and, once its 15 containers finish, run the same command: the label check passes, and `codecov/project/client` and `codecov/patch/client` are present and successful. Before the containers finish, no `client` check should be present. Copy the titles into the PR description.
+
+## Open Questions
+
+<!-- Implementation-focused questions only. Requirements questions go in requirements.md. -->
+
+### RESOLVED: Judgment call: one commit for the config, workflow and test, or three?
+**Options considered**:
+- A) One commit.
+- B) Three commits.
+
+**Decision**: A. The test reads all three files, so no split leaves every commit's test passing.
+
+### RESOLVED: Judgment call: a new workflow, or a job in `regression-label.yml`?
+**Options considered**:
+- A) A new `regression-label-check.yml`.
+- B) A second job in `regression-label.yml`.
+
+**Decision**: A. `regression-label.yml` runs only on `labeled` and needs `actions: write` to rerun `CI Regression`; the check needs other triggers and only read access.
