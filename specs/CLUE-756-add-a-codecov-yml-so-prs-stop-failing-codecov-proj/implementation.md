@@ -6,16 +6,16 @@
 
 ## Implementation Plan
 
-The branch already holds the first version (carryforward). These steps replace it, then verify on the open PR. No dependency, lockfile or app-source change.
+Two commits, then a check on the PR itself. No dependency, lockfile or app-source change.
 
 ### Split the Codecov checks and require a regression label on client changes
 
 **Summary**: R1 to R8. The config, the label check, and the test that keeps them in step go in one commit, because the test reads all three.
 
 **Files affected**:
-- `codecov.yml`: replaced
+- `codecov.yml` (new)
 - `.github/workflows/regression-label-check.yml` (new)
-- `src/test/codecov-config.test.ts`: rewritten
+- `src/test/codecov-config.test.ts` (new)
 
 **Estimated diff size**: ~120 lines
 
@@ -28,8 +28,7 @@ coverage:
         threshold: 0.2%
         # shared/ and the authoring-api helper are here because the client imports them.
         paths: &client_paths ["src/", "shared/", "authoring-api/src/helpers/"]
-        # Naming the flags makes the status wait for cypress-regression's after_n_builds,
-        # and leaves out the nightly `cypress` flag.
+        # Listing the flags waits for cypress-regression's after_n_builds and omits the nightly `cypress` flag.
         flags: &client_flags [jest, cypress-smoke, cypress-regression]
       scripts:
         target: auto
@@ -172,15 +171,14 @@ npm test -- src/test/codecov-config.test.ts
 
 **Files affected**:
 - `.claude/skills/releasing-clue/preparing.md`: the **Codecov** bullet under "Other rules"
+- `README.md`: the sentence on Codecov under the test notes
 
-**Estimated diff size**: 6 lines
+**Estimated diff size**: 8 lines
 
 Before:
 
 ```markdown
-- **Codecov:** `codecov.yml` sets how far project coverage may drop and carries the Cypress
-  flags forward for PRs that skip a suite, so a red `codecov/project` or `codecov/patch` is
-  worth a look before calling a PR ready.
+- **Codecov:** its checks fail on almost every PR; ignore them when judging readiness.
 ```
 
 After:
@@ -191,6 +189,12 @@ After:
   without `run regression` or with a failed container; the Regression Label Check flags a client
   change that has neither `run regression` nor `skip regression`. A red Codecov check is worth a
   look before calling a PR ready.
+```
+
+`README.md`, which said Codecov reports on "overall coverage":
+
+```markdown
+The tests are run automatically on PRs and Codecov tracks coverage as separate `client` and `scripts` checks (see `codecov.yml`). The `client` checks report only after the regression suite runs, so a PR that changes client code or Cypress specs needs the `run regression` label, or `skip regression` when it does not need the suite; the Regression Label Check enforces this.
 ```
 
 ---

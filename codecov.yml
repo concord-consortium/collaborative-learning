@@ -6,8 +6,7 @@ coverage:
         threshold: 0.2%
         # shared/ and the authoring-api helper are here because the client imports them.
         paths: &client_paths ["src/", "shared/", "authoring-api/src/helpers/"]
-        # Naming the flags makes the status wait for cypress-regression's after_n_builds,
-        # and leaves out the nightly `cypress` flag.
+        # Listing the flags waits for cypress-regression's after_n_builds and omits the nightly `cypress` flag.
         flags: &client_flags [jest, cypress-smoke, cypress-regression]
       scripts:
         target: auto

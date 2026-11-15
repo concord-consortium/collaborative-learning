@@ -54,7 +54,7 @@ A per-flag split (Jest vs. Cypress) does not work either: new code covered only 
   - `after_n_builds` stops matching the number of containers in `ci-regression.yml`'s matrix;
   - the label check's folder list stops matching the `client` paths plus `cypress/`;
   - a status names a flag no workflow uploads, or names the nightly `cypress` flag.
-- **R9.** `.claude/skills/releasing-clue/preparing.md` no longer says to ignore Codecov. It names the `client` and `scripts` checks and the label check, and does not restate the threshold.
+- **R9.** `.claude/skills/releasing-clue/preparing.md` no longer says to ignore Codecov, and `README.md` no longer describes a single overall-coverage report. Both name the `client` and `scripts` checks and the label check, and neither restates the threshold.
 - **R10.** Verified on this PR:
   - Pushed without a label: the label check fails, `codecov/project/scripts` and `codecov/patch/scripts` post, and no `client` check posts.
   - With `run regression` added: the label check passes, and `codecov/project/client` and `codecov/patch/client` post only after all 15 `cypress-regression` uploads, both passing.

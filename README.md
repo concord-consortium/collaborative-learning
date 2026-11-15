@@ -166,7 +166,7 @@ The user names and passwords are stored in the 1Password shared `Developer` vaul
 
 These secrets are automatically used by the CI workflow for running tests.
 
-The tests are run automatically on PRs and Codecov is configured to track coverage. Codecov will report on whether a given PR increases or decreases overall coverage to encourage good testing habits.
+The tests are run automatically on PRs and Codecov tracks coverage as separate `client` and `scripts` checks (see `codecov.yml`). The `client` checks report only after the regression suite runs, so a PR that changes client code or Cypress specs needs the `run regression` label, or `skip regression` when it does not need the suite; the Regression Label Check enforces this.
 
 Note that currently, some of the jest tests (notably `db.test.ts`) and many of the cypress tests target the the production database, albeit generally `qa` or `test`-specific portions of the production database. It would be better if these tests targeted the emulators. Furthermore, some of the cypress tests require launching from the portal via activities which target the `master` branch, which means that the automated cypress tests that run on a PR can fail due to code on the master branch. This should be fixed with some combination of targeting the emulators and mocking the necessary portal interactions.
 
