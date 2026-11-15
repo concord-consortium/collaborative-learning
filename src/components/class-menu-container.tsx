@@ -21,6 +21,7 @@ export class ClassMenuContainer extends BaseComponent <IProps> {
     if (user.standaloneAuthUser) {
       links.unshift({
         text: "Log Out",
+        isAction: true,
         selected: false,
         hideItemCheck: true,
         bottomBorder: true,
@@ -33,6 +34,7 @@ export class ClassMenuContainer extends BaseComponent <IProps> {
       // of the current URL as it contains all the information needed to join the class
       links.unshift({
         text: "Copy Shareable Link",
+        isAction: true,
         selected: false,
         hideItemCheck: true,
         onClick: () => {

@@ -33,7 +33,8 @@ describe("StudentMenuContainer", () => {
 
     await ue.click(screen.getByTestId("user-header"));
     expect(screen.getByTestId("user-list")).toBeInTheDocument();
-    expect(screen.getByTestId("list-item-log-out")).toBeInTheDocument();
+    expect(screen.getByTestId("list-item-log-out")).not.toHaveAttribute("aria-selected");
+    expect(screen.getByTestId("user-header")).not.toHaveTextContent("Log Out");
 
     // In Jest 30/jsdom, window.location is non-configurable so we cannot
     // mock location.assign directly. The call to location.assign triggers a

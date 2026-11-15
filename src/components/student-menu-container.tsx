@@ -14,6 +14,7 @@ export class StudentMenuContainer extends BaseComponent <IProps> {
     const links: ICustomDropdownItem[] = [
       {
         text: "Log Out",
+        isAction: true,
         selected: false,
         hideItemCheck: true,
         onClick: () => {
