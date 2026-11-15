@@ -13,7 +13,7 @@ interface IProps {
 // Marks the point in the history a link into the document asked for, so the reader can look
 // around and come back to it.
 export const LinkMarker: React.FC<IProps> = ({ location, activeNavTab, onClick }) => {
-  // 10px is half the width of the marker, it is subtracted to center it
+  // Half of .link-marker-button's 20px width (link-marker.scss), so the marker centers on its location
   const style = { left: `calc(${location}% - 10px)` };
 
   return (

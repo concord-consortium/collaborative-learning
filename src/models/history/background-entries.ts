@@ -1,7 +1,7 @@
 // This rule is temporary. History entries recorded before the `background` flag existed carry no
 // flag, so it recognizes the ones produced by code (DataFlow ticks and recomputes, Simulator
-// steps) from their action names and patch paths. It is removed the release after the migration
-// script that backfills the flag has run.
+// steps) from their action names and patch paths. Remove it the release after the migration script
+// that backfills the flag has run.
 import { HistoryEntrySnapshot, HistoryEntryType } from "./history";
 
 interface ILegacyEntryShape {
@@ -58,6 +58,8 @@ const demoPath = "/content/tileMap/t1/content/program/nodes/3489/data/demoOutput
 const demoReplace = { op: "replace", path: demoPath };
 const rec = (patches: Array<{ op: string; path: string }>) => ({ patches });
 
+// Shared with the migration script's tests, so the read-time rule and the script are checked
+// against the same cases.
 export const kLegacyBackgroundRuleCases: Array<{ name: string; entry: ILegacyEntryShape; expected: boolean }> = [
   { name: "DataFlow tick", expected: true,
     entry: { action: "/content/tileMap/t1/content/program/tickAndProcess", records: [rec(valuesReplaces)] } },

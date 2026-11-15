@@ -402,7 +402,7 @@ describe("PlaybackControlModel", () => {
       expect(model.currentStopIndex).toBe(1);
     });
 
-    it("puts a stop the document stops between on the stop before it", () => {
+    it("shows the stop before a position that falls between two stops", () => {
       // Stops are [initial, user at 1, user at 4].
       const { model } = setupModel(4, { backgroundIndexes: [1, 2], appliedPosition: 3 });
 

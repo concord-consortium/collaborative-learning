@@ -21,7 +21,7 @@ actions(self => {
 })
 ```
 
-Currently if you add `withoutUndo` to an action and then you call this action from another action, the `withoutUndo` will be ignored. A warning message will be printed in this case describing how we can change the code to handle this. You can see that in [without-undo.ts](../src/models/history/without-undo.ts). If ignoring it is what you want, pass `withoutUndo({ unlessChildAction: true })` and no warning is printed.
+If you add `withoutUndo` to an action and call that action from another action, the `withoutUndo` is ignored. A warning message will be printed in this case describing how we can change the code to handle this. You can see that in [without-undo.ts](../src/models/history/without-undo.ts). If ignoring it is what you want, pass `withoutUndo({ unlessChildAction: true })` and no warning is printed.
 
 ### asBackground
 

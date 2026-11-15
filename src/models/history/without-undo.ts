@@ -22,7 +22,7 @@ interface IChildActionOptions {
  *
  */
 export function withoutUndo(options?: IChildActionOptions) {
-  const env = getRootCallEnv("withoutUndo", options);
+  const env = getRootCallEnv("withoutUndo", "left out of the undo history", options);
   if (!env) return;
   env.undoable = false;
 }
@@ -33,7 +33,8 @@ export function withoutUndo(options?: IChildActionOptions) {
  * as a tick of a running program. A background entry is not undoable.
  *
  * `producerTileId` is the id of the tile that owns the action, usually
- * `getTileModel(self)?.id`.
+ * `getTileModel(self)?.id` with the `getTileModel` from
+ * `shared-model-document-manager.ts`, which works from any model under the tile.
  *
  * Like `withoutUndo`, it only applies when the action is the initial action. A
  * child action's changes belong to its parent's entry, which might hold a
@@ -41,7 +42,7 @@ export function withoutUndo(options?: IChildActionOptions) {
  * recorded as the parent's. `unlessChildAction: true` skips the warning.
  */
 export function asBackground(options: { producerTileId: string | undefined; unlessChildAction?: boolean }) {
-  const env = getRootCallEnv("asBackground", options);
+  const env = getRootCallEnv("asBackground", "recorded in a background entry", options);
   if (!env) return;
   env.undoable = false;
   env.background = true;
@@ -50,9 +51,10 @@ export function asBackground(options: { producerTileId: string | undefined; unle
 
 /**
  * Returns the environment of the tracked call of the running action, or undefined when the
- * action is a child action or isn't tracked.
+ * action is a child action or isn't tracked. `effect` says what the caller does to the action's
+ * changes, for the warning about a child action.
  */
-function getRootCallEnv(name: string, options?: IChildActionOptions): CallEnv | undefined {
+function getRootCallEnv(name: string, effect: string, options?: IChildActionOptions): CallEnv | undefined {
   const actionCall = getRunningActionContext();
   if (!actionCall) {
     throw new Error(`${name} called outside of an MST action`);
@@ -71,8 +73,8 @@ function getRootCallEnv(name: string, options?: IChildActionOptions): CallEnv | 
       `with ${name} is something you need to do, you have a few options.` +
       `- If you want to ignore the ${name} when in a child action:` +
       `  ${name}({ unlessChildAction: true })` +
-      "  Note: this may cause issues if other code is always assuming this action" +
-      "  will never be included in the undo history" +
+      "  Note: this may cause issues if other code assumes this action's changes are" +
+      `  always ${effect}` +
       "- If you want to do something else you'll need to update this code." +
       "  Here are a couple options you might want:" +
       `    1. Apply the ${name} to the parent action`,
@@ -82,9 +84,10 @@ function getRootCallEnv(name: string, options?: IChildActionOptions): CallEnv | 
       "     in strange ways. For example a model action can trigger a re-render of a component." +
       "     If the component has a componentDidUpdate which calls another action, this second" +
       "     action will be considered a child action of the initial model action." +
-      "   - option 2 will require changing the undo stack so it can record different " +
-      "     entries from the history stack. It will also require changing the recordPatches " +
-      "     function to somehow track this child action information."
+      "   - option 2 will require recording the child action's changes apart from its parent's." +
+      "     That means changing the recordPatches function to somehow track this child action" +
+      "     information, and for withoutUndo, changing the undo stack so it can record different" +
+      "     entries from the history stack."
     ].join('\n'));
     return;
   }
