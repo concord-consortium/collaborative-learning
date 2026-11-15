@@ -56,7 +56,7 @@ describe("StudentMenuContainer", () => {
   it("lists About CLUE first, above a divider, and opens it without logging out", async () => {
     const ue = userEvent.setup();
     const onShowAbout = jest.fn();
-    const user = UserModel.create({ id: "1", name: "Test User", className: "Class 1" });
+    const user = UserModel.create({ id: "1", name: "Test User" });
 
     render(
       <Provider stores={specStores({ user })}>

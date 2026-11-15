@@ -6,8 +6,7 @@ import { ClassMenuContainer } from "./class-menu-container";
 import { specStores } from "../models/stores/spec-stores";
 import { IStandaloneAuthUser, UserModel } from "../models/stores/user";
 
-// The offerings' unit and ordinal give the problem path specStores() reports (NULL/0/0),
-// which is what ClassMenuContainer matches classes against.
+// unitCode "NULL" + ordinal "0.0" match specStores()'s problemPath (NULL/0/0), so the classes are listed.
 const offering = (className: string, offeringId: string) => ({
   className, offeringId, unitCode: "NULL", problemOrdinal: "0.0", location: `https://example.com/${offeringId}`
 });
@@ -24,12 +23,13 @@ function renderMenu(options: { offerings?: boolean, standalone?: boolean } = {})
     user.setStandaloneAuthUser({ rawJWT: "", jwt: {}, classId: 1, offeringId: 1 } as IStandaloneAuthUser);
   }
   const onShowAbout = jest.fn();
+  const stores = specStores({ user });
   render(
-    <Provider stores={specStores({ user })}>
+    <Provider stores={stores}>
       <ClassMenuContainer onShowAbout={onShowAbout} />
     </Provider>
   );
-  return onShowAbout;
+  return { onShowAbout, stores };
 }
 
 // useDropdown moves focus to the selected option after an animation frame.
@@ -44,7 +44,7 @@ const optionNames = () => screen.getAllByRole("option").map(option => option.tex
 
 describe("ClassMenuContainer", () => {
   it("lists About CLUE above the classes and keeps the class selected after opening it", async () => {
-    const onShowAbout = renderMenu({ offerings: true });
+    const { onShowAbout } = renderMenu({ offerings: true });
     await openMenu();
     const names = optionNames();
     expect(names).toHaveLength(3);
@@ -73,5 +73,23 @@ describe("ClassMenuContainer", () => {
     const names = optionNames();
     expect(names).toHaveLength(5);
     expect(names).toEqual(["About CLUE", "Copy Shareable Link", "Log Out", "Class 1", "Class 2"]);
+  });
+
+  it("keeps the class selected after Copy Shareable Link", async () => {
+    const writeText = jest.fn(() => Promise.resolve());
+    Object.defineProperty(navigator, "clipboard", { value: { writeText }, configurable: true });
+    const { stores } = renderMenu({ offerings: true, standalone: true });
+    const alert = jest.spyOn(stores.ui, "alert").mockImplementation(() => undefined);
+    await openMenu();
+
+    fireEvent.click(screen.getByRole("option", { name: "Copy Shareable Link" }));
+    await flush();
+    expect(writeText).toHaveBeenCalledTimes(1);
+    expect(alert).toHaveBeenCalledTimes(1);
+    expect(screen.getByRole("option", { name: "Class 1" })).toHaveAttribute("aria-selected", "true");
+    expect(screen.getByRole("option", { name: "Copy Shareable Link" })).not.toHaveAttribute("aria-selected");
+
+    await openMenu();
+    expect(document.activeElement).toBe(screen.getByRole("option", { name: "Class 1" }));
   });
 });
