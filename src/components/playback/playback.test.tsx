@@ -139,6 +139,18 @@ describe("PlaybackComponent", () => {
     expect(region).toBeEmptyDOMElement();
   });
 
+  it("says nothing at the start of a history that is all available", () => {
+    const docModel = setupDocument();
+    const treeManager = docModel.treeManagerAPI as Instance<typeof TreeManager>;
+    render(<PlaybackComponent document={docModel} historyManager={makeHistoryManager()}
+              requestedHistoryId={undefined} />);
+    act(() => {
+      treeManager.setNumHistoryEntriesApplied(0);
+    });
+    expect(treeManager.earliestReachablePosition).toBe(0);
+    expect(screen.getByTestId("playback-history-unavailable")).toBeEmptyDOMElement();
+  });
+
   it("explains why the slider goes no further back than the earliest available stop", async () => {
     // Entries 1 and 2 are background, and the history before position 3 can't be rebuilt.
     mockVirtualConversions = [{ position: 3, oldJson: undefined, path: "/content/tileMap/t1" }];

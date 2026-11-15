@@ -867,6 +867,25 @@ describe("entry completion, open-entry timeout and late records", () => {
       expect(manager.activeHistoryEntries.length).toBe(0);
     });
 
+    it("keeps a timed-out background entry's flag and tile on its late record's entry", () => {
+      const manager = TreeManager.create({ document: {}, undoStore: {} });
+      manager.createHistoryEntry({
+        id: "e1", exchangeId: "e1-x1", tree: treeId, model: "TestModel", action: "/tick", undoable: false,
+        background: true, producerTileId: "t1"
+      });
+      manager.startExchange("e1", "x2", "stuck-exchange");
+      manager.addTreePatchRecord("e1", "e1-x1", patchRecord("/tick"));
+      jest.spyOn(console, "error").mockImplementation(() => null);
+      jest.advanceTimersByTime(kOpenEntryTimeoutMs);
+      (console.error as jest.Mock).mockRestore();
+
+      manager.addTreePatchRecord("e1", "x2", patchRecord("/followUp"));
+      const late = manager.latestDocumentHistoryEntry!;
+      expect(late.lateRecordForEntryId).toBe("e1");
+      expect(late.background).toBe(true);
+      expect(late.producerTileId).toBe("t1");
+    });
+
     it("drops a late record with no patches, and ignores late startExchange/endExchange calls", () => {
       const { manager } = openStuckEntry();
       jest.spyOn(console, "error").mockImplementation(() => null);

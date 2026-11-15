@@ -957,6 +957,8 @@ describe("PlaybackControlModel", () => {
       expect(seek).not.toHaveBeenCalledWith(0);
       expect(treeManager.numHistoryEventsApplied).toBe(3);
       expect(model.sliderValue).toBe(2);
+      // The time readout shows the last entry applied at the earliest stop.
+      expect(model.sliderStopHistoryIndex).toBe(2);
     });
 
     it("moves the earliest stop to where a seek found the oldest reachable position", () => {
@@ -1133,6 +1135,17 @@ describe("PlaybackControlModel", () => {
       expect(back.treeManager.historyPlaybackFailures.map(f => f.direction)).toEqual(["undo"]);
       // Stop 1 of 2 along the rail.
       expect(back.model.uniqueFailures.map(m => m.location)).toEqual([50]);
+    });
+
+    it("marks an undo failure on the stop just before the failing entry when that is a user stop", async () => {
+      // Every entry is a user change, so the stop at position 2 is the document without entry 2.
+      const { model, treeManager } = setupModel(4, { failingEntryIndex: 2 });
+      await jestSpyConsole("warn", async () => {
+        await model.goToSliderStop(0);
+      });
+      expect(treeManager.historyPlaybackFailures.map(f => f.direction)).toEqual(["undo"]);
+      // Stop 2 of 4 along the rail.
+      expect(model.uniqueFailures.map(m => m.location)).toEqual([50]);
     });
   });
 });

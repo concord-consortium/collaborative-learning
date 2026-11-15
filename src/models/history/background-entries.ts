@@ -6,7 +6,8 @@ import { HistoryEntrySnapshot, HistoryEntryType } from "./history";
 
 interface ILegacyEntryShape {
   action?: string;
-  records: ReadonlyArray<{ patches: ReadonlyArray<{ op: string; path: string }> }>;
+  // Optional because an entry snapshot may leave it out.
+  records?: ReadonlyArray<{ patches: ReadonlyArray<{ op: string; path: string }> }>;
 }
 
 const kBackgroundActionSuffixes = ["/tickAndProcess", "/processAfterProgramChange"];
@@ -24,7 +25,7 @@ export function isLegacyBackgroundEntry(entry: ILegacyEntryShape): boolean {
   if (kBackgroundActionSuffixes.some(suffix => action.endsWith(suffix))) return true;
   if (kSimulatorStepAction.test(action)) return true;
   if (action.endsWith(kSetProgramSuffix)) {
-    const patches = entry.records.flatMap(record => record.patches);
+    const patches = (entry.records ?? []).flatMap(record => record.patches);
     // demoOutput alone is not enough: at least one running-values patch must be present.
     return patches.some(patch => patch.op === "replace" && kRunningValuesPath.test(patch.path)) &&
       patches.every(patch => patch.op === "replace" &&

@@ -266,7 +266,7 @@ export const TreeManager = types
   /**
    * Entries that were force-completed, so records that arrive for them later can be recognized.
    */
-  timedOutEntries: new Map<string, { model?: string }>(),
+  timedOutEntries: new Map<string, { model?: string; background?: boolean; producerTileId?: string }>(),
   /**
    * Set when the JSON copy can't get back to the trees' position after a failed move. The copy
    * and the trees then disagree, so playback makes no more moves.
@@ -477,7 +477,8 @@ export const TreeManager = types
       })}`);
 
       self.exactness.markNotExact("timed-out-entry");
-      self.timedOutEntries.set(entryId, { model: entry.model });
+      const { model, background, producerTileId } = entry;
+      self.timedOutEntries.set(entryId, { model, background, producerTileId });
       entry.activeExchanges.clear();
       entry.timedOut = true;
       completeHistoryEntry(entry);
@@ -752,6 +753,9 @@ export const TreeManager = types
           model: timedOutEntry.model,
           action: record.action,
           undoable: false,
+          // A late record of a background entry is background too.
+          background: timedOutEntry.background,
+          producerTileId: timedOutEntry.producerTileId,
           lateRecordForEntryId: historyEntryId,
           records: [record]
         });

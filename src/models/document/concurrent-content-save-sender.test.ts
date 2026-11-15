@@ -315,26 +315,43 @@ describe("ConcurrentContentSaveSender", () => {
       expect(rtdbEnvelopeRef.writes[1].values.lastHistoryEntryId).toBe(a);
     });
 
-    it("doesn't show Saved again for background-only changes once the indicator clears it", async () => {
+    it("doesn't show Saved again when another member's save covers only background changes", async () => {
       const { commits, rtdbEnvelopeRef, document, edit, tick } = track(setup({}, true));
       const a = await edit("alpha");
       commits.commit(a);
       rtdbEnvelopeRef.writes[0].resolve();
       await flush();
       expect(document.saveState).toBe(SaveState.Saved);
+      // as the save indicator does a while after showing Saved
       document.setSaveState(SaveState.Idle);
 
       const setSaveState = jest.spyOn(document, "setSaveState");
       const b = await tick("bravo");
       commits.commit(b);
-      jest.advanceTimersByTime(kBackgroundSaveGapMs);
-      rtdbEnvelopeRef.lastWrite.resolve();
-      await flush();
-      // another member's save reaches this client's entry
+      // Another member saves the head, which is this client's entry, while this client's save
+      // waits out the background gap. Both the committed entry and the head are then covered.
+      jest.advanceTimersByTime(100);
       rtdbEnvelopeRef.fireEnvelope({ lastHistoryEntryId: b, exactThrough: { id: b, index: 2 } });
       await flush();
+      jest.advanceTimersByTime(kBackgroundSaveGapMs);
+      await flush();
+      expect(rtdbEnvelopeRef.update).toHaveBeenCalledTimes(1);
       expect(setSaveState).not.toHaveBeenCalled();
       expect(document.saveState).toBe(SaveState.Idle);
+    });
+
+    it("shows Saved when another member's save covers the last user change while a tick waits to commit",
+        async () => {
+      const { commits, rtdbEnvelopeRef, document, edit, tick } = track(setup({ random: () => 0.5 }, true));
+      const a = await edit("alpha");
+      commits.commit(a);
+      await tick("bravo");
+      expect(document.saveState).toBe(SaveState.Saving);
+      // The tick hasn't committed, so the history isn't settled and only the committed entry is covered.
+      rtdbEnvelopeRef.fireEnvelope({ lastHistoryEntryId: a, exactThrough: { id: a, index: 1 } });
+      await flush();
+      expect(rtdbEnvelopeRef.update).not.toHaveBeenCalled();
+      expect(document.saveState).toBe(SaveState.Saved);
     });
   });
 

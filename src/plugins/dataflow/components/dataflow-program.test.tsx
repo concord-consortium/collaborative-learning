@@ -127,6 +127,23 @@ describe("DataflowProgram recording lifecycle", () => {
     expect(content.isRecording).toBe(false);
   });
 
+  it("records each tick of a running recording as a tick case", () => {
+    jest.useFakeTimers();
+    try {
+      const content = createContent();
+      const recordTickCase = jest.spyOn(content, "recordTickCase");
+      const recordSingleSample = jest.spyOn(content, "recordSingleSample");
+      renderProgram(content);
+      act(() => content.startRecording(jest.fn()));
+      act(() => { jest.advanceTimersByTime(kDataRate); });
+      expect(recordTickCase).toHaveBeenCalledTimes(1);
+      expect(recordSingleSample).not.toHaveBeenCalled();
+      expect(content.dataSet.cases).toHaveLength(1);
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
   it("does not stop recording on unmount of a read-only view", () => {
     const content = createContent();
     const { unmount } = renderProgram(content, { readOnly: true });

@@ -150,9 +150,9 @@ context('History Playback', () => {
       expect(Number(match[1]) + 1, 'history entries').to.be.greaterThan(9);
     });
     // The stops are the initial one, the drawing tile, its line, the DataFlow tile, the three number
-    // blocks, the generator and the latest entry, so the last stop's index is 8. Allow one more.
-    cy.get(playbackSliderHandle).invoke('attr', 'aria-valuemax')
-      .then(Number).should('be.at.most', 9);
+    // blocks, the generator and the latest entry, so the last stop's index is 8. A tick that became
+    // a user stop would add one.
+    cy.get(playbackSliderHandle).should('have.attr', 'aria-valuemax', '8');
 
     cy.log('verify playback reaches the start of a document with a DataFlow tile in a unit with Live Output settings');
     beforeTest(liveOutputUnitQueryParams);

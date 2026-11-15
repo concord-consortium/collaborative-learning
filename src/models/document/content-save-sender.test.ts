@@ -731,8 +731,9 @@ describe("ContentSaveSender", () => {
 
   describe("background changes", () => {
     it("waits 3 seconds between saves that hold only background changes", async () => {
-      const { commits, rtdbEnvelopeRef, tick } = track(setup());
-      const a = await tick("alpha");
+      const { commits, rtdbEnvelopeRef, edit, tick } = track(setup());
+      // a saved user change leaves only background changes unsaved, the most common case
+      const a = await edit("alpha");
       commits.commit(a);
       expect(rtdbEnvelopeRef.update).toHaveBeenCalledTimes(1);
       rtdbEnvelopeRef.writes[0].resolve();
