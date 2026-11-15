@@ -1,9 +1,12 @@
-import { render, screen } from "@testing-library/react";
+import { act, fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import React from "react";
 import { Provider } from "mobx-react";
+import Modal from "react-modal";
+import { ModalProvider } from "react-modal-hook";
 
 import { StudentMenuContainer } from "./student-menu-container";
+import { useAboutDialog } from "./about/about-dialog";
 import { specStores } from "../models/stores/spec-stores";
 import { UserModel } from "../models/stores/user";
 import * as authUtils from "../utilities/auth-utils";
@@ -15,6 +18,9 @@ jest.mock("../utilities/auth-utils", () => ({
 }));
 
 describe("StudentMenuContainer", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
 
   it("renders custom select with logout link", async () => {
     const ue = userEvent.setup();
@@ -26,7 +32,7 @@ describe("StudentMenuContainer", () => {
 
     render(
       <Provider stores={stores}>
-        <StudentMenuContainer />
+        <StudentMenuContainer onShowAbout={jest.fn()} />
       </Provider>
     );
     expect(screen.getByTestId("user-header")).toBeInTheDocument();
@@ -45,5 +51,61 @@ describe("StudentMenuContainer", () => {
     // Verify getConfirmLogoutUrl was called with undefined (no return URL)
     // since user.standaloneAuthUser is not set
     expect(authUtils.getConfirmLogoutUrl).toHaveBeenCalledWith(undefined);
+  });
+
+  it("lists About CLUE first, above a divider, and opens it without logging out", async () => {
+    const ue = userEvent.setup();
+    const onShowAbout = jest.fn();
+    const user = UserModel.create({ id: "1", name: "Test User", className: "Class 1" });
+
+    render(
+      <Provider stores={specStores({ user })}>
+        <StudentMenuContainer onShowAbout={onShowAbout} />
+      </Provider>
+    );
+    const header = screen.getByTestId("user-header");
+    const headerText = header.textContent;
+
+    await ue.click(header);
+    const names = screen.getAllByRole("option").map(option => option.textContent);
+    expect(names).toHaveLength(2);
+    expect(names).toEqual(["About CLUE", "Log Out"]);
+    expect(screen.getByTestId("list-item-about-clue")).toHaveClass("bottomBorder");
+
+    await ue.click(screen.getByTestId("list-item-about-clue"));
+    expect(onShowAbout).toHaveBeenCalledTimes(1);
+    expect(authUtils.getConfirmLogoutUrl).not.toHaveBeenCalled();
+    expect(header.textContent).toBe(headerText);
+    expect(screen.getByRole("option", { name: "About CLUE" })).not.toHaveAttribute("aria-selected");
+  });
+
+  it("returns focus to the menu button when the About dialog closes", async () => {
+    const MenuWithDialog = () => {
+      const showAbout = useAboutDialog();
+      return <StudentMenuContainer onShowAbout={showAbout} />;
+    };
+    const user = UserModel.create({ id: "1", name: "Test User" });
+    render(
+      <Provider stores={specStores({ user, appVersion: "4.3.0" })}>
+        <ModalProvider><div className="app"><MenuWithDialog /></div></ModalProvider>
+      </Provider>
+    );
+    Modal.setAppElement(".app");
+    // useDropdown and react-modal both move focus after an animation frame.
+    const flush = () => act(async () => { await new Promise(resolve => setTimeout(resolve, 50)); });
+
+    const header = screen.getByTestId("user-header");
+    header.focus();
+    fireEvent.keyDown(header, { key: "Enter" });
+    await flush();
+    const about = screen.getByTestId("list-item-about-clue");
+    fireEvent.keyDown(about, { key: "Enter" });
+    await flush();
+    expect(screen.getByRole("dialog")).toBeInTheDocument();
+
+    fireEvent.keyDown(screen.getByRole("dialog"), { key: "Escape", keyCode: 27 });
+    await flush();
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    expect(document.activeElement).toBe(header);
   });
 });

@@ -344,6 +344,7 @@ Colors come from `vars.scss` rather than the mockup's hex values: `$workspace-te
 - `src/clue/components/clue-app-header.scss`: menu item icon size
 - `src/components/student-menu-container.test.tsx`: About item tests; existing test passes `onShowAbout`
 - `src/components/class-menu-container.test.tsx` (new)
+- `cypress/e2e/functional/teacher_tests/teacher_dashboard_spec.js`: a demo teacher's class menu is no longer empty, so the spec checks that it opens with About CLUE first instead of expecting no list
 
 **Estimated diff size**: ~170 lines
 

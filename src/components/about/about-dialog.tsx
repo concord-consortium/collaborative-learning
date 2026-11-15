@@ -4,6 +4,8 @@ import { useStores } from "../../hooks/use-stores";
 import { IGitInfo } from "../../models/stores/base-stores-types";
 import { ExternalLink } from "../utilities/external-link";
 import clueBlockLogo from "../../assets/clue-block-logo.png";
+import InfoIcon from "../../assets/icons/info-icon.svg";
+import { ICustomDropdownItem } from "../../clue/components/custom-select";
 
 import "./about-dialog.scss";
 
@@ -74,4 +76,15 @@ export function useAboutDialog() {
     dataTestId: "about-dialog"
   });
   return showModal as () => void;
+}
+
+export function aboutMenuItem(onShowAbout: () => void): ICustomDropdownItem {
+  return {
+    text: "About CLUE",
+    itemIcon: <InfoIcon aria-hidden="true" />,
+    isAction: true,
+    hideItemCheck: true,
+    bottomBorder: true,
+    onClick: onShowAbout
+  };
 }

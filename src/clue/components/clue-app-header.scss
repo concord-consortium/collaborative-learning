@@ -353,6 +353,19 @@ $member-size: 18px;
         border-width: 0;
       }
 
+      .custom-select .item-icon {
+        display: flex;
+        align-items: center;
+        width: 16px;
+        height: 16px;
+        margin-right: 6px;
+
+        svg {
+          width: 16px;
+          height: 16px;
+        }
+      }
+
       .class > .custom-select > .header {
         min-width: 250px;
         border-radius: 5px 0 0 5px;

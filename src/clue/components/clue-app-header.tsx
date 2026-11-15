@@ -1,6 +1,7 @@
 import { ToggleGroup } from "@concord-consortium/react-components";
 import { observer } from "mobx-react";
 import React, { useCallback, useEffect, useRef, useState } from "react";
+import { useAboutDialog } from "../../components/about/about-dialog";
 import { EPanelId, IPanelGroupSpec } from "../../components/app-header";
 import { IBaseProps } from "../../components/base";
 import { ChatTutorSidebar } from "../../components/chat-tutor/chat-sidebar";
@@ -40,6 +41,7 @@ export const ClueAppHeaderComponent: React.FC<IProps> = observer(function ClueAp
   const myGroup = showGroup ? groups.getGroupById(user.currentGroupId) : undefined;
   const [isGroupManagementModalOpen, setIsGroupManagementModalOpen] = useState(false);
   const [isStudentGroupModalOpen, setIsStudentGroupModalOpen] = useState(false);
+  const showAboutDialog = useAboutDialog();
   // Drawer open state lives in the ui store (not local useState) so the workspace layout
   // can reserve space for the drawer and bump its content over instead of being overlaid.
   const isChatTutorOpen = ui.showChatTutor;
@@ -325,7 +327,7 @@ export const ClueAppHeaderComponent: React.FC<IProps> = observer(function ClueAp
           {renderStudentGroupsButton()}
           <div className="user teacher" title={getUserTitle()}>
             <div className="class" data-test="user-class">
-              <ClassMenuContainer />
+              <ClassMenuContainer onShowAbout={showAboutDialog} />
             </div>
             <div className="profile-icon teacher">
               <div className="profile-icon-inner"/>
@@ -411,7 +413,7 @@ export const ClueAppHeaderComponent: React.FC<IProps> = observer(function ClueAp
           {showUserInfo &&
           <div className="user" title={getUserTitle()}>
             <div className="user-contents">
-              <StudentMenuContainer />
+              <StudentMenuContainer onShowAbout={showAboutDialog} />
             </div>
             <div className="profile-icon">
               <div className="profile-icon-inner"/>
