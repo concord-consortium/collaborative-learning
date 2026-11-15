@@ -17,6 +17,7 @@ const Content: React.FC<any> = () => (
     </select>
     <textarea data-testid="textarea" />
     <input data-testid="input" />
+    <a href="#target" data-testid="link">link</a>
   </div>
 );
 
@@ -91,6 +92,17 @@ describe("useCustomModal Enter-key handling", () => {
     textarea.focus();
     fireEvent.keyDown(textarea, { key: "Enter" });
     expect(onDefaultClick).not.toHaveBeenCalled();
+  });
+
+  it("lets Enter on a focused link follow the link instead of firing the default action", async () => {
+    const onDefaultClick = jest.fn();
+    await openModal({ onDefaultClick });
+    const link = screen.getByTestId("link");
+    link.focus();
+    const notPrevented = fireEvent.keyDown(link, { key: "Enter" });
+    expect(onDefaultClick).not.toHaveBeenCalled();
+    expect(notPrevented).toBe(true);
+    expect(screen.getByTestId("link")).toBeInTheDocument();
   });
 
   it("fires the default action on Enter when focus is on a plain input", async () => {
