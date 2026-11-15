@@ -353,16 +353,38 @@ $member-size: 18px;
         border-width: 0;
       }
 
-      .custom-select .item-icon {
-        display: flex;
-        align-items: center;
-        width: 16px;
-        height: 16px;
-        margin-right: 6px;
+      .custom-select {
+        position: relative;
 
-        svg {
+        .list {
+          min-width: 100%;
+          box-sizing: border-box;
+          border-radius: 5px;
+
+          .list-item:first-child {
+            border-radius: 5px 5px 0 0;
+          }
+        }
+
+        .item-icon {
+          display: flex;
+          align-items: center;
           width: 16px;
           height: 16px;
+          margin-right: 6px;
+
+          &:first-child {
+            margin-left: 12px;
+          }
+
+          svg {
+            width: 16px;
+            height: 16px;
+
+            .info-icon-fill {
+              fill: none;
+            }
+          }
         }
       }
 

@@ -81,7 +81,7 @@ export function useAboutDialog() {
 export function aboutMenuItem(onShowAbout: () => void): ICustomDropdownItem {
   return {
     text: "About CLUE",
-    itemIcon: <InfoIcon aria-hidden="true" />,
+    itemIcon: <InfoIcon viewBox="0 0 24 24" aria-hidden="true" />,
     isAction: true,
     hideItemCheck: true,
     bottomBorder: true,

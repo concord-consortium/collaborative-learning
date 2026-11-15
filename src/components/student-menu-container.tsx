@@ -35,6 +35,7 @@ export class StudentMenuContainer extends BaseComponent <IProps> {
         titlePrefix={user.name}
         title={user.className}
         items={links}
+        showItemChecks={false}
         showItemIcons={true}
         dataTest="user"
       />

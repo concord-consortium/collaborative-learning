@@ -338,10 +338,10 @@ Colors come from `vars.scss` rather than the mockup's hex values: `$workspace-te
 - `src/plugins/timeline/assets/info-icon.svg` → `src/assets/icons/info-icon.svg` (`git mv`)
 - `src/plugins/timeline/components/timeline-info-button.tsx`: import path
 - `src/components/about/about-dialog.tsx`: `aboutMenuItem()`
-- `src/components/student-menu-container.tsx`: `onShowAbout` prop; About item first; `showItemIcons`
+- `src/components/student-menu-container.tsx`: `onShowAbout` prop; About item first; `showItemIcons`; `showItemChecks={false}`, since the student menu has no selection to check
 - `src/components/class-menu-container.tsx`: same
 - `src/clue/components/clue-app-header.tsx`: call `useAboutDialog()`; pass `onShowAbout` to both containers
-- `src/clue/components/clue-app-header.scss`: menu item icon size
+- `src/clue/components/clue-app-header.scss`: the user menu's list width, corners and icon styles
 - `src/components/student-menu-container.test.tsx`: About item tests; existing test passes `onShowAbout`
 - `src/components/class-menu-container.test.tsx` (new)
 - `cypress/e2e/functional/teacher_tests/teacher_dashboard_spec.js`: a demo teacher's class menu is no longer empty, so the spec checks that it opens with About CLUE first instead of expecting no list
@@ -356,7 +356,7 @@ import { ICustomDropdownItem } from "../../clue/components/custom-select";
 export function aboutMenuItem(onShowAbout: () => void): ICustomDropdownItem {
   return {
     text: "About CLUE",
-    itemIcon: <InfoIcon aria-hidden="true" />,
+    itemIcon: <InfoIcon viewBox="0 0 24 24" aria-hidden="true" />,
     isAction: true,
     hideItemCheck: true,
     bottomBorder: true,
@@ -377,7 +377,7 @@ const links: ICustomDropdownItem[] = [
 ];
 return (
   <CustomSelect titlePrefix={user.name} title={user.className} items={links}
-    showItemIcons={true} dataTest="user" />
+    showItemChecks={false} showItemIcons={true} dataTest="user" />
 );
 ```
 
@@ -399,19 +399,43 @@ const showAboutDialog = useAboutDialog();
 
 ```scss
 // clue-app-header.scss, inside .user
-.custom-select .item-icon {
-  display: flex;
-  align-items: center;
-  width: 16px;
-  height: 16px;
-  margin-right: 6px;
+.custom-select {
+  position: relative;
 
-  svg {
+  .list {
+    min-width: 100%;
+    box-sizing: border-box;
+    border-radius: 5px;
+
+    .list-item:first-child {
+      border-radius: 5px 5px 0 0;
+    }
+  }
+
+  .item-icon {
+    display: flex;
+    align-items: center;
     width: 16px;
     height: 16px;
+    margin-right: 6px;
+
+    &:first-child {
+      margin-left: 12px;
+    }
+
+    svg {
+      width: 16px;
+      height: 16px;
+
+      .info-icon-fill {
+        fill: none;
+      }
+    }
   }
 }
 ```
+
+The menu follows the Zeplin screen: the list is at least as wide as the header and rounded on all four corners, and the icon is the teal outline glyph with its light fill turned off. The `viewBox` prop is needed because the build's svgo pass strips `viewBox` from `info-icon.svg`, so sizing the 24 px glyph to 16 px would crop it instead of scaling it (the same fix as `TitleIcon` in `document-file-menu.tsx`). The class menu keeps its check column, since it marks the current class, so the 12 px indent applies only where the icon comes first.
 
 The divider is the existing `bottomBorder` style (a dashed `$workspace-teal-light-5` rule that already separates "Log Out" from the class list for standalone teachers), not the mockup's solid gray line, per R14, so the menu keeps one divider style (Doug's call).
 
