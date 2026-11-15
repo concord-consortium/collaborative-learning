@@ -362,7 +362,12 @@ $member-size: 18px;
           border-radius: 5px;
 
           .list-item:first-child {
-            border-radius: 5px 5px 0 0;
+            border-top-left-radius: 5px;
+            border-top-right-radius: 5px;
+          }
+
+          .list-item:active .item-icon svg path:not(.info-icon-fill) {
+            fill: white;
           }
         }
 
