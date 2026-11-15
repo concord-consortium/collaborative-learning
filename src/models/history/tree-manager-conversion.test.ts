@@ -748,6 +748,37 @@ describe("playback across a load entry", () => {
         expectPosition(3 + i);
       });
     });
+
+    it("keeps a bridge's conversions while it says the appended entries don't change them", () => {
+      const { manager } = setupVirtualConversionDocument(undefined);
+      // The registry has no way to remove a bridge, so this one reports nothing once the test ends.
+      let active = true;
+      const t9Conversions = [{ path: "/content/tileMap/t9", position: 1, oldJson: {} }];
+      const findVirtualConversions = jest.fn(() => active ? t9Conversions : []);
+      let appendChanges = false;
+      const appendChangesConversions = jest.fn(() => appendChanges);
+      registerHistoryBridge({ findVirtualConversions, appendChangesConversions });
+      const append = () => manager.addHistoryEntryAfterApplying(
+        HistoryEntry.create(makeEntry([replaceRecord(`${t1Path}/content/label`, "x", "y")])));
+      try {
+        expect(manager.virtualConversions).toContain(t9Conversions[0]);
+        expect(findVirtualConversions).toHaveBeenCalledTimes(1);
+        const previousLength = manager.document.history.length;
+        append();
+        append();
+        expect(manager.virtualConversions).toContain(t9Conversions[0]);
+        expect(findVirtualConversions).toHaveBeenCalledTimes(1);
+        expect(appendChangesConversions).toHaveBeenCalledWith(manager.document.history, previousLength, kTreeId,
+          t9Conversions);
+
+        appendChanges = true;
+        append();
+        expect(manager.virtualConversions).toContain(t9Conversions[0]);
+        expect(findVirtualConversions).toHaveBeenCalledTimes(2);
+      } finally {
+        active = false;
+      }
+    });
   });
 });
 

@@ -34,8 +34,18 @@ export function isLegacyBackgroundEntry(entry: ILegacyEntryShape): boolean {
   return false;
 }
 
+// The rule's answer per entry. Playback reads every entry each time the history grows, and an
+// entry in the history doesn't change.
+const legacyRuleResults = new WeakMap<object, boolean>();
+
 export function isBackgroundEntry(entry: HistoryEntryType | HistoryEntrySnapshot): boolean {
-  return entry.background ?? isLegacyBackgroundEntry(entry as ILegacyEntryShape);
+  if (entry.background !== undefined) return entry.background;
+  let result = legacyRuleResults.get(entry);
+  if (result === undefined) {
+    result = isLegacyBackgroundEntry(entry as ILegacyEntryShape);
+    legacyRuleResults.set(entry, result);
+  }
+  return result;
 }
 
 const kSetProgram = "/content/tileMap/t1/content/setProgram";

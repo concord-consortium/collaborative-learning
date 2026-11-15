@@ -266,6 +266,40 @@ describe("legacyDataflowHistoryBridge", () => {
     const conversions = findConversions([addLegacyTile(), legacyValue(), laterLoadEntry()]);
     expect(conversions.map(c => [c.path, c.position])).toEqual([[kTilePath, 2]]);
   });
+
+  describe("appendChangesConversions", () => {
+    // Whether appending `appended` to `before` can change the conversions. When it says no, the
+    // conversions a full scan finds must be the ones found before.
+    function appendChanges(before: HistoryEntrySnapshot[], appended: HistoryEntrySnapshot[]) {
+      const history = CDocument.create({ history: [...before, ...appended] }).history;
+      const earlier = legacyDataflowHistoryBridge.findVirtualConversions(history.slice(0, before.length), kTreeId);
+      const changes = legacyDataflowHistoryBridge.appendChangesConversions!(history, before.length, kTreeId, earlier);
+      if (!changes) {
+        expect(legacyDataflowHistoryBridge.findVirtualConversions(history, kTreeId)).toEqual(earlier);
+      }
+      return changes;
+    }
+
+    it("is false for entries that touch no converted tile, or a tile whose conversion has a next entry", () => {
+      expect(appendChanges([addLegacyTile(), legacyValue()], [currentMove("t2")])).toBe(false);
+      expect(appendChanges([addLegacyTile(), legacyValue(), currentMove()], [currentMove(), currentMove()]))
+        .toBe(false);
+      expect(appendChanges([currentMove()], [currentMove()])).toBe(false);
+    });
+
+    it("is true for an entry with a legacy patch", () => {
+      expect(appendChanges([addLegacyTile(), legacyValue(), currentMove()], [legacyValue()])).toBe(true);
+      expect(appendChanges([], [addLegacyTile("t2")])).toBe(true);
+    });
+
+    it("is true for the first entry after a conversion to touch its tile", () => {
+      expect(appendChanges([addLegacyTile(), legacyValue()], [currentMove()])).toBe(true);
+      expect(appendChanges([addLegacyTile(), legacyValue()], [buildTileLoadEntry(legacyTileWithNode(5))]))
+        .toBe(true);
+      const replaceTileMap = makeEntry([{ op: "replace", path: "/content/tileMap", value: {} }]);
+      expect(appendChanges([addLegacyTile(), legacyValue()], [replaceTileMap])).toBe(true);
+    });
+  });
 });
 
 describe("playback of legacy DataFlow history", () => {

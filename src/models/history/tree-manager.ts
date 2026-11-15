@@ -302,10 +302,13 @@ export const TreeManager = types
   let scannedLength = 0;
   let hasLoadEntry = false;
   // Finding virtual conversions runs every registered bridge, so the result is kept until the key
-  // changes.
+  // changes. When entries were only appended, a bridge that can tell whether they matter keeps its
+  // result, since the history grows on every tick while playback is open.
   let virtualKey: {
-    history: unknown; length: number; treeId: string; bridgeCount: number; localLoadEntry: unknown
+    history: unknown; length: number; lastEntry: unknown; treeId: string; bridgeCount: number;
+    localLoadEntry: unknown; extraLoadEntry: boolean
   } | undefined;
+  let bridgeConversions: IVirtualConversion[][] = [];
   let virtualConversions = kNoVirtualConversions;
 
   function getVirtualConversions() {
@@ -314,16 +317,30 @@ export const TreeManager = types
     if (bridges.length === 0 || treeId === undefined) return kNoVirtualConversions;
     const history = self.document.history;
     const { localLoadEntry } = self;
-    if (virtualKey?.history !== history || virtualKey.length !== history.length ||
-        virtualKey.treeId !== treeId || virtualKey.bridgeCount !== bridges.length ||
-        virtualKey.localLoadEntry !== localLoadEntry) {
-      virtualKey = { history, length: history.length, treeId, bridgeCount: bridges.length, localLoadEntry };
-      // A local load entry that the history doesn't hold yet comes after it, so the bridges see
-      // the conversion it records.
-      const bridgeHistory = localLoadEntry && !history.some(entry => entry.id === localLoadEntry.id)
-        ? [...history, HistoryEntry.create(localLoadEntry)]
-        : history;
-      virtualConversions = bridges.flatMap(bridge => bridge.findVirtualConversions(bridgeHistory, treeId));
+    const previous = virtualKey;
+    const sameSource = previous?.history === history && previous.treeId === treeId &&
+      previous.bridgeCount === bridges.length && previous.localLoadEntry === localLoadEntry;
+    if (sameSource && previous.length === history.length) return virtualConversions;
+
+    // A local load entry that the history doesn't hold yet comes after it, so the bridges see
+    // the conversion it records.
+    const extraLoadEntry = !!localLoadEntry && !history.some(entry => entry.id === localLoadEntry.id);
+    const bridgeHistory = extraLoadEntry ? [...history, HistoryEntry.create(localLoadEntry)] : history;
+    const appendedOnly = sameSource && previous.length < history.length &&
+      previous.lastEntry === history[previous.length - 1] && !previous.extraLoadEntry && !extraLoadEntry;
+    virtualKey = {
+      history, length: history.length, lastEntry: history[history.length - 1], treeId,
+      bridgeCount: bridges.length, localLoadEntry, extraLoadEntry
+    };
+    const previousConversions = bridgeConversions;
+    bridgeConversions = bridges.map((bridge, index) =>
+      appendedOnly && bridge.appendChangesConversions?.(history, previous.length, treeId,
+          previousConversions[index]) === false
+        ? previousConversions[index]
+        : bridge.findVirtualConversions(bridgeHistory, treeId));
+    // Unchanged results keep the same array, so what reads it isn't recomputed.
+    if (!appendedOnly || bridgeConversions.some((conversions, index) => conversions !== previousConversions[index])) {
+      virtualConversions = bridgeConversions.flat();
     }
     return virtualConversions;
   }
