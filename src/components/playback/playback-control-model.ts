@@ -40,7 +40,7 @@ interface ISliderStopBase {
 interface IInitialSliderStop extends ISliderStopBase {
   kind: "initial";
 }
-// The oldest position playback can reach, when the history before it can't be rebuilt and no
+// The earliest position playback can reach, when the history before it can't be rebuilt and no
 // other stop is there. Like a link stop, it shows the document right after an entry.
 interface IEarliestSliderStop extends ISliderStopBase {
   kind: "earliest";
@@ -224,7 +224,7 @@ export class PlaybackControlModel {
       stops.push({ kind: "latest", position: history.length, entry: lastEntry, created: lastEntry.created });
     }
 
-    // The oldest reachable position and a link's entry each get a stop unless one of the
+    // The earliest reachable position and a link's entry each get a stop unless one of the
     // document's own stops already shows them. Both usually fall on a background entry.
     const hasOwnStopAt = (position: number) => stops.some(s => position === s.position);
     const earliest = this.earliestReachablePosition;
@@ -346,7 +346,7 @@ export class PlaybackControlModel {
     return index === undefined ? undefined : this.railLocation(index);
   }
 
-  // The oldest position playback can reach, which the tree manager works out.
+  // The earliest position playback can reach, which the tree manager works out.
   get earliestReachablePosition(): number {
     return this.treeManager.earliestReachablePosition;
   }
@@ -523,13 +523,13 @@ export class PlaybackControlModel {
         const actual = this.treeManager.numHistoryEventsApplied;
         const blocked = threw || (actual !== undefined && actual !== position);
         // A backward seek that stops where earlier history can't be rebuilt isn't a failure.
-        const atOldestReachable = !threw && actual !== undefined && position < actual &&
-          actual === this.treeManager.oldestReachablePosition;
+        const atSeekBoundary = !threw && actual !== undefined && position < actual &&
+          actual === this.treeManager.seekBoundaryPosition;
         // Once the playback copy is out of step, no move can succeed until the history is
         // reopened, which makes a new copy.
         this.playbackFailureWarning = this.treeManager.jsonCopyOutOfStep
           ? kPlaybackStoppedWarning
-          : blocked && !atOldestReachable ? kPlaybackFailureWarning : null;
+          : blocked && !atSeekBoundary ? kPlaybackFailureWarning : null;
         // The stop that was asked for was never reached, so there is nothing left to prefer
         // over wherever the document actually stopped.
         if (blocked) this.requestedStop = undefined;

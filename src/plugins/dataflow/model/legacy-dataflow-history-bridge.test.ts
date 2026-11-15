@@ -335,7 +335,7 @@ describe("playback of legacy DataFlow history", () => {
       await manager.goToHistoryEntryPosition(0);
       expect(manager.historyPlaybackFailures).toEqual([]);
       expect(manager.numHistoryEventsApplied).toBe(0);
-      expect(manager.oldestReachablePosition).toBeUndefined();
+      expect(manager.seekBoundaryPosition).toBeUndefined();
       expect(document.content!.tileMap.get("t1")).toBeUndefined();
 
       // Reached forward from the tile's add, the same state doesn't depend on the rebuilt tile.
@@ -403,7 +403,7 @@ describe("playback of legacy DataFlow history", () => {
     await manager.goToHistoryEntryPosition(0);
     expect(manager.historyPlaybackFailures).toEqual([]);
     expect(manager.numHistoryEventsApplied).toBe(0);
-    expect(manager.oldestReachablePosition).toBeUndefined();
+    expect(manager.seekBoundaryPosition).toBeUndefined();
     expect(getNodeValue(document)).toBe(4);
   });
 
@@ -422,7 +422,7 @@ describe("playback of legacy DataFlow history", () => {
     await manager.goToHistoryEntryPosition(0);
     expect(manager.historyPlaybackFailures).toEqual([]);
     expect(manager.numHistoryEventsApplied).toBe(0);
-    expect(manager.oldestReachablePosition).toBeUndefined();
+    expect(manager.seekBoundaryPosition).toBeUndefined();
     expect(getNodeValue(document)).toBe(4);
 
     // The student's load entry and an edit arrive.
@@ -456,7 +456,7 @@ describe("playback of legacy DataFlow history", () => {
     await manager.goToHistoryEntryPosition(0);
     expect(manager.historyPlaybackFailures).toEqual([]);
     expect(manager.numHistoryEventsApplied).toBe(0);
-    expect(manager.oldestReachablePosition).toBeUndefined();
+    expect(manager.seekBoundaryPosition).toBeUndefined();
     expect(getNodeValue(document)).toBe(4);
   });
 
@@ -468,7 +468,7 @@ describe("playback of legacy DataFlow history", () => {
 
     await manager.goToHistoryEntryPosition(0);
     expect(manager.numHistoryEventsApplied).toBe(conversion.position);
-    expect(manager.oldestReachablePosition).toBe(conversion.position);
+    expect(manager.seekBoundaryPosition).toBe(conversion.position);
     expect(manager.historyPlaybackFailures).toEqual([]);
 
     await manager.goToHistoryEntryPosition(fixture.history.length);

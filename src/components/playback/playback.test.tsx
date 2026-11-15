@@ -119,7 +119,7 @@ describe("PlaybackComponent", () => {
       .toHaveTextContent("Could not find the requested point");
   });
 
-  it("shows that earlier history isn't available at the oldest reachable position", () => {
+  it("shows that earlier history isn't available at the earliest reachable position", () => {
     const docModel = setupDocument();
     const treeManager = docModel.treeManagerAPI as Instance<typeof TreeManager>;
     render(<PlaybackComponent document={docModel} historyManager={makeHistoryManager()}
@@ -129,7 +129,7 @@ describe("PlaybackComponent", () => {
     expect(region).toBeEmptyDOMElement();
 
     act(() => {
-      treeManager.setOldestReachablePosition(1);
+      treeManager.setSeekBoundaryPosition(1);
     });
     expect(region).toHaveTextContent("Earlier history isn't available.");
 

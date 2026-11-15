@@ -673,10 +673,10 @@ describe("playback across a load entry", () => {
       expect(manager.jsonHistoryCopy!.getJson(t1Path)).toEqual(endJson.content.tileMap.t1);
       expect(getTile(document, "t1").items.map(item => item.id)).toEqual(kEndIds);
       expect(manager.historyPlaybackFailures).toEqual([]);
-      expect(manager.oldestReachablePosition).toBeUndefined();
+      expect(manager.seekBoundaryPosition).toBeUndefined();
     });
 
-    it("stops at the oldest reachable position without a failure banner", async () => {
+    it("stops at the seek boundary without a failure banner", async () => {
       const { document, manager } = setupVirtualConversionDocument(undefined);
 
       await manager.goToHistoryEntryPosition(0);
@@ -685,16 +685,16 @@ describe("playback across a load entry", () => {
       expect(manager.jsonHistoryCopy!.position).toBe(2);
       expect(getTile(document, "t1").label).toBe("b");
       expect(manager.historyPlaybackFailures).toEqual([]);
-      expect(manager.oldestReachablePosition).toBe(2);
+      expect(manager.seekBoundaryPosition).toBe(2);
 
       // A move from the boundary further back goes nowhere, and still says why.
       await manager.goToHistoryEntryPosition(1);
       expect(manager.numHistoryEventsApplied).toBe(2);
       expect(manager.historyPlaybackFailures).toEqual([]);
-      expect(manager.oldestReachablePosition).toBe(2);
+      expect(manager.seekBoundaryPosition).toBe(2);
     });
 
-    it("returns to the end with real ids after stopping at the oldest reachable position", async () => {
+    it("returns to the end with real ids after stopping at the seek boundary", async () => {
       const { document, manager, endJson } = setupVirtualConversionDocument(undefined);
 
       for (const position of [0, 1, 3, 2, 4]) {
@@ -708,10 +708,10 @@ describe("playback across a load entry", () => {
       expect(manager.historyPlaybackFailures).toEqual([]);
     });
 
-    it("updates the oldest reachable position when the conversions change", async () => {
+    it("updates the seek boundary when the conversions change", async () => {
       const { document, manager } = setupVirtualConversionDocument(undefined);
       await manager.goToHistoryEntryPosition(0);
-      expect(manager.oldestReachablePosition).toBe(2);
+      expect(manager.seekBoundaryPosition).toBe(2);
 
       // An entry arrives, and the bridge can now rebuild the old tile.
       virtualConversions = [{ path: t1Path, position: 2, oldJson: oldTileBeforeConversion() }];
@@ -721,7 +721,7 @@ describe("playback across a load entry", () => {
 
       expect(manager.numHistoryEventsApplied).toBe(0);
       expect(getTile(document, "t1").label).toBe("a");
-      expect(manager.oldestReachablePosition).toBeUndefined();
+      expect(manager.seekBoundaryPosition).toBeUndefined();
       expect(manager.historyPlaybackFailures).toEqual([]);
     });
 

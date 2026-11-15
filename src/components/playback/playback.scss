@@ -215,7 +215,7 @@
     }
   }
 
-  // Shares the slot of .playback-failure-warning. A forward seek blocked at the oldest reachable
+  // Shares the slot of .playback-failure-warning. A forward seek blocked at the earliest reachable
   // position shows that warning, which explains the stop, so this message gives way to it.
   &:has(.playback-failure-warning) .playback-history-unavailable {
     display: none;

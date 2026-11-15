@@ -289,11 +289,12 @@ export const TreeManager = types
    */
   jsonHistoryCopy: undefined as JsonHistoryCopy | undefined,
   /**
-   * The oldest position playback can reach. It is set when a playback move stops at a virtual
-   * conversion it can't cross backward, because the bridge couldn't rebuild the old state or the
-   * model isn't in the copy there. Each later move updates it from the conversions then.
+   * Where a playback move found it couldn't go further back: a virtual conversion it can't cross
+   * backward, because the bridge couldn't rebuild the old state or the model isn't in the copy
+   * there. Each later move updates it from the conversions then. Playback reads
+   * earliestReachablePosition, which also counts what the bridges report before any move.
    */
-  oldestReachablePosition: undefined as number | undefined
+  seekBoundaryPosition: undefined as number | undefined
 }))
 .views((self) => {
   // The history usually only grows during playback, so the scan resumes where it stopped. A new or
@@ -380,15 +381,15 @@ export const TreeManager = types
   },
 
   /**
-   * The oldest position playback can reach. The history bridges know where they can't rebuild
+   * The earliest position playback can reach. The history bridges know where they can't rebuild
    * the old state before any seek gets there, and a seek that stops short records where it found
-   * the boundary, so this is the later of the two. 0 when all of the history can be reached.
+   * the boundary (seekBoundaryPosition), so this is the later of the two. 0 when all of the history can be reached.
    */
   get earliestReachablePosition(): number {
     const unrebuildable = self.virtualConversions
       .filter(conversion => conversion.oldJson === undefined)
       .map(conversion => conversion.position);
-    return Math.max(self.oldestReachablePosition ?? 0, ...unrebuildable);
+    return Math.max(self.seekBoundaryPosition ?? 0, ...unrebuildable);
   },
 
   findHistoryEntryIndex(historyEntryId: string) {
@@ -546,8 +547,8 @@ export const TreeManager = types
       self.numHistoryEventsApplied = value;
     },
 
-    setOldestReachablePosition(value: number | undefined) {
-      self.oldestReachablePosition = value;
+    setSeekBoundaryPosition(value: number | undefined) {
+      self.seekBoundaryPosition = value;
     },
 
     /**
@@ -950,8 +951,8 @@ export const TreeManager = types
       targetPosition = moved.position;
       // Stopping where earlier history can't be rebuilt isn't a failure; playback says so instead.
       // The conversions change as the history grows, which can move that position or remove it.
-      if (moved.unavailable || self.oldestReachablePosition !== undefined) {
-        self.oldestReachablePosition = copy.oldestReachablePosition || undefined;
+      if (moved.unavailable || self.seekBoundaryPosition !== undefined) {
+        self.seekBoundaryPosition = copy.boundaryPosition || undefined;
       }
       if (moved.failure) {
         const { historyIndex, direction: failureDirection, message } = moved.failure;

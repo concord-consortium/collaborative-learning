@@ -749,7 +749,7 @@ describe("PlaybackControlModel", () => {
       function stopSeeksAt(treeManager: Instance<typeof TreeManager>, stop: number, error?: Error) {
         jest.spyOn(treeManager, "goToHistoryEntryPosition").mockImplementation((async () => {
           treeManager.setNumHistoryEntriesApplied(stop);
-          treeManager.setOldestReachablePosition(2);
+          treeManager.setSeekBoundaryPosition(2);
           if (error) throw error;
         }) as any);
       }
@@ -758,7 +758,7 @@ describe("PlaybackControlModel", () => {
         jest.restoreAllMocks();
       });
 
-      it("doesn't warn when a seek stops at the oldest reachable position", async () => {
+      it("doesn't warn when a seek stops at the seek boundary", async () => {
         const { model, treeManager } = setupModel(4);
         stopSeeksAt(treeManager, 2);
 
@@ -769,7 +769,7 @@ describe("PlaybackControlModel", () => {
         expect(model.sliderValue).toBe(2);
       });
 
-      it("still warns when a seek that stops at the oldest reachable position throws", async () => {
+      it("still warns when a seek that stops at the seek boundary throws", async () => {
         const { model, treeManager } = setupModel(4);
         stopSeeksAt(treeManager, 2, new Error("seek failed"));
 
@@ -791,7 +791,7 @@ describe("PlaybackControlModel", () => {
         expect(model.currentStopIndex).toBe(3);
       });
 
-      it("still warns when a forward seek from the oldest reachable position is blocked there",
+      it("still warns when a forward seek from the seek boundary is blocked there",
           async () => {
         const { model, treeManager } = setupModel(4, { appliedPosition: 2 });
         stopSeeksAt(treeManager, 2);
@@ -988,12 +988,12 @@ describe("PlaybackControlModel", () => {
       expect(model.sliderStopHistoryIndex).toBe(2);
     });
 
-    it("moves the earliest stop to where a seek found the oldest reachable position", () => {
+    it("moves the earliest stop to the seek boundary", () => {
       mockVirtualConversions = [kUnrebuildable];
       const { model, treeManager } = setupModel(6, { backgroundIndexes: [1, 2, 3] });
       expect(stopPositions(model)).toEqual([0, 1, 3, 5, 6]);
 
-      treeManager.setOldestReachablePosition(4);
+      treeManager.setSeekBoundaryPosition(4);
 
       expect(stopKinds(model)).toEqual(["initial", "user", "earliest", "user", "user"]);
       expect(stopPositions(model)).toEqual([0, 1, 4, 5, 6]);
