@@ -1266,6 +1266,9 @@ export class ReteManager implements INodeServices {
     const id = uniqueId();
     const { editor } = this;
     const newPosition = position ?? this.getNewNodePosition();
+    // The node is added in one MST action, and its nodeValue is set by the processing below, in
+    // another. So read-only views see the node without a value and try to initialize it. That
+    // isn't a problem, it is just confusing.
     this.mstProgram.addNodeSnapshot({
       id,
       name: nodeType,
