@@ -7,7 +7,7 @@ import { IVirtualConversion, registerHistoryBridge } from "../../models/history/
 import { HistoryEntry, HistoryEntrySnapshot } from "../../models/history/history";
 import { WithId } from "../../hooks/firestore-hooks";
 import { CommentDocument } from "../../lib/firestore-schema";
-import { kPlaybackStepMs, PlaybackControlModel, StopRequest } from "./playback-control-model";
+import { kLongSeekEntryCount, kPlaybackStepMs, PlaybackControlModel, StopRequest } from "./playback-control-model";
 
 // Playback logging reaches through the Logger into the global stores, which this test
 // does not set up. The model is the subject here, not what it logs.
@@ -491,6 +491,33 @@ describe("PlaybackControlModel", () => {
       finishSeek();
       await seek;
       expect(model.seekInProgress).toBe(false);
+    });
+
+    it("reports a long seek and lets the browser paint before the seek starts", async () => {
+      const { model, treeManager } = setupModel(kLongSeekEntryCount);
+      const seekTo = jest.spyOn(treeManager, "goToHistoryEntryPosition");
+
+      const seek = model.goToSliderStop(0);
+      expect(model.longSeekInProgress).toBe(true);
+      expect(seekTo).not.toHaveBeenCalled();
+
+      // A frame, then the timer that follows it, which this file's fake timers hold.
+      await new Promise(resolve => requestAnimationFrame(resolve));
+      expect(seekTo).not.toHaveBeenCalled();
+      jest.advanceTimersByTime(0);
+      await seek;
+      expect(seekTo).toHaveBeenCalledWith(0);
+      expect(model.longSeekInProgress).toBe(false);
+    });
+
+    it("starts a shorter seek at once without reporting it as long", async () => {
+      const { model, treeManager } = setupModel(kLongSeekEntryCount);
+      const seekTo = jest.spyOn(treeManager, "goToHistoryEntryPosition");
+
+      const seek = model.goToSliderStop(1);
+      expect(model.longSeekInProgress).toBe(false);
+      expect(seekTo).toHaveBeenCalledWith(1);
+      await seek;
     });
 
     it("stops reporting a seek in progress when the seek throws", async () => {

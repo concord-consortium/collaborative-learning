@@ -17,7 +17,7 @@ import { PlaybackControlModel } from "./playback-control-model";
 
 import "./playback-control.scss";
 
-// A move that settles within this long needs no explanation, and showing one would only flash.
+// A seek that settles within this long needs no explanation, and showing one would only flash.
 export const kSeekProgressDelayMs = 300;
 
 export interface IMarkerProps {
@@ -52,17 +52,19 @@ export const PlaybackControlComponent: React.FC<IProps> = observer((props: IProp
     model.setRequestedHistoryId(requestedHistoryId);
   }, [model, requestedHistoryId]);
 
-  // Only a seek that has run for a while is reported as loading.
-  const [showSeekProgress, setShowSeekProgress] = useState(false);
+  // Only a seek that has run for a while, or that the model expects to be long, is reported as
+  // loading.
+  const [seekRanLong, setSeekRanLong] = useState(false);
   const seekInProgress = model.seekInProgress;
   useEffect(() => {
     if (!seekInProgress) {
-      setShowSeekProgress(false);
+      setSeekRanLong(false);
       return;
     }
-    const timer = setTimeout(() => setShowSeekProgress(true), kSeekProgressDelayMs);
+    const timer = setTimeout(() => setSeekRanLong(true), kSeekProgressDelayMs);
     return () => clearTimeout(timer);
   }, [seekInProgress]);
+  const showSeekProgress = seekRanLong || model.longSeekInProgress;
 
   // The chat panel filters itself to the moment on screen. Deriving that from the current
   // stop covers every way the document can move, including seeks the slider did not start.

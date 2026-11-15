@@ -11,6 +11,16 @@ import { HistoryPlaybackFailure, TreeManager } from "../../models/history/tree-m
 
 // How long each stop stays on screen while the history plays itself.
 export const kPlaybackStepMs = 500;
+// A seek across this many entries takes about 300 ms in Chrome, long enough to report.
+export const kLongSeekEntryCount = 100;
+
+/**
+ * Resolves once the browser has painted. A seek applies its entries without handing control back
+ * to the browser, so anything shown about the seek has to be painted before it starts.
+ */
+export function waitForPaint() {
+  return new Promise<void>(resolve => requestAnimationFrame(() => setTimeout(resolve, 0)));
+}
 
 const kPlaybackFailureWarning = "History playback could not apply some changes and was stopped.";
 const kPlaybackStoppedWarning =
@@ -112,6 +122,9 @@ export class PlaybackControlModel {
   // True from the moment a seek starts until the document has settled, which for a move across
   // thousands of background entries can take seconds.
   seekInProgress = false;
+  // True while a seek across at least kLongSeekEntryCount entries runs. Set before the seek
+  // starts, since the browser can't paint while it runs.
+  longSeekInProgress = false;
 
   private treeManager: Instance<typeof TreeManager>;
   private requestedHistoryId: string | undefined;
@@ -443,6 +456,7 @@ export class PlaybackControlModel {
         runInAction(() => {
           this.seekLoop = undefined;
           this.seekInProgress = false;
+          this.longSeekInProgress = false;
         });
       });
     }
@@ -491,6 +505,12 @@ export class PlaybackControlModel {
       // thumb back to the document rather than leaving it on a stop nothing reached.
       let threw = false;
       try {
+        const applied = this.treeManager.numHistoryEventsApplied;
+        if (!this.longSeekInProgress && applied !== undefined &&
+            Math.abs(position - applied) >= kLongSeekEntryCount) {
+          runInAction(() => { this.longSeekInProgress = true; });
+          await waitForPaint();
+        }
         await this.treeManager.goToHistoryEntryPosition(position);
       } catch (error) {
         console.warn("PlaybackControlModel: seek to history position", position, "failed:", error);

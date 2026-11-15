@@ -8,7 +8,7 @@ import { CDocument, TreeManager } from "../../models/history/tree-manager";
 import { HistoryEntry } from "../../models/history/history";
 import { IVirtualConversion, registerHistoryBridge } from "../../models/history/history-bridges";
 import { kSeekProgressDelayMs, PlaybackControlComponent } from "./playback-control";
-import { PlaybackControlModel } from "./playback-control-model";
+import { kLongSeekEntryCount, PlaybackControlModel } from "./playback-control-model";
 
 // The slider is the subject of these tests, so everything the component pulls
 // from stores and Firestore hooks is stubbed; only the TreeManager is real.
@@ -252,7 +252,7 @@ describe("PlaybackControlComponent", () => {
     });
   });
 
-  describe("progress for a slow move", () => {
+  describe("progress for a slow seek", () => {
     // Only setTimeout is faked: the component's delay is a timer, and the seek rides on
     // microtasks and nextTick that must keep running.
     beforeEach(() => {
@@ -297,6 +297,31 @@ describe("PlaybackControlComponent", () => {
       expect(screen.queryByTestId("playback-seek-progress")).toBeNull();
       expect(sliderContainer.getAttribute("aria-busy")).not.toBe("true");
       expect(status.textContent).toBe("");
+    });
+
+    it("shows the progress indicator at once for a seek across many entries, and paints it first", async () => {
+      const treeManager = setupTreeManager(kLongSeekEntryCount);
+      let finishSeek: () => void = () => undefined;
+      const seekTo = jest.spyOn(treeManager, "goToHistoryEntryPosition")
+        .mockImplementation(() => new Promise<void>(resolve => { finishSeek = resolve; }));
+      render(<PlaybackControlComponent treeManager={treeManager} requestedHistoryId={undefined} />);
+      const sliderContainer = screen.getByTestId("playback-slider");
+
+      // Home asks for the initial stop, kLongSeekEntryCount entries back.
+      act(() => { fireEvent.keyDown(screen.getByRole("slider"), { key: "Home", keyCode: 36 }); });
+      expect(screen.getByTestId("playback-seek-progress")).toBeInTheDocument();
+      expect(sliderContainer.getAttribute("aria-busy")).toBe("true");
+      expect(screen.getByTestId("playback-seek-status").textContent).toBe("Loading this point in the history…");
+      expect(seekTo).not.toHaveBeenCalled();
+
+      await act(async () => {
+        await new Promise(resolve => requestAnimationFrame(resolve));
+        jest.advanceTimersByTime(0);
+      });
+      expect(seekTo).toHaveBeenCalledWith(0);
+
+      await act(async () => { finishSeek(); });
+      expect(screen.queryByTestId("playback-seek-progress")).toBeNull();
     });
 
     it("never shows the progress indicator for a seek that settles within the delay", async () => {
