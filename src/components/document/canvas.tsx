@@ -17,6 +17,7 @@ import { transformCurriculumImageUrl } from "../../models/tiles/image/image-impo
 import { TreeManagerType } from "../../models/history/tree-manager";
 import { ObjectBoundingBox } from "../../models/annotations/clue-object";
 import { FirestoreHistoryManager } from "../../models/history/firestore-history-manager";
+import { getContentHistoryEntryId } from "../../models/history/content-history-entry";
 import { PlaybackComponent } from "../playback/playback";
 import {
   ITileApiInterface, TileApiInterfaceContext, EditableTileApiInterfaceRefContext, AddTilesContext, TileApiInterface
@@ -386,10 +387,10 @@ class _CanvasComponent extends BaseComponent<IProps, IState> {
       const treeManager = docCopy.treeManagerAPI as TreeManagerType;
       const firestore = this.stores.db.firestore;
 
-      // Only a still-pending load entry is handed over. A flushed one is in the
+      // Only a still-pending conversion entry is handed over. A flushed one is in the
       // Firestore history (or its local cache) already.
       const liveTreeManager = this.props.document.treeManagerAPI as TreeManagerType | undefined;
-      treeManager.setLocalLoadEntry(liveTreeManager?.pendingLoadEntry);
+      treeManager.setLocalConversionEntry(liveTreeManager?.pendingConversionEntry);
 
       // We don't need to dispose the old history manager because the old document copy will be destroyed
       // by updateHistoryDocument. This document disposal will trigger the tree manager disposal. The
@@ -400,7 +401,9 @@ class _CanvasComponent extends BaseComponent<IProps, IState> {
         userContextProvider: this.stores.userContextProvider,
         treeManager,
         uploadLocalHistory: false,
-        syncRemoteHistory: true
+        syncRemoteHistory: true,
+        // The live document's content can be behind its history, so playback moves the copy forward.
+        contentEntryId: getContentHistoryEntryId(this.props.document)
       });
       treeManager.setHistoryManager(this.historyManager);
 

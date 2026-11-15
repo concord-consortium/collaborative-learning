@@ -165,7 +165,7 @@ describe("Canvas Component", () => {
   // The live document's content can be replaced after it loads, which converts its old tiles
   // again with new ids. The playback copy is made from the live content, so the entry it is
   // handed must give those ids.
-  it("hands the playback copy the load entry rebuilt for replaced content", () => {
+  it("hands the playback copy the conversion entry rebuilt for replaced content", () => {
     registerTileComponentInfo({
       type: kVersionedTestTileType, Component: () => null, tileEltClass: "versioned-test-tile"
     });
@@ -196,7 +196,7 @@ describe("Canvas Component", () => {
       </Provider>
     );
 
-    const localEntry = copyTreeManager?.localLoadEntry;
+    const localEntry = copyTreeManager?.localConversionEntry;
     expect(localEntry).toBeDefined();
     const docJson: any = { content: oldContent() };
     applyJsonPatches(docJson, HistoryEntry.create(localEntry!).records[0].getPatches(HistoryOperation.Redo));
@@ -204,6 +204,32 @@ describe("Canvas Component", () => {
     const copyTile = copyDocument.content!.tileMap.get("t1")!.content as VersionedTestTileType;
     expect(docJson.content.tileMap.t1.content.items.map((item: any) => item.id))
       .toEqual(copyTile.items.map(item => item.id));
+  });
+
+  it("tells the playback copy's history manager which entry the live content holds", () => {
+    let copyContentEntryId: string | undefined;
+    jest.spyOn(FirestoreHistoryManager.prototype as any, "subscribeToFirestoreHistory")
+      .mockImplementation(function(this: FirestoreHistoryManager) {
+        copyContentEntryId = this.contentEntryId;
+      });
+    jest.spyOn(FirestoreHistoryManager.prototype as any, "waitUntilEnvironmentAndMetadataDocReady")
+      .mockResolvedValue(undefined);
+    const document = createDocumentModel({
+      type: ProblemDocument, title: "test", uid: "1", key: "test", createdAt: 1, visibility: "public",
+      content: createSingleTileContent({ type: "Text", text: "test" })
+    });
+    document.setSavedEnvelope({ lastHistoryEntryId: "e4", exactThrough: { index: 4, since: "first" } });
+    document.setShowPlaybackControls(true);
+
+    render(
+      <Provider stores={specStores()}>
+        <ModalProvider>
+          <CanvasComponent context="test" document={document} readOnly={true} showPlayback={true} />
+        </ModalProvider>
+      </Provider>
+    );
+
+    expect(copyContentEntryId).toBe("e4");
   });
 
 });

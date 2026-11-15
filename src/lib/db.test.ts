@@ -8,7 +8,8 @@ import {
   registerClassWideDocumentKind, registerDocumentKind, resetDocumentKindRegistryForTests
 } from "../models/document/document-kinds";
 import {
-  AxesDocument, GroupDocument, LearningLogDocument, PersonalDocument, PlanningDocument, ProblemDocument
+  AxesDocument, GroupDocument, LearningLogDocument, PersonalDocument, PlanningDocument, ProblemDocument,
+  ProblemPublication
 } from "../models/document/document-types";
 import {
   CanonicalSlotOwnerChangedError, getCanonicalPointerPath, kDefaultCanonicalDocumentLabel
@@ -24,6 +25,11 @@ import { createSingleTileContent } from "../utilities/test-utils";
 import * as UrlParams from "../utilities/url-params";
 import { Logger } from "./logger";
 import { LogEventName } from "./logger-types";
+import { deferred } from "promise-assist";
+import { hashString } from "../utilities/js-utils";
+import { FirestoreHistoryManager } from "../models/history/firestore-history-manager";
+import { kHistoryStart } from "../models/history/session-exactness";
+import { TreeManagerType } from "../models/history/tree-manager";
 
 // This is needed so MST can deserialize snapshots referring to tools
 import { registerTileTypes } from "../register-tile-types";
@@ -579,6 +585,16 @@ describe("db", () => {
       // The RTDB read resolves the server timestamp; Firestore stores the same value.
       expect(written[0].createdAt).toBe(999);
     });
+
+    it("records the key of the document it creates, so opening it skips the history catch-up", async () => {
+      mockFirestore.mockImplementation(() => ({
+        doc: () => ({ get: () => Promise.resolve({ exists: false }), set: () => Promise.resolve() })
+      }));
+      stubRtdbForCreate();
+      await db.connect({ appMode: "test", stores, dontStartListeners: true });
+      const { document } = await db.createDocument({ type: AxesDocument, kind: GroupDocument });
+      expect((db as any).createdDocumentKeys.has(document.self.documentKey)).toBe(true);
+    });
   });
 
   // These pin which fields the builder derives from the stores and which it takes from its caller. They
@@ -967,6 +983,105 @@ describe("db", () => {
       expect(doc.contextId).toBe("class-1");
       expect(doc.concurrent).toBe(true);
       expect(doc.kind).toBe("group");
+    });
+
+    it("builds the loaded and saved envelopes from the envelope's history fields", async () => {
+      const content = JSON.stringify({ tileMap: {} });
+      stubRtdb({ createdAt: 1, properties: {} }, {
+        content, changeCount: 0, lastHistoryEntryId: "e7",
+        exactThrough: { id: "e7", index: 7, contentHash: hashString(content), since: "e2" }
+      });
+      const doc = await db.openDocument({ documentKey: "s1", type: "problem", userId: "u1",
+        firestoreMetadata: { uid: "u1", type: "problem", key: "s1" } } as any);
+      const expected = { lastHistoryEntryId: "e7", exactThrough: { index: 7, since: "e2" } };
+      expect(doc.loadedEnvelope).toEqual(expected);
+      expect(doc.savedEnvelope).toEqual(expected);
+    });
+
+    it("builds a saved envelope without exactThrough from an envelope with only an entry id", async () => {
+      stubRtdb({ createdAt: 1, properties: {} }, { changeCount: 0, lastHistoryEntryId: "e7" });
+      const doc = await db.openDocument({ documentKey: "s2", type: "problem", userId: "u1",
+        firestoreMetadata: { uid: "u1", type: "problem", key: "s2" } } as any);
+      expect(doc.savedEnvelope).toEqual({ lastHistoryEntryId: "e7" });
+    });
+
+    function setUpHistoryManagers(currentUid: string) {
+      stores.documents.setFirestore({
+        doc: () => ({ onSnapshot: (callback: (doc: { exists: boolean }) => void) => {
+          callback({ exists: true });
+          return () => undefined;
+        } })
+      } as any);
+      stores.documents.setUserContextProvider({ userContext: { uid: currentUid } } as any);
+    }
+
+    it("opens the owner's individual document read-only, and catches it up once it is asked to", async () => {
+      stubRtdb({ createdAt: 1, properties: {} }, { changeCount: 0, lastHistoryEntryId: "e7" });
+      setUpHistoryManagers("u1");
+      const catchUp = deferred<void>();
+      const catchUpSpy = jest.spyOn(FirestoreHistoryManager.prototype, "catchUpAtLoad")
+        .mockReturnValue(catchUp.promise);
+
+      const doc = await db.openDocument({ documentKey: "c1", type: "problem", userId: "u1",
+        firestoreMetadata: { uid: "u1", type: "problem", key: "c1" } } as any);
+      expect(catchUpSpy).not.toHaveBeenCalled();
+      expect(doc.historyCatchUpPending).toBe(true);
+
+      let caughtUp = false;
+      const first = stores.documents.historyCatchUp(doc).then(() => { caughtUp = true; });
+      const second = stores.documents.historyCatchUp(doc);
+      expect(catchUpSpy).toHaveBeenCalledTimes(1);
+      expect(catchUpSpy.mock.calls[0][0]()).toBe(doc.savedEnvelope);
+      await new Promise(process.nextTick);
+      expect(caughtUp).toBe(false);
+
+      catchUp.resolve();
+      await Promise.all([first, second]);
+      expect(doc.historyCatchUpPending).toBe(false);
+    });
+
+    it("opens a document this session created as caught up, exact from the start of its history", async () => {
+      stubRtdb({ createdAt: 1, properties: {} }, { changeCount: 0 });
+      setUpHistoryManagers("u1");
+      const catchUpSpy = jest.spyOn(FirestoreHistoryManager.prototype, "catchUpAtLoad")
+        .mockReturnValue(new Promise<void>(() => undefined));
+      // Stands in for createDocument, which records the key of each document it creates.
+      (db as any).createdDocumentKeys.add("c4");
+
+      const doc = await db.openDocument({ documentKey: "c4", type: "problem", userId: "u1",
+        firestoreMetadata: { uid: "u1", type: "problem", key: "c4" } } as any);
+
+      expect(doc.historyCatchUpPending).toBe(false);
+      expect((doc.treeManagerAPI as TreeManagerType).exactness.exactSince).toBe(kHistoryStart);
+      await stores.documents.historyCatchUp(doc);
+      expect(catchUpSpy).not.toHaveBeenCalled();
+    });
+
+    it("doesn't catch up or wait for another user's individual document", async () => {
+      stubRtdb({ createdAt: 1, properties: {} }, { changeCount: 0, lastHistoryEntryId: "e7" });
+      setUpHistoryManagers("u2");
+      const catchUpSpy = jest.spyOn(FirestoreHistoryManager.prototype, "catchUpAtLoad")
+        .mockReturnValue(new Promise<void>(() => undefined));
+
+      const doc = await db.openDocument({ documentKey: "c2", type: "problem", userId: "u1",
+        firestoreMetadata: { uid: "u1", type: "problem", key: "c2" } } as any);
+
+      expect(catchUpSpy).not.toHaveBeenCalled();
+      expect(doc.historyCatchUpPending).toBe(false);
+    });
+
+    it("doesn't catch up or wait for the owner's publication", async () => {
+      stubRtdb({ createdAt: 1, properties: {} }, { changeCount: 0, lastHistoryEntryId: "e7" });
+      setUpHistoryManagers("u1");
+      const catchUpSpy = jest.spyOn(FirestoreHistoryManager.prototype, "catchUpAtLoad")
+        .mockReturnValue(new Promise<void>(() => undefined));
+
+      const doc = await db.openDocument({ documentKey: "c3", type: ProblemPublication, userId: "u1",
+        firestoreMetadata: { uid: "u1", type: ProblemPublication, key: "c3" } } as any);
+
+      expect(doc.isPublished).toBe(true);
+      expect(catchUpSpy).not.toHaveBeenCalled();
+      expect(doc.historyCatchUpPending).toBe(false);
     });
 
     it("fetches Firestore metadata from the store when none is passed", async () => {

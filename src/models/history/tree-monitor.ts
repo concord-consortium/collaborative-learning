@@ -1,6 +1,7 @@
+import { observable, runInAction } from "mobx";
 import {
   addDisposer, addMiddleware, getSnapshot, IJsonPatch, Instance,
-  isActionContextThisOrChildOf, isAlive, recordPatches, tryResolve
+  isActionContextThisOrChildOf, isAlive, onPatch, recordPatches, tryResolve
 } from "mobx-state-tree";
 import { nanoid } from "nanoid";
 import { DocumentContentModelType } from "../document/document-content";
@@ -16,10 +17,27 @@ import {
 import { FAKE_HISTORY_ENTRY_ID } from "./tree-manager";
 import { createActionTrackingMiddleware3, IActionTrackingMiddleware3Call } from "./create-action-tracking-middleware-3";
 
+// TODO: CLUE Specific filtering of 'changeCount', should we record
+// this or not?
+const filterChangeCount = (patch: IJsonPatch) => !patch.path.match(/\/changeCount/);
+
 export class TreeMonitor {
   tree: Instance<typeof Tree>;
   manager: TreeManagerAPI;
   private enabled = false;
+
+  // Top-level calls between onStart and onFinish. A flow stays here while it is suspended.
+  private trackedCalls = new Set<{ call: IActionTrackingMiddleware3Call<CallEnv>, env: CallEnv }>();
+  private runningCallCountBox = observable.box(0);
+  // Calls that have finished but whose tree patch record hasn't reached the manager yet, keyed by
+  // the call's exchange id: whether the call changed the tree.
+  private finishedCalls = new Map<string, boolean>();
+
+  /**
+   * Called when the tree changes while monitoring is enabled and no tracked call is running,
+   * so no history entry will describe the change.
+   */
+  onUnrecordedChange?: () => void;
 
   constructor(tree: Instance<typeof Tree>,  manager: TreeManagerAPI, includeHooks: boolean) {
     // We don't care how `this` is handled by createActionTrackingMiddleware
@@ -147,6 +165,7 @@ export class TreeMonitor {
           exchangeId,
           undoable: true
         };
+        self.trackCall(call, call.env);
       },
       onFinish(call, error) {
         const env = call.env;
@@ -156,14 +175,16 @@ export class TreeMonitor {
         // DEBUG:
         // console.log("onFinish", getActionPath(call));
 
+        self.untrackCall(call);
         call.env = undefined;
 
         const { recorder } = env;
         recorder.stop();
 
         if (error === undefined) {
+          self.finishedCalls.set(env.exchangeId, recorder.patches.some(filterChangeCount));
           // recordAction is async
-          self.recordAction(call, env);
+          self.recordAction(call, env).finally(() => self.finishedCalls.delete(env.exchangeId));
         } else if (env.historyEntryId === FAKE_HISTORY_ENTRY_ID) {
           // History playback (goToHistoryEntryPosition / replayHistoryToTrees)
           // uses FAKE_HISTORY_ENTRY_ID to mark its own apply calls. It
@@ -196,6 +217,60 @@ export class TreeMonitor {
     // We might need an option to not add this disposer, but it seems it would generally
     // ge a good thing to do.
     addDisposer(tree, middlewareDisposer);
+
+    // While monitoring is enabled every top-level action is tracked, so a patch that arrives
+    // with nothing tracked came from outside an action or otherwise bypassed the middleware.
+    const patchDisposer = onPatch(tree, () => {
+      if (this.enabled && this.trackedCalls.size === 0) {
+        this.onUnrecordedChange?.();
+      }
+    });
+    addDisposer(tree, patchDisposer);
+  }
+
+  get runningCallCount() {
+    return this.runningCallCountBox.get();
+  }
+
+  /**
+   * The running calls that have already changed the tree. Their changes are not in any
+   * history entry until the call finishes.
+   */
+  getRunningCallsWithChanges() {
+    const result: Array<{ action: string, historyEntryId: string }> = [];
+    this.trackedCalls.forEach(({ call, env }) => {
+      if (env.recorder.patches.length > 0) {
+        result.push({ action: getActionPath(call), historyEntryId: env.historyEntryId });
+      }
+    });
+    return result;
+  }
+
+  /**
+   * True while some call's changes are in the tree but in no history entry yet: a running call
+   * that has changed the tree, or a finished call that changed it and whose tree patch record
+   * hasn't reached the manager.
+   */
+  hasCallWithUnrecordedChanges() {
+    return this.getRunningCallsWithChanges().length > 0 ||
+      Array.from(this.finishedCalls.values()).some(hasChanges => hasChanges);
+  }
+
+  /** True when the exchange belongs to a call that has finished but whose record hasn't reached the manager. */
+  isFinishedCallExchange(exchangeId: string) {
+    return this.finishedCalls.has(exchangeId);
+  }
+
+  private trackCall(call: IActionTrackingMiddleware3Call<CallEnv>, env: CallEnv) {
+    this.trackedCalls.add({ call, env });
+    runInAction(() => this.runningCallCountBox.set(this.trackedCalls.size));
+  }
+
+  private untrackCall(call: IActionTrackingMiddleware3Call<CallEnv>) {
+    this.trackedCalls.forEach(entry => {
+      if (entry.call === call) this.trackedCalls.delete(entry);
+    });
+    runInAction(() => this.runningCallCountBox.set(this.trackedCalls.size));
   }
 
   get isEnabled() {
@@ -293,9 +368,6 @@ export class TreeMonitor {
       return;
     }
 
-    // TODO: CLUE Specific filtering of 'changeCount', should we record
-    // this or not?
-    const filterChangeCount = (patch: IJsonPatch) => !patch.path.match(/\/changeCount/);
     const patches = recorder.patches.filter(filterChangeCount);
     const inversePatches = recorder.inversePatches.filter(filterChangeCount);
 
@@ -307,6 +379,8 @@ export class TreeMonitor {
       patches,
       inversePatches,
     };
+    // Sending the record can complete the entry, so the call stops counting as finished but unrecorded.
+    this.finishedCalls.delete(exchangeId);
     this.manager.addTreePatchRecord(historyEntryId, exchangeId, record);
 
     for (const exchange of exchangesToProcess) {

@@ -50,22 +50,22 @@ describe("Dataflow schemaVersion", () => {
         return { document, manager, tile };
       };
       const first = load({ tileMap: { t1: newerTile() } });
-      expect(first.manager.pendingLoadEntry).toBeUndefined();
+      expect(first.manager.pendingConversionEntry).toBeUndefined();
       expect(first.tile.program.id).toBe("dataflow@2");
 
       const later = load(toJsonValue(getSnapshot(first.document.content!)));
-      expect(later.manager.pendingLoadEntry).toBeUndefined();
+      expect(later.manager.pendingConversionEntry).toBeUndefined();
       expect(later.tile.program.id).toBe("dataflow@2");
     });
   });
 
-  it("records a load entry for a legacy document whose patches turn the stored tile into the live one", () => {
+  it("records a conversion entry for a legacy document whose patches turn the stored tile into the live one", () => {
     const tileId = "CIUYXl4cwYYrfP5t";
     const stored = cloneDeep(legacyDataflowDocument);
     const document = createDocumentModel({ uid: "1", type: ProblemDocument, key: "doc1", content: stored });
     const manager = document.treeManagerAPI as Instance<typeof TreeManager>;
-    expect(manager.pendingLoadEntry).toBeDefined();
-    const record = HistoryEntry.create(manager.pendingLoadEntry!).records[0];
+    expect(manager.pendingConversionEntry).toBeDefined();
+    const record = HistoryEntry.create(manager.pendingConversionEntry!).records[0];
     const liveTile = toJsonValue(getSnapshot(document.content!.tileMap.get(tileId)!));
     const storedTile = toJsonValue(legacyDataflowDocument.tileMap[tileId]);
     expect(liveTile).not.toEqual(storedTile);

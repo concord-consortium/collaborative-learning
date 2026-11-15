@@ -59,12 +59,20 @@ export const HistoryEntry = types.model("HistoryEntry", {
    */
   uid: types.maybe(types.string),
   /**
-   * True on a load entry: the entry that records the changes CLUE made to the stored content
-   * while loading it, when a document loads or its content is replaced, such as converting old
-   * tiles and shared models to their current format. It is never applied to a live document or
-   * put on the undo stack.
+   * Set when the entry was force-completed because one of its exchanges never closed. Its records
+   * may be missing patches that arrive later.
    */
-  isLoadEntry: types.maybe(types.boolean),
+  timedOut: types.maybe(types.boolean),
+  /**
+   * Set on an entry made from a record that arrived after the entry it belongs to had timed out.
+   */
+  lateRecordForEntryId: types.maybe(types.string),
+  /**
+   * True on a conversion entry: the entry that records the conversion of old tiles and shared
+   * models to their current format, when a document loads or its content is replaced. It is never
+   * applied to a live document or put on the undo stack.
+   */
+  isConversionEntry: types.maybe(types.boolean),
   /**
    * True on entries that the user did not cause directly.
    */
@@ -109,7 +117,7 @@ export enum HistoryOperation {
 
 /**
  * The recorded patches of one history entry for one tree in a given
- * direction, with the records in playback order. Load entries are
+ * direction, with the records in playback order. Conversion entries are
  * included; a playback patch source decides which patches an MST tree
  * receives.
  */

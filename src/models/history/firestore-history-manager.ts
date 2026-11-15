@@ -1,12 +1,22 @@
-import { action, computed, makeObservable, observable, when } from "mobx";
-import { addDisposer, getSnapshot, Instance, applySnapshot } from "mobx-state-tree";
+import { action, computed, makeObservable, observable, runInAction, when } from "mobx";
+import { addDisposer, getSnapshot, Instance, applySnapshot, isAlive } from "mobx-state-tree";
 import firebase from "firebase/app";
 import { getSimpleDocumentPath } from "../../../shared/shared";
 import { Firestore } from "../../lib/firestore";
 import { UserContextProvider } from "../stores/user-context-provider";
-import { getLastHistoryEntry, IFirestoreHistoryEntryDoc, loadHistory } from "./history-firestore";
-import { CDocument, CDocumentType, TreeManagerType } from "./tree-manager";
+import { LogEventName } from "../../lib/logger-types";
+import {
+  getHistoryEntriesAfter, getLastHistoryEntry, IFirestoreHistoryEntryDoc, loadHistory
+} from "./history-firestore";
+import { CDocument, CDocumentType, TreeManagerLogger, TreeManagerType } from "./tree-manager";
 import { HistoryEntry, HistoryEntrySnapshot, HistoryEntryType } from "./history";
+import { planCatchUp, takeContiguousEntries } from "./load-catch-up";
+import { ICommitListener, ICommitSource, ICommittedEntry, VoidReason } from "./history-commits";
+import { kHistoryStart, NotExactReason } from "./session-exactness";
+import type { ISavedEnvelope } from "../document/document";
+
+// The user id before the user is known.
+const kUnknownUserId = "0";
 
 const seekIncompleteMessage = (historyId: string) =>
   `Could not show this document at the requested point in its history (id: ${historyId}): ` +
@@ -24,6 +34,9 @@ export enum HistoryStatus {
   NO_HISTORY,
   HISTORY_LOADED,
   HISTORY_LOADING,
+  // The history has loaded, and the content is being moved forward from the entry it holds to the
+  // newest one (see contentEntryId).
+  HISTORY_CATCHING_UP,
 }
 
 export interface IFirestoreHistoryManagerArgs {
@@ -32,19 +45,32 @@ export interface IFirestoreHistoryManagerArgs {
   treeManager: TreeManagerType;
   uploadLocalHistory: boolean;
   syncRemoteHistory: boolean;
-  // Id recorded alongside the document content at save time (from the RTDB
-  // envelope). When the Firestore history first loads, we verify this id is
-  // present in the history. If not, the content reflects entries that never
-  // made it to the history chain — drift. Undefined skips the check.
-  savedLastHistoryEntryId?: string;
-  // Invoked once if the loaded Firestore history doesn't contain
-  // savedLastHistoryEntryId. The owner decides how to react — typically by
+  /**
+   * History fields recorded alongside the document content at save time (from the RTDB
+   * envelope). When the envelope has exactThrough, catchUpAtLoad applies the entries after its
+   * lastHistoryEntryId. When the Firestore history first loads, we verify its lastHistoryEntryId
+   * is present in the history. If not, the content reflects entries that never made it to the
+   * history chain — drift. Undefined skips the check.
+   */
+  loadedEnvelope?: ISavedEnvelope;
+  // Invoked once if the loaded Firestore history doesn't contain the loaded envelope's
+  // lastHistoryEntryId. The owner decides how to react — typically by
   // setting the document content into an error state. Keeping this as a
   // callback avoids the history layer having to import DocumentModel.
   onContentDrift?: (message: string) => void;
   // Invoked once for each local entry after Firestore has accepted its upload. Not invoked for an entry
   // whose upload fails or that is rolled back before it is uploaded.
   onLocalEntryUploaded?: (entry: HistoryEntryType) => void;
+  /**
+   * Logs an event about the document, such as a load catch-up that couldn't finish.
+   */
+  logEvent?: TreeManagerLogger;
+  /**
+   * For playback: the last history entry the content holds, when that can be older than the newest
+   * entry in Firestore. Once the history loads, the content is moved forward from there to the
+   * newest entry. Undefined means the content holds every entry.
+   */
+  contentEntryId?: string;
 }
 
 /**
@@ -54,21 +80,45 @@ export interface IFirestoreHistoryManagerArgs {
  * In the future there might be a subclass which handles documents being edited by multiple
  * users at the same time.
  */
-export class FirestoreHistoryManager {
+export class FirestoreHistoryManager implements ICommitSource {
   firestore: Firestore;
   userContextProvider: UserContextProvider;
   treeManager: TreeManagerType;
   uploadLocalHistory: boolean;
+  syncRemoteHistory: boolean;
   historyError = undefined as firebase.firestore.FirestoreError | undefined;
   environmentAndMetadataDocReadyPromise: Promise<void> | undefined;
   firestoreHistoryInfoPromise: Promise<IFirestoreHistoryInfo> | undefined;
-  savedLastHistoryEntryId: string | undefined;
+  loadedEnvelope: ISavedEnvelope | undefined;
   onContentDrift: ((message: string) => void) | undefined;
   onLocalEntryUploaded: ((entry: HistoryEntryType) => void) | undefined;
+  logEvent: TreeManagerLogger | undefined;
   driftChecked = false;
   // Why a requested history entry could not be shown, for the playback UI to
   // display. Undefined when no request has failed.
   historyEntryRequestError = undefined as string | undefined;
+  /**
+   * This session's newest committed local entry.
+   */
+  lastCommitted: ICommittedEntry | undefined = undefined;
+  /**
+   * The last Firestore entry catchUpAtLoad applied to the loaded content, when it applied any.
+   */
+  caughtUpTo: ICommittedEntry | undefined = undefined;
+  /**
+   * The envelope whose content catchUpAtLoad applied the entries through caughtUpTo to.
+   */
+  caughtUpFrom: ISavedEnvelope | undefined = undefined;
+  contentEntryId: string | undefined;
+  /**
+   * True until the content has been moved from contentEntryId to the newest entry.
+   */
+  catchingUpToNewest: boolean;
+  private commitListeners = new Set<ICommitListener>();
+  /**
+   * The local entries recorded for upload that haven't been reported committed, in chain order.
+   */
+  private uncommitted: Array<ICommittedEntry & { uploaded: boolean }> = [];
 
   constructor({
     firestore,
@@ -76,17 +126,23 @@ export class FirestoreHistoryManager {
     treeManager,
     uploadLocalHistory,
     syncRemoteHistory,
-    savedLastHistoryEntryId,
+    loadedEnvelope,
     onContentDrift,
-    onLocalEntryUploaded
+    onLocalEntryUploaded,
+    logEvent,
+    contentEntryId
   }: IFirestoreHistoryManagerArgs) {
     this.firestore = firestore;
     this.userContextProvider = userContextProvider;
     this.treeManager = treeManager;
     this.uploadLocalHistory = uploadLocalHistory;
-    this.savedLastHistoryEntryId = savedLastHistoryEntryId;
+    this.syncRemoteHistory = syncRemoteHistory;
+    this.loadedEnvelope = loadedEnvelope;
     this.onContentDrift = onContentDrift;
     this.onLocalEntryUploaded = onLocalEntryUploaded;
+    this.logEvent = logEvent;
+    this.contentEntryId = contentEntryId;
+    this.catchingUpToNewest = contentEntryId !== undefined;
 
     if (syncRemoteHistory) {
       this.subscribeToFirestoreHistory();
@@ -99,10 +155,38 @@ export class FirestoreHistoryManager {
       historyError: observable,
       setHistoryError: action,
       historyEntryRequestError: observable,
+      lastCommitted: observable.ref,
+      catchingUpToNewest: observable,
+      setCatchingUpToNewest: action,
       setHistoryEntryRequestError: action,
       historyStatus: computed,
       historyStatusString: computed
     });
+  }
+
+  addCommitListener(listener: ICommitListener) {
+    this.commitListeners.add(listener);
+    return () => { this.commitListeners.delete(listener); };
+  }
+
+  protected notifyCommitted(entries: ICommittedEntry[]) {
+    if (entries.length === 0) return;
+    runInAction(() => { this.lastCommitted = entries[entries.length - 1]; });
+    this.commitListeners.forEach(listener => listener.onCommitted(entries));
+  }
+
+  protected notifyVoided(reason: VoidReason) {
+    this.commitListeners.forEach(listener => listener.onUncommittedVoided(reason));
+  }
+
+  /**
+   * Forgets the catch-up and this session's commits, for content that replaced the content they
+   * describe. The next catch-up starts from the new content's envelope.
+   */
+  forgetCatchUp() {
+    this.caughtUpTo = undefined;
+    this.caughtUpFrom = undefined;
+    runInAction(() => { this.lastCommitted = undefined; });
   }
 
   setHistoryEntryRequestError(message: string | undefined) {
@@ -225,6 +309,106 @@ export class FirestoreHistoryManager {
     return this.firestoreHistoryInfoPromise;
   }
 
+  /**
+   * True when the current user is known and isn't the document's owner. Only the owner writes an
+   * individual document's history and content, so another user's copy has nothing to catch up.
+   */
+  get isOtherUsersDocument() {
+    const uid = this.userContextProvider?.userContext?.uid;
+    const ownerUid = this.treeManager.mainDocument?.uid;
+    return !!uid && uid !== kUnknownUserId && uid !== ownerUid;
+  }
+
+  /**
+   * Bring an individual document's content up to the last history entry in Firestore, applying
+   * the entries its envelope is missing, and decide where the session's exact saves start.
+   * `currentEnvelope` returns the envelope of the content the document holds now, which is the
+   * loaded one unless the content listener has replaced the content since. Managers that mirror the
+   * remote history or don't upload local history skip it, as does another user's copy of the
+   * document, leaving its exactness undecided.
+   * Only an envelope with exactThrough is caught up. The id of one without it can be older than
+   * what its content holds, so applying the entries after it could apply some of them twice.
+   * Never rejects: anything that keeps the catch-up from finishing leaves the session not exact,
+   * including the content being replaced while the catch-up reads Firestore.
+   */
+  async catchUpAtLoad(currentEnvelope: () => ISavedEnvelope | undefined) {
+    if (this.syncRemoteHistory || !this.uploadLocalHistory || this.isOtherUsersDocument) return;
+    const { exactness } = this.treeManager;
+    const envelope = currentEnvelope();
+    const savedId = envelope?.lastHistoryEntryId;
+    // Where exact saves start once the content is known to match `contentId`.
+    const startAt = (contentId: string) => {
+      exactness.startAt(envelope?.exactThrough?.since ?? contentId);
+    };
+    const incomplete = (reason: NotExactReason, params: Record<string, unknown> = {}) => {
+      exactness.markNotExact(reason);
+      this.logEvent?.(LogEventName.HISTORY_LOAD_CATCH_UP_INCOMPLETE, { reason, savedId, ...params });
+    };
+
+    let applying = false;
+    try {
+      // The user may only become known during this wait.
+      await this.environmentAndMetadataDocReadyPromise;
+      if (this.isOtherUsersDocument) return;
+      const { documentPath, lastEntryIndex, lastEntryId } = await this.getFirestoreHistoryInfo();
+      if (currentEnvelope() !== envelope) {
+        incomplete("catch-up-content-replaced");
+        return;
+      }
+      const last = { id: lastEntryId, index: lastEntryIndex };
+      const saved = { id: savedId, index: envelope?.exactThrough?.index };
+      const plan = planCatchUp(saved, last);
+      switch (plan.kind) {
+        case "none":
+          // With nothing to fetch, a saved id other than the last entry can't be in Firestore: an
+          // entry in Firestore with an index at or after the last entry's would be the last entry.
+          if (savedId && savedId !== lastEntryId) {
+            exactness.markNotExact("saved-id-missing");
+          } else {
+            startAt(savedId ?? lastEntryId ?? kHistoryStart);
+          }
+          return;
+        case "unmarked":
+          incomplete("unmarked-envelope-gap");
+          return;
+        case "too-large":
+          incomplete("catch-up-gap-too-large", { gap: plan.gap });
+          return;
+        case "fetch": {
+          const gap = lastEntryIndex - plan.afterIndex;
+          // Stops at the last entry read, since that is the entry the next local entry chains after.
+          const docs = await getHistoryEntriesAfter(this.firestore, documentPath, plan.afterIndex, lastEntryIndex);
+          if (currentEnvelope() !== envelope) {
+            incomplete("catch-up-content-replaced", { gap });
+            return;
+          }
+          const { entries } = takeContiguousEntries(docs, savedId!, plan.afterIndex);
+          applying = true;
+          const { applied, error } = this.treeManager.applyEntriesAtLoad(entries.map(doc => doc.entry));
+          const lastApplied = entries[applied - 1];
+          if (lastApplied) {
+            this.caughtUpTo = { id: lastApplied.id, index: lastApplied.index };
+            this.caughtUpFrom = envelope;
+          }
+          if (error !== undefined) {
+            incomplete("catch-up-apply-failed", { gap, applied, error });
+          } else if (entries[entries.length - 1]?.id !== lastEntryId) {
+            incomplete("catch-up-hole", { gap, applied });
+          } else {
+            startAt(lastEntryId);
+          }
+          break;
+        }
+      }
+    } catch (error) {
+      if (applying) {
+        incomplete("catch-up-apply-failed", { error: error instanceof Error ? error.message : String(error) });
+      } else {
+        exactness.markNotExact("history-unavailable");
+      }
+    }
+  }
+
   async onHistoryEntryCompleted(
     historyContainer: CDocumentType,
     entry: Instance<typeof HistoryEntry>,
@@ -253,16 +437,49 @@ export class FirestoreHistoryManager {
     // If there was no last entry in Firestore, prepareFirestoreHistoryInfo sets
     // lastEntryIndex to -1
     const index = lastEntryIndex + 1 + newLocalIndex;
-    await docRef.set({
-      index,
-      created: firestore.timestamp(),
-      previousEntryId,
-      entry: JSON.stringify(snapshot)
-    });
+    const recorded = { id: entry.id, index, uploaded: false };
+    this.uncommitted.push(recorded);
+    try {
+      await docRef.set({
+        index,
+        created: firestore.timestamp(),
+        previousEntryId,
+        entry: JSON.stringify(snapshot)
+      });
+    } catch (error) {
+      // The entry stays unuploaded, so it and every later entry stay uncommitted.
+      console.warn("Could not upload history entry", entry.id, error);
+      return;
+    }
+    recorded.uploaded = true;
     this.onLocalEntryUploaded?.(entry);
+    this.commitUploadedPrefix();
+  }
+
+  /**
+   * An entry is committed once it and every earlier entry from this session have uploaded.
+   */
+  private commitUploadedPrefix() {
+    const count = this.uncommitted.findIndex(recorded => !recorded.uploaded);
+    const committed = this.uncommitted.splice(0, count < 0 ? this.uncommitted.length : count);
+    this.notifyCommitted(committed.map(({ id, index }) => ({ id, index })));
   }
 
   get historyStatus() : HistoryStatus {
+    const status = this.getLoadStatus();
+    return status === HistoryStatus.HISTORY_LOADED && this.catchingUpToNewest
+      ? HistoryStatus.HISTORY_CATCHING_UP
+      : status;
+  }
+
+  setCatchingUpToNewest(value: boolean) {
+    this.catchingUpToNewest = value;
+  }
+
+  /**
+   * The status of loading the history, leaving out the move to the newest entry.
+   */
+  private getLoadStatus() : HistoryStatus {
     if (this.historyError) {
       return HistoryStatus.HISTORY_ERROR;
     }
@@ -303,6 +520,8 @@ export class FirestoreHistoryManager {
         const {numHistoryEventsApplied} = this.treeManager;
         return `Loading history (${historyLength}/${numHistoryEventsApplied})`;
       }
+      case HistoryStatus.HISTORY_CATCHING_UP:
+        return "Loading the latest changes.";
       default:
         return "Unknown history status";
     }
@@ -372,12 +591,42 @@ export class FirestoreHistoryManager {
   }
 
   /**
+   * Once the history has loaded, moves the content from the entry it holds to the newest entry,
+   * so playback opens with content that holds every entry it shows. A move that stops on an entry
+   * that doesn't apply leaves playback there, with the failure marked. Content whose entry isn't in
+   * the history is left at the newest entry, as content is when its entry isn't known.
+   */
+  private async moveContentToNewestEntry(contentEntryId: string) {
+    const { treeManager } = this;
+    try {
+      // Bounded, like moveToHistoryEntryAfterLoad, so a history that never loads doesn't leak the
+      // reaction.
+      await when(() => {
+        const status = this.getLoadStatus();
+        return status === HistoryStatus.HISTORY_LOADED || status === HistoryStatus.HISTORY_ERROR;
+      }, { timeout: 30000 });
+      if (this.historyError || !isAlive(treeManager)) return;
+      const newest = treeManager.document.history.length;
+      const contentPosition = treeManager.findHistoryEntryIndex(contentEntryId) + 1;
+      if (contentPosition > 0 && contentPosition < newest) {
+        treeManager.setNumHistoryEntriesApplied(contentPosition);
+        await treeManager.goToHistoryEntryPosition(newest);
+      }
+    } catch (error) {
+      console.warn("Could not move the playback content to the newest history entry:", error);
+    } finally {
+      this.setCatchingUpToNewest(false);
+    }
+  }
+
+  /**
    * Compare the envelope's saved lastHistoryEntryId against the loaded
    * Firestore history. If the saved id isn't found in the history, the
    * loaded content reflects edits that never made it to the history chain —
    * drift. On mismatch, invoke onContentDrift so the owner can surface
    * the DocumentError UI instead of leaving potentially-corrupted content
-   * visible to the user.
+   * visible to the user. A group document's owner stops its saves instead,
+   * since its history holds every change.
    *
    * Skipped when no saved id is available (pre-feature envelopes, fresh
    * documents with no prior history).
@@ -386,11 +635,11 @@ export class FirestoreHistoryManager {
    * which today is gated by syncRemoteHistory=true in the manager args.
    * In practice that means group documents (see documents.ts) and the
    * playback path (see canvas.tsx). Playback doesn't pass
-   * savedLastHistoryEntryId so the check is a no-op there. Other document
+   * a loaded envelope so the check is a no-op there. Other document
    * types never subscribe, so the drift check does not run for them.
    */
   checkContentDriftAgainstHistory(history: IFirestoreHistoryEntryDoc[]) {
-    const savedId = this.savedLastHistoryEntryId;
+    const savedId = this.loadedEnvelope?.lastHistoryEntryId;
     if (!savedId) return;
     const found = history.some(doc => doc.entry?.id === savedId);
     if (found) return;
@@ -445,6 +694,9 @@ export class FirestoreHistoryManager {
 
     // TODO: we should move this function into the history manager
     treeManager.setNumHistoryEntriesAppliedFromFirestore(firestore, documentPath);
+    if (this.contentEntryId !== undefined) {
+      void this.moveContentToNewestEntry(this.contentEntryId);
+    }
 
     const snapshotUnsubscribe = loadHistory(firestore, `${documentPath}/history`,
       (history, error) => {

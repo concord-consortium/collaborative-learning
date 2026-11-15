@@ -1,6 +1,6 @@
 # Group Documents Plan
 
-Forward-looking plan for group documents. For completed work (GD-1 through GD-6, GD-9), see [group-docs-completed-work.md](group-docs-completed-work.md). For where things stand today as a user or tester, see [group-docs-current-state.md](group-docs-current-state.md).
+Forward-looking plan for group documents. For completed work (GD-1 through GD-6, GD-9, GD-18), see [group-docs-completed-work.md](group-docs-completed-work.md). For where things stand today as a user or tester, see [group-docs-current-state.md](group-docs-current-state.md).
 
 ## Work Areas
 
@@ -16,7 +16,7 @@ Forward-looking plan for group documents. For completed work (GD-1 through GD-6,
 | **GD-15** | Finer-grained `doc` scope | Split GD-9's single `doc` scope bucket so concurrent tile-adds and unrelated layout edits don't conflict |
 | **GD-16** | E2E Test Framework | Add Playwright support so tests can drive two browser windows with independent focus state, enabling automated tests for concurrent-editing UI issues |
 | **GD-17** | Type-Aware Merge Delegation | Common mechanism for tiles, shared models, and the document level to register conflict-detection / merge functions. Foundation for GD-10, GD-14, GD-15 |
-| **GD-18** | Settled-State Document Saves | Save the doc only when the receive-side state machine is settled, so saved content reflects canonical state at a known position. Reduces multi-writer save thrash. Prerequisite for GD-19 |
+| **GD-18** | Settled-State Document Saves | Done: see [completed work](group-docs-completed-work.md#gd-18-settled-state-document-saves-pr-3086--clue-751). Saves record whether their `lastHistoryEntryId` is exact, so saved content reflects canonical state at a known position. Prerequisite for GD-19 |
 | **GD-19** | Transaction-Free History | Replace the per-document Firestore transaction with a multi-parent DAG of history entries, removing the write-rate choke point and moving conflict detection client-side |
 | **GD-20** | Background Entries (DataFlow) | Make tick-rate producer changes (dataflow) ordinary history entries with a `background` flag plus runner lock, asymmetric conflict resolution, producer notification, and skip-by-default scrubber/undo. Unblocks DataFlow in group docs |
 | **GD-21** | Collaborative Text-Tile Editing | Replace the text tile's single serialized string field with a fine-grained representation so edits produce small targeted patches instead of full-text replacements. Reduces history size today; prerequisite for text-tile collaborative merging via GD-14/GD-17; carries enough intent for a Slate-aware applier to preserve cursor/selection on remote updates |
@@ -40,7 +40,7 @@ Items at the same level can be done in parallel or in either order. Indented ite
      - **GD-14: Intra-Tile Merging** — depends on GD-10 (text tile additionally requires GD-21)
    - **GD-15: Finer-grained `doc` scope** — uses GD-17 for cases beyond simple per-id splits (only if practical pain emerges)
 4. **GD-11: Tile Hardening** (as needed, after the merging work areas)
-5. **GD-18: Settled-State Document Saves** — independent prerequisite chain for DataFlow support
+5. **GD-18: Settled-State Document Saves** (done) — independent prerequisite chain for DataFlow support
    - **GD-19: Transaction-Free History** — depends on GD-18
      - **GD-20: Background Entries (DataFlow)** — depends on GD-19
 6. **GD-21: Collaborative Text-Tile Editing** — independent; sibling enabler for text-tile collaborative editing alongside GD-14/GD-17
@@ -145,11 +145,7 @@ Reproduction scripts and observed behavior for each case live in [test-scripts/s
 
 ### GD-18: Settled-State Document Saves
 
-Today every CLUE client saves the full document state to RTDB on every local change *and* on remote changes that get applied. That produces multi-writer save thrash (N editors → ~N RTDB writes per edit) and lets the saved doc briefly reflect non-canonical state during fork-rollback. GD-18 changes the save trigger to "settled state" — no pending local entries, no pending conflict decisions, all visible canonical entries processed — so the saved doc always reflects canonical state at a known canonical position.
-
-Design: [settled-state-doc-saves-design.md](settled-state-doc-saves-design.md). Status: design complete, ready for implementation plan.
-
-Independent of the merging work; can be done in parallel. Prerequisite for GD-19.
+Done. Group documents save only from a settled history, and every content save records whether its `lastHistoryEntryId` is exact. See [completed work](group-docs-completed-work.md#gd-18-settled-state-document-saves-pr-3086--clue-751), and [group-doc-content-saves.md](group-doc-content-saves.md) for how it works. Prerequisite for GD-19.
 
 ### GD-19: Transaction-Free History
 
@@ -256,7 +252,8 @@ Best done after [GD-16: E2E Test Framework](#gd-16-e2e-test-framework) lands so 
 
 Hardening the existing infrastructure to prevent silent failures and data loss in edge cases. Specific items, locations, and proposed fixes live in [group-docs-implementation-todos.md](group-docs-implementation-todos.md). Highlights:
 
-- Race condition in initial history load (explicitly deferred by GD-6)
+- Race condition in initial history load (explicitly deferred by GD-6). A group document loaded from an envelope with a trusted `exactThrough` doesn't have it. One loaded from an envelope without it does: the content and Firestore's last entry are read separately, so an entry committed between the two reads is skipped, and that session's saves are marked exact anyway.
+- Race in the upload path. After an upload transaction commits, another client's entry chained after ours can reach the listener before the transaction promise resolves. `detectAndResolveFork` then sees our committed entries still in `completedHistoryEntryQueue` and can roll them back, and the success path's `splice(0, entriesToUpload.length)` can drop entries queued while the upload ran, which are never uploaded. A client can then look settled while holding a non-canonical state. The window is narrow. GD-19 removes it: a local entry leaves the pending set only when its own echo arrives, and there is no transaction promise or splice.
 - Error handling when metadata promise rejects (silent infinite failure loop)
 - Unhandled promise in recursive upload
 

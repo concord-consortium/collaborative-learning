@@ -28,9 +28,9 @@ const makeDocument = (type = "problem", uid = "7") =>
   createDocumentModel({ type: type as any, key: nanoid(), uid, content: {} });
 
 const addEntry = (document: DocumentModelType, model = "TextContent",
-                  action = "/content/tileMap/t/content/setText", isLoadEntry?: boolean) => {
+                  action = "/content/tileMap/t/content/setText", isConversionEntry?: boolean) => {
   const entry = HistoryEntry.create({
-    id: nanoid(), tree: document.key, model, action, isLoadEntry, state: "complete"
+    id: nanoid(), tree: document.key, model, action, isConversionEntry, state: "complete"
   });
   (document.treeManagerAPI as TreeManagerType).addHistoryEntryAfterApplying(entry);
   return entry;
@@ -81,12 +81,12 @@ describe("ActivityRecorder", () => {
     expect(mockSet).not.toHaveBeenCalled();
   });
 
-  it("writes nothing for a load entry", async () => {
+  it("writes nothing for a conversion entry", async () => {
     recorder = new ActivityRecorder(makeStores());
     const doc = makeDocument();
-    const load = addEntry(doc, "DocumentContent", "/loadContent", true);
-    recorder.onLocalEntryUploaded(doc, load);
-    recorder.onContentSaved(doc, load.id);
+    const conversion = addEntry(doc, "DocumentContent", "/convertContent", true);
+    recorder.onLocalEntryUploaded(doc, conversion);
+    recorder.onContentSaved(doc, conversion.id);
     jest.advanceTimersByTime(kActivitySaveTimeoutMs * 2);
     await flush();
     expect(mockSet).not.toHaveBeenCalled();
@@ -238,7 +238,7 @@ describe("ActivityRecorder", () => {
     const doc = makeDocument();
     const other = makeDocument();
     const entry = addEntry(doc);
-    doc.setSavedLastHistoryEntryId(entry.id);
+    doc.setSavedEnvelope({ lastHistoryEntryId: entry.id });
     recorder.onContentSaved(other, entry.id);
     recorder.onLocalEntryUploaded(doc, entry);
     await flush();

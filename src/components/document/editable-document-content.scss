@@ -97,3 +97,13 @@
     }
   }
 }
+
+.history-catch-up-spinner {
+  position: absolute;
+  top: 100px;
+  left: calc(50% - 100px);
+  width: 200px;
+  height: 200px;
+  background-image: url("../../assets/Spinner-1s-200px.svg");
+  background-repeat: no-repeat;
+}

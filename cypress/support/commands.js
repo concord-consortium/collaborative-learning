@@ -196,15 +196,22 @@ Cypress.Commands.add("getCanvasItemTitle", (section) => {
 Cypress.Commands.add("openDocumentThumbnail", (navTab,section,title) => { //opens thumbnail into the nav panel
   cy.get('.document-tabs.'+navTab+' .documents-list.'+section+' [data-test='+section+'-list-items] .footer').contains(title).parent().parent().siblings('.scaled-list-item-container').click({force:true});
 });
+// Waits for the workspace document to catch up to its history. Until then it shows a spinner in
+// place of its toolbar and content, and the tools that copy tiles into it are disabled.
+Cypress.Commands.add("waitForDocumentCatchUp", () => {
+  cy.get('.primary-workspace [data-testid="history-catch-up-spinner"]').should('not.exist');
+});
 Cypress.Commands.add("openDocumentWithTitle", (tab, section, title) => {
   cy.openSection(tab,section);
   cy.get('.document-tabs.'+tab+' .documents-list.'+section+' [data-test='+section+'-list-items] .footer').contains(title).parent().parent().siblings('.scaled-list-item-container').click({force:true});
   cy.get('.document-tabs.'+tab+' [data-test=subtab-'+section+'] .toolbar .tool.edit').click();
+  cy.waitForDocumentCatchUp();
 });
 Cypress.Commands.add("openDocumentWithIndex", (tab, section, docIndex) => {
   cy.openSection(tab,section);
   cy.get('.document-list.'+section+' [data-test='+section+'-list-items] .footer').eq(docIndex).siblings('.scaled-list-item-container').click({force:true});
   cy.get('.toolbar .tool.edit').click();
+  cy.waitForDocumentCatchUp();
 });
 Cypress.Commands.add("clickProblemResourceTile", (subsection, tileIndex = 0) => {
   cy.get('[data-focus-section="'+subsection+'"] .problem-panel .document-content .tile-row').eq(tileIndex).then($tileRow => {

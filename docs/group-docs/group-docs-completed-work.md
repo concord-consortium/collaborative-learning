@@ -55,6 +55,12 @@ Two changes touching the same tile (even at disjoint sub-paths) still conflict â
 
 Design and out-of-scope items: [merge-independent-forks-design.md](../superpowers/specs/2026-04-22-merge-independent-forks-design.md).
 
+## GD-18: Settled-state document saves (PR #3086 / CLUE-751)
+
+Every content save records whether its `lastHistoryEntryId` is exact: the saved content is the document's state at that entry, and the entry is already in Firestore. Group documents save only from a settled history, so their saved content is canonical state at a known position, and an idle member can save once its history is settled. A group document whose session stops being exact stops saving and shows a notice over the document. Individual documents also make intermediate saves when no exact save has been possible for a while, and catch up to their history when opened for editing. Both are saved by subclasses of the same `ContentSaveSender`.
+
+How it works: [content-saves.md](../history-framework/content-saves.md) for every document, and [group-doc-content-saves.md](group-doc-content-saves.md) for what group documents add.
+
 ## CLUE-483: UI Disruption Testing
 
 Tested whether transient UI disruptions from concurrent editing are tolerable in practice. Reframed the [requires active interaction] cases catalogued in [test-scripts/](test-scripts/) to be exercised by one person across two browser sessions using GD-3's pause/resume (5-second resume delay), and split each Result row into Expected vs. Actual.
