@@ -3,7 +3,7 @@ import { useCustomModal } from "../../hooks/use-custom-modal";
 import { useStores } from "../../hooks/use-stores";
 import { IGitInfo } from "../../models/stores/base-stores-types";
 import { ExternalLink } from "../utilities/external-link";
-import clueBlockLogo from "../../assets/clue-block-logo.png";
+import ClueBlockLogo from "../../assets/clue-block-logo.svg";
 import InfoIcon from "../../assets/icons/info-icon.svg";
 import { ICustomDropdownItem } from "../../clue/components/custom-select";
 
@@ -32,7 +32,7 @@ export const AboutDialogContent: React.FC<IAboutDialogContentProps> = ({ appVers
   return (
     <div className="about-dialog-body">
       <div className="about-dialog-identity">
-        <img className="about-dialog-logo" src={clueBlockLogo} alt="CLUE" />
+        <ClueBlockLogo className="about-dialog-logo" viewBox="0 0 105 70" role="img" aria-label="CLUE" />
         <div className="about-dialog-product-of">a product of The Concord Consortium</div>
         <div className="about-dialog-tagline">Collaborative Learning User Environment</div>
         <div className="about-dialog-version" data-testid="about-dialog-version">
