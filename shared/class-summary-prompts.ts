@@ -11,7 +11,7 @@ export const CLASS_SUMMARY_STUDENT_INSTRUCTION =
   "Summarize the key points, themes, topics, main ideas, and important details in this student work. " +
   "Do not describe the structure of the documents, just the content.";
 
-export const CLASS_SUMMARY_CUE = "Summary:";
+const CLASS_SUMMARY_CUE = "Summary:";
 
 /**
  * Mirrors `chatTutorPrompts`: `replace` swaps out the built-in instruction, `append` is added
