@@ -132,6 +132,8 @@ export const ContainerConfig: React.FC<Props> = ({ path }) => {
       // Default to on when a legacy template already exists (flag undefined → applied at runtime).
       documentTemplateEnabled: cfg?.defaultDocumentTemplateEnabled ?? !!cfg?.defaultDocumentTemplate,
       planningTemplateEnabled: cfg?.planningTemplateEnabled ?? !!cfg?.planningTemplate,
+      classSummaryReplacePrompt: cfg?.classSummaryPrompts?.replaceStudentPrompt ?? "",
+      classSummaryAppendPrompt: cfg?.classSummaryPrompts?.appendToStudentPrompt ?? "",
     };
   }, [item, availableSections, files, sectionPathPrefix]);
 
@@ -329,6 +331,20 @@ export const ContainerConfig: React.FC<Props> = ({ path }) => {
         if (!currentItem.config) currentItem.config = {};
         currentItem.config.planningTemplateEnabled = data.planningTemplateEnabled;
       }
+
+      const replaceStudentPrompt = data.classSummaryReplacePrompt.trim();
+      const appendToStudentPrompt = data.classSummaryAppendPrompt.trim();
+      if (replaceStudentPrompt || appendToStudentPrompt) {
+        if (!currentItem.config) currentItem.config = {};
+        currentItem.config.classSummaryPrompts = {
+          ...(replaceStudentPrompt ? { replaceStudentPrompt } : {}),
+          ...(appendToStudentPrompt ? { appendToStudentPrompt } : {}),
+        };
+      } else if (currentItem.config) {
+        // Removed rather than left empty: the nearest level that has this property supplies the
+        // whole of it, so an empty block here would silence the unit's prompt instead of inheriting it.
+        delete currentItem.config.classSummaryPrompts;
+      }
     };
 
     if (pathInfo.isTeacherGuide) {
@@ -408,6 +424,26 @@ export const ContainerConfig: React.FC<Props> = ({ path }) => {
             {problemConfig?.planningTemplate &&
               <button type="button" className="danger" onClick={deleteProblemPlanningTemplate}>Delete</button>}
           </div>
+        </fieldset>
+        <fieldset className="class-summary-controls">
+          <legend>Class Summary</legend>
+          <p className="muted small">
+            Overrides the prompt behind the teacher&apos;s Class Summary for this problem only, and
+            only for the summary of student work. Either field replaces the unit&apos;s Class Summary
+            settings outright; clear both to go back to inheriting them.
+          </p>
+          <label htmlFor="classSummaryReplacePrompt">Replace built-in summary prompt</label>
+          <textarea
+            id="classSummaryReplacePrompt"
+            rows={6}
+            {...problemForm.register("classSummaryReplacePrompt")}
+          />
+          <label htmlFor="classSummaryAppendPrompt">Additional summary prompt (appended)</label>
+          <textarea
+            id="classSummaryAppendPrompt"
+            rows={4}
+            {...problemForm.register("classSummaryAppendPrompt")}
+          />
         </fieldset>
         <div className="bottomButtons">
           <button type="submit" disabled={saveState === "saving"}>Save</button>

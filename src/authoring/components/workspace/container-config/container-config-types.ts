@@ -20,6 +20,8 @@ export interface IProblemFormInputs {
   // Template enable flags persist with the form (on Save), like the unit-scope Document Settings form.
   documentTemplateEnabled: boolean;
   planningTemplateEnabled: boolean;
+  classSummaryReplacePrompt: string;
+  classSummaryAppendPrompt: string;
 }
 
 export interface IUnitParentFormInputs {
