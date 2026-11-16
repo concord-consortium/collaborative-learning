@@ -151,12 +151,50 @@ describe("onClassDataDocWritten", () => {
       studentContent: "Short student work.",
     });
 
-    expect(mockGetUnitSummary).not.toHaveBeenCalled();
+    // Still fetched without an ordinal: a unit-level authored prompt applies either way, and only
+    // the context slice needs to know which problem the class is on.
+    expect(mockGetUnitSummary).toHaveBeenCalled();
     expect(mockInvoke).toHaveBeenCalledTimes(1);
     expect(systemMessageOf(0)).toContain(UNIT_SUMMARY_LOOKAHEAD_INSTRUCTION);
     expect(systemMessageOf(0)).toContain(PROBLEM_APPROACH_INSTRUCTION_CLASS);
     expect(systemMessageOf(0)).not.toContain(PROBLEM_APPROACH_INSTRUCTION);
     expect(humanMessageOf(0)).not.toContain("<curriculum-context>");
+  });
+
+  test("an authored replacement steers the student request and leaves the teacher request alone",
+    async () => {
+      mockGetUnitSummary.mockResolvedValue(unitSummaryResult({
+        byProblemOrdinal: {"1.1": {replaceStudentPrompt: "List every misconception you can find."}},
+      }));
+      mockInvoke
+        .mockResolvedValueOnce(invokeResponse("student chunk summary"))
+        .mockResolvedValueOnce(invokeResponse("teacher chunk summary"));
+
+      await writeAndTrigger({
+        studentContent: "Short student work.",
+        teacherContent: "Short teacher work.",
+        currentProblemOrdinal: "1.1",
+      });
+
+      expect(humanMessageOf(0)).toContain("List every misconception you can find.");
+      expect(humanMessageOf(0)).not.toContain("Summarize the key points, themes, topics");
+      expect(humanMessageOf(1)).toContain("Analyze this teacher work");
+      expect(humanMessageOf(1)).not.toContain("List every misconception you can find.");
+    });
+
+  test("a unit-level prompt reaches a class that has no current problem", async () => {
+    mockGetUnitSummary.mockResolvedValue(unitSummaryResult({
+      unit: {appendToStudentPrompt: "Call out anything a teacher should address tomorrow."},
+      byProblemOrdinal: {},
+    }));
+    mockInvoke.mockResolvedValueOnce(invokeResponse("student chunk summary"));
+
+    await writeAndTrigger({
+      studentContent: "Short student work.",
+    });
+
+    expect(humanMessageOf(0)).toContain("Summarize the key points, themes, topics");
+    expect(humanMessageOf(0)).toContain("Call out anything a teacher should address tomorrow.");
   });
 
   test("a summary whose sourceManifest no longer matches the live problem list sends no slice",
