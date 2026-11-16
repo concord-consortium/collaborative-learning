@@ -1,7 +1,7 @@
 @import "../vars";
 
 .custom-modal.about-dialog {
-  width: 580px;
+  width: 584px;
   max-width: calc(100vw - 40px);
   max-height: calc(100vh - 40px);
 
@@ -9,6 +9,8 @@
     justify-content: flex-start;
     min-height: 0;
     overflow-y: auto;
+    padding-left: 28px;
+    padding-right: 28px;
   }
 
   .about-dialog-body {
@@ -18,6 +20,7 @@
 
     a {
       color: $workspace-teal-dark-1;
+      text-decoration: underline;
 
       &:hover {
         color: $workspace-teal-dark-2;
@@ -42,8 +45,9 @@
 
   .about-dialog-product-of {
     font-size: 11px;
+    line-height: 1.2;
     color: $charcoal-dark-1;
-    margin-bottom: 4px;
+    margin-bottom: 3px;
   }
 
   .about-dialog-tagline {
@@ -54,6 +58,8 @@
     background-color: $charcoal-light-6;
     border-radius: 12px;
     padding: 3px 12px;
+    margin: 1px 0 4px;
+    line-height: 16px;
     user-select: text;
   }
 
@@ -64,20 +70,20 @@
     width: 100%;
   }
 
+  .about-dialog-identity + .about-dialog-divider {
+    margin-top: 11px;
+  }
+
   .about-dialog-heading {
     font-size: 13px;
     font-weight: normal;
     color: $charcoal-dark-1;
-    margin: 0 0 8px;
+    margin: 0 0 6px;
   }
 
   .about-dialog-text {
     font-size: 15px;
     margin: 0 0 8px;
-
-    a {
-      text-decoration: underline;
-    }
   }
 
   .about-dialog-links {
@@ -85,13 +91,5 @@
     flex-wrap: wrap;
     gap: 22px;
     font-size: 13px;
-
-    a {
-      text-decoration: none;
-
-      &:hover {
-        text-decoration: underline;
-      }
-    }
   }
 }

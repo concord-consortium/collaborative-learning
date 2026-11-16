@@ -41,7 +41,7 @@ Concord is adding Terms of Use and licensing language across its hosted apps. CO
 
 - R14. The modal uses CLUE's existing dialog chrome (gray title bar, teal border, close ×, Lato, CLUE's modal buttons and their existing hover and pressed states), not CODAP's.
 - R15. External links (every link but the mailto) open in a new tab with `target="_blank"` and `rel="noopener noreferrer"`, and carry visually hidden text "(opens in a new tab)" for screen readers. The ↗ is `aria-hidden`. The story says `rel="noopener"`; `noreferrer` is added to match CODAP and the stream's geo apps.
-- R16. Links inside the body paragraphs are underlined at rest. Quick links are not underlined at rest.
+- R16. Every link is underlined at rest, in the body paragraphs and the quick links alike, as the mockup's screen 1 shows.
 
 ### Accessibility and behavior
 
@@ -57,7 +57,7 @@ Concord is adding Terms of Use and licensing language across its hosted apps. CO
 
 ### Verification
 
-- R23. Automated tests cover the menu item in both containers (present, first, followed by the divider, not selectable as a value) and the modal (content, link targets and attributes, close paths, focus return). *(Portal-launched and iframe behavior is a hand check on the branch deploy, as part of Kiley's review; the deploy drops the ticket prefix from the folder name, see "Branch preview URLs" in `CLAUDE.md`.)*
+- R23. Automated tests cover the menu item in both containers (present, first, followed by the divider, not selectable as a value) and the modal (content, link targets and attributes, close paths, focus return). Iframe behavior is checked in Activity Player: a hand-written activity whose interactives load a local build in demo mode, as a student and as a teacher, served locally and opened with `?activity=<url>`. About CLUE is first in each menu, opens by keyboard with focus moved in and kept in, and closes by Escape, Close and × with focus back on the menu button. A portal launch loads the same CLUE URL, so it needs no separate check.
 
 ## Technical Notes
 
@@ -68,7 +68,7 @@ Concord is adding Terms of Use and licensing language across its hosted apps. CO
 - Logo: the 4x PNG (420 × 280) export of Zeplin's "CLUE Logo Small" layer, at `src/assets/clue-block-logo.png`, displayed at 135 × 90. The SVG export draws the letters as live text in Museo, which CLUE does not load.
 - Info icon: moved from `src/plugins/timeline/assets/` to `src/assets/icons/info-icon.svg` so core code does not import from a plugin. The build's svgo pass strips its `viewBox`, so the menu passes `viewBox="0 0 24 24"` as a prop to scale it to 16 px instead of cropping it (as `TitleIcon` does in `document-file-menu.tsx`).
 - User menu styling follows the Zeplin screen (`clue-app-header.scss`, inside `.user`): the list is at least as wide as the header and rounded on all four corners; the icon is the teal outline glyph with its light fill turned off, drawn white while the item is pressed; the student menu has no check column, so the icon sits 12 px from the edge and "Log Out" aligns with the About label. The class menu keeps its check column to mark the current class.
-- Colors come from `vars.scss`: `$workspace-teal-dark-1` is the mockup's link color exactly (#0481a0); hover and gray text use the nearest palette entries. Measured mockup values: dialog 580 px wide; "a product of" 11 px; tagline 14 px; version pill 13 px with a 12 px radius; body paragraphs 15 px, line-height 1.5; section heading 13 px; quick links 13 px with a 22 px gap.
+- Colors come from `vars.scss`: `$workspace-teal-dark-1` is the mockup's link color exactly (#0481a0); hover and gray text use the nearest palette entries. Measured mockup values: dialog 584 px wide including its 2 px border, with 28 px side padding; "a product of" 11 px; tagline 14 px; version pill 13 px text, 22 px tall, with a 12 px radius; body paragraphs 15 px, line-height 1.5; section heading 13 px; quick links 13 px with a 22 px gap.
 - Test harness notes: react-modal's Escape handler checks `keyCode`, so tests send `fireEvent.keyDown(..., { keyCode: 27 })`. Tests render inside a `.app` wrapper and call `Modal.setAppElement(".app")` after render, so react-modal does not hide the dialog itself from role queries, and focus the trigger before clicking it so focus return has a target.
 - In demo and QA modes a teacher or researcher has no portal class offerings, so the class menu, previously disabled there, now opens with About CLUE alone. The teacher dashboard Cypress spec checks for that instead of expecting no list.
 - No Firebase functions, rules or indexes change, so no Deploy timing callout; no authorable unit `config` changes.
