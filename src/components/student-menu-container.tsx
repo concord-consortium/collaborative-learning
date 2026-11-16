@@ -20,7 +20,6 @@ export class StudentMenuContainer extends BaseComponent <IProps> {
         text: "Log Out",
         isAction: true,
         selected: false,
-        hideItemCheck: true,
         onClick: () => {
           // return back to standalone if the user authenticated in standalone mode
           // otherwise go to the default logout URL set in the portal (currently the homepage)
