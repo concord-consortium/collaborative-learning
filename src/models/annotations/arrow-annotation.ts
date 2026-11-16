@@ -42,8 +42,9 @@ function applyViewTransform(x: number, y: number, transform?: { offsetX: number;
 export const kArrowAnnotationTextWidth = 150;
 export const kArrowAnnotationTextHeight = 50;
 const kArrowAnnotationTextMargin = 15;
-// Fallbacks for a label whose chip has not been measured: they infer it from the fixed box it is
-// centered in, so they only hold for text that happens to fill that box.
+// Fallbacks for a label whose chip has not been measured, inferred from the fixed box it is
+// centered in: the vertical margin holds for text that fills the box's height, the horizontal one
+// for a chip half the box's width.
 export const kTextHorizontalMargin = kArrowAnnotationTextMargin + kArrowAnnotationTextWidth / 4;
 export const kTextVerticalMargin = kArrowAnnotationTextMargin + kArrowAnnotationTextHeight / 2;
 
@@ -249,8 +250,8 @@ export const ArrowAnnotation = types
     }
 
     // Finally, it is constrained to be within the document bounding box, by a margin measured from
-    // the chip the reader can see. Taken from the box the chip sits in, the same drag would end
-    // somewhere different depending on how much text was typed.
+    // the chip the reader can see. Taken from the fixed box the chip sits in, the gap between the
+    // label and the document edge would depend on how much text was typed.
     const textMarginX = textSize ? kArrowAnnotationTextMargin + textSize.width / 2 : kTextHorizontalMargin;
     const textMarginY = textSize ? kArrowAnnotationTextMargin + textSize.height / 2 : kTextVerticalMargin;
 

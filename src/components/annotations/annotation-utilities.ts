@@ -76,8 +76,10 @@ const longArcLength = 300;
  *
  * The offset is otherwise a fraction of the arrow's length, which leaves almost nothing for a short
  * one: between two adjacent table rows it works out at 11px, so the label lands on top of both
- * endpoints and the rows they mark. Half a label chip plus an endpoint's radius clears all three.
- * Screen pixels, so a zoomed tile gets the same clearance as an unzoomed one.
+ * endpoints and the rows they mark. 24px is half a chip's height plus an endpoint's radius, enough
+ * to lift it off the rows. It does not clear the endpoints: the offset runs perpendicular to the
+ * arrow, so beside a vertical one the chip reaches back over them along its width. That is why the
+ * handles paint last. Screen pixels, so a zoomed tile gets the same clearance as an unzoomed one.
  */
 const kMinPeakOffset = 24;
 

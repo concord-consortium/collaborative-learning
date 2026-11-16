@@ -364,8 +364,8 @@ export const ArrowAnnotationComponent = observer(
             }
           </div>
         </foreignObject>
-        {/* Painted last so an endpoint is never lost under a label that happens to cover it. The
-            handles are sized to the object they mark, so what they take from a label is a disc at
+        {/* Painted last so this sparrow's endpoints are never lost under its own label. The handles
+            are sized to the object they mark, so what they take from the label is a small square at
             each end rather than the whole chip. */}
         <DragHandle
           centerRadius={sourceNodeRadii?.centerRadius ?? sourceHighlightRadius / 2}

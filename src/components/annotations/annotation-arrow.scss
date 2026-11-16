@@ -14,7 +14,8 @@
   }
 
   &.background-arrow {
-    // Width comes from the `hitStrokeWidth` prop, which narrows it on a short sparrow.
+    // The stem's stroke width sets its click area. It comes from the `hitStrokeWidth`
+    // prop (an inline style), which `fitStemHitWidth` narrows on a short sparrow.
     .arrow-stem {
       stroke-opacity: 0;
       pointer-events: none;

@@ -36,7 +36,7 @@ export function AnnotationArrow({
 
   return (
     <g className={classNames("arrow", className)}>
-      {/* The width is an inline style because a stroke-width attribute loses to the stylesheet. */}
+      {/* The stroke width is an inline style because a stroke-width attribute loses to the stylesheet. */}
       <path
         className="arrow-stem"
         d={path}

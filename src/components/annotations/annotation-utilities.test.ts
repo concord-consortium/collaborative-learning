@@ -49,10 +49,10 @@ describe("fitStemHitWidth", () => {
 
 describe("getDefaultPeak", () => {
   // A sparrow between two cells one table row apart: 22px, straight down. The floor it lands on is
-  // half a label chip plus an endpoint's radius, which is 24px.
+  // half a chip's height plus an endpoint's radius, which is 24px.
   const adjacentRows = () => getDefaultPeak(ArrowShape.curved, 100, 100, 100, 122);
 
-  it("holds a new label clear of endpoints that are only a table row apart", () => {
+  it("floors the offset for endpoints that are only a table row apart", () => {
     const { peakDx, peakDy } = adjacentRows();
     expect(Math.hypot(peakDx, peakDy)).toBeCloseTo(24);
   });
