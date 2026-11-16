@@ -49,10 +49,10 @@ A per-flag split (Jest vs. Cypress) does not work either: new code covered only 
 - **R4.** Two patch statuses, `client` and `scripts`, with the same paths and flags as R2 and the default target: each one's target is its own filtered base coverage, so a scripts patch is measured against scripts coverage (79.64% on `master`) rather than the overall figure.
 - **R5.** No flag is carried forward. `cypress-regression` has `after_n_builds: 15`, so a status that names it does not post until the head has 15 `cypress-regression` uploads. The nightly `cypress` flag is in neither status.
 - **R6.** Codecov's validator accepts the file: `curl -s -X POST --data-binary @codecov.yml https://codecov.io/validate` prints `Valid!`.
-- **R7.** A pull-request workflow fails when the PR changes a file under `src/`, `shared/`, `authoring-api/src/helpers/` or `cypress/` and has neither the `run regression` nor the `skip regression` label. It passes otherwise, so a scripts-only or docs-only PR needs no label. It runs on `opened`, `synchronize`, `reopened`, `labeled`, `unlabeled` and `ready_for_review`.
+- **R7.** A pull-request workflow fails when the PR changes a file under `src/`, `shared/`, `authoring-api/src/helpers/`, `cypress/` or `patches/`, or changes `package.json`, `package-lock.json`, `webpack.config.js`, `tsconfig.json`, `postcss.config.js` or `cypress.config.ts`, and has neither the `run regression` nor the `skip regression` label. It passes otherwise, so a scripts-only or docs-only PR needs no label. The build and dependency files are in the label check only, not in `codecov.yml`, since they carry no coverage. It runs on `opened`, `synchronize`, `reopened`, `labeled`, `unlabeled` and `ready_for_review`.
 - **R8.** A Jest test fails when:
   - `after_n_builds` stops matching the number of containers in `ci-regression.yml`'s matrix;
-  - the label check's folder list stops matching the `client` paths plus `cypress/`;
+  - the label check's paths stop including every `client` path and `cypress/`, or name a path that does not exist;
   - a status names a flag no workflow uploads, or names the nightly `cypress` flag.
 - **R9.** `.claude/skills/releasing-clue/preparing.md` no longer says to ignore Codecov, and `README.md` no longer describes a single overall-coverage report. Both name the `client` and `scripts` checks and the label check, and neither restates the threshold.
 - **R10.** Verified on this PR:
@@ -98,6 +98,15 @@ A per-flag split (Jest vs. Cypress) does not work either: new code covered only 
 - B) Claude creates it once Doug approves.
 
 **Decision**: B (Doug). Created in the repo with the description "A client change that does not need the regression suite".
+
+### RESOLVED: Should build and dependency changes need the label?
+**Context**: A PR touching only `package.json`, `package-lock.json`, `patches/`, `webpack.config.js`, `tsconfig.json`, `postcss.config.js` or `cypress.config.ts` changes the built client or how the suite runs, but needed no label.
+**Options considered**:
+- A) Add them to the label check only.
+- B) Add them to the label check and `codecov.yml`.
+- C) Leave them out.
+
+**Decision**: A (Scott, in his approval review). They carry no coverage, so they stay out of `codecov.yml`; the agreement test checks the label paths include the `client` paths rather than equal them.
 
 ### RESOLVED: What should the project threshold be?
 **Options considered**:

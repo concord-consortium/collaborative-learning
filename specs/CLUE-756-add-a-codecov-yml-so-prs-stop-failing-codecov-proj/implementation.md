@@ -74,20 +74,22 @@ jobs:
           GH_REPO: ${{ github.repository }}
           PR: ${{ github.event.pull_request.number }}
           LABELS: ${{ toJSON(github.event.pull_request.labels.*.name) }}
-          # The `client` paths in codecov.yml, plus the Cypress specs.
-          CLIENT_PATHS: "src/ shared/ authoring-api/src/helpers/ cypress/"
+          # The `client` paths in codecov.yml, the Cypress specs, and the build and dependency files.
+          # A path ending in `/` matches everything under it; any other path matches only that file.
+          LABEL_PATHS: "src/ shared/ authoring-api/src/helpers/ cypress/ package.json package-lock.json patches/ webpack.config.js tsconfig.json postcss.config.js cypress.config.ts"
         run: |
           files=$(gh api --paginate "repos/$GH_REPO/pulls/$PR/files" --jq '.[] | .filename, (.previous_filename // empty)')
-          changed=$(grep -E "^($(tr ' ' '|' <<< "$CLIENT_PATHS"))" <<< "$files" || true)
+          pattern=$(tr ' ' '\n' <<< "$LABEL_PATHS" | sed -e 's/\./\\./g' -e '/\/$/!s/$/$/' | paste -sd '|')
+          changed=$(grep -E "^($pattern)" <<< "$files" || true)
           if [ -z "$changed" ]; then
-            echo "No client files changed; no regression label needed."
+            echo "No client or build files changed; no regression label needed."
             exit 0
           fi
           if jq -e 'index("run regression") or index("skip regression")' <<< "$LABELS" > /dev/null; then
-            echo "Client files changed and the PR is labeled."
+            echo "Client or build files changed and the PR is labeled."
             exit 0
           fi
-          echo "::error::Client files changed. Add the 'run regression' label, or 'skip regression' if the change does not need the suite."
+          echo "::error::Client or build files changed. Add the 'run regression' label, or 'skip regression' if the change does not need the suite."
           head -20 <<< "$changed"
           exit 1
 ```
@@ -97,8 +99,10 @@ Why this shape:
 - **Labels come from the event payload,** which carries the PR's current labels on every listed event type, including `labeled` and `unlabeled`.
 - **The API file list, not `gh pr diff`,** since the diff endpoint refuses very large diffs; the files endpoint lists up to 3000.
 - **A renamed file counts by both paths** (`previous_filename`), so moving a file out of a client folder still needs a label.
+- **A path ending in `/` is a folder prefix; any other path is matched exactly,** with its dots escaped, so `package.json` matches the root file but not `functions-v2/package.json`.
+- **The build and dependency files are in `LABEL_PATHS` only.** They change the built client or how the suite runs, but carry no coverage, so they stay out of `codecov.yml`.
 
-Run as Actions runs it (`bash --noprofile --norc -eo pipefail`) against real PRs: #3091 with no labels exits 1 with the error; with `run regression` or `skip regression` exits 0; scripts/docs-only #3078 with no labels exits 0; a nonexistent PR exits 1 on the `gh` 404.
+Run as Actions runs it (`bash --noprofile --norc -eo pipefail`) against real PRs: #3091 with no labels exits 1 with the error; with `run regression` or `skip regression` exits 0; scripts/docs-only #3078 with no labels exits 0; a nonexistent PR exits 1 on the `gh` 404. With a mocked `gh` returning one file and no labels: `package.json`, `package-lock.json` and a file under `patches/` each exit 1; `functions-v2/package.json` and `scripts/x.ts` exit 0.
 
 `src/test/codecov-config.test.ts` reads the files as text, so no YAML parser dependency is added:
 
@@ -139,10 +143,11 @@ describe("codecov.yml", () => {
     expect(builds).toBe(containers.length);
   });
 
-  it("has the label check guard the client paths plus the Cypress specs", () => {
+  it("has the label check guard the client paths and the Cypress specs, and only paths that exist", () => {
     const clientPaths = list(capture(kCodecov, /paths: &client_paths \[(.*)\]/));
-    const labelPaths = capture(read(".github/workflows/regression-label-check.yml"), /CLIENT_PATHS: "(.*)"/).split(" ");
-    expect(labelPaths).toEqual([...clientPaths, "cypress/"]);
+    const labelPaths = capture(read(".github/workflows/regression-label-check.yml"), /LABEL_PATHS: "(.*)"/).split(" ");
+    expect(labelPaths).toEqual(expect.arrayContaining([...clientPaths, "cypress/"]));
+    expect(labelPaths.filter(p => !fs.existsSync(path.join(kRoot, p)))).toEqual([]);
   });
 
   it("names only flags that a workflow uploads, leaving out the nightly cypress flag", () => {
@@ -154,7 +159,7 @@ describe("codecov.yml", () => {
 });
 ```
 
-Built in the worktree as throwaway code: all three pass, `eslint` (both configs) and `tsc` are clean, and each of these mutations fails exactly one test: `after_n_builds: 14`; a 16th matrix container; a `functions-v2/` client path; `shared/` dropped from `CLIENT_PATHS`; `cypress/` dropped from it; `cypress-smoke` renamed in `ci.yml`; an unknown flag in a status; `cypress` added to `client_flags`; an upload step with `token:` before `flags:`. Every `capture` asserts its match, so none of the comparisons can pass on an empty list.
+Built in the worktree as throwaway code: all three pass, `eslint` (both configs) and `tsc` are clean, and each of these mutations fails exactly one test: `after_n_builds: 14`; a 16th matrix container; a `functions-v2/` client path; `shared/` dropped from `LABEL_PATHS`; `cypress/` dropped from it; `webpack.config.js` mistyped as `webpack.config.ts`; `cypress-smoke` renamed in `ci.yml`; an unknown flag in a status; `cypress` added to `client_flags`; an upload step with `token:` before `flags:`. Every `capture` asserts its match, so none of the comparisons can pass on an empty list. The label paths are checked as a superset of the `client` paths plus `cypress/`, so an extra existing path (such as `README.md`) passes, and the existence check is what catches a typo in the build files.
 
 **Check before committing** (R6, R8):
 
@@ -194,7 +199,7 @@ After:
 `README.md`, which said Codecov reports on "overall coverage":
 
 ```markdown
-The tests are run automatically on PRs and Codecov tracks coverage as separate `client` and `scripts` checks (see `codecov.yml`). The `client` checks report only after the regression suite runs, so a PR that changes client code or Cypress specs needs the `run regression` label, or `skip regression` when it does not need the suite; the Regression Label Check enforces this.
+The tests are run automatically on PRs and Codecov tracks coverage as separate `client` and `scripts` checks (see `codecov.yml`). The `client` checks report only after the regression suite runs, so a PR that changes client code, Cypress specs, or the build and dependency files (such as `package.json` or `webpack.config.js`) needs the `run regression` label, or `skip regression` when it does not need the suite; the Regression Label Check enforces this.
 ```
 
 ---

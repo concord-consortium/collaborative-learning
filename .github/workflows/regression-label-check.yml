@@ -17,19 +17,21 @@ jobs:
           GH_REPO: ${{ github.repository }}
           PR: ${{ github.event.pull_request.number }}
           LABELS: ${{ toJSON(github.event.pull_request.labels.*.name) }}
-          # The `client` paths in codecov.yml, plus the Cypress specs.
-          CLIENT_PATHS: "src/ shared/ authoring-api/src/helpers/ cypress/"
+          # The `client` paths in codecov.yml, the Cypress specs, and the build and dependency files.
+          # A path ending in `/` matches everything under it; any other path matches only that file.
+          LABEL_PATHS: "src/ shared/ authoring-api/src/helpers/ cypress/ package.json package-lock.json patches/ webpack.config.js tsconfig.json postcss.config.js cypress.config.ts"
         run: |
           files=$(gh api --paginate "repos/$GH_REPO/pulls/$PR/files" --jq '.[] | .filename, (.previous_filename // empty)')
-          changed=$(grep -E "^($(tr ' ' '|' <<< "$CLIENT_PATHS"))" <<< "$files" || true)
+          pattern=$(tr ' ' '\n' <<< "$LABEL_PATHS" | sed -e 's/\./\\./g' -e '/\/$/!s/$/$/' | paste -sd '|')
+          changed=$(grep -E "^($pattern)" <<< "$files" || true)
           if [ -z "$changed" ]; then
-            echo "No client files changed; no regression label needed."
+            echo "No client or build files changed; no regression label needed."
             exit 0
           fi
           if jq -e 'index("run regression") or index("skip regression")' <<< "$LABELS" > /dev/null; then
-            echo "Client files changed and the PR is labeled."
+            echo "Client or build files changed and the PR is labeled."
             exit 0
           fi
-          echo "::error::Client files changed. Add the 'run regression' label, or 'skip regression' if the change does not need the suite."
+          echo "::error::Client or build files changed. Add the 'run regression' label, or 'skip regression' if the change does not need the suite."
           head -20 <<< "$changed"
           exit 1

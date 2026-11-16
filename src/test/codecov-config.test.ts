@@ -34,10 +34,11 @@ describe("codecov.yml", () => {
     expect(builds).toBe(containers.length);
   });
 
-  it("has the label check guard the client paths plus the Cypress specs", () => {
+  it("has the label check guard the client paths and the Cypress specs, and only paths that exist", () => {
     const clientPaths = list(capture(kCodecov, /paths: &client_paths \[(.*)\]/));
-    const labelPaths = capture(read(".github/workflows/regression-label-check.yml"), /CLIENT_PATHS: "(.*)"/).split(" ");
-    expect(labelPaths).toEqual([...clientPaths, "cypress/"]);
+    const labelPaths = capture(read(".github/workflows/regression-label-check.yml"), /LABEL_PATHS: "(.*)"/).split(" ");
+    expect(labelPaths).toEqual(expect.arrayContaining([...clientPaths, "cypress/"]));
+    expect(labelPaths.filter(p => !fs.existsSync(path.join(kRoot, p)))).toEqual([]);
   });
 
   it("names only flags that a workflow uploads, leaving out the nightly cypress flag", () => {
