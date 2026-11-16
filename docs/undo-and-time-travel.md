@@ -23,7 +23,7 @@ actions(self => {
 
 If you add `withoutUndo` to an action and call that action from another action, the `withoutUndo` is ignored. A warning message will be printed in this case describing how we can change the code to handle this. You can see that in [without-undo.ts](../src/models/history/without-undo.ts). If ignoring it is what you want, pass `withoutUndo({ unlessChildAction: true })` and no warning is printed.
 
-### asBackground
+## asBackground
 
 A background history entry is one produced by code, not by direct user activation: a DataFlow tick, a Simulator step, or any other change a tile makes on its own while it runs. To mark an action's entry as background, call `asBackground()` at the top of the action, the same way as `withoutUndo()`:
 
