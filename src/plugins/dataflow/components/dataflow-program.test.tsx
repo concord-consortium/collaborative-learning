@@ -4,6 +4,7 @@ import { DndContext } from "@dnd-kit/core";
 import { Provider } from "mobx-react";
 import { ModalProvider } from "react-modal-hook";
 
+import { addCanonicalCasesToDataSet } from "../../../models/data/data-set";
 import { SerialDevice } from "../../../models/stores/serial";
 import { specStores } from "../../../models/stores/spec-stores";
 import { DataflowContentModel, DataflowContentModelType } from "../model/dataflow-content";
@@ -41,7 +42,8 @@ jest.mock("../rete/rete-manager", () => {
           editor: { clear: jest.fn() },
           dispose: jest.fn(),
           fitContent: jest.fn(),
-          tickAndProcessNodes: jest.fn(),
+          tickAndProcessNodes: jest.fn(
+            ({ afterTick }: { afterTick?: () => void } = {}) => afterTick?.()),
           updateSharedProgramData: jest.fn()
         };
       })
@@ -127,18 +129,39 @@ describe("DataflowProgram recording lifecycle", () => {
     expect(content.isRecording).toBe(false);
   });
 
-  it("records each tick of a running recording as a tick case", () => {
+  it("records a case at the end of each tick of a running recording", () => {
     jest.useFakeTimers();
     try {
       const content = createContent();
-      const recordTickCase = jest.spyOn(content, "recordTickCase");
       const recordSingleSample = jest.spyOn(content, "recordSingleSample");
       renderProgram(content);
+      const { results } = MockedReteManager.mock;
+      const tickAndProcessNodes = (results[results.length - 1].value as ManagerStub).tickAndProcessNodes as jest.Mock;
+      // A tick that doesn't run its callback adds no case, so the case is taken inside the tick.
+      tickAndProcessNodes.mockImplementationOnce(() => undefined);
       act(() => content.startRecording(jest.fn()));
       act(() => { jest.advanceTimersByTime(kDataRate); });
-      expect(recordTickCase).toHaveBeenCalledTimes(1);
-      expect(recordSingleSample).not.toHaveBeenCalled();
+      expect(content.dataSet.cases).toHaveLength(0);
+      act(() => { jest.advanceTimersByTime(kDataRate); });
       expect(content.dataSet.cases).toHaveLength(1);
+      expect(recordSingleSample).not.toHaveBeenCalled();
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
+  it("stops a running recording at the case cap without adding a case", () => {
+    jest.useFakeTimers();
+    try {
+      const content = createContent();
+      renderProgram(content);
+      act(() => content.startRecording(jest.fn()));
+      const [pointAttr] = content.dataSet.attributes;
+      const cases = Array.from({ length: content.maxRecordableCases }, (_, i) => ({ [pointAttr.id]: i + 1 }));
+      act(() => addCanonicalCasesToDataSet(content.dataSet, cases));
+      act(() => { jest.advanceTimersByTime(kDataRate); });
+      expect(content.isRecording).toBe(false);
+      expect(content.dataSet.cases).toHaveLength(content.maxRecordableCases);
     } finally {
       jest.useRealTimers();
     }

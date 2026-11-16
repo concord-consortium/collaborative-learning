@@ -1407,15 +1407,19 @@ export class ReteManager implements INodeServices {
     });
   }
 
-  public tickAndProcessNodes() {
+  /** `afterTick` runs at the end of the tick's action; see tickAndProcess. */
+  public tickAndProcessNodes({ afterTick }: { afterTick?: () => void } = {}) {
     // This is wrapped in an MST action so all of the changes are batched together
     // We are using our own custom Rete Dataflow Engine which runs synchronously
     // so all calls to the nodes `data` and `onTick` methods are grouped together.
-    this.mstProgram.tickAndProcess(() => {
-      this.updateChannels();
-      this.inTick = true;
-      this.process();
-      this.inTick = false;
+    this.mstProgram.tickAndProcess({
+      runner: () => {
+        this.updateChannels();
+        this.inTick = true;
+        this.process();
+        this.inTick = false;
+      },
+      afterTick
     });
   }
 

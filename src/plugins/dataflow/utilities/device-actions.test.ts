@@ -30,7 +30,7 @@ function makeContent() {
     id: "num", name: "Number", x: 0, y: 0, data: { type: "Number", value: 7 }
   }));
   content.program.addNewTick("t0");
-  for (let i = 0; i < 3; i++) content.program.tickAndProcess(() => {});
+  for (let i = 0; i < 3; i++) content.program.tickAndProcess({ runner: () => {} });
   return content;
 }
 

@@ -244,7 +244,9 @@ export const DataflowProgramModel = types.
     // This action is used to wrap the changes in a single MST transaction
     // This could be generic, but a specific name is used so the recorded event has
     // a useful name.
-    tickAndProcess(runner: () => void) {
+    // `afterTick` runs after the new tick is added, still inside this action, so the changes it
+    // makes join the tick's history entry.
+    tickAndProcess({ runner, afterTick }: { runner: () => void, afterTick?: () => void }) {
       asBackground({ producerTileId: getTileModel(self)?.id });
       runner();
       // We add the new tick after the data and onTick methods have been called
@@ -253,6 +255,7 @@ export const DataflowProgramModel = types.
       // This means that the graph should graph (recentTicks.length - 1) points.
       const newTick = uniqueId();
       self.addNewTick(newTick);
+      afterTick?.();
     },
 
     // This action is called after a change in the Rete diagram.

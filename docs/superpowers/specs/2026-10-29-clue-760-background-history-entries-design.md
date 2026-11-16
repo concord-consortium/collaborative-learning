@@ -143,10 +143,12 @@ entry should carry belongs with the group-docs conflict rule.
 - **Recorded cases.** While recording, every interval also calls `recordCase`
   ([recording-utilities.ts](../../../src/plugins/dataflow/model/utilities/recording-utilities.ts)).
   It calls the dataset's `addCanonicalCases` directly, so the root action is a generic dataset
-  action that user edits also use. A DataFlow content action, `recordTickCase()`, wraps it and
-  calls `asBackground()`. Recorded cases are produced by code, so they are background, even though
-  starting the recording was a user change. Starting, stopping and clearing a recording stay user
-  changes, and so does a single sample the student records by hand (`recordSingleSample()`).
+  action that user edits also use. The component runs it, and the stop at the case cap, in a
+  callback that `tickAndProcess` calls after adding the new tick, so the case joins the tick's
+  background entry instead of making an entry of its own. Recorded cases are produced by code, so
+  they are background, even though starting the recording was a user change. Starting, stopping
+  and clearing a recording stay user changes, and so does a single sample the student records by
+  hand (`recordSingleSample()`).
 - **`SimulatorTool.step`**
   ([simulator-content.ts](../../../src/plugins/simulator/model/simulator-content.ts)).
   The activity recorder already ignores it as a tick. Once the recorder reads the flag instead, the

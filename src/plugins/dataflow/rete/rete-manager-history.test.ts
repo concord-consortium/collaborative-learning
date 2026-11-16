@@ -9,6 +9,7 @@ import { TreeManager } from "../../../models/history/tree-manager";
 import { specStores } from "../../../models/stores/spec-stores";
 import { registerTileTypes } from "../../../register-tile-types";
 import { DataflowContentModelType } from "../model/dataflow-content";
+import { recordCase } from "../model/utilities/recording-utilities";
 import { ReteManager } from "./rete-manager";
 
 jest.mock("firebase/app", () => ({
@@ -76,16 +77,20 @@ describe("ReteManager history entries", () => {
     expect(ticks[0].undoable).toBe(false);
   });
 
-  it("records a running recording's case as a background entry and a single sample as a user entry", async () => {
+  it("records a case added after a tick in the tick's entry and a single sample as a user entry", async () => {
     const { content, manager, treeManager } = await setupProgram();
     managers.push(manager);
 
-    content.recordTickCase();
+    const { history } = treeManager.document;
+    const historyLength = history.length;
+    manager.tickAndProcessNodes({ afterTick: () => recordCase(content) });
     await settle(treeManager);
-    const tickCases = entriesFor(treeManager, "/recordTickCase");
-    expect(tickCases).toHaveLength(1);
-    expect(tickCases[0].background).toBe(true);
-    expect(tickCases[0].producerTileId).toBe("df1");
+    expect(content.dataSet.cases).toHaveLength(1);
+    expect(history).toHaveLength(historyLength + 1);
+    const tick = history[historyLength];
+    expect(tick.action).toMatch(/\/tickAndProcess$/);
+    expect(tick.background).toBe(true);
+    expect(patchPaths(tick).some(path => path.startsWith("/content/sharedModelMap/"))).toBe(true);
 
     content.recordSingleSample(jest.fn());
     await settle(treeManager);

@@ -163,7 +163,7 @@ describe("DataflowProgramModel.resetRunningState", () => {
       data: { type: "Control", controlOperator: "Hold 0", waitDuration: 4 }
     }));
     program.addNewTick("t0");
-    for (let i = 0; i < 3; i++) program.tickAndProcess(() => {});
+    for (let i = 0; i < 3; i++) program.tickAndProcess({ runner: () => {} });
     return program;
   }
 
