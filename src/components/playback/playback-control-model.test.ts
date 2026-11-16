@@ -226,7 +226,7 @@ describe("PlaybackControlModel", () => {
       expect(stopPositions(model)).toEqual([0, 1, 2]);
     });
 
-    it("never makes a stop for a load entry", () => {
+    it("makes no user stop for a load entry", () => {
       const { model, treeManager } = setupModel(0);
       treeManager.setChangeDocument(CDocument.create({
         history: [entrySnapshot(0, { isLoadEntry: true, background: true }), entrySnapshot(1)]

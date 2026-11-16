@@ -27,10 +27,12 @@ const kPlaybackStoppedWarning =
   "History playback stopped because of an error. Close and reopen the history to try again.";
 
 /**
- * A slider stop is a state of the document rather than a change to it. Its position is a history
- * position, which counts applied entries, so position p is the document with entries 0..p-1
- * applied. Background entries are applied on the way between stops but are never stops of their
- * own.
+ * A slider stop is a notch on the slider. Its position is the history position it shows, which
+ * counts applied entries, so position p is the document with entries 0..p-1 applied. Apart from
+ * comments, a position has at most one stop. Each comment is a stop of its own at the position of
+ * the entry before it, so a position can also have one or more comment stops. A background entry
+ * doesn't make a stop the way a user's entry does; it is applied on the way between stops. The
+ * latest, earliest and link stops can still fall right after a background entry.
  */
 interface ISliderStopBase {
   position: number;
@@ -52,8 +54,9 @@ interface IUserSliderStop extends ISliderStopBase {
   entry: HistoryEntryType;
   created: Date;
 }
-// The whole history, when background entries follow the last user change. It keeps the end of
-// the slider on the live document while a program runs.
+// The whole history, when it ends with a background entry. It keeps the end of the slider on the
+// live document while a program runs. A history that ends with a user change needs no latest stop,
+// since that change's own stop is the end.
 interface ILatestSliderStop extends ISliderStopBase {
   kind: "latest";
   entry: HistoryEntryType;
@@ -75,11 +78,9 @@ interface ILinkSliderStop extends ISliderStopBase {
 export type ISliderStop = IInitialSliderStop | IEarliestSliderStop | IUserSliderStop | ILatestSliderStop |
   ICommentSliderStop | ILinkSliderStop;
 
-// Stops for the document's own states come before stops for events from outside it that share
-// their position, so a comment or link stands after the entry before it. The outside events are
-// in created order among themselves; the document's own stops never share a position.
-const isOutsideEventStop = (stop: ISliderStop) => stop.kind === "comment" || stop.kind === "link";
-const stopRank = (stop: ISliderStop) => isOutsideEventStop(stop) ? 1 : 0;
+// A comment stop comes after the other stop at its position, if there is one, so it stands after
+// the entry before it. Comments at the same position are in created order.
+const stopRank = (stop: ISliderStop) => stop.kind === "comment" ? 1 : 0;
 const compareStops = (a: ISliderStop, b: ISliderStop) =>
   (a.position - b.position) || (stopRank(a) - stopRank(b)) ||
   ((a.created?.getTime() ?? 0) - (b.created?.getTime() ?? 0));
@@ -374,28 +375,20 @@ export class PlaybackControlModel {
   }
 
   /**
-   * The inverse: the stop that represents a history position. That is the document's own stop at
-   * the position when there is one, rather than a comment that shares it, so a comment written
-   * after the final entry stands beyond the end of the history rather than in place of it.
+   * The inverse: the stop that represents a history position. That is the stop at the position
+   * that isn't a comment, when there is one, rather than a comment that shares it, so a comment
+   * written after the final entry stands beyond the end of the history rather than in place of it.
    *
-   * When the document has no stop of its own there, a link's stop at the position comes next,
-   * since that is where a link's seek lands.
-   *
-   * Background entries have no stops, so a seek that stops on a failing one can leave the
-   * document between two stops. The thumb then shows the stop before it.
+   * When no stop is at the position, the stop before it is returned.
    */
   stopIndexForHistoryPosition(historyPosition: number) {
     const stops = this.sliderStops;
     let found = 0;
-    let linkFound: number | undefined;
     for (let i = 0; i < stops.length && stops[i].position <= historyPosition; i++) {
-      if (stops[i].position === historyPosition) {
-        if (stopRank(stops[i]) === 0) return i;
-        if (stops[i].kind === "link") linkFound = i;
-      }
+      if (stops[i].position === historyPosition && stopRank(stops[i]) === 0) return i;
       found = i;
     }
-    return linkFound ?? found;
+    return found;
   }
 
   private commentStopIndex(comment: WithId<CommentDocument>) {

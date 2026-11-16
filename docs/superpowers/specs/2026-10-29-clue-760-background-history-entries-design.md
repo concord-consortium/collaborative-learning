@@ -265,8 +265,9 @@ documents from 2022 to 2026 (the counts are in #3074's description):
 
 In [playback-control-model.ts](../../../src/components/playback/playback-control-model.ts):
 
-- **Background entries are never stops of their own.** They are still applied when moving between
-  stops. Stops stay evenly spaced, as today.
+- **Background entries don't make stops the way user changes do.** They are still applied when
+  moving between stops. The latest, earliest and link stops described below can still fall right
+  after one. Stops stay evenly spaced, as today.
 - **A user stop shows the document right after that change**, as a history stop does today. The
   values shown are the latest ones from before the change, because the program hasn't ticked
   since.
@@ -500,7 +501,7 @@ the background check covers them and that clause goes too.
   latest stop appears only when background entries follow the last user change. A comment made
   between ticks, and a link to a tick, each get a stop at their exact position, in history order.
   Following the end applies new background entries. Positions between stops map to the right stop,
-  and so do failure markers. A load entry is never a stop. A legacy document whose bridge
+  and so do failure markers. A load entry gets no user stop. A legacy document whose bridge
   can't rebuild the old state gets an earliest available stop, and the stops before it can't be
   reached. A link to a user entry puts the marker on that entry's stop, and a new link moves the
   link stop and marker and stops following the end. A seek across at least 100 entries is reported
