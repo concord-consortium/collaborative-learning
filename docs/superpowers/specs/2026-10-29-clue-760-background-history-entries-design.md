@@ -203,11 +203,12 @@ Entries written before this change have no `background` field. CLUE-760 handles 
 2. **A one-off migration**, run in each environment after the new code is deployed. It applies the
    same rule to stored entries and writes `background: true` into the stored entry JSON. It lives
    in [scripts/](../../../scripts/) beside the other Firestore scripts. The script is not in #3074:
-   it comes in a later PR, with its Firestore index and deploy timing.
+   it comes in a later PR (CLUE-815), with its Firestore index and deploy timing.
 
 The release after the migration has run removes the read-time call. The rule then lives only in the
-script. `kLegacyBackgroundRuleCases` in background-entries.ts is a table of cases that the script's
-tests are to reuse, so the two can't disagree.
+script. `kLegacyBackgroundRuleCases` in background-entries.test.ts is a table of cases that the
+script's tests are to reuse, so the two can't disagree. The script's PR moves it to a test-utils file
+both tests import.
 
 **The rule.** `isTickEntry` in the activity recorder was the starting point, but it matches on
 `model`, and **older entries have no `model` field**. In a 2024 document from the
@@ -476,7 +477,8 @@ the background check covers them and that clause goes too.
 
 ## Left to the builder
 
-- The migration script's batching, resume and cost estimate. The script comes in a later PR.
+- The migration script's batching, resume and cost estimate. The script comes in a later PR
+  (CLUE-815).
 
 ## Testing
 

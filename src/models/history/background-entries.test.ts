@@ -1,5 +1,43 @@
-import { isBackgroundEntry, isLegacyBackgroundEntry, kLegacyBackgroundRuleCases } from "./background-entries";
+import { isBackgroundEntry, isLegacyBackgroundEntry } from "./background-entries";
 import { HistoryEntrySnapshot } from "./history";
+
+const kSetProgram = "/content/tileMap/t1/content/setProgram";
+const kValues = "/content/tileMap/t1/content/program/values";
+const valuesReplaces = [
+  { op: "replace", path: `${kValues}/3489/recentValues/nodeValue` },
+  { op: "replace", path: `${kValues}/3490/currentValues/nodeValue` }
+];
+const demoPath = "/content/tileMap/t1/content/program/nodes/3489/data/demoOutput/tilt";
+const demoReplace = { op: "replace", path: demoPath };
+const rec = (patches: Array<{ op: string; path: string }>) => ({ patches });
+
+const kLegacyBackgroundRuleCases = [
+  { name: "DataFlow tick", expected: true,
+    entry: { action: "/content/tileMap/t1/content/program/tickAndProcess", records: [rec(valuesReplaces)] } },
+  { name: "DataFlow recompute", expected: true,
+    entry: { action: "/content/tileMap/t1/content/program/processAfterProgramChange", records: [] } },
+  { name: "Simulator step", expected: true,
+    entry: { action: "/content/tileMap/s1/content/step", records: [] } },
+  { name: "values-only setProgram", expected: true,
+    entry: { action: kSetProgram, records: [rec(valuesReplaces)] } },
+  { name: "setProgram with a node move", expected: false,
+    entry: { action: kSetProgram, records: [rec([
+      valuesReplaces[0],
+      { op: "replace", path: "/content/tileMap/t1/content/program/nodes/3489/position/0" }
+    ])] } },
+  { name: "setProgram adding a node", expected: false,
+    entry: { action: kSetProgram, records: [rec([{ op: "add", path: `${kValues}/3491` }])] } },
+  { name: "values and demoOutput setProgram", expected: true,
+    entry: { action: kSetProgram, records: [rec([valuesReplaces[0], demoReplace])] } },
+  { name: "demoOutput-only setProgram", expected: false,
+    entry: { action: kSetProgram, records: [rec([demoReplace])] } },
+  { name: "setProgram adding demoOutput", expected: false,
+    entry: { action: kSetProgram, records: [rec([valuesReplaces[0], { op: "add", path: demoPath }])] } },
+  { name: "setProgram with no patches", expected: false,
+    entry: { action: kSetProgram, records: [] } },
+  { name: "text edit", expected: false,
+    entry: { action: "/content/tileMap/x1/content/setText", records: [rec(valuesReplaces)] } }
+];
 
 describe("isLegacyBackgroundEntry", () => {
   it.each(kLegacyBackgroundRuleCases)("$name", ({ entry, expected }) => {
