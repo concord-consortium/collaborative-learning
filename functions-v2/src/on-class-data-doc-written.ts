@@ -26,14 +26,6 @@ const chunkSize = 64000; // characters per chunk
 
 const systemPrompt = "You are a helpful assistant teacher that analyzes and extracts themes from student work.";
 
-// Held apart from its trailing cue so an authored addition lands before "Summary:" rather than
-// after it, where the model reads it as the start of the answer instead of as an instruction.
-const summarizeStudentContentInstruction =
-  "Summarize the key points, themes, topics, main ideas, and important details in this student work. " +
-  "Do not describe the structure of the documents, just the content.";
-
-const summaryCue = "Summary:";
-
 const combineSummariesPrompt = "These are summaries of important ideas found in several sets of student work.\n" +
   "Combine these into a single list of the key points, themes, topics, main ideas, " +
   "and important details that were found.\n\n";
@@ -67,7 +59,7 @@ async function summarizeChunk(
   const contextPrefix = unitContext ? `${unitContextSection(unitContext)}\n\n` : "";
   const instruction = role === "teacher" ?
     summarizeTeacherContentPrompt :
-    buildSummaryPrompt(summarizeStudentContentInstruction, summaryCue, prompts);
+    buildSummaryPrompt(prompts);
   const messages = [
     new SystemMessage(withCurriculumInstructions(systemPrompt, "the class")),
     new HumanMessage(`${contextPrefix}${capRole} work part ${chunkIndex + 1} of ${totalChunks}:

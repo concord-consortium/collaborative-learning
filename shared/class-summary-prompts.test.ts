@@ -1,33 +1,33 @@
-import { buildSummaryPrompt, parseClassSummaryPrompts } from "./class-summary-prompts";
-
-const builtIn = "Summarize the student work.";
-const cue = "Summary:";
+import {
+  buildSummaryPrompt, parseClassSummaryPrompts, CLASS_SUMMARY_CUE, CLASS_SUMMARY_STUDENT_INSTRUCTION,
+} from "./class-summary-prompts";
 
 describe("buildSummaryPrompt", () => {
   it("uses the built-in instruction when nothing is authored", () => {
-    expect(buildSummaryPrompt(builtIn, cue)).toBe("Summarize the student work.\nSummary:");
+    expect(buildSummaryPrompt())
+      .toBe(`${CLASS_SUMMARY_STUDENT_INSTRUCTION}\n${CLASS_SUMMARY_CUE}`);
   });
 
   it("replaces the built-in instruction", () => {
-    expect(buildSummaryPrompt(builtIn, cue, { replaceStudentPrompt: "List the strategies." }))
-      .toBe("List the strategies.\nSummary:");
+    expect(buildSummaryPrompt({ replaceStudentPrompt: "List the strategies." }))
+      .toBe(`List the strategies.\n${CLASS_SUMMARY_CUE}`);
   });
 
   // The cue is what tells the model to start writing. Authored text appended after it would be
   // read as the beginning of the answer rather than as an instruction.
   it("puts appended text before the cue, not after it", () => {
-    expect(buildSummaryPrompt(builtIn, cue, { appendToStudentPrompt: "Name the students." }))
-      .toBe("Summarize the student work.\nName the students.\nSummary:");
+    expect(buildSummaryPrompt({ appendToStudentPrompt: "Name the students." }))
+      .toBe(`${CLASS_SUMMARY_STUDENT_INSTRUCTION}\nName the students.\n${CLASS_SUMMARY_CUE}`);
   });
 
   it("applies a replacement and an addition together", () => {
     const prompts = { replaceStudentPrompt: "List the strategies.", appendToStudentPrompt: "Be brief." };
-    expect(buildSummaryPrompt(builtIn, cue, prompts)).toBe("List the strategies.\nBe brief.\nSummary:");
+    expect(buildSummaryPrompt(prompts)).toBe(`List the strategies.\nBe brief.\n${CLASS_SUMMARY_CUE}`);
   });
 
   it("falls back to the built-in instruction for a whitespace-only replacement", () => {
-    expect(buildSummaryPrompt(builtIn, cue, { replaceStudentPrompt: "   " }))
-      .toBe("Summarize the student work.\nSummary:");
+    expect(buildSummaryPrompt({ replaceStudentPrompt: "   " }))
+      .toBe(`${CLASS_SUMMARY_STUDENT_INSTRUCTION}\n${CLASS_SUMMARY_CUE}`);
   });
 });
 
