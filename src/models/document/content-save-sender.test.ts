@@ -877,10 +877,10 @@ describe("ContentSaveSender", () => {
       expect(rtdbEnvelopeRef.update).toHaveBeenCalledTimes(2);
       expect(document.contentSaveActive).toBe(true);
 
-      rtdbEnvelopeRef.writes[0].resolve();
+      rtdbEnvelopeRef.writes[0].reject(new Error("offline"));
       await flush();
       expect(document.contentSaveActive).toBe(true);
-      rtdbEnvelopeRef.writes[1].reject(new Error("offline"));
+      rtdbEnvelopeRef.writes[1].resolve();
       await flush();
       expect(document.contentSaveActive).toBe(false);
     });
