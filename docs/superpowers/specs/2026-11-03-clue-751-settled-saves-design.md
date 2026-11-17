@@ -298,9 +298,11 @@ here.
 
 The listener doesn't monitor a document that has closed until this client's last write of its
 content settles: while the sender keeps saving after the document closes, and until its last write
-lands, including the one sent when the 30 seconds run out (`DocumentModel.contentSaveActive`). Until
-then the stored content can be older than the document's, and replacing it would undo edits that
-haven't been saved, which the draining sender would then count as a change and could save.
+lands, including the one sent when the 30 seconds run out (`DocumentModel.contentSaveActive`). That
+write can still be waiting, for example while offline, after the document has been opened again with
+a new sender, so the flag clears only once no sender of the document is running or has a write in
+flight. Until then the stored content can be older than the document's, and replacing it would undo
+edits that haven't been saved, which the draining sender would then count as a change and could save.
 
 The catch-up never loads the whole history. DataFlow and Simulator documents can have very large
 histories, and today an individual load reads only the last entry (`getLastHistoryEntry`, a

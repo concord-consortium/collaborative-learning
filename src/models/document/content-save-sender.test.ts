@@ -885,6 +885,25 @@ describe("ContentSaveSender", () => {
       expect(document.contentSaveActive).toBe(false);
     });
 
+    // Reopening the document gets a new sender while the old one's last write is still queued.
+    it("keeps the content save active for a new sender when the old sender's last write settles", async () => {
+      const { rtdbEnvelopeRef, document, edit, sender } = track(setup());
+      await edit("alpha");
+      sender.detach();
+      jest.advanceTimersByTime(kSenderUnmountLimitMs);
+      expect(rtdbEnvelopeRef.update).toHaveBeenCalledTimes(1);
+
+      const next = track({ sender: getContentSaveSender(document,
+        { rtdbEnvelopeRef, updateTools: () => Promise.resolve() }) as IndividualContentSaveSender });
+      expect(next.sender).not.toBe(sender);
+      rtdbEnvelopeRef.writes[0].resolve();
+      await flush();
+      expect(document.contentSaveActive).toBe(true);
+
+      next.sender.detach();
+      expect(document.contentSaveActive).toBe(false);
+    });
+
     it("clears the content save once a drain ends with nothing in flight", async () => {
       const { commits, rtdbEnvelopeRef, document, edit, sender } = track(setup());
       const a = await edit("alpha");

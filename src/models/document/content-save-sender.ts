@@ -105,6 +105,10 @@ function subscribeToCurrent<T>(expression: () => T, subscribe: (value: T) => (()
   };
 }
 
+// The senders of each document that are running or have a write in flight. A sender leaves once it
+// has stopped and its last write has settled, so a document's entry goes when it has none.
+const activeSenders = new WeakMap<DocumentModelType, Set<ContentSaveSender>>();
+
 const sameTools = (a: string[], b: string[]) =>
   a.length === b.length && a.every((tool, index) => tool === b[index]);
 
@@ -235,9 +239,16 @@ export abstract class ContentSaveSender {
     this.updateContentSaveActive();
   }
 
-  // A write sent before the sender stopped, such as the drain timeout's last save, can still land.
+  // A write sent before the sender stopped, such as the drain timeout's last save, can still land,
+  // after a new sender for the document has started. So the flag clears only once no sender for the
+  // document is running or has a write in flight.
   private updateContentSaveActive() {
-    if (!this.running && this.writesInFlight.size === 0 && isAlive(this.document)) {
+    if (this.running || this.writesInFlight.size > 0) return;
+    const active = activeSenders.get(this.document);
+    active?.delete(this);
+    if (active?.size) return;
+    activeSenders.delete(this.document);
+    if (isAlive(this.document)) {
       this.document.setContentSaveActive(false);
     }
   }
@@ -246,6 +257,9 @@ export abstract class ContentSaveSender {
   // once the sender has stopped.
   start() {
     this.running = true;
+    const active = activeSenders.get(this.document) ?? new Set();
+    active.add(this);
+    activeSenders.set(this.document, active);
     this.document.setContentSaveActive(true);
     const treeManager = getTreeManager(this.document);
     if (treeManager) {

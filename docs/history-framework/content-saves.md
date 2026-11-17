@@ -109,8 +109,10 @@ saves the caught-up content, so the stored content isn't left behind its history
 **The content listener waits for the last save.** Once a document closes, the content listener
 monitors it again, but not while the sender may still write its content: while the sender keeps
 saving after the document closes, and until its last write settles, including the one sent when the
-30 seconds run out. Until then the stored content can be older than the document's, and replacing it
-would undo edits that haven't been saved yet.
+30 seconds run out. That write can still be waiting, for example while offline, after the document
+has been opened again with a new sender, so the listener waits until no sender of the document is
+running or has a write in flight. Until then the stored content can be older than the document's,
+and replacing it would undo edits that haven't been saved yet.
 
 An envelope without `exactThrough` can hold entries after its `lastHistoryEntryId`, so applying the
 entries after that id could apply some of them twice. When such an envelope is behind its history,
