@@ -95,7 +95,11 @@ Other rules:
 - **Jira keys in other repositories:** a key written in a PR in another repository links that PR to
   the story, which then shows up in triage. When writing PRs or comments elsewhere, avoid CLUE keys
   unless the link is wanted.
-- **Codecov:** its checks fail on almost every PR; ignore them when judging readiness.
+- **Codecov:** `codecov.yml` splits coverage into `client` and `scripts` checks. The `client`
+  checks post only once every CI Regression upload has arrived, so they are missing on a PR
+  without `run regression` or with a failed container; the Regression Label Check flags a client,
+  Cypress, build or dependency change that has neither `run regression` nor `skip regression`. A
+  red Codecov check is worth a look before calling a PR ready.
 - **Jira REST:** the Atlassian connection covers issues but not versions. For anything else, write
   a small script in `scripts/local/` that reads the dev-templates `.env`.
 
