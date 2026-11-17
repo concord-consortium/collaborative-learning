@@ -317,11 +317,11 @@ export const PlaybackControlComponent: React.FC<IProps> = observer((props: IProp
       </div>
       {renderTimeInfo()}
       {/* Rendered whether or not there is anything to say, so screen readers announce the
-          change. */}
+          change. The spinner is the visible cue; the words are for screen readers. */}
       <div className="playback-seek-status" data-testid="playback-seek-status" role="status">
         {showSeekProgress && <span className="playback-seek-progress" data-testid="playback-seek-progress"
             aria-hidden="true" />}
-        {showSeekProgress && <span className="playback-seek-message">Loading this point in the history…</span>}
+        {showSeekProgress && <span className="visually-hidden">Loading this point in the history…</span>}
       </div>
       {model.playbackFailureWarning && !model.selectedFailure &&
         <div className="playback-failure-warning" data-testid="playback-failure-warning">

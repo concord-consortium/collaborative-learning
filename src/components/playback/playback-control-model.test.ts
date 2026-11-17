@@ -843,7 +843,6 @@ describe("PlaybackControlModel", () => {
 
       expect(stopKinds(model)).toEqual(["initial", "user", "link", "user"]);
       expect(stopPositions(model)).toEqual([0, 1, 3, 4]);
-      expect(model.sliderStops[2]).toMatchObject({ kind: "link", entryId: "entry-2" });
       expect(model.linkPosition).toBe(3);
       expect(model.linkLocation).toBeCloseTo(100 * 2 / 3);
     });

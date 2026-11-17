@@ -628,16 +628,6 @@ $seek-progress-arc-color: $charcoal-dark-1;
     border-radius: 50%;
     animation: playback-seek-spin 0.8s linear infinite;
   }
-
-  // The spinner is the visible cue; the words are for screen readers.
-  .playback-seek-message {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    overflow: hidden;
-    clip: rect(0 0 0 0);
-    white-space: nowrap;
-  }
 }
 
 @keyframes playback-seek-spin {

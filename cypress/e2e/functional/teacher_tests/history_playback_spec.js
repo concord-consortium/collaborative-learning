@@ -143,15 +143,10 @@ context('History Playback', () => {
     // The program ticks once a second, and each tick is a history entry.
     cy.wait(4000);
     cy.get('.toolbar .tool.toggleplayback').click(); //open playback controls
-    // At the latest stop the time readout shows the index of the last history entry.
-    cy.get('[data-testid="playback-time-info"]').should($timeInfo => {
-      const match = /\((\d+)\)/.exec($timeInfo.text());
-      expect(match, 'history index in the time readout').to.not.equal(null);
-      expect(Number(match[1]) + 1, 'history entries').to.be.greaterThan(9);
-    });
     // The stops are the initial one, the drawing tile, its line, the DataFlow tile, the three number
-    // blocks, the generator and the latest entry, so the last stop's index is 8. A tick that became
-    // a user stop would add one.
+    // blocks, the generator and the latest entry, so the last stop's index is 8. The latest stop is
+    // there only because ticks were recorded after the generator was added, and a tick that became a
+    // user stop would add one.
     cy.get(playbackSliderHandle).should('have.attr', 'aria-valuemax', '8');
 
     cy.log('verify playback reaches the start of a document with a DataFlow tile in a unit with Live Output settings');

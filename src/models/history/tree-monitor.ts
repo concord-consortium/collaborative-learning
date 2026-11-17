@@ -348,7 +348,8 @@ export class TreeMonitor {
         action: getActionPath(call),
         undoable
       };
-      // User entries leave the background fields out
+      // A user entry stores neither field, rather than `background: false`, so only background
+      // entries carry them.
       if (background) {
         entryInfo.background = true;
         if (producerTileId !== undefined) entryInfo.producerTileId = producerTileId;

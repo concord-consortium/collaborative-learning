@@ -72,7 +72,6 @@ export interface ICommentSliderStop extends ISliderStopBase {
 // shows it. It shows the document right after that entry, which is usually a background one.
 interface ILinkSliderStop extends ISliderStopBase {
   kind: "link";
-  entryId: string;
   created: Date;
 }
 export type ISliderStop = IInitialSliderStop | IEarliestSliderStop | IUserSliderStop | ILatestSliderStop |
@@ -235,7 +234,7 @@ export class PlaybackControlModel {
     const linkPosition = this.linkPosition;
     if (linkPosition !== undefined && !hasOwnStopAt(linkPosition)) {
       const linkEntry = history[linkPosition - 1];
-      stops.push({ kind: "link", position: linkPosition, entryId: linkEntry.id, created: linkEntry.created });
+      stops.push({ kind: "link", position: linkPosition, created: linkEntry.created });
     }
 
     // Each comment goes before the first entry created later than it, background entries

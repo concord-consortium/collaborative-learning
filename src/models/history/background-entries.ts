@@ -1,7 +1,8 @@
 // This rule is temporary. History entries recorded before the `background` flag existed carry no
 // flag, so it recognizes the ones produced by code (DataFlow ticks and recomputes, Simulator
-// steps) from their action names and patch paths. Remove it the release after the migration script
-// that backfills the flag has run.
+// steps) from their action names and patch paths. The migration script that backfills the flag is
+// to use the same rule. Once that script has run, the release after it removes the read-time call,
+// and the rule then lives only in the script.
 import { HistoryEntrySnapshot, HistoryEntryType } from "./history";
 
 interface ILegacyEntryShape {
