@@ -102,6 +102,11 @@ export class FirestoreHistoryManager implements ICommitSource {
    */
   lastCommitted: ICommittedEntry | undefined = undefined;
   /**
+   * This session's newest committed local entry, kept when forgetCatchUp forgets lastCommitted. It
+   * says where the history is rather than what the content holds, so a later catch-up plans against it.
+   */
+  private newestCommitted: ICommittedEntry | undefined = undefined;
+  /**
    * The last Firestore entry catchUpAtLoad applied to the loaded content, when it applied any.
    */
   caughtUpTo: ICommittedEntry | undefined = undefined;
@@ -171,6 +176,7 @@ export class FirestoreHistoryManager implements ICommitSource {
 
   protected notifyCommitted(entries: ICommittedEntry[]) {
     if (entries.length === 0) return;
+    this.newestCommitted = entries[entries.length - 1];
     runInAction(() => { this.lastCommitted = entries[entries.length - 1]; });
     this.commitListeners.forEach(listener => listener.onCommitted(entries));
   }
@@ -181,7 +187,8 @@ export class FirestoreHistoryManager implements ICommitSource {
 
   /**
    * Forgets the catch-up and this session's commits, for content that replaced the content they
-   * describe. The next catch-up starts from the new content's envelope.
+   * describe. The next catch-up starts from the new content's envelope, and still plans against the
+   * newest entry this session committed.
    */
   forgetCatchUp() {
     this.caughtUpTo = undefined;
@@ -355,17 +362,22 @@ export class FirestoreHistoryManager implements ICommitSource {
         incomplete("catch-up-content-replaced");
         return;
       }
-      const last = { id: lastEntryId, index: lastEntryIndex };
+      // The newest entry this session knows of: its own newest commit, which the entry read at load
+      // doesn't include, or else that entry. The next local entry chains after it.
+      const last = this.newestCommitted ?? { id: lastEntryId, index: lastEntryIndex };
       const saved = { id: savedId, index: envelope?.exactThrough?.index };
       const plan = planCatchUp(saved, last);
       switch (plan.kind) {
         case "none":
-          // With nothing to fetch, a saved id other than the last entry can't be in Firestore: an
-          // entry in Firestore with an index at or after the last entry's would be the last entry.
-          if (savedId && savedId !== lastEntryId) {
+          if (!savedId || savedId === last.id) {
+            startAt(savedId ?? last.id ?? kHistoryStart);
+          } else if (last.id === null) {
             exactness.markNotExact("saved-id-missing");
           } else {
-            startAt(savedId ?? lastEntryId ?? kHistoryStart);
+            // The envelope names a different entry at or after the newest one this session knows
+            // of. Most likely another session wrote it, forking the history, which isn't supported
+            // for individual documents.
+            incomplete("history-written-elsewhere", { savedIndex: saved.index, lastIndex: last.index });
           }
           return;
         case "unmarked":
@@ -375,9 +387,9 @@ export class FirestoreHistoryManager implements ICommitSource {
           incomplete("catch-up-gap-too-large", { gap: plan.gap });
           return;
         case "fetch": {
-          const gap = lastEntryIndex - plan.afterIndex;
-          // Stops at the last entry read, since that is the entry the next local entry chains after.
-          const docs = await getHistoryEntriesAfter(this.firestore, documentPath, plan.afterIndex, lastEntryIndex);
+          const gap = last.index - plan.afterIndex;
+          // Stops at the newest entry this session knows of, the entry the next local entry chains after.
+          const docs = await getHistoryEntriesAfter(this.firestore, documentPath, plan.afterIndex, last.index);
           if (currentEnvelope() !== envelope) {
             incomplete("catch-up-content-replaced", { gap });
             return;
@@ -392,10 +404,10 @@ export class FirestoreHistoryManager implements ICommitSource {
           }
           if (error !== undefined) {
             incomplete("catch-up-apply-failed", { gap, applied, error });
-          } else if (entries[entries.length - 1]?.id !== lastEntryId) {
+          } else if (entries[entries.length - 1]?.id !== last.id) {
             incomplete("catch-up-hole", { gap, applied });
           } else {
-            startAt(lastEntryId);
+            startAt(last.id);
           }
           break;
         }

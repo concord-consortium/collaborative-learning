@@ -851,7 +851,8 @@ describe("catchUpAtLoad", () => {
       { lastHistoryEntryId: "e5", exactThrough: { index: 5, since: "e2" } }, { id: "e7", index: 7 });
     await historyManager.catchUpAtLoad(() => undefined);
     expect(getHistoryEntriesAfter).not.toHaveBeenCalled();
-    expect(treeManager.exactness.exactSince).toBe("e7");
+    expect(treeManager.exactness.isExact).toBe(false);
+    expect(treeManager.exactness.notExactReason).toBe("unmarked-envelope-gap");
   });
 
   it("applies nothing and leaves the session not exact when the content is replaced during the fetch",
@@ -920,11 +921,52 @@ describe("catchUpAtLoad", () => {
     expect(treeManager.exactness.isExact).toBe(true);
   });
 
-  it("starts at Firestore's last entry when there is no saved envelope", async () => {
-    const { treeManager, historyManager } = setupCatchUp(undefined, { id: "e7", index: 7 });
+  // The content may lack entries Firestore has, so the session can't vouch for it.
+  it("leaves the session not exact when there is no saved entry id and Firestore has history", async () => {
+    const { treeManager, historyManager, logEvent } = setupCatchUp(undefined, { id: "e7", index: 7 });
     await historyManager.catchUpAtLoad(() => historyManager.loadedEnvelope);
     expect(getHistoryEntriesAfter).not.toHaveBeenCalled();
-    expect(treeManager.exactness.exactSince).toBe("e7");
+    expect(treeManager.exactness.isExact).toBe(false);
+    expect(treeManager.exactness.notExactReason).toBe("unmarked-envelope-gap");
+    expect(logEvent).toHaveBeenCalledWith(LogEventName.HISTORY_LOAD_CATCH_UP_INCOMPLETE,
+      expect.objectContaining({ reason: "unmarked-envelope-gap", savedId: undefined }));
+  });
+
+  it("leaves the session not exact when the envelope names another entry at the last entry's index",
+      async () => {
+    const { treeManager, historyManager, logEvent } = setupCatchUp(
+      { lastHistoryEntryId: "b7", exactThrough: { index: 7, since: "e2" } }, { id: "e7", index: 7 });
+    await historyManager.catchUpAtLoad(() => historyManager.loadedEnvelope);
+    expect(getHistoryEntriesAfter).not.toHaveBeenCalled();
+    expect(treeManager.exactness.notExactReason).toBe("history-written-elsewhere");
+    expect(logEvent).toHaveBeenCalledWith(LogEventName.HISTORY_LOAD_CATCH_UP_INCOMPLETE,
+      expect.objectContaining({ reason: "history-written-elsewhere", savedId: "b7", savedIndex: 7, lastIndex: 7 }));
+  });
+
+  it("leaves the session not exact when the envelope is past the last entry this session knows of",
+      async () => {
+    const { treeManager, historyManager } = setupCatchUp(
+      { lastHistoryEntryId: "e9", exactThrough: { index: 9, since: "e2" } }, { id: "e7", index: 7 });
+    await historyManager.catchUpAtLoad(() => historyManager.loadedEnvelope);
+    expect(treeManager.exactness.notExactReason).toBe("history-written-elsewhere");
+  });
+
+  // A catch-up started over after the content listener replaced the content.
+  it("plans against this session's newest commit after the catch-up is forgotten", async () => {
+    const { treeManager, tileContent, historyManager, firestore } = setupCatchUp(
+      { lastHistoryEntryId: "e5", exactThrough: { index: 5, since: "e2" } }, { id: "e5", index: 5 });
+    await historyManager.catchUpAtLoad(() => historyManager.loadedEnvelope);
+    (historyManager as any).notifyCommitted([{ id: "e6", index: 6 }, { id: "e7", index: 7 }]);
+    historyManager.forgetCatchUp();
+    treeManager.exactness.restart();
+    getHistoryEntriesAfter.mockResolvedValue([entryDoc(7, "e6")]);
+    const replaced = { lastHistoryEntryId: "e6", exactThrough: { index: 6, since: "e2" } };
+    await historyManager.catchUpAtLoad(() => replaced);
+    expect(getHistoryEntriesAfter).toHaveBeenCalledWith(firestore, documentPath, 6, 7);
+    expect(tileContent.text).toBe("e7");
+    expect(historyManager.lastCommitted).toBeUndefined();
+    expect(treeManager.exactness.exactSince).toBe("e2");
+    expect(treeManager.exactness.isExact).toBe(true);
   });
 
   it("doesn't fetch a gap over 200 entries and leaves the session not exact", async () => {

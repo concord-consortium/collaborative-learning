@@ -1,0 +1,28 @@
+coverage:
+  status:
+    project:
+      client:
+        target: auto
+        threshold: 0.2%
+        # shared/ and the authoring-api helper are here because the client imports them.
+        paths: &client_paths ["src/", "shared/", "authoring-api/src/helpers/"]
+        # Listing the flags waits for cypress-regression's after_n_builds and omits the nightly `cypress` flag.
+        flags: &client_flags [jest, cypress-smoke, cypress-regression]
+      scripts:
+        target: auto
+        threshold: 0.2%
+        paths: &scripts_paths ["scripts/"]
+        flags: &scripts_flags [jest]
+    patch:
+      client:
+        paths: *client_paths
+        flags: *client_flags
+      scripts:
+        paths: *scripts_paths
+        flags: *scripts_flags
+
+flag_management:
+  individual_flags:
+    # One upload per container in ci-regression.yml's matrix.
+    - name: cypress-regression
+      after_n_builds: 15

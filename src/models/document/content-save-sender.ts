@@ -107,6 +107,10 @@ function subscribeToCurrent<T>(expression: () => T, subscribe: (value: T) => (()
   };
 }
 
+// The senders of each document that are running or have a write in flight. A sender leaves once it
+// has stopped and its last write has settled, so a document's entry goes when it has none.
+const activeSenders = new WeakMap<DocumentModelType, Set<ContentSaveSender>>();
+
 const sameTools = (a: string[], b: string[]) =>
   a.length === b.length && a.every((tool, index) => tool === b[index]);
 
@@ -239,12 +243,31 @@ export abstract class ContentSaveSender {
     this.keptSnapshots.clear();
     this.pendingSave = undefined;
     this.consecutiveFailures = 0;
+    this.updateContentSaveActive();
+  }
+
+  // A write sent before the sender stopped, such as the drain timeout's last save, can still land,
+  // after a new sender for the document has started. So the flag clears only once no sender for the
+  // document is running or has a write in flight.
+  private updateContentSaveActive() {
+    if (this.running || this.writesInFlight.size > 0) return;
+    const active = activeSenders.get(this.document);
+    active?.delete(this);
+    if (active?.size) return;
+    activeSenders.delete(this.document);
+    if (isAlive(this.document)) {
+      this.document.setContentSaveActive(false);
+    }
   }
 
   // Starts saving. getContentSaveSender calls it after making the sender, and attach calls it again
   // once the sender has stopped.
   start() {
     this.running = true;
+    const active = activeSenders.get(this.document) ?? new Set();
+    active.add(this);
+    activeSenders.set(this.document, active);
+    this.document.setContentSaveActive(true);
     const treeManager = getTreeManager(this.document);
     if (treeManager) {
       this.disposers.push(treeManager.addEntryCompletedListener(this.handleEntryCompleted));
@@ -491,6 +514,7 @@ export abstract class ContentSaveSender {
       if (isNewest) {
         this.reportWrite(save);
       }
+      this.updateContentSaveActive();
       return;
     }
     this.consecutiveFailures = 0;
@@ -512,6 +536,7 @@ export abstract class ContentSaveSender {
   // The pending save stays in place, unless a newer one has replaced it, so the retry sends the newest.
   private handleWriteFailed(save: IWaitingSave, error: unknown) {
     this.writesInFlight.delete(save);
+    this.updateContentSaveActive();
     if (!this.running) return;
     this.consecutiveFailures++;
     this.lastFailureAt = Date.now();

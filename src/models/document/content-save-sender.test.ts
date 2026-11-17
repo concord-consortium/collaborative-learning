@@ -999,6 +999,57 @@ describe("ContentSaveSender", () => {
       expect(rtdbEnvelopeRef.update).toHaveBeenCalledTimes(2);
     });
 
+    // The content listener waits for this before it replaces the content with the RTDB's.
+    it("keeps the content save active until the writes sent before the drain timeout settle", async () => {
+      const { rtdbEnvelopeRef, document, edit, sender } = track(setup());
+      expect(document.contentSaveActive).toBe(true);
+      await edit("alpha");
+      sender.detach();
+      jest.advanceTimersByTime(kIntermediateSaveIntervalMs);
+      await edit("bravo");
+      jest.advanceTimersByTime(kSenderUnmountLimitMs - kIntermediateSaveIntervalMs);
+      expect(rtdbEnvelopeRef.update).toHaveBeenCalledTimes(2);
+      expect(document.contentSaveActive).toBe(true);
+
+      rtdbEnvelopeRef.writes[0].reject(new Error("offline"));
+      await flush();
+      expect(document.contentSaveActive).toBe(true);
+      rtdbEnvelopeRef.writes[1].resolve();
+      await flush();
+      expect(document.contentSaveActive).toBe(false);
+    });
+
+    // Reopening the document gets a new sender while the old one's last write is still queued.
+    it("keeps the content save active for a new sender when the old sender's last write settles", async () => {
+      const { rtdbEnvelopeRef, document, edit, sender } = track(setup());
+      await edit("alpha");
+      sender.detach();
+      jest.advanceTimersByTime(kSenderUnmountLimitMs);
+      expect(rtdbEnvelopeRef.update).toHaveBeenCalledTimes(1);
+
+      const next = track({ sender: getContentSaveSender(document,
+        { rtdbEnvelopeRef, updateTools: () => Promise.resolve() }) as IndividualContentSaveSender });
+      expect(next.sender).not.toBe(sender);
+      rtdbEnvelopeRef.writes[0].resolve();
+      await flush();
+      expect(document.contentSaveActive).toBe(true);
+
+      next.sender.detach();
+      expect(document.contentSaveActive).toBe(false);
+    });
+
+    it("clears the content save once a drain ends with nothing in flight", async () => {
+      const { commits, rtdbEnvelopeRef, document, edit, sender } = track(setup());
+      const a = await edit("alpha");
+      commits.commit(a);
+      jest.advanceTimersByTime(kMinimumSaveGapMs);
+      rtdbEnvelopeRef.writes[0].resolve();
+      await flush();
+      expect(document.contentSaveActive).toBe(true);
+      sender.detach();
+      expect(document.contentSaveActive).toBe(false);
+    });
+
     it("records the envelope without exactThrough when it stops with an intermediate save in flight", async () => {
       const { rtdbEnvelopeRef, document, edit, sender } = track(setup());
       document.setSavedEnvelope(
