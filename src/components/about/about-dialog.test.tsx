@@ -38,8 +38,7 @@ describe("AboutDialogContent", () => {
   });
 
   it("shows the logo, product line, tagline, version and copyright", () => {
-    expect(screen.getByRole("img", { name: "CLUE" })).toBeInTheDocument();
-    expect(screen.getByText("a product of The Concord Consortium")).toBeInTheDocument();
+    expect(screen.getByRole("img", { name: "CLUE, a product of The Concord Consortium" })).toBeInTheDocument();
     expect(screen.getByText("Collaborative Learning User Environment")).toBeInTheDocument();
     expect(screen.getByTestId("about-dialog-version")).toHaveTextContent(/^Version 4\.3\.0 · build 0123456$/);
     expect(screen.getByText("© 2031 The Concord Consortium, Inc.")).toBeInTheDocument();

@@ -3,7 +3,7 @@ import { useCustomModal } from "../../hooks/use-custom-modal";
 import { useStores } from "../../hooks/use-stores";
 import { IGitInfo } from "../../models/stores/base-stores-types";
 import { ExternalLink } from "../utilities/external-link";
-import ClueBlockLogo from "../../assets/clue-block-logo.svg";
+import ClueProductOfConcordLogo from "../../assets/clue-product-of-concord-logo.nosvgo.svg";
 import InfoIcon from "../../assets/icons/info-icon.svg";
 import { ICustomDropdownItem } from "../../clue/components/custom-select";
 
@@ -32,8 +32,8 @@ export const AboutDialogContent: React.FC<IAboutDialogContentProps> = ({ appVers
   return (
     <div className="about-dialog-body">
       <div className="about-dialog-identity">
-        <ClueBlockLogo className="about-dialog-logo" viewBox="0 0 105 70" role="img" aria-label="CLUE" />
-        <div className="about-dialog-product-of">a product of The Concord Consortium</div>
+        <ClueProductOfConcordLogo className="about-dialog-logo" role="img"
+          aria-label="CLUE, a product of The Concord Consortium" />
         <div className="about-dialog-tagline">Collaborative Learning User Environment</div>
         <div className="about-dialog-version" data-testid="about-dialog-version">
           {getVersionText(appVersion, gitInfo.gitSha)}
