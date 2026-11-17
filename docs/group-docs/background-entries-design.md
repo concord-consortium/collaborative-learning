@@ -517,7 +517,7 @@ The implementation plan derived from this spec will detail each phase.
 ## Relation to existing GD-* work
 
 - **Transaction-free history design** — prerequisite. This design is unimplementable without that one.
-- **Settled-state doc saves design** — prerequisite of transaction-free history; transitively required.
+- **[GD-18 settled-state document saves](group-doc-content-saves.md)** — prerequisite of transaction-free history; transitively required. Done.
 - **GD-9 / GD-10 (Document and Shared Model Merging)** — independent at MVP; share scope-overlap analysis with transaction-free history.
 - **GD-14 (Intra-Tile Merging)** — prerequisite for cross-client split-producer deployments. Not needed for MVP (dataflow on a single client); the producerId machinery is in place so cross-client deployment becomes viable the moment GD-14 lands.
 - **GD-11 (Tile Hardening)** — this spec's per-tile reactive-derivation audit feeds into GD-11.

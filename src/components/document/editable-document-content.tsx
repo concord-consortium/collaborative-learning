@@ -1,4 +1,5 @@
-import React, { useRef } from "react";
+import React, { useEffect, useRef } from "react";
+import { observer } from "mobx-react";
 import classNames from "classnames";
 import { getSnapshot } from "mobx-state-tree";
 import { clone } from "lodash";
@@ -17,6 +18,7 @@ import { CanvasComponent } from "./canvas";
 import { DocumentContextReact } from "./document-context";
 import { DocumentToolbar } from "./document-toolbar";
 import { SaveIndicator } from "./save-indicator";
+import { SaveStoppedNotice, useSaveStoppedNotice } from "./save-stopped-notice";
 
 import "./editable-document-content.scss";
 
@@ -79,17 +81,30 @@ export interface IProps {
   toolbar?: IToolbarModel;
   pane?: "left" | "right";
   readOnly?: boolean;
+  /**
+   * Shown in one of the workspace's panes, where documents are opened for editing. Such a document
+   * catches up to its history before it is shown even when this view of it is read-only, since it
+   * may still get the workspace's editing toolbar.
+   */
+  inWorkspace?: boolean;
   fullHeight?: boolean
   sectionClass?: string;
 }
-export function EditableDocumentContent({
-  className, contained, mode, isPrimary, document, toolbar, pane, readOnly, showPlayback, fullHeight, sectionClass
+export const EditableDocumentContent = observer(function EditableDocumentContent({
+  className, contained, mode, isPrimary, document, toolbar, pane, readOnly, inWorkspace, showPlayback, fullHeight,
+  sectionClass
 }: IProps) {
   const documentContext = useDocumentContext(document);
-  const { db: { firebase, firestore }, ui, persistentUI, user, appConfig, activityRecorder } = useStores();
+  const { db: { firebase, firestore }, documents, ui, persistentUI, user, appConfig, activityRecorder } = useStores();
   // set by the canvas and used by the toolbar
   const editableTileApiInterfaceRef: EditableTileApiInterfaceRef = useRef(null);
-  const isReadOnly = !isPrimary || readOnly || document.isPublished;
+  // Until the document has caught up to its history it can't be edited or saved.
+  const { historyCatchUpPending } = document;
+  const isEditable = isPrimary && !readOnly && !document.isPublished && !historyCatchUpPending;
+  // A notice that can't be closed also stops editing, since the edits might not be kept.
+  const saveStopped = useSaveStoppedNotice(document);
+  const showSaveStopped = isEditable && saveStopped;
+  const isReadOnly = !isEditable || (!!showSaveStopped && !showSaveStopped.notice.dismissible);
   let modifiedToolbar = toolbar;
   if (toolbar && isPrimary && DEBUG_HISTORY_VIEW) {
     // The snapshot is read-only so we need to clone it before modifying
@@ -115,8 +130,22 @@ export function EditableDocumentContent({
     contained ? "contained-editable-document-content" : "full-screen-editable-document-content",
     {"comment-select" : documentSelectedForComment, "full-height": fullHeight}, className);
 
+  // Opening the document for editing, or in the workspace, catches it up to its history first. Until
+  // then it shows a spinner rather than a document whose toolbar ignores clicks.
+  const catchesUp = (!readOnly || !!inWorkspace) && !document.isPublished;
+  useEffect(() => {
+    if (catchesUp) documents.historyCatchUp(document);
+  }, [catchesUp, documents, document]);
   useDocumentSyncToFirebase(user, firebase, firestore, document, readOnly,
     (doc, lastHistoryEntryId) => activityRecorder?.onContentSaved(doc, lastHistoryEntryId));
+  if (catchesUp && historyCatchUpPending) {
+    return (
+      <div className={editableDocContentClass} data-focus-document={document.key}>
+        <div className="history-catch-up-spinner" role="status" aria-label="Loading the document"
+            data-testid="history-catch-up-spinner"/>
+      </div>
+    );
+  }
   // Skip the save indicator for non-editable documents and when Firebase sync is disabled
   // (doc-editor, iframe, authoring); those contexts have their own storage mechanisms.
   const showSaveIndicator = !isReadOnly && !(window as any).DISABLE_FIREBASE_SYNC;
@@ -134,9 +163,10 @@ export function EditableDocumentContent({
               readOnly={isReadOnly}
               {...{mode, isPrimary, document, showPlayback}}
             />
+            {showSaveStopped && <SaveStoppedNotice state={showSaveStopped} />}
           </div>
         </EditableTileApiInterfaceRefContext.Provider>
       </DocumentContextReact.Provider>
     </>
   );
-}
+});

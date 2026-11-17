@@ -1,5 +1,5 @@
 import {
-  types, Instance, flow, IAnyStateTreeNode, IJsonPatch, destroy, getSnapshot, toGenerator
+  types, Instance, flow, IAnyStateTreeNode, IJsonPatch, destroy, getSnapshot, toGenerator, addDisposer
 } from "mobx-state-tree";
 import { nanoid } from "nanoid";
 import { TreeAPI } from "./tree-api";
@@ -21,6 +21,8 @@ import { IDocumentMetadata } from "../../../shared/shared";
 import { Firestore } from "../../lib/firestore";
 import { UserContextProvider } from "../stores/user-context-provider";
 import { getLastHistoryEntry } from "./history-firestore";
+import { SessionExactness } from "./session-exactness";
+import { LogEventName } from "../../lib/logger-types";
 
 export interface HistoryPlaybackFailure {
   historyEntry: Instance<typeof HistoryEntry>;
@@ -142,10 +144,44 @@ function getJsonCopyStart(documentJson: object, treeId: string, history: readonl
   return documentJson;
 }
 
+/**
+ * Applies entries a load is missing to the document's JSON as it was stored, before the load
+ * converted any old models, and returns the content they reach. The entries were recorded against
+ * the stored models, and a load entry among them converts those models itself, so neither fits
+ * converted MST content. Entries are applied one at a time, each all or nothing, and application
+ * stops at the first one that fails.
+ */
+function applyEntriesToStoredJson(documentJson: any, treeId: string,
+    pendingLoadEntry: HistoryEntrySnapshot | undefined, snapshots: HistoryEntrySnapshot[]) {
+  let applied = 0;
+  let error: string | undefined;
+  try {
+    if (pendingLoadEntry) {
+      applyJsonPatches(documentJson,
+        getEntryPatchesForTree(HistoryEntry.create(pendingLoadEntry), treeId, HistoryOperation.Undo));
+    }
+    for (const snapshot of snapshots) {
+      const entry = HistoryEntry.create(snapshot);
+      const otherTree = entry.records.find(record => record.tree !== treeId);
+      if (otherTree) throw new Error(`Unknown tree '${otherTree.tree}'`);
+      applyJsonPatches(documentJson, getEntryPatchesForTree(entry, treeId, HistoryOperation.Redo));
+      applied++;
+    }
+  } catch (e) {
+    error = e instanceof Error ? e.message : String(e);
+  }
+  return { content: documentJson.content, applied, error };
+}
+
 const kNoVirtualConversions: readonly IVirtualConversion[] = [];
 
 export const FAKE_HISTORY_ENTRY_ID = "FAKE_HISTORY_ENTRY_ID";
 export const FAKE_EXCHANGE_ID = "FAKE_EXCHANGE_ID";
+
+// An entry whose exchanges are still open after this long is force-completed.
+export const kOpenEntryTimeoutMs = 30000;
+
+export type TreeManagerLogger = (event: LogEventName, params: Record<string, unknown>) => void;
 
 export const CDocument = types
 .model("CDocument", {
@@ -160,6 +196,10 @@ interface IMainDocument extends TreeAPI {
   key: string;
   uid: string;
   metadata: IDocumentMetadata;
+  /**
+   * Replaces the content with stored content, converting its old models.
+   */
+  setContent(content: any): void;
 }
 
 /**
@@ -212,6 +252,21 @@ export const TreeManager = types
    * in one direction but not the other, so entries include the direction.
    */
   historyPlaybackFailures: [] as HistoryPlaybackFailure[],
+  /**
+   * Whether the document's lastHistoryEntryId is exact for this session. See NotExactReason for what
+   * breaks it.
+   */
+  exactness: new SessionExactness(),
+  entryCompletedListeners: new Set<(entry: HistoryEntryType) => void>(),
+  logger: undefined as TreeManagerLogger | undefined,
+  /**
+   * One timer per entry that still has open exchanges.
+   */
+  openEntryTimers: new Map<string, ReturnType<typeof setTimeout>>(),
+  /**
+   * Entries that were force-completed, so records that arrive for them later can be recognized.
+   */
+  timedOutEntries: new Map<string, { model?: string }>(),
   /**
    * Set when the JSON copy can't get back to the trees' position after a failed move. The copy
    * and the trees then disagree, so playback makes no more moves.
@@ -321,8 +376,17 @@ export const TreeManager = types
   },
 }))
 .actions((self) => {
-  function completeHistoryEntry(activeEntry: Instance<typeof HistoryEntry>) {
+  function clearOpenEntryTimer(entryId: string) {
+    const timer = self.openEntryTimers.get(entryId);
+    if (timer !== undefined) {
+      clearTimeout(timer);
+      self.openEntryTimers.delete(entryId);
+    }
+  }
+
+  function completeHistoryEntry(activeEntry: HistoryEntryType) {
     activeEntry.state = "complete";
+    clearOpenEntryTimer(activeEntry.id);
 
     // Copied rather than detached: detach walks every identifier in the tree, and the history
     // grows to thousands of entries. The active entry is destroyed, so code refers to active
@@ -375,9 +439,40 @@ export const TreeManager = types
       self.revisionId = entry.id;
     }
 
+    self.entryCompletedListeners.forEach(listener => listener(entry));
+
     self.historyManager?.onHistoryEntryCompleted(self.document, entry, newLocalIndex);
   }
 
+  return {
+    completeHistoryEntry,
+
+    /**
+     * Complete an entry whose exchanges never closed. Records that arrive for it later are
+     * kept as new entries, see addTreePatchRecord.
+     */
+    timeOutEntry(entryId: string) {
+      self.openEntryTimers.delete(entryId);
+      const entry = self.findActiveHistoryEntry(entryId);
+      if (!entry) return;
+
+      const openExchanges = Array.from(entry.activeExchanges.values());
+      self.logger?.(LogEventName.HISTORY_ENTRY_TIMED_OUT, {
+        entryId, model: entry.model, action: entry.action, openExchanges
+      });
+      console.error(`History entry timed out with open exchanges ${json({
+        entryId, model: entry.model, action: entry.action, openExchanges
+      })}`);
+
+      self.exactness.markNotExact("timed-out-entry");
+      self.timedOutEntries.set(entryId, { model: entry.model });
+      entry.activeExchanges.clear();
+      entry.timedOut = true;
+      completeHistoryEntry(entry);
+    }
+  };
+})
+.actions((self) => {
   return {
     /**
      * Append a history entry whose patches have already been applied by
@@ -481,6 +576,8 @@ export const TreeManager = types
       // Find if there is already an entry with this historyEntryId
       const entry = self.findActiveHistoryEntry(historyEntryId);
       if (!entry) {
+        // A tree can still be working on an entry that was force-completed.
+        if (self.timedOutEntries.has(historyEntryId)) return Promise.resolve();
         throw new Error(`History Entry doesn't exist ${ json({historyEntryId})} `);
       }
 
@@ -502,6 +599,7 @@ export const TreeManager = types
     endExchange(historyEntryId: string, exchangeId: string) {
       const entry = self.findActiveHistoryEntry(historyEntryId);
       if (!entry) {
+        if (self.timedOutEntries.has(historyEntryId)) return;
         throw new Error(`There isn't an active entry for ${ json({historyEntryId, exchangeId})}`);
       }
 
@@ -515,7 +613,7 @@ export const TreeManager = types
       // TODO: We could use autorun for watching this observable map instead of
       // changing the entry state here.
       if (entry.activeExchanges.size === 0) {
-        completeHistoryEntry(entry);
+        self.completeHistoryEntry(entry);
       }
     },
 
@@ -532,6 +630,30 @@ export const TreeManager = types
       self.activeHistoryEntries.push(entry);
 
       entry.activeExchanges.set(exchangeId, `TreeManager.createHistoryEntry ${action}`);
+
+      self.openEntryTimers.set(historyEntryId,
+        setTimeout(() => self.timeOutEntry(historyEntryId), kOpenEntryTimeoutMs));
+    },
+
+    /**
+     * Listeners are called synchronously when a local entry with records has been added to the
+     * history, before the history manager is told about it. Returns a function that removes the
+     * listener.
+     */
+    addEntryCompletedListener(listener: (entry: HistoryEntryType) => void) {
+      self.entryCompletedListeners.add(listener);
+      return () => { self.entryCompletedListeners.delete(listener); };
+    },
+
+    setLogger(logger: TreeManagerLogger | undefined) {
+      self.logger = logger;
+    },
+
+    afterCreate() {
+      addDisposer(self, () => {
+        self.openEntryTimers.forEach(timer => clearTimeout(timer));
+        self.openEntryTimers.clear();
+      });
     },
 
     setNumHistoryEntriesAppliedFromFirestore: flow(
@@ -607,6 +729,25 @@ export const TreeManager = types
 
     // Find if there is already an entry with this historyEntryId
     const entry = self.findActiveHistoryEntry(historyEntryId);
+    const timedOutEntry = self.timedOutEntries.get(historyEntryId);
+    if (!entry && timedOutEntry) {
+      // The entry this record belongs to was force-completed, so the record is kept as an entry of
+      // its own.
+      if (treePatchRecord.patches.length > 0) {
+        const lateEntry = HistoryEntry.create({
+          id: nanoid(),
+          tree: record.tree,
+          model: timedOutEntry.model,
+          action: record.action,
+          undoable: false,
+          lateRecordForEntryId: historyEntryId,
+          records: [record]
+        });
+        self.activeHistoryEntries.push(lateEntry);
+        self.completeHistoryEntry(lateEntry);
+      }
+      return;
+    }
     if (!entry) {
       throw new Error(`There isn't an active entry for ${ json({historyEntryId, exchangeId})}`);
     }
@@ -698,6 +839,36 @@ export const TreeManager = types
     // One way might be using unique history_entry_ids that we mark as closed
     // after the finish call.
   }),
+
+  /**
+   * Apply entries that were saved after the content was last saved, when a document loads.
+   *
+   * The entries are applied to the document's stored JSON (see applyEntriesToStoredJson), and the
+   * document's content is set to the result, which converts any old models and rebuilds the
+   * pending load entry from it. They aren't added to `document.history` or reported as completed:
+   * they are already in Firestore. The document mustn't be monitored, or setting its content
+   * would record the change as a new entry.
+   *
+   * Application stops at the first entry that fails, and a caller must treat any `error` as
+   * leaving the content not exact. When setting the content fails, the content is left as it
+   * was loaded and no entries count as applied.
+   */
+  applyEntriesAtLoad(snapshots: HistoryEntrySnapshot[]): { applied: number, error?: string } {
+    const { mainDocument, pendingLoadEntry } = self;
+    if (!mainDocument) return { applied: 0, error: "No document" };
+    const documentJson = toJsonValue(getSnapshot(mainDocument as unknown as IAnyStateTreeNode));
+    const stored = applyEntriesToStoredJson(documentJson, mainDocument.key, pendingLoadEntry, snapshots);
+    if (stored.applied > 0) {
+      try {
+        mainDocument.setContent(stored.content);
+      } catch (e) {
+        return { applied: 0, error: e instanceof Error ? e.message : String(e) };
+      }
+    }
+    return stored.error === undefined
+      ? { applied: stored.applied }
+      : { applied: stored.applied, error: stored.error };
+  },
 
   goToHistoryEntryPosition: flow(function* goToHistoryEntryPosition(
                                       newHistoryPosition: number) {

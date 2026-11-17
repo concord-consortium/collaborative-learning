@@ -34,7 +34,6 @@ These plan areas are not yet tracked by individual Jira stories. CLUE-379 (the r
 | [GD-15: Finer-grained `doc` scope](group-docs-plan.md#gd-15-finer-grained-doc-scope) | Simple cases depend on GD-9 only; complex cases need GD-17. |
 | [GD-16: E2E Test Framework](group-docs-plan.md#gd-16-e2e-test-framework) | Playwright multi-context tests. |
 | [GD-17: Type-Aware Merge Delegation](group-docs-plan.md#gd-17-type-aware-merge-delegation) | Foundation for GD-10, GD-14, GD-15. |
-| [GD-18: Settled-State Document Saves](group-docs-plan.md#gd-18-settled-state-document-saves) | Prerequisite for GD-19. |
 | [GD-19: Transaction-Free History](group-docs-plan.md#gd-19-transaction-free-history) | Prerequisite for GD-20. |
 | [GD-20: Background Entries (DataFlow)](group-docs-plan.md#gd-20-background-entries-dataflow) | CLUE-379 SPIKE is loosely related. |
 | [GD-21: Collaborative Text-Tile Editing](group-docs-plan.md#gd-21-collaborative-text-tile-editing) | Independent. |
@@ -150,6 +149,7 @@ The DataFlow simulation work resulted in three related plan entries: [GD-18: Set
 
 | Key | Summary | Status | Notes |
 |---|---|---|---|
+| [CLUE-751](https://concord-consortium.atlassian.net/browse/CLUE-751) | Save documents only when their history is settled | In review (PR #3086) | GD-18. See [completed work](group-docs-completed-work.md#gd-18-settled-state-document-saves-pr-3086--clue-751). |
 | [CLUE-379](https://concord-consortium.atlassian.net/browse/CLUE-379) | SPIKE: Run-time state for History/Group Synch | In Progress | Separates runtime state (value streams from dataflow execution) from setup state (program blocks and settings). Runtime state uses its own sync mechanism rather than history entries. Predates the formal GD-18/19/20 plan entries; the SPIKE outcome informed all three. |
 
 ### Plan area: UI / Product Features (not in technical plan)

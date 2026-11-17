@@ -1,5 +1,8 @@
 import { IObservableArray, observable, runInAction } from "mobx";
+import { getSnapshot } from "mobx-state-tree";
+import { createDocumentModel } from "../../models/document/document";
 import { LearningLogDocument, PersonalDocument } from "../../models/document/document-types";
+import { hashString } from "../../utilities/js-utils";
 import { DBDocumentsContentListener } from "./db-docs-content-listener";
 
 describe("DBDocumentsContentListener (personal documents)", () => {
@@ -13,7 +16,7 @@ describe("DBDocumentsContentListener (personal documents)", () => {
   let db: any;
 
   const makeDoc = (key: string, uid: string, type: string = PersonalDocument) =>
-    ({ key, uid, type, setGroupIdOfUserOwner: jest.fn(), setContent: jest.fn() });
+    ({ key, uid, type, setGroupIdOfUserOwner: jest.fn(), setContent: jest.fn(), setSavedEnvelope: jest.fn() });
 
   const makeRef = (path: string) => {
     if (!refsByPath[path]) {
@@ -80,6 +83,27 @@ describe("DBDocumentsContentListener (personal documents)", () => {
     listener.stop();
   });
 
+  it("records the envelope the remote content came from", () => {
+    const listener = new DBDocumentsContentListener(db);
+    listener.start();
+
+    const doc = makeDoc("p1", "student-1");
+    runInAction(() => docs.push(doc));
+
+    const content = JSON.stringify({ rowMap: {} });
+    const exactThrough = { id: "e5", index: 5, contentHash: hashString(content), since: "e2" };
+    const path = documentPath("student-1", "p1");
+    handlersByPath[path]({ val: () => ({ content, lastHistoryEntryId: "e5", exactThrough }) });
+    expect(doc.setSavedEnvelope).toHaveBeenLastCalledWith(
+      { lastHistoryEntryId: "e5", exactThrough: { index: 5, since: "e2" } });
+
+    handlersByPath[path]({ val: () => ({ content: JSON.stringify({ rowMap: { r1: {} } }), lastHistoryEntryId: "e6",
+      exactThrough }) });
+    expect(doc.setSavedEnvelope).toHaveBeenLastCalledWith({ lastHistoryEntryId: "e6" });
+
+    listener.stop();
+  });
+
   it("monitors the user's own personal documents (unlike problem documents)", () => {
     const listener = new DBDocumentsContentListener(db);
     listener.start();
@@ -120,11 +144,11 @@ describe("DBDocumentsContentListener (personal documents)", () => {
     listener.stop();
   });
 
-  it("does not monitor the document open for editing, and re-monitors when it closes", () => {
+  it("does not monitor the document open for editing, and re-monitors when its last save settles", () => {
     const listener = new DBDocumentsContentListener(db);
     listener.start();
 
-    const doc = makeDoc("p1", "student-1");
+    const doc = observable({ ...makeDoc("p1", "student-1"), contentSaveActive: false });
     runInAction(() => docs.push(doc));
 
     const path = documentPath("student-1", "p1");
@@ -132,11 +156,18 @@ describe("DBDocumentsContentListener (personal documents)", () => {
 
     // Opening the doc for editing in the workspace should tear down its monitor
     // so a remote snapshot can't clobber local unsaved edits.
-    runInAction(() => { problemWorkspace.primaryDocumentKey = "p1"; });
+    runInAction(() => {
+      problemWorkspace.primaryDocumentKey = "p1";
+      doc.contentSaveActive = true;
+    });
     expect(refsByPath[path].off).toHaveBeenCalledWith("value", expect.any(Function));
 
-    // Closing the editor re-attaches the monitor.
+    // Closing the editor doesn't re-attach the monitor while the content may still be saved, since
+    // the RTDB content can be older until then.
     runInAction(() => { problemWorkspace.primaryDocumentKey = undefined; });
+    expect(refsByPath[path].on).toHaveBeenCalledTimes(1);
+
+    runInAction(() => { doc.contentSaveActive = false; });
     expect(refsByPath[path].on).toHaveBeenCalledTimes(2);
 
     listener.stop();
@@ -167,5 +198,25 @@ describe("DBDocumentsContentListener (personal documents)", () => {
     listener.stop();
 
     expect(refsByPath[path].off).toHaveBeenCalledWith("value", expect.any(Function));
+  });
+
+  // A document's catch-up and exact saves were worked out for the content it held.
+  it("starts a document's catch-up over only when its content is replaced with different content", () => {
+    const restartHistoryCatchUp = jest.fn();
+    db.stores.documents.restartHistoryCatchUp = restartHistoryCatchUp;
+    const listener = new DBDocumentsContentListener(db);
+    listener.start();
+
+    const doc = createDocumentModel({ type: PersonalDocument, uid: "student-1", key: "p1", content: {} });
+    runInAction(() => docs.push(doc));
+    const path = documentPath("student-1", "p1");
+
+    handlersByPath[path]({ val: () => ({ content: getSnapshot(doc.content!) }) });
+    expect(restartHistoryCatchUp).not.toHaveBeenCalled();
+
+    handlersByPath[path]({ val: () => ({ content: { rowMap: { r1: { id: "r1" } }, rowOrder: ["r1"] } }) });
+    expect(restartHistoryCatchUp).toHaveBeenCalledWith(doc);
+
+    listener.stop();
   });
 });

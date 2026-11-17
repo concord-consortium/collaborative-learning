@@ -1,10 +1,15 @@
 import firebase from "firebase/app";
 import { autorun, IReactionDisposer } from "mobx";
+import { getSnapshot } from "mobx-state-tree";
 import { DocumentModelType } from "../../models/document/document";
+import { readSavedEnvelope } from "../../models/document/content-save-envelope";
 import { LearningLogDocument, PersonalDocument, ProblemDocument } from "../../models/document/document-types";
 import { DB } from "../db";
 import { DBDocument } from "../db-types";
 import { BaseListener } from "./base-listener";
+
+const contentJson = (document: DocumentModelType | undefined) =>
+  document?.content ? JSON.stringify(getSnapshot(document.content)) : undefined;
 
 class DocumentMonitor {
   public document: DocumentModelType;
@@ -27,7 +32,15 @@ class DocumentMonitor {
     if (snapshot?.val()) {
       const updatedDoc: DBDocument = snapshot.val();
       const updatedContent = this.db.parseDocumentContent(updatedDoc);
+      const contentBefore = contentJson(this.document);
       this.document?.setContent(updatedContent || {});
+      // The content now comes from this envelope, so a sender made for the document later reads it.
+      this.document?.setSavedEnvelope(readSavedEnvelope(updatedDoc));
+      // A save this client made comes back as the content it already holds. Different content
+      // doesn't match the document's catch-up, which has to run again.
+      if (contentBefore !== undefined && contentJson(this.document) !== contentBefore) {
+        this.db.stores.documents.restartHistoryCatchUp(this.document);
+      }
     }
   };
 
@@ -81,11 +94,13 @@ export class DBDocumentsContentListener extends BaseListener {
       // Monitor personal documents and learning logs, except the document currently
       // open for editing in the workspace (that one is already reactive via its shared
       // in-memory instance, and a remote "value" listener would clobber local edits).
+      // A document that has closed isn't monitored until this client's last write of its content
+      // settles: the RTDB content can be older until then, and would revert edits not yet saved.
       const { primaryDocumentKey, comparisonDocumentKey } = persistentUI.problemWorkspace;
       const editableKeys = new Set([primaryDocumentKey, comparisonDocumentKey]);
       [PersonalDocument, LearningLogDocument].forEach((type) => {
         documents.byType(type).forEach((document) => {
-          if (editableKeys.has(document.key)) return;
+          if (editableKeys.has(document.key) || document.contentSaveActive) return;
           documentsToMonitor.push(document);
         });
       });

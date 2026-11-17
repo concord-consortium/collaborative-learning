@@ -43,7 +43,7 @@ config on mount.
   tile's creation. `scripts/migrations/fix-out-of-order-history.ts` repairs them by moving each
   such entry to just after the entry that creates its tile. See its header for how it decides what
   is safe to move.
-- **Load entries** (see "Load entries" in [history-framework.md](../history-framework.md)) record
+- **Load entries** (see [load-entries.md](load-entries.md)) record
   the schema conversions CLUE makes when it loads old content. They aren't start editing entries;
   see below.
 

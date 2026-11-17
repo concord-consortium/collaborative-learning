@@ -159,11 +159,12 @@ export const ToolbarComponent = observer(function ToolbarComponent(props: IProps
       return true;
     }
 
-    // Copying to the workspace needs a loaded primary document to copy into. Until one is
-    // available the action can do nothing, so keep the button disabled rather than letting it
-    // accept clicks that are silently discarded.
+    // Copying to the workspace needs a loaded primary document to copy into, one that has caught
+    // up to its history. Until then the action can't run, so keep the button disabled rather than
+    // letting it accept clicks that are silently discarded.
+    const primaryDocument = stores.documents.getDocument(primaryDocumentKey ?? "");
     if (toolButton.id === "copyToWorkspace" &&
-        !stores.documents.getDocument(primaryDocumentKey ?? "")?.content) {
+        (!primaryDocument?.content || primaryDocument.historyCatchUpPending)) {
       return true;
     }
 
@@ -329,7 +330,8 @@ export const ToolbarComponent = observer(function ToolbarComponent(props: IProps
     const content = document?.content ?? section?.content;
     const primaryDocument = documents.getDocument(primaryDocumentKey ?? "");
 
-    if (content && primaryDocument?.content && (document?.key !== primaryDocument.key)) {
+    if (content && primaryDocument?.content && !primaryDocument.historyCatchUpPending &&
+        (document?.key !== primaryDocument.key)) {
       const sectionId = document ? undefined : section?.type;
       const copySpec = content.getCopySpec(ui.selectedTileIds, sectionId);
       const copiedTiles = primaryDocument.content.applyCopySpec(copySpec, true);
@@ -345,8 +347,10 @@ export const ToolbarComponent = observer(function ToolbarComponent(props: IProps
 
     if (content) {
       ui.getCopyToDocumentKey(document?.key ?? "")
-        .then(copyToDocumentKey => {
+        .then(async copyToDocumentKey => {
           const copyToDocument = documents.getDocument(copyToDocumentKey);
+          // The copy is an edit, so it waits for the document to catch up to its history.
+          if (copyToDocument) await documents.historyCatchUp(copyToDocument);
           if (copyToDocument?.content) {
             const sectionId = document ? undefined : section?.type;
             const copySpec = content.getCopySpec(ui.selectedTileIds, sectionId);

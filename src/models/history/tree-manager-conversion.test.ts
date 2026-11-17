@@ -871,3 +871,91 @@ describe("dumb rebuild of a chain recorded by the current code", () => {
     expect(end).toEqual(endJson);
   });
 });
+
+describe("applying the entries a load is missing to converted content", () => {
+  function loadStoredContent(content: any) {
+    const document = createDocumentModel({ uid: "1", type: ProblemDocument, key: kTreeId, content });
+    const manager = document.treeManagerAPI as Instance<typeof TreeManager>;
+    return { document, manager };
+  }
+
+  // The stored JSON a document's pending load entry turns into its content.
+  function storedJsonOf(document: DocumentModelType, manager: Instance<typeof TreeManager>) {
+    const json: any = toJsonValue(getSnapshot(document));
+    const copy = new JsonHistoryCopy(kTreeId, json, 1);
+    copy.moveTo([HistoryEntry.create(manager.pendingLoadEntry!)], 0);
+    return copy.getJson(t1Path);
+  }
+
+  it("applies old-format entries to the stored models, then converts the result", async () => {
+    const { document, manager } = loadStoredContent({ tileMap: { t1: oldTile("t1", "a") } });
+    const loadedEntry = manager.pendingLoadEntry;
+    expect(loadedEntry).toBeDefined();
+
+    const result = await manager.applyEntriesAtLoad(t1OldEntries());
+
+    expect(result).toEqual({ applied: 3 });
+    const tile = getTile(document, "t1");
+    expect(tile.label).toBe("c");
+    expect(tile.items.map(item => item.value)).toEqual(["a"]);
+    expect(manager.pendingLoadEntry).not.toBe(loadedEntry);
+    expect(storedJsonOf(document, manager)).toEqual(oldTile("t1", "c", ["a"]));
+  });
+
+  it("applies a load entry among them, and the current-format entries after it", async () => {
+    const stored = { tileMap: { t1: oldTile("t1", "a", ["a"]) } };
+    // An earlier session converted the stored content, uploaded the load entry and an edit, and
+    // closed before its content save.
+    const earlier = await setupConvertedDocument(cloneDeep(stored), []);
+    const gap: HistoryEntrySnapshot[] = toJsonValue(getSnapshot(earlier.manager.document.history));
+    expect(gap.map(entry => !!entry.isLoadEntry)).toEqual([true, false]);
+    const { document, manager } = loadStoredContent(cloneDeep(stored));
+
+    const result = await manager.applyEntriesAtLoad(gap);
+
+    expect(result).toEqual({ applied: 2 });
+    expect(manager.pendingLoadEntry).toBeUndefined();
+    expect(toJsonValue(getSnapshot(document.content!))).toEqual(earlier.endJson.content);
+  });
+
+  it("applies a load entry among them as JSON when the load converted nothing", async () => {
+    const stored = { tileMap: { t1: oldTile("t1", "a", ["a"]) } };
+    const earlier = await setupConvertedDocument(cloneDeep(stored), []);
+    const gap: HistoryEntrySnapshot[] = toJsonValue(getSnapshot(earlier.manager.document.history));
+    // Content already in the current format, such as the converted content the load entry made.
+    const converted = loadStoredContent(cloneDeep(stored));
+    const currentFormat = toJsonValue(getSnapshot(converted.document.content!));
+    const { document, manager } = loadStoredContent(currentFormat);
+    expect(manager.pendingLoadEntry).toBeUndefined();
+
+    const result = await manager.applyEntriesAtLoad(gap);
+
+    expect(result).toEqual({ applied: 2 });
+    expect(manager.pendingLoadEntry).toBeUndefined();
+    expect(toJsonValue(getSnapshot(document.content!))).toEqual(earlier.endJson.content);
+  });
+
+  it("stops at an entry that doesn't apply, keeping the entries before it", async () => {
+    const { document, manager } = loadStoredContent({ tileMap: { t1: oldTile("t1", "a") } });
+    const [first] = t1OldEntries();
+    const failing = makeEntry([replaceRecord(`${t1Path}/content/missing/text`, "a", "b")]);
+
+    const result = await manager.applyEntriesAtLoad([first, failing]);
+
+    expect(result).toEqual({ applied: 1, error: expect.any(String) });
+    expect(getTile(document, "t1").label).toBe("b");
+    expect(storedJsonOf(document, manager)).toEqual(oldTile("t1", "b"));
+  });
+
+  it("leaves the content as loaded when no entry applies", async () => {
+    const { document, manager } = loadStoredContent({ tileMap: { t1: oldTile("t1", "a") } });
+    const loadedEntry = manager.pendingLoadEntry;
+    const failing = makeEntry([replaceRecord(`${t1Path}/content/missing/text`, "a", "b")]);
+
+    const result = await manager.applyEntriesAtLoad([failing]);
+
+    expect(result).toEqual({ applied: 0, error: expect.any(String) });
+    expect(getTile(document, "t1").label).toBe("a");
+    expect(manager.pendingLoadEntry).toBe(loadedEntry);
+  });
+});
