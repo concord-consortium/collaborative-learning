@@ -329,6 +329,9 @@ way:
    entry the session knows of, the entry was most likely saved by another session
    (`history-written-elsewhere`). Otherwise the first fetched entry's `previousEntryId` doesn't name
    it, which is a hole.
+7. **No saved id.** An envelope with no `lastHistoryEntryId` says nothing about which entries its
+   content holds, so when Firestore has history it is treated as unmarked: nothing is applied and
+   the session is not exact.
 
 Opening the document for editing waits for the catch-up: one more query.
 Applying entries after the user has started editing would collide with their new entries, so a
@@ -360,8 +363,8 @@ loading the latest changes.
 
 **Whether a load is exact.** A load is exact when the envelope had a trusted `exactThrough` and any
 missing entries applied cleanly. Then its `since` carries forward. An unmarked envelope at Firestore's last
-entry starts the session's exact saves at the loaded id. An unmarked envelope with a gap leaves the
-session not exact.
+entry starts the session's exact saves at the loaded id. An unmarked envelope with a gap, or one with
+no id when the document has history, leaves the session not exact.
 
 **The group-document initial load.** The FIXME at `getInitialLastHistoryEntry` in
 `firestore-history-manager-concurrent.ts` describes a race: the content and

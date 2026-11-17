@@ -4,8 +4,10 @@ import { kCatchUpMaxEntries, planCatchUp, takeContiguousEntries } from "./load-c
 describe("planCatchUp", () => {
   it("needs nothing when the saved id is the last entry", () =>
     expect(planCatchUp({ id: "e9", index: 9 }, { id: "e9", index: 9 })).toEqual({ kind: "none" }));
-  it("needs nothing when the save has no entry id", () =>
-    expect(planCatchUp({}, { id: "e9", index: 9 })).toEqual({ kind: "none" }));
+  it("doesn't catch up a save with no entry id, which says nothing about what its content holds", () =>
+    expect(planCatchUp({}, { id: "e9", index: 9 })).toEqual({ kind: "unmarked" }));
+  it("needs nothing when neither the save nor Firestore has an entry", () =>
+    expect(planCatchUp({}, { id: null, index: -1 })).toEqual({ kind: "none" }));
   it("needs nothing when Firestore has no history", () =>
     expect(planCatchUp({ id: "e5", index: 5 }, { id: null, index: -1 })).toEqual({ kind: "none" }));
   it("doesn't catch up an envelope without exactThrough, which gives no index", () =>

@@ -115,8 +115,9 @@ would undo edits that haven't been saved yet.
 An envelope without `exactThrough` can hold entries after its `lastHistoryEntryId`, so applying the
 entries after that id could apply some of them twice. When such an envelope is behind its history,
 nothing is applied for it: the document opens as saved, and the session isn't exact, so its saves
-are intermediate ones. One at Firestore's last entry has nothing to catch up, so the session is
-exact. An exact envelope at an entry other than the
+are intermediate ones. The same goes for an envelope with no `lastHistoryEntryId` when the document
+has history, since it says nothing about which entries its content holds. One at Firestore's last
+entry has nothing to catch up, so the session is exact. An exact envelope at an entry other than the
 newest one the session knows of, with an index at or past it, was most likely saved by another
 session; the session isn't exact (`history-written-elsewhere`). Publications are never caught up.
 

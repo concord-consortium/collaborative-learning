@@ -851,7 +851,8 @@ describe("catchUpAtLoad", () => {
       { lastHistoryEntryId: "e5", exactThrough: { index: 5, since: "e2" } }, { id: "e7", index: 7 });
     await historyManager.catchUpAtLoad(() => undefined);
     expect(getHistoryEntriesAfter).not.toHaveBeenCalled();
-    expect(treeManager.exactness.exactSince).toBe("e7");
+    expect(treeManager.exactness.isExact).toBe(false);
+    expect(treeManager.exactness.notExactReason).toBe("unmarked-envelope-gap");
   });
 
   it("applies nothing and leaves the session not exact when the content is replaced during the fetch",
@@ -920,11 +921,15 @@ describe("catchUpAtLoad", () => {
     expect(treeManager.exactness.isExact).toBe(true);
   });
 
-  it("starts at Firestore's last entry when there is no saved envelope", async () => {
-    const { treeManager, historyManager } = setupCatchUp(undefined, { id: "e7", index: 7 });
+  // The content may lack entries Firestore has, so the session can't vouch for it.
+  it("leaves the session not exact when there is no saved entry id and Firestore has history", async () => {
+    const { treeManager, historyManager, logEvent } = setupCatchUp(undefined, { id: "e7", index: 7 });
     await historyManager.catchUpAtLoad(() => historyManager.loadedEnvelope);
     expect(getHistoryEntriesAfter).not.toHaveBeenCalled();
-    expect(treeManager.exactness.exactSince).toBe("e7");
+    expect(treeManager.exactness.isExact).toBe(false);
+    expect(treeManager.exactness.notExactReason).toBe("unmarked-envelope-gap");
+    expect(logEvent).toHaveBeenCalledWith(LogEventName.HISTORY_LOAD_CATCH_UP_INCOMPLETE,
+      expect.objectContaining({ reason: "unmarked-envelope-gap", savedId: undefined }));
   });
 
   it("leaves the session not exact when the envelope names another entry at the last entry's index",

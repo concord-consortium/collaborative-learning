@@ -12,12 +12,13 @@ export type CatchUpPlan =
 /**
  * Decide how to bring saved content up to the last history entry in Firestore. The saved entry's
  * index is known only from the envelope's exactThrough. Without it the envelope's id can be older
- * than what its content holds, so content behind Firestore is "unmarked" and isn't caught up.
+ * than what its content holds, so content behind Firestore is "unmarked" and isn't caught up. So is
+ * content whose envelope has no id, which says nothing about the entries the content holds.
  */
 export function planCatchUp(saved: { id?: string; index?: number },
     last: { id: string | null; index: number }): CatchUpPlan {
-  if (!saved.id || last.id == null || saved.id === last.id) return { kind: "none" };
-  if (saved.index === undefined) return { kind: "unmarked" };
+  if (last.id == null || saved.id === last.id) return { kind: "none" };
+  if (!saved.id || saved.index === undefined) return { kind: "unmarked" };
   if (last.index <= saved.index) return { kind: "none" };
   const gap = last.index - saved.index;
   if (gap > kCatchUpMaxEntries) return { kind: "too-large", gap };
