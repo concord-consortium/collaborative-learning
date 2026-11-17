@@ -144,6 +144,28 @@ describe("onClassDataDocWritten", () => {
     expect(humanMessageOf(lastCall)).toContain("digest one");
   });
 
+  test("the merge request repeats an authored addition but not an authored replacement", async () => {
+    mockGetUnitSummary.mockResolvedValue(unitSummaryResult({
+      unit: {
+        replaceStudentPrompt: "List every misconception you can find.",
+        appendToStudentPrompt: "Call out anything a teacher should address tomorrow.",
+      },
+      byProblemOrdinal: {},
+    }));
+    mockInvoke.mockResolvedValue(invokeResponse("a chunk summary"));
+
+    await writeAndTrigger({
+      studentContent: longStudentContent(),
+      currentProblemOrdinal: "1.1",
+    });
+
+    expect(mockInvoke.mock.calls.length).toBeGreaterThan(1);
+    const lastCall = mockInvoke.mock.calls.length - 1;
+    expect(humanMessageOf(0)).toContain("List every misconception you can find.");
+    expect(humanMessageOf(lastCall)).toContain("Call out anything a teacher should address tomorrow.");
+    expect(humanMessageOf(lastCall)).not.toContain("List every misconception you can find.");
+  });
+
   test("no currentProblemOrdinal: both instructions are present, but there is no slice", async () => {
     mockInvoke.mockResolvedValueOnce(invokeResponse("student chunk summary"));
 
