@@ -133,6 +133,11 @@ export class PlaybackControlModel {
   // rc-slider reports every mouse move of a drag, and only the last of them is worth
   // seeking to.
   private queuedStopIndex: number | undefined = undefined;
+  // Counts the requests for a stop. A request can name the stop index already queued and still
+  // mean another position: the latest stop keeps its index when a new entry moves it, and a new
+  // link's stop can take the index of the old one. So the seek loop compares this count, not the
+  // index, to tell whether a request arrived while it waited or sought.
+  private requestCount = 0;
   private seekLoop: Promise<void> | undefined = undefined;
   private followEndDisposer: IReactionDisposer;
 
@@ -149,7 +154,7 @@ export class PlaybackControlModel {
     this.requestedStop = initialRequest;
     this.requestedHistoryId = requestedHistoryId;
     makeAutoObservable<PlaybackControlModel,
-                       "treeManager" | "advanceTimer" | "queuedStopIndex" | "seekLoop" |
+                       "treeManager" | "advanceTimer" | "queuedStopIndex" | "requestCount" | "seekLoop" |
                        "followEndDisposer" | "requestedStopIndex" | "linkStopIndex">(this, {
       // The comment queries hand back a new array whenever their results change, so tracking
       // the reference is enough, and it leaves the comment objects themselves alone.
@@ -161,6 +166,7 @@ export class PlaybackControlModel {
       uniqueFailures: false,
       treeManager: false,
       advanceTimer: false,
+      requestCount: false,
       seekLoop: false,
       followEndDisposer: false,
       requestedStopIndex: computed,
@@ -463,6 +469,7 @@ export class PlaybackControlModel {
   private async seekToStop(stopIndex: number, request: StopRequest) {
     this.requestedStop = request;
     this.queuedStopIndex = stopIndex;
+    this.requestCount++;
     // Only one seek runs at a time. A request arriving while one is running waits for it,
     // and the loop then goes to wherever the reader has got to by that point rather than
     // replaying every stop they dragged across.
@@ -518,6 +525,7 @@ export class PlaybackControlModel {
     // has settled there.
     while (this.queuedStopIndex !== undefined) {
       const target = this.queuedStopIndex;
+      const requestCount = this.requestCount;
       const position = this.historyPositionForStopIndex(target);
       // A throw leaves the document part-way, like a seek that stops short, so it is reported
       // the same way. Catching it here is also what lets the queue below clear, bringing the
@@ -532,9 +540,7 @@ export class PlaybackControlModel {
           // Requests can arrive while the browser paints: a link, or a new entry that moves the end
           // a reader is following. Start over with whatever is queued now rather than seek to a
           // destination that is out of date.
-          if (this.queuedStopIndex !== target || this.historyPositionForStopIndex(target) !== position) {
-            continue;
-          }
+          if (this.requestCount !== requestCount) continue;
         }
         await this.treeManager.goToHistoryEntryPosition(position);
       } catch (error) {
@@ -559,11 +565,8 @@ export class PlaybackControlModel {
         // over wherever the document actually stopped.
         if (blocked) this.requestedStop = undefined;
         // A newer request may have arrived while this seek ran. Leave its target for the
-        // next turn of the loop. So may a new entry at the end: the latest stop keeps its index
-        // when it moves, so a reader following the end queues the index this seek already had,
-        // and it has to run again to reach the new position.
-        const endMoved = this.requestedStop === "end" && this.historyPositionForStopIndex(target) !== position;
-        if (this.queuedStopIndex === target && !endMoved) this.queuedStopIndex = undefined;
+        // next turn of the loop.
+        if (this.requestCount === requestCount) this.queuedStopIndex = undefined;
       });
     }
   }

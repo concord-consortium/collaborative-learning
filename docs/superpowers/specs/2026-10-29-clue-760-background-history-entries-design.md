@@ -306,9 +306,10 @@ In [playback-control-model.ts](../../../src/components/playback/playback-control
 - **Following the end.** While a viewer is at the end, new background entries keep arriving and
   move the latest stop rather than adding stops. The follow-end reaction applies them, so it
   watches the history length, not only `lastStopIndex`. The latest stop keeps its index when it
-  moves, so the reaction's request can look the same as the seek already queued. The seek loop
-  checks whether the queued stop still shows the position it is about to seek to after waiting for
-  the browser to paint, and whether the end moved once the seek has run, and seeks again if so.
+  moves, and a new link's stop can take the index of the old one, so a new request can name the
+  stop index already queued and still mean another position. The model counts requests, and the
+  seek loop compares the count, not the index: a request that arrived while it waited for the
+  browser to paint, or while it sought, sends it round again.
 - **Positions between stops.** A seek that stops on a failing entry can leave the document between
   two stops. The thumb shows the stop before that position. A failure marker goes on the stop that
   playback couldn't reach.

@@ -657,7 +657,9 @@ describe("PlaybackControlModel", () => {
     it("reaches an entry that arrives at the end while a seek to it runs", async () => {
       const { model, treeManager } = setupModel(3, { appliedPosition: 0, backgroundIndexes: [2] });
       const seekTo = treeManager.goToHistoryEntryPosition;
-      jest.spyOn(treeManager, "goToHistoryEntryPosition").mockImplementationOnce(position => {
+      // The entry arrives once the seek has yielded, as it could if seeks gave way to the browser.
+      jest.spyOn(treeManager, "goToHistoryEntryPosition").mockImplementationOnce(async position => {
+        await Promise.resolve();
         addEntry(treeManager, 3, { background: true });
         return seekTo(position);
       });
@@ -1025,6 +1027,25 @@ describe("PlaybackControlModel", () => {
       expect(seekTo).not.toHaveBeenCalledWith(0);
       expect(treeManager.numHistoryEventsApplied).toBe(3);
       expect(model.currentStopIndex).toBe(3);
+    });
+
+    // Both links get the link stop at index 2, at different positions.
+    it("goes to a new link that arrives while a seek runs, even at the same stop index", async () => {
+      const { model, treeManager } = setupLink(6, "entry-2", { backgroundIndexes: [1, 2, 3, 4] });
+      const seekTo = treeManager.goToHistoryEntryPosition;
+      let secondLink: Promise<void> | undefined;
+      // The link arrives once the seek has yielded, as it could if seeks gave way to the browser.
+      jest.spyOn(treeManager, "goToHistoryEntryPosition").mockImplementationOnce(async position => {
+        await Promise.resolve();
+        secondLink = model.followLink("entry-3");
+        return seekTo(position);
+      });
+
+      await model.followLink("entry-2");
+      await secondLink;
+
+      expect(model.sliderStops[2]).toMatchObject({ kind: "link", position: 4 });
+      expect(treeManager.numHistoryEventsApplied).toBe(4);
     });
 
     it("puts the thumb on the link's stop when the link's seek reaches it beside a comment", async () => {
