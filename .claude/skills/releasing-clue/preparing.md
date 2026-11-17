@@ -186,7 +186,7 @@ What's deployed (read-only; projects are `staging` = collaborative-learning-stag
   commands; running one is a Google Cloud delete **[approve]**. Ask the function's author, and let
   the developer choose: wait for the PR to merge, or deploy the release's changed functions by
   name (cutting.md). Don't ask the author to deploy their whole branch instead: it may lack
-  functions changes the release has (in 7.8.0, #3052's branch lacked #3060).
+  functions changes the release has.
   Production's 1st-gen functions are in codebase `default` on nodejs16, while staging's are in
   `functions-v1`; a `functions-v1` deploy to production needs a decision about that first.
 - **Indexes:** `npx firebase firestore:indexes --project <project>`. Strip the implicit `__name__`
