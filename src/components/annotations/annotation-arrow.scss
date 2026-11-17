@@ -14,9 +14,10 @@
   }
 
   &.background-arrow {
+    // The stem's stroke width sets its click area. It comes from the `hitStrokeWidth`
+    // prop (an inline style), which `fitStemHitWidth` narrows on a short sparrow.
     .arrow-stem {
       stroke-opacity: 0;
-      stroke-width: 11px;
       pointer-events: none;
 
       .annotation-layer.show-handles & {
