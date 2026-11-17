@@ -204,8 +204,9 @@ export const DocumentsModel = types
           return Promise.resolve();
         }
         // The content listener may have replaced the loaded content, along with its envelope, before
-        // or during the catch-up. This client doesn't change the envelope: its sender doesn't save
-        // while the catch-up is pending.
+        // or during the catch-up. This client's sender doesn't change the envelope meanwhile: it
+        // doesn't start until the catch-up finishes, and the listener replaces the content, restarting
+        // the catch-up, only once an earlier sender's last write has settled.
         catchUp = manager.catchUpAtLoad(() => document.savedEnvelope)
           .finally(() => document.setHistoryCatchUpPending(false));
         self.historyCatchUps.set(document, catchUp);

@@ -101,14 +101,24 @@ listener replaces along with the content. If the listener replaces the content w
 reads Firestore, the catch-up applies nothing and the session isn't exact. If it replaces the content
 of a document that has already caught up with different content, for example older content when
 the caught-up content was never saved, the session starts over: the document is marked as not
-caught up again, and the next open for editing catches it up from the new content's envelope. As soon as the sender
-starts, it saves the caught-up content, so the stored content isn't left behind its history.
+caught up again, and the next open for editing catches it up from the new content's envelope. The
+catch-up plans against the newest entry the session knows of: its own newest commit, or else
+Firestore's last entry as read when the document first caught up. As soon as the sender starts, it
+saves the caught-up content, so the stored content isn't left behind its history.
+
+**The content listener waits for the last save.** Once a document closes, the content listener
+monitors it again, but not while the sender may still write its content: while the sender keeps
+saving after the document closes, and until its last write settles, including the one sent when the
+30 seconds run out. Until then the stored content can be older than the document's, and replacing it
+would undo edits that haven't been saved yet.
 
 An envelope without `exactThrough` can hold entries after its `lastHistoryEntryId`, so applying the
 entries after that id could apply some of them twice. When such an envelope is behind its history,
 nothing is applied for it: the document opens as saved, and the session isn't exact, so its saves
 are intermediate ones. One at Firestore's last entry has nothing to catch up, so the session is
-exact. Publications are never caught up.
+exact. An exact envelope at an entry other than the
+newest one the session knows of, with an index at or past it, was most likely saved by another
+session; the session isn't exact (`history-written-elsewhere`). Publications are never caught up.
 
 **Page hide.** On page hide, the sender sends the newest committed snapshot save at once, without
 waiting for the minimum gap or the write in flight. The sender listens for page hide itself, so this
@@ -134,6 +144,11 @@ intermediate save over it loses nothing. The client tracks that envelope in the 
   entry fails wherever it is applied later: in playback, in a catch-up, or on another group
   member's client. The session that recorded it is already not exact, so it makes no exact saves
   past that entry.
+- Two sessions editing the same individual document, in two tabs or on two devices, aren't
+  supported. Each numbers its entries from the newest entry it knows of, so the history forks. The
+  catch-up's chain check keeps a load from applying entries from another fork, and the session isn't
+  exact. Nothing detects the fork itself, and a load can start exact on either side of a fork of
+  equal length.
 
 ## Related docs
 

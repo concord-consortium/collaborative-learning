@@ -144,11 +144,11 @@ describe("DBDocumentsContentListener (personal documents)", () => {
     listener.stop();
   });
 
-  it("does not monitor the document open for editing, and re-monitors when it closes", () => {
+  it("does not monitor the document open for editing, and re-monitors when its last save settles", () => {
     const listener = new DBDocumentsContentListener(db);
     listener.start();
 
-    const doc = makeDoc("p1", "student-1");
+    const doc = observable({ ...makeDoc("p1", "student-1"), contentSaveActive: false });
     runInAction(() => docs.push(doc));
 
     const path = documentPath("student-1", "p1");
@@ -156,11 +156,18 @@ describe("DBDocumentsContentListener (personal documents)", () => {
 
     // Opening the doc for editing in the workspace should tear down its monitor
     // so a remote snapshot can't clobber local unsaved edits.
-    runInAction(() => { problemWorkspace.primaryDocumentKey = "p1"; });
+    runInAction(() => {
+      problemWorkspace.primaryDocumentKey = "p1";
+      doc.contentSaveActive = true;
+    });
     expect(refsByPath[path].off).toHaveBeenCalledWith("value", expect.any(Function));
 
-    // Closing the editor re-attaches the monitor.
+    // Closing the editor doesn't re-attach the monitor while the content may still be saved, since
+    // the RTDB content can be older until then.
     runInAction(() => { problemWorkspace.primaryDocumentKey = undefined; });
+    expect(refsByPath[path].on).toHaveBeenCalledTimes(1);
+
+    runInAction(() => { doc.contentSaveActive = false; });
     expect(refsByPath[path].on).toHaveBeenCalledTimes(2);
 
     listener.stop();

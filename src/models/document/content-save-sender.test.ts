@@ -865,6 +865,38 @@ describe("ContentSaveSender", () => {
       expect(rtdbEnvelopeRef.update).toHaveBeenCalledTimes(2);
     });
 
+    // The content listener waits for this before it replaces the content with the RTDB's.
+    it("keeps the content save active until the writes sent before the drain timeout settle", async () => {
+      const { rtdbEnvelopeRef, document, edit, sender } = track(setup());
+      expect(document.contentSaveActive).toBe(true);
+      await edit("alpha");
+      sender.detach();
+      jest.advanceTimersByTime(kIntermediateSaveIntervalMs);
+      await edit("bravo");
+      jest.advanceTimersByTime(kSenderUnmountLimitMs - kIntermediateSaveIntervalMs);
+      expect(rtdbEnvelopeRef.update).toHaveBeenCalledTimes(2);
+      expect(document.contentSaveActive).toBe(true);
+
+      rtdbEnvelopeRef.writes[0].resolve();
+      await flush();
+      expect(document.contentSaveActive).toBe(true);
+      rtdbEnvelopeRef.writes[1].reject(new Error("offline"));
+      await flush();
+      expect(document.contentSaveActive).toBe(false);
+    });
+
+    it("clears the content save once a drain ends with nothing in flight", async () => {
+      const { commits, rtdbEnvelopeRef, document, edit, sender } = track(setup());
+      const a = await edit("alpha");
+      commits.commit(a);
+      jest.advanceTimersByTime(kMinimumSaveGapMs);
+      rtdbEnvelopeRef.writes[0].resolve();
+      await flush();
+      expect(document.contentSaveActive).toBe(true);
+      sender.detach();
+      expect(document.contentSaveActive).toBe(false);
+    });
+
     it("records the envelope without exactThrough when it stops with an intermediate save in flight", async () => {
       const { rtdbEnvelopeRef, document, edit, sender } = track(setup());
       document.setSavedEnvelope(
