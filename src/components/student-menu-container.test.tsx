@@ -40,7 +40,7 @@ describe("StudentMenuContainer", () => {
     await ue.click(screen.getByTestId("user-header"));
     expect(screen.getByTestId("user-list")).toBeInTheDocument();
     expect(screen.getByTestId("list-item-log-out")).not.toHaveAttribute("aria-selected");
-    expect(screen.getByTestId("user-header")).not.toHaveTextContent("Log Out");
+    const headerText = screen.getByTestId("user-header").textContent;
 
     // In Jest 30/jsdom, window.location is non-configurable so we cannot
     // mock location.assign directly. The call to location.assign triggers a
@@ -51,6 +51,7 @@ describe("StudentMenuContainer", () => {
     // Verify getConfirmLogoutUrl was called with undefined (no return URL)
     // since user.standaloneAuthUser is not set
     expect(authUtils.getConfirmLogoutUrl).toHaveBeenCalledWith(undefined);
+    expect(screen.getByTestId("user-header").textContent).toBe(headerText);
   });
 
   it("lists About CLUE first, above a divider, and opens it without logging out", async () => {
