@@ -18,10 +18,6 @@ import type { ISavedEnvelope } from "../document/document";
 // The user id before the user is known.
 const kUnknownUserId = "0";
 
-const seekIncompleteMessage = (historyId: string) =>
-  `Could not show this document at the requested point in its history (id: ${historyId}): ` +
-  "some of its history could not be replayed.";
-
 interface IFirestoreHistoryInfo {
   documentPath: string;
   lastEntryIndex: number;
@@ -539,7 +535,12 @@ export class FirestoreHistoryManager implements ICommitSource {
     }
   }
 
-  async moveToHistoryEntryAfterLoad(historyId: string) {
+  /**
+   * Reports what keeps a link from showing the entry it asked for: a history that doesn't load, or
+   * an entry the history doesn't have. The playback control does the seek itself, through the queue
+   * its slider uses, so the seek shows its progress and can't race the slider's.
+   */
+  async checkHistoryEntryAfterLoad(historyId: string) {
     // Any message on screen describes a request this one replaces, and the wait below can take
     // 30 seconds, so drop it before starting rather than when this request resolves.
     this.setHistoryEntryRequestError(undefined);
@@ -558,48 +559,24 @@ export class FirestoreHistoryManager implements ICommitSource {
         { timeout: 30000 }
       );
     } catch {
-      console.warn("moveToHistoryEntryAfterLoad: history did not load within timeout; status:",
+      console.warn("checkHistoryEntryAfterLoad: history did not load within timeout; status:",
         this.historyStatus);
       this.setHistoryEntryRequestError(historyNotLoadedMessage);
       return;
     }
     if (this.historyStatus !== HistoryStatus.HISTORY_LOADED) {
-      console.warn("moveToHistoryEntryAfterLoad: history did not load; status:", this.historyStatus);
+      console.warn("checkHistoryEntryAfterLoad: history did not load; status:", this.historyStatus);
       this.setHistoryEntryRequestError(historyNotLoadedMessage);
       return;
     }
-    // goToHistoryEntryPosition takes a position, which counts applied entries: position p is the
-    // document with entries 0..p-1 applied. A historyId names the entry the document had reached,
-    // so the moment it names is the position that includes it, one past its index.
     // "first" is the sentinel logDocumentEvent emits for a change made before the document had
-    // any entry at all, which is position 0.
-    let position = 0;
-    if (historyId !== "first") {
-      const index = this.treeManager.findHistoryEntryIndex(historyId);
-      if (index < 0) {
-        console.warn("Did not find history entry with id: ", historyId);
-        this.setHistoryEntryRequestError(
-          `Could not find the requested point in this document's history (id: ${historyId}).`);
-        return;
-      }
-      position = index + 1;
+    // any entry at all, so it names no entry to look for.
+    if (historyId !== "first" && this.treeManager.findHistoryEntryIndex(historyId) < 0) {
+      console.warn("Did not find history entry with id: ", historyId);
+      this.setHistoryEntryRequestError(
+        `Could not find the requested point in this document's history (id: ${historyId}).`);
     }
-
-    // goToHistoryEntryPosition stops at the last position it could apply, so where it landed
-    // has to be checked.
-    try {
-      await this.treeManager.goToHistoryEntryPosition(position);
-    } catch (error) {
-      console.warn("moveToHistoryEntryAfterLoad: seek failed for id:", historyId, error);
-      this.setHistoryEntryRequestError(seekIncompleteMessage(historyId));
-      return;
-    }
-    // Nothing to report on success: the message was cleared before the request started.
-    if (this.treeManager.numHistoryEventsApplied !== position) {
-      console.warn("moveToHistoryEntryAfterLoad: seek stopped at",
-        this.treeManager.numHistoryEventsApplied, "instead of", position, "for id:", historyId);
-      this.setHistoryEntryRequestError(seekIncompleteMessage(historyId));
-    }
+    // Nothing to report otherwise: the message was cleared before the request started.
   }
 
   /**
@@ -611,7 +588,7 @@ export class FirestoreHistoryManager implements ICommitSource {
   private async moveContentToNewestEntry(contentEntryId: string) {
     const { treeManager } = this;
     try {
-      // Bounded, like moveToHistoryEntryAfterLoad, so a history that never loads doesn't leak the
+      // Bounded, like checkHistoryEntryAfterLoad, so a history that never loads doesn't leak the
       // reaction.
       await when(() => {
         const status = this.getLoadStatus();

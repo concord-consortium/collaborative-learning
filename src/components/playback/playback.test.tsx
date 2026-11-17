@@ -60,14 +60,14 @@ function makeHistoryManager(historyEntryRequestError?: string) {
     historyStatus: HistoryStatus.HISTORY_LOADED,
     historyStatusString: "History is loaded",
     historyEntryRequestError,
-    moveToHistoryEntryAfterLoad: jest.fn()
+    checkHistoryEntryAfterLoad: jest.fn()
   } as unknown as FirestoreHistoryManager;
 }
 
 // A real manager, so that the MobX wiring is part of what is covered. A stubbed manager
 // holds a plain field, which renders the same way whether or not historyEntryRequestError
 // is declared observable — and without that declaration the alert never appears in the app,
-// because nothing re-renders when the seek fails.
+// because nothing re-renders when the check fails.
 function makeRealHistoryManager(docModel: DocumentModelType) {
   const firestore = {
     doc: () => ({
@@ -100,7 +100,7 @@ describe("PlaybackComponent", () => {
       .toHaveTextContent("Could not find the requested point");
   });
 
-  // The seek resolves well after the reader's attention has moved on, so the message has to
+  // The check can resolve well after the reader's attention has moved on, so the message has to
   // arrive into a live region that was already there. A region rendered together with its
   // text is announced inconsistently, and that is the case this test has to rule out.
   it("announces a request failure that arrives after the document has loaded", async () => {
@@ -187,6 +187,6 @@ describe("PlaybackComponent", () => {
               requestedHistoryId="entry-0" />);
 
     expect(screen.getByTestId("playback-history-request-error")).toBeEmptyDOMElement();
-    expect(historyManager.moveToHistoryEntryAfterLoad).toHaveBeenCalledWith("entry-0");
+    expect(historyManager.checkHistoryEntryAfterLoad).toHaveBeenCalledWith("entry-0");
   });
 });

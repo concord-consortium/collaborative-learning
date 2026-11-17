@@ -290,13 +290,25 @@ In [playback-control-model.ts](../../../src/components/playback/playback-control
     builds on this.
   - **A new link while playback is open** moves the marker, and the link's stop, to the new entry.
     The document is about to be sent there, so, as when playback opens from a link, the reader
-    stops following the end: the new link's stop appearing past them doesn't pull them back.
+    stops following the end: the new link's stop appearing past them doesn't pull them back. Play
+    stops too, since its next step would move the document off the link's entry.
+  - **The control does a link's seek**, with the model's `followLink`, through the same queue as
+    the slider's seeks. So a link's seek shows that it is running, and a slider seek still waiting
+    to start gives way to it. The control mounts only once the history has loaded, so the link's
+    entry can be found by then. The history manager's `checkHistoryEntryAfterLoad`
+    ([firestore-history-manager.ts](../../../src/models/history/firestore-history-manager.ts)) waits
+    for the history and reports a history that doesn't load, or an entry it doesn't have, but
+    doesn't seek. A link names one entry, so the reader stays on it rather than following the end,
+    even when it is the last entry.
 - **Stops stay in history order.** A comment or link stop sits between the user stops around it,
   so Play and the slider never move backward through history.
 - **Play** steps from stop to stop at the current 500 ms.
 - **Following the end.** While a viewer is at the end, new background entries keep arriving and
   move the latest stop rather than adding stops. The follow-end reaction applies them, so it
-  watches the history length, not only `lastStopIndex`.
+  watches the history length, not only `lastStopIndex`. The latest stop keeps its index when it
+  moves, so the reaction's request can look the same as the seek already queued. The seek loop
+  checks whether the queued stop still shows the position it is about to seek to after waiting for
+  the browser to paint, and whether the end moved once the seek has run, and seeks again if so.
 - **Positions between stops.** A seek that stops on a failing entry can leave the document between
   two stops. The thumb shows the stop before that position. A failure marker goes on the stop that
   playback couldn't reach.
@@ -472,8 +484,8 @@ the background check covers them and that clause goes too.
   `producerTileId` names a real tile.
 - An "earliest available" stop at the earliest reachable position, with the rail before it shaded
   with stripes and its stops unreachable.
-- Playback shows when a seek is running, after 300 ms or at once for a seek across at least 100
-  entries. Splitting seeks so they yield is left to a follow-up story.
+- Playback shows when a seek is running, a link's seek included, after 300 ms or at once for a seek
+  across at least 100 entries. Splitting seeks so they yield is left to a follow-up story.
 - Revert entries don't copy `background` or `producerTileId`; that waits for the group-docs work.
 
 ## Left to the builder
@@ -505,9 +517,15 @@ the background check covers them and that clause goes too.
   can't rebuild the old state gets an earliest available stop, and the stops before it can't be
   reached. A link to a user entry puts the marker on that entry's stop, and a new link moves the
   link stop and marker and stops following the end. A seek across at least 100 entries is reported
-  as long and lets the browser paint before it starts.
-- **Playback components:** the progress indicator's 300 ms delay, `aria-busy` and status text; the
-  link marker and clicking it; the shaded range; "Earlier history isn't available." at the
+  as long and lets the browser paint before it starts. A link's seek goes through the model's queue:
+  it is reported as long when it crosses 100 entries, it stops Play, a slider seek still waiting for
+  the paint gives way to it, and the reader stays on a link to the last entry. An entry that arrives
+  at the end during a seek there, while it waits for the paint or while it runs, is still reached.
+  The history manager only reports a link's problems: a history that doesn't load, or an entry it
+  doesn't have.
+- **Playback components:** the progress indicator's 300 ms delay, `aria-busy` and status text, and
+  the indicator for a link's long seek; a link sending the document to its entry; the link marker
+  and clicking it; the shaded range; "Earlier history isn't available." at the
   earliest stop.
 - **Performance:** playback across load entries was measured one entry at a time (CLUE-773). Here
   one move between user stops applies every tick in between, and in a document with a load entry

@@ -27,8 +27,8 @@ export interface IMarkerProps {
 
 interface IProps {
   treeManager: Instance<typeof TreeManager>;
-  // Set when a link asked for a particular entry of this document. The document is about to
-  // be sent there, so the reader is not following the end of its history. The slider keeps a
+  // Set when a link asked for a particular entry of this document. The control sends the
+  // document there, so the reader is not following the end of its history. The slider keeps a
   // marker on that entry.
   requestedHistoryId: string | undefined;
 }
@@ -47,9 +47,14 @@ export const PlaybackControlComponent: React.FC<IProps> = observer((props: IProp
   const [model] = useState(() =>
     new PlaybackControlModel(treeManager, requestedHistoryId ? undefined : "end", requestedHistoryId));
   useEffect(() => () => model.dispose(), [model]);
-  // A later link into the same document doesn't remount the control, so its id is passed on.
+  // The control mounts once the history has loaded, so a link's entry can be found from here. A
+  // later link into the same document doesn't remount the control, so its id is passed on too.
   useEffect(() => {
-    model.setRequestedHistoryId(requestedHistoryId);
+    if (requestedHistoryId) {
+      void model.followLink(requestedHistoryId);
+    } else {
+      model.setRequestedHistoryId(undefined);
+    }
   }, [model, requestedHistoryId]);
 
   // Only a seek that has run for a while, or that the model expects to be long, is reported as

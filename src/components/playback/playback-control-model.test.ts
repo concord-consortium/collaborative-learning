@@ -634,6 +634,39 @@ describe("PlaybackControlModel", () => {
 
       expect(model.currentStopIndex).toBe(1);
     });
+
+    // The latest stop keeps its index when an entry moves it, so the request to follow it looks
+    // the same as the seek that is waiting for the browser to paint.
+    it("reaches an entry that arrives while a long seek to the end waits to start", async () => {
+      const entryCount = kLongSeekEntryCount + 1;
+      const { model, treeManager } = setupModel(entryCount, {
+        appliedPosition: 0, backgroundIndexes: [entryCount - 1]
+      });
+      const seek = model.goToSliderStop(model.lastStopIndex);
+      expect(model.longSeekInProgress).toBe(true);
+
+      addEntry(treeManager, entryCount, { background: true });
+      await new Promise(resolve => requestAnimationFrame(resolve));
+      jest.advanceTimersByTime(0);
+      await seek;
+
+      expect(treeManager.numHistoryEventsApplied).toBe(entryCount + 1);
+      expect(model.currentStopIndex).toBe(model.lastStopIndex);
+    });
+
+    it("reaches an entry that arrives at the end while a seek to it runs", async () => {
+      const { model, treeManager } = setupModel(3, { appliedPosition: 0, backgroundIndexes: [2] });
+      const seekTo = treeManager.goToHistoryEntryPosition;
+      jest.spyOn(treeManager, "goToHistoryEntryPosition").mockImplementationOnce(position => {
+        addEntry(treeManager, 3, { background: true });
+        return seekTo(position);
+      });
+
+      await model.goToSliderStop(model.lastStopIndex);
+
+      expect(treeManager.numHistoryEventsApplied).toBe(4);
+      expect(model.currentStopIndex).toBe(model.lastStopIndex);
+    });
   });
 
   describe("goToSliderStop", () => {
@@ -920,6 +953,78 @@ describe("PlaybackControlModel", () => {
       expect(model.requestedStop).toBeUndefined();
       expect(seek).not.toHaveBeenCalled();
       seek.mockRestore();
+    });
+
+    it("sends the document to the entry a link asks for", async () => {
+      const { model, treeManager } = setupLink(4, "entry-2", { backgroundIndexes: [1, 2] });
+
+      await model.followLink("entry-2");
+
+      expect(treeManager.numHistoryEventsApplied).toBe(3);
+      expect(model.currentStopIndex).toBe(2);
+    });
+
+    it("leaves the document where it is for an id the history doesn't have", async () => {
+      const { model, treeManager } = setupLink(4, "no-such-id");
+      const seekTo = jest.spyOn(treeManager, "goToHistoryEntryPosition");
+
+      await model.followLink("no-such-id");
+
+      expect(seekTo).not.toHaveBeenCalled();
+      expect(treeManager.numHistoryEventsApplied).toBe(4);
+    });
+
+    // A link names one entry, so the reader stays on it as later entries arrive.
+    it("doesn't follow the end after a link to the last entry", async () => {
+      const { model, treeManager } = setupLink(3, "entry-2", { backgroundIndexes: [2], appliedPosition: 0 });
+
+      await model.followLink("entry-2");
+      addEntry(treeManager, 3, { background: true });
+      await flushPromises();
+
+      expect(treeManager.numHistoryEventsApplied).toBe(3);
+    });
+
+    it("reports a link's seek across many entries as long", async () => {
+      const { model, treeManager } = setupLink(kLongSeekEntryCount + 1, "entry-0");
+      const seekTo = jest.spyOn(treeManager, "goToHistoryEntryPosition");
+
+      const seek = model.followLink("entry-0");
+      expect(model.seekInProgress).toBe(true);
+      expect(model.longSeekInProgress).toBe(true);
+
+      await new Promise(resolve => requestAnimationFrame(resolve));
+      jest.advanceTimersByTime(0);
+      await seek;
+      expect(seekTo).toHaveBeenCalledWith(1);
+      expect(model.seekInProgress).toBe(false);
+    });
+
+    it("stops Play when a new link arrives", async () => {
+      const { model, treeManager } = setupModel(5, { appliedPosition: 0 });
+      model.togglePlay(true);
+
+      await model.followLink("entry-3");
+      await runPlaybackStep();
+
+      expect(model.sliderPlaying).toBe(false);
+      expect(treeManager.numHistoryEventsApplied).toBe(4);
+    });
+
+    it("sends a seek still waiting for the browser to paint to a link that arrives", async () => {
+      const { model, treeManager } = setupModel(kLongSeekEntryCount + 5);
+      const seekTo = jest.spyOn(treeManager, "goToHistoryEntryPosition");
+      const slide = model.goToSliderStop(0);
+      expect(model.longSeekInProgress).toBe(true);
+
+      const link = model.followLink("entry-2");
+      await new Promise(resolve => requestAnimationFrame(resolve));
+      jest.advanceTimersByTime(0);
+      await Promise.all([slide, link]);
+
+      expect(seekTo).not.toHaveBeenCalledWith(0);
+      expect(treeManager.numHistoryEventsApplied).toBe(3);
+      expect(model.currentStopIndex).toBe(3);
     });
 
     it("puts the thumb on the link's stop when the link's seek reaches it beside a comment", async () => {

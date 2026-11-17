@@ -196,8 +196,8 @@
 
   // Sits above the playback bar rather than in its row, which is a fixed height, and above
   // .playback-failure-warning: both are positioned against .playback-component and can be
-  // visible at once, when a deep link's seek stops short and the reader then drags the
-  // scrubber past the same entry.
+  // visible at once, when a deep link's entry can't be found and the reader then drags the
+  // scrubber onto an entry that can't be applied.
   .playback-history-request-error {
     @include playback-alert;
     bottom: calc(100% + #{$playback-alert-height});

@@ -190,11 +190,27 @@ export class PlaybackControlModel {
    * A new link into the document's history moves the link stop and marker to its entry. The
    * document is about to be sent there, so, as when the control opens with a link, the reader
    * is no longer following the end: the link stop appearing past them must not pull them back.
+   * Play stops too, since its next step would move the document off the entry the link asked for.
    */
   setRequestedHistoryId(requestedHistoryId: string | undefined) {
     if (requestedHistoryId === this.requestedHistoryId) return;
-    if (requestedHistoryId !== undefined) this.requestedStop = undefined;
+    if (requestedHistoryId !== undefined) {
+      this.requestedStop = undefined;
+      // Set directly rather than through togglePlay, which would log a pause the reader didn't
+      // make.
+      this.sliderPlaying = false;
+      this.clearAdvanceTimer();
+    }
     this.requestedHistoryId = requestedHistoryId;
+  }
+
+  /**
+   * Sends the document to the entry a link into it asked for. The seek goes through the same queue
+   * as the slider's, so it shows its progress, and a seek still waiting to start gives way to it.
+   */
+  async followLink(requestedHistoryId: string) {
+    this.setRequestedHistoryId(requestedHistoryId);
+    await this.goToLink();
   }
 
   setComments(comments?: WithId<CommentDocument>[], simplePathComments?: WithId<CommentDocument>[]) {
@@ -431,13 +447,21 @@ export class PlaybackControlModel {
   }
 
   async goToSliderStop(requestedIndex: number) {
-    // The stops before the earliest available one can't be reached, so a request for one of
-    // them goes no further back than it.
-    const stopIndex = Math.max(requestedIndex, this.earliestStopIndex);
+    const stopIndex = this.reachableStopIndex(requestedIndex);
     // Asking for the last stop is asking to be at the end. The behavior we want when they
     // are at the end is to stay at the end as new stops are added, so record the request as
     // "end" rather than as the index that happens to be last right now.
-    this.requestedStop = stopIndex >= this.lastStopIndex ? "end" : stopIndex;
+    await this.seekToStop(stopIndex, stopIndex >= this.lastStopIndex ? "end" : stopIndex);
+  }
+
+  // The stops before the earliest available one can't be reached, so a request for one of them
+  // goes no further back than it.
+  private reachableStopIndex(requestedIndex: number) {
+    return Math.max(requestedIndex, this.earliestStopIndex);
+  }
+
+  private async seekToStop(stopIndex: number, request: StopRequest) {
+    this.requestedStop = request;
     this.queuedStopIndex = stopIndex;
     // Only one seek runs at a time. A request arriving while one is running waits for it,
     // and the loop then goes to wherever the reader has got to by that point rather than
@@ -465,7 +489,10 @@ export class PlaybackControlModel {
   async goToLink() {
     const index = this.linkStopIndex;
     if (index !== undefined) {
-      await this.goToSliderStop(index);
+      // A link names one entry, so the reader stays on it rather than following the end, even
+      // when that entry is the last one.
+      const stopIndex = this.reachableStopIndex(index);
+      await this.seekToStop(stopIndex, stopIndex);
     }
   }
 
@@ -502,6 +529,12 @@ export class PlaybackControlModel {
             Math.abs(position - applied) >= kLongSeekEntryCount) {
           runInAction(() => { this.longSeekInProgress = true; });
           await waitForPaint();
+          // Requests can arrive while the browser paints: a link, or a new entry that moves the end
+          // a reader is following. Start over with whatever is queued now rather than seek to a
+          // destination that is out of date.
+          if (this.queuedStopIndex !== target || this.historyPositionForStopIndex(target) !== position) {
+            continue;
+          }
         }
         await this.treeManager.goToHistoryEntryPosition(position);
       } catch (error) {
@@ -526,8 +559,11 @@ export class PlaybackControlModel {
         // over wherever the document actually stopped.
         if (blocked) this.requestedStop = undefined;
         // A newer request may have arrived while this seek ran. Leave its target for the
-        // next turn of the loop.
-        if (this.queuedStopIndex === target) this.queuedStopIndex = undefined;
+        // next turn of the loop. So may a new entry at the end: the latest stop keeps its index
+        // when it moves, so a reader following the end queues the index this seek already had,
+        // and it has to run again to reach the new position.
+        const endMoved = this.requestedStop === "end" && this.historyPositionForStopIndex(target) !== position;
+        if (this.queuedStopIndex === target && !endMoved) this.queuedStopIndex = undefined;
       });
     }
   }
