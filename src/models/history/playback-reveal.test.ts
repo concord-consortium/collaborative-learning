@@ -2,8 +2,10 @@ import { Instance } from "mobx-state-tree";
 import { createDocumentModel } from "../document/document";
 import { DocumentContentModelType } from "../document/document-content";
 import { ProblemDocument } from "../document/document-types";
+import { QuestionContentModel } from "../tiles/question/question-content";
+import { kQuestionTileType } from "../tiles/question/question-types";
 import { TableContentModelType } from "../tiles/table/table-content";
-import { TextContentModelType } from "../tiles/text/text-content";
+import { defaultTextContent, TextContentModelType } from "../tiles/text/text-content";
 import { registerTileTypes } from "../../register-tile-types";
 import { HistoryEntry, HistoryEntrySnapshot, HistoryEntryType } from "./history";
 import { getChangedTileId, getPlaybackRevealTileId } from "./playback-reveal";
@@ -14,7 +16,7 @@ jest.mock("firebase/app", () => ({
   functions: () => ({ httpsCallable: () => jest.fn() })
 }));
 
-registerTileTypes(["Text", "Table"]);
+registerTileTypes(["Text", "Table", "Question"]);
 
 const kTreeId = "doc";
 
@@ -154,5 +156,47 @@ describe("getChangedTileId", () => {
       { op: "replace", path: `/content/sharedModelMap/${sharedModelId}/sharedModel/name`, value: "n" },
       { op: "replace", path: `/content/tileMap/${textId}/content/text`, value: "t" }
     ], content)).toBe(textId);
+  });
+});
+
+describe("getPlaybackRevealTileId inside a Question", () => {
+  // A Question holding Text tiles A and B in rows of their own, with one entry that moves B's row
+  // above A's.
+  async function recordMoveInQuestion() {
+    const document = createDocumentModel({ uid: "1", type: ProblemDocument, key: kTreeId, content: {} as any });
+    const manager = document.treeManagerAPI as Instance<typeof TreeManager>;
+    const content = document.content!;
+    const question = QuestionContentModel.create({ type: kQuestionTileType, version: 2 });
+    const questionId = content.addTileContentInNewRow(question).tileId;
+    const textA = content.addTileContentInNewRow(defaultTextContent(), { rowList: question }).tileId;
+    const textB = content.addTileContentInNewRow(defaultTextContent(), { rowList: question }).tileId;
+    document.treeMonitor!.enableMonitoring();
+    content.userMoveTiles(content.getDragTileItems([textB]),
+      { rowInsertIndex: 0, rowDropId: content.findRowIdContainingTile(textA)!, rowDropLocation: "top" });
+    await expectEntryToBeComplete(manager, 1);
+    manager.setNumHistoryEntriesApplied(1);
+    const history = manager.document.history;
+    expect(history.at(0)!.records[0].patches.every(({ path }) =>
+      path.startsWith(`/content/tileMap/${questionId}/content/row`))).toBe(true);
+    const moveAndReveal = async (to: number) => {
+      const from = manager.numHistoryEventsApplied!;
+      await manager.goToHistoryEntryPosition(to);
+      return getPlaybackRevealTileId({ history, treeId: kTreeId, from, to, content });
+    };
+    return { content, questionId, textB, moveAndReveal };
+  }
+
+  it("names the tile a row move inside the Question moved, not the Question", async () => {
+    const { moveAndReveal, textB } = await recordMoveInQuestion();
+    expect(await moveAndReveal(0)).toBe(textB);
+    expect(await moveAndReveal(1)).toBe(textB);
+  });
+
+  it("names the Question when none of the tiles in the rows it changed is left", async () => {
+    const { content, questionId } = await recordMoveInQuestion();
+    expect(getChangedTileId([
+      { op: "remove", path: `/content/tileMap/${questionId}/content/rowOrder/0` },
+      { op: "remove", path: `/content/tileMap/${questionId}/content/rowMap/gone` }
+    ], content)).toBe(questionId);
   });
 });

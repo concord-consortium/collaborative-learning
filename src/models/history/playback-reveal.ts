@@ -9,20 +9,31 @@ import { getEntryPatchesForTree, HistoryEntryType, HistoryOperation } from "./hi
 // Every tile linked to a shared model gets this patch when the shared model changes, whatever
 // changed, so it does not mark the tile itself as changed.
 const kUpdatedHashSubpath = "/updatedHash";
+// The rows of a container tile, such as a Question. Group 1 is the row id, for a row patch.
+const kContainerRowsSubpathRegex = /^\/content\/(?:rowMap\/([^/]+)|rowOrder)(?:\/|$)/;
 
 /**
  * The tile a set of patches changed that exists in `content`, for history playback to bring on
  * screen. A tile the patches changed comes first, then a tile linked to a shared model they
- * changed, then a tile in a row they changed. Within each, the first in patch order wins.
+ * changed, then a tile in a row they changed (inside a container tile too), then a container tile
+ * whose rows they changed. Within each, the first in patch order wins.
  */
 export function getChangedTileId(patches: readonly IJsonPatch[], content: DocumentContentModelType) {
   const tileIds: string[] = [];
   const sharedModelIds: string[] = [];
   const rowIds: string[] = [];
+  const containerIds: string[] = [];
   patches.forEach(({ path }) => {
     const tileMatch = kTileSubtreePartsRegex.exec(path);
     if (tileMatch) {
-      if (tileMatch[2] !== kUpdatedHashSubpath) tileIds.push(tileMatch[1]);
+      const [, tileId, subpath] = tileMatch;
+      const containerRowsMatch = kContainerRowsSubpathRegex.exec(subpath);
+      if (containerRowsMatch) {
+        if (containerRowsMatch[1]) rowIds.push(containerRowsMatch[1]);
+        containerIds.push(tileId);
+      } else if (subpath !== kUpdatedHashSubpath) {
+        tileIds.push(tileId);
+      }
       return;
     }
     const sharedMatch = kSharedModelEntrySubtreeRegex.exec(path);
@@ -34,8 +45,8 @@ export function getChangedTileId(patches: readonly IJsonPatch[], content: Docume
     if (rowMatch) rowIds.push(rowMatch[1]);
   });
   const linkedTileIds = sharedModelIds.flatMap(id => content.sharedModelMap.get(id)?.tiles.map(tile => tile.id) ?? []);
-  const rowTileIds = rowIds.flatMap(id => content.getRow(id)?.tileIds ?? []);
-  return [...tileIds, ...linkedTileIds, ...rowTileIds].find(id => content.getTile(id));
+  const rowTileIds = rowIds.flatMap(id => content.getRowRecursive(id)?.tileIds ?? []);
+  return [...tileIds, ...linkedTileIds, ...rowTileIds, ...containerIds].find(id => content.getTile(id));
 }
 
 /**
