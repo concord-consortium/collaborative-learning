@@ -26,7 +26,6 @@ import { ContainerContext } from "./container-context";
 import { LogEventName } from "../../lib/logger-types";
 import { buildVisibilityLogParams, computeVisibleTiles, nextVisibilityCause,
   type ITileExtent, type IVisibilityLogExtra, type VisibilityCause } from "./tile-visibility";
-
 import { kPlaybackComponentClass } from "../playback/playback";
 import { prefersReducedMotion } from "../../utilities/dom-utils";
 import { getRevealScrollBehavior, getRevealScrollTop } from "./playback-reveal-scroll";
