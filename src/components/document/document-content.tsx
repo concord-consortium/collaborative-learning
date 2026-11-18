@@ -209,7 +209,7 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
   public componentDidUpdate(prevProps: IProps) {
     const { playbackRevealRequest } = this.props;
     if (playbackRevealRequest && playbackRevealRequest !== prevProps.playbackRevealRequest) {
-      this.revealTile(playbackRevealRequest.tileId);
+      this.revealTile(playbackRevealRequest);
     }
     if (this.props.logTileVisibility &&
         this.props.content?.contentId !== prevProps.content?.contentId) {
@@ -242,13 +242,14 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
   }
 
   // A tile the move added renders after this request arrives, so the lookup waits a frame and
-  // tries a few more before giving up.
-  private revealTile(tileId: string, framesLeft = kRevealFrames) {
+  // tries a few more before giving up. A newer request takes over from one still waiting.
+  private revealTile(request: { tileId: string }, framesLeft = kRevealFrames) {
     requestAnimationFrame(() => {
+      if (this.props.playbackRevealRequest !== request) return;
       const container = this.domElement;
-      const tileNode = container && getTileNode(container, tileId);
+      const tileNode = container && getTileNode(container, request.tileId);
       if (!container || !tileNode) {
-        if (container && framesLeft > 1) this.revealTile(tileId, framesLeft - 1);
+        if (container && framesLeft > 1) this.revealTile(request, framesLeft - 1);
         return;
       }
       const containerRect = container.getBoundingClientRect();

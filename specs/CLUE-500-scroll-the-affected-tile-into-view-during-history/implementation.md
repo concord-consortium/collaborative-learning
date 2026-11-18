@@ -247,8 +247,10 @@ Every early return in the action (no move, `jsonCopyOutOfStep`, a JSON copy that
 
 ```ts
   private requestCount = 0;
-  // Whether the queued seek should bring the tile it changes on screen.
-  private queuedRevealChange = true;
+  // Whether the next seek should bring the tile it changes on screen. A request that asks for it
+  // keeps it set until a seek uses it, so a later request that doesn't, such as a move following
+  // the end, can't cancel it.
+  private queuedRevealChange = false;
 ```
 
 Add `"queuedRevealChange"` to the private-name list of `makeAutoObservable` (wrapping the list, which would pass 120 characters) and `queuedRevealChange: false` to its overrides, beside `requestCount: false`. The follow-the-end reaction:
@@ -276,21 +278,21 @@ Add `"queuedRevealChange"` to the private-name list of `makeAutoObservable` (wra
   private async seekToStop(stopIndex: number, request: StopRequest, revealChange = true) {
     this.requestedStop = request;
     this.queuedStopIndex = stopIndex;
-    this.queuedRevealChange = revealChange;
+    this.queuedRevealChange = this.queuedRevealChange || revealChange;
     this.requestCount++;
 ```
 
-`runSeekLoop` reads `const revealChange = this.queuedRevealChange;` beside `requestCount` at the top of each turn and calls `this.treeManager.goToHistoryEntryPosition(position, { revealChange })`. The loop seeks only the latest request, and a request that arrives during its wait for paint sends it round again, so the latest request's option is the one that applies: a reader's drag or a link that lands while a follow-the-end move is queued still reveals.
+`runSeekLoop`, just before each seek (after any wait for paint), reads `const revealChange = this.queuedRevealChange;`, resets the flag to false, and calls `this.treeManager.goToHistoryEntryPosition(position, { revealChange })`. The loop seeks only the latest request, so the flag is kept rather than overwritten: a reader's drag or a link that lands while a follow-the-end move is queued still reveals, and so does a reader's seek when a tick arrives during its wait for paint and its follow request takes over the queue. Once a seek has used it, a later follow move does not reveal.
 
 `firestore-history-manager.ts` needs nothing: `checkHistoryEntryAfterLoad` no longer seeks, and `moveContentToNewestEntry` passes no option, so the catch-up when playback opens does not reveal (R13).
 
 **Tests**:
 - `tree-manager.test.ts`, a new `describe("playback reveal")` using the existing `setupDocument()` (one `TestTile` `t1` linked to shared model `sm1`): record `tileContent.setActionText("a")` and wait for `expectEntryToBeComplete(manager, 1)`, then `manager.setNumHistoryEntriesApplied(1)` (recording an entry does not move the applied position). Then `goToHistoryEntryPosition(0, { revealChange: true })` sets `playbackRevealRequest` to `{ tileId: "t1" }`; the same move without the option leaves it undefined; moving back to 1 and to 0 again with the option gives a second object, not the first.
 - R2's stopped-short case needs two tiles, or the mutation it guards (using `newHistoryPosition` for `to`) names the same tile. Call `setupDocument()` with content holding `TestTile`s `t1` and `t2`, and seed it with the existing `seedHistory` helper: `[setActionText on t2, failingEntry, setActionText on t1]` (the first and last built like `action1`, with the tile id in the paths, through `makeRealHistoryEntry`), at position 0. `goToHistoryEntryPosition(3, { revealChange: true })` stops at 1, as the existing failure tests show, and the request names `t2` from entry 0; with the mutation it would name `t1` from entry 2. Going backward from 3 to 0 stops at 2, and the request names `t1` from entry 2, the one it undid.
-- `playback-control-model.test.ts`: spy on `treeManager.goToHistoryEntryPosition`. `goToSliderStop(1)` calls it with `{ revealChange: true }`; Play's first step does too; `followLink` to a tick's entry calls it with `{ revealChange: true }`; in "following the end of the history", a user entry and then two background entries arriving while at the end call it three times, each with `{ revealChange: false }`; a reader request queued behind a follow request is sought with `{ revealChange: true }`.
+- `playback-control-model.test.ts`: spy on `treeManager.goToHistoryEntryPosition`. `goToSliderStop(1)` calls it with `{ revealChange: true }`; Play's first step does too; `followLink` to a tick's entry calls it with `{ revealChange: true }`; in "following the end of the history", a user entry and then two background entries arriving while at the end call it three times, each with `{ revealChange: false }`; a reader request queued behind a follow request is sought with `{ revealChange: true }`; a reader's long seek to the end, with a background entry arriving during its wait for paint, is sought once with `{ revealChange: true }`; the follow test starts with a reader's seek to the end, so the moves that follow it carry `{ revealChange: false }`.
 - Existing assertions on the seek's arguments gain the option: `toHaveBeenCalledWith(n)` becomes `toHaveBeenCalledWith(n, { revealChange: true })` in `playback-control-model.test.ts` ("reports a long seek and lets the browser paint before the seek starts", "starts a shorter seek at once without reporting it as long", "reports a link's seek across many entries as long", "keeps the slider off the stops before the earliest available one") and `playback-control.test.tsx` ("shows the progress indicator at once for a seek across many entries, and paints it first", "shows the progress indicator for a link's seek across many entries"). These six are the only existing tests the option breaks. Two `not.toHaveBeenCalledWith(0)` assertions in `playback-control-model.test.ts` ("sends a seek still waiting for the browser to paint to a link that arrives", "keeps the slider off the stops before the earliest available one") would pass vacuously once every call carries the option, so they become `not.toHaveBeenCalledWith(0, expect.anything())`.
 
-Mutations caught: dropping the `revealChange` check (the no-option test); using `newHistoryPosition` for `to` (the stopped-short tests); passing `true` from the follow reaction (the follow test); reading the option once before the loop rather than per turn (the queued reader request).
+Mutations caught: dropping the `revealChange` check (the no-option test); using `newHistoryPosition` for `to` (the stopped-short tests); passing `true` from the follow reaction (the follow test); overwriting the flag rather than keeping it (the entry during the wait for paint); not resetting it after a seek (the follow test).
 
 ---
 
@@ -397,7 +399,7 @@ At the top of `componentDidUpdate`:
 ```ts
     const { playbackRevealRequest } = this.props;
     if (playbackRevealRequest && playbackRevealRequest !== prevProps.playbackRevealRequest) {
-      this.revealTile(playbackRevealRequest.tileId);
+      this.revealTile(playbackRevealRequest);
     }
 ```
 
@@ -405,13 +407,14 @@ and the method:
 
 ```ts
   // A tile the move added renders after this request arrives, so the lookup waits a frame and
-  // tries a few more before giving up.
-  private revealTile(tileId: string, framesLeft = kRevealFrames) {
+  // tries a few more before giving up. A newer request takes over from one still waiting.
+  private revealTile(request: { tileId: string }, framesLeft = kRevealFrames) {
     requestAnimationFrame(() => {
+      if (this.props.playbackRevealRequest !== request) return;
       const container = this.domElement;
-      const tileNode = container && getTileNode(container, tileId);
+      const tileNode = container && getTileNode(container, request.tileId);
       if (!container || !tileNode) {
-        if (container && framesLeft > 1) this.revealTile(tileId, framesLeft - 1);
+        if (container && framesLeft > 1) this.revealTile(request, framesLeft - 1);
         return;
       }
       const containerRect = container.getBoundingClientRect();
@@ -453,11 +456,14 @@ and the method:
   - with B's rect moved inside the visible area (150 to 240), redoing B's text (`goToHistoryEntryPosition(3, { revealChange: true })`) does not call it (R7, R15);
   - with B's rect back at 1000 to 1100, a following move without the option (`goToHistoryEntryPosition(2)`) does not call it, so a TreeManager that ignored the option would fail here;
   - undoing B's creation (`goToHistoryEntryPosition(1, { revealChange: true })`) does not call it;
+  - redoing B's creation (`goToHistoryEntryPosition(2, { revealChange: true })`) scrolls to B's new node again (R9);
   - `document.activeElement` is unchanged throughout, and `Element.prototype.scrollIntoView` is never called.
+
+  Tile rects are stubbed by `data-tool-id` on `Element.prototype`, so a node rendered again after a move gets its rect, and each "does not call" waits out the reveal's frames before asserting. Two more canvas tests spy on `getTileNode` to miss a tile's first two lookups: one expects the reveal to arrive anyway (R9's retry), and one, with a fourth entry setting A's text, undoes A's text and then B's, and expects only B's reveal (R10: a newer request takes over from one still waiting).
 
   jsdom implements neither `Element.prototype.scrollTo` nor `scrollIntoView`. The test assigns the pane's `scrollTo`, and defines `Element.prototype.scrollIntoView` as a `jest.fn()` for the test and deletes it afterwards, so the "never called" assertion has something to observe.
 
-  Mutations caught: in the pure tests, a fixed 8 px margin (the near-fit tile), dropping the fills-the-area check (the covering tile), and aligning every tall tile by its top (the tall tile whose bottom is inside); in the canvas test, not subtracting the bar (top would be 808); calling `scrollIntoView`; dropping the prop from the canvas; dropping the already-visible check in `getRevealScrollTop` (the visible-tile move).
+  Mutations caught: in the pure tests, a fixed 8 px margin (the near-fit tile), dropping the fills-the-area check (the covering tile), and aligning every tall tile by its top (the tall tile whose bottom is inside); in the canvas test, not subtracting the bar (top would be 808); calling `scrollIntoView`; dropping the prop from the canvas; dropping the already-visible check in `getRevealScrollTop` (the visible-tile move); a single lookup frame (the retry test); dropping the newer-request check (the takeover test).
 
 These tests print MST "no longer part of a state tree" warnings when a playback move removes a Text tile. They come from the Text tile component under jsdom and appear the same with `revealChange` off, so they are not from this change.
 

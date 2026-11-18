@@ -138,8 +138,10 @@ export class PlaybackControlModel {
   // link's stop can take the index of the old one. So the seek loop compares this count, not the
   // index, to tell whether a request arrived while it waited or sought.
   private requestCount = 0;
-  // Whether the queued seek should bring the tile it changes on screen.
-  private queuedRevealChange = true;
+  // Whether the next seek should bring the tile it changes on screen. A request that asks for it
+  // keeps it set until a seek uses it, so a later request that doesn't, such as a move following
+  // the end, can't cancel it.
+  private queuedRevealChange = false;
   private seekLoop: Promise<void> | undefined = undefined;
   private followEndDisposer: IReactionDisposer;
 
@@ -480,7 +482,7 @@ export class PlaybackControlModel {
   private async seekToStop(stopIndex: number, request: StopRequest, revealChange = true) {
     this.requestedStop = request;
     this.queuedStopIndex = stopIndex;
-    this.queuedRevealChange = revealChange;
+    this.queuedRevealChange = this.queuedRevealChange || revealChange;
     this.requestCount++;
     // Only one seek runs at a time. A request arriving while one is running waits for it,
     // and the loop then goes to wherever the reader has got to by that point rather than
@@ -538,7 +540,6 @@ export class PlaybackControlModel {
     while (this.queuedStopIndex !== undefined) {
       const target = this.queuedStopIndex;
       const requestCount = this.requestCount;
-      const revealChange = this.queuedRevealChange;
       const position = this.historyPositionForStopIndex(target);
       // A throw leaves the document part-way, like a seek that stops short, so it is reported
       // the same way. Catching it here is also what lets the queue below clear, bringing the
@@ -555,6 +556,8 @@ export class PlaybackControlModel {
           // destination that is out of date.
           if (this.requestCount !== requestCount) continue;
         }
+        const revealChange = this.queuedRevealChange;
+        this.queuedRevealChange = false;
         await this.treeManager.goToHistoryEntryPosition(position, { revealChange });
       } catch (error) {
         console.warn("PlaybackControlModel: seek to history position", position, "failed:", error);

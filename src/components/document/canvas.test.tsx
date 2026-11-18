@@ -5,6 +5,7 @@ import { Provider } from "mobx-react";
 import { ModalProvider } from "react-modal-hook";
 import { CanvasComponent } from "./canvas";
 import { kPlaybackComponentClass } from "../playback/playback";
+import * as tileDom from "../tiles/tile-dom";
 import { LogEventName } from "../../lib/logger-types";
 import { createDocumentModel, DocumentModelType } from "../../models/document/document";
 import { ProblemDocument } from "../../models/document/document-types";
@@ -288,7 +289,10 @@ describe("Canvas Component", () => {
       top, bottom, height: bottom - top, left: 0, right: 100, width: 100, x: 0, y: top, toJSON: () => ({})
     }) as DOMRect;
 
-    it("scrolls the history view to the tile a playback move changed", async () => {
+    // A canvas showing the history of a document whose entries are: add Text A, add Text B, set B's
+    // text, and with `editA`, set A's text. The pane shows 0 to 300 with the playback bar from 251,
+    // A is in view and B below it.
+    async function setupReveal({ editA = false } = {}) {
       let copyTreeManager: TreeManagerType | undefined;
       jest.spyOn(FirestoreHistoryManager.prototype as any, "subscribeToFirestoreHistory")
         .mockImplementation(function(this: FirestoreHistoryManager) {
@@ -309,6 +313,11 @@ describe("Canvas Component", () => {
       await expectEntryToBeComplete(liveManager, 2);
       (document.content!.getTile(tileB)!.content as TextContentModelType).setText("changed");
       await expectEntryToBeComplete(liveManager, 3);
+      if (editA) {
+        (document.content!.getTile(tileA)!.content as TextContentModelType).setText("changed");
+        await expectEntryToBeComplete(liveManager, 4);
+      }
+      const entryCount = liveManager.document.history.length;
       document.treeMonitor!.disableMonitoring();
       document.setShowPlaybackControls(true);
 
@@ -321,7 +330,7 @@ describe("Canvas Component", () => {
         </Provider>
       );
       copyTreeManager!.setChangeDocument(CDocument.create({ history: getSnapshot(liveManager.document.history) }));
-      copyTreeManager!.setNumHistoryEntriesApplied(3);
+      copyTreeManager!.setNumHistoryEntriesApplied(entryCount);
 
       const pane = screen.getByTestId("document-content");
       const scrollTo = jest.fn();
@@ -330,31 +339,83 @@ describe("Canvas Component", () => {
       pane.getBoundingClientRect = () => rect(0, 300);
       const bar = pane.parentElement!.querySelector(`.${kPlaybackComponentClass}`)!;
       bar.getBoundingClientRect = () => rect(251, 300);
-      const tileBNode = () => pane.querySelector<HTMLElement>(`[data-tool-id="${tileB}"]`)!;
-      tileBNode().getBoundingClientRect = () => rect(1000, 1100);
-      // A tile in view, so the visibility log has something to report.
-      pane.querySelector<HTMLElement>(`[data-tool-id="${tileA}"]`)!.getBoundingClientRect = () => rect(10, 100);
+      // Set by tile id on the prototype, so a tile node rendered again after a move gets it too.
+      const tileRects: Record<string, DOMRect> = { [tileA]: rect(10, 100), [tileB]: rect(1000, 1100) };
+      const getRect = Element.prototype.getBoundingClientRect;
+      jest.spyOn(Element.prototype, "getBoundingClientRect").mockImplementation(function(this: Element) {
+        return tileRects[this.getAttribute("data-tool-id") ?? ""] ?? getRect.call(this);
+      });
+      const goTo = (position: number, options?: { revealChange?: boolean }) =>
+        act(() => copyTreeManager!.goToHistoryEntryPosition(position, options));
+      return { goTo, scrollTo, tileRects, tileA, tileB };
+    }
+
+    const afterFrames = () => act(() => new Promise(resolve => setTimeout(resolve, 200)));
+
+    it("scrolls the history view to the tile a playback move changed", async () => {
+      const { goTo, scrollTo, tileRects, tileB } = await setupReveal();
       const focused = window.document.activeElement;
+      // Let the visibility event logged when the canvas mounted settle.
       await act(() => new Promise(resolve => setTimeout(resolve, 600)));
       mockLogDocumentOrCurriculumEvent.mockClear();
 
-      await act(() => copyTreeManager!.goToHistoryEntryPosition(2, { revealChange: true }));
+      await goTo(2, { revealChange: true });
       await waitFor(() => expect(scrollTo).toHaveBeenCalledWith({ top: 857, behavior: "instant" }));
       await waitFor(() => expect(mockLogDocumentOrCurriculumEvent).toHaveBeenCalledWith(
         LogEventName.TILE_VISIBILITY_CHANGE, expect.objectContaining({ cause: "historyPlayback" })
       ), { timeout: 1500 });
 
       scrollTo.mockClear();
-      tileBNode().getBoundingClientRect = () => rect(150, 240);
-      await act(() => copyTreeManager!.goToHistoryEntryPosition(3, { revealChange: true }));
-      tileBNode().getBoundingClientRect = () => rect(1000, 1100);
-      await act(() => copyTreeManager!.goToHistoryEntryPosition(2));
-      await act(() => copyTreeManager!.goToHistoryEntryPosition(1, { revealChange: true }));
-      await act(() => new Promise(resolve => setTimeout(resolve, 200)));
+      tileRects[tileB] = rect(150, 240);
+      await goTo(3, { revealChange: true });
+      await afterFrames();
       expect(scrollTo).not.toHaveBeenCalled();
+
+      tileRects[tileB] = rect(1000, 1100);
+      await goTo(2);
+      await afterFrames();
+      expect(scrollTo).not.toHaveBeenCalled();
+
+      await goTo(1, { revealChange: true });
+      await afterFrames();
+      expect(scrollTo).not.toHaveBeenCalled();
+
+      // Redoing B's creation reveals B once its new node renders.
+      await goTo(2, { revealChange: true });
+      await waitFor(() => expect(scrollTo).toHaveBeenCalledWith({ top: 857, behavior: "instant" }));
 
       expect(window.document.activeElement).toBe(focused);
       expect(scrollIntoView).not.toHaveBeenCalled();
+    });
+
+    it("waits a few frames for a tile that has not rendered yet", async () => {
+      const { goTo, scrollTo, tileB } = await setupReveal();
+      const getTileNode = tileDom.getTileNode;
+      let misses = 2;
+      jest.spyOn(tileDom, "getTileNode").mockImplementation((root, tileId) =>
+        tileId === tileB && misses-- > 0 ? undefined : getTileNode(root, tileId));
+
+      await goTo(2, { revealChange: true });
+
+      await waitFor(() => expect(scrollTo).toHaveBeenCalledWith({ top: 857, behavior: "instant" }));
+    });
+
+    it("lets a newer request take over from one still waiting for its tile", async () => {
+      const { goTo, scrollTo, tileRects, tileA } = await setupReveal({ editA: true });
+      tileRects[tileA] = rect(2000, 2100);
+      const getTileNode = tileDom.getTileNode;
+      let misses = 2;
+      jest.spyOn(tileDom, "getTileNode").mockImplementation((root, tileId) =>
+        tileId === tileA && misses-- > 0 ? undefined : getTileNode(root, tileId));
+
+      // Undoing A's text asks for A, which is slow to appear; undoing B's text then asks for B.
+      await goTo(3, { revealChange: true });
+      await goTo(2, { revealChange: true });
+      await afterFrames();
+
+      // The pane also goes to the top when its content is replaced, which isn't a reveal.
+      const reveals = scrollTo.mock.calls.filter(([options]) => options.behavior);
+      expect(reveals).toEqual([[{ top: 857, behavior: "instant" }]]);
     });
   });
 

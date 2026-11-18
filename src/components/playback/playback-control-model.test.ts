@@ -671,7 +671,8 @@ describe("PlaybackControlModel", () => {
     });
 
     it("leaves the history view's scroll alone while following the end", async () => {
-      const { model, treeManager } = setupModel(3);
+      const { model, treeManager } = setupModel(3, { appliedPosition: 2 });
+      await model.goToSliderStop(model.lastStopIndex);
       const seekTo = jest.spyOn(treeManager, "goToHistoryEntryPosition");
 
       addEntry(treeManager, 3);
@@ -685,6 +686,23 @@ describe("PlaybackControlModel", () => {
         [4, { revealChange: false }], [5, { revealChange: false }], [6, { revealChange: false }]
       ]);
       expect(model.currentStopIndex).toBe(model.lastStopIndex);
+    });
+
+    it("still reveals the change for a reader's seek when an entry arrives before it starts", async () => {
+      const entryCount = kLongSeekEntryCount + 1;
+      const { model, treeManager } = setupModel(entryCount, {
+        appliedPosition: 0, backgroundIndexes: [entryCount - 1]
+      });
+      const seekTo = jest.spyOn(treeManager, "goToHistoryEntryPosition");
+      const seek = model.goToSliderStop(model.lastStopIndex);
+      expect(model.longSeekInProgress).toBe(true);
+
+      addEntry(treeManager, entryCount, { background: true });
+      await new Promise(resolve => requestAnimationFrame(resolve));
+      jest.advanceTimersByTime(0);
+      await seek;
+
+      expect(seekTo.mock.calls).toEqual([[entryCount + 1, { revealChange: true }]]);
     });
 
     it("reveals the change for a reader's request queued behind a move following the end", async () => {
