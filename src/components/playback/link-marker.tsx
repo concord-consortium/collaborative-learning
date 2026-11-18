@@ -21,7 +21,9 @@ export const LinkMarker: React.FC<IProps> = ({ location, activeNavTab, onClick }
       <div className="vertical-line" />
       <button type="button" className="link-marker-button"
           aria-label="Linked point in history" title="Linked point in history" onClick={onClick}>
-        <LinkIcon aria-hidden="true" />
+        {/* The build's SVG optimizer drops the icon's viewBox, which the icon needs to scale down
+            to the marker's size. */}
+        <LinkIcon aria-hidden="true" viewBox="0 0 36 35" />
       </button>
     </div>
   );
