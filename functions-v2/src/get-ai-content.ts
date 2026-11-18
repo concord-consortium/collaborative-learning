@@ -121,7 +121,7 @@ function returnCachedContent(cachedContent: DocumentSnapshot) {
 
 async function generateContent(firestoreRoot: string, unit: string, classHash: string,
   documentId: string, tileId: string, systemPrompt: string, composedPrompt: string,
-  requestHash: number | undefined) {
+  requestHash: string | undefined) {
   // The Firebase function is often called multiple times in quick succession
   // (because multiple copies of the same tile are being rendered)
   // but we want to avoid calling the LLM multiple times. So we use a lock

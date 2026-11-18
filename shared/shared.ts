@@ -313,7 +313,7 @@ export interface IAiContentParams extends IFirebaseFunctionBaseParams {
    * only when the echo matches, so an answer generated for a different revision under lock
    * contention is not mistaken for this one.
    */
-  requestHash?: number;
+  requestHash?: string;
 }
 
 export type IAiContentUnionParams = IAiContentParams | IFirebaseFunctionWarmUpParams;
