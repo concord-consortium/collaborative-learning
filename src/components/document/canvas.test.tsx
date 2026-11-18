@@ -5,6 +5,7 @@ import { Provider } from "mobx-react";
 import { ModalProvider } from "react-modal-hook";
 import { CanvasComponent } from "./canvas";
 import { kPlaybackComponentClass } from "../playback/playback";
+import { LogEventName } from "../../lib/logger-types";
 import { createDocumentModel, DocumentModelType } from "../../models/document/document";
 import { ProblemDocument } from "../../models/document/document-types";
 import { specStores } from "../../models/stores/spec-stores";
@@ -28,6 +29,12 @@ const mockGetQueryState = jest.fn();
 // The real control needs a NavTabPanelInfoProvider, which these tests don't set up.
 jest.mock("../playback/playback-control", () => ({
   PlaybackControlComponent: () => null
+}));
+
+const mockLogDocumentOrCurriculumEvent = jest.fn();
+jest.mock("../../models/document/log-document-event", () => ({
+  ...jest.requireActual("../../models/document/log-document-event"),
+  logDocumentOrCurriculumEvent: (...args: any[]) => mockLogDocumentOrCurriculumEvent(...args)
 }));
 
 jest.mock("react-query", () => ({
@@ -296,7 +303,7 @@ describe("Canvas Component", () => {
       });
       const liveManager = document.treeManagerAPI as TreeManagerType;
       document.treeMonitor!.enableMonitoring();
-      document.content!.addTile("Text");
+      const tileA = document.content!.addTile("Text")!.tileId;
       await expectEntryToBeComplete(liveManager, 1);
       const tileB = document.content!.addTile("Text")!.tileId;
       await expectEntryToBeComplete(liveManager, 2);
@@ -308,7 +315,8 @@ describe("Canvas Component", () => {
       render(
         <Provider stores={specStores()}>
           <ModalProvider>
-            <CanvasComponent context="test" document={document} readOnly={true} showPlayback={true} />
+            <CanvasComponent context="test" document={document} readOnly={true} showPlayback={true}
+              logTileVisibility={true} />
           </ModalProvider>
         </Provider>
       );
@@ -324,10 +332,17 @@ describe("Canvas Component", () => {
       bar.getBoundingClientRect = () => rect(251, 300);
       const tileBNode = () => pane.querySelector<HTMLElement>(`[data-tool-id="${tileB}"]`)!;
       tileBNode().getBoundingClientRect = () => rect(1000, 1100);
+      // A tile in view, so the visibility log has something to report.
+      pane.querySelector<HTMLElement>(`[data-tool-id="${tileA}"]`)!.getBoundingClientRect = () => rect(10, 100);
       const focused = window.document.activeElement;
+      await act(() => new Promise(resolve => setTimeout(resolve, 600)));
+      mockLogDocumentOrCurriculumEvent.mockClear();
 
       await act(() => copyTreeManager!.goToHistoryEntryPosition(2, { revealChange: true }));
       await waitFor(() => expect(scrollTo).toHaveBeenCalledWith({ top: 857, behavior: "instant" }));
+      await waitFor(() => expect(mockLogDocumentOrCurriculumEvent).toHaveBeenCalledWith(
+        LogEventName.TILE_VISIBILITY_CHANGE, expect.objectContaining({ cause: "historyPlayback" })
+      ), { timeout: 1500 });
 
       scrollTo.mockClear();
       tileBNode().getBoundingClientRect = () => rect(150, 240);

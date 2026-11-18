@@ -264,6 +264,7 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
       if (top === undefined) return;
       const behavior = getRevealScrollBehavior(top - container.scrollTop, visibleBottom - visibleTop,
         prefersReducedMotion());
+      if (this.props.logTileVisibility) this.queueVisibilityLog("historyPlayback");
       container.scrollTo({ top, behavior });
     });
   }

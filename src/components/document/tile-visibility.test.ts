@@ -126,6 +126,7 @@ describe("nextVisibilityCause", () => {
     expect(nextVisibilityCause("documentChange", "scroll")).toBe("documentChange");
     expect(nextVisibilityCause("tileResize", "scroll")).toBe("tileResize");
     expect(nextVisibilityCause("comparisonToggle", "scroll")).toBe("comparisonToggle");
+    expect(nextVisibilityCause("historyPlayback", "scroll")).toBe("historyPlayback");
   });
 
   it("lets a layout cause displace a pending scroll", () => {
