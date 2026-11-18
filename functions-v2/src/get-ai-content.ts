@@ -8,6 +8,8 @@ import {ChatOpenAI} from "@langchain/openai";
 import {HumanMessage, SystemMessage} from "@langchain/core/messages";
 import {IAiContentUnionParams, isWarmUpParams} from "../../shared/shared";
 import {withCurriculumInstructions} from "../../shared/unit-summary-slice";
+import {AiContextBlocks, composePrompt, kServerResolvedTokens, tokensUsed}
+  from "../../shared/ai-context-tokens";
 import {validateUserContext} from "./user-context";
 
 // This function generates and returns tile content from an LLM.
@@ -28,7 +30,7 @@ const lockTimeout = 60 * 1000; // 1 minute
 // systemPrompt fallback) so a cached response generated under the old wording is regenerated
 // rather than reused. Written onto the cached content doc alongside prompt; compared in
 // isCachedContentUpToDate.
-export const PROMPT_POLICY_VERSION = 2;
+export const PROMPT_POLICY_VERSION = 3;
 
 export function buildSystemMessageText(systemPrompt: string | undefined): string {
   return withCurriculumInstructions(systemPrompt || "You are a helpful, collaborative student.", "the student");
@@ -63,6 +65,37 @@ export function isCachedContentUpToDate(prompt: string,
   return true;
 }
 
+interface IClassSummaries {
+  studentSummary?: string;
+  teacherSummary?: string;
+}
+
+/**
+ * The prompt actually sent, and the string the cache is keyed on.
+ *
+ * The class and teacher summaries are added only when the authored prompt asked for them. Before
+ * this they were appended after the question unconditionally, which is the position a model reads
+ * as most relevant -- so advice written for "you" drew on work the student never wrote.
+ *
+ * @param {string} question the authored prompt, tokens already replaced with their noun phrases
+ * @param {AiContextBlocks|undefined} clientBlocks context the caller resolved for itself
+ * @param {IClassSummaries} classSummaries the class doc's summaries, used only where asked for
+ * @return {string} the context section followed by the question
+ */
+export function buildRequestPrompt(
+  question: string, clientBlocks: AiContextBlocks | undefined, classSummaries: IClassSummaries
+): string {
+  const blocks: AiContextBlocks = {...clientBlocks};
+  const asked = tokensUsed(question);
+  for (const token of kServerResolvedTokens) {
+    if (!asked.has(token)) continue;
+    const summary =
+      token === "classwork" ? classSummaries.studentSummary : classSummaries.teacherSummary;
+    if (summary) blocks[token] = summary;
+  }
+  return composePrompt(blocks, question);
+}
+
 function returnCachedContent(cachedContent: DocumentSnapshot) {
   const data = cachedContent.data();
   if (data) {
@@ -72,6 +105,10 @@ function returnCachedContent(cachedContent: DocumentSnapshot) {
       // need it: waitForContent returns whatever the lock holder generated, which under
       // contention can be an answer for a different revision of the same tile.
       prompt: data.prompt,
+      // The requester's own hash of that request. The prompt alone can no longer identify it: the
+      // caller sends its context separately and never sees the composed string, so it has nothing
+      // to compare the prompt against.
+      clientRequestHash: data.clientRequestHash ?? null,
       lastUpdated: data.lastUpdated,
       error: null,
     };
@@ -83,7 +120,8 @@ function returnCachedContent(cachedContent: DocumentSnapshot) {
 }
 
 async function generateContent(firestoreRoot: string, unit: string, classHash: string,
-  documentId: string, tileId: string, systemPrompt: string, tilePrompt: string, classInfo: DocumentSnapshot) {
+  documentId: string, tileId: string, systemPrompt: string, composedPrompt: string,
+  requestHash: number | undefined) {
   // The Firebase function is often called multiple times in quick succession
   // (because multiple copies of the same tile are being rendered)
   // but we want to avoid calling the LLM multiple times. So we use a lock
@@ -132,14 +170,9 @@ async function generateContent(firestoreRoot: string, unit: string, classHash: s
     model,
   });
 
-  const studentSummary = classInfo.data()?.studentSummary;
-  const teacherSummary = classInfo.data()?.teacherSummary;
-  const studentMessage = `Here is a summary of the student work in this class:\n\n${studentSummary}\n\n`;
-  const teacherMessage =
-    teacherSummary ? `Here is a summary of the teacher work in this class:\n\n ${teacherSummary}\n\n` : "";
   const messages = [
     new SystemMessage(buildSystemMessageText(systemPrompt)),
-    new HumanMessage(`${tilePrompt}\n\n${teacherMessage}${studentMessage}`),
+    new HumanMessage(composedPrompt),
   ];
 
   let content = "";
@@ -156,8 +189,9 @@ async function generateContent(firestoreRoot: string, unit: string, classHash: s
   const aiContentPath = getAIContentPath(firestoreRoot, unit, classHash, documentId, tileId);
   await getFirestore().doc(aiContentPath).set({
     content,
-    prompt: tilePrompt,
+    prompt: composedPrompt,
     promptPolicyVersion: PROMPT_POLICY_VERSION,
+    clientRequestHash: requestHash ?? null,
     lastUpdated,
   });
 
@@ -165,7 +199,8 @@ async function generateContent(firestoreRoot: string, unit: string, classHash: s
 
   return {
     text: content,
-    prompt: tilePrompt,
+    prompt: composedPrompt,
+    clientRequestHash: requestHash ?? null,
     lastUpdated,
     error: errorMessage,
   };
@@ -194,8 +229,8 @@ export const getAiContent = onCall(
   async (request: CallableRequest<IAiContentUnionParams>) => {
     const params = request.data;
     if (isWarmUpParams(params)) return {version};
-    const {context: userContext, dynamicContentPrompt: tilePrompt, systemPrompt,
-      unit, documentId, tileId} = params || {};
+    const {context: userContext, dynamicContentPrompt: question, systemPrompt,
+      unit, documentId, tileId, contextBlocks, requestHash} = params || {};
 
     const validatedUserContext = validateUserContext(userContext, request.auth);
     const {isValid, uid, firestoreRoot} = validatedUserContext;
@@ -207,14 +242,22 @@ export const getAiContent = onCall(
     const classInfoPath = getClassInfoPath(firestoreRoot, unit, classHash);
     const classInfo = await getFirestore().doc(classInfoPath).get();
 
+    // Composed before the cache check: the context blocks are part of what was asked, so they are
+    // part of the key. Without that, editing a document would no longer invalidate its answer --
+    // the summary used to travel inside dynamicContentPrompt and now travels beside it.
+    const composedPrompt = buildRequestPrompt(question, contextBlocks, {
+      studentSummary: classInfo.data()?.studentSummary,
+      teacherSummary: classInfo.data()?.teacherSummary,
+    });
+
     const aiContentPath = getAIContentPath(firestoreRoot, unit, classHash, documentId, tileId);
     const cachedAIContent = await getFirestore().doc(aiContentPath).get();
 
-    if (isCachedContentUpToDate(tilePrompt, classInfo, cachedAIContent)) {
+    if (isCachedContentUpToDate(composedPrompt, classInfo, cachedAIContent)) {
       return returnCachedContent(cachedAIContent);
     } else {
       return await generateContent(firestoreRoot, unit, classHash, documentId, tileId,
-        systemPrompt, tilePrompt, classInfo);
+        systemPrompt, composedPrompt, requestHash);
     }
   },
 );
