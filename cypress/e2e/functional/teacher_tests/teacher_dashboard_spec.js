@@ -38,9 +38,13 @@ context('Teacher Dashboard View', () => {
       dashboard.getProblemList().should('not.have.class', 'show');
 
       cy.log('verify class list UI and visibility');
-      dashboard.getClassList().should('not.exist');
+      dashboard.getClassList().should('not.have.class', 'show');
       dashboard.getClassDropdown().should('contain', clueData.teacherName);
       dashboard.getClassDropdown().should('be.visible').click({ force: true });
+      dashboard.getClassList().should('have.class', 'show');
+      dashboard.getClassList().find('.list-item').first().should('contain', 'About CLUE');
+      dashboard.getClassDropdown().click({ force: true });
+      dashboard.getClassList().should('not.have.class', 'show');
 
       cy.log('verify Dashboard and Workspace toggle default');
       dashboard.getViewToggle('Dashboard').should('be.visible').and('have.class', 'selected');

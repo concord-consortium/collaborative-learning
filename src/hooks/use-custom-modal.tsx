@@ -75,6 +75,9 @@ export const useCustomModal = <IContentProps,>({
       // also fire the default button, or Enter on Cancel/Close would still submit.
       if (e.target instanceof HTMLButtonElement) return;
 
+      // Enter on a focused link follows the link.
+      if (e.target instanceof HTMLAnchorElement) return;
+
       const defaultButton = buttons.find(b => b.isDefault);
       if (defaultButton && !defaultButton.isDisabled) {
         blurModal();

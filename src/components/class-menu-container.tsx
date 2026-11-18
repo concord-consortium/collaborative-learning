@@ -8,8 +8,11 @@ import { Logger } from "../lib/logger";
 import { LogEventMethod, LogEventName } from "../lib/logger-types";
 import { IUserPortalOffering } from "../models/stores/user";
 import { getConfirmLogoutUrl } from "../utilities/auth-utils";
+import { aboutMenuItem } from "./about/about-dialog";
 
-interface IProps extends IBaseProps {}
+interface IProps extends IBaseProps {
+  onShowAbout: () => void;
+}
 
 @inject("stores")
 @observer
@@ -21,6 +24,7 @@ export class ClassMenuContainer extends BaseComponent <IProps> {
     if (user.standaloneAuthUser) {
       links.unshift({
         text: "Log Out",
+        isAction: true,
         selected: false,
         hideItemCheck: true,
         bottomBorder: true,
@@ -33,6 +37,7 @@ export class ClassMenuContainer extends BaseComponent <IProps> {
       // of the current URL as it contains all the information needed to join the class
       links.unshift({
         text: "Copy Shareable Link",
+        isAction: true,
         selected: false,
         hideItemCheck: true,
         onClick: () => {
@@ -44,12 +49,14 @@ export class ClassMenuContainer extends BaseComponent <IProps> {
         }
       });
     }
+    links.unshift(aboutMenuItem(this.props.onShowAbout));
 
     return(
       <CustomSelect
         titlePrefix={user.name}
         title={user.className}
         items={links}
+        showItemIcons={true}
       />
     );
   }
