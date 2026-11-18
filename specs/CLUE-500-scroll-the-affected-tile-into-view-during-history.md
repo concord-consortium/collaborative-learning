@@ -17,7 +17,8 @@ When someone replays a document's history, the change at each step can be in a t
 - **R3.** Within that entry, the tile is chosen in this order, taking the first candidate in the entry's patch order at the first tier that has one that exists after the move:
   1. a tile the entry added, removed or changed;
   2. a tile linked, in the document after the move, to a shared model the entry changed;
-  3. a tile in a row the entry added or changed (a tile move, or a tile deleted from a row that still has others).
+  3. a tile in a row the entry added or changed (a tile move, or a tile deleted from a row that still has others), including a row inside a container tile such as a Question;
+  4. a container tile whose rows the entry changed, when none of the tiles in those rows is left.
 - **R4.** When no tier names a tile that exists after the move (for example, undoing the step that created a tile, or deleting the only tile in a row), the view does not scroll.
 - **R5.** A move that does not change the document's position does not scroll: a comment stop at the same position as the entry before it, a move refused because playback has stopped, or a move that rolls back to where it started.
 
@@ -27,7 +28,7 @@ When someone replays a document's history, the change at each step can be in a t
 - **R7.** A tile already fully visible is not scrolled. A tile taller than the visible area is scrolled only as far as it takes to fill the visible area, and not at all when it already fills it, so a reader who has scrolled within a tall tile is not jumped back to its top.
 - **R8.** Tiles inside a container tile (for example, a Question tile) are found and scrolled into view the same way as top-level tiles.
 - **R9.** A tile that the move itself added is scrolled into view once it has rendered.
-- **R10.** The scroll is smooth when the distance is at most the height of the history view's visible area, and instant when it is farther or when the reader's system asks for reduced motion. A new move's scroll replaces one still animating.
+- **R10.** The scroll is smooth when the distance is at most the height of the history view's visible area, and instant when it is farther or when the reader's system asks for reduced motion. A new move's scroll replaces one still animating, and a move whose tile is already visible stops an earlier reveal still animating, so that animation cannot carry the tile out of view.
 - **R11.** Scrolling does not select the tile and does not move keyboard focus, so keyboard stepping on the slider keeps working.
 
 ### What does not scroll
@@ -48,6 +49,8 @@ When someone replays a document's history, the change at each step can be in a t
 
 - **Where the pieces are.** `getPlaybackRevealTileId` and `getChangedTileId` (`src/models/history/playback-reveal.ts`) pick the tile. `TreeManager.goToHistoryEntryPosition(pos, { revealChange })` sets the volatile `playbackRevealRequest` after a move, using `stopPosition` so a move that stops short counts only what it applied. `PlaybackControlModel` passes `revealChange` through its seek queue; the follow-the-end reaction passes false, and `moveContentToNewestEntry` passes nothing. `CanvasComponent` hands the history copy's request to its `DocumentContentComponent`, whose `revealTile` scrolls with the geometry in `src/components/document/playback-reveal-scroll.ts`.
 - **The reveal flag is sticky in the seek queue.** The loop seeks only the latest request, so a reader's request keeps the flag set until a seek uses it; a follow-the-end request that takes over the queue cannot cancel it.
+- **Rows inside a container.** A Question keeps its rows in its own content, so a move inside it records patches under `/content/tileMap/<questionId>/content/rowMap` and `rowOrder`. These count as row changes (tier 3, found with `getRowRecursive`) rather than as a change to the Question, so a moved embedded tile is revealed even when the Question is taller than the view; the Question itself is the fallback (tier 4).
+- **Stopping a stale smooth reveal.** `revealTile` remembers its last smooth scroll for a second. When the next reveal's tile is already visible and that scroll has not reached its target, it stops it with an instant `scrollTo` to the current position. It only does so for its own recent smooth scroll, so a reader's own scrolling is left alone.
 - **What history records.** A tile edit has paths under `/content/tileMap/<tileId>` plus an `updatedHash` patch. A shared data set edit has paths under `/content/sharedModelMap/<id>/sharedModel`, then an `updatedHash` patch on every linked tile whatever changed, which is why `updatedHash` does not count as a tile change. A tile move touches only `/content/rowMap` and `/content/rowOrder`, which is why tier 3 exists. Embedded tiles live in the same flat `tileMap`.
 - **Measuring the bar.** The view measures the canvas's `.playback-component` (from the exported `kPlaybackComponentClass`) at scroll time rather than subtracting a constant. The spacer below the last tile is `$playback-bar-height` in `vars.scss`, shared with the bar's own height, and `showPlaybackSpacer` is now passed from the canvas.
 - **Retry and takeover.** The tile lookup retries for up to five animation frames, since a tile the move added may not have rendered yet; a newer request makes an older one still waiting give up.
@@ -184,6 +187,18 @@ When someone replays a document's history, the change at each step can be in a t
 
 ### Instant scrolls use `"instant"`, not `"auto"`
 **Decision**: In the teacher dashboard the history pane has `scroll-behavior: smooth`, and a headless Chrome check showed `"auto"` animating there, so reduced motion and long jumps would still have animated.
+
+---
+
+### A move inside a Question reveals the moved tile
+**Context**: Code review on the PR found that a row move inside a Question named the Question, and a Question taller than the view is not scrolled at all (R7), so an off-screen moved tile stayed hidden.
+**Decision**: The Question's row patches count as row changes (tier 3), with the Question as a last fallback (tier 4), rather than as a change to the Question itself.
+
+---
+
+### A later reveal stops an earlier smooth one still running
+**Context**: Code review on the PR (raised twice) found that when the next reveal's tile was already visible, nothing stopped an earlier smooth reveal, which could then carry the tile out of view.
+**Decision**: The view stops its own recent smooth reveal in that case. Stopping any running scroll would also cut off a reader's own scrolling, so only the view's own smooth reveal is stopped.
 
 ---
 
