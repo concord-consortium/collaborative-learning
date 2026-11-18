@@ -604,3 +604,38 @@ describe("ai-analysis-messages", () => {
     });
   });
 });
+
+describe("context tokens in the main prompt", () => {
+  const textOf = (messages: ReturnType<typeof buildSummaryMessages>) =>
+    (messages[1].content as Array<{ text?: string }>).map(part => part.text ?? "").join("\n");
+
+  it("replaces a token in the main prompt with its noun phrase", () => {
+    const messages = buildSummaryMessages(
+      { ...defaultAiPrompt, mainPrompt: "Comment on {{mywork}}." }, "A summary.", []);
+    expect((messages[1].content as Array<{ text?: string }>)[0].text)
+      .toBe("Comment on this document.");
+  });
+
+  it("adds a class-work block when the main prompt asks for it", () => {
+    const messages = buildSummaryMessages(
+      { ...defaultAiPrompt, mainPrompt: "Compare with {{classwork}}." },
+      "A summary.", [], undefined, { classwork: "Class themes." });
+    const text = textOf(messages);
+    expect(text).toContain("<classwork>");
+    expect(text).toContain("Class themes.");
+  });
+
+  it("adds no class-work block when the main prompt does not ask", () => {
+    const messages = buildSummaryMessages(
+      defaultAiPrompt, "A summary.", [], undefined, { classwork: "Class themes." });
+    expect(textOf(messages)).not.toContain("Class themes.");
+  });
+
+  // An author who never adopts the vocabulary must see no change at all.
+  it("builds the same message as before for a prompt with no tokens", () => {
+    const withBlocks = buildSummaryMessages(
+      defaultAiPrompt, "A summary.", [], undefined, { classwork: "Class themes.", mywork: "Mine." });
+    const withoutBlocks = buildSummaryMessages(defaultAiPrompt, "A summary.", []);
+    expect(withBlocks).toEqual(withoutBlocks);
+  });
+});
