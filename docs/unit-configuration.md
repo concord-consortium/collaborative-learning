@@ -127,6 +127,27 @@ A document with no content at all is an exception: it is evaluated anyway, and o
 
 An `aiPrompt` may still carry a `summarizer` property, written by older versions of the authoring interface to choose between sending text and sending a picture. It is ignored.
 
+### Context tokens in AI prompts
+
+An AI tile prompt and the `aiPrompt` "mainPrompt" may name which contexts the AI should work with:
+
+| Token | What it supplies |
+|---|---|
+| `{{curriculum}}` | The unit's curriculum around the student's current problem |
+| `{{problem}}` | The current problem and how it asks students to work |
+| `{{classwork}}` | All student work in this class, including this student's own |
+| `{{teacherwork}}` | The teacher's materials, supplied as reference |
+| `{{mywork}}` | The document the student is working in |
+
+A token names a context; it does not paste text where it appears. `Compare {{mywork}} with {{classwork}}` reads to the AI as "Compare this document with the class's work", with both summaries supplied above the question.
+
+A prompt that names no token uses `{{curriculum}}` and `{{mywork}}`, which is what every prompt received before this existed, minus the class's work.
+
+`{{classwork}}` is a summary of every student document in the class and includes the student's own, so it cannot be used to mean "everyone except me".
+
+A misspelled token such as `{{myWork}}` is left in the prompt as ordinary text, so it will show up in the AI's answer.
+
+
 `aiEvaluateOnSessionEnd`: (boolean | undefined) When true, `aiEvaluation` also runs without anyone asking: when a document the student edited is closed, and whenever their connection drops. Defaults to false, so a unit with `aiEvaluation` set evaluates only what students request with the ideas button, since unrequested evaluations cost real money. Setting this has no effect without `aiEvaluation`.
 A session-end evaluation is skipped only when the document, the prompt and the problem it was
 asked from are all unchanged since the last successful evaluation, so a student who opens and
