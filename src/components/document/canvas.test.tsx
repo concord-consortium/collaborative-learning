@@ -1,19 +1,23 @@
-import { render, screen } from "@testing-library/react";
+import { act, render, screen, waitFor } from "@testing-library/react";
 import React from "react";
+import { getSnapshot } from "mobx-state-tree";
 import { Provider } from "mobx-react";
 import { ModalProvider } from "react-modal-hook";
 import { CanvasComponent } from "./canvas";
+import { kPlaybackComponentClass } from "../playback/playback";
 import { createDocumentModel, DocumentModelType } from "../../models/document/document";
 import { ProblemDocument } from "../../models/document/document-types";
 import { specStores } from "../../models/stores/spec-stores";
 import { createSingleTileContent } from "../../utilities/test-utils";
 import { FirestoreHistoryManager } from "../../models/history/firestore-history-manager";
 import { HistoryEntry, HistoryOperation } from "../../models/history/history";
+import { CDocument, TreeManagerType } from "../../models/history/tree-manager";
+import { expectEntryToBeComplete } from "../../models/history/undo-store-test-utils";
+import { TextContentModelType } from "../../models/tiles/text/text-content";
 import { applyJsonPatches } from "../../models/history/json-patch";
 import {
   kVersionedTestTileType, VersionedTestTileType
 } from "../../models/history/schema-conversion-test-types";
-import { TreeManagerType } from "../../models/history/tree-manager";
 import { registerTileComponentInfo } from "../../models/tiles/tile-component-info";
 
 // This is needed so MST can deserialize snapshots referring to tools
@@ -21,6 +25,11 @@ import { registerTileTypes } from "../../register-tile-types";
 registerTileTypes(["Text"]);
 
 const mockGetQueryState = jest.fn();
+// The real control needs a NavTabPanelInfoProvider, which these tests don't set up.
+jest.mock("../playback/playback-control", () => ({
+  PlaybackControlComponent: () => null
+}));
+
 jest.mock("react-query", () => ({
   useQueryClient: () => ({
     getQueryState: mockGetQueryState
@@ -256,6 +265,82 @@ describe("Canvas Component", () => {
     document.setShowPlaybackControls(true);
     renderCanvas();
     expect(screen.getByTestId("document-content").querySelector(".playback-spacer")).not.toBeNull();
+  });
+
+  describe("revealing the tile a playback move changed", () => {
+    let scrollIntoView: jest.Mock;
+    beforeEach(() => {
+      scrollIntoView = jest.fn();
+      (Element.prototype as any).scrollIntoView = scrollIntoView;
+    });
+    afterEach(() => {
+      delete (Element.prototype as any).scrollIntoView;
+    });
+
+    const rect = (top: number, bottom: number) => ({
+      top, bottom, height: bottom - top, left: 0, right: 100, width: 100, x: 0, y: top, toJSON: () => ({})
+    }) as DOMRect;
+
+    it("scrolls the history view to the tile a playback move changed", async () => {
+      let copyTreeManager: TreeManagerType | undefined;
+      jest.spyOn(FirestoreHistoryManager.prototype as any, "subscribeToFirestoreHistory")
+        .mockImplementation(function(this: FirestoreHistoryManager) {
+          copyTreeManager = this.treeManager;
+        });
+      jest.spyOn(FirestoreHistoryManager.prototype as any, "waitUntilEnvironmentAndMetadataDocReady")
+        .mockResolvedValue(undefined);
+
+      const document = createDocumentModel({
+        type: ProblemDocument, title: "test", uid: "1", key: "test", createdAt: 1, visibility: "public",
+        content: {} as any
+      });
+      const liveManager = document.treeManagerAPI as TreeManagerType;
+      document.treeMonitor!.enableMonitoring();
+      document.content!.addTile("Text");
+      await expectEntryToBeComplete(liveManager, 1);
+      const tileB = document.content!.addTile("Text")!.tileId;
+      await expectEntryToBeComplete(liveManager, 2);
+      (document.content!.getTile(tileB)!.content as TextContentModelType).setText("changed");
+      await expectEntryToBeComplete(liveManager, 3);
+      document.treeMonitor!.disableMonitoring();
+      document.setShowPlaybackControls(true);
+
+      render(
+        <Provider stores={specStores()}>
+          <ModalProvider>
+            <CanvasComponent context="test" document={document} readOnly={true} showPlayback={true} />
+          </ModalProvider>
+        </Provider>
+      );
+      copyTreeManager!.setChangeDocument(CDocument.create({ history: getSnapshot(liveManager.document.history) }));
+      copyTreeManager!.setNumHistoryEntriesApplied(3);
+
+      const pane = screen.getByTestId("document-content");
+      const scrollTo = jest.fn();
+      pane.scrollTo = scrollTo;
+      Object.defineProperty(pane, "clientHeight", { configurable: true, value: 300 });
+      pane.getBoundingClientRect = () => rect(0, 300);
+      const bar = pane.parentElement!.querySelector(`.${kPlaybackComponentClass}`)!;
+      bar.getBoundingClientRect = () => rect(251, 300);
+      const tileBNode = () => pane.querySelector<HTMLElement>(`[data-tool-id="${tileB}"]`)!;
+      tileBNode().getBoundingClientRect = () => rect(1000, 1100);
+      const focused = window.document.activeElement;
+
+      await act(() => copyTreeManager!.goToHistoryEntryPosition(2, { revealChange: true }));
+      await waitFor(() => expect(scrollTo).toHaveBeenCalledWith({ top: 857, behavior: "instant" }));
+
+      scrollTo.mockClear();
+      tileBNode().getBoundingClientRect = () => rect(150, 240);
+      await act(() => copyTreeManager!.goToHistoryEntryPosition(3, { revealChange: true }));
+      tileBNode().getBoundingClientRect = () => rect(1000, 1100);
+      await act(() => copyTreeManager!.goToHistoryEntryPosition(2));
+      await act(() => copyTreeManager!.goToHistoryEntryPosition(1, { revealChange: true }));
+      await act(() => new Promise(resolve => setTimeout(resolve, 200)));
+      expect(scrollTo).not.toHaveBeenCalled();
+
+      expect(window.document.activeElement).toBe(focused);
+      expect(scrollIntoView).not.toHaveBeenCalled();
+    });
   });
 
 });

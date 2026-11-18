@@ -335,9 +335,11 @@ export const kPlaybackComponentClass = "playback-component";
 // Space left between a revealed tile and the edge of the visible area.
 export const kRevealMarginPx = 8;
 
-/** Vertical positions in client coordinates, as getBoundingClientRect gives them. */
+/**
+ * The container's scrollTop, and vertical positions in client coordinates, as
+ * getBoundingClientRect gives them.
+ */
 export interface IRevealGeometry {
-  // The scroll container's current scrollTop.
   scrollTop: number;
   // The top and bottom of the part of the container that is not covered.
   visibleTop: number;

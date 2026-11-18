@@ -27,6 +27,10 @@ import { LogEventName } from "../../lib/logger-types";
 import { buildVisibilityLogParams, computeVisibleTiles, nextVisibilityCause,
   type ITileExtent, type IVisibilityLogExtra, type VisibilityCause } from "./tile-visibility";
 
+import { kPlaybackComponentClass } from "../playback/playback";
+import { prefersReducedMotion } from "../../utilities/dom-utils";
+import { getRevealScrollBehavior, getRevealScrollTop } from "./playback-reveal-scroll";
+
 import "./document-content.scss";
 
 interface IProps extends IBaseProps {
@@ -35,6 +39,8 @@ interface IProps extends IBaseProps {
   documentId?: string;
   logTileVisibility?: boolean;
   onScroll?: (x: number, y: number) => void;
+  // A tile history playback changed, to bring on screen. Each new object is a new request.
+  playbackRevealRequest?: { tileId: string };
   readOnly?: boolean;
   scale?: number;
   selectedSectionId?: string | null;
@@ -56,6 +62,8 @@ interface IState {
 }
 // Interval in ms between recalculation for highlighting drag/drop zones
 const kDragUpdateInterval = 50;
+// How many frames a playback reveal waits for its tile to render.
+const kRevealFrames = 5;
 
 @inject("stores")
 @observer
@@ -200,6 +208,10 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
   }
 
   public componentDidUpdate(prevProps: IProps) {
+    const { playbackRevealRequest } = this.props;
+    if (playbackRevealRequest && playbackRevealRequest !== prevProps.playbackRevealRequest) {
+      this.revealTile(playbackRevealRequest.tileId);
+    }
     if (this.props.logTileVisibility &&
         this.props.content?.contentId !== prevProps.content?.contentId) {
       this.queueVisibilityLog("documentChange");
@@ -227,6 +239,32 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
           }
         }
       });
+    });
+  }
+
+  // A tile the move added renders after this request arrives, so the lookup waits a frame and
+  // tries a few more before giving up.
+  private revealTile(tileId: string, framesLeft = kRevealFrames) {
+    requestAnimationFrame(() => {
+      const container = this.domElement;
+      const tileNode = container && getTileNode(container, tileId);
+      if (!container || !tileNode) {
+        if (container && framesLeft > 1) this.revealTile(tileId, framesLeft - 1);
+        return;
+      }
+      const containerRect = container.getBoundingClientRect();
+      const visibleTop = containerRect.top;
+      let visibleBottom = containerRect.top + container.clientHeight;
+      const bar = container.parentElement?.querySelector(`.${kPlaybackComponentClass}`);
+      if (bar) visibleBottom = Math.min(visibleBottom, bar.getBoundingClientRect().top);
+      const tileRect = tileNode.getBoundingClientRect();
+      const top = getRevealScrollTop({
+        scrollTop: container.scrollTop, visibleTop, visibleBottom, tileTop: tileRect.top, tileBottom: tileRect.bottom
+      });
+      if (top === undefined) return;
+      const behavior = getRevealScrollBehavior(top - container.scrollTop, visibleBottom - visibleTop,
+        prefersReducedMotion());
+      container.scrollTo({ top, behavior });
     });
   }
 

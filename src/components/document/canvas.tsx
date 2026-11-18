@@ -235,6 +235,7 @@ class _CanvasComponent extends BaseComponent<IProps, IState> {
     const {content, document, showPlayback, viaTeacherDashboard, ...others} = this.props;
     const showPlaybackControls = this.props.document?.showPlaybackControls;
     const documentToShow = this.getDocumentToShow();
+    const playbackTreeManager = documentToShow?.treeManagerAPI as TreeManagerType | undefined;
     const documentContent = content || documentToShow?.content; // we only pass in content if it is a problem panel
     const typeClass = content ? "problem-panel" : document?.type === "planning" ? "planning-doc" : "";
 
@@ -257,6 +258,7 @@ class _CanvasComponent extends BaseComponent<IProps, IState> {
             documentId={documentToShow?.key}
             onScroll={(x: number, y: number) => this.setState({ documentScrollX: x, documentScrollY: y })}
             showPlaybackSpacer={showPlayback && showPlaybackControls}
+            playbackRevealRequest={showPlaybackControls ? playbackTreeManager?.playbackRevealRequest : undefined}
             {...{typeClass, viaTeacherDashboard, ...others}}
           />
           {showPlayback && showPlaybackControls && (
