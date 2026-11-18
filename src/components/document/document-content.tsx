@@ -63,6 +63,8 @@ interface IState {
 const kDragUpdateInterval = 50;
 // How many frames a playback reveal waits for its tile to render.
 const kRevealFrames = 5;
+// Longer than a browser's smooth scroll across one visible height takes.
+const kSmoothRevealMs = 1000;
 
 @inject("stores")
 @observer
@@ -74,6 +76,8 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
   public state: IState = {};
 
   private domElement: HTMLElement | null;
+  // The last smooth playback reveal, while it may still be animating.
+  private smoothReveal?: { top: number; until: number };
   private rowRefs: Array<TileRowHandle>;
   private mutationObserver: MutationObserver;
   private scrollDisposer: IReactionDisposer;
@@ -261,9 +265,20 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
       const top = getRevealScrollTop({
         scrollTop: container.scrollTop, visibleTop, visibleBottom, tileTop: tileRect.top, tileBottom: tileRect.bottom
       });
-      if (top === undefined) return;
+      const smoothReveal = this.smoothReveal;
+      this.smoothReveal = undefined;
+      if (top === undefined) {
+        // The tile is in view now, but an earlier reveal still animating could carry it out, so stop
+        // that animation where it is.
+        if (smoothReveal && performance.now() < smoothReveal.until &&
+            Math.abs(container.scrollTop - smoothReveal.top) > 1) {
+          container.scrollTo({ top: container.scrollTop, behavior: "instant" });
+        }
+        return;
+      }
       const behavior = getRevealScrollBehavior(top - container.scrollTop, visibleBottom - visibleTop,
         prefersReducedMotion());
+      if (behavior === "smooth") this.smoothReveal = { top, until: performance.now() + kSmoothRevealMs };
       if (this.props.logTileVisibility) this.queueVisibilityLog("historyPlayback");
       container.scrollTo({ top, behavior });
     });

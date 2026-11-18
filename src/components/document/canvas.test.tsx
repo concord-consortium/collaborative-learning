@@ -418,6 +418,18 @@ describe("Canvas Component", () => {
       expect(reveals).toEqual([[{ top: 857, behavior: "instant" }]]);
     });
 
+    it("stops an earlier smooth reveal when the next reveal's tile is already in view", async () => {
+      const { goTo, scrollTo, tileRects, tileB } = await setupReveal({ editA: true });
+      tileRects[tileB] = rect(260, 320);
+
+      // Undoing B's text scrolls a short way, smoothly; the pane's scrollTop stays at 0 under jsdom,
+      // as if that scroll were still under way when redoing A's text asks for A, which is in view.
+      await goTo(2, { revealChange: true });
+      await waitFor(() => expect(scrollTo).toHaveBeenCalledWith({ top: 77, behavior: "smooth" }));
+      await goTo(4, { revealChange: true });
+      await waitFor(() => expect(scrollTo).toHaveBeenLastCalledWith({ top: 0, behavior: "instant" }));
+    });
+
     it("drops a request still waiting for its tile when a newer move has nothing to reveal", async () => {
       const { goTo, scrollTo, tileRects, tileA } = await setupReveal({ editA: true });
       tileRects[tileA] = rect(2000, 2100);
