@@ -300,8 +300,8 @@ export const TreeManager = types
   seekBoundaryPosition: undefined as number | undefined,
   /**
    * The tile the last playback move the reader started changed, for the history view to bring on
-   * screen. A new object each time, so a move that changes the same tile again still reaches the
-   * view.
+   * screen, or undefined when that move changed none. A new object each time, so a move that
+   * changes the same tile again still reaches the view.
    */
   playbackRevealRequest: undefined as { tileId: string } | undefined
 }))
@@ -915,7 +915,7 @@ export const TreeManager = types
 
   /**
    * Moves the trees to a history position. With `revealChange`, a move that changes the position
-   * sets `playbackRevealRequest` to the tile it changed, if any.
+   * sets `playbackRevealRequest` to the tile it changed, or clears it when it changed none.
    */
   goToHistoryEntryPosition: flow(function* goToHistoryEntryPosition(
                                       newHistoryPosition: number, options: { revealChange?: boolean } = {}) {
@@ -1361,7 +1361,7 @@ export const TreeManager = types
       const tileId = getPlaybackRevealTileId({
         history, treeId: mainDocument.key, from: initialPosition, to: stopPosition, content
       });
-      if (tileId) self.playbackRevealRequest = { tileId };
+      self.playbackRevealRequest = tileId ? { tileId } : undefined;
     }
   }),
 }))

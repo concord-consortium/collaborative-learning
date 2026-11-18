@@ -417,6 +417,24 @@ describe("Canvas Component", () => {
       const reveals = scrollTo.mock.calls.filter(([options]) => options.behavior);
       expect(reveals).toEqual([[{ top: 857, behavior: "instant" }]]);
     });
+
+    it("drops a request still waiting for its tile when a newer move has nothing to reveal", async () => {
+      const { goTo, scrollTo, tileRects, tileA } = await setupReveal({ editA: true });
+      tileRects[tileA] = rect(2000, 2100);
+      const getTileNode = tileDom.getTileNode;
+      let misses = 2;
+      jest.spyOn(tileDom, "getTileNode").mockImplementation((root, tileId) =>
+        tileId === tileA && misses-- > 0 ? undefined : getTileNode(root, tileId));
+
+      // Undoing A's text asks for A, which is slow to appear; undoing B's text and B's creation
+      // together leaves no tile to reveal.
+      await goTo(3, { revealChange: true });
+      await goTo(1, { revealChange: true });
+      await afterFrames();
+
+      const reveals = scrollTo.mock.calls.filter(([options]) => options.behavior);
+      expect(reveals).toEqual([]);
+    });
   });
 
 });
