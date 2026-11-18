@@ -112,6 +112,7 @@ describe("shared/ai-analysis-messages in functions-v2", () => {
         getEmbeddings: jest.fn().mockResolvedValue(defaultEmbedding),
         findRelatedSummaries: jest.fn().mockResolvedValue([relatedSummary]),
         getUnitSummary: jest.fn().mockResolvedValue(undefined),
+        getClassSummaries: jest.fn().mockResolvedValue({}),
         createOpenAI: () => ({
           chat: {
             completions: {
@@ -126,6 +127,33 @@ describe("shared/ai-analysis-messages in functions-v2", () => {
       };
       return {deps, sent};
     }
+
+    test("a prompt naming class work is given it, from the doc keyed by context id", async () => {
+      const {deps, sent} = recordingDeps({
+        getClassSummaries: jest.fn().mockResolvedValue({classwork: "Class themes about water."}),
+      });
+      const askingPrompt = {...fullPrompt, mainPrompt: "Compare with {{classwork}}."};
+
+      await categorizeRepresentations(
+        {summary, imageUrl: null}, "key", "demo/AI/documents/testdoc1", askingPrompt, undefined, deps);
+
+      expect(deps.getClassSummaries).toHaveBeenCalledWith("demo", "AI", "vibe", "class1");
+      const text = sent[0].messages[1].content.map((part: {text?: string}) => part.text ?? "").join("\n");
+      expect(text).toContain("Class themes about water.");
+    });
+
+    test("a prompt naming no class work neither reads nor receives it", async () => {
+      const {deps, sent} = recordingDeps({
+        getClassSummaries: jest.fn().mockResolvedValue({classwork: "Class themes about water."}),
+      });
+
+      await categorizeRepresentations(
+        {summary, imageUrl: null}, "key", "demo/AI/documents/testdoc1", fullPrompt, undefined, deps);
+
+      expect(deps.getClassSummaries).not.toHaveBeenCalled();
+      const text = sent[0].messages[1].content.map((part: {text?: string}) => part.text ?? "").join("\n");
+      expect(text).not.toContain("Class themes about water.");
+    });
 
     test("a mixed request is exactly buildMixedMessages", async () => {
       const {deps, sent} = recordingDeps();
@@ -365,6 +393,7 @@ describe("shared/ai-analysis-messages in functions-v2", () => {
         getEmbeddings: jest.fn().mockResolvedValue(undefined),
         findRelatedSummaries: jest.fn().mockResolvedValue([]),
         getUnitSummary: jest.fn().mockResolvedValue({summary: unitSummaryFixture(), liveProblems}),
+        getClassSummaries: jest.fn().mockResolvedValue({}),
         createOpenAI: () => ({
           chat: {
             completions: {
