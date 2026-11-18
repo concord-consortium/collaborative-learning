@@ -9,6 +9,7 @@ import {
   AiContextBlocks, kServerResolvedTokens, requestedTokens, substituteContext
 } from "../../../shared/ai-context-tokens";
 import { formatUnitSummarySlice, unitSummarySlice } from "../../../shared/unit-summary-slice";
+import { AiContextVocabularyHelp } from "../../components/ai/ai-context-vocabulary-help";
 import { useReadOnlyContext } from "../../components/document/read-only-context";
 import { BasicEditableTileTitle } from "../../components/tiles/basic-editable-tile-title";
 import { TileToolbar } from "../../components/toolbar/tile-toolbar";
@@ -257,6 +258,7 @@ export const AIComponent: React.FC<ITileProps> = observer((props) => {
     return (
       <div className="prompt-form">
         <h3>Prompt for AI</h3>
+        <AiContextVocabularyHelp />
         <textarea
           value={content.prompt}
           onChange={handlePromptChange}

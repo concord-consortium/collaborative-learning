@@ -6,6 +6,7 @@ import { WritableDraft } from "immer";
 import { AIEvaluation, IAuthorTool } from "../../types";
 import { useCurriculum } from "../../hooks/use-curriculum";
 import { kAITileType } from "../../../plugins/ai/ai-types";
+import { AiContextVocabularyHelp } from "../../../components/ai/ai-context-vocabulary-help";
 
 interface AISettingsFormInputs {
   aiEvaluation?: AIEvaluation | "";
@@ -228,6 +229,7 @@ const AISettings: React.FC = () => {
                 {errors.aiPrompt?.mainPrompt &&
                   <span className="form-error">{errors.aiPrompt?.mainPrompt?.message}</span>
                 }
+                <AiContextVocabularyHelp />
               </div>
             </td>
             <td className="left">
