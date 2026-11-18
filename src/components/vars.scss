@@ -337,6 +337,8 @@ $playback-alert-border: #f5c6cb;
 // The height of a one-line alert: a 12px line box plus 4px of padding and 1px of border,
 // top and bottom, and a little air between the two.
 $playback-alert-height: 28px;
+// The playback bar covers this much of the bottom of the document it plays back.
+$playback-bar-height: 49px;
 
 $highlight-blue: #0081ff;
 $highlight-blue-20: #0081ff33;

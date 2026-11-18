@@ -256,6 +256,7 @@ class _CanvasComponent extends BaseComponent<IProps, IState> {
             content={documentContent}
             documentId={documentToShow?.key}
             onScroll={(x: number, y: number) => this.setState({ documentScrollX: x, documentScrollY: y })}
+            showPlaybackSpacer={showPlayback && showPlaybackControls}
             {...{typeClass, viaTeacherDashboard, ...others}}
           />
           {showPlayback && showPlaybackControls && (

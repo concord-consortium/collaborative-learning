@@ -232,4 +232,30 @@ describe("Canvas Component", () => {
     expect(copyContentEntryId).toBe("e4");
   });
 
+  it("leaves room below the last tile for the playback bar only while playback shows", () => {
+    jest.spyOn(FirestoreHistoryManager.prototype as any, "subscribeToFirestoreHistory")
+      .mockImplementation(() => undefined);
+    jest.spyOn(FirestoreHistoryManager.prototype as any, "waitUntilEnvironmentAndMetadataDocReady")
+      .mockResolvedValue(undefined);
+    const document = createDocumentModel({
+      type: ProblemDocument, title: "test", uid: "1", key: "test", createdAt: 1, visibility: "public",
+      content: createSingleTileContent({ type: "Text", text: "test" })
+    });
+    const renderCanvas = () => render(
+      <Provider stores={specStores()}>
+        <ModalProvider>
+          <CanvasComponent context="test" document={document} readOnly={true} showPlayback={true} />
+        </ModalProvider>
+      </Provider>
+    );
+
+    const { unmount } = renderCanvas();
+    expect(screen.getByTestId("document-content").querySelector(".playback-spacer")).toBeNull();
+    unmount();
+
+    document.setShowPlaybackControls(true);
+    renderCanvas();
+    expect(screen.getByTestId("document-content").querySelector(".playback-spacer")).not.toBeNull();
+  });
+
 });
