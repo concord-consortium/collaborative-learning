@@ -103,7 +103,6 @@ export const AIComponent: React.FC<ITileProps> = observer((props) => {
             return;
           }
 
-          // The contexts this prompt named, or the default pair when it named none.
           const asked = requestedTokens(content.prompt);
           // document's own curriculum stamp, not stores.problemOrdinal (the displayed problem,
           // which can diverge from the document's -- four-up view, a teacher inspecting a
@@ -137,8 +136,8 @@ export const AIComponent: React.FC<ITileProps> = observer((props) => {
               });
             }
           }
-          // Class and teacher work are deliberately absent: a student may not read the class
-          // summary, so the server fills those in for a prompt that names them.
+          // Class and teacher work are the server's to resolve, for the reason the gate below
+          // turns on.
           const dynamicContentPrompt = substituteContext(content.prompt);
 
           // The gate hashes the whole request, built above but not yet sent, and runs before
