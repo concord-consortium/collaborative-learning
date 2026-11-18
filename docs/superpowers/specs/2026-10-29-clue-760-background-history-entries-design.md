@@ -245,6 +245,11 @@ documents from 2022 to 2026 (the counts are in #3074's description):
 - Every unflagged `setProgram` entry carries a structural or node-property change.
 - About 18k unflagged `setProgram` entries hold only `add` patches on running values. They may be
   ticks that add a new value. The rule leaves them as user entries for now.
+- 659k `setProgramZoom` entries, in about 2,000 documents up to July 2026, record canvas pans one
+  animation frame at a time. A person made them, so the rule leaves them as user entries, but
+  nothing reads `programZoom` any more and their stops show no change. Both kinds are described
+  for developers in "Old stops that seem to do nothing" in
+  [history-framework.md](../../history-framework.md).
 - The rule doesn't try to tell old DataFlow recordings (`addCanonicalCases` on a DataFlow tile's
   dataset) apart from user edits to the dataset, so they all stay user entries.
 

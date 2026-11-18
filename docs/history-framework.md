@@ -192,6 +192,15 @@ Background entries, flagged by `asBackground()` (see [undo-and-time-travel.md](u
 
 Entries recorded before the flag existed are recognized at read time by `background-entries.ts`.
 
+### Old stops that seem to do nothing
+
+The read-time rule matches only entries it can be sure no person made. Two kinds of old DataFlow entry fall outside it and stay user stops, which can leave a researcher scrubbing through stops where the document doesn't seem to change:
+
+- **Canvas pans.** Until July 2026, DataFlow recorded the program canvas's pan and zoom with `setProgramZoom`, an entry for each animation frame while the canvas moved, so one drag adds dozens of stops in a row. Nothing reads `programZoom` any more (the canvas fits its content when it loads), so stepping through them changes nothing on screen. They are a person's doing, not code's, so the rule leaves them alone. In one 2024 document they are about 6,500 of its 6,700 stops.
+- **The first tick after a node was added**, in the program format used before May 2024. It adds the new node's running values instead of replacing them, and the rule only matches replaces of running values. Its stop shows only that node's value appearing.
+
+Neither is handled, since matching them only removes stops. Both could be added to the rule, and so to the migration that backfills the flag: a `setProgramZoom` entry whose patches are all under `programZoom`, and a `setProgram` entry whose patches add or replace only paths inside a node's `currentValues` or `recentValues`.
+
 ## Load entries
 
 When a document loads, CLUE converts its old tiles and shared models to their current schema, and records the conversion as a **load entry**: a history entry with `isLoadEntry: true`, which is never undoable and never applied to an MST tree. An individual document opened for editing also catches up to its history then, applying the entries its saved content is missing. Both are described in [history-framework/load-entries.md](history-framework/load-entries.md).
