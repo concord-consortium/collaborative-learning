@@ -613,17 +613,29 @@ $playback-unavailable-stripe-color: $charcoal-light-3;
 $seek-progress-track-color: $charcoal-light-4;
 $seek-progress-arc-color: $charcoal-dark-1;
 
+// Holds the time readout and lays the seek status over it, so showing the spinner doesn't take
+// width from the slider.
+.playback-time-status {
+  position: relative;
+  flex: none;
+}
+
 .playback-seek-status {
+  position: absolute;
+  inset: 0;
   display: flex;
   align-items: center;
+  justify-content: center;
+  pointer-events: none;
 
   .playback-seek-progress {
     flex: none;
     box-sizing: border-box;
-    width: 16px;
-    height: 16px;
-    margin-right: 8px;
-    border: 2px solid $seek-progress-track-color;
+    width: 20px;
+    height: 20px;
+    border: 3px solid $seek-progress-track-color;
+    // Keeps the dimmed readout under it from showing through the ring.
+    background-color: white;
     border-top-color: $seek-progress-arc-color;
     border-radius: 50%;
     animation: playback-seek-spin 0.8s linear infinite;
@@ -648,5 +660,10 @@ $seek-progress-arc-color: $charcoal-dark-1;
 
   div {
     margin: 0;
+  }
+
+  // Dimmed while a seek runs, so the spinner on top of it stands out.
+  &.seeking {
+    opacity: 0.3;
   }
 }

@@ -143,7 +143,7 @@ export const PlaybackControlComponent: React.FC<IProps> = observer((props: IProp
     const historyIndex = model.sliderStopHistoryIndex;
 
     return (
-      <div className={"time-info"} data-testid="playback-time-info">
+      <div className={classNames("time-info", { seeking: showSeekProgress })} data-testid="playback-time-info">
         <div className={"date-info"}>{strDate}</div>
         <div className={"time-info"}>{strTime} {historyIndex !== undefined && `(${historyIndex})`}</div>
       </div>
@@ -320,13 +320,16 @@ export const PlaybackControlComponent: React.FC<IProps> = observer((props: IProp
         {renderPlaybackFailureMarkers()}
         {renderSliderContainer()}
       </div>
-      {renderTimeInfo()}
-      {/* Rendered whether or not there is anything to say, so screen readers announce the
-          change. The spinner is the visible cue; the words are for screen readers. */}
-      <div className="playback-seek-status" data-testid="playback-seek-status" role="status">
-        {showSeekProgress && <span className="playback-seek-progress" data-testid="playback-seek-progress"
-            aria-hidden="true" />}
-        {showSeekProgress && <span className="visually-hidden">Loading this point in the history…</span>}
+      <div className="playback-time-status">
+        {renderTimeInfo()}
+        {/* Rendered whether or not there is anything to say, so screen readers announce the
+            change. The spinner is the visible cue, laid over the dimmed time readout so the slider
+            keeps its width; the words are for screen readers. */}
+        <div className="playback-seek-status" data-testid="playback-seek-status" role="status">
+          {showSeekProgress && <span className="playback-seek-progress" data-testid="playback-seek-progress"
+              aria-hidden="true" />}
+          {showSeekProgress && <span className="visually-hidden">Loading this point in the history…</span>}
+        </div>
       </div>
       {model.playbackFailureWarning && !model.selectedFailure &&
         <div className="playback-failure-warning" data-testid="playback-failure-warning">

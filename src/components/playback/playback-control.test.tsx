@@ -282,6 +282,7 @@ describe("PlaybackControlComponent", () => {
       render(<PlaybackControlComponent treeManager={treeManager} requestedHistoryId={undefined} />);
       const status = screen.getByTestId("playback-seek-status");
       const sliderContainer = screen.getByTestId("playback-slider");
+      const timeInfo = screen.getByTestId("playback-time-info");
       expect(status.getAttribute("role")).toBe("status");
       expect(status.textContent).toBe("");
 
@@ -292,16 +293,20 @@ describe("PlaybackControlComponent", () => {
       expect(screen.queryByTestId("playback-seek-progress")).toBeNull();
       expect(sliderContainer.getAttribute("aria-busy")).not.toBe("true");
       expect(status.textContent).toBe("");
+      expect(timeInfo).not.toHaveClass("seeking");
 
       act(() => { jest.advanceTimersByTime(1); });
       expect(screen.getByTestId("playback-seek-progress")).toBeInTheDocument();
       expect(sliderContainer.getAttribute("aria-busy")).toBe("true");
       expect(status.textContent).toBe("Loading this point in the history…");
+      // The time readout is dimmed under the spinner.
+      expect(timeInfo).toHaveClass("seeking");
 
       await act(async () => { finishSeek(); });
       expect(screen.queryByTestId("playback-seek-progress")).toBeNull();
       expect(sliderContainer.getAttribute("aria-busy")).not.toBe("true");
       expect(status.textContent).toBe("");
+      expect(timeInfo).not.toHaveClass("seeking");
     });
 
     it("shows the progress indicator at once for a seek across many entries, and paints it first", async () => {

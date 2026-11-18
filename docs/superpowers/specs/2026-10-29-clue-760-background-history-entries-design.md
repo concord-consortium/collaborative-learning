@@ -332,7 +332,8 @@ In [playback-control-model.ts](../../../src/components/playback/playback-control
   moves the JSON copy. Measured in jsdom on the study data, a move across 4,366 entries took
   2.2–3.5 s, and one across the largest gap, 24,834 entries, took 37–41 s. So the control
   ([playback-control.tsx](../../../src/components/playback/playback-control.tsx)) shows that a seek
-  is running: a spinner beside the time readout, `aria-busy` on the slider, and a status region
+  is running: a spinner over the dimmed time readout (so the slider keeps its width), `aria-busy`
+  on the slider, and a status region
   that says "Loading this point in the history…". It shows once a seek has run for 300 ms
   (`kSeekProgressDelayMs`), so a quick seek doesn't flash it. A seek applies its entries without
   yielding, so the browser can't run that timer or paint during it. For a seek across at least 100
