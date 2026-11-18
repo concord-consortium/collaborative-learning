@@ -15,17 +15,6 @@ export const kActivitySaveTimeoutMs = 30000;
 // Each consecutive failed write doubles the wait before the next, up to this.
 export const kActivityMaxRetryDelayMs = 60000;
 
-// Entries a running Simulator or DataFlow tile records on its own, every step. They are not activity.
-const kTickEntries: Array<{ model: string, actionSuffix: string }> = [
-  { model: "SimulatorTool", actionSuffix: "/step" },
-  { model: "DataflowProgram", actionSuffix: "/tickAndProcess" }
-];
-
-export function isTickEntry(entry: Pick<HistoryEntryType, "model" | "action">) {
-  return kTickEntries.some(({ model, actionSuffix }) =>
-    entry.model === model && !!entry.action?.endsWith(actionSuffix));
-}
-
 export interface IActivityRecorderStores {
   appMode: AppMode;
   user: UserModelType;
@@ -82,8 +71,8 @@ export class ActivityRecorder {
   }
 
   onLocalEntryUploaded(document: DocumentModelType, entry: HistoryEntryType) {
-    // A load entry records CLUE's own changes at load, which a tick can flush.
-    if (!this.isEnabled || isTickEntry(entry) || entry.isLoadEntry) return;
+    // A background entry is code's own change, such as a tick or a load, not a person's activity.
+    if (!this.isEnabled || entry.background) return;
     if (!this.listening) {
       window.addEventListener("pagehide", this.handlePageHide);
       this.listening = true;

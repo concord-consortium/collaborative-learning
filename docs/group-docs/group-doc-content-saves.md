@@ -21,6 +21,8 @@ An idle member has no local entries of its own, so it saves its current content 
 
 The save is stamped with the last canonical entry (`expectedRemoteHead` and its index), not the last entry in local history, because after a fork rollback that is a local-only revert entry.
 
+Other members' changes aren't this user's, so such a save starts at least 3 seconds after this client's previous one, as a save of background changes does (see "Sending" in [content-saves.md](../history-framework/content-saves.md#sending)). The member who made a change keeps the 1-second gap.
+
 ## Stale-check and jitter
 
 Before a group save, the sender compares the save's chain index with the index in the envelope's `exactThrough`. If the envelope is already at or past it, the save is skipped. Otherwise it waits a random 0 to 200 ms, checks again, and saves. Local history can't order two entry ids from before the load point, which is why the index is stored. A committing writer learns of its commit before the other members receive the entry, so it usually saves first and the idle members skip. An envelope whose `exactThrough` doesn't name its `lastHistoryEntryId` can't be ordered against a save, so it counts as behind.

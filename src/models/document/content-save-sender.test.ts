@@ -5,7 +5,9 @@ import { FAKE_HISTORY_ENTRY_ID } from "../history/tree-manager";
 import { LogEventName } from "../../lib/logger-types";
 import { hashString } from "../../utilities/js-utils";
 import { kConcurrentSaveJitterMs } from "./concurrent-content-save-sender";
-import { kMaxRetryDelayMs, kMaxUsableSnapshots, kMinimumSaveGapMs, kSenderUnmountLimitMs } from "./content-save-sender";
+import {
+  kBackgroundSaveGapMs, kMaxRetryDelayMs, kMaxUsableSnapshots, kMinimumSaveGapMs, kSenderUnmountLimitMs
+} from "./content-save-sender";
 import { FakeRtdbEnvelopeRef, flush, setup, textOf, trackSenders, twoStepGate } from "./content-save-sender-test-utils";
 import { getContentSaveSender } from "./get-content-save-sender";
 import { IndividualContentSaveSender, kIntermediateSaveIntervalMs } from "./individual-content-save-sender";
@@ -727,6 +729,137 @@ describe("ContentSaveSender", () => {
     });
   });
 
+  describe("background changes", () => {
+    it("waits 3 seconds between saves that hold only background changes", async () => {
+      const { commits, rtdbEnvelopeRef, edit, tick } = track(setup());
+      // a saved user change leaves only background changes unsaved, the most common case
+      const a = await edit("alpha");
+      commits.commit(a);
+      expect(rtdbEnvelopeRef.update).toHaveBeenCalledTimes(1);
+      rtdbEnvelopeRef.writes[0].resolve();
+      await flush();
+
+      const b = await tick("bravo");
+      commits.commit(b);
+      jest.advanceTimersByTime(100);
+      const c = await tick("charlie");
+      commits.commit(c);
+      jest.advanceTimersByTime(kBackgroundSaveGapMs - 101);
+      expect(rtdbEnvelopeRef.update).toHaveBeenCalledTimes(1);
+      jest.advanceTimersByTime(1);
+      expect(rtdbEnvelopeRef.update).toHaveBeenCalledTimes(2);
+      expect(rtdbEnvelopeRef.writes[1].values.lastHistoryEntryId).toBe(c);
+      expect(textOf(rtdbEnvelopeRef.writes[1].values)).toBe("charlie");
+    });
+
+    it("sends a user change within 1 second during a background wait", async () => {
+      const { commits, rtdbEnvelopeRef, edit, tick } = track(setup());
+      const a = await tick("alpha");
+      commits.commit(a);
+      rtdbEnvelopeRef.writes[0].resolve();
+      await flush();
+
+      const b = await tick("bravo");
+      commits.commit(b);
+      jest.advanceTimersByTime(500);
+      const c = await edit("charlie");
+      commits.commit(c);
+      jest.advanceTimersByTime(kMinimumSaveGapMs - 501);
+      expect(rtdbEnvelopeRef.update).toHaveBeenCalledTimes(1);
+      jest.advanceTimersByTime(1);
+      expect(rtdbEnvelopeRef.update).toHaveBeenCalledTimes(2);
+      expect(rtdbEnvelopeRef.writes[1].values.lastHistoryEntryId).toBe(c);
+      expect(textOf(rtdbEnvelopeRef.writes[1].values)).toBe("charlie");
+    });
+
+    it("leaves the indicator alone for background changes", async () => {
+      const { commits, rtdbEnvelopeRef, document, edit, tick } = track(setup());
+      const a = await edit("alpha");
+      commits.commit(a);
+      rtdbEnvelopeRef.writes[0].resolve();
+      await flush();
+      expect(document.saveState).toBe(SaveState.Saved);
+
+      const b = await tick("bravo");
+      expect(document.saveState).toBe(SaveState.Saved);
+      commits.commit(b);
+      jest.advanceTimersByTime(kBackgroundSaveGapMs);
+      expect(rtdbEnvelopeRef.update).toHaveBeenCalledTimes(2);
+      expect(document.saveState).toBe(SaveState.Saved);
+      rtdbEnvelopeRef.writes[1].resolve();
+      await flush();
+      expect(document.saveState).toBe(SaveState.Saved);
+    });
+
+    it("doesn't show Saved again for background-only saves once the indicator clears it", async () => {
+      const { commits, rtdbEnvelopeRef, document, edit, tick } = track(setup());
+      const a = await edit("alpha");
+      commits.commit(a);
+      rtdbEnvelopeRef.writes[0].resolve();
+      await flush();
+      expect(document.saveState).toBe(SaveState.Saved);
+      // as the save indicator does a while after showing Saved
+      document.setSaveState(SaveState.Idle);
+
+      const setSaveState = jest.spyOn(document, "setSaveState");
+      for (let i = 1; i <= 3; i++) {
+        const id = await tick(`tick-${i}`);
+        commits.commit(id);
+        jest.advanceTimersByTime(kBackgroundSaveGapMs);
+        expect(rtdbEnvelopeRef.update).toHaveBeenCalledTimes(i + 1);
+        rtdbEnvelopeRef.lastWrite.resolve();
+        await flush();
+      }
+      expect(setSaveState).not.toHaveBeenCalled();
+      expect(document.saveState).toBe(SaveState.Idle);
+    });
+
+    it("shows Saved once a save covers the last user change while ticks continue", async () => {
+      const { commits, rtdbEnvelopeRef, document, edit, tick } = track(setup());
+      const a = await edit("alpha");
+      expect(document.saveState).toBe(SaveState.Saving);
+      await tick("bravo");
+      commits.commit(a);
+      expect(textOf(rtdbEnvelopeRef.writes[0].values)).toBe("alpha");
+      rtdbEnvelopeRef.writes[0].resolve();
+      await flush();
+      expect(document.saveState).toBe(SaveState.Saved);
+    });
+
+    it("shows Retrying when background-only saves keep failing, and Saved when one succeeds", async () => {
+      const { commits, rtdbEnvelopeRef, document, edit, tick } = track(setup());
+      const a = await edit("alpha");
+      commits.commit(a);
+      rtdbEnvelopeRef.writes[0].resolve();
+      await flush();
+
+      await jestSpyConsole("warn", async () => {
+        const b = await tick("bravo");
+        commits.commit(b);
+        jest.advanceTimersByTime(kBackgroundSaveGapMs);
+        expect(rtdbEnvelopeRef.update).toHaveBeenCalledTimes(2);
+        rtdbEnvelopeRef.writes[1].reject(new Error("offline"));
+        await flush();
+        expect(document.saveState).toBe(SaveState.Saved);
+        jest.advanceTimersByTime(kMaxRetryDelayMs);
+        rtdbEnvelopeRef.writes[2].reject(new Error("offline"));
+        await flush();
+        expect(document.saveState).toBe(SaveState.Saved);
+        jest.advanceTimersByTime(kMaxRetryDelayMs);
+        rtdbEnvelopeRef.writes[3].reject(new Error("offline"));
+        await flush();
+        expect(document.saveState).toBe(SaveState.Retrying);
+
+        jest.advanceTimersByTime(kMaxRetryDelayMs);
+        expect(rtdbEnvelopeRef.update).toHaveBeenCalledTimes(5);
+        expect(rtdbEnvelopeRef.writes[4].values.lastHistoryEntryId).toBe(b);
+        rtdbEnvelopeRef.writes[4].resolve();
+        await flush();
+        expect(document.saveState).toBe(SaveState.Saved);
+      });
+    });
+  });
+
   describe("lifetime", () => {
     it("stops listening when disposed", async () => {
       const { commits, rtdbEnvelopeRef, document, edit, sender: disposed } = track(setup());
@@ -807,7 +940,8 @@ describe("ContentSaveSender", () => {
       await flush();
 
       commits.commit(a);
-      jest.advanceTimersByTime(kMinimumSaveGapMs);
+      // the intermediate save already holds the user's change, so the exact save waits the longer gap
+      jest.advanceTimersByTime(kBackgroundSaveGapMs);
       expect(rtdbEnvelopeRef.update).toHaveBeenCalledTimes(2);
       expect(rtdbEnvelopeRef.writes[1].values).toMatchObject({ lastHistoryEntryId: a, exactThrough: { id: a } });
     });

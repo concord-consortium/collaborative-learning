@@ -30,7 +30,8 @@ describe("IndividualContentSaveSender", () => {
       });
       rtdbEnvelopeRef.writes[0].resolve();
       await flush();
-      expect(document.saveState).toBe(SaveState.Saved);
+      // the load's catch-up holds no change of the user's, so the indicator stays idle
+      expect(document.saveState).toBe(SaveState.Idle);
       expect(document.savedEnvelope).toEqual(
         { lastHistoryEntryId: "caught-up", exactThrough: { index: 9, since: "e0" } });
     });
@@ -340,6 +341,26 @@ describe("IndividualContentSaveSender", () => {
   describe("page hide", () => {
     const exactEnvelope = { lastHistoryEntryId: "loaded", exactThrough: { index: 7, since: "loaded" } };
     const unmarkedEnvelope = { lastHistoryEntryId: "loaded" };
+
+    it("sends the newest committed snapshot at once on pagehide while only background changes wait",
+        async () => {
+      const { commits, rtdbEnvelopeRef, document, tick } = track(setup());
+      document.setSavedEnvelope(exactEnvelope);
+      const a = await tick("alpha");
+      commits.commit(a);
+      rtdbEnvelopeRef.writes[0].resolve();
+      await flush();
+      const b = await tick("bravo");
+      commits.commit(b);
+      jest.advanceTimersByTime(200);
+      await tick("charlie");
+      expect(rtdbEnvelopeRef.update).toHaveBeenCalledTimes(1);
+
+      window.dispatchEvent(new Event("pagehide"));
+      expect(rtdbEnvelopeRef.update).toHaveBeenCalledTimes(2);
+      expect(rtdbEnvelopeRef.writes[1].values).toMatchObject({ lastHistoryEntryId: b, exactThrough: { id: b } });
+      expect(textOf(rtdbEnvelopeRef.writes[1].values)).toBe("bravo");
+    });
 
     it("sends the newest committed snapshot at once on page hide", async () => {
       const { commits, rtdbEnvelopeRef, document, edit, sender } = track(setup());

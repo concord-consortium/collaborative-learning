@@ -266,7 +266,7 @@ export const TreeManager = types
   /**
    * Entries that were force-completed, so records that arrive for them later can be recognized.
    */
-  timedOutEntries: new Map<string, { model?: string }>(),
+  timedOutEntries: new Map<string, { model?: string; background?: boolean; producerTileId?: string }>(),
   /**
    * Set when the JSON copy can't get back to the trees' position after a failed move. The copy
    * and the trees then disagree, so playback makes no more moves.
@@ -289,11 +289,12 @@ export const TreeManager = types
    */
   jsonHistoryCopy: undefined as JsonHistoryCopy | undefined,
   /**
-   * The oldest position playback can reach. It is set when a playback move stops at a virtual
-   * conversion it can't cross backward, because the bridge couldn't rebuild the old state or the
-   * model isn't in the copy there. Each later move updates it from the conversions then.
+   * Where a playback move found it couldn't go further back: a virtual conversion it can't cross
+   * backward, because the bridge couldn't rebuild the old state or the model isn't in the copy
+   * there. Each later move updates it from the conversions then. Playback reads
+   * earliestReachablePosition, which also counts what the bridges report before any move.
    */
-  oldestReachablePosition: undefined as number | undefined
+  seekBoundaryPosition: undefined as number | undefined
 }))
 .views((self) => {
   // The history usually only grows during playback, so the scan resumes where it stopped. A new or
@@ -302,10 +303,13 @@ export const TreeManager = types
   let scannedLength = 0;
   let hasLoadEntry = false;
   // Finding virtual conversions runs every registered bridge, so the result is kept until the key
-  // changes.
+  // changes. When entries were only appended, a bridge that can tell whether they matter keeps its
+  // result, since the history grows on every tick while playback is open.
   let virtualKey: {
-    history: unknown; length: number; treeId: string; bridgeCount: number; localLoadEntry: unknown
+    history: unknown; length: number; lastEntry: unknown; treeId: string; bridgeCount: number;
+    localLoadEntry: unknown; extraLoadEntry: boolean
   } | undefined;
+  let bridgeConversions: IVirtualConversion[][] = [];
   let virtualConversions = kNoVirtualConversions;
 
   function getVirtualConversions() {
@@ -314,16 +318,30 @@ export const TreeManager = types
     if (bridges.length === 0 || treeId === undefined) return kNoVirtualConversions;
     const history = self.document.history;
     const { localLoadEntry } = self;
-    if (virtualKey?.history !== history || virtualKey.length !== history.length ||
-        virtualKey.treeId !== treeId || virtualKey.bridgeCount !== bridges.length ||
-        virtualKey.localLoadEntry !== localLoadEntry) {
-      virtualKey = { history, length: history.length, treeId, bridgeCount: bridges.length, localLoadEntry };
-      // A local load entry that the history doesn't hold yet comes after it, so the bridges see
-      // the conversion it records.
-      const bridgeHistory = localLoadEntry && !history.some(entry => entry.id === localLoadEntry.id)
-        ? [...history, HistoryEntry.create(localLoadEntry)]
-        : history;
-      virtualConversions = bridges.flatMap(bridge => bridge.findVirtualConversions(bridgeHistory, treeId));
+    const previous = virtualKey;
+    const sameSource = previous?.history === history && previous.treeId === treeId &&
+      previous.bridgeCount === bridges.length && previous.localLoadEntry === localLoadEntry;
+    if (sameSource && previous.length === history.length) return virtualConversions;
+
+    // A local load entry that the history doesn't hold yet comes after it, so the bridges see
+    // the conversion it records.
+    const extraLoadEntry = !!localLoadEntry && !history.some(entry => entry.id === localLoadEntry.id);
+    const bridgeHistory = extraLoadEntry ? [...history, HistoryEntry.create(localLoadEntry)] : history;
+    const appendedOnly = sameSource && previous.length < history.length &&
+      previous.lastEntry === history[previous.length - 1] && !previous.extraLoadEntry && !extraLoadEntry;
+    virtualKey = {
+      history, length: history.length, lastEntry: history[history.length - 1], treeId,
+      bridgeCount: bridges.length, localLoadEntry, extraLoadEntry
+    };
+    const previousConversions = bridgeConversions;
+    bridgeConversions = bridges.map((bridge, index) =>
+      appendedOnly && bridge.appendChangesConversions?.(history, previous.length, treeId,
+          previousConversions[index]) === false
+        ? previousConversions[index]
+        : bridge.findVirtualConversions(bridgeHistory, treeId));
+    // Unchanged results keep the same array, so what reads it isn't recomputed.
+    if (!appendedOnly || bridgeConversions.some((conversions, index) => conversions !== previousConversions[index])) {
+      virtualConversions = bridgeConversions.flat();
     }
     return virtualConversions;
   }
@@ -360,6 +378,18 @@ export const TreeManager = types
 .views((self) => ({
   get undoManager() : IUndoManager {
     return self.undoStore;
+  },
+
+  /**
+   * The earliest position playback can reach. The history bridges know where they can't rebuild
+   * the old state before any seek gets there, and a seek that stops short records where it found
+   * the boundary (seekBoundaryPosition), so this is the later of the two. 0 when all of the history can be reached.
+   */
+  get earliestReachablePosition(): number {
+    const unrebuildable = self.virtualConversions
+      .filter(conversion => conversion.oldJson === undefined)
+      .map(conversion => conversion.position);
+    return Math.max(self.seekBoundaryPosition ?? 0, ...unrebuildable);
   },
 
   findHistoryEntryIndex(historyEntryId: string) {
@@ -465,7 +495,8 @@ export const TreeManager = types
       })}`);
 
       self.exactness.markNotExact("timed-out-entry");
-      self.timedOutEntries.set(entryId, { model: entry.model });
+      const { model, background, producerTileId } = entry;
+      self.timedOutEntries.set(entryId, { model, background, producerTileId });
       entry.activeExchanges.clear();
       entry.timedOut = true;
       completeHistoryEntry(entry);
@@ -516,8 +547,8 @@ export const TreeManager = types
       self.numHistoryEventsApplied = value;
     },
 
-    setOldestReachablePosition(value: number | undefined) {
-      self.oldestReachablePosition = value;
+    setSeekBoundaryPosition(value: number | undefined) {
+      self.seekBoundaryPosition = value;
     },
 
     /**
@@ -740,6 +771,9 @@ export const TreeManager = types
           model: timedOutEntry.model,
           action: record.action,
           undoable: false,
+          // A late record of a background entry is background too.
+          background: timedOutEntry.background,
+          producerTileId: timedOutEntry.producerTileId,
           lateRecordForEntryId: historyEntryId,
           records: [record]
         });
@@ -917,8 +951,8 @@ export const TreeManager = types
       targetPosition = moved.position;
       // Stopping where earlier history can't be rebuilt isn't a failure; playback says so instead.
       // The conversions change as the history grows, which can move that position or remove it.
-      if (moved.unavailable || self.oldestReachablePosition !== undefined) {
-        self.oldestReachablePosition = copy.oldestReachablePosition || undefined;
+      if (moved.unavailable || self.seekBoundaryPosition !== undefined) {
+        self.seekBoundaryPosition = copy.boundaryPosition || undefined;
       }
       if (moved.failure) {
         const { historyIndex, direction: failureDirection, message } = moved.failure;

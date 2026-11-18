@@ -7,7 +7,6 @@ import { SessionExactness } from "../history/session-exactness";
 import { getConcurrentHistoryState, getOpenEntries, getSnapshotBlockers, getTreeManager } from "./content-save-checks";
 import { buildExactSave } from "./content-save-envelope";
 import { ContentSaveSender, getSaveIndex, IQueuedSave, IWaitingSave } from "./content-save-sender";
-import { SaveState } from "./document";
 import { DocumentContentModelType, DocumentContentSnapshotType } from "./document-content";
 
 // The most time a concurrent document's save waits, at random, before checking the envelope again.
@@ -180,9 +179,7 @@ export class ConcurrentContentSaveSender extends ContentSaveSender {
     const envelope = this.envelopeEntry;
     const committed = this.lastCommittedLocal;
     if (!envelope || !committed || envelope.index < committed.index) return;
-    if (committed.changeSeq >= this.dirtySeq) {
-      this.setSaveState(SaveState.Saved);
-    }
+    this.showSavedIfCovered(committed.changeSeq);
     if (envelope.index > this.reportedIndex) {
       this.reportedIndex = envelope.index;
       this.reportContentSaved(envelope.id);
@@ -237,7 +234,7 @@ export class ConcurrentContentSaveSender extends ContentSaveSender {
   private showAllChangesSaved() {
     if (this.savedSeq >= this.dirtySeq) return;
     this.savedSeq = this.dirtySeq;
-    this.setSaveState(SaveState.Saved);
+    this.showSavedIfCovered(this.dirtySeq);
     this.checkDrained();
   }
 

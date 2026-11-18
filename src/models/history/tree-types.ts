@@ -11,6 +11,9 @@ export interface CallEnv {
   historyEntryId: string;
   exchangeId: string;
   undoable: boolean;
+  // Set by asBackground(), and by the tree monitor on a background call's shared model follow-ups
+  background?: boolean;
+  producerTileId?: string;
 }
 
 export function isValidCallEnv(env?: CallEnv): env is CallEnv {

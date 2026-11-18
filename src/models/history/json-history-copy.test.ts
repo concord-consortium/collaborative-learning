@@ -228,7 +228,7 @@ describe("JsonHistoryCopy", () => {
       const entries = history();
       const copy = new JsonHistoryCopy(kTreeId, endJson(), 3);
       copy.setVirtualConversions([{ path: t1Path, position: 2, oldJson: v1Tile("c") }]);
-      expect(copy.oldestReachablePosition).toBe(0);
+      expect(copy.boundaryPosition).toBe(0);
 
       expect(copy.moveTo(entries, 0)).toEqual({ position: 0 });
       expect(copy.getJson(t1Path)).toEqual(v1Tile("a"));
@@ -248,7 +248,7 @@ describe("JsonHistoryCopy", () => {
       const entries = history();
       const copy = new JsonHistoryCopy(kTreeId, endJson(), 3);
       copy.setVirtualConversions([{ path: t1Path, position: 2, oldJson: undefined }]);
-      expect(copy.oldestReachablePosition).toBe(2);
+      expect(copy.boundaryPosition).toBe(2);
 
       expect(copy.moveTo(entries, 0)).toEqual({ position: 2, unavailable: true });
       expect(copy.position).toBe(2);
@@ -278,7 +278,7 @@ describe("JsonHistoryCopy", () => {
         { path: t1Path, position: 3, oldJson: undefined },
         { path: "/content/tileMap/t2", position: 1, oldJson: undefined }
       ]);
-      expect(copy.oldestReachablePosition).toBe(3);
+      expect(copy.boundaryPosition).toBe(3);
       expect(copy.moveTo(entries, 0)).toEqual({ position: 3, unavailable: true });
     });
 
@@ -288,7 +288,7 @@ describe("JsonHistoryCopy", () => {
       copy.setVirtualConversions([{ path: "/content/tileMap/t9", position: 2, oldJson: v1Tile("c") }]);
 
       expect(copy.moveTo(entries, 0)).toEqual({ position: 2, unavailable: true });
-      expect(copy.oldestReachablePosition).toBe(2);
+      expect(copy.boundaryPosition).toBe(2);
     });
   });
 

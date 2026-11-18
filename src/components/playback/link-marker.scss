@@ -1,0 +1,67 @@
+@import "../vars";
+
+$link-marker-background: white;
+
+// Colors the marker's line and button for the tab it is shown in.
+@mixin link-marker-color($color) {
+  .vertical-line {
+    background-color: $color;
+  }
+  .link-marker-button {
+    border-color: $color;
+
+    svg path:last-of-type {
+      fill: $color;
+    }
+  }
+}
+
+.link-marker {
+  position: absolute;
+  top: 0px;
+  @include link-marker-color($charcoal-dark-1);
+
+  &.my-work, &.class-work {
+    @include link-marker-color($workspace-teal);
+  }
+  &.sort-work {
+    @include link-marker-color($classwork-purple);
+  }
+  &.student-work {
+    @include link-marker-color($charcoal);
+  }
+  &.learning-log {
+    @include link-marker-color($learninglog-green);
+  }
+  &.problems {
+    @include link-marker-color($problem-orange);
+  }
+
+  .vertical-line {
+    position: absolute;
+    left: 50%;
+    top: 20px;
+    width: 2px;
+    height: 28px;
+    transform: translateX(-50%);
+  }
+
+  .link-marker-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    width: 20px;
+    height: 20px;
+    padding: 0;
+    border: solid 1.5px;
+    border-radius: 50%;
+    background-color: $link-marker-background;
+    cursor: pointer;
+
+    svg {
+      width: 18px;
+      height: 18px;
+    }
+  }
+}

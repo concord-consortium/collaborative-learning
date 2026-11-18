@@ -128,7 +128,7 @@ describe("Canvas Component", () => {
       .mockImplementation(() => undefined);
     jest.spyOn(FirestoreHistoryManager.prototype as any, "waitUntilEnvironmentAndMetadataDocReady")
       .mockResolvedValue(undefined);
-    const moveSpy = jest.spyOn(FirestoreHistoryManager.prototype, "moveToHistoryEntryAfterLoad")
+    const checkSpy = jest.spyOn(FirestoreHistoryManager.prototype, "checkHistoryEntryAfterLoad")
       .mockResolvedValue(undefined);
 
     const makeDoc = (key: string) => createDocumentModel({
@@ -149,7 +149,7 @@ describe("Canvas Component", () => {
         </ModalProvider>
       </Provider>
     );
-    expect(moveSpy).toHaveBeenCalledWith("entry-abc");
+    expect(checkSpy).toHaveBeenCalledWith("entry-abc");
 
     rerender(
       <Provider stores={stores}>
@@ -159,7 +159,7 @@ describe("Canvas Component", () => {
       </Provider>
     );
 
-    expect(moveSpy).toHaveBeenCalledTimes(1);
+    expect(checkSpy).toHaveBeenCalledTimes(1);
   });
 
   // The live document's content can be replaced after it loads, which converts its old tiles

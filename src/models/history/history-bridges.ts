@@ -20,6 +20,14 @@ export interface IVirtualConversion {
  */
 export interface IHistoryBridge {
   findVirtualConversions(history: readonly HistoryEntryType[], treeId: string): IVirtualConversion[];
+  /**
+   * Whether the entries from `previousLength` on, appended to a history whose first
+   * `previousLength` entries gave `conversions`, can change the conversions. When it returns
+   * false the earlier result is kept, so a growing history isn't scanned again on every entry.
+   * A bridge without it is asked for the whole history again.
+   */
+  appendChangesConversions?(history: readonly HistoryEntryType[], previousLength: number, treeId: string,
+    conversions: readonly IVirtualConversion[]): boolean;
 }
 
 const bridges: IHistoryBridge[] = [];

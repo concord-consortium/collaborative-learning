@@ -1,5 +1,8 @@
 @import "../vars";
 $border-radius-base: 6px;
+// The part of the rail before the earliest available stop, which playback can't reach.
+$playback-unavailable-color: $charcoal-light-5;
+$playback-unavailable-stripe-color: $charcoal-light-3;
 
 .playback-controls {
   display: flex;
@@ -215,6 +218,25 @@ $border-radius-base: 6px;
     }
   }
 
+  // Spans the rail, which the slider insets by 10px at each end.
+  .playback-unavailable-range-container {
+    position: absolute;
+    bottom: 0;
+    left: 10px;
+    right: 10px;
+    height: 26px;
+    display: flex;
+    align-items: center;
+    pointer-events: none;
+  }
+
+  .playback-unavailable-range {
+    height: 10px;
+    border-radius: 2px;
+    background: repeating-linear-gradient(-45deg, $playback-unavailable-stripe-color 0 3px,
+                                          $playback-unavailable-color 3px 6px);
+  }
+
   .slider-container {
     width: 100%;
     height: 26px;
@@ -315,12 +337,21 @@ $border-radius-base: 6px;
     }
   }
 
-  .comment-markers-container {
+  .comment-markers-container, .link-marker-container {
     position: absolute;
     top: 0;
     left: 10px;
     right: 10px;
     height: 100%;
+  }
+
+  // It lies over the comment markers, so only the marker itself takes clicks.
+  .link-marker-container {
+    pointer-events: none;
+
+    .link-marker-button {
+      pointer-events: auto;
+    }
   }
 
   .rc-slider {
@@ -579,6 +610,42 @@ $border-radius-base: 6px;
   white-space: nowrap;
 }
 
+$seek-progress-track-color: $charcoal-light-4;
+$seek-progress-arc-color: $charcoal-dark-1;
+
+// Holds the time readout and lays the seek status over it, so showing the spinner doesn't take
+// width from the slider.
+.playback-time-status {
+  position: relative;
+  flex: none;
+}
+
+.playback-seek-status {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+
+  .playback-seek-progress {
+    flex: none;
+    box-sizing: border-box;
+    width: 20px;
+    height: 20px;
+    border: 3px solid $seek-progress-track-color;
+    // Keeps the dimmed readout under it from showing through the ring.
+    background-color: white;
+    border-top-color: $seek-progress-arc-color;
+    border-radius: 50%;
+    animation: playback-seek-spin 0.8s linear infinite;
+  }
+}
+
+@keyframes playback-seek-spin {
+  to { transform: rotate(360deg); }
+}
+
 .time-info {
   width: 85px;
   text-align: center;
@@ -593,5 +660,10 @@ $border-radius-base: 6px;
 
   div {
     margin: 0;
+  }
+
+  // Dimmed while a seek runs, so the spinner on top of it stands out.
+  &.seeking {
+    opacity: 0.3;
   }
 }

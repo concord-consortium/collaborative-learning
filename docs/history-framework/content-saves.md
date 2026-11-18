@@ -57,8 +57,11 @@ newest snapshot kept among its entries, which is at most about a second behind i
 ## Sending
 
 The sender sends one write at a time, always of the newest state, except on page hide and at the end
-of the drain (see below). A failed write is retried after a delay that doubles from 1 second up to
-30 seconds, and after 3 failures in a row the save indicator shows `Retrying`.
+of the drain (see below). A write starts at least 1 second after the previous one, or 3 seconds
+when no unsaved change was made by the user, only by background calls such as a running program's
+ticks. The save indicator follows the user's changes only: background changes don't show `Saving`,
+and a save of them doesn't show `Saved` again. A failed write is retried after a delay that doubles
+from 1 second up to 30 seconds, and after 3 failures in a row the save indicator shows `Retrying`.
 
 When the document unmounts, the sender keeps saving until the latest change is saved, for up to 30
 seconds. A document that mounts again in that time reuses the same sender.

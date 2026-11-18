@@ -1,6 +1,6 @@
 import { action, makeObservable, observable } from "mobx";
 
-// Sentinel for "before any history entry"; moveToHistoryEntryAfterLoad treats it the same way.
+// Sentinel for "before any history entry". A link that carries it opens playback before the first entry.
 export const kHistoryStart = "first";
 
 export type NotExactReason = "unrecorded-change" | "timed-out-entry" | "catch-up-apply-failed"

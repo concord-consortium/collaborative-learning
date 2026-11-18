@@ -30,13 +30,13 @@ function moveSliderTo(percent) {
 const kArrowLeft = { key: "ArrowLeft", keyCode: 37, which: 37 };
 const kArrowRight = { key: "ArrowRight", keyCode: 39, which: 39 };
 
-// Moves the playback slider one history entry. This sends the key without the click that `type`
+// Moves the playback slider one stop. This sends the key without the click that `type`
 // makes first, since a click on the slider can move it.
 function stepPlayback(arrow) {
   cy.get(playbackSliderHandle).trigger("keydown", arrow);
 }
 
-// Steps playback one history entry at a time, in the direction of `arrow`, until the playback
+// Steps playback one stop at a time, in the direction of `arrow`, until the playback
 // document shows `count` DataFlow blocks. The blocks render asynchronously, so each step gets a
 // moment to settle before the count is read.
 function stepUntilDataflowNodes(arrow, count, stepsLeft = 60) {
@@ -135,6 +135,19 @@ context('History Playback', () => {
     stepUntilDataflowNodes(kArrowRight, 1);
     stepUntilDataflowNodes(kArrowRight, 2);
     stepUntilDataflowNodes(kArrowRight, 3);
+
+    cy.log('verify the slider stops only at user changes while a DataFlow program ticks');
+    cy.get('.toolbar .tool.toggleplayback').click(); //close playback controls
+    dataflowToolTile.getCreateNodeButton('generator').click();
+    dataflowToolTile.getNode('generator').should('exist');
+    // The program ticks once a second, and each tick is a history entry.
+    cy.wait(4000);
+    cy.get('.toolbar .tool.toggleplayback').click(); //open playback controls
+    // The stops are the initial one, the drawing tile, its line, the DataFlow tile, the three number
+    // blocks, the generator and the latest entry, so the last stop's index is 8. The latest stop is
+    // there only because ticks were recorded after the generator was added, and a tick that became a
+    // user stop would add one.
+    cy.get(playbackSliderHandle).should('have.attr', 'aria-valuemax', '8');
 
     cy.log('verify playback reaches the start of a document with a DataFlow tile in a unit with Live Output settings');
     beforeTest(liveOutputUnitQueryParams);
