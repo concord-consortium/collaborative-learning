@@ -1,3 +1,5 @@
+import { AiContextBlocks } from "./ai-context-tokens";
+
 export const escapeKey = (s: string): string => {
   return s.replace(/[.$[\]#/]/g, "_");
 };
@@ -292,11 +294,26 @@ export interface IPostDocumentCommentParams extends IFirestoreMetadataDocumentPa
 export type IPostDocumentCommentUnionParams = IPostDocumentCommentParams | IFirebaseFunctionWarmUpParams;
 
 export interface IAiContentParams extends IFirebaseFunctionBaseParams {
+  /**
+   * The authored question with its context tokens already replaced by noun phrases. The context
+   * itself travels in contextBlocks, so this no longer contains the document summary.
+   */
   dynamicContentPrompt: string;
   systemPrompt: string;
   unit: string;
   documentId: string;
   tileId: string;
+  /**
+   * Context the client resolved. The server adds the blocks students may not read and assembles
+   * the whole section. Optional so a deployed client sending the old shape still works.
+   */
+  contextBlocks?: AiContextBlocks;
+  /**
+   * The caller's own hash of its whole request, echoed back on the response. The caller records it
+   * only when the echo matches, so an answer generated for a different revision under lock
+   * contention is not mistaken for this one.
+   */
+  requestHash?: number;
 }
 
 export type IAiContentUnionParams = IAiContentParams | IFirebaseFunctionWarmUpParams;
