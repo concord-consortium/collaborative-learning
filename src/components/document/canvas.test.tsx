@@ -343,7 +343,7 @@ describe("Canvas Component", () => {
       const tileRects: Record<string, DOMRect> = { [tileA]: rect(10, 100), [tileB]: rect(1000, 1100) };
       const getRect = Element.prototype.getBoundingClientRect;
       jest.spyOn(Element.prototype, "getBoundingClientRect").mockImplementation(function(this: Element) {
-        return tileRects[this.getAttribute("data-tool-id") ?? ""] ?? getRect.call(this);
+        return tileRects[this.getAttribute(tileDom.kTileIdAttr) ?? ""] ?? getRect.call(this);
       });
       const goTo = (position: number, options?: { revealChange?: boolean }) =>
         act(() => copyTreeManager!.goToHistoryEntryPosition(position, options));
