@@ -5,6 +5,7 @@
 export const kContentPath = "/content";
 export const kTileMapPath = `${kContentPath}/tileMap`;
 export const kSharedModelMapPath = `${kContentPath}/sharedModelMap`;
+export const kRowMapPath = `${kContentPath}/rowMap`;
 
 // The path segments contain no regex special characters, so they are used without escaping.
 
@@ -31,3 +32,6 @@ export const kSharedModelEntrySubtreeRegex = new RegExp(`^${kSharedModelMapPath}
  * model id.
  */
 export const kSharedModelSubtreeRegex = new RegExp(`^${kSharedModelMapPath}/([^/]+)/sharedModel(/|$)`);
+
+/** A top-level row or anything inside it. Group 1 is the row id. */
+export const kRowSubtreeRegex = new RegExp(`^${kRowMapPath}/([^/]+)(/|$)`);
