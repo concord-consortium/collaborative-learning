@@ -1,5 +1,6 @@
 import React from "react";
 import { AiContextToken, kAiContextTokens, kDefaultTokens } from "../../../shared/ai-context-tokens";
+import "./ai-context-vocabulary-help.scss";
 
 const kTokenHelp: Record<AiContextToken, string> = {
   curriculum: "the unit's curriculum around the current problem",
@@ -11,12 +12,14 @@ const kTokenHelp: Record<AiContextToken, string> = {
 
 /**
  * What an author may name in a prompt. Rendered from the vocabulary itself, so a token added to
- * the shared module cannot leave this list behind.
+ * the shared module cannot leave this list behind. Collapsed by default: it sits inside a tile,
+ * where five items expanded would push the prompt itself out of view.
  */
 export function AiContextVocabularyHelp() {
   const defaults = kDefaultTokens.map(token => `{{${token}}}`).join(" and ");
   return (
-    <div className="ai-context-vocabulary-help">
+    <details className="ai-context-vocabulary-help">
+      <summary>What can this prompt reference?</summary>
       <p>Name the context this prompt should work with:</p>
       <ul>
         {kAiContextTokens.map(token => (
@@ -26,6 +29,6 @@ export function AiContextVocabularyHelp() {
         ))}
       </ul>
       <p>A prompt naming none of these uses {defaults}.</p>
-    </div>
+    </details>
   );
 }
