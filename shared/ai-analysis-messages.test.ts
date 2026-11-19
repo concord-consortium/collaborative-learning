@@ -631,6 +631,16 @@ describe("context tokens in the main prompt", () => {
     expect(textOf(messages)).not.toContain("Class themes.");
   });
 
+  // What trails the question reads as the thing to answer from, which the class's work is not.
+  it("puts the context blocks above the question", () => {
+    const messages = buildSummaryMessages(
+      { ...defaultAiPrompt, mainPrompt: "Compare with {{classwork}}." },
+      "A summary.", [], undefined, { classwork: "Class themes." });
+    const parts = messages[1].content as Array<{ text?: string }>;
+    expect(parts[0].text).toContain("<classwork>");
+    expect(parts[1].text).toBe("Compare with the class's work.");
+  });
+
   // An author who never adopts the vocabulary must see no change at all.
   it("builds the same message as before for a prompt with no tokens", () => {
     const withBlocks = buildSummaryMessages(

@@ -214,15 +214,14 @@ function unitContextPart(unitContext: string): ChatCompletionContentPart {
 }
 
 /**
- * The context blocks the main prompt named, as one more part.
+ * The context blocks the main prompt named, as one part placed above the question.
  *
  * Only what the prompt asked for: a caller may pass everything it holds without widening what any
  * particular prompt receives. A prompt naming no token adds no part at all, so an existing unit's
- * messages are unchanged.
+ * messages are unchanged -- which is also what makes leading with these blocks safe.
  *
- * Appended after the question, unlike the AI tile, which composes its context above one. These
- * messages have always carried their context in trailing parts, and the fenced labels -- not the
- * position -- are what keep the class's work from reading as the student's.
+ * Above the question for the reason the AI tile composes its context there: what trails the
+ * question reads as the most relevant thing to answer from, and the class's work is not that.
  */
 function contextBlockParts(
   mainPrompt: string, blocks: AiContextBlocks | undefined
@@ -300,13 +299,13 @@ export function buildImageMessages(
     {
       role: "user",
       content: [
+        ...contextBlockParts(aiPrompt.mainPrompt, contextBlocks),
         {
           type: "text",
           text: substituteContext(aiPrompt.mainPrompt),
         },
         ...imageContentParts(images, options),
         ...(unitContext ? [unitContextPart(unitContext)] : []),
-        ...contextBlockParts(aiPrompt.mainPrompt, contextBlocks),
       ],
     },
   ];
@@ -324,13 +323,13 @@ export function buildSummaryMessages(
     {
       role: "user",
       content: [
+        ...contextBlockParts(aiPrompt.mainPrompt, contextBlocks),
         {
           type: "text",
           text: substituteContext(aiPrompt.mainPrompt),
         },
         ...summaryContentParts(summary, relatedSummaries),
         ...(unitContext ? [unitContextPart(unitContext)] : []),
-        ...contextBlockParts(aiPrompt.mainPrompt, contextBlocks),
       ],
     },
   ];
@@ -364,6 +363,7 @@ export function buildMixedMessages(
     {
       role: "user",
       content: [
+        ...contextBlockParts(aiPrompt.mainPrompt, contextBlocks),
         {
           type: "text",
           text: substituteContext(aiPrompt.mainPrompt),
@@ -371,7 +371,6 @@ export function buildMixedMessages(
         ...(summary === null ? [] : summaryContentParts(summary, relatedSummaries)),
         ...imageContentParts(images, options),
         ...(unitContext ? [unitContextPart(unitContext)] : []),
-        ...contextBlockParts(aiPrompt.mainPrompt, contextBlocks),
       ],
     },
   ];
