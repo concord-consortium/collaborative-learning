@@ -219,6 +219,10 @@ function unitContextPart(unitContext: string): ChatCompletionContentPart {
  * Only what the prompt asked for: a caller may pass everything it holds without widening what any
  * particular prompt receives. A prompt naming no token adds no part at all, so an existing unit's
  * messages are unchanged.
+ *
+ * Appended after the question, unlike the AI tile, which composes its context above one. These
+ * messages have always carried their context in trailing parts, and the fenced labels -- not the
+ * position -- are what keep the class's work from reading as the student's.
  */
 function contextBlockParts(
   mainPrompt: string, blocks: AiContextBlocks | undefined

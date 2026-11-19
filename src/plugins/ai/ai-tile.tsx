@@ -116,6 +116,8 @@ export const AIComponent: React.FC<ITileProps> = observer((props) => {
                 )
               : undefined;
 
+          // Only the contexts the client may read. Class and teacher work are the server's, for
+          // the reason the gate below turns on.
           const contextBlocks: AiContextBlocks = {};
           if (asked.has("mywork")) {
             const summary = documentSummarizer(document.content, {});
@@ -136,8 +138,6 @@ export const AIComponent: React.FC<ITileProps> = observer((props) => {
               });
             }
           }
-          // Class and teacher work are the server's to resolve, for the reason the gate below
-          // turns on.
           const dynamicContentPrompt = substituteContext(content.prompt);
 
           // The gate hashes the whole request, built above but not yet sent, and runs before

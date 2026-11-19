@@ -20,7 +20,7 @@ interface IProps {
  * What an author may name in a prompt. Rendered from the vocabulary itself, so a token added to
  * the shared module cannot leave this list behind.
  */
-export function AiContextVocabularyHelp({ defaultOpen }: IProps = {}) {
+export function AiContextVocabularyHelp({ defaultOpen }: IProps) {
   const defaults = kDefaultTokens.map(token => `{{${token}}}`).join(" and ");
   return (
     <details className="ai-context-vocabulary-help" open={defaultOpen}>

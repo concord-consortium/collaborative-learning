@@ -139,14 +139,13 @@ An AI tile prompt and the `aiPrompt` "mainPrompt" may name which contexts the AI
 | `{{teacherwork}}` | The teacher's materials, supplied as reference |
 | `{{mywork}}` | The document the student is working in |
 
-A token names a context; it does not paste text where it appears. `Compare {{mywork}} with {{classwork}}` reads to the AI as "Compare this document with the class's work", with both summaries supplied above the question.
+A token names a context; it does not paste text where it appears. `Compare {{mywork}} with {{classwork}}` reads to the AI as "Compare this document with the class's work", with both summaries supplied alongside, each labelled with what it holds.
 
 A prompt that names no token uses `{{curriculum}}` and `{{mywork}}`, which is what every prompt received before this existed, minus the class's work.
 
 `{{classwork}}` is a summary of every student document in the class and includes the student's own, so it cannot be used to mean "everyone except me".
 
 A misspelled token such as `{{myWork}}` is left in the prompt as ordinary text, so it will show up in the AI's answer.
-
 
 `aiEvaluateOnSessionEnd`: (boolean | undefined) When true, `aiEvaluation` also runs without anyone asking: when a document the student edited is closed, and whenever their connection drops. Defaults to false, so a unit with `aiEvaluation` set evaluates only what students request with the ideas button, since unrequested evaluations cost real money. Setting this has no effect without `aiEvaluation`.
 A session-end evaluation is skipped only when the document, the prompt and the problem it was

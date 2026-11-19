@@ -20,11 +20,18 @@ export const kAiContextTokens: AiContextToken[] =
  */
 export const kServerResolvedTokens: AiContextToken[] = ["classwork", "teacherwork"];
 
-/** What a prompt means when it names no token at all: today's client behaviour, minus class work. */
+/**
+ * What a prompt means when it names no token at all: what every prompt received before this
+ * vocabulary existed, minus class work.
+ *
+ * Every default must be client-resolved. Only the client applies this fallback; the server reads
+ * the tokens a prompt actually names, so a server-resolved token added here would be built on one
+ * side and never on the other.
+ */
 export const kDefaultTokens: AiContextToken[] = ["curriculum", "mywork"];
 
 /** What each token is replaced with in the prompt text. */
-export const kTokenPhrases: Record<AiContextToken, string> = {
+const kTokenPhrases: Record<AiContextToken, string> = {
   curriculum: "the unit curriculum",
   problem: "this problem",
   classwork: "the class's work",
@@ -40,7 +47,7 @@ function isAiContextToken(name: string): name is AiContextToken {
   return (kAiContextTokens as string[]).includes(name);
 }
 
-/** Which contexts a prompt names. Drives what to resolve and whether the client gate applies. */
+/** Drives what each side resolves, and whether the client gate applies. */
 export function tokensUsed(prompt: string): Set<AiContextToken> {
   const found = new Set<AiContextToken>();
   // A fresh regex per call: a shared global one carries lastIndex between calls.
