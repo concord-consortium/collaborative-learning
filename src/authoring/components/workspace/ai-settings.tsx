@@ -229,7 +229,7 @@ const AISettings: React.FC = () => {
                 {errors.aiPrompt?.mainPrompt &&
                   <span className="form-error">{errors.aiPrompt?.mainPrompt?.message}</span>
                 }
-                <AiContextVocabularyHelp />
+                <AiContextVocabularyHelp defaultOpen={true} />
               </div>
             </td>
             <td className="left">

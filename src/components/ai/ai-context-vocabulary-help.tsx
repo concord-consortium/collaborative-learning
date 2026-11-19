@@ -10,15 +10,20 @@ const kTokenHelp: Record<AiContextToken, string> = {
   mywork: "the document the student is working in",
 };
 
+interface IProps {
+  /** Open on load. Set where the form has room; leave closed inside a tile, where five items
+   * expanded would push the prompt itself out of view. */
+  defaultOpen?: boolean;
+}
+
 /**
  * What an author may name in a prompt. Rendered from the vocabulary itself, so a token added to
- * the shared module cannot leave this list behind. Collapsed by default: it sits inside a tile,
- * where five items expanded would push the prompt itself out of view.
+ * the shared module cannot leave this list behind.
  */
-export function AiContextVocabularyHelp() {
+export function AiContextVocabularyHelp({ defaultOpen }: IProps = {}) {
   const defaults = kDefaultTokens.map(token => `{{${token}}}`).join(" and ");
   return (
-    <details className="ai-context-vocabulary-help">
+    <details className="ai-context-vocabulary-help" open={defaultOpen}>
       <summary>What can this prompt reference?</summary>
       <p>Name the context this prompt should work with:</p>
       <ul>

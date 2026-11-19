@@ -2,6 +2,9 @@
   margin: 0 0 5px 0;
   font-size: 0.8em;
   color: #444;
+  // The authoring settings form puts this in a `td`, which sets `white-space: nowrap` for the
+  // short values that fill the rest of that table.
+  white-space: normal;
 
   summary {
     cursor: pointer;
