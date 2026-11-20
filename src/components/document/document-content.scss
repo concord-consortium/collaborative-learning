@@ -12,7 +12,7 @@
     height: 300px;
 
     &.playback-spacer {
-      height: 350px;
+      height: calc(300px + #{$playback-bar-height});
     }
 
     &.empty-drop-target {
@@ -24,7 +24,7 @@
   }
 
   .playback-spacer {
-    height: 50px;
+    height: $playback-bar-height;
   }
 }
 

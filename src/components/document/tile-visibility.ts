@@ -3,7 +3,7 @@
 
 export type VisibilityCause =
   "scroll" | "windowResize" | "dividerResize" | "tileResize" | "documentChange"
-  | "commentsToggle" | "comparisonToggle";
+  | "commentsToggle" | "comparisonToggle" | "historyPlayback";
 
 export interface IVisibleTile {
   tileId: string;

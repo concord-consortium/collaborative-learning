@@ -54,3 +54,8 @@ if (!Element.prototype.closest) {
     return null;
   };
 }
+
+/** Honors the OS setting. matchMedia is absent under jsdom, hence the optional call. */
+export function prefersReducedMotion() {
+  return !!window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+}

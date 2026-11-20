@@ -996,3 +996,59 @@ describe("applying entries at load", () => {
     expect(tileContent.actionText).toBeUndefined();
   });
 });
+
+describe("playback reveal", () => {
+  it("asks for the tile a move changed only when the move asks for it", async () => {
+    const {tileContent, manager} = setupDocument();
+    tileContent.setActionText("a");
+    await expectEntryToBeComplete(manager, 1);
+    manager.setNumHistoryEntriesApplied(1);
+
+    await manager.goToHistoryEntryPosition(0);
+    expect(manager.playbackRevealRequest).toBeUndefined();
+
+    await manager.goToHistoryEntryPosition(1, { revealChange: true });
+    const firstRequest = manager.playbackRevealRequest;
+    expect(firstRequest).toEqual({ tileId: "t1" });
+
+    await manager.goToHistoryEntryPosition(0, { revealChange: true });
+    expect(manager.playbackRevealRequest).toEqual({ tileId: "t1" });
+    expect(manager.playbackRevealRequest).not.toBe(firstRequest);
+  });
+
+  describe("a move stopped short by a failing entry", () => {
+    const onTile = (entry: any, tileId: string) =>
+      makeRealHistoryEntry(JSON.parse(JSON.stringify(entry).replace(/tileMap\/t1\//g, `tileMap/${tileId}/`)));
+    const twoTileContent = {
+      tileMap: {
+        t1: { id: "t1", content: { type: "TestTile" } },
+        t2: { id: "t2", content: { type: "TestTile" } }
+      }
+    } as DocumentContentSnapshotType;
+    // An edit on t2, the failing entry, then an edit on t1.
+    const history = () => [onTile(action1, "t2"), makeRealHistoryEntry(failingEntry), onTile(action1, "t1")];
+
+    it("names the tile of the last entry applied going forward", async () => {
+      const {manager} = setupDocument(twoTileContent);
+      seedHistory(manager, history(), 0);
+
+      await manager.goToHistoryEntryPosition(3, { revealChange: true });
+
+      expect(manager.numHistoryEventsApplied).toBe(1);
+      expect(manager.playbackRevealRequest).toEqual({ tileId: "t2" });
+    });
+
+    it("names the tile of the last entry undone going backward", async () => {
+      const {docContent, manager} = setupDocument(twoTileContent);
+      seedHistory(manager, history(), 3, () => {
+        (docContent.tileMap.get("t1")!.content as TestTileType).setActionText("action 1");
+        (docContent.tileMap.get("t2")!.content as TestTileType).setActionText("action 1");
+      });
+
+      await manager.goToHistoryEntryPosition(0, { revealChange: true });
+
+      expect(manager.numHistoryEventsApplied).toBe(2);
+      expect(manager.playbackRevealRequest).toEqual({ tileId: "t1" });
+    });
+  });
+});

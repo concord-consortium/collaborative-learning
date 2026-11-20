@@ -23,6 +23,8 @@ import { UserContextProvider } from "../stores/user-context-provider";
 import { getLastHistoryEntry } from "./history-firestore";
 import { SessionExactness } from "./session-exactness";
 import { LogEventName } from "../../lib/logger-types";
+import type { DocumentContentModelType } from "../document/document-content";
+import { getPlaybackRevealTileId } from "./playback-reveal";
 
 export interface HistoryPlaybackFailure {
   historyEntry: Instance<typeof HistoryEntry>;
@@ -200,6 +202,7 @@ interface IMainDocument extends TreeAPI {
    * Replaces the content with stored content, converting its old models.
    */
   setContent(content: any): void;
+  content?: DocumentContentModelType;
 }
 
 /**
@@ -294,7 +297,13 @@ export const TreeManager = types
    * there. Each later move updates it from the conversions then. Playback reads
    * earliestReachablePosition, which also counts what the bridges report before any move.
    */
-  seekBoundaryPosition: undefined as number | undefined
+  seekBoundaryPosition: undefined as number | undefined,
+  /**
+   * The tile the last playback move the reader started changed, for the history view to bring on
+   * screen, or undefined when that move changed none. A new object each time, so a move that
+   * changes the same tile again still reaches the view.
+   */
+  playbackRevealRequest: undefined as { tileId: string } | undefined
 }))
 .views((self) => {
   // The history usually only grows during playback, so the scan resumes where it stopped. A new or
@@ -904,8 +913,12 @@ export const TreeManager = types
       : { applied: stored.applied, error: stored.error };
   },
 
+  /**
+   * Moves the trees to a history position. With `revealChange`, a move that changes the position
+   * sets `playbackRevealRequest` to the tile it changed, or clears it when it changed none.
+   */
   goToHistoryEntryPosition: flow(function* goToHistoryEntryPosition(
-                                      newHistoryPosition: number) {
+                                      newHistoryPosition: number, options: { revealChange?: boolean } = {}) {
     const trees = Object.values(self.trees);
 
     if (newHistoryPosition === self.numHistoryEventsApplied) return;
@@ -1341,6 +1354,15 @@ export const TreeManager = types
     // One way might be using unique history_entry_ids that we mark as closed
     // after the finish call.
     self.numHistoryEventsApplied = stopPosition;
+
+    const { mainDocument } = self;
+    const content = mainDocument?.content;
+    if (options.revealChange && mainDocument && content) {
+      const tileId = getPlaybackRevealTileId({
+        history, treeId: mainDocument.key, from: initialPosition, to: stopPosition, content
+      });
+      self.playbackRevealRequest = tileId ? { tileId } : undefined;
+    }
   }),
 }))
 .views(self => ({

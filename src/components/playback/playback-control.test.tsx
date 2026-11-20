@@ -328,7 +328,7 @@ describe("PlaybackControlComponent", () => {
         await new Promise(resolve => requestAnimationFrame(resolve));
         jest.advanceTimersByTime(0);
       });
-      expect(seekTo).toHaveBeenCalledWith(0);
+      expect(seekTo).toHaveBeenCalledWith(0, { revealChange: true });
 
       await act(async () => { finishSeek(); });
       expect(screen.queryByTestId("playback-seek-progress")).toBeNull();
@@ -348,7 +348,7 @@ describe("PlaybackControlComponent", () => {
         await new Promise(resolve => requestAnimationFrame(resolve));
         jest.advanceTimersByTime(0);
       });
-      expect(seekTo).toHaveBeenCalledWith(1);
+      expect(seekTo).toHaveBeenCalledWith(1, { revealChange: true });
 
       await act(async () => { finishSeek(); });
       expect(screen.queryByTestId("playback-seek-progress")).toBeNull();

@@ -5,6 +5,7 @@
 export const kContentPath = "/content";
 export const kTileMapPath = `${kContentPath}/tileMap`;
 export const kSharedModelMapPath = `${kContentPath}/sharedModelMap`;
+export const kRowMapPath = `${kContentPath}/rowMap`;
 
 // The path segments contain no regex special characters, so they are used without escaping.
 
@@ -31,3 +32,19 @@ export const kSharedModelEntrySubtreeRegex = new RegExp(`^${kSharedModelMapPath}
  * model id.
  */
 export const kSharedModelSubtreeRegex = new RegExp(`^${kSharedModelMapPath}/([^/]+)/sharedModel(/|$)`);
+
+/** A top-level row or anything inside it. Group 1 is the row id. */
+export const kRowSubtreeRegex = new RegExp(`^${kRowMapPath}/([^/]+)(/|$)`);
+
+// The constants below are relative to a tile: they match the rest of a path below the tile, group 2
+// of `kTileSubtreePartsRegex`, rather than a full path from the document root. The `/content` in
+// them is the tile's `content` field, not the document's, so it is written out.
+
+/** The tile's `updatedHash` field. */
+export const kUpdatedHashSubpath = "/updatedHash";
+
+/**
+ * The rows of a container tile, such as a Question: a row or anything inside it, or the row order.
+ * Group 1 is the row id, for a row.
+ */
+export const kContainerRowsSubpathRegex = /^\/content\/(?:rowMap\/([^/]+)|rowOrder)(?:\/|$)/;
