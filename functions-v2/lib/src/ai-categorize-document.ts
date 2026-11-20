@@ -11,7 +11,7 @@ import {
 import { AiAgreement, AiAgreementV2, isAiAgreement } from "../../src/summary-types";
 import { getUnitSummary } from "../../../shared/get-unit-summary";
 import {
-  AiContextBlocks, kServerResolvedTokens, tokensUsed
+  AiContextBlocks, classSummaryBlocks, kServerResolvedTokens, tokensUsed
 } from "../../../shared/ai-context-tokens";
 import { IEvaluationRequestContext, kRatingValues } from "../../../shared/shared";
 import {
@@ -474,12 +474,7 @@ export async function getClassSummaries(
 ): Promise<AiContextBlocks> {
   const path = `${root}/${space}/aicontent/${unit}/classes/${contextId}`;
   const classDoc = await firestoreClient().doc(path).get();
-  const data = classDoc.data();
-  if (!data) return {};
-  const blocks: AiContextBlocks = {};
-  if (data.studentSummary) blocks.classwork = data.studentSummary;
-  if (data.teacherSummary) blocks.teacherwork = data.teacherSummary;
-  return blocks;
+  return classSummaryBlocks(classDoc.data());
 }
 
 /**
@@ -601,7 +596,7 @@ export async function categorizeRepresentations(
       // Related summaries are other students' documents in this class, and peer comments on them.
       // A prompt that scoped itself to anything short of the class's work must not receive them --
       // the class may hold this student's document, but this student's work may never hold the
-      // class's. A prompt naming no token at all keeps the enrichment it has always had.
+      // class's. A prompt naming no token is unscoped, and receives them as it always has.
       wantsRelatedSummaries = askedTokens.size === 0 || askedTokens.has("classwork");
 
       // Only for a prompt that named one, so a prompt that did not costs no read.

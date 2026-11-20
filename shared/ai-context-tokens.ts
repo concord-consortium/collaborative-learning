@@ -21,12 +21,11 @@ export const kAiContextTokens: AiContextToken[] =
 export const kServerResolvedTokens: AiContextToken[] = ["classwork", "teacherwork"];
 
 /**
- * What a prompt means when it names no token at all: what every prompt received before this
- * vocabulary existed, minus class work.
+ * What a prompt means when it names no token at all.
  *
- * Every default must be client-resolved. Only the client applies this fallback; the server reads
- * the tokens a prompt actually names, so a server-resolved token added here would be built on one
- * side and never on the other.
+ * Every default must be client-resolved: the Ideas path reads only the tokens a prompt names, so
+ * a server-resolved default would reach the AI tile, whose client applies this fallback and sends
+ * the result, and never reach Ideas.
  */
 export const kDefaultTokens: AiContextToken[] = ["curriculum", "mywork"];
 
@@ -99,8 +98,8 @@ const kBlockLabels: Record<AiContextToken, string> = {
     "A summary of the teacher's materials for this class. This is reference material, not work the " +
     "student wrote.",
   mywork:
-    "A summary of the document this student is working in. This is the student's own work, and the " +
-    "only block that is.",
+    "A summary of the document this student is working in, including any curriculum it holds. No " +
+    "other block is this student's document.",
 };
 
 /**
@@ -122,18 +121,26 @@ export function composePrompt(blocks: AiContextBlocks, question: string): string
   return [buildContextSection(blocks), question.trim()].filter(part => part).join("\n\n");
 }
 
-/** The class-wide summaries, as the class doc stores them. */
-export interface IClassSummaries {
-  studentSummary?: string;
-  teacherSummary?: string;
+/**
+ * The class doc's summary fields as the blocks they stand for.
+ *
+ * One mapping, used by both paths that read that doc, so a server-resolved token added to the
+ * vocabulary cannot be wired into one of them and forgotten in the other.
+ */
+export function classSummaryBlocks(
+  data: {studentSummary?: string, teacherSummary?: string} | undefined
+): AiContextBlocks {
+  const blocks: AiContextBlocks = {};
+  if (data?.studentSummary) blocks.classwork = data.studentSummary;
+  if (data?.teacherSummary) blocks.teacherwork = data.teacherSummary;
+  return blocks;
 }
 
 /**
  * The prompt a request is finally built from, and the string its cache is keyed on.
  *
- * The class and teacher summaries are added only where the authored prompt asked for them. Before
- * this they were appended after the question unconditionally, which is the position a model reads
- * as most relevant -- so advice written for "you" drew on work the student never wrote.
+ * The class and teacher summaries are added only where the authored prompt asked for them, and
+ * sit above the question, where a model reads them as context rather than as the thing to answer.
  *
  * Which contexts were asked for cannot be recovered from the question: the caller replaces each
  * token with its noun phrase before sending, so nothing is left here to parse. The caller reports
@@ -145,7 +152,7 @@ export interface IClassSummaries {
  */
 export function buildRequestPrompt(
   question: string, clientBlocks: AiContextBlocks | undefined,
-  askedTokens: Iterable<AiContextToken>, classSummaries: IClassSummaries
+  askedTokens: Iterable<AiContextToken>, serverBlocks: AiContextBlocks
 ): string {
   const blocks: AiContextBlocks = {...clientBlocks};
   const asked = new Set(askedTokens);
@@ -154,9 +161,8 @@ export function buildRequestPrompt(
     // the caller of this function read, never what the client passed under that name.
     delete blocks[token];
     if (!asked.has(token)) continue;
-    const summary =
-      token === "classwork" ? classSummaries.studentSummary : classSummaries.teacherSummary;
-    if (summary) blocks[token] = summary;
+    const content = serverBlocks[token];
+    if (content) blocks[token] = content;
   }
   return composePrompt(blocks, question);
 }

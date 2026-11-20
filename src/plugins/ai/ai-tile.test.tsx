@@ -44,7 +44,7 @@ import {
 import { DocumentContentModel } from "../../models/document/document-content";
 import { ReadOnlyContext } from "../../components/document/read-only-context";
 import { hashString } from "../../../shared/hash-string";
-import { buildRequestPrompt } from "../../../shared/ai-context-tokens";
+import { buildRequestPrompt, classSummaryBlocks } from "../../../shared/ai-context-tokens";
 
 // The starter tile needs to be registered so the TileModel.create
 // knows it is a supported tile type
@@ -355,21 +355,6 @@ describe("AIComponent", () => {
       expect(aiContent.text).toBe("Mocked customized content");
     });
 
-    // The prompt is sent with its tokens already replaced, so this list is the only thing telling
-    // the server which contexts were named. Without it, nothing server-resolved is ever added.
-    it("reports the contexts a prompt named, which its sent text no longer shows", async () => {
-      mockStores.documents.getDocument.mockReturnValue(documentWith(populatedDocContent()));
-      const aiContent = defaultAIContent();
-      aiContent.setPrompt("Compare {{mywork}} with {{classwork}}.");
-      const aiModel = TileModel.create({ content: aiContent });
-
-      await act(async () => render(<AIComponent {...defaultProps} model={aiModel} documentId="test-doc-1" />));
-
-      const [request] = mockGetAiContent.mock.calls[0];
-      expect(request.contextTokens.sort()).toEqual(["classwork", "mywork"]);
-      expect(request.dynamicContentPrompt).not.toContain("classwork");
-    });
-
     // The seam neither side's own tests can see across. Both halves passed while disagreeing about
     // whether the sent prompt still carried its tokens, and the class context silently never
     // arrived. This runs the real request through the real composer rather than a restatement of
@@ -385,7 +370,7 @@ describe("AIComponent", () => {
       const [request] = mockGetAiContent.mock.calls[0];
       const composed = buildRequestPrompt(
         request.dynamicContentPrompt, request.contextBlocks, request.contextTokens,
-        { studentSummary: "What the class has been doing." }
+        classSummaryBlocks({ studentSummary: "What the class has been doing." })
       );
       expect(composed).toContain("What the class has been doing.");
       expect(composed).toContain("The student's answer.");
@@ -406,6 +391,8 @@ describe("AIComponent", () => {
       expect(request.contextBlocks.mywork).toBeUndefined();
     });
 
+    // The sent text no longer shows which contexts were named, so the token list is the only
+    // record of them, and the class block is the server's to fill rather than the client's.
     it("names a class context without resolving it, which only the server may do", async () => {
       mockStores.documents.getDocument.mockReturnValue(documentWith(populatedDocContent()));
       const aiContent = defaultAIContent();
@@ -415,6 +402,7 @@ describe("AIComponent", () => {
       await act(async () => render(<AIComponent {...defaultProps} model={aiModel} documentId="test-doc-1" />));
 
       const [request] = mockGetAiContent.mock.calls[0];
+      expect(request.contextTokens.sort()).toEqual(["classwork", "mywork"]);
       expect(request.contextBlocks.mywork).toContain("The student's answer.");
       expect(request.contextBlocks.classwork).toBeUndefined();
       expect(request.dynamicContentPrompt).toBe("Compare this document with the class's work.");
@@ -428,7 +416,8 @@ describe("AIComponent", () => {
         const sent = mockGetAiContent.mock.calls[mockGetAiContent.mock.calls.length - 1][0];
         return hashString(
           `${sent.systemPrompt ?? ""}\u0000${sent.dynamicContentPrompt}` +
-          `\u0000${JSON.stringify(sent.contextBlocks)}`
+          `\u0000${JSON.stringify(sent.contextBlocks)}` +
+          `\u0000${[...sent.contextTokens].sort().join(",")}`
         );
       };
 
@@ -475,13 +464,10 @@ describe("AIComponent", () => {
         expect(mockGetAiContent).toHaveBeenCalledTimes(1);
       });
 
-      // The prompt is part of the request even though it is not part of the document. An author
-      // revising the prompt and pressing Update has changed what is being asked, and a gate on the
-      // document summary alone would tell them nothing had changed and never send the new prompt.
       // The client may not read the class summary, so it cannot tell whether that summary moved.
-      // Gating here would suppress the one change such a prompt exists to pick up. The server's
-      // own cache still compares summaryCreatedAt, so the extra call is a round trip, not a
-      // second LLM call.
+      // Gating here would suppress the one change such a prompt exists to pick up. The server
+      // composes that summary into its cache key, so an unchanged one costs a round trip rather
+      // than a second LLM call.
       it("always re-requests for a prompt naming class work, even with nothing else changed", async () => {
         mockStores.documents.getDocument.mockReturnValue(documentWith(populatedDocContent()));
         const aiContent = defaultAIContent();
@@ -514,6 +500,33 @@ describe("AIComponent", () => {
         expect(screen.queryByText(AI_TILE_UNCHANGED_MESSAGE)).toBeInTheDocument();
       });
 
+      // A prompt of nothing but tokens substitutes to empty text whichever contexts it named, and
+      // the server-resolved ones never reach contextBlocks. Dropping {{classwork}} therefore moves
+      // nothing else in the request, so without the tokens in the hash the author would be told
+      // nothing had changed and keep an answer still drawn from the class's work.
+      it("sends the request when a token was removed but the sent text did not change", async () => {
+        mockStores.documents.getDocument.mockReturnValue(documentWith(populatedDocContent()));
+        const aiContent = defaultAIContent();
+        aiContent.setPrompt("{{classwork}} {{curriculum}}");
+        const aiModel = TileModel.create({ content: aiContent });
+
+        await renderTile(aiModel);
+        expect(mockGetAiContent).toHaveBeenCalledTimes(1);
+        const first = mockGetAiContent.mock.calls[0][0];
+
+        await act(async () => { aiContent.setPrompt("{{curriculum}}"); });
+        await pressUpdate(aiContent);
+
+        expect(mockGetAiContent).toHaveBeenCalledTimes(2);
+        const second = mockGetAiContent.mock.calls[1][0];
+        // The premise: everything the hash covered before the tokens were added is unchanged.
+        expect(second.dynamicContentPrompt).toBe(first.dynamicContentPrompt);
+        expect(second.contextBlocks).toEqual(first.contextBlocks);
+      });
+
+      // The prompt is part of the request even though it is not part of the document. An author
+      // revising the prompt and pressing Update has changed what is being asked, and a gate on the
+      // document summary alone would tell them nothing had changed and never send the new prompt.
       it("sends the request when the prompt changed but the document did not", async () => {
         mockStores.documents.getDocument.mockReturnValue(documentWith(populatedDocContent()));
         const { aiContent, aiModel } = tileWithPrompt();

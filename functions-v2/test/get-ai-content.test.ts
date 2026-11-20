@@ -39,48 +39,43 @@ describe("isCachedContentUpToDate", () => {
     });
   }
 
-  it("reuses the cache when the version and prompt match and there's no newer class summary", () => {
-    const classInfo = fakeSnapshot(true, {});
-    expect(isCachedContentUpToDate(prompt, classInfo, contentSnapshot())).toBe(true);
+  it("reuses the cache when the version and prompt match", () => {
+    expect(isCachedContentUpToDate(prompt, contentSnapshot())).toBe(true);
   });
 
   it("regenerates when the cached promptPolicyVersion is older than the current one", () => {
-    const classInfo = fakeSnapshot(true, {});
     const content = contentSnapshot({promptPolicyVersion: PROMPT_POLICY_VERSION - 1});
-    expect(isCachedContentUpToDate(prompt, classInfo, content)).toBe(false);
+    expect(isCachedContentUpToDate(prompt, content)).toBe(false);
   });
 
   // The literal 1, not PROMPT_POLICY_VERSION - 1, which would stop covering version 1 as soon as
   // the version advances again.
   it("regenerates a cache written under policy version 1", () => {
-    const classInfo = fakeSnapshot(true, {});
     const content = contentSnapshot({promptPolicyVersion: 1});
-    expect(isCachedContentUpToDate(prompt, classInfo, content)).toBe(false);
+    expect(isCachedContentUpToDate(prompt, content)).toBe(false);
   });
 
   it("regenerates when promptPolicyVersion is absent (a cache written before this field existed)", () => {
-    const classInfo = fakeSnapshot(true, {});
     const content = contentSnapshot({promptPolicyVersion: undefined});
-    expect(isCachedContentUpToDate(prompt, classInfo, content)).toBe(false);
-  });
-
-  it("regenerates when the cached content is older than the class's summaryCreatedAt", () => {
-    const classInfo = fakeSnapshot(true, {summaryCreatedAt: Timestamp.fromMillis(2000)});
-    expect(isCachedContentUpToDate(prompt, classInfo, contentSnapshot())).toBe(false);
-  });
-
-  // lastUpdated on the class doc is never written by on-class-data-doc-written.ts, so the old
-  // check (comparing against it) was always inert. summaryCreatedAt absent means no class summary
-  // has been generated yet, which must not be treated as staleness.
-  it("reuses the cache when summaryCreatedAt is absent from the class doc", () => {
-    const classInfo = fakeSnapshot(true, {});
-    expect(isCachedContentUpToDate(prompt, classInfo, contentSnapshot())).toBe(true);
+    expect(isCachedContentUpToDate(prompt, content)).toBe(false);
   });
 
   it("regenerates when the tile prompt text differs from the cached one", () => {
-    const classInfo = fakeSnapshot(true, {});
     const content = contentSnapshot({prompt: "a different prompt"});
-    expect(isCachedContentUpToDate(prompt, classInfo, content)).toBe(false);
+    expect(isCachedContentUpToDate(prompt, content)).toBe(false);
+  });
+
+  // A regenerated class summary reaches this through the prompt, because the summary it changed
+  // is inside the composed prompt whenever it was asked for. A prompt that never named class work
+  // keeps its answer, rather than paying to rebuild a byte-identical one.
+  it("regenerates for a prompt holding a summary that has since changed", () => {
+    const withOldSummary = contentSnapshot({prompt: "context: old class summary\n\nthe question"});
+    expect(isCachedContentUpToDate("context: new class summary\n\nthe question", withOldSummary))
+      .toBe(false);
+  });
+
+  it("reuses the cache for a prompt that names no class work, whatever the class has done", () => {
+    expect(isCachedContentUpToDate(prompt, contentSnapshot())).toBe(true);
   });
 });
 

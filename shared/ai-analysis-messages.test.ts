@@ -641,8 +641,9 @@ describe("context tokens in the main prompt", () => {
     expect(parts[1].text).toBe("Compare with the class's work.");
   });
 
-  // An author who never adopts the vocabulary must see no change at all.
-  it("builds the same message as before for a prompt with no tokens", () => {
+  // An author who never adopts the vocabulary must see no change at all, which is also what
+  // lets the blocks lead without disturbing the messages every existing unit builds.
+  it("ignores context blocks for a prompt naming no token", () => {
     const withBlocks = buildSummaryMessages(
       defaultAiPrompt, "A summary.", [], undefined, { classwork: "Class themes.", mywork: "Mine." });
     const withoutBlocks = buildSummaryMessages(defaultAiPrompt, "A summary.", []);

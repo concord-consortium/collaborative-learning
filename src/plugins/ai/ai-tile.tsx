@@ -148,17 +148,22 @@ export const AIComponent: React.FC<ITileProps> = observer((props) => {
           // is in it because an author editing the prompt has changed the request without touching
           // the document, and must not be told nothing has changed.
           // The blocks are in it because they carry the document summary, so an edit has to move
-          // the hash. systemPrompt is sent alongside, so a change to it alone sends a request; the
-          // server cache does not compare the system prompt, so that request returns the cached
-          // answer built with the old one. NUL separates the parts because none can contain it, so
-          // no two requests can collide.
+          // the hash. The tokens are in it because nothing else records them: a prompt that names
+          // only tokens substitutes to the same text whichever it named, and the server-resolved
+          // ones never reach contextBlocks, so dropping {{classwork}} would otherwise leave an
+          // identical hash and keep the class-based answer. Sorted, because naming the same
+          // contexts in a different order is the same request. systemPrompt is sent alongside, so
+          // a change to it alone sends a request; the server cache does not compare the system
+          // prompt, so that request returns the cached answer built with the old one. NUL
+          // separates the parts because none can contain it, so no two requests can collide.
           const requestHash = hashString(
-            `${systemPrompt ?? ""}\u0000${dynamicContentPrompt}\u0000${JSON.stringify(contextBlocks)}`
+            `${systemPrompt ?? ""}\u0000${dynamicContentPrompt}\u0000${JSON.stringify(contextBlocks)}` +
+            `\u0000${[...asked].sort().join(",")}`
           );
           // A prompt naming a context only the server can read cannot be gated here: the client is
           // not allowed to read the class summary, so it cannot tell whether that summary moved.
-          // The server's own cache still compares summaryCreatedAt, so the extra call costs a
-          // round trip, not a second LLM call.
+          // The server composes that summary into its cache key, so an unchanged one still costs
+          // a round trip rather than a second LLM call.
           const gated = !kServerResolvedTokens.some(token => asked.has(token));
           if (gated && requestHash === content.evaluatedRequestHash) {
             // Only someone who pressed Refresh is told why nothing happened; a rerun from any

@@ -294,18 +294,15 @@ export interface IPostDocumentCommentParams extends IFirestoreMetadataDocumentPa
 export type IPostDocumentCommentUnionParams = IPostDocumentCommentParams | IFirebaseFunctionWarmUpParams;
 
 export interface IAiContentParams extends IFirebaseFunctionBaseParams {
-  /**
-   * The authored question with its context tokens already replaced by noun phrases. The context
-   * itself travels in contextBlocks, so this no longer contains the document summary.
-   */
+  /** The authored question, with its context tokens already replaced by noun phrases. */
   dynamicContentPrompt: string;
   systemPrompt: string;
   unit: string;
   documentId: string;
   tileId: string;
   /**
-   * Context the client resolved. The server adds the blocks students may not read and assembles
-   * the whole section. Optional so a deployed client sending the old shape still works.
+   * Context the client resolved for itself. The server adds the blocks students may not read and
+   * assembles the whole section. Optional, so a client sending the older shape still works.
    */
   contextBlocks?: AiContextBlocks;
   /**

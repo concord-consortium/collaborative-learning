@@ -1,5 +1,6 @@
 import {
-  buildContextSection, buildRequestPrompt, composePrompt, substituteContext, tokensUsed
+  buildContextSection, buildRequestPrompt, classSummaryBlocks, composePrompt, substituteContext,
+  tokensUsed
 } from "./ai-context-tokens";
 
 describe("tokensUsed", () => {
@@ -98,10 +99,11 @@ describe("composePrompt", () => {
   });
 });
 describe("buildRequestPrompt", () => {
-  const classSummaries = {
+  // What the class doc holds, as the blocks it stands for -- the same mapping production uses.
+  const classSummaries = classSummaryBlocks({
     studentSummary: "Class themes about water access.",
     teacherSummary: "Teacher notes about stakeholders.",
-  };
+  });
 
   // Questions here arrive as the caller sends them: tokens already replaced with their noun
   // phrases, which is why the contexts asked for are a separate argument.

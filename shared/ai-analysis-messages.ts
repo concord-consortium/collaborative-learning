@@ -217,11 +217,11 @@ function unitContextPart(unitContext: string): ChatCompletionContentPart {
  * The context blocks the main prompt named, as one part placed above the question.
  *
  * Only what the prompt asked for: a caller may pass everything it holds without widening what any
- * particular prompt receives. A prompt naming no token adds no part at all, so an existing unit's
- * messages are unchanged -- which is also what makes leading with these blocks safe.
+ * particular prompt receives. A prompt naming no token adds no part at all, which is what lets
+ * these lead without changing the messages such a prompt already builds.
  *
- * Above the question for the reason the AI tile composes its context there: what trails the
- * question reads as the most relevant thing to answer from, and the class's work is not that.
+ * Above the question because what trails the question reads as the most relevant thing to answer
+ * from, and the class's work is not that.
  */
 function contextBlockParts(
   mainPrompt: string, blocks: AiContextBlocks | undefined

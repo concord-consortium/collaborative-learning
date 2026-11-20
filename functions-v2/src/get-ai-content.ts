@@ -8,13 +8,13 @@ import {ChatOpenAI} from "@langchain/openai";
 import {HumanMessage, SystemMessage} from "@langchain/core/messages";
 import {IAiContentUnionParams, isWarmUpParams} from "../../shared/shared";
 import {withCurriculumInstructions} from "../../shared/unit-summary-slice";
-import {buildRequestPrompt} from "../../shared/ai-context-tokens";
+import {buildRequestPrompt, classSummaryBlocks} from "../../shared/ai-context-tokens";
 import {validateUserContext} from "./user-context";
 
 // This function generates and returns tile content from an LLM.
-// The prompt provided by the client along with the current summary of student and teacher.
-// work in the given class and unit are provided as input.
-// The response will be cached and re-used unless the prompt or work summary is updated.
+// The caller sends its question, the context it resolved for itself, and the contexts it wants;
+// the class and teacher summaries are added here, and only for a question that named them.
+// The response is cached and re-used until the composed prompt changes.
 
 const openaiApiKey = defineSecret("OPENAI_API_KEY");
 
@@ -25,10 +25,11 @@ const version = "1.0.0";
 
 const lockTimeout = 60 * 1000; // 1 minute
 
-// Bump whenever the code-level system message changes (either instruction below, or the default
-// systemPrompt fallback) so a cached response generated under the old wording is regenerated
-// rather than reused. Written onto the cached content doc alongside prompt; compared in
-// isCachedContentUpToDate.
+// Bump whenever what this sends the model changes shape without the authored prompt changing:
+// the code-level system message (either instruction below, or the default systemPrompt fallback),
+// or how the request itself is composed. A cached response built under the old shape is then
+// regenerated rather than reused. Written onto the cached content doc alongside prompt; compared
+// in isCachedContentUpToDate.
 export const PROMPT_POLICY_VERSION = 3;
 
 export function buildSystemMessageText(systemPrompt: string | undefined): string {
@@ -50,17 +51,28 @@ function getLockPath(firestoreRoot: string, unit: string, classHash: string, doc
   return getAIContentPath(firestoreRoot, unit, classHash, documentId, tileId) + "-LOCK";
 }
 
-export function isCachedContentUpToDate(prompt: string,
-  classInfo: DocumentSnapshot, contentSnapshot: DocumentSnapshot): boolean {
+/**
+ * Whether the stored answer still answers this request.
+ *
+ * The prompt comparison is the whole test. A class or teacher summary is inside the composed
+ * prompt exactly when it was asked for, so a regenerated summary changes the prompt and is caught
+ * here. Comparing the class doc's summaryCreatedAt as well would additionally throw away every
+ * tile's answer each time the summarizer runs, including prompts that never name class work --
+ * paid regenerations of a byte-identical prompt.
+ *
+ * @param {string} prompt the composed prompt this request would send
+ * @param {DocumentSnapshot} contentSnapshot the stored answer
+ * @return {boolean} true when the stored answer can be returned as is
+ */
+export function isCachedContentUpToDate(
+  prompt: string, contentSnapshot: DocumentSnapshot
+): boolean {
   if (!contentSnapshot.exists) return false;
   const contentData = contentSnapshot.data();
   if (!contentData) return false;
   if (!contentData.lastUpdated) return false;
   if (contentData.promptPolicyVersion !== PROMPT_POLICY_VERSION) return false;
   if (contentData.prompt !== prompt) return false;
-  // summaryCreatedAt is absent until a class summary is first generated; absence is not staleness.
-  const summaryCreatedAt = classInfo.data()?.summaryCreatedAt;
-  if (summaryCreatedAt && contentData.lastUpdated.toMillis() < summaryCreatedAt.toMillis()) return false;
   return true;
 }
 
@@ -221,18 +233,17 @@ export const getAiContent = onCall(
     const classInfoPath = getClassInfoPath(firestoreRoot, unit, classHash);
     const classInfo = await getFirestore().doc(classInfoPath).get();
 
-    // Composed before the cache check: the context blocks are part of what was asked, so they are
-    // part of the key. Without that, editing a document would no longer invalidate its answer --
-    // the summary used to travel inside dynamicContentPrompt and now travels beside it.
-    const composedPrompt = buildRequestPrompt(question, contextBlocks, contextTokens ?? [], {
-      studentSummary: classInfo.data()?.studentSummary,
-      teacherSummary: classInfo.data()?.teacherSummary,
-    });
+    // Composed before the cache check, because the context blocks are part of what was asked and
+    // so part of the key. Keying on the question alone would leave an edited document answered by
+    // the summary of an earlier one.
+    const composedPrompt = buildRequestPrompt(
+      question, contextBlocks, contextTokens ?? [], classSummaryBlocks(classInfo.data())
+    );
 
     const aiContentPath = getAIContentPath(firestoreRoot, unit, classHash, documentId, tileId);
     const cachedAIContent = await getFirestore().doc(aiContentPath).get();
 
-    if (isCachedContentUpToDate(composedPrompt, classInfo, cachedAIContent)) {
+    if (isCachedContentUpToDate(composedPrompt, cachedAIContent)) {
       return returnCachedContent(cachedAIContent);
     } else {
       return await generateContent(firestoreRoot, unit, classHash, documentId, tileId,
