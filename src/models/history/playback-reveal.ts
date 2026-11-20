@@ -1,16 +1,11 @@
 import { IJsonPatch } from "mobx-state-tree";
 import { DocumentContentModelType } from "../document/document-content";
 import {
-  kRowSubtreeRegex, kSharedModelEntrySubtreeRegex, kTileSubtreePartsRegex
+  kContainerRowsSubpathRegex, kRowSubtreeRegex, kSharedModelEntrySubtreeRegex, kTileSubtreePartsRegex,
+  kUpdatedHashSubpath
 } from "../document/document-paths";
 import { isBackgroundEntry } from "./background-entries";
 import { getEntryPatchesForTree, HistoryEntryType, HistoryOperation } from "./history";
-
-// Every tile linked to a shared model gets this patch when the shared model changes, whatever
-// changed, so it does not mark the tile itself as changed.
-const kUpdatedHashSubpath = "/updatedHash";
-// The rows of a container tile, such as a Question. Group 1 is the row id, for a row patch.
-const kContainerRowsSubpathRegex = /^\/content\/(?:rowMap\/([^/]+)|rowOrder)(?:\/|$)/;
 
 /**
  * The tile a set of patches changed that exists in `content`, for history playback to bring on
@@ -32,6 +27,8 @@ export function getChangedTileId(patches: readonly IJsonPatch[], content: Docume
         if (containerRowsMatch[1]) rowIds.push(containerRowsMatch[1]);
         containerIds.push(tileId);
       } else if (subpath !== kUpdatedHashSubpath) {
+        // Every tile linked to a shared model gets an `updatedHash` patch when the shared model
+        // changes, whatever changed, so that patch alone does not mark the tile as changed.
         tileIds.push(tileId);
       }
       return;
