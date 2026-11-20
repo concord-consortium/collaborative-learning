@@ -66,12 +66,16 @@ const ClassSummarySettings: React.FC = () => {
         keeps its built-in prompt. A problem can override the unit with its own wording on the
         problem&apos;s Container Configuration page.
       </p>
-      <p className="muted">
-        Three things to know before you iterate here. The summary is written by a server that reads
-        the <strong>published unit on the main branch</strong>, so a change has no effect on a branch
-        preview. The server caches a unit for about ten minutes. And a summary that has already been
-        written is not redone, so a class that has one keeps it.
-      </p>
+      <p className="muted">Three things to know before you iterate here:</p>
+      <ul className="muted iterationNotes">
+        <li>
+          The summary is written by a server that reads the{" "}
+          <strong>published unit on the main branch</strong>, so a change has no effect on a branch
+          preview.
+        </li>
+        <li>The server caches a unit for about ten minutes.</li>
+        <li>A summary that has already been written is not redone, so a class that has one keeps it.</li>
+      </ul>
 
       <details className="builtInPrompt">
         <summary>View built-in summary prompt</summary>
