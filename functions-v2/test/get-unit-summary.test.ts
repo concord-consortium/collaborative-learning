@@ -293,5 +293,41 @@ describe("getUnitSummary", () => {
       expect(result?.summary).toBeDefined();
       expect(result?.classSummaryPrompts.unit).toBeUndefined();
     });
+
+    // The level above has to take over, or a typo on one problem silently costs that problem the
+    // wording the unit authored for it.
+    it("falls back to the unit when a problem's own block is malformed", async () => {
+      jest.spyOn(global, "fetch").mockResolvedValue(jsonResponse(promptsBody({
+        unit: {replaceStudentPrompt: "unit"},
+        problem: {replaceStudentPrompt: 42},
+      })));
+      const result = await getUnitSummary("cs-malformed-problem");
+      expect(result?.classSummaryPrompts.byProblemOrdinal["1.1"])
+        .toEqual({prompts: {replaceStudentPrompt: "unit"}, source: {level: "unit"}});
+    });
+
+    // The forms trim and omit an empty field, so only a hand-edited block can carry one. It must
+    // not outrank the unit and then supply nothing.
+    it("treats a blank authored prompt as missing rather than as an override", async () => {
+      jest.spyOn(global, "fetch").mockResolvedValue(jsonResponse(promptsBody({
+        unit: {replaceStudentPrompt: "unit"},
+        problem: {replaceStudentPrompt: "   "},
+      })));
+      const result = await getUnitSummary("cs-blank-problem");
+      expect(result?.classSummaryPrompts.byProblemOrdinal["1.1"])
+        .toEqual({prompts: {replaceStudentPrompt: "unit"}, source: {level: "unit"}});
+    });
+
+    it("keeps the other field when only one of a block's two prompts is blank", async () => {
+      jest.spyOn(global, "fetch").mockResolvedValue(jsonResponse(promptsBody({
+        problem: {replaceStudentPrompt: "", appendToStudentPrompt: "problem extra"},
+      })));
+      const result = await getUnitSummary("cs-blank-field");
+      expect(result?.classSummaryPrompts.byProblemOrdinal["1.1"])
+        .toEqual({
+          prompts: {appendToStudentPrompt: "problem extra"},
+          source: {level: "problem", ordinal: "1.1"},
+        });
+    });
   });
 });

@@ -44,7 +44,8 @@ jest.mock("../../../hooks/use-curriculum", () => ({
 // problem's config, which is what the runtime reads.
 function applyLastUpdater(existing?: IClassSummaryPrompts) {
   const draft = makeUnit(existing);
-  mockSetUnitConfig.mock.calls[0][0](draft);
+  const {calls} = mockSetUnitConfig.mock;
+  calls[calls.length - 1][0](draft);
   return draft.investigations[0].problems[0].config;
 }
 
@@ -89,5 +90,14 @@ describe("ContainerConfig class summary prompts", () => {
 
     await waitFor(() => expect(mockSetUnitConfig).toHaveBeenCalled());
     expect(applyLastUpdater(authored)?.classSummaryPrompts).toBeUndefined();
+  });
+
+  // The summary function reads the unit's own content.json, so a prompt saved here would be
+  // stored into the teacher guide and never read. Not offered rather than quietly ignored.
+  it("offers no class summary fields on a teacher-guide problem", () => {
+    render(<ContainerConfig path="teacher-guides/investigation-0/problem-0/containerConfig" />);
+
+    expect(screen.queryByLabelText(replaceLabel)).not.toBeInTheDocument();
+    expect(screen.queryByLabelText(appendLabel)).not.toBeInTheDocument();
   });
 });

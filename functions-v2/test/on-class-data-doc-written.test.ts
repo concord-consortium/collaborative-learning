@@ -259,6 +259,43 @@ describe("onClassDataDocWritten", () => {
     expect(humanMessageOf(0)).toContain("Call out anything a teacher should address tomorrow.");
   });
 
+  // Both levels set, so the precedence is what this pins rather than the presence of either.
+  test("the problem the class has reached outranks the unit's own prompt", async () => {
+    mockGetUnitSummary.mockResolvedValue(unitSummaryResult({
+      unit: {replaceStudentPrompt: "Unit rules."},
+      byProblemOrdinal: {"1.1": {prompts: {replaceStudentPrompt: "Problem rules."},
+        source: {level: "problem", ordinal: "1.1"}}},
+    }));
+    mockInvoke.mockResolvedValueOnce(invokeResponse("student chunk summary"));
+
+    await writeAndTrigger({studentContent: "Short student work.", currentProblemOrdinal: "1.1"});
+
+    expect(humanMessageOf(0)).toContain("Problem rules.");
+    expect(humanMessageOf(0)).not.toContain("Unit rules.");
+  });
+
+  // The try block around the fetch covers the prompts as well as the curriculum slice, so a
+  // failure there must leave the built-in prompt running rather than no prompt at all.
+  test("the built-in prompt runs when the unit summary cannot be fetched", async () => {
+    mockGetUnitSummary.mockRejectedValue(new Error("network down"));
+    mockInvoke.mockResolvedValueOnce(invokeResponse("student chunk summary"));
+
+    await writeAndTrigger({studentContent: "Short student work.", currentProblemOrdinal: "1.1"});
+
+    expect(humanMessageOf(0)).toContain("Summarize the key points, themes, topics");
+    const written = (await getFirestore().doc(kClassDataDocPath).get()).data();
+    expect(written?.summaryPromptSource).toBeNull();
+  });
+
+  test("the built-in prompt runs when the unit has no summary at all", async () => {
+    mockGetUnitSummary.mockResolvedValue(undefined);
+    mockInvoke.mockResolvedValueOnce(invokeResponse("student chunk summary"));
+
+    await writeAndTrigger({studentContent: "Short student work.", currentProblemOrdinal: "1.1"});
+
+    expect(humanMessageOf(0)).toContain("Summarize the key points, themes, topics");
+  });
+
   test("a summary whose sourceManifest no longer matches the live problem list sends no slice",
     async () => {
       const staleSummary: IUnitSummary = {

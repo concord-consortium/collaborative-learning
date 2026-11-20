@@ -341,8 +341,8 @@ export const ContainerConfig: React.FC<Props> = ({ path }) => {
           ...(appendToStudentPrompt ? { appendToStudentPrompt } : {}),
         };
       } else if (currentItem.config) {
-        // Removed rather than left empty: the nearest level that has this property supplies the
-        // whole of it, so an empty block here would silence the unit's prompt instead of inheriting it.
+        // Removed rather than left empty. An empty block is read as absent, so it would inherit
+        // either way; what it would not do is say so to the next author reading the JSON.
         delete currentItem.config.classSummaryPrompts;
       }
     };
@@ -425,29 +425,33 @@ export const ContainerConfig: React.FC<Props> = ({ path }) => {
               <button type="button" className="danger" onClick={deleteProblemPlanningTemplate}>Delete</button>}
           </div>
         </fieldset>
-        <fieldset className="class-summary-controls">
-          <legend>Class Summary</legend>
-          <p className="muted small">
-            Overrides the prompt behind the teacher&apos;s Class Summary, for the summary of student
-            work only. That summary covers the whole unit&apos;s work rather than one problem&apos;s,
-            so these rules steer all of it whenever this is the furthest problem any student has
-            worked on, and stop applying once a student starts the next one. The summary panel names
-            the rules it used. Either field replaces the unit&apos;s Class Summary settings outright;
-            clear both to go back to inheriting them.
-          </p>
-          <label htmlFor="classSummaryReplacePrompt">Replace built-in summary prompt</label>
-          <textarea
-            id="classSummaryReplacePrompt"
-            rows={6}
-            {...problemForm.register("classSummaryReplacePrompt")}
-          />
-          <label htmlFor="classSummaryAppendPrompt">Additional summary prompt (appended)</label>
-          <textarea
-            id="classSummaryAppendPrompt"
-            rows={4}
-            {...problemForm.register("classSummaryAppendPrompt")}
-          />
-        </fieldset>
+        {/* Only on the unit's own problems: the summary function reads the unit's content.json,
+            so prompts saved on a teacher-guide problem would be stored and never used. */}
+        {!pathInfo?.isTeacherGuide && (
+          <fieldset className="class-summary-controls">
+            <legend>Class Summary</legend>
+            <p className="muted small">
+              Overrides the prompt behind the teacher&apos;s Class Summary, for the summary of
+              student work only. That summary covers the whole unit&apos;s work rather than one
+              problem&apos;s, so these rules steer all of it whenever this is the furthest problem
+              any student has worked on, and stop applying once a student starts the next one. The
+              summary panel names the rules it used. Either field replaces the unit&apos;s Class
+              Summary settings outright; clear both to go back to inheriting them.
+            </p>
+            <label htmlFor="classSummaryReplacePrompt">Replace built-in summary prompt</label>
+            <textarea
+              id="classSummaryReplacePrompt"
+              rows={6}
+              {...problemForm.register("classSummaryReplacePrompt")}
+            />
+            <label htmlFor="classSummaryAppendPrompt">Additional summary prompt (appended)</label>
+            <textarea
+              id="classSummaryAppendPrompt"
+              rows={4}
+              {...problemForm.register("classSummaryAppendPrompt")}
+            />
+          </fieldset>
+        )}
         <div className="bottomButtons">
           <button type="submit" disabled={saveState === "saving"}>Save</button>
         </div>

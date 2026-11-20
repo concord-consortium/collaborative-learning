@@ -34,17 +34,23 @@ export function buildSummaryPrompt(prompts?: IClassSummaryPrompts): string {
 }
 
 /**
- * Accepts only string fields, and returns undefined for anything else -- including an authored
- * block that is present but misspelled. Callers parse a remote content.json where one bad value
- * must not invalidate the whole unit.
+ * Accepts only non-blank string fields, and returns undefined for anything else -- including an
+ * authored block that is present but misspelled. Callers parse a remote content.json where one bad
+ * value must not invalidate the whole unit.
+ *
+ * Blank counts as missing, matching the forms, which trim and omit an empty field so they cannot
+ * save one. A block hand-edited to `{"replaceStudentPrompt": ""}` would otherwise be a block that
+ * exists and says nothing: it would outrank the unit's prompts and then supply none, silently
+ * costing the unit its authored wording. Investigation-level blocks have no form at all, so they
+ * are always hand-edited.
  */
 export function parseClassSummaryPrompts(value: unknown): IClassSummaryPrompts | undefined {
   if (typeof value !== "object" || value === null) return undefined;
   const record = value as Record<string, unknown>;
-  const replaceStudentPrompt =
-    typeof record.replaceStudentPrompt === "string" ? record.replaceStudentPrompt : undefined;
-  const appendToStudentPrompt =
-    typeof record.appendToStudentPrompt === "string" ? record.appendToStudentPrompt : undefined;
+  const asPrompt = (field: unknown) =>
+    typeof field === "string" && field.trim() ? field : undefined;
+  const replaceStudentPrompt = asPrompt(record.replaceStudentPrompt);
+  const appendToStudentPrompt = asPrompt(record.appendToStudentPrompt);
   if (replaceStudentPrompt === undefined && appendToStudentPrompt === undefined) return undefined;
   return {
     ...(replaceStudentPrompt !== undefined && {replaceStudentPrompt}),

@@ -24,7 +24,8 @@ jest.mock("../../hooks/use-curriculum", () => ({
 // Runs the updater passed to setUnitConfig against a mock draft (seeded with the given pre-existing
 // config) and returns it.
 const applyLastUpdater = (classSummaryPrompts?: IClassSummaryPrompts) => {
-  const updaterFn = mockSetUnitConfig.mock.calls[0][0];
+  const {calls} = mockSetUnitConfig.mock;
+  const updaterFn = calls[calls.length - 1][0];
   const mockDraft: { config: { classSummaryPrompts?: IClassSummaryPrompts } } =
     { config: { classSummaryPrompts } };
   updaterFn(mockDraft);
@@ -70,15 +71,23 @@ describe("ClassSummarySettings", () => {
 
   it("shows the built-in prompt and copies it to the clipboard", async () => {
     const writeText = jest.fn().mockResolvedValue(undefined);
+    // Restored afterwards: navigator is shared across every test in the run, so a stub left in
+    // place is a stub some later suite inherits without asking for it.
+    const original = Object.getOwnPropertyDescriptor(navigator, "clipboard");
     Object.defineProperty(navigator, "clipboard", { value: { writeText }, configurable: true });
-    render(<ClassSummarySettings />);
+    try {
+      render(<ClassSummarySettings />);
 
-    expect(screen.getByText("View built-in summary prompt")).toBeInTheDocument();
-    expect(screen.getByText(/Summarize the key points, themes, topics/)).toBeInTheDocument();
+      expect(screen.getByText("View built-in summary prompt")).toBeInTheDocument();
+      expect(screen.getByText(/Summarize the key points, themes, topics/)).toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole("button", { name: "Copy to clipboard" }));
-    expect(writeText).toHaveBeenCalledWith(CLASS_SUMMARY_STUDENT_INSTRUCTION);
-    expect(await screen.findByRole("button", { name: "Copied!" })).toBeInTheDocument();
+      fireEvent.click(screen.getByRole("button", { name: "Copy to clipboard" }));
+      expect(writeText).toHaveBeenCalledWith(CLASS_SUMMARY_STUDENT_INSTRUCTION);
+      expect(await screen.findByRole("button", { name: "Copied!" })).toBeInTheDocument();
+    } finally {
+      if (original) Object.defineProperty(navigator, "clipboard", original);
+      else Reflect.deleteProperty(navigator, "clipboard");
+    }
   });
 
   it("removes classSummaryPrompts when both fields are blank", async () => {
