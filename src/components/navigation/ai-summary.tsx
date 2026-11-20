@@ -4,6 +4,7 @@ import { observer } from "mobx-react";
 import Markdown from "markdown-to-jsx";
 
 import { useDBStore, useStores } from "../../hooks/use-stores";
+import { UnitModelType } from "../../models/curriculum/unit";
 import { useFirebaseFunction } from "../../hooks/use-firebase-function";
 import { useUserContext } from "../../hooks/use-user-context";
 
@@ -21,12 +22,42 @@ interface PartialSummaryDataResult {
   teacherSummary: string;
   lastEditedAt: number;
   summaryCreatedAt: CreatedAt;
+  summaryPromptSource: PromptSource | null;
 }
+interface PromptSource {
+  level: "problem" | "investigation" | "unit";
+  ordinal?: string;
+}
+
 interface SummaryData {
   studentSummary?: string;
   teacherSummary?: string;
   lastEditedAt?: string;
   summaryCreatedAt?: string;
+  promptSource?: PromptSource;
+}
+
+/**
+ * Which authored rules the summary followed, for the teacher reading it.
+ *
+ * Worth saying because the level is not the teacher's to choose: this summary covers the whole
+ * class's work, and the rules come from whichever problem the class has reached, which can change
+ * without anyone editing a prompt. Named rather than hinted at, so a teacher who expected their
+ * own problem's rules can see which ones ran instead.
+ */
+export function describePromptSource(unit: UnitModelType, source?: PromptSource): string {
+  if (!source) return "Summarizing using the default rules";
+  const named = (label: string, ordinal: string, title?: string) =>
+    `Summarizing using rules for ${label} ${ordinal}${title ? `: ${title}` : ""}`;
+  if (source.level === "problem" && source.ordinal) {
+    const {problem} = unit.getProblem(source.ordinal);
+    return named("Problem", source.ordinal, problem?.title);
+  }
+  if (source.level === "investigation" && source.ordinal) {
+    const investigation = unit.getInvestigation(Number(source.ordinal));
+    return named("Investigation", source.ordinal, investigation?.title);
+  }
+  return `Summarizing using rules for Unit: ${unit.title}`;
 }
 
 type Status = "checking" | "generating" | "regenerating" | "error" | "loaded";
@@ -89,7 +120,8 @@ const AISummaryContent: React.FC = () => {
         studentSummary: result.studentSummary,
         teacherSummary: result.teacherSummary,
         lastEditedAt: result.lastEditedAt ? niceDate(result.lastEditedAt) : undefined,
-        summaryCreatedAt: result.summaryCreatedAt ? niceDate(result.summaryCreatedAt.seconds*1000) : undefined
+        summaryCreatedAt: result.summaryCreatedAt ? niceDate(result.summaryCreatedAt.seconds*1000) : undefined,
+        promptSource: result.summaryPromptSource ?? undefined
       });
       setStatus("loaded");
     }, (error) => {
@@ -110,6 +142,8 @@ const AISummaryContent: React.FC = () => {
 
   return (
     <div className="ai-summary-content">
+      <div className="summary-rules">{describePromptSource(unit, summaryData.promptSource)}</div>
+
       <h3>Teacher work summary</h3>
       <div className="summary-content">
         <Markdown>{summaryData.teacherSummary ?? "No teacher summary available"}</Markdown>

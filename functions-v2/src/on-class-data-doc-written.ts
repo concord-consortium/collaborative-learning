@@ -6,7 +6,7 @@ import {defineSecret} from "firebase-functions/params";
 import {MarkdownTextSplitter} from "@langchain/textsplitters";
 import {ChatOpenAI} from "@langchain/openai";
 import {HumanMessage, SystemMessage} from "@langchain/core/messages";
-import {getUnitSummary} from "../../shared/get-unit-summary";
+import {getUnitSummary, IClassSummaryPromptSource} from "../../shared/get-unit-summary";
 import {buildSummaryPrompt, IClassSummaryPrompts} from "../../shared/class-summary-prompts";
 import {
   fencedUnitContext, formatUnitSummarySlice, unitSummarySlice, withCurriculumInstructions,
@@ -150,6 +150,10 @@ export const onClassDataDocWritten = onDocumentWritten(
       // authored prompts fail closed the same way: unresolved means the built-in prompt runs.
       let unitContext: string | undefined;
       let classSummaryPrompts: IClassSummaryPrompts | undefined;
+      // Written beside the summary so the teacher is told which rules it followed. The summary
+      // covers the whole class's work but takes its rules from one level, and which level that is
+      // can change without anyone editing a prompt -- see docs/unit-configuration.md.
+      let promptSource: IClassSummaryPromptSource | undefined;
       try {
         // Fetched whether or not the class has a current problem, because a unit-level prompt
         // applies either way; only the context slice needs the ordinal.
@@ -161,9 +165,15 @@ export const onClassDataDocWritten = onDocumentWritten(
             );
             unitContext = slice && formatUnitSummarySlice(slice);
           }
-          classSummaryPrompts = (content.currentProblemOrdinal &&
-            unitSummaryResult.classSummaryPrompts.byProblemOrdinal[content.currentProblemOrdinal]) ||
-            unitSummaryResult.classSummaryPrompts.unit;
+          const resolved = content.currentProblemOrdinal &&
+            unitSummaryResult.classSummaryPrompts.byProblemOrdinal[content.currentProblemOrdinal];
+          if (resolved) {
+            classSummaryPrompts = resolved.prompts;
+            promptSource = resolved.source;
+          } else if (unitSummaryResult.classSummaryPrompts.unit) {
+            classSummaryPrompts = unitSummaryResult.classSummaryPrompts.unit;
+            promptSource = {level: "unit"};
+          }
         }
       } catch (error) {
         logger.warn("unit summary unavailable, continuing without it", error);
@@ -203,6 +213,9 @@ export const onClassDataDocWritten = onDocumentWritten(
         teacherSummary: teacherSummary.summary,
         summaryTokenCount: studentSummary.tokenCount + teacherSummary.tokenCount,
         summaryCreatedAt: FieldValue.serverTimestamp(),
+        // null rather than omitted: a regenerated summary that resolves no prompt has to clear
+        // whatever the last one recorded, or the teacher reads a stale attribution.
+        summaryPromptSource: promptSource ?? null,
       });
 
       logger.info("Summarized the class work into the data doc", event.subject);

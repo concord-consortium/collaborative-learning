@@ -186,7 +186,8 @@ describe("onClassDataDocWritten", () => {
   test("an authored replacement steers the student request and leaves the teacher request alone",
     async () => {
       mockGetUnitSummary.mockResolvedValue(unitSummaryResult({
-        byProblemOrdinal: {"1.1": {replaceStudentPrompt: "List every misconception you can find."}},
+        byProblemOrdinal: {"1.1": {prompts: {replaceStudentPrompt: "List every misconception you can find."},
+          source: {level: "problem", ordinal: "1.1"}}},
       }));
       mockInvoke
         .mockResolvedValueOnce(invokeResponse("student chunk summary"))
@@ -203,6 +204,45 @@ describe("onClassDataDocWritten", () => {
       expect(humanMessageOf(1)).toContain("Analyze this teacher work");
       expect(humanMessageOf(1)).not.toContain("List every misconception you can find.");
     });
+
+  // The teacher is told which rules ran, because the level is not theirs to choose and can change
+  // without anyone editing a prompt.
+  test("records the level an applied prompt was authored at", async () => {
+    mockGetUnitSummary.mockResolvedValue(unitSummaryResult({
+      byProblemOrdinal: {"1.1": {prompts: {replaceStudentPrompt: "Problem rules."},
+        source: {level: "problem", ordinal: "1.1"}}},
+    }));
+    mockInvoke.mockResolvedValueOnce(invokeResponse("student chunk summary"));
+
+    await writeAndTrigger({studentContent: "Short student work.", currentProblemOrdinal: "1.1"});
+
+    const written = (await getFirestore().doc(kClassDataDocPath).get()).data();
+    expect(written?.summaryPromptSource).toEqual({level: "problem", ordinal: "1.1"});
+  });
+
+  test("records the unit level when the class has reached no problem with its own rules", async () => {
+    mockGetUnitSummary.mockResolvedValue(unitSummaryResult({
+      unit: {replaceStudentPrompt: "Unit rules."},
+      byProblemOrdinal: {},
+    }));
+    mockInvoke.mockResolvedValueOnce(invokeResponse("student chunk summary"));
+
+    await writeAndTrigger({studentContent: "Short student work.", currentProblemOrdinal: "1.1"});
+
+    const written = (await getFirestore().doc(kClassDataDocPath).get()).data();
+    expect(written?.summaryPromptSource).toEqual({level: "unit"});
+  });
+
+  // Null rather than absent: a regenerated summary has to clear the last one's attribution.
+  test("records no level when the unit authors no prompts at all", async () => {
+    mockGetUnitSummary.mockResolvedValue(unitSummaryResult({byProblemOrdinal: {}}));
+    mockInvoke.mockResolvedValueOnce(invokeResponse("student chunk summary"));
+
+    await writeAndTrigger({studentContent: "Short student work.", currentProblemOrdinal: "1.1"});
+
+    const written = (await getFirestore().doc(kClassDataDocPath).get()).data();
+    expect(written?.summaryPromptSource).toBeNull();
+  });
 
   test("a unit-level prompt reaches a class that has no current problem", async () => {
     mockGetUnitSummary.mockResolvedValue(unitSummaryResult({

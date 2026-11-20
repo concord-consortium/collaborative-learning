@@ -428,9 +428,12 @@ export const ContainerConfig: React.FC<Props> = ({ path }) => {
         <fieldset className="class-summary-controls">
           <legend>Class Summary</legend>
           <p className="muted small">
-            Overrides the prompt behind the teacher&apos;s Class Summary for this problem only, and
-            only for the summary of student work. Either field replaces the unit&apos;s Class Summary
-            settings outright; clear both to go back to inheriting them.
+            Overrides the prompt behind the teacher&apos;s Class Summary, for the summary of student
+            work only. That summary covers the whole unit&apos;s work rather than one problem&apos;s,
+            so these rules steer all of it whenever this is the furthest problem any student has
+            worked on, and stop applying once a student starts the next one. The summary panel names
+            the rules it used. Either field replaces the unit&apos;s Class Summary settings outright;
+            clear both to go back to inheriting them.
           </p>
           <label htmlFor="classSummaryReplacePrompt">Replace built-in summary prompt</label>
           <textarea

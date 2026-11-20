@@ -238,7 +238,7 @@ describe("getUnitSummary", () => {
         jsonResponse(promptsBody({unit: {replaceStudentPrompt: "unit"}})));
       const result = await getUnitSummary("cs-unit-only");
       expect(result?.classSummaryPrompts.byProblemOrdinal["1.2"])
-        .toEqual({replaceStudentPrompt: "unit"});
+        .toEqual({prompts: {replaceStudentPrompt: "unit"}, source: {level: "unit"}});
     });
 
     // Matches ConfigurationManager.getProp: the nearest level supplies the whole property, so the
@@ -250,7 +250,10 @@ describe("getUnitSummary", () => {
       })));
       const result = await getUnitSummary("cs-problem-wins");
       expect(result?.classSummaryPrompts.byProblemOrdinal["1.1"])
-        .toEqual({appendToStudentPrompt: "problem extra"});
+        .toEqual({
+          prompts: {appendToStudentPrompt: "problem extra"},
+          source: {level: "problem", ordinal: "1.1"},
+        });
     });
 
     it("prefers an investigation's prompts over the unit's", async () => {
@@ -260,7 +263,10 @@ describe("getUnitSummary", () => {
       })));
       const result = await getUnitSummary("cs-investigation");
       expect(result?.classSummaryPrompts.byProblemOrdinal["1.1"])
-        .toEqual({replaceStudentPrompt: "investigation"});
+        .toEqual({
+          prompts: {replaceStudentPrompt: "investigation"},
+          source: {level: "investigation", ordinal: "1"},
+        });
     });
 
     it("exposes the unit's prompts for a class with no current problem", async () => {

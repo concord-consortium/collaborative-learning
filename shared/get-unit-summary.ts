@@ -9,11 +9,26 @@ import {IClassSummaryPrompts, parseClassSummaryPrompts} from "./class-summary-pr
 import {ILiveProblem} from "./unit-summary-slice";
 import {IUnitSummary} from "./unit-summary-types";
 
+/**
+ * Which level an applied prompt was authored at, kept because resolution flattens that away and
+ * the teacher is told which rules their summary followed. `ordinal` is the problem or investigation
+ * the prompt was written on, which is not necessarily the one they are looking at.
+ */
+export interface IClassSummaryPromptSource {
+  level: "problem" | "investigation" | "unit";
+  ordinal?: string;
+}
+
+export interface IResolvedClassSummaryPrompts {
+  prompts: IClassSummaryPrompts;
+  source: IClassSummaryPromptSource;
+}
+
 export interface IClassSummaryPromptsByLevel {
   /** The unit's own prompts, for a class that has no current problem. */
   unit?: IClassSummaryPrompts;
   /** Already resolved problem -> investigation -> unit, so a caller just looks up its ordinal. */
-  byProblemOrdinal: Record<string, IClassSummaryPrompts>;
+  byProblemOrdinal: Record<string, IResolvedClassSummaryPrompts>;
 }
 
 export interface IUnitSummaryFetchResult {
@@ -96,7 +111,7 @@ function parseContent(content: unknown): IUnitSummaryFetchResult {
   const unitPrompts = parseClassSummaryPrompts(config?.classSummaryPrompts);
 
   const liveProblems: ILiveProblem[] = [];
-  const byProblemOrdinal: Record<string, IClassSummaryPrompts> = {};
+  const byProblemOrdinal: Record<string, IResolvedClassSummaryPrompts> = {};
   for (const investigation of investigations) {
     const investigationRecord = asRecord(investigation);
     if (!investigationRecord) throw new Error("an investigation is not an object");
@@ -119,9 +134,14 @@ function parseContent(content: unknown): IUnitSummaryFetchResult {
       liveProblems.push({ordinal, title: String(problemRecord.title ?? "")});
 
       // Nearest level wins outright, as ConfigurationManager.getProp does for the client.
-      const prompts = parseClassSummaryPrompts(asRecord(problemRecord.config)?.classSummaryPrompts)
-        ?? investigationPrompts ?? unitPrompts;
-      if (prompts) byProblemOrdinal[ordinal] = prompts;
+      const problemPrompts = parseClassSummaryPrompts(asRecord(problemRecord.config)?.classSummaryPrompts);
+      const resolved: IResolvedClassSummaryPrompts | undefined =
+        problemPrompts ? {prompts: problemPrompts, source: {level: "problem", ordinal}} :
+        investigationPrompts
+          ? {prompts: investigationPrompts,
+            source: {level: "investigation", ordinal: String(investigationRecord.ordinal)}} :
+        unitPrompts ? {prompts: unitPrompts, source: {level: "unit"}} : undefined;
+      if (resolved) byProblemOrdinal[ordinal] = resolved;
     }
   }
 
