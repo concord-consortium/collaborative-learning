@@ -1,6 +1,6 @@
 import {Timestamp} from "firebase-admin/firestore";
 import {DocumentSnapshot} from "firebase-functions/v2/firestore";
-import {buildSystemMessageText, isCachedContentUpToDate, PROMPT_POLICY_VERSION}
+import {aiContentResponse, buildSystemMessageText, isCachedContentUpToDate, PROMPT_POLICY_VERSION}
   from "../src/get-ai-content";
 import {PROBLEM_APPROACH_INSTRUCTION, UNIT_SUMMARY_LOOKAHEAD_INSTRUCTION}
   from "../../shared/unit-summary-types";
@@ -10,6 +10,24 @@ import {PROBLEM_APPROACH_INSTRUCTION, UNIT_SUMMARY_LOOKAHEAD_INSTRUCTION}
 function fakeSnapshot(exists: boolean, data?: Record<string, unknown>): DocumentSnapshot {
   return {exists, data: () => data} as unknown as DocumentSnapshot;
 }
+
+// The composed prompt carries the class and teacher summaries, which firestore.rules lets only
+// teachers read, and the caller names which contexts go into it. A response that echoed the prompt
+// would let any student ask for the class summary and read it back.
+describe("aiContentResponse", () => {
+  it("never carries the prompt it was built from", () => {
+    const response = aiContentResponse({
+      text: "an answer", clientRequestHash: "abc", lastUpdated: 1, error: null,
+    });
+    expect(response).not.toHaveProperty("prompt");
+    expect(Object.keys(response).sort())
+      .toEqual(["clientRequestHash", "error", "lastUpdated", "text"]);
+  });
+
+  it("reports no hash rather than undefined, so a caller can tell it was absent", () => {
+    expect(aiContentResponse({text: "an answer", error: null}).clientRequestHash).toBeNull();
+  });
+});
 
 describe("isCachedContentUpToDate", () => {
   const prompt = "the tile prompt";

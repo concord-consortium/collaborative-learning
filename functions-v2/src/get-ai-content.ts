@@ -64,27 +64,41 @@ export function isCachedContentUpToDate(prompt: string,
   return true;
 }
 
+/**
+ * Everything a caller is given back, and the one place that decides it.
+ *
+ * It must never carry the prompt. The composed prompt holds the class and teacher summaries,
+ * firestore.rules lets only teachers read those, and the contexts to compose are named by the
+ * caller -- so a returned prompt would hand any student the class summary for the asking. Both
+ * answer paths build their response here so neither can grow the field back on its own.
+ *
+ * Callers still need to know which request they are being answered: waitForContent returns
+ * whatever the lock holder generated, which under contention can be an answer for a different
+ * revision of this tile. The hash identifies it without disclosing it.
+ *
+ * @param {object} fields the answer, its requester's hash, when it was written, and any error
+ * @return {object} the callable's response
+ */
+export function aiContentResponse(
+  fields: {text: string, clientRequestHash?: string, lastUpdated?: unknown, error: string | null}
+) {
+  return {
+    text: fields.text,
+    clientRequestHash: fields.clientRequestHash ?? null,
+    lastUpdated: fields.lastUpdated,
+    error: fields.error,
+  };
+}
+
 function returnCachedContent(cachedContent: DocumentSnapshot) {
   const data = cachedContent.data();
-  if (data) {
-    return {
-      text: data.content,
-      // The prompt this answer was built from. Callers that cache or gate on their own request
-      // need it: waitForContent returns whatever the lock holder generated, which under
-      // contention can be an answer for a different revision of the same tile.
-      prompt: data.prompt,
-      // The requester's own hash of that request. The prompt alone can no longer identify it: the
-      // caller sends its context separately and never sees the composed string, so it has nothing
-      // to compare the prompt against.
-      clientRequestHash: data.clientRequestHash ?? null,
-      lastUpdated: data.lastUpdated,
-      error: null,
-    };
-  } else {
-    return {
-      error: "No data",
-    };
-  }
+  if (!data) return {error: "No data"};
+  return aiContentResponse({
+    text: data.content,
+    clientRequestHash: data.clientRequestHash,
+    lastUpdated: data.lastUpdated,
+    error: null,
+  });
 }
 
 async function generateContent(firestoreRoot: string, unit: string, classHash: string,
@@ -165,13 +179,10 @@ async function generateContent(firestoreRoot: string, unit: string, classHash: s
 
   await lockRef.delete();
 
-  return {
-    text: content,
-    prompt: composedPrompt,
-    clientRequestHash: requestHash ?? null,
-    lastUpdated,
-    error: errorMessage,
-  };
+  // The Firestore write above keeps the prompt; that copy is what the cache comparison reads.
+  return aiContentResponse({
+    text: content, clientRequestHash: requestHash, lastUpdated, error: errorMessage,
+  });
 }
 
 // If we're waiting on a lock, poll every second until it is released.
