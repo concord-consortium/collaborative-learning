@@ -112,6 +112,7 @@ describe("shared/ai-analysis-messages in functions-v2", () => {
         getEmbeddings: jest.fn().mockResolvedValue(defaultEmbedding),
         findRelatedSummaries: jest.fn().mockResolvedValue([relatedSummary]),
         getUnitSummary: jest.fn().mockResolvedValue(undefined),
+        getClassSummaries: jest.fn().mockResolvedValue({}),
         createOpenAI: () => ({
           chat: {
             completions: {
@@ -126,6 +127,78 @@ describe("shared/ai-analysis-messages in functions-v2", () => {
       };
       return {deps, sent};
     }
+
+    // Related summaries are other students' documents and peer comments on them. The class may
+    // hold this student's work; this student's work may never hold the class's.
+    test("a prompt scoped to its own work is given no peer summaries", async () => {
+      const {deps, sent} = recordingDeps();
+      const scoped = {...fullPrompt, mainPrompt: "Comment on {{mywork}}."};
+
+      await categorizeRepresentations(
+        {summary, imageUrl: null}, "key", "demo/AI/documents/testdoc1", scoped, undefined, deps);
+
+      expect(deps.findRelatedSummaries).not.toHaveBeenCalled();
+      const text = sent[0].messages[1].content.map((part: {text?: string}) => part.text ?? "").join("\n");
+      expect(text).not.toContain("A classmate wrote this about that document.");
+    });
+
+    test("a prompt naming class work is still given the peer summaries", async () => {
+      const {deps} = recordingDeps();
+      const asking = {...fullPrompt, mainPrompt: "Compare {{mywork}} with {{classwork}}."};
+
+      await categorizeRepresentations(
+        {summary, imageUrl: null}, "key", "demo/AI/documents/testdoc1", asking, undefined, deps);
+
+      expect(deps.findRelatedSummaries).toHaveBeenCalled();
+    });
+
+    // An author who never adopts the vocabulary keeps the enrichment they have always had.
+    test("a prompt naming no token keeps its peer summaries", async () => {
+      const {deps} = recordingDeps();
+
+      await categorizeRepresentations(
+        {summary, imageUrl: null}, "key", "demo/AI/documents/testdoc1", fullPrompt, undefined, deps);
+
+      expect(deps.findRelatedSummaries).toHaveBeenCalled();
+    });
+
+    // Everyone else's searches must still find this document, whatever its own prompt asked for.
+    test("a scoped prompt still has its summary embedded for others to find", async () => {
+      const {deps} = recordingDeps();
+      const scoped = {...fullPrompt, mainPrompt: "Comment on {{mywork}}."};
+
+      await categorizeRepresentations(
+        {summary, imageUrl: null}, "key", "demo/AI/documents/testdoc1", scoped, undefined, deps);
+
+      expect(deps.getEmbeddings).toHaveBeenCalled();
+    });
+
+    test("a prompt naming class work is given it, from the doc keyed by context id", async () => {
+      const {deps, sent} = recordingDeps({
+        getClassSummaries: jest.fn().mockResolvedValue({classwork: "Class themes about water."}),
+      });
+      const askingPrompt = {...fullPrompt, mainPrompt: "Compare with {{classwork}}."};
+
+      await categorizeRepresentations(
+        {summary, imageUrl: null}, "key", "demo/AI/documents/testdoc1", askingPrompt, undefined, deps);
+
+      expect(deps.getClassSummaries).toHaveBeenCalledWith("demo", "AI", "vibe", "class1");
+      const text = sent[0].messages[1].content.map((part: {text?: string}) => part.text ?? "").join("\n");
+      expect(text).toContain("Class themes about water.");
+    });
+
+    test("a prompt naming no class work neither reads nor receives it", async () => {
+      const {deps, sent} = recordingDeps({
+        getClassSummaries: jest.fn().mockResolvedValue({classwork: "Class themes about water."}),
+      });
+
+      await categorizeRepresentations(
+        {summary, imageUrl: null}, "key", "demo/AI/documents/testdoc1", fullPrompt, undefined, deps);
+
+      expect(deps.getClassSummaries).not.toHaveBeenCalled();
+      const text = sent[0].messages[1].content.map((part: {text?: string}) => part.text ?? "").join("\n");
+      expect(text).not.toContain("Class themes about water.");
+    });
 
     test("a mixed request is exactly buildMixedMessages", async () => {
       const {deps, sent} = recordingDeps();
@@ -365,6 +438,7 @@ describe("shared/ai-analysis-messages in functions-v2", () => {
         getEmbeddings: jest.fn().mockResolvedValue(undefined),
         findRelatedSummaries: jest.fn().mockResolvedValue([]),
         getUnitSummary: jest.fn().mockResolvedValue({summary: unitSummaryFixture(), liveProblems}),
+        getClassSummaries: jest.fn().mockResolvedValue({}),
         createOpenAI: () => ({
           chat: {
             completions: {

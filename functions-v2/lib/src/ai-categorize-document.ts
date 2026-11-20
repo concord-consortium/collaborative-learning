@@ -10,6 +10,9 @@ import {
 } from "@google-cloud/firestore";
 import { AiAgreement, AiAgreementV2, isAiAgreement } from "../../src/summary-types";
 import { getUnitSummary } from "../../../shared/get-unit-summary";
+import {
+  AiContextBlocks, classSummaryBlocks, kServerResolvedTokens, tokensUsed
+} from "../../../shared/ai-context-tokens";
 import { IEvaluationRequestContext, kRatingValues } from "../../../shared/shared";
 import {
   Agreements,
@@ -460,6 +463,21 @@ export interface DocumentRepresentations {
 }
 
 /**
+ * The class-wide summaries, for a prompt that names one.
+ *
+ * The class doc is keyed by context id: update-class-data-docs writes
+ * `{root}/{space}/aicontent/{unit}/classes/{contextId}` and get-ai-content reads that same path
+ * calling the key `classHash`. They are one value under two names.
+ */
+export async function getClassSummaries(
+  root: string, space: string, unit: string, contextId: string
+): Promise<AiContextBlocks> {
+  const path = `${root}/${space}/aicontent/${unit}/classes/${contextId}`;
+  const classDoc = await firestoreClient().doc(path).get();
+  return classSummaryBlocks(classDoc.data());
+}
+
+/**
  * Test seam. Production callers pass nothing.
  *
  * These are called through same-module bindings, so exporting them and spying on the exports does
@@ -472,6 +490,7 @@ export interface CategorizeDeps {
   getEmbeddings: typeof getEmbeddings;
   findRelatedSummaries: typeof findRelatedSummaries;
   getUnitSummary: typeof getUnitSummary;
+  getClassSummaries: typeof getClassSummaries;
   createOpenAI: (apiKey: string) => OpenAI;
 }
 
@@ -480,6 +499,7 @@ const defaultCategorizeDeps: CategorizeDeps = {
   getEmbeddings,
   findRelatedSummaries,
   getUnitSummary,
+  getClassSummaries,
   createOpenAI: (apiKey: string) => new OpenAI({apiKey}),
 };
 
@@ -539,6 +559,8 @@ export async function categorizeRepresentations(
   let summaryEmbedding: number[] | undefined;
   let relatedSummaries: RelatedSummary[] = [];
   let unitContext: string | undefined;
+  let contextBlocks: AiContextBlocks | undefined;
+  let wantsRelatedSummaries = true;
 
   try {
     const responseSchema = buildZodResponseSchema(aiPrompt);
@@ -570,6 +592,25 @@ export async function categorizeRepresentations(
         logger.warn("unit summary unavailable, continuing without it", error);
       }
 
+      const askedTokens = tokensUsed(aiPrompt.mainPrompt);
+      // Related summaries are other students' documents in this class, and peer comments on them.
+      // A prompt that scoped itself to anything short of the class's work must not receive them --
+      // the class may hold this student's document, but this student's work may never hold the
+      // class's. A prompt naming no token is unscoped, and receives them as it always has.
+      wantsRelatedSummaries = askedTokens.size === 0 || askedTokens.has("classwork");
+
+      // Only for a prompt that named one, so a prompt that did not costs no read.
+      if (kServerResolvedTokens.some((token) => askedTokens.has(token))) {
+        try {
+          contextBlocks = await deps.getClassSummaries(
+            documentMetadata.root, documentMetadata.space, documentMetadata.unit,
+            documentMetadata.context_id
+          );
+        } catch (error) {
+          logger.warn("class summaries unavailable, continuing without them", error);
+        }
+      }
+
       // Only when a summary is being sent, so a document that receives agreement counts is always
       // one that can contribute them. Related summaries are enrichment: their absence costs the
       // evaluation nothing.
@@ -580,7 +621,11 @@ export async function categorizeRepresentations(
           // zero-dimension vector no search can find.
           summaryEmbedding = await deps.getEmbeddings(summary, apiKey);
           if (summaryEmbedding?.length) {
-            relatedSummaries = await deps.findRelatedSummaries(documentMetadata, summaryEmbedding);
+            // The embedding is still taken and stored, because this document has to stay findable
+            // by everyone else's searches whatever its own prompt asked for.
+            if (wantsRelatedSummaries) {
+              relatedSummaries = await deps.findRelatedSummaries(documentMetadata, summaryEmbedding);
+            }
           } else {
             summaryEmbedding = undefined;
             logger.warn("no embedding for this summary, continuing without related summaries");
@@ -595,11 +640,12 @@ export async function categorizeRepresentations(
     const buildMessages = () => {
       switch (request.shape) {
       case "mixed":
-        return buildMixedMessages(aiPrompt, request.summary, relatedSummaries, request.imageUrl, {}, unitContext);
+        return buildMixedMessages(
+          aiPrompt, request.summary, relatedSummaries, request.imageUrl, {}, unitContext, contextBlocks);
       case "summary-only":
-        return buildSummaryMessages(aiPrompt, request.summary, relatedSummaries, unitContext);
+        return buildSummaryMessages(aiPrompt, request.summary, relatedSummaries, unitContext, contextBlocks);
       case "image-only":
-        return buildMixedMessages(aiPrompt, null, [], request.imageUrl, {}, unitContext);
+        return buildMixedMessages(aiPrompt, null, [], request.imageUrl, {}, unitContext, contextBlocks);
       }
     };
     const messages = buildMessages();

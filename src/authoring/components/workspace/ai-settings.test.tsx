@@ -41,6 +41,18 @@ describe("AISettings", () => {
     mockCurriculumValue.saveState = undefined;
   });
 
+  it("lists the context vocabulary beside the main prompt", () => {
+    mockConfig.aiEvaluation = "custom";
+    mockConfig.aiPrompt = { ...aiPromptFields };
+    render(<AISettings />);
+
+    expect(screen.getByText("{{curriculum}}")).toBeInTheDocument();
+    expect(screen.getByText("{{problem}}")).toBeInTheDocument();
+    expect(screen.getByText("{{classwork}}")).toBeInTheDocument();
+    expect(screen.getByText("{{teacherwork}}")).toBeInTheDocument();
+    expect(screen.getByText("{{mywork}}")).toBeInTheDocument();
+  });
+
   it("does not offer a choice of the format sent to the AI", () => {
     mockConfig.aiEvaluation = "custom";
     mockConfig.aiPrompt = { ...aiPromptFields, summarizer: "text" };
