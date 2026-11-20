@@ -565,6 +565,7 @@ export async function categorizeRepresentations(
   let relatedSummaries: RelatedSummary[] = [];
   let unitContext: string | undefined;
   let contextBlocks: AiContextBlocks | undefined;
+  let wantsRelatedSummaries = true;
 
   try {
     const responseSchema = buildZodResponseSchema(aiPrompt);
@@ -596,8 +597,14 @@ export async function categorizeRepresentations(
         logger.warn("unit summary unavailable, continuing without it", error);
       }
 
-      // Only for a prompt that named one, so a prompt that did not costs no read.
       const askedTokens = tokensUsed(aiPrompt.mainPrompt);
+      // Related summaries are other students' documents in this class, and peer comments on them.
+      // A prompt that scoped itself to anything short of the class's work must not receive them --
+      // the class may hold this student's document, but this student's work may never hold the
+      // class's. A prompt naming no token at all keeps the enrichment it has always had.
+      wantsRelatedSummaries = askedTokens.size === 0 || askedTokens.has("classwork");
+
+      // Only for a prompt that named one, so a prompt that did not costs no read.
       if (kServerResolvedTokens.some((token) => askedTokens.has(token))) {
         try {
           contextBlocks = await deps.getClassSummaries(
@@ -619,7 +626,11 @@ export async function categorizeRepresentations(
           // zero-dimension vector no search can find.
           summaryEmbedding = await deps.getEmbeddings(summary, apiKey);
           if (summaryEmbedding?.length) {
-            relatedSummaries = await deps.findRelatedSummaries(documentMetadata, summaryEmbedding);
+            // The embedding is still taken and stored, because this document has to stay findable
+            // by everyone else's searches whatever its own prompt asked for.
+            if (wantsRelatedSummaries) {
+              relatedSummaries = await deps.findRelatedSummaries(documentMetadata, summaryEmbedding);
+            }
           } else {
             summaryEmbedding = undefined;
             logger.warn("no embedding for this summary, continuing without related summaries");
