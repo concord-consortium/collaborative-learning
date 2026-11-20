@@ -44,6 +44,7 @@ import {
 import { DocumentContentModel } from "../../models/document/document-content";
 import { ReadOnlyContext } from "../../components/document/read-only-context";
 import { hashString } from "../../../shared/hash-string";
+import { buildRequestPrompt } from "../../../shared/ai-context-tokens";
 
 // The starter tile needs to be registered so the TileModel.create
 // knows it is a supported tile type
@@ -367,6 +368,30 @@ describe("AIComponent", () => {
       const [request] = mockGetAiContent.mock.calls[0];
       expect(request.contextTokens.sort()).toEqual(["classwork", "mywork"]);
       expect(request.dynamicContentPrompt).not.toContain("classwork");
+    });
+
+    // The seam neither side's own tests can see across. Both halves passed while disagreeing about
+    // whether the sent prompt still carried its tokens, and the class context silently never
+    // arrived. This runs the real request through the real composer rather than a restatement of
+    // either one.
+    it("sends a request the server resolves the named class context from", async () => {
+      mockStores.documents.getDocument.mockReturnValue(documentWith(populatedDocContent()));
+      const aiContent = defaultAIContent();
+      aiContent.setPrompt("Compare {{mywork}} with {{classwork}}.");
+      const aiModel = TileModel.create({ content: aiContent });
+
+      await act(async () => render(<AIComponent {...defaultProps} model={aiModel} documentId="test-doc-1" />));
+
+      const [request] = mockGetAiContent.mock.calls[0];
+      const composed = buildRequestPrompt(
+        request.dynamicContentPrompt, request.contextBlocks, request.contextTokens,
+        { studentSummary: "What the class has been doing." }
+      );
+      expect(composed).toContain("What the class has been doing.");
+      expect(composed).toContain("The student's answer.");
+      // The question still reads as a question, and the contexts sit above it.
+      expect(composed.indexOf("What the class has been doing."))
+        .toBeLessThan(composed.indexOf("Compare this document with the class's work."));
     });
 
     it("sends no document summary when the prompt does not ask for its own work", async () => {

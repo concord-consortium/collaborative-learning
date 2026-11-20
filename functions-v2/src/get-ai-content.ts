@@ -8,8 +8,7 @@ import {ChatOpenAI} from "@langchain/openai";
 import {HumanMessage, SystemMessage} from "@langchain/core/messages";
 import {IAiContentUnionParams, isWarmUpParams} from "../../shared/shared";
 import {withCurriculumInstructions} from "../../shared/unit-summary-slice";
-import {AiContextBlocks, AiContextToken, composePrompt, kServerResolvedTokens}
-  from "../../shared/ai-context-tokens";
+import {buildRequestPrompt} from "../../shared/ai-context-tokens";
 import {validateUserContext} from "./user-context";
 
 // This function generates and returns tile content from an LLM.
@@ -63,46 +62,6 @@ export function isCachedContentUpToDate(prompt: string,
   const summaryCreatedAt = classInfo.data()?.summaryCreatedAt;
   if (summaryCreatedAt && contentData.lastUpdated.toMillis() < summaryCreatedAt.toMillis()) return false;
   return true;
-}
-
-interface IClassSummaries {
-  studentSummary?: string;
-  teacherSummary?: string;
-}
-
-/**
- * The prompt actually sent, and the string the cache is keyed on.
- *
- * The class and teacher summaries are added only when the authored prompt asked for them. Before
- * this they were appended after the question unconditionally, which is the position a model reads
- * as most relevant -- so advice written for "you" drew on work the student never wrote.
- *
- * Which contexts were asked for cannot be recovered from the question: the caller replaces each
- * token with its noun phrase before sending, so nothing is left here to parse. The caller reports
- * what it found instead.
- *
- * @param {string} question the authored prompt, tokens already replaced with their noun phrases
- * @param {AiContextBlocks|undefined} clientBlocks context the caller resolved for itself
- * @param {Iterable} askedTokens the contexts the prompt named, as the caller parsed them
- * @param {IClassSummaries} classSummaries the class doc's summaries, used only where asked for
- * @return {string} the context section followed by the question
- */
-export function buildRequestPrompt(
-  question: string, clientBlocks: AiContextBlocks | undefined,
-  askedTokens: Iterable<AiContextToken>, classSummaries: IClassSummaries
-): string {
-  const blocks: AiContextBlocks = {...clientBlocks};
-  const asked = new Set(askedTokens);
-  for (const token of kServerResolvedTokens) {
-    // Dropped before anything is added back: a block labelled as the class's work has to hold what
-    // this function read, never what a caller passed under that name.
-    delete blocks[token];
-    if (!asked.has(token)) continue;
-    const summary =
-      token === "classwork" ? classSummaries.studentSummary : classSummaries.teacherSummary;
-    if (summary) blocks[token] = summary;
-  }
-  return composePrompt(blocks, question);
 }
 
 function returnCachedContent(cachedContent: DocumentSnapshot) {

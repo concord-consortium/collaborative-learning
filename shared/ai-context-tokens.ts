@@ -121,3 +121,42 @@ export function buildContextSection(blocks: AiContextBlocks): string {
 export function composePrompt(blocks: AiContextBlocks, question: string): string {
   return [buildContextSection(blocks), question.trim()].filter(part => part).join("\n\n");
 }
+
+/** The class-wide summaries, as the class doc stores them. */
+export interface IClassSummaries {
+  studentSummary?: string;
+  teacherSummary?: string;
+}
+
+/**
+ * The prompt a request is finally built from, and the string its cache is keyed on.
+ *
+ * The class and teacher summaries are added only where the authored prompt asked for them. Before
+ * this they were appended after the question unconditionally, which is the position a model reads
+ * as most relevant -- so advice written for "you" drew on work the student never wrote.
+ *
+ * Which contexts were asked for cannot be recovered from the question: the caller replaces each
+ * token with its noun phrase before sending, so nothing is left here to parse. The caller reports
+ * what it found instead.
+ *
+ * Lives here rather than beside its one caller so that caller's own tests can reach it. The seam
+ * between what a client sends and what this composes is where the tokens went missing once
+ * already, and neither side's tests could see across it.
+ */
+export function buildRequestPrompt(
+  question: string, clientBlocks: AiContextBlocks | undefined,
+  askedTokens: Iterable<AiContextToken>, classSummaries: IClassSummaries
+): string {
+  const blocks: AiContextBlocks = {...clientBlocks};
+  const asked = new Set(askedTokens);
+  for (const token of kServerResolvedTokens) {
+    // Dropped before anything is added back: a block labelled as the class's work has to hold what
+    // the caller of this function read, never what the client passed under that name.
+    delete blocks[token];
+    if (!asked.has(token)) continue;
+    const summary =
+      token === "classwork" ? classSummaries.studentSummary : classSummaries.teacherSummary;
+    if (summary) blocks[token] = summary;
+  }
+  return composePrompt(blocks, question);
+}
