@@ -6,7 +6,8 @@ import {defineSecret} from "firebase-functions/params";
 import {MarkdownTextSplitter} from "@langchain/textsplitters";
 import {ChatOpenAI} from "@langchain/openai";
 import {HumanMessage, SystemMessage} from "@langchain/core/messages";
-import {getUnitSummary} from "../../shared/get-unit-summary";
+import {getUnitSummary, IClassSummaryPromptSource} from "../../shared/get-unit-summary";
+import {buildSummaryPrompt, IClassSummaryPrompts} from "../../shared/class-summary-prompts";
 import {
   fencedUnitContext, formatUnitSummarySlice, unitSummarySlice, withCurriculumInstructions,
 } from "../../shared/unit-summary-slice";
@@ -24,11 +25,6 @@ const classDataDocPath = "{realm}/{realmId}/aicontent/{unit}/classes/{classId}";
 const chunkSize = 64000; // characters per chunk
 
 const systemPrompt = "You are a helpful assistant teacher that analyzes and extracts themes from student work.";
-
-const summarizeStudentContentPrompt =
-  "Summarize the key points, themes, topics, main ideas, and important details in this student work. " +
-  "Do not describe the structure of the documents, just the content.\n" +
-  "Summary:";
 
 const combineSummariesPrompt = "These are summaries of important ideas found in several sets of student work.\n" +
   "Combine these into a single list of the key points, themes, topics, main ideas, " +
@@ -56,15 +52,19 @@ async function summarizeChunk(
   chunkIndex: number,
   totalChunks: number,
   role: "student" | "teacher",
-  unitContext: string | undefined
+  unitContext: string | undefined,
+  prompts: IClassSummaryPrompts | undefined
 ): Promise<SummarizeResult> {
   const capRole = role.charAt(0).toUpperCase() + role.slice(1);
   const contextPrefix = unitContext ? `${unitContextSection(unitContext)}\n\n` : "";
+  const instruction = role === "teacher" ?
+    summarizeTeacherContentPrompt :
+    buildSummaryPrompt(prompts);
   const messages = [
     new SystemMessage(withCurriculumInstructions(systemPrompt, "the class")),
     new HumanMessage(`${contextPrefix}${capRole} work part ${chunkIndex + 1} of ${totalChunks}:
      ${chunk}\n
-     ${role === "teacher" ? summarizeTeacherContentPrompt : summarizeStudentContentPrompt}`),
+     ${instruction}`),
   ];
 
   logger.info("Calling LLM to summarize chunk", chunkIndex);
@@ -80,17 +80,27 @@ async function summarizeChunk(
 async function combineSummaries(
   openai: ChatOpenAI,
   chunkSummaries: SummarizeResult[],
-  unitContext: string | undefined
+  unitContext: string | undefined,
+  prompts: IClassSummaryPrompts | undefined
 ): Promise<SummarizeResult> {
   const summariesText = chunkSummaries
     .map((cs, index) => `## Section ${index + 1}:\n\n${cs.summary}`)
     .join("\n\n");
   const contextPrefix = unitContext ? `${unitContextSection(unitContext)}\n\n` : "";
 
+  // An authored addition is repeated here so it still applies once the chunk summaries are merged;
+  // without it, this call flattens a steered summary back into generic themes. A replacement is
+  // deliberately not carried over: it is written to be applied to student work, and this call is
+  // given summaries of it.
+  const addition = prompts?.appendToStudentPrompt?.trim();
+  const combineInstruction = addition ?
+    `${combineSummariesPrompt}${addition}\n\n` :
+    combineSummariesPrompt;
+
   const messages = [
     new SystemMessage(withCurriculumInstructions(systemPrompt, "the class")),
     new HumanMessage(contextPrefix +
-      combineSummariesPrompt +
+      combineInstruction +
       summariesText +
       "\n\nSummary:"),
   ];
@@ -136,37 +146,57 @@ export const onClassDataDocWritten = onDocumentWritten(
       // Fail closed: any doubt (no currentProblemOrdinal, no fetched summary, no slice for this
       // ordinal) leaves unitContext undefined, and every call below still runs -- just without
       // curriculum context. The instructions themselves are unconditional
-      // (withCurriculumInstructions), so their absence never depends on this succeeding.
+      // (withCurriculumInstructions), so their absence never depends on this succeeding. The
+      // authored prompts fail closed the same way: unresolved means the built-in prompt runs.
       let unitContext: string | undefined;
-      if (content.currentProblemOrdinal) {
-        try {
-          const unitSummaryResult = await getUnitSummary(event.params.unit);
-          if (unitSummaryResult) {
+      let classSummaryPrompts: IClassSummaryPrompts | undefined;
+      // Written beside the summary so the teacher is told which rules it followed. The summary
+      // covers the whole class's work but takes its rules from one level, and which level that is
+      // can change without anyone editing a prompt -- see docs/unit-configuration.md.
+      let promptSource: IClassSummaryPromptSource | undefined;
+      try {
+        // Fetched whether or not the class has a current problem, because a unit-level prompt
+        // applies either way; only the context slice needs the ordinal.
+        const unitSummaryResult = await getUnitSummary(event.params.unit);
+        if (unitSummaryResult) {
+          if (content.currentProblemOrdinal) {
             const slice = unitSummarySlice(
               unitSummaryResult.summary, unitSummaryResult.liveProblems, content.currentProblemOrdinal
             );
             unitContext = slice && formatUnitSummarySlice(slice);
           }
-        } catch (error) {
-          logger.warn("unit summary unavailable, continuing without it", error);
+          const resolved = content.currentProblemOrdinal &&
+            unitSummaryResult.classSummaryPrompts.byProblemOrdinal[content.currentProblemOrdinal];
+          if (resolved) {
+            classSummaryPrompts = resolved.prompts;
+            promptSource = resolved.source;
+          } else if (unitSummaryResult.classSummaryPrompts.unit) {
+            classSummaryPrompts = unitSummaryResult.classSummaryPrompts.unit;
+            promptSource = {level: "unit"};
+          }
         }
+      } catch (error) {
+        logger.warn("unit summary unavailable, continuing without it", error);
       }
 
       const splitter = new MarkdownTextSplitter({chunkSize, chunkOverlap: 0});
       const chunks = await splitter.splitText(content.studentContent);
       const studentSummaries = await Promise.all(chunks.map(
-        (chunk, index) => summarizeChunk(openai, chunk, index, chunks.length, "student", unitContext)));
+        (chunk, index) => summarizeChunk(
+          openai, chunk, index, chunks.length, "student", unitContext, classSummaryPrompts)));
 
       let studentSummary: SummarizeResult;
       if (studentSummaries.length > 1) {
-        studentSummary = await combineSummaries(openai, studentSummaries, unitContext);
+        studentSummary = await combineSummaries(openai, studentSummaries, unitContext, classSummaryPrompts);
       } else {
         studentSummary = studentSummaries[0];
       }
 
       let teacherSummary: SummarizeResult;
       if (content.teacherContent && !content.teacherSummary) {
-        teacherSummary = await summarizeChunk(openai, content.teacherContent, 0, 1, "teacher", unitContext);
+        // The teacher half keeps its built-in prompt; classSummaryPrompts steers student work only.
+        teacherSummary = await summarizeChunk(
+          openai, content.teacherContent, 0, 1, "teacher", unitContext, undefined);
       } else {
         teacherSummary = {
           chunkIndex: 0,
@@ -183,6 +213,9 @@ export const onClassDataDocWritten = onDocumentWritten(
         teacherSummary: teacherSummary.summary,
         summaryTokenCount: studentSummary.tokenCount + teacherSummary.tokenCount,
         summaryCreatedAt: FieldValue.serverTimestamp(),
+        // null rather than omitted: a regenerated summary that resolves no prompt has to clear
+        // whatever the last one recorded, or the teacher reads a stale attribution.
+        summaryPromptSource: promptSource ?? null,
       });
 
       logger.info("Summarized the class work into the data doc", event.subject);

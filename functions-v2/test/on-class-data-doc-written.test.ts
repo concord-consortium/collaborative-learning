@@ -47,10 +47,13 @@ const kSummary: IUnitSummary = {
   ],
 };
 
-function unitSummaryResult(): IUnitSummaryFetchResult {
+function unitSummaryResult(
+  classSummaryPrompts: IUnitSummaryFetchResult["classSummaryPrompts"] = {byProblemOrdinal: {}}
+): IUnitSummaryFetchResult {
   return {
     summary: kSummary,
     liveProblems: [{ordinal: "1.1", title: "Problem 1.1"}, {ordinal: "1.2", title: "Problem 1.2"}],
+    classSummaryPrompts,
   };
 }
 
@@ -141,6 +144,28 @@ describe("onClassDataDocWritten", () => {
     expect(humanMessageOf(lastCall)).toContain("digest one");
   });
 
+  test("the merge request repeats an authored addition but not an authored replacement", async () => {
+    mockGetUnitSummary.mockResolvedValue(unitSummaryResult({
+      unit: {
+        replaceStudentPrompt: "List every misconception you can find.",
+        appendToStudentPrompt: "Call out anything a teacher should address tomorrow.",
+      },
+      byProblemOrdinal: {},
+    }));
+    mockInvoke.mockResolvedValue(invokeResponse("a chunk summary"));
+
+    await writeAndTrigger({
+      studentContent: longStudentContent(),
+      currentProblemOrdinal: "1.1",
+    });
+
+    expect(mockInvoke.mock.calls.length).toBeGreaterThan(1);
+    const lastCall = mockInvoke.mock.calls.length - 1;
+    expect(humanMessageOf(0)).toContain("List every misconception you can find.");
+    expect(humanMessageOf(lastCall)).toContain("Call out anything a teacher should address tomorrow.");
+    expect(humanMessageOf(lastCall)).not.toContain("List every misconception you can find.");
+  });
+
   test("no currentProblemOrdinal: both instructions are present, but there is no slice", async () => {
     mockInvoke.mockResolvedValueOnce(invokeResponse("student chunk summary"));
 
@@ -148,12 +173,127 @@ describe("onClassDataDocWritten", () => {
       studentContent: "Short student work.",
     });
 
-    expect(mockGetUnitSummary).not.toHaveBeenCalled();
+    // Still fetched without an ordinal: a unit-level authored prompt applies either way, and only
+    // the context slice needs to know which problem the class is on.
+    expect(mockGetUnitSummary).toHaveBeenCalled();
     expect(mockInvoke).toHaveBeenCalledTimes(1);
     expect(systemMessageOf(0)).toContain(UNIT_SUMMARY_LOOKAHEAD_INSTRUCTION);
     expect(systemMessageOf(0)).toContain(PROBLEM_APPROACH_INSTRUCTION_CLASS);
     expect(systemMessageOf(0)).not.toContain(PROBLEM_APPROACH_INSTRUCTION);
     expect(humanMessageOf(0)).not.toContain("<curriculum-context>");
+  });
+
+  test("an authored replacement steers the student request and leaves the teacher request alone",
+    async () => {
+      mockGetUnitSummary.mockResolvedValue(unitSummaryResult({
+        byProblemOrdinal: {"1.1": {prompts: {replaceStudentPrompt: "List every misconception you can find."},
+          source: {level: "problem", ordinal: "1.1"}}},
+      }));
+      mockInvoke
+        .mockResolvedValueOnce(invokeResponse("student chunk summary"))
+        .mockResolvedValueOnce(invokeResponse("teacher chunk summary"));
+
+      await writeAndTrigger({
+        studentContent: "Short student work.",
+        teacherContent: "Short teacher work.",
+        currentProblemOrdinal: "1.1",
+      });
+
+      expect(humanMessageOf(0)).toContain("List every misconception you can find.");
+      expect(humanMessageOf(0)).not.toContain("Summarize the key points, themes, topics");
+      expect(humanMessageOf(1)).toContain("Analyze this teacher work");
+      expect(humanMessageOf(1)).not.toContain("List every misconception you can find.");
+    });
+
+  // The teacher is told which rules ran, because the level is not theirs to choose and can change
+  // without anyone editing a prompt.
+  test("records the level an applied prompt was authored at", async () => {
+    mockGetUnitSummary.mockResolvedValue(unitSummaryResult({
+      byProblemOrdinal: {"1.1": {prompts: {replaceStudentPrompt: "Problem rules."},
+        source: {level: "problem", ordinal: "1.1"}}},
+    }));
+    mockInvoke.mockResolvedValueOnce(invokeResponse("student chunk summary"));
+
+    await writeAndTrigger({studentContent: "Short student work.", currentProblemOrdinal: "1.1"});
+
+    const written = (await getFirestore().doc(kClassDataDocPath).get()).data();
+    expect(written?.summaryPromptSource).toEqual({level: "problem", ordinal: "1.1"});
+  });
+
+  test("records the unit level when the class has reached no problem with its own rules", async () => {
+    mockGetUnitSummary.mockResolvedValue(unitSummaryResult({
+      unit: {replaceStudentPrompt: "Unit rules."},
+      byProblemOrdinal: {},
+    }));
+    mockInvoke.mockResolvedValueOnce(invokeResponse("student chunk summary"));
+
+    await writeAndTrigger({studentContent: "Short student work.", currentProblemOrdinal: "1.1"});
+
+    const written = (await getFirestore().doc(kClassDataDocPath).get()).data();
+    expect(written?.summaryPromptSource).toEqual({level: "unit"});
+  });
+
+  // Null rather than absent: a regenerated summary has to clear the last one's attribution.
+  test("records no level when the unit authors no prompts at all", async () => {
+    mockGetUnitSummary.mockResolvedValue(unitSummaryResult({byProblemOrdinal: {}}));
+    mockInvoke.mockResolvedValueOnce(invokeResponse("student chunk summary"));
+
+    await writeAndTrigger({studentContent: "Short student work.", currentProblemOrdinal: "1.1"});
+
+    const written = (await getFirestore().doc(kClassDataDocPath).get()).data();
+    expect(written?.summaryPromptSource).toBeNull();
+  });
+
+  test("a unit-level prompt reaches a class that has no current problem", async () => {
+    mockGetUnitSummary.mockResolvedValue(unitSummaryResult({
+      unit: {appendToStudentPrompt: "Call out anything a teacher should address tomorrow."},
+      byProblemOrdinal: {},
+    }));
+    mockInvoke.mockResolvedValueOnce(invokeResponse("student chunk summary"));
+
+    await writeAndTrigger({
+      studentContent: "Short student work.",
+    });
+
+    expect(humanMessageOf(0)).toContain("Summarize the key points, themes, topics");
+    expect(humanMessageOf(0)).toContain("Call out anything a teacher should address tomorrow.");
+  });
+
+  // Both levels set, so the precedence is what this pins rather than the presence of either.
+  test("the problem the class has reached outranks the unit's own prompt", async () => {
+    mockGetUnitSummary.mockResolvedValue(unitSummaryResult({
+      unit: {replaceStudentPrompt: "Unit rules."},
+      byProblemOrdinal: {"1.1": {prompts: {replaceStudentPrompt: "Problem rules."},
+        source: {level: "problem", ordinal: "1.1"}}},
+    }));
+    mockInvoke.mockResolvedValueOnce(invokeResponse("student chunk summary"));
+
+    await writeAndTrigger({studentContent: "Short student work.", currentProblemOrdinal: "1.1"});
+
+    expect(humanMessageOf(0)).toContain("Problem rules.");
+    expect(humanMessageOf(0)).not.toContain("Unit rules.");
+  });
+
+  // The try block around the fetch covers the prompts as well as the curriculum slice, so a
+  // failure there must leave the built-in prompt running rather than no prompt at all.
+  test("the built-in prompt runs when the unit summary cannot be fetched", async () => {
+    mockGetUnitSummary.mockRejectedValue(new Error("network down"));
+    mockInvoke.mockResolvedValueOnce(invokeResponse("student chunk summary"));
+
+    await writeAndTrigger({studentContent: "Short student work.", currentProblemOrdinal: "1.1"});
+
+    expect(humanMessageOf(0)).toContain("Summarize the key points, themes, topics");
+    const written = (await getFirestore().doc(kClassDataDocPath).get()).data();
+    expect(written?.summaryPromptSource).toBeNull();
+  });
+
+  test("the built-in prompt runs when the unit has no summary at all", async () => {
+    mockGetUnitSummary.mockResolvedValue(undefined);
+    mockInvoke.mockResolvedValueOnce(invokeResponse("student chunk summary"));
+
+    await writeAndTrigger({studentContent: "Short student work.", currentProblemOrdinal: "1.1"});
+
+    expect(humanMessageOf(0)).toContain("Summarize the key points, themes, topics");
   });
 
   test("a summary whose sourceManifest no longer matches the live problem list sends no slice",
@@ -165,7 +305,7 @@ describe("onClassDataDocWritten", () => {
           {ordinal: "1.2", title: "Problem 1.2", problemHash: "h2"},
         ],
       };
-      mockGetUnitSummary.mockResolvedValue({summary: staleSummary, liveProblems: unitSummaryResult().liveProblems});
+      mockGetUnitSummary.mockResolvedValue({...unitSummaryResult(), summary: staleSummary});
       mockInvoke
         .mockResolvedValueOnce(invokeResponse("student chunk summary"))
         .mockResolvedValueOnce(invokeResponse("teacher chunk summary"));
@@ -192,7 +332,7 @@ describe("onClassDataDocWritten", () => {
         {ordinal: "1.2", priorKnowledge: "knows things", problemDigest: "digest two"},
       ],
     };
-    mockGetUnitSummary.mockResolvedValue({summary: unsafeSummary, liveProblems: unitSummaryResult().liveProblems});
+    mockGetUnitSummary.mockResolvedValue({...unitSummaryResult(), summary: unsafeSummary});
     mockInvoke.mockResolvedValueOnce(invokeResponse("student chunk summary"));
 
     await writeAndTrigger({

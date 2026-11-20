@@ -11,6 +11,7 @@ import { useCurriculum } from "../hooks/use-curriculum";
 import NavTabs from "./workspace/nav-tabs";
 import AISettings from "./workspace/ai-settings";
 import ChatTutorSettings from "./workspace/chat-tutor-settings";
+import ClassSummarySettings from "./workspace/class-summary-settings";
 import UnitSummarySettings from "./workspace/unit-summary-settings";
 import CommentsSettings from "./workspace/comments-settings";
 import SortWorkSettings from "./workspace/sort-work-settings";
@@ -154,6 +155,8 @@ const Workspace: React.FC = () => {
         return <AISettings />;
       case "config/chatTutorSettings":
         return <ChatTutorSettings />;
+      case "config/classSummarySettings":
+        return <ClassSummarySettings />;
       case "config/unitSummarySettings":
         return <UnitSummarySettings />;
       case "config/commentsSettings":

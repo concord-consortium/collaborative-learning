@@ -87,6 +87,15 @@
       color: white;
     }
 
+    ul.iterationNotes {
+      margin: 0 0 12px 0;
+      padding-left: 20px;
+
+      li {
+        margin-bottom: 2px;
+      }
+    }
+
     details.builtInPrompt {
       background: #eaf3fa;
       border: 1px solid #b8d4e8;
