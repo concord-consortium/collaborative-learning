@@ -171,6 +171,7 @@ export const AIComponent: React.FC<ITileProps> = observer((props) => {
             context: userContext,
             dynamicContentPrompt,
             contextBlocks,
+            contextTokens: [...asked],
             requestHash,
             systemPrompt,
             unit: unit.code,

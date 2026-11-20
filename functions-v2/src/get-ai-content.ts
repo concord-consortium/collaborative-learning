@@ -8,7 +8,7 @@ import {ChatOpenAI} from "@langchain/openai";
 import {HumanMessage, SystemMessage} from "@langchain/core/messages";
 import {IAiContentUnionParams, isWarmUpParams} from "../../shared/shared";
 import {withCurriculumInstructions} from "../../shared/unit-summary-slice";
-import {AiContextBlocks, composePrompt, kServerResolvedTokens, tokensUsed}
+import {AiContextBlocks, AiContextToken, composePrompt, kServerResolvedTokens}
   from "../../shared/ai-context-tokens";
 import {validateUserContext} from "./user-context";
 
@@ -77,17 +77,26 @@ interface IClassSummaries {
  * this they were appended after the question unconditionally, which is the position a model reads
  * as most relevant -- so advice written for "you" drew on work the student never wrote.
  *
+ * Which contexts were asked for cannot be recovered from the question: the caller replaces each
+ * token with its noun phrase before sending, so nothing is left here to parse. The caller reports
+ * what it found instead.
+ *
  * @param {string} question the authored prompt, tokens already replaced with their noun phrases
  * @param {AiContextBlocks|undefined} clientBlocks context the caller resolved for itself
+ * @param {Iterable} askedTokens the contexts the prompt named, as the caller parsed them
  * @param {IClassSummaries} classSummaries the class doc's summaries, used only where asked for
  * @return {string} the context section followed by the question
  */
 export function buildRequestPrompt(
-  question: string, clientBlocks: AiContextBlocks | undefined, classSummaries: IClassSummaries
+  question: string, clientBlocks: AiContextBlocks | undefined,
+  askedTokens: Iterable<AiContextToken>, classSummaries: IClassSummaries
 ): string {
   const blocks: AiContextBlocks = {...clientBlocks};
-  const asked = tokensUsed(question);
+  const asked = new Set(askedTokens);
   for (const token of kServerResolvedTokens) {
+    // Dropped before anything is added back: a block labelled as the class's work has to hold what
+    // this function read, never what a caller passed under that name.
+    delete blocks[token];
     if (!asked.has(token)) continue;
     const summary =
       token === "classwork" ? classSummaries.studentSummary : classSummaries.teacherSummary;
@@ -230,7 +239,7 @@ export const getAiContent = onCall(
     const params = request.data;
     if (isWarmUpParams(params)) return {version};
     const {context: userContext, dynamicContentPrompt: question, systemPrompt,
-      unit, documentId, tileId, contextBlocks, requestHash} = params || {};
+      unit, documentId, tileId, contextBlocks, contextTokens, requestHash} = params || {};
 
     const validatedUserContext = validateUserContext(userContext, request.auth);
     const {isValid, uid, firestoreRoot} = validatedUserContext;
@@ -245,7 +254,7 @@ export const getAiContent = onCall(
     // Composed before the cache check: the context blocks are part of what was asked, so they are
     // part of the key. Without that, editing a document would no longer invalidate its answer --
     // the summary used to travel inside dynamicContentPrompt and now travels beside it.
-    const composedPrompt = buildRequestPrompt(question, contextBlocks, {
+    const composedPrompt = buildRequestPrompt(question, contextBlocks, contextTokens ?? [], {
       studentSummary: classInfo.data()?.studentSummary,
       teacherSummary: classInfo.data()?.teacherSummary,
     });

@@ -350,7 +350,23 @@ describe("AIComponent", () => {
       // A prompt naming no token asks for curriculum and its own document, never the class's.
       expect(request.contextBlocks.classwork).toBeUndefined();
       expect(request.contextBlocks.teacherwork).toBeUndefined();
+      expect(request.contextTokens.sort()).toEqual(["curriculum", "mywork"]);
       expect(aiContent.text).toBe("Mocked customized content");
+    });
+
+    // The prompt is sent with its tokens already replaced, so this list is the only thing telling
+    // the server which contexts were named. Without it, nothing server-resolved is ever added.
+    it("reports the contexts a prompt named, which its sent text no longer shows", async () => {
+      mockStores.documents.getDocument.mockReturnValue(documentWith(populatedDocContent()));
+      const aiContent = defaultAIContent();
+      aiContent.setPrompt("Compare {{mywork}} with {{classwork}}.");
+      const aiModel = TileModel.create({ content: aiContent });
+
+      await act(async () => render(<AIComponent {...defaultProps} model={aiModel} documentId="test-doc-1" />));
+
+      const [request] = mockGetAiContent.mock.calls[0];
+      expect(request.contextTokens.sort()).toEqual(["classwork", "mywork"]);
+      expect(request.dynamicContentPrompt).not.toContain("classwork");
     });
 
     it("sends no document summary when the prompt does not ask for its own work", async () => {

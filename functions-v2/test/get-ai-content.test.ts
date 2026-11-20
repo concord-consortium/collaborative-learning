@@ -99,9 +99,11 @@ describe("buildRequestPrompt", () => {
     teacherSummary: "Teacher notes about stakeholders.",
   };
 
+  // Questions here arrive as the caller sends them: tokens already replaced with their noun
+  // phrases, which is why the contexts asked for are a separate argument.
   it("omits class work when the prompt does not ask for it", () => {
     const prompt = buildRequestPrompt(
-      "What could be improved?", {mywork: "My need statement."}, classSummaries);
+      "What could be improved?", {mywork: "My need statement."}, ["mywork"], classSummaries);
     expect(prompt).toContain("My need statement.");
     expect(prompt).not.toContain("Class themes about water access.");
     expect(prompt).not.toContain("Teacher notes about stakeholders.");
@@ -110,36 +112,58 @@ describe("buildRequestPrompt", () => {
   it("includes class work when the prompt asks for it", () => {
     const prompt = buildRequestPrompt(
       "Compare this document with the class's work.",
-      {mywork: "Mine.", classwork: "ignored, the server reads its own"},
-      classSummaries);
+      {mywork: "Mine."}, ["mywork", "classwork"], classSummaries);
     expect(prompt).toContain("Class themes about water access.");
   });
 
   it("includes teacher work only when the prompt asks for it", () => {
-    const asked = buildRequestPrompt("Use {{teacherwork}}.", {}, classSummaries);
+    const asked = buildRequestPrompt(
+      "Use the teacher's materials.", {}, ["teacherwork"], classSummaries);
     expect(asked).toContain("Teacher notes about stakeholders.");
-    const notAsked = buildRequestPrompt("Use {{classwork}}.", {}, classSummaries);
+    const notAsked = buildRequestPrompt(
+      "Use the class's work.", {}, ["classwork"], classSummaries);
     expect(notAsked).not.toContain("Teacher notes about stakeholders.");
+  });
+
+  // A caller cannot read the class summary, so a block it sends under that name is not one.
+  it("ignores a caller's own class-work block and reads its own", () => {
+    const prompt = buildRequestPrompt(
+      "Compare this document with the class's work.",
+      {mywork: "Mine.", classwork: "Work the caller made up."},
+      ["mywork", "classwork"], classSummaries);
+    expect(prompt).toContain("Class themes about water access.");
+    expect(prompt).not.toContain("Work the caller made up.");
+  });
+
+  it("drops a caller's class-work block even when it has no summary to put there", () => {
+    const prompt = buildRequestPrompt(
+      "Consider the class's work.", {classwork: "Work the caller made up."},
+      ["classwork"], {});
+    expect(prompt).not.toContain("Work the caller made up.");
+    expect(prompt).not.toContain("<classwork>");
   });
 
   it("puts every context block above the question", () => {
     const question = "What could be improved?";
     const prompt = buildRequestPrompt(
-      `${question} Consider {{classwork}}.`, {mywork: "My need statement."}, classSummaries);
+      `${question} Consider the class's work.`, {mywork: "My need statement."},
+      ["mywork", "classwork"], classSummaries);
     expect(prompt.indexOf("My need statement.")).toBeLessThan(prompt.indexOf(question));
     expect(prompt.indexOf("Class themes about water access.")).toBeLessThan(prompt.indexOf(question));
   });
 
   it("never lets class work into the my-work block", () => {
     const prompt = buildRequestPrompt(
-      "Compare with {{classwork}}.", {mywork: "My need statement."}, classSummaries);
+      "Compare with the class's work.", {mywork: "My need statement."},
+      ["mywork", "classwork"], classSummaries);
     const myWork = prompt.slice(prompt.indexOf("<mywork>"), prompt.indexOf("</mywork>"));
     expect(myWork).toContain("My need statement.");
     expect(myWork).not.toContain("Class themes");
   });
 
   it("asks for nothing extra when the class has no summary yet", () => {
-    const prompt = buildRequestPrompt("Compare with {{classwork}}.", {mywork: "Mine."}, {});
+    const prompt = buildRequestPrompt(
+      "Compare with the class's work.", {mywork: "Mine."}, ["mywork", "classwork"], {});
     expect(prompt).not.toContain("<classwork>");
     expect(prompt).toContain("<mywork>");
   });

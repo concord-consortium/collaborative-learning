@@ -1,4 +1,4 @@
-import { AiContextBlocks } from "./ai-context-tokens";
+import { AiContextBlocks, AiContextToken } from "./ai-context-tokens";
 
 export const escapeKey = (s: string): string => {
   return s.replace(/[.$[\]#/]/g, "_");
@@ -308,6 +308,11 @@ export interface IAiContentParams extends IFirebaseFunctionBaseParams {
    * the whole section. Optional so a deployed client sending the old shape still works.
    */
   contextBlocks?: AiContextBlocks;
+  /**
+   * The contexts the authored prompt named. Sent because dynamicContentPrompt arrives with its
+   * tokens already replaced, leaving the server nothing to parse.
+   */
+  contextTokens?: AiContextToken[];
   /**
    * The caller's own hash of its whole request, echoed back on the response. The caller records it
    * only when the echo matches, so an answer generated for a different revision under lock
