@@ -146,9 +146,8 @@ export function classSummaryBlocks(
  * token with its noun phrase before sending, so nothing is left here to parse. The caller reports
  * what it found instead.
  *
- * Lives here rather than beside its one caller so that caller's own tests can reach it. The seam
- * between what a client sends and what this composes is where the tokens went missing once
- * already, and neither side's tests could see across it.
+ * Lives here rather than beside its one caller so the client's tests can run the real composer
+ * on what they send.
  */
 export function buildRequestPrompt(
   question: string, clientBlocks: AiContextBlocks | undefined,

@@ -355,10 +355,8 @@ describe("AIComponent", () => {
       expect(aiContent.text).toBe("Mocked customized content");
     });
 
-    // The seam neither side's own tests can see across. Both halves passed while disagreeing about
-    // whether the sent prompt still carried its tokens, and the class context silently never
-    // arrived. This runs the real request through the real composer rather than a restatement of
-    // either one.
+    // Runs the real request through the real composer, so the client and server cannot disagree
+    // about the request shape unnoticed.
     it("sends a request the server resolves the named class context from", async () => {
       mockStores.documents.getDocument.mockReturnValue(documentWith(populatedDocContent()));
       const aiContent = defaultAIContent();
@@ -391,8 +389,8 @@ describe("AIComponent", () => {
       expect(request.contextBlocks.mywork).toBeUndefined();
     });
 
-    // The sent text no longer shows which contexts were named, so the token list is the only
-    // record of them, and the class block is the server's to fill rather than the client's.
+    // The sent text carries noun phrases, not tokens, so the token list is the only record of
+    // what was named; the class block is the server's to fill rather than the client's.
     it("names a class context without resolving it, which only the server may do", async () => {
       mockStores.documents.getDocument.mockReturnValue(documentWith(populatedDocContent()));
       const aiContent = defaultAIContent();
@@ -410,8 +408,8 @@ describe("AIComponent", () => {
 
     describe("the document-changed gate", () => {
       // Hashes the request the tile actually sent, so these cannot pass against a request the
-      // production code no longer makes. The formula is copied from the tile: a change to it
-      // must change this too.
+      // tile does not make. The formula is copied from the tile: a change to it must change this
+      // too.
       const hashOfLastRequest = () => {
         const sent = mockGetAiContent.mock.calls[mockGetAiContent.mock.calls.length - 1][0];
         return hashString(
@@ -519,7 +517,7 @@ describe("AIComponent", () => {
 
         expect(mockGetAiContent).toHaveBeenCalledTimes(2);
         const second = mockGetAiContent.mock.calls[1][0];
-        // The premise: everything the hash covered before the tokens were added is unchanged.
+        // The premise: the sent text and blocks are identical, so only the token list differs.
         expect(second.dynamicContentPrompt).toBe(first.dynamicContentPrompt);
         expect(second.contextBlocks).toEqual(first.contextBlocks);
       });
@@ -583,7 +581,8 @@ describe("AIComponent", () => {
         expect(aiContent.evaluatedRequestHash).toBe(goodHash);
       });
 
-      // The current server always echoes the hash it was sent, so this is the production path.
+      // The server echoes the hash it was sent, except under lock contention, so this is the
+      // production path.
       it("records the gate when the server answered the request that was sent", async () => {
         mockStores.documents.getDocument.mockReturnValue(documentWith(populatedDocContent()));
         const { aiContent, aiModel } = tileWithPrompt();

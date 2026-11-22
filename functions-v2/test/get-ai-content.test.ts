@@ -1,37 +1,61 @@
 import {Timestamp} from "firebase-admin/firestore";
 import {DocumentSnapshot} from "firebase-functions/v2/firestore";
-import {aiContentResponse, buildSystemMessageText, isCachedContentUpToDate, PROMPT_POLICY_VERSION}
-  from "../src/get-ai-content";
+import {aiContentResponse, buildSystemMessageText, isCachedContentUpToDate, PROMPT_POLICY_VERSION,
+  returnCachedContent} from "../src/get-ai-content";
+import {buildRequestPrompt, classSummaryBlocks} from "../../shared/ai-context-tokens";
 import {PROBLEM_APPROACH_INSTRUCTION, UNIT_SUMMARY_LOOKAHEAD_INSTRUCTION}
   from "../../shared/unit-summary-types";
 
-// isCachedContentUpToDate and buildSystemMessageText are pure functions over plain data, so these
-// are mocked-Firestore tests: fake DocumentSnapshot-shaped objects, no emulator involved.
+// isCachedContentUpToDate, returnCachedContent and buildSystemMessageText are pure functions over
+// plain data, so these are mocked-Firestore tests: fake DocumentSnapshot-shaped objects, no
+// emulator involved.
 function fakeSnapshot(exists: boolean, data?: Record<string, unknown>): DocumentSnapshot {
   return {exists, data: () => data} as unknown as DocumentSnapshot;
 }
 
-// The composed prompt carries the class and teacher summaries, which firestore.rules lets only
-// teachers read, and the caller names which contexts go into it. A response that echoed the prompt
-// would let any student ask for the class summary and read it back.
 describe("aiContentResponse", () => {
-  it("never carries the prompt it was built from", () => {
-    const response = aiContentResponse({
-      text: "an answer", clientRequestHash: "abc", lastUpdated: 1, error: null,
-    });
-    expect(response).not.toHaveProperty("prompt");
-    expect(Object.keys(response).sort())
-      .toEqual(["clientRequestHash", "error", "lastUpdated", "text"]);
-  });
-
   it("reports no hash rather than undefined, so a caller can tell it was absent", () => {
     expect(aiContentResponse({text: "an answer", error: null}).clientRequestHash).toBeNull();
+  });
+});
+
+describe("returnCachedContent", () => {
+  const summary = "Most of the class divided instead of subtracting.";
+  const cached = (overrides?: Record<string, unknown>) => fakeSnapshot(true, {
+    content: "an answer",
+    prompt: `The class's work so far: ${summary}\n\nWhat should I try next?`,
+    clientRequestHash: "hash-of-the-request-that-generated-this",
+    lastUpdated: Timestamp.fromMillis(1000),
+    ...overrides,
+  });
+
+  // The stored prompt holds the class and teacher summaries, which firestore.rules lets only
+  // teachers read, and the caller names which of them go into it. Spreading the stored document
+  // into the response would hand any student the class summary.
+  it("returns no part of the prompt the answer was built from", () => {
+    const response = returnCachedContent(cached());
+    expect(Object.keys(response).sort())
+      .toEqual(["clientRequestHash", "error", "lastUpdated", "text"]);
+    expect(JSON.stringify(response)).not.toContain(summary);
+  });
+
+  it("echoes the caller's hash, so the client recognises the answer as its own", () => {
+    expect(returnCachedContent(cached(), "my-own-hash"))
+      .toMatchObject({clientRequestHash: "my-own-hash"});
+  });
+
+  // Waiting on another thread's lock. The answer belongs to the request that held the lock, and
+  // the caller is given no hash to pass, so the stored one is what the client gets.
+  it("falls back to the stored hash when the caller passes none", () => {
+    expect(returnCachedContent(cached()))
+      .toMatchObject({clientRequestHash: "hash-of-the-request-that-generated-this"});
   });
 });
 
 describe("isCachedContentUpToDate", () => {
   const prompt = "the tile prompt";
   const lastUpdated = Timestamp.fromMillis(1000);
+  const question = "What should I try next?";
 
   function contentSnapshot(overrides?: Record<string, unknown>): DocumentSnapshot {
     return fakeSnapshot(true, {
@@ -65,17 +89,19 @@ describe("isCachedContentUpToDate", () => {
     expect(isCachedContentUpToDate(prompt, content)).toBe(false);
   });
 
-  // A regenerated class summary reaches this through the prompt, because the summary it changed
-  // is inside the composed prompt whenever it was asked for. A prompt that never named class work
-  // keeps its answer, rather than paying to rebuild a byte-identical one.
-  it("regenerates for a prompt holding a summary that has since changed", () => {
-    const withOldSummary = contentSnapshot({prompt: "context: old class summary\n\nthe question"});
-    expect(isCachedContentUpToDate("context: new class summary\n\nthe question", withOldSummary))
-      .toBe(false);
+  // A changed class summary reaches the cache through the prompt, because the summary is inside
+  // the composed prompt exactly when a token named it. These two build the real prompts rather
+  // than standing in strings for them, so they fail if composition stops carrying the summary.
+  it("regenerates when a summary the prompt named has since changed", () => {
+    const cached = buildRequestPrompt(question, {}, ["classwork"], classSummaryBlocks({studentSummary: "old"}));
+    const current = buildRequestPrompt(question, {}, ["classwork"], classSummaryBlocks({studentSummary: "new"}));
+    expect(isCachedContentUpToDate(current, contentSnapshot({prompt: cached}))).toBe(false);
   });
 
-  it("reuses the cache for a prompt that names no class work, whatever the class has done", () => {
-    expect(isCachedContentUpToDate(prompt, contentSnapshot())).toBe(true);
+  it("reuses the cache when the summary changed but no token named it", () => {
+    const cached = buildRequestPrompt(question, {}, [], classSummaryBlocks({studentSummary: "old"}));
+    const current = buildRequestPrompt(question, {}, [], classSummaryBlocks({studentSummary: "new"}));
+    expect(isCachedContentUpToDate(current, contentSnapshot({prompt: cached}))).toBe(true);
   });
 });
 
@@ -105,4 +131,3 @@ describe("buildSystemMessageText", () => {
       .toBeLessThan(text.indexOf(PROBLEM_APPROACH_INSTRUCTION));
   });
 });
-

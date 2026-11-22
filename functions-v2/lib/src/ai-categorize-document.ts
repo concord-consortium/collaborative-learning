@@ -596,7 +596,7 @@ export async function categorizeRepresentations(
       // Related summaries are other students' documents in this class, and peer comments on them.
       // A prompt that scoped itself to anything short of the class's work must not receive them --
       // the class may hold this student's document, but this student's work may never hold the
-      // class's. A prompt naming no token is unscoped, and receives them as it always has.
+      // class's. A prompt naming no token is unscoped and receives them.
       wantsRelatedSummaries = askedTokens.size === 0 || askedTokens.has("classwork");
 
       // Only for a prompt that named one, so a prompt that did not costs no read.

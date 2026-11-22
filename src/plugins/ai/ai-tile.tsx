@@ -146,16 +146,13 @@ export const AIComponent: React.FC<ITileProps> = observer((props) => {
           // this tile's own setText advances that index on every refresh, while handleAiTile keeps
           // AI tiles out of the summary, so nothing the tile writes can move this hash. The prompt
           // is in it because an author editing the prompt has changed the request without touching
-          // the document, and must not be told nothing has changed.
-          // The blocks are in it because they carry the document summary, so an edit has to move
-          // the hash. The tokens are in it because nothing else records them: a prompt that names
-          // only tokens substitutes to the same text whichever it named, and the server-resolved
-          // ones never reach contextBlocks, so dropping {{classwork}} would otherwise leave an
-          // identical hash and keep the class-based answer. Sorted, because naming the same
-          // contexts in a different order is the same request. systemPrompt is sent alongside, so
-          // a change to it alone sends a request; the server cache does not compare the system
-          // prompt, so that request returns the cached answer built with the old one. NUL
-          // separates the parts because none can contain it, so no two requests can collide.
+          // the document, and must not be told nothing has changed. The blocks are in it because
+          // they carry the document summary. Tokens are in it because a token-only prompt
+          // substitutes to the same text whichever it named, and server-resolved tokens never
+          // reach contextBlocks; sorted, since order does not change the request. systemPrompt is
+          // sent alongside, so a change to it alone sends a request that the server answers from
+          // cache, which does not compare the system prompt. NUL separates the parts because none
+          // can contain it, so no two requests can collide.
           const requestHash = hashString(
             `${systemPrompt ?? ""}\u0000${dynamicContentPrompt}\u0000${JSON.stringify(contextBlocks)}` +
             `\u0000${[...asked].sort().join(",")}`
@@ -201,10 +198,9 @@ export const AIComponent: React.FC<ITileProps> = observer((props) => {
           content.setText(response.data.text, lastUpdated ? lastUpdated._seconds * 1000 : undefined);
           // The server echoes back the hash the requester sent. Under lock contention it can hand
           // back an answer generated for a different revision of this tile, and recording our hash
-          // against it would gate away the request we really made. The prompt cannot be compared
-          // instead: the server composes it from blocks we send separately, so we never hold the
-          // string it built. Older deployments omit the field; an unverifiable answer is gated as
-          // before rather than costing every student a second request.
+          // against it would gate away the request we really made. Older deployments omit the
+          // field; an unverifiable answer is gated as before rather than costing every student a
+          // second request.
           const answeredHash = response.data.clientRequestHash;
           if (typeof answeredHash !== "string" || answeredHash === requestHash) {
             content.setEvaluatedRequestHash(requestHash);

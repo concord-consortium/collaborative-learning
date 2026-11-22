@@ -102,12 +102,29 @@ export function aiContentResponse(
   };
 }
 
-function returnCachedContent(cachedContent: DocumentSnapshot) {
+/**
+ * `clientRequestHash` tells the client which request an answer belongs to, so it can tell its own
+ * answer from one already on screen.
+ *
+ * Pass `callerRequestHash` whenever the caller's own request is known to match the stored answer.
+ * The client's hash covers more than the composed prompt does -- the system prompt, surrounding
+ * whitespace, a named token whose block is empty -- so two different client hashes can share one
+ * composed prompt. Returning the stored hash in that case never matches what the caller sent, and
+ * the client re-requests on every mount for as long as the answer is cached.
+ *
+ * It is omitted when waiting on another thread's lock, where the answer belongs to the request
+ * that held the lock rather than to this one, and the stored hash is the only honest answer.
+ *
+ * @param {DocumentSnapshot} cachedContent the stored answer
+ * @param {string} callerRequestHash the caller's own hash, when it matches the stored answer
+ * @return {object} the callable's response, carrying no part of the stored prompt
+ */
+export function returnCachedContent(cachedContent: DocumentSnapshot, callerRequestHash?: string) {
   const data = cachedContent.data();
   if (!data) return {error: "No data"};
   return aiContentResponse({
     text: data.content,
-    clientRequestHash: data.clientRequestHash,
+    clientRequestHash: callerRequestHash ?? data.clientRequestHash,
     lastUpdated: data.lastUpdated,
     error: null,
   });
@@ -244,7 +261,7 @@ export const getAiContent = onCall(
     const cachedAIContent = await getFirestore().doc(aiContentPath).get();
 
     if (isCachedContentUpToDate(composedPrompt, cachedAIContent)) {
-      return returnCachedContent(cachedAIContent);
+      return returnCachedContent(cachedAIContent, requestHash);
     } else {
       return await generateContent(firestoreRoot, unit, classHash, documentId, tileId,
         systemPrompt, composedPrompt, requestHash);

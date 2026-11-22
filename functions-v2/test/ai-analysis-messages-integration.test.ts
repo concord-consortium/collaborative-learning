@@ -152,7 +152,7 @@ describe("shared/ai-analysis-messages in functions-v2", () => {
       expect(deps.findRelatedSummaries).toHaveBeenCalled();
     });
 
-    // An author who never adopts the vocabulary keeps the enrichment they have always had.
+    // A prompt naming no token is unscoped, so it receives peer summaries.
     test("a prompt naming no token keeps its peer summaries", async () => {
       const {deps} = recordingDeps();
 
