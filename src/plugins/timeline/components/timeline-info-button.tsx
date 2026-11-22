@@ -1,6 +1,6 @@
 import React from "react";
 import { useCustomModal } from "../../../hooks/use-custom-modal";
-import InfoIcon from "../assets/info-icon.svg";
+import InfoIcon from "../../../assets/icons/info-icon.svg";
 import "./timeline-info-button.scss";
 
 const kModalTitle = "Using the Timeline";

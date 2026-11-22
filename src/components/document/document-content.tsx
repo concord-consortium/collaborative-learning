@@ -26,6 +26,9 @@ import { ContainerContext } from "./container-context";
 import { LogEventName } from "../../lib/logger-types";
 import { buildVisibilityLogParams, computeVisibleTiles, nextVisibilityCause,
   type ITileExtent, type IVisibilityLogExtra, type VisibilityCause } from "./tile-visibility";
+import { kPlaybackComponentClass } from "../playback/playback";
+import { prefersReducedMotion } from "../../utilities/dom-utils";
+import { getRevealScrollBehavior, getRevealScrollTop } from "./playback-reveal-scroll";
 
 import "./document-content.scss";
 
@@ -35,6 +38,8 @@ interface IProps extends IBaseProps {
   documentId?: string;
   logTileVisibility?: boolean;
   onScroll?: (x: number, y: number) => void;
+  // A tile history playback changed, to bring on screen. Each new object is a new request.
+  playbackRevealRequest?: { tileId: string };
   readOnly?: boolean;
   scale?: number;
   selectedSectionId?: string | null;
@@ -56,6 +61,10 @@ interface IState {
 }
 // Interval in ms between recalculation for highlighting drag/drop zones
 const kDragUpdateInterval = 50;
+// How many frames a playback reveal waits for its tile to render.
+const kRevealFrames = 5;
+// Longer than a browser's smooth scroll across one visible height takes.
+const kSmoothRevealMs = 1000;
 
 @inject("stores")
 @observer
@@ -67,6 +76,8 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
   public state: IState = {};
 
   private domElement: HTMLElement | null;
+  // The last smooth playback reveal, while it may still be animating.
+  private smoothReveal?: { top: number; until: number };
   private rowRefs: Array<TileRowHandle>;
   private mutationObserver: MutationObserver;
   private scrollDisposer: IReactionDisposer;
@@ -200,6 +211,10 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
   }
 
   public componentDidUpdate(prevProps: IProps) {
+    const { playbackRevealRequest } = this.props;
+    if (playbackRevealRequest && playbackRevealRequest !== prevProps.playbackRevealRequest) {
+      this.revealTile(playbackRevealRequest);
+    }
     if (this.props.logTileVisibility &&
         this.props.content?.contentId !== prevProps.content?.contentId) {
       this.queueVisibilityLog("documentChange");
@@ -227,6 +242,45 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
           }
         }
       });
+    });
+  }
+
+  // A tile the move added renders after this request arrives, so the lookup waits a frame and
+  // tries a few more before giving up. A newer request takes over from one still waiting.
+  private revealTile(request: { tileId: string }, framesLeft = kRevealFrames) {
+    requestAnimationFrame(() => {
+      if (this.props.playbackRevealRequest !== request) return;
+      const container = this.domElement;
+      const tileNode = container && getTileNode(container, request.tileId);
+      if (!container || !tileNode) {
+        if (container && framesLeft > 1) this.revealTile(request, framesLeft - 1);
+        return;
+      }
+      const containerRect = container.getBoundingClientRect();
+      const visibleTop = containerRect.top;
+      let visibleBottom = containerRect.top + container.clientHeight;
+      const bar = container.parentElement?.querySelector(`.${kPlaybackComponentClass}`);
+      if (bar) visibleBottom = Math.min(visibleBottom, bar.getBoundingClientRect().top);
+      const tileRect = tileNode.getBoundingClientRect();
+      const top = getRevealScrollTop({
+        scrollTop: container.scrollTop, visibleTop, visibleBottom, tileTop: tileRect.top, tileBottom: tileRect.bottom
+      });
+      const smoothReveal = this.smoothReveal;
+      this.smoothReveal = undefined;
+      if (top === undefined) {
+        // The tile is in view now, but an earlier reveal still animating could carry it out, so stop
+        // that animation where it is.
+        if (smoothReveal && performance.now() < smoothReveal.until &&
+            Math.abs(container.scrollTop - smoothReveal.top) > 1) {
+          container.scrollTo({ top: container.scrollTop, behavior: "instant" });
+        }
+        return;
+      }
+      const behavior = getRevealScrollBehavior(top - container.scrollTop, visibleBottom - visibleTop,
+        prefersReducedMotion());
+      if (behavior === "smooth") this.smoothReveal = { top, until: performance.now() + kSmoothRevealMs };
+      if (this.props.logTileVisibility) this.queueVisibilityLog("historyPlayback");
+      container.scrollTo({ top, behavior });
     });
   }
 

@@ -288,6 +288,22 @@ marked as not caught up, its exactness and catch-up are forgotten, and the next 
 catches it up from the new content's envelope. Content the listener brings back unchanged, such as
 this client's own save, leaves the session alone.
 
+A restarted catch-up plans against the newest entry the session knows of: its own newest commit,
+which `forgetCatchUp` keeps, or else Firestore's last entry as first read. The read itself isn't
+repeated, since the session's next entry chains after what it knows. An exact envelope at a different
+entry with an index at or past that one was most likely saved by another session, so the session isn't
+exact (`history-written-elsewhere`). Two sessions editing one individual document aren't supported:
+each numbers its entries from what it knows, so the history forks, and nothing more is done about it
+here.
+
+The listener doesn't monitor a document that has closed until this client's last write of its
+content settles: while the sender keeps saving after the document closes, and until its last write
+lands, including the one sent when the 30 seconds run out (`DocumentModel.contentSaveActive`). That
+write can still be waiting, for example while offline, after the document has been opened again with
+a new sender, so the flag clears only once no sender of the document is running or has a write in
+flight. Until then the stored content can be older than the document's, and replacing it would undo
+edits that haven't been saved, which the draining sender would then count as a change and could save.
+
 The catch-up never loads the whole history. DataFlow and Simulator documents can have very large
 histories, and today an individual load reads only the last entry (`getLastHistoryEntry`, a
 `limit(1)` query on `index` descending, via `getFirestoreHistoryInfo`). The catch-up keeps it that
@@ -310,9 +326,14 @@ way:
 5. **A complete gap.** The fetched indexes must run without holes, and each entry's `previousEntryId`
    must be the entry before it. A hole means an upload failed for good. Entries up to the hole are
    applied, and the session is not exact.
-6. **A saved id that isn't in Firestore** gets no catch-up, and the session is not exact. With
-   nothing to fetch, a saved id other than the last entry can't be in Firestore. Otherwise the first
-   fetched entry's `previousEntryId` doesn't name it, which is a hole.
+6. **A saved id that isn't in Firestore** gets no catch-up, and the session is not exact. When
+   Firestore has no history, that is `saved-id-missing`. When the saved index is at or past the newest
+   entry the session knows of, the entry was most likely saved by another session
+   (`history-written-elsewhere`). Otherwise the first fetched entry's `previousEntryId` doesn't name
+   it, which is a hole.
+7. **No saved id.** An envelope with no `lastHistoryEntryId` says nothing about which entries its
+   content holds, so when Firestore has history it is treated as unmarked: nothing is applied and
+   the session is not exact.
 
 Opening the document for editing waits for the catch-up: one more query.
 Applying entries after the user has started editing would collide with their new entries, so a
@@ -344,8 +365,8 @@ loading the latest changes.
 
 **Whether a load is exact.** A load is exact when the envelope had a trusted `exactThrough` and any
 missing entries applied cleanly. Then its `since` carries forward. An unmarked envelope at Firestore's last
-entry starts the session's exact saves at the loaded id. An unmarked envelope with a gap leaves the
-session not exact.
+entry starts the session's exact saves at the loaded id. An unmarked envelope with a gap, or one with
+no id when the document has history, leaves the session not exact.
 
 **The group-document initial load.** The FIXME at `getInitialLastHistoryEntry` in
 `firestore-history-manager-concurrent.ts` describes a race: the content and

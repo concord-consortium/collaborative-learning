@@ -11,8 +11,11 @@ A document this session created has no history in Firestore yet, so it opens cau
 An envelope without `exactThrough` can hold entries after its `lastHistoryEntryId`, so applying the
 entries after that id could apply some of them twice. When such an envelope is behind its history,
 nothing is applied for it: the document opens as saved, and the session isn't exact, so its saves
-are intermediate ones. One at Firestore's last entry has nothing to catch up, so the session is
-exact. Publications are never caught up.
+are intermediate ones. The same goes for an envelope with no `lastHistoryEntryId` when the document
+has history, since it says nothing about which entries its content holds. One at Firestore's last
+entry has nothing to catch up, so the session is exact. An exact envelope at an entry other than the
+newest one the session knows of, with an index at or past it, was most likely saved by another
+session; the session isn't exact (`history-written-elsewhere`). Publications are never caught up.
 
 ## While the document catches up
 
@@ -27,8 +30,9 @@ while the catch-up reads Firestore, the catch-up applies nothing and the session
 replaces the content of a document that has already caught up with different content, for example
 older content when the caught-up content was never saved, the session starts over: the document is
 marked as not caught up again, and the next open for editing catches it up from the new content's
-envelope. As soon as the sender starts, it saves the caught-up content, so the stored content isn't
-left behind its history.
+envelope. The catch-up plans against the newest entry the session knows of: its own newest commit,
+or else Firestore's last entry as read when the document first caught up. As soon as the sender
+starts, it saves the caught-up content, so the stored content isn't left behind its history.
 
 ## How the entries are applied
 

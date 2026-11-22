@@ -3,6 +3,7 @@ import { flow, Instance, types } from "mobx-state-tree";
 import { deferred } from "promise-assist";
 import { ICommitListener, ICommitSource, ICommittedEntry } from "../history/history-commits";
 import { FAKE_HISTORY_ENTRY_ID, IHistoryManager, TreeManagerType } from "../history/tree-manager";
+import { asBackground } from "../history/without-undo";
 import { registerTileComponentInfo } from "../tiles/tile-component-info";
 import { registerTileContentInfo } from "../tiles/tile-content-info";
 import { TileContentModel } from "../tiles/tile-content";
@@ -22,6 +23,11 @@ const TestTile = TileContentModel
   })
   .actions(self => ({
     setText(value: string) {
+      self.text = value;
+    },
+    // Like a tick of a running program
+    tickText(value: string) {
+      asBackground({ producerTileId: "t1" });
       self.text = value;
     },
     setTextLater: flow(function* (value: string, gate: Promise<void>) {
@@ -200,16 +206,19 @@ export function setup<Concurrent extends boolean = false>(overrides?: Partial<IC
     { rtdbEnvelopeRef, updateTools, onContentSaved, beforeWrite, random: () => 0, ...overrides }
   ) as Concurrent extends true ? ConcurrentContentSaveSender : IndividualContentSaveSender;
 
-  // Makes an edit and returns the id of the entry that recorded it.
-  async function edit(text: string) {
+  // Makes a change and returns the id of the entry that recorded it.
+  async function record(change: () => void) {
     const ids: string[] = [];
     const remove = treeManager.addEntryCompletedListener(entry => { ids.push(entry.id); });
-    tile.setText(text);
+    change();
     await flush();
     remove();
     expect(ids).toHaveLength(1);
     return ids[0];
   }
+  const edit = (text: string) => record(() => tile.setText(text));
+  // A background change, recorded in a background entry.
+  const tick = (text: string) => record(() => tile.tickText(text));
 
   // Opens an entry that stays open until the returned function is called.
   function openEntry(id: string) {
@@ -235,7 +244,7 @@ export function setup<Concurrent extends boolean = false>(overrides?: Partial<IC
   }
 
   return { document, treeManager, commits, tile, rtdbEnvelopeRef, updateTools, onContentSaved, beforeWrite,
-    sender, edit, openEntry, applyRemote };
+    sender, edit, tick, openEntry, applyRemote };
 }
 
 // A gate a flow waits on twice: the first wait ends at `first`, the second at `second`.

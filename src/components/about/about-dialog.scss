@@ -1,0 +1,89 @@
+@import "../vars";
+
+.custom-modal.about-dialog {
+  width: 584px;
+  max-width: calc(100vw - 40px);
+  max-height: calc(100vh - 40px);
+
+  .modal-content {
+    justify-content: flex-start;
+    min-height: 0;
+    overflow-y: auto;
+    padding-left: 28px;
+    padding-right: 28px;
+  }
+
+  .about-dialog-body {
+    color: $charcoal-dark-2;
+    font-size: 14px;
+    line-height: 1.5;
+
+    a {
+      color: $workspace-teal-dark-1;
+      text-decoration: underline;
+
+      &:hover {
+        color: $workspace-teal-dark-2;
+      }
+    }
+  }
+
+  .about-dialog-identity {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    text-align: center;
+    font-size: 13px;
+  }
+
+  .about-dialog-logo {
+    display: block;
+    width: 210px;
+    height: auto;
+    margin-bottom: 7px;
+  }
+
+  .about-dialog-tagline {
+    font-size: 14px;
+  }
+
+  .about-dialog-version {
+    background-color: $charcoal-light-6;
+    border-radius: 12px;
+    padding: 3px 12px;
+    margin: 1px 0 4px;
+    line-height: 16px;
+    user-select: text;
+  }
+
+  .about-dialog-divider {
+    border: none;
+    border-top: 1px solid $charcoal-light-4;
+    margin: 14px 0;
+    width: 100%;
+  }
+
+  .about-dialog-identity + .about-dialog-divider {
+    margin-top: 11px;
+  }
+
+  .about-dialog-heading {
+    font-size: 13px;
+    font-weight: normal;
+    color: $charcoal-dark-1;
+    margin: 0 0 6px;
+  }
+
+  .about-dialog-text {
+    font-size: 15px;
+    margin: 0 0 8px;
+  }
+
+  .about-dialog-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 22px;
+    font-size: 13px;
+  }
+}

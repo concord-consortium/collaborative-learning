@@ -10,6 +10,9 @@ import { PlaybackControlComponent } from "./playback-control";
 
 import "./playback.scss";
 
+// The bar sits over the bottom of the document, which the history view allows for when it scrolls.
+export const kPlaybackComponentClass = "playback-component";
+
 interface IProps {
   document: DocumentModelType | undefined;
   historyManager: FirestoreHistoryManager | undefined;
@@ -23,12 +26,12 @@ export const PlaybackComponent: React.FC<IProps> = observer((props: IProps) => {
 
   useEffect(() => {
     if (props.requestedHistoryId && historyManager) {
-      historyManager.moveToHistoryEntryAfterLoad(props.requestedHistoryId);
+      historyManager.checkHistoryEntryAfterLoad(props.requestedHistoryId);
     }
   }, [props.requestedHistoryId, historyManager]);
 
   const disablePlayback = false;
-  const playbackComponentClass = classNames("playback-component show-control", activeNavTab,
+  const playbackComponentClass = classNames(kPlaybackComponentClass, "show-control", activeNavTab,
                                             {"disabled" : disablePlayback});
 
   // The control builds a model around the tree manager when it mounts, so switching to
@@ -41,25 +44,27 @@ export const PlaybackComponent: React.FC<IProps> = observer((props: IProps) => {
       </div>;
 
   const historyEntryRequestError = historyManager?.historyEntryRequestError;
-  const oldestReachablePosition = treeManager?.oldestReachablePosition;
-  const atOldestReachablePosition = oldestReachablePosition !== undefined &&
-    treeManager.numHistoryEventsApplied === oldestReachablePosition;
+  // The slider keeps the reader from going back past this position, so being there is the
+  // moment to say why.
+  const earliestReachablePosition = treeManager?.earliestReachablePosition ?? 0;
+  const atEarliestReachablePosition = earliestReachablePosition > 0 &&
+    treeManager.numHistoryEventsApplied === earliestReachablePosition;
 
 return (
     <div className={playbackComponentClass} data-testid="playback-component">
       {playbackControls}
-      {/* Rendered whether or not there is anything to say. A seek resolves long after the
-          reader's attention has moved on, and screen readers announce a live region reliably
-          only when the region was already there and its contents changed. */}
+      {/* Rendered whether or not there is anything to say. A link's problem can be reported
+          long after the reader's attention has moved on, and screen readers announce a live
+          region reliably only when the region was already there and its contents changed. */}
       <div className="playback-history-request-error" data-testid="playback-history-request-error"
           role="alert">
         {historyEntryRequestError}
       </div>
-      {/* Rendered from the start for the same reason. A backward seek stops here without a failure
-          because the history before this point can't be rebuilt. */}
+      {/* Rendered from the start for the same reason. The history before this point can't be
+          rebuilt, so the slider goes no further back. */}
       <div className="playback-history-unavailable" data-testid="playback-history-unavailable"
           role="status">
-        {atOldestReachablePosition && "Earlier history isn't available."}
+        {atEarliestReachablePosition && "Earlier history isn't available."}
       </div>
     </div>
   );

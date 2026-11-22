@@ -57,12 +57,12 @@ export class JsonHistoryCopy {
   }
 
   /**
-   * The oldest position the copy can reach: the largest position of a virtual conversion it
+   * The earliest position the copy can reach: the largest position of a virtual conversion it
    * can't cross backward, or 0.
    */
-  get oldestReachablePosition() {
-    return this.conversions.reduce((oldest, conversion) =>
-      isUncrossable(conversion) ? Math.max(oldest, conversion.position) : oldest, 0);
+  get boundaryPosition() {
+    return this.conversions.reduce((earliest, conversion) =>
+      isUncrossable(conversion) ? Math.max(earliest, conversion.position) : earliest, 0);
   }
 
   /**

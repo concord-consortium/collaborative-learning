@@ -95,8 +95,8 @@ export class FirestoreHistoryManagerConcurrent extends FirestoreHistoryManager {
     // The document content is loaded from the realtime database once, separately from the
     // history entries; after that, all updates come from the history entries. The initial
     // last history entry is taken to be the last entry already in that content, so only the
-    // entries after it are applied. That is only guaranteed when the envelope is settled; see
-    // getInitialLastHistoryEntry.
+    // entries after it are applied. That is only guaranteed when the envelope has a trusted
+    // exactThrough; see getInitialLastHistoryEntry.
     this.getInitialLastHistoryEntry();
 
     // Make the upload, download and pause state observable so the UI and the content save sender

@@ -12,6 +12,8 @@ export interface ICustomDropdownItem extends IDropdownItem {
   itemIcon?: ReactNode;
   hideItemCheck?: boolean;
   bottomBorder?: boolean;
+  /** Runs onClick without becoming the selected value, e.g. "Log Out". */
+  isAction?: boolean;
 }
 
 function getItemId(item: ICustomDropdownItem) {
@@ -53,7 +55,7 @@ export const CustomSelect: React.FC<IProps> = (props) => {
   const headerId = useId();
 
   const [selected, setSelected] = useState(() =>
-    items.find(item => item.selected)?.text || (items.length > 0 ? items[0].text : "")
+    items.find(item => item.selected)?.text || items.find(item => !item.isAction)?.text || ""
   );
 
   // Sync selected state when items change externally
@@ -68,7 +70,9 @@ export const CustomSelect: React.FC<IProps> = (props) => {
     const item = items[index];
     if (!item || item.disabled) return;
     item.onClick?.(item);
-    setSelected(item.text);
+    if (!item.isAction) {
+      setSelected(item.text);
+    }
   }, [items]);
 
   const dropdown = useDropdown({

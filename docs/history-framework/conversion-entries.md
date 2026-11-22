@@ -82,7 +82,14 @@ conversion. The JSON copy crosses a virtual conversion like a conversion entry. 
 sets the model to the old JSON the bridge rebuilt, and going forward it undoes that. When a bridge
 can't rebuild a model's old JSON, or the model isn't in the copy when the copy reaches the
 conversion, the copy can't cross that conversion backward, so playback treats its position as the
-oldest it can reach and says "Earlier history isn't available." It does not show the failure banner.
+earliest it can reach and says "Earlier history isn't available." The slider gives that position a
+stop of its own (`earliest`), unless a user stop is already there, and shades the stops before it.
+It does not show the failure banner.
+
+A bridge can also implement `appendChangesConversions`, which says whether entries appended to the
+history can change the conversions it found. While they can't, the tree manager keeps the earlier
+result rather than asking the bridge to scan the whole history again, which matters because a
+running program adds an entry on every tick while playback is open.
 
 DataFlow's legacy bridge (`legacy-dataflow-history-bridge.ts`) is the example. Legacy DataFlow tiles
 store their program in an older format, and the history of a tile converted without a conversion
@@ -97,7 +104,8 @@ holds it, such as the tile map. It then replays the patches on the tile forward 
 the last legacy entry. If no entry adds the tile, or a patch doesn't apply, the bridge falls back to
 the undo patches of the next entry that touches the tile, when they put back the legacy tile, as
 when that entry deletes it. Otherwise the old JSON is left undefined and playback stops at the
-conversion.
+conversion. Appended entries change its conversions only when one has a legacy patch, or is the
+first entry after a conversion to touch its tile.
 
 ### Old models and model replacements
 

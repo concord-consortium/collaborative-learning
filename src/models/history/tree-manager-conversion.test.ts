@@ -673,10 +673,10 @@ describe("playback across a conversion entry", () => {
       expect(manager.jsonHistoryCopy!.getJson(t1Path)).toEqual(endJson.content.tileMap.t1);
       expect(getTile(document, "t1").items.map(item => item.id)).toEqual(kEndIds);
       expect(manager.historyPlaybackFailures).toEqual([]);
-      expect(manager.oldestReachablePosition).toBeUndefined();
+      expect(manager.seekBoundaryPosition).toBeUndefined();
     });
 
-    it("stops at the oldest reachable position without a failure banner", async () => {
+    it("stops at the seek boundary without a failure banner", async () => {
       const { document, manager } = setupVirtualConversionDocument(undefined);
 
       await manager.goToHistoryEntryPosition(0);
@@ -685,16 +685,16 @@ describe("playback across a conversion entry", () => {
       expect(manager.jsonHistoryCopy!.position).toBe(2);
       expect(getTile(document, "t1").label).toBe("b");
       expect(manager.historyPlaybackFailures).toEqual([]);
-      expect(manager.oldestReachablePosition).toBe(2);
+      expect(manager.seekBoundaryPosition).toBe(2);
 
       // A move from the boundary further back goes nowhere, and still says why.
       await manager.goToHistoryEntryPosition(1);
       expect(manager.numHistoryEventsApplied).toBe(2);
       expect(manager.historyPlaybackFailures).toEqual([]);
-      expect(manager.oldestReachablePosition).toBe(2);
+      expect(manager.seekBoundaryPosition).toBe(2);
     });
 
-    it("returns to the end with real ids after stopping at the oldest reachable position", async () => {
+    it("returns to the end with real ids after stopping at the seek boundary", async () => {
       const { document, manager, endJson } = setupVirtualConversionDocument(undefined);
 
       for (const position of [0, 1, 3, 2, 4]) {
@@ -708,10 +708,10 @@ describe("playback across a conversion entry", () => {
       expect(manager.historyPlaybackFailures).toEqual([]);
     });
 
-    it("updates the oldest reachable position when the conversions change", async () => {
+    it("updates the seek boundary when the conversions change", async () => {
       const { document, manager } = setupVirtualConversionDocument(undefined);
       await manager.goToHistoryEntryPosition(0);
-      expect(manager.oldestReachablePosition).toBe(2);
+      expect(manager.seekBoundaryPosition).toBe(2);
 
       // An entry arrives, and the bridge can now rebuild the old tile.
       virtualConversions = [{ path: t1Path, position: 2, oldJson: oldTileBeforeConversion() }];
@@ -721,7 +721,7 @@ describe("playback across a conversion entry", () => {
 
       expect(manager.numHistoryEventsApplied).toBe(0);
       expect(getTile(document, "t1").label).toBe("a");
-      expect(manager.oldestReachablePosition).toBeUndefined();
+      expect(manager.seekBoundaryPosition).toBeUndefined();
       expect(manager.historyPlaybackFailures).toEqual([]);
     });
 
@@ -747,6 +747,37 @@ describe("playback across a conversion entry", () => {
         change();
         expectPosition(3 + i);
       });
+    });
+
+    it("keeps a bridge's conversions while it says the appended entries don't change them", () => {
+      const { manager } = setupVirtualConversionDocument(undefined);
+      // The registry has no way to remove a bridge, so this one reports nothing once the test ends.
+      let active = true;
+      const t9Conversions = [{ path: "/content/tileMap/t9", position: 1, oldJson: {} }];
+      const findVirtualConversions = jest.fn(() => active ? t9Conversions : []);
+      let appendChanges = false;
+      const appendChangesConversions = jest.fn(() => appendChanges);
+      registerHistoryBridge({ findVirtualConversions, appendChangesConversions });
+      const append = () => manager.addHistoryEntryAfterApplying(
+        HistoryEntry.create(makeEntry([replaceRecord(`${t1Path}/content/label`, "x", "y")])));
+      try {
+        expect(manager.virtualConversions).toContain(t9Conversions[0]);
+        expect(findVirtualConversions).toHaveBeenCalledTimes(1);
+        const previousLength = manager.document.history.length;
+        append();
+        append();
+        expect(manager.virtualConversions).toContain(t9Conversions[0]);
+        expect(findVirtualConversions).toHaveBeenCalledTimes(1);
+        expect(appendChangesConversions).toHaveBeenCalledWith(manager.document.history, previousLength, kTreeId,
+          t9Conversions);
+
+        appendChanges = true;
+        append();
+        expect(manager.virtualConversions).toContain(t9Conversions[0]);
+        expect(findVirtualConversions).toHaveBeenCalledTimes(2);
+      } finally {
+        active = false;
+      }
     });
   });
 });

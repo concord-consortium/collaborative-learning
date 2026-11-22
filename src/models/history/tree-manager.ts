@@ -23,6 +23,8 @@ import { UserContextProvider } from "../stores/user-context-provider";
 import { getLastHistoryEntry } from "./history-firestore";
 import { SessionExactness } from "./session-exactness";
 import { LogEventName } from "../../lib/logger-types";
+import type { DocumentContentModelType } from "../document/document-content";
+import { getPlaybackRevealTileId } from "./playback-reveal";
 
 export interface HistoryPlaybackFailure {
   historyEntry: Instance<typeof HistoryEntry>;
@@ -82,10 +84,10 @@ function getEntriesBetween(history: readonly HistoryEntryType[], from: number, t
 }
 
 /**
- * Moves the JSON copy toward `target` and builds the patch source for the move. A model is
- * treated as old when it is old in the copy at either end of the move, when a patch in the move
- * carries an old version of it, or when a conversion entry or a virtual conversion in the move changes
- * it. The patches catch an old model that is absent at both ends. The conversion-entry and
+ * Moves the JSON copy toward `target` and builds the patch source for the move. A model is treated
+ * as old when it is old in the copy at either end of the move, when a patch in the move carries an
+ * old version of it, or when a conversion entry or a virtual conversion in the move changes it. The
+ * patches catch an old model that is absent at both ends. The conversion-entry and
  * virtual-conversion checks are backstops: a model either one converts is old at the end of the
  * move before the conversion, or was added in the move with an old value. The copy can stop short
  * of `target`; the source covers only the entries up to where it stopped.
@@ -125,8 +127,8 @@ function moveJsonCopy(copy: JsonHistoryCopy, history: readonly HistoryEntryType[
  * from Firestore doesn't hold it, and its entries expect those models as they are stored, before
  * conversion. So the conversion entry is undone here, which puts them back in their stored form.
  *
- * Once the history holds the conversion entry before `position`, the document's JSON already matches
- * the history there, and it is returned unchanged. `documentJson` is changed in place.
+ * Once the history holds the conversion entry before `position`, the document's JSON already
+ * matches the history there, and it is returned unchanged. `documentJson` is changed in place.
  */
 function getJsonCopyStart(documentJson: object, treeId: string, history: readonly HistoryEntryType[],
     position: number, localConversionEntry: HistoryEntrySnapshot | undefined) {
@@ -199,6 +201,7 @@ interface IMainDocument extends TreeAPI {
    * Replaces the content with stored content, converting its old models.
    */
   setContent(content: any): void;
+  content?: DocumentContentModelType;
 }
 
 /**
@@ -265,7 +268,7 @@ export const TreeManager = types
   /**
    * Entries that were force-completed, so records that arrive for them later can be recognized.
    */
-  timedOutEntries: new Map<string, { model?: string }>(),
+  timedOutEntries: new Map<string, { model?: string; background?: boolean; producerTileId?: string }>(),
   /**
    * Set when the JSON copy can't get back to the trees' position after a failed move. The copy
    * and the trees then disagree, so playback makes no more moves.
@@ -277,9 +280,9 @@ export const TreeManager = types
    */
   pendingConversionEntry: undefined as HistoryEntrySnapshot | undefined,
   /**
-   * A conversion entry that the live document has not uploaded yet, handed to a playback copy. It stays
-   * out of the copy's history, which comes from Firestore. The JSON copy starts with it undone (see
-   * getJsonCopyStart), so it holds the stored content that the history reaches.
+   * A conversion entry that the live document has not uploaded yet, handed to a playback copy. It
+   * stays out of the copy's history, which comes from Firestore. The JSON copy starts with it
+   * undone (see getJsonCopyStart), so it holds the stored content that the history reaches.
    */
   localConversionEntry: undefined as HistoryEntrySnapshot | undefined,
   /**
@@ -288,11 +291,18 @@ export const TreeManager = types
    */
   jsonHistoryCopy: undefined as JsonHistoryCopy | undefined,
   /**
-   * The oldest position playback can reach. It is set when a playback move stops at a virtual
-   * conversion it can't cross backward, because the bridge couldn't rebuild the old state or the
-   * model isn't in the copy there. Each later move updates it from the conversions then.
+   * Where a playback move found it couldn't go further back: a virtual conversion it can't cross
+   * backward, because the bridge couldn't rebuild the old state or the model isn't in the copy
+   * there. Each later move updates it from the conversions then. Playback reads
+   * earliestReachablePosition, which also counts what the bridges report before any move.
    */
-  oldestReachablePosition: undefined as number | undefined
+  seekBoundaryPosition: undefined as number | undefined,
+  /**
+   * The tile the last playback move the reader started changed, for the history view to bring on
+   * screen, or undefined when that move changed none. A new object each time, so a move that
+   * changes the same tile again still reaches the view.
+   */
+  playbackRevealRequest: undefined as { tileId: string } | undefined
 }))
 .views((self) => {
   // The history usually only grows during playback, so the scan resumes where it stopped. A new or
@@ -301,10 +311,13 @@ export const TreeManager = types
   let scannedLength = 0;
   let hasConversionEntry = false;
   // Finding virtual conversions runs every registered bridge, so the result is kept until the key
-  // changes.
+  // changes. When entries were only appended, a bridge that can tell whether they matter keeps its
+  // result, since the history grows on every tick while playback is open.
   let virtualKey: {
-    history: unknown; length: number; treeId: string; bridgeCount: number; localConversionEntry: unknown
+    history: unknown; length: number; lastEntry: unknown; treeId: string; bridgeCount: number;
+    localConversionEntry: unknown; extraConversionEntry: boolean
   } | undefined;
+  let bridgeConversions: IVirtualConversion[][] = [];
   let virtualConversions = kNoVirtualConversions;
 
   function getVirtualConversions() {
@@ -313,16 +326,33 @@ export const TreeManager = types
     if (bridges.length === 0 || treeId === undefined) return kNoVirtualConversions;
     const history = self.document.history;
     const { localConversionEntry } = self;
-    if (virtualKey?.history !== history || virtualKey.length !== history.length ||
-        virtualKey.treeId !== treeId || virtualKey.bridgeCount !== bridges.length ||
-        virtualKey.localConversionEntry !== localConversionEntry) {
-      virtualKey = { history, length: history.length, treeId, bridgeCount: bridges.length, localConversionEntry };
-      // A local conversion entry that the history doesn't hold yet comes after it, so the bridges see
-      // the conversion it records.
-      const bridgeHistory = localConversionEntry && !history.some(entry => entry.id === localConversionEntry.id)
-        ? [...history, HistoryEntry.create(localConversionEntry)]
-        : history;
-      virtualConversions = bridges.flatMap(bridge => bridge.findVirtualConversions(bridgeHistory, treeId));
+    const previous = virtualKey;
+    const sameSource = previous?.history === history && previous.treeId === treeId &&
+      previous.bridgeCount === bridges.length && previous.localConversionEntry === localConversionEntry;
+    if (sameSource && previous.length === history.length) return virtualConversions;
+
+    // A local conversion entry that the history doesn't hold yet comes after it, so the bridges see
+    // the conversion it records.
+    const extraConversionEntry =
+      !!localConversionEntry && !history.some(entry => entry.id === localConversionEntry.id);
+    const bridgeHistory =
+      extraConversionEntry ? [...history, HistoryEntry.create(localConversionEntry)] : history;
+    const appendedOnly = sameSource && previous.length < history.length &&
+      previous.lastEntry === history[previous.length - 1] && !previous.extraConversionEntry &&
+      !extraConversionEntry;
+    virtualKey = {
+      history, length: history.length, lastEntry: history[history.length - 1], treeId,
+      bridgeCount: bridges.length, localConversionEntry, extraConversionEntry
+    };
+    const previousConversions = bridgeConversions;
+    bridgeConversions = bridges.map((bridge, index) =>
+      appendedOnly && bridge.appendChangesConversions?.(history, previous.length, treeId,
+          previousConversions[index]) === false
+        ? previousConversions[index]
+        : bridge.findVirtualConversions(bridgeHistory, treeId));
+    // Unchanged results keep the same array, so what reads it isn't recomputed.
+    if (!appendedOnly || bridgeConversions.some((conversions, index) => conversions !== previousConversions[index])) {
+      virtualConversions = bridgeConversions.flat();
     }
     return virtualConversions;
   }
@@ -337,8 +367,8 @@ export const TreeManager = types
     },
 
     /**
-     * True when playback needs a JSON copy of the document: when the history holds a
-     * conversion entry, a local conversion entry was handed over, or a history bridge finds a conversion it
+     * True when playback needs a JSON copy of the document: when the history holds a conversion
+     * entry, a local conversion entry was handed over, or a history bridge finds a conversion it
      * never recorded.
      */
     get needsJsonCopy() {
@@ -359,6 +389,18 @@ export const TreeManager = types
 .views((self) => ({
   get undoManager() : IUndoManager {
     return self.undoStore;
+  },
+
+  /**
+   * The earliest position playback can reach. The history bridges know where they can't rebuild
+   * the old state before any seek gets there, and a seek that stops short records where it found
+   * the boundary (seekBoundaryPosition), so this is the later of the two. 0 when all of the history can be reached.
+   */
+  get earliestReachablePosition(): number {
+    const unrebuildable = self.virtualConversions
+      .filter(conversion => conversion.oldJson === undefined)
+      .map(conversion => conversion.position);
+    return Math.max(self.seekBoundaryPosition ?? 0, ...unrebuildable);
   },
 
   findHistoryEntryIndex(historyEntryId: string) {
@@ -406,8 +448,9 @@ export const TreeManager = types
     }
 
     // Content is saved only when it changes, so flushing before a metadata-only entry (a title
-    // change) would pair the conversion entry with old content, and the next load would convert it again
-    // with new ids. The entry isn't undoable, so it skips the undo store and leaves revisionId alone.
+    // change) would pair the conversion entry with old content, and the next load would convert it
+    // again with new ids. The entry isn't undoable, so it skips the undo store and leaves
+    // revisionId alone.
     if (self.pendingConversionEntry && entryChangesContent(snapshot)) {
       const conversionEntryIndex = self.document.history.length;
       self.document.history.push(self.pendingConversionEntry);
@@ -464,7 +507,8 @@ export const TreeManager = types
       })}`);
 
       self.exactness.markNotExact("timed-out-entry");
-      self.timedOutEntries.set(entryId, { model: entry.model });
+      const { model, background, producerTileId } = entry;
+      self.timedOutEntries.set(entryId, { model, background, producerTileId });
       entry.activeExchanges.clear();
       entry.timedOut = true;
       completeHistoryEntry(entry);
@@ -515,8 +559,8 @@ export const TreeManager = types
       self.numHistoryEventsApplied = value;
     },
 
-    setOldestReachablePosition(value: number | undefined) {
-      self.oldestReachablePosition = value;
+    setSeekBoundaryPosition(value: number | undefined) {
+      self.seekBoundaryPosition = value;
     },
 
     /**
@@ -739,6 +783,9 @@ export const TreeManager = types
           model: timedOutEntry.model,
           action: record.action,
           undoable: false,
+          // A late record of a background entry is background too.
+          background: timedOutEntry.background,
+          producerTileId: timedOutEntry.producerTileId,
           lateRecordForEntryId: historyEntryId,
           records: [record]
         });
@@ -869,8 +916,12 @@ export const TreeManager = types
       : { applied: stored.applied, error: stored.error };
   },
 
+  /**
+   * Moves the trees to a history position. With `revealChange`, a move that changes the position
+   * sets `playbackRevealRequest` to the tile it changed, or clears it when it changed none.
+   */
   goToHistoryEntryPosition: flow(function* goToHistoryEntryPosition(
-                                      newHistoryPosition: number) {
+                                      newHistoryPosition: number, options: { revealChange?: boolean } = {}) {
     const trees = Object.values(self.trees);
 
     if (newHistoryPosition === self.numHistoryEventsApplied) return;
@@ -916,8 +967,8 @@ export const TreeManager = types
       targetPosition = moved.position;
       // Stopping where earlier history can't be rebuilt isn't a failure; playback says so instead.
       // The conversions change as the history grows, which can move that position or remove it.
-      if (moved.unavailable || self.oldestReachablePosition !== undefined) {
-        self.oldestReachablePosition = copy.oldestReachablePosition || undefined;
+      if (moved.unavailable || self.seekBoundaryPosition !== undefined) {
+        self.seekBoundaryPosition = copy.boundaryPosition || undefined;
       }
       if (moved.failure) {
         const { historyIndex, direction: failureDirection, message } = moved.failure;
@@ -1306,6 +1357,15 @@ export const TreeManager = types
     // One way might be using unique history_entry_ids that we mark as closed
     // after the finish call.
     self.numHistoryEventsApplied = stopPosition;
+
+    const { mainDocument } = self;
+    const content = mainDocument?.content;
+    if (options.revealChange && mainDocument && content) {
+      const tileId = getPlaybackRevealTileId({
+        history, treeId: mainDocument.key, from: initialPosition, to: stopPosition, content
+      });
+      self.playbackRevealRequest = tileId ? { tileId } : undefined;
+    }
   }),
 }))
 .views(self => ({

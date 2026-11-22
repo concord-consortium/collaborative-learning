@@ -57,8 +57,11 @@ newest snapshot kept among its entries, which is at most about a second behind i
 ## Sending
 
 The sender sends one write at a time, always of the newest state, except on page hide and at the end
-of the drain (see below). A failed write is retried after a delay that doubles from 1 second up to
-30 seconds, and after 3 failures in a row the save indicator shows `Retrying`.
+of the drain (see below). A write starts at least 1 second after the previous one, or 3 seconds
+when no unsaved change was made by the user, only by background calls such as a running program's
+ticks. The save indicator follows the user's changes only: background changes don't show `Saving`,
+and a save of them doesn't show `Saved` again. A failed write is retried after a delay that doubles
+from 1 second up to 30 seconds, and after 3 failures in a row the save indicator shows `Retrying`.
 
 When the document unmounts, the sender keeps saving until the latest change is saved, for up to 30
 seconds. A document that mounts again in that time reuses the same sender.
@@ -92,9 +95,18 @@ save has been possible for 5 seconds. Each stretch of intermediate saves is logg
 `exactThrough` and is behind its history applies the missing entries when its owner opens it for
 editing (see [catch-up-at-load.md](catch-up-at-load.md)). Its content isn't saved until the catch-up
 finishes, and as soon as the sender starts, it saves the caught-up content, so the stored content
-isn't left behind its history. When nothing is applied, because the envelope is behind its history
-and has no `exactThrough`, or because the content listener replaces the content while the catch-up
-reads Firestore, the session isn't exact, so its saves are intermediate ones.
+isn't left behind its history. When the catch-up can't apply the entries the content is missing, for
+example because the envelope is behind its history and has no `exactThrough`, or because the content
+listener replaces the content while the catch-up reads Firestore, the session isn't exact, so its
+saves are intermediate ones.
+
+**The content listener waits for the last save.** Once a document closes, the content listener
+monitors it again, but not while the sender may still write its content: while the sender keeps
+saving after the document closes, and until its last write settles, including the one sent when the
+30 seconds run out. That write can still be waiting, for example while offline, after the document
+has been opened again with a new sender, so the listener waits until no sender of the document is
+running or has a write in flight. Until then the stored content can be older than the document's,
+and replacing it would undo edits that haven't been saved yet.
 
 **Page hide.** On page hide, the sender sends the newest committed snapshot save at once, without
 waiting for the minimum gap or the write in flight. The sender listens for page hide itself, so this
@@ -120,6 +132,11 @@ intermediate save over it loses nothing. The client tracks that envelope in the 
   entry fails wherever it is applied later: in playback, in a catch-up, or on another group
   member's client. The session that recorded it is already not exact, so it makes no exact saves
   past that entry.
+- Two sessions editing the same individual document, in two tabs or on two devices, aren't
+  supported. Each numbers its entries from the newest entry it knows of, so the history forks. The
+  catch-up's chain check keeps a load from applying entries from another fork, and the session isn't
+  exact. Nothing detects the fork itself, and a load can start exact on either side of a fork of
+  equal length.
 
 ## Related docs
 

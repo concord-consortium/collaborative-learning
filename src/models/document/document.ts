@@ -169,6 +169,12 @@ export const DocumentModel = Tree.named("Document")
      * document can't be edited until then.
      */
     historyCatchUpPending: false,
+    /**
+     * True while this client may still write the document's content to the RTDB: while a content
+     * save sender runs, including after the document closes, and until the last write of every
+     * sender it has had settles. Until then the RTDB content can be older than the document's.
+     */
+    contentSaveActive: false,
     saveState: SaveState.Idle as SaveState,
   }))
   .views(self => ({
@@ -399,6 +405,10 @@ export const DocumentModel = Tree.named("Document")
 
     setHistoryCatchUpPending(pending: boolean) {
       self.historyCatchUpPending = pending;
+    },
+
+    setContentSaveActive(active: boolean) {
+      self.contentSaveActive = active;
     }
   }))
   .actions(self => ({

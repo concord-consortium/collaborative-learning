@@ -421,16 +421,20 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     this.setState({lastIntervalDuration: now - this.lastIntervalTime});
     this.lastIntervalTime = now;
 
-    reteManager.tickAndProcessNodes();
-    if (tileContent.isRecording && !readOnly) {
-      // Checked before appending, not after: Record stays available once a run hits the cap, and
-      // appending first would let every further click push the dataset one row past it.
-      if (tileContent.dataSet.cases.length >= tileContent.maxRecordableCases) {
-        tileContent.stopRecording();
-      } else {
-        recordCase(tileContent);
+    // A running recording's next point is taken inside the tick's action, so it joins the tick's
+    // background history entry instead of making an entry of its own.
+    reteManager.tickAndProcessNodes({
+      afterTick: () => {
+        if (!tileContent.isRecording || readOnly) return;
+        // Checked before appending, not after: Record stays available once a run hits the cap, and
+        // appending first would let every further click push the dataset one row past it.
+        if (tileContent.dataSet.cases.length >= tileContent.maxRecordableCases) {
+          tileContent.stopRecording();
+        } else {
+          recordCase(tileContent);
+        }
       }
-    }
+    });
     reteManager.updateSharedProgramData();
   };
 }

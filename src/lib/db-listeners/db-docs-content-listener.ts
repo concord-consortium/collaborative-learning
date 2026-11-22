@@ -94,11 +94,13 @@ export class DBDocumentsContentListener extends BaseListener {
       // Monitor personal documents and learning logs, except the document currently
       // open for editing in the workspace (that one is already reactive via its shared
       // in-memory instance, and a remote "value" listener would clobber local edits).
+      // A document that has closed isn't monitored until this client's last write of its content
+      // settles: the RTDB content can be older until then, and would revert edits not yet saved.
       const { primaryDocumentKey, comparisonDocumentKey } = persistentUI.problemWorkspace;
       const editableKeys = new Set([primaryDocumentKey, comparisonDocumentKey]);
       [PersonalDocument, LearningLogDocument].forEach((type) => {
         documents.byType(type).forEach((document) => {
-          if (editableKeys.has(document.key)) return;
+          if (editableKeys.has(document.key) || document.contentSaveActive) return;
           documentsToMonitor.push(document);
         });
       });

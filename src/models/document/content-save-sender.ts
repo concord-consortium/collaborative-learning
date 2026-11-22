@@ -10,6 +10,8 @@ import { DocumentModelType, SaveState } from "./document";
 import { DocumentContentSnapshotType } from "./document-content";
 
 export const kMinimumSaveGapMs = 1000;
+// The gap before a save when no change since the last completed save was made by the user.
+export const kBackgroundSaveGapMs = 3000;
 export const kMaxRetryDelayMs = 30000;
 export const kRetryingAfterFailures = 3;
 // The most time a sender keeps saving after it is detached.
@@ -105,13 +107,19 @@ function subscribeToCurrent<T>(expression: () => T, subscribe: (value: T) => (()
   };
 }
 
+// The senders of each document that are running or have a write in flight. A sender leaves once it
+// has stopped and its last write has settled, so a document's entry goes when it has none.
+const activeSenders = new WeakMap<DocumentModelType, Set<ContentSaveSender>>();
+
 const sameTools = (a: string[], b: string[]) =>
   a.length === b.length && a.every((tool, index) => tool === b[index]);
 
 /**
  * Saves a document's content to its RTDB envelope. A snapshot is taken when each local history
  * entry completes and is saved, marked with exactThrough, once that entry has committed. Only one write is
- * in flight at a time, and each write sends the newest save waiting by then.
+ * in flight at a time, and each write sends the newest save waiting by then. A write starts at
+ * least 1 second after the previous one, or 3 seconds while every unsaved change was made by
+ * background calls, such as a running program's ticks. Those changes don't show as saving.
  *
  * Once every attachment is detached the sender keeps saving until a save covers the latest change,
  * or 30 seconds pass. Then the sender is disposed, after calling onDrained. Attaching it again
@@ -136,6 +144,9 @@ export abstract class ContentSaveSender {
   private consecutiveFailures = 0;
   // Counts the content changes. A save covers the changes up to its changeSeq.
   protected dirtySeq = 0;
+  // The newest content change made by the user, rather than only by background calls. The save
+  // indicator follows these changes, and saves holding only background changes wait longer.
+  private lastUserChangeSeq = 0;
   // The newest content change the RTDB content is known to hold: from this sender's writes, or a
   // concurrent document's envelope that reaches the head.
   protected savedSeq = 0;
@@ -232,12 +243,31 @@ export abstract class ContentSaveSender {
     this.keptSnapshots.clear();
     this.pendingSave = undefined;
     this.consecutiveFailures = 0;
+    this.updateContentSaveActive();
+  }
+
+  // A write sent before the sender stopped, such as the drain timeout's last save, can still land,
+  // after a new sender for the document has started. So the flag clears only once no sender for the
+  // document is running or has a write in flight.
+  private updateContentSaveActive() {
+    if (this.running || this.writesInFlight.size > 0) return;
+    const active = activeSenders.get(this.document);
+    active?.delete(this);
+    if (active?.size) return;
+    activeSenders.delete(this.document);
+    if (isAlive(this.document)) {
+      this.document.setContentSaveActive(false);
+    }
   }
 
   // Starts saving. getContentSaveSender calls it after making the sender, and attach calls it again
   // once the sender has stopped.
   start() {
     this.running = true;
+    const active = activeSenders.get(this.document) ?? new Set();
+    active.add(this);
+    activeSenders.set(this.document, active);
+    this.document.setContentSaveActive(true);
     const treeManager = getTreeManager(this.document);
     if (treeManager) {
       this.disposers.push(treeManager.addEntryCompletedListener(this.handleEntryCompleted));
@@ -330,9 +360,13 @@ export abstract class ContentSaveSender {
 
   private handleContentChanged = () => {
     if (!isLocalChange(this.document)) return;
+    const background = !!this.document.treeMonitor?.areUnrecordedChangesAllBackground();
     this.dirtySeq++;
-    if (this.consecutiveFailures < kRetryingAfterFailures) {
-      this.setSaveState(SaveState.Saving);
+    if (!background) {
+      this.lastUserChangeSeq = this.dirtySeq;
+      if (this.consecutiveFailures < kRetryingAfterFailures) {
+        this.setSaveState(SaveState.Saving);
+      }
     }
     this.handleLocalChange();
   };
@@ -398,7 +432,8 @@ export abstract class ContentSaveSender {
   private getWriteReadyAt(save: IWaitingSave) {
     let readyAt = 0;
     if (this.lastWriteStartedAt !== undefined) {
-      const gap = this.options.getMinimumGapMs?.(save) ?? kMinimumSaveGapMs;
+      const gap = this.options.getMinimumGapMs?.(save)
+        ?? (this.lastUserChangeSeq > this.savedSeq ? kMinimumSaveGapMs : kBackgroundSaveGapMs);
       readyAt = this.lastWriteStartedAt + gap;
     }
     if (this.consecutiveFailures > 0 && this.lastFailureAt !== undefined) {
@@ -479,6 +514,7 @@ export abstract class ContentSaveSender {
       if (isNewest) {
         this.reportWrite(save);
       }
+      this.updateContentSaveActive();
       return;
     }
     this.consecutiveFailures = 0;
@@ -489,9 +525,7 @@ export abstract class ContentSaveSender {
     if (isNewest) {
       this.reportWrite(save);
     }
-    if (save.changeSeq >= this.dirtySeq) {
-      this.setSaveState(SaveState.Saved);
-    } else if (this.document.saveState === SaveState.Retrying) {
+    if (!this.showSavedIfCovered(save.changeSeq) && this.document.saveState === SaveState.Retrying) {
       this.setSaveState(SaveState.Saving);
     }
     this.scheduleWrite();
@@ -502,6 +536,7 @@ export abstract class ContentSaveSender {
   // The pending save stays in place, unless a newer one has replaced it, so the retry sends the newest.
   private handleWriteFailed(save: IWaitingSave, error: unknown) {
     this.writesInFlight.delete(save);
+    this.updateContentSaveActive();
     if (!this.running) return;
     this.consecutiveFailures++;
     this.lastFailureAt = Date.now();
@@ -561,6 +596,20 @@ export abstract class ContentSaveSender {
           this.sentTools = undefined;
         }
       });
+  }
+
+  /**
+   * Shows Saved when the indicator shows the user's changes as saving or retrying, and the content
+   * through changeSeq, which holds the user's last change, is saved. Otherwise a save of background
+   * changes would show Saved again each time the indicator clears it. Returns whether it showed Saved.
+   */
+  protected showSavedIfCovered(changeSeq: number) {
+    const { saveState } = this.document;
+    if ((saveState !== SaveState.Saving && saveState !== SaveState.Retrying) || changeSeq < this.lastUserChangeSeq) {
+      return false;
+    }
+    this.setSaveState(SaveState.Saved);
+    return true;
   }
 
   // Each call is a document action, which the tree monitor records, so only call it on a change.

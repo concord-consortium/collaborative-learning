@@ -99,3 +99,51 @@ describe("CustomSelect accessibility", () => {
     expect(onAncestorKeyDown).toHaveBeenCalledTimes(1);
   });
 });
+
+describe("CustomSelect action items", () => {
+  it("runs an action item's onClick without moving the selection to it", async () => {
+    const onAction = jest.fn();
+    render(
+      <CustomSelect items={[
+        { text: "Do it", isAction: true, onClick: onAction },
+        { text: "March", selected: true },
+        { text: "April" }
+      ]} />
+    );
+    openList();
+    await flushOpenEffect();
+
+    fireEvent.click(screen.getByRole("option", { name: "Do it" }));
+    expect(onAction).toHaveBeenCalledTimes(1);
+    expect(screen.getByRole("option", { name: "March" })).toHaveAttribute("aria-selected", "true");
+    expect(screen.getByRole("option", { name: "Do it" })).not.toHaveAttribute("aria-selected");
+
+    openList();
+    await flushOpenEffect();
+    expect(document.activeElement).toBe(screen.getByRole("option", { name: "March" }));
+  });
+
+  it("never starts with an action item as the selection", () => {
+    const { container } = render(
+      <CustomSelect title="" titlePrefix="Name" items={[
+        { text: "Do it", isAction: true },
+        { text: "March" }
+      ]} />
+    );
+    expect(container.querySelector("[data-test=custom-select-title]")).toHaveTextContent(/^March$/);
+    expect(screen.getByRole("option", { name: "Do it", hidden: true })).not.toHaveAttribute("aria-selected");
+  });
+
+  it("still makes a chosen normal item the selection", async () => {
+    const { container } = render(
+      <CustomSelect title="" titlePrefix="Name" items={[{ text: "March" }, { text: "April" }]} />
+    );
+    openList();
+    await flushOpenEffect();
+
+    fireEvent.click(screen.getByRole("option", { name: "April" }));
+    expect(screen.getByRole("option", { name: "April" })).toHaveAttribute("aria-selected", "true");
+    expect(screen.getByRole("option", { name: "March" })).not.toHaveAttribute("aria-selected");
+    expect(container.querySelector("[data-test=custom-select-title]")).toHaveTextContent(/^April$/);
+  });
+});

@@ -439,60 +439,37 @@ describe("history loading", () => {
 
   });
 
-  describe("moveToHistoryEntryAfterLoad", () => {
+  describe("checkHistoryEntryAfterLoad", () => {
     afterEach(() => jest.restoreAllMocks());
 
-    /**
-     * Stands in for goToHistoryEntryPosition doing its job: a seek that replays every entry it was
-     * asked for ends with numHistoryEventsApplied at the requested position.
-     */
-    function mockCompletedSeek(treeManager: Instance<typeof TreeManager>) {
-      return jest.spyOn(treeManager, "goToHistoryEntryPosition").mockImplementation(((position: number) => {
-        treeManager.setNumHistoryEntriesApplied(position);
-        return Promise.resolve();
-      }) as any);
-    }
-
-    // A link names the entry the document had reached when the event was logged, so the
-    // requested moment is the one with that entry applied: the position after it, not before.
-    it("seeks to the position where the requested entry has been applied", async () => {
+    // The playback control does a link's seek, so checking a link never moves the document.
+    it("reports nothing and leaves the document alone for an entry the history has", async () => {
       const { treeManager, historyManager } = await mirrorMockHistory({
         entries: [{ id: "a1" }, { id: "a2" }]
       });
-      const goToSpy = mockCompletedSeek(treeManager);
-      await historyManager.moveToHistoryEntryAfterLoad("a2");
-      expect(goToSpy).toHaveBeenCalledWith(2);
-    });
-
-    it("treats the 'first' sentinel as position 0", async () => {
-      const { treeManager, historyManager } = await mirrorMockHistory({
-        entries: [{ id: "a1" }, { id: "a2" }]
-      });
-      const goToSpy = mockCompletedSeek(treeManager);
-      await historyManager.moveToHistoryEntryAfterLoad("first");
-      expect(goToSpy).toHaveBeenCalledWith(0);
-    });
-
-    it("warns and does not navigate for an unresolved id", async () => {
-      const { treeManager, historyManager } = await mirrorMockHistory({
-        entries: [{ id: "a1" }, { id: "a2" }]
-      });
-      const goToSpy = jest.spyOn(treeManager, "goToHistoryEntryPosition").mockImplementation(() => undefined as any);
-      const warnSpy = jest.spyOn(console, "warn").mockImplementation(() => undefined);
-      await historyManager.moveToHistoryEntryAfterLoad("no-such-id");
+      const goToSpy = jest.spyOn(treeManager, "goToHistoryEntryPosition");
+      await historyManager.checkHistoryEntryAfterLoad("a2");
+      expect(historyManager.historyEntryRequestError).toBeUndefined();
       expect(goToSpy).not.toHaveBeenCalled();
-      expect(warnSpy).toHaveBeenCalled();
+    });
+
+    it("reports nothing for the 'first' sentinel, which names no entry", async () => {
+      const { historyManager } = await mirrorMockHistory({
+        entries: [{ id: "a1" }, { id: "a2" }]
+      });
+      await historyManager.checkHistoryEntryAfterLoad("first");
+      expect(historyManager.historyEntryRequestError).toBeUndefined();
     });
 
     // A console.warn is invisible to the researcher following a link from a report, who would
     // otherwise just read the end of the history believing it to be the requested moment.
-    it("reports an unresolved id so it can be shown to the user", async () => {
-      const { treeManager, historyManager } = await mirrorMockHistory({
+    it("warns about an unresolved id and reports it so it can be shown to the user", async () => {
+      const { historyManager } = await mirrorMockHistory({
         entries: [{ id: "a1" }, { id: "a2" }]
       });
-      jest.spyOn(treeManager, "goToHistoryEntryPosition").mockImplementation(() => undefined as any);
-      jest.spyOn(console, "warn").mockImplementation(() => undefined);
-      await historyManager.moveToHistoryEntryAfterLoad("no-such-id");
+      const warnSpy = jest.spyOn(console, "warn").mockImplementation(() => undefined);
+      await historyManager.checkHistoryEntryAfterLoad("no-such-id");
+      expect(warnSpy).toHaveBeenCalled();
       expect(historyManager.historyEntryRequestError).toEqual(expect.stringContaining("no-such-id"));
     });
 
@@ -500,93 +477,53 @@ describe("history loading", () => {
     // earlier request would otherwise sit on screen for all of it, describing a request the
     // reader has already replaced.
     it("clears an earlier request's message as soon as a new request starts", async () => {
-      const { treeManager, historyManager } = await mirrorMockHistory({
+      const { historyManager } = await mirrorMockHistory({
         entries: [{ id: "a1" }, { id: "a2" }]
       });
       jest.spyOn(console, "warn").mockImplementation(() => undefined);
-      await historyManager.moveToHistoryEntryAfterLoad("no-such-id");
+      await historyManager.checkHistoryEntryAfterLoad("no-such-id");
       expect(historyManager.historyEntryRequestError).toEqual(expect.any(String));
 
-      mockCompletedSeek(treeManager);
-      const seekPromise = historyManager.moveToHistoryEntryAfterLoad("a2");
+      const checkPromise = historyManager.checkHistoryEntryAfterLoad("a2");
       expect(historyManager.historyEntryRequestError).toBeUndefined();
-      await seekPromise;
-    });
-
-    it("reports nothing when the seek succeeds", async () => {
-      const { treeManager, historyManager } = await mirrorMockHistory({
-        entries: [{ id: "a1" }, { id: "a2" }]
-      });
-      mockCompletedSeek(treeManager);
-      await historyManager.moveToHistoryEntryAfterLoad("a2");
-      expect(historyManager.historyEntryRequestError).toBeUndefined();
-    });
-
-    it("reports a seek that stops short of the requested entry", async () => {
-      const { treeManager, historyManager } = await mirrorMockHistory({
-        entries: [{ id: "a1" }, { id: "a2" }, { id: "a3" }]
-      });
-      jest.spyOn(treeManager, "goToHistoryEntryPosition").mockImplementation((() => {
-        treeManager.setNumHistoryEntriesApplied(1);
-        return Promise.resolve();
-      }) as any);
-      jest.spyOn(console, "warn").mockImplementation(() => undefined);
-
-      // "a3" is index 2, but the replay only gets as far as 1.
-      await historyManager.moveToHistoryEntryAfterLoad("a3");
-
-      expect(historyManager.historyEntryRequestError).toEqual(expect.stringContaining("a3"));
-    });
-
-    it("reports a seek that throws", async () => {
-      const { treeManager, historyManager } = await mirrorMockHistory({
-        entries: [{ id: "a1" }, { id: "a2" }]
-      });
-      jest.spyOn(treeManager, "goToHistoryEntryPosition")
-        .mockImplementation((() => Promise.reject(new Error("replay blew up"))) as any);
-      jest.spyOn(console, "warn").mockImplementation(() => undefined);
-
-      await historyManager.moveToHistoryEntryAfterLoad("a2");
-
-      expect(historyManager.historyEntryRequestError).toEqual(expect.any(String));
+      await checkPromise;
     });
 
     // A Firestore failure ends the load in HISTORY_ERROR rather than leaving it unfinished, so
     // the wait resolves and it is the status, not a timeout, that says the request cannot be met.
     it("reports a history that fails to load so it can be shown to the user", async () => {
-      const { treeManager, historyManager } = await mirrorMockHistory({
+      const { historyManager } = await mirrorMockHistory({
         entries: [],
         loadingError: { message: "fake error" } as firebase.firestore.FirestoreError,
         lastHistoryEntry: { index: 1, id: "1234" }
       });
-      const goToSpy = jest.spyOn(treeManager, "goToHistoryEntryPosition")
-        .mockImplementation(() => undefined as any);
       jest.spyOn(console, "warn").mockImplementation(() => undefined);
 
-      await historyManager.moveToHistoryEntryAfterLoad("first");
+      await historyManager.checkHistoryEntryAfterLoad("first");
 
       expect(historyManager.historyStatus).toBe(HistoryStatus.HISTORY_ERROR);
       expect(historyManager.historyEntryRequestError).toEqual(expect.any(String));
-      expect(goToSpy).not.toHaveBeenCalled();
     });
 
-    it("reports a history that never loads so it can be shown to the user", async () => {
+    // A genuinely empty document stays NO_HISTORY forever, so the bounded wait must time out
+    // rather than hang.
+    it("warns and reports a history that never loads", async () => {
       jest.useFakeTimers();
       const { treeManager } = setupDocument();
       const { historyManager } = setupFirestoreHistoryManager(treeManager);
-      jest.spyOn(treeManager, "goToHistoryEntryPosition").mockImplementation(() => undefined as any);
-      jest.spyOn(console, "warn").mockImplementation(() => undefined);
-      const seekPromise = historyManager.moveToHistoryEntryAfterLoad("first");
+      const warnSpy = jest.spyOn(console, "warn").mockImplementation(() => undefined);
+      const checkPromise = historyManager.checkHistoryEntryAfterLoad("first");
       await jest.advanceTimersByTimeAsync(30000);
-      await seekPromise;
+      await checkPromise;
+      expect(warnSpy).toHaveBeenCalled();
       expect(historyManager.historyEntryRequestError).toEqual(expect.any(String));
       jest.useRealTimers();
     });
 
     // The real ordering: PlaybackComponent calls this from a mount effect while the status is still
-    // the initial NO_HISTORY, before the Firestore query resolves. The seek must wait for the load
-    // and then happen — this is the case the earlier "stop on NO_HISTORY" version regressed.
-    it("seeks once the history loads when called before the load resolves", async () => {
+    // the initial NO_HISTORY, before the Firestore query resolves. The check must wait for the load
+    // rather than give up on NO_HISTORY.
+    it("checks the entry once the history loads when called before the load resolves", async () => {
       const { treeManager } = setupDocument();
       const { historyManager } = setupFirestoreHistoryManager(treeManager);
       getLastHistoryEntry.mockResolvedValue(undefined);
@@ -594,34 +531,19 @@ describe("history loading", () => {
         historyLoaded([{ id: "a1", index: 0, entry: { id: "a1" } }, { id: "a2", index: 1, entry: { id: "a2" } }]);
         return () => undefined;
       });
-      const goToSpy = mockCompletedSeek(treeManager);
+      jest.spyOn(console, "warn").mockImplementation(() => undefined);
 
       // Status is the initial NO_HISTORY here — call BEFORE the history loads.
       expect(historyManager.historyStatus).toBe(HistoryStatus.NO_HISTORY);
-      const seekPromise = historyManager.moveToHistoryEntryAfterLoad("a2");
+      const checkPromise = historyManager.checkHistoryEntryAfterLoad("no-such-id");
 
-      // Now load the history; the pending seek proceeds once the status becomes LOADED.
+      // Now load the history; the pending check proceeds once the status becomes LOADED.
       await historyManager.subscribeToFirestoreHistory();
       await when(() => treeManager.numHistoryEventsApplied !== undefined);
-      await seekPromise;
+      await checkPromise;
 
-      expect(goToSpy).toHaveBeenCalled();
-    });
-
-    // A genuinely empty document stays NO_HISTORY forever, so the bounded wait must time out
-    // (not hang) and give up without navigating.
-    it("warns and does not navigate when the history never loads (times out)", async () => {
-      jest.useFakeTimers();
-      const { treeManager } = setupDocument();
-      const { historyManager } = setupFirestoreHistoryManager(treeManager);
-      const goToSpy = jest.spyOn(treeManager, "goToHistoryEntryPosition").mockImplementation(() => undefined as any);
-      const warnSpy = jest.spyOn(console, "warn").mockImplementation(() => undefined);
-      const seekPromise = historyManager.moveToHistoryEntryAfterLoad("first");
-      await jest.advanceTimersByTimeAsync(30000);
-      await seekPromise;
-      expect(goToSpy).not.toHaveBeenCalled();
-      expect(warnSpy).toHaveBeenCalled();
-      jest.useRealTimers();
+      expect(historyManager.historyStatus).toBe(HistoryStatus.HISTORY_LOADED);
+      expect(historyManager.historyEntryRequestError).toEqual(expect.stringContaining("no-such-id"));
     });
   });
 });
@@ -851,7 +773,8 @@ describe("catchUpAtLoad", () => {
       { lastHistoryEntryId: "e5", exactThrough: { index: 5, since: "e2" } }, { id: "e7", index: 7 });
     await historyManager.catchUpAtLoad(() => undefined);
     expect(getHistoryEntriesAfter).not.toHaveBeenCalled();
-    expect(treeManager.exactness.exactSince).toBe("e7");
+    expect(treeManager.exactness.isExact).toBe(false);
+    expect(treeManager.exactness.notExactReason).toBe("unmarked-envelope-gap");
   });
 
   it("applies nothing and leaves the session not exact when the content is replaced during the fetch",
@@ -920,11 +843,52 @@ describe("catchUpAtLoad", () => {
     expect(treeManager.exactness.isExact).toBe(true);
   });
 
-  it("starts at Firestore's last entry when there is no saved envelope", async () => {
-    const { treeManager, historyManager } = setupCatchUp(undefined, { id: "e7", index: 7 });
+  // The content may lack entries Firestore has, so the session can't vouch for it.
+  it("leaves the session not exact when there is no saved entry id and Firestore has history", async () => {
+    const { treeManager, historyManager, logEvent } = setupCatchUp(undefined, { id: "e7", index: 7 });
     await historyManager.catchUpAtLoad(() => historyManager.loadedEnvelope);
     expect(getHistoryEntriesAfter).not.toHaveBeenCalled();
-    expect(treeManager.exactness.exactSince).toBe("e7");
+    expect(treeManager.exactness.isExact).toBe(false);
+    expect(treeManager.exactness.notExactReason).toBe("unmarked-envelope-gap");
+    expect(logEvent).toHaveBeenCalledWith(LogEventName.HISTORY_LOAD_CATCH_UP_INCOMPLETE,
+      expect.objectContaining({ reason: "unmarked-envelope-gap", savedId: undefined }));
+  });
+
+  it("leaves the session not exact when the envelope names another entry at the last entry's index",
+      async () => {
+    const { treeManager, historyManager, logEvent } = setupCatchUp(
+      { lastHistoryEntryId: "b7", exactThrough: { index: 7, since: "e2" } }, { id: "e7", index: 7 });
+    await historyManager.catchUpAtLoad(() => historyManager.loadedEnvelope);
+    expect(getHistoryEntriesAfter).not.toHaveBeenCalled();
+    expect(treeManager.exactness.notExactReason).toBe("history-written-elsewhere");
+    expect(logEvent).toHaveBeenCalledWith(LogEventName.HISTORY_LOAD_CATCH_UP_INCOMPLETE,
+      expect.objectContaining({ reason: "history-written-elsewhere", savedId: "b7", savedIndex: 7, lastIndex: 7 }));
+  });
+
+  it("leaves the session not exact when the envelope is past the last entry this session knows of",
+      async () => {
+    const { treeManager, historyManager } = setupCatchUp(
+      { lastHistoryEntryId: "e9", exactThrough: { index: 9, since: "e2" } }, { id: "e7", index: 7 });
+    await historyManager.catchUpAtLoad(() => historyManager.loadedEnvelope);
+    expect(treeManager.exactness.notExactReason).toBe("history-written-elsewhere");
+  });
+
+  // A catch-up started over after the content listener replaced the content.
+  it("plans against this session's newest commit after the catch-up is forgotten", async () => {
+    const { treeManager, tileContent, historyManager, firestore } = setupCatchUp(
+      { lastHistoryEntryId: "e5", exactThrough: { index: 5, since: "e2" } }, { id: "e5", index: 5 });
+    await historyManager.catchUpAtLoad(() => historyManager.loadedEnvelope);
+    (historyManager as any).notifyCommitted([{ id: "e6", index: 6 }, { id: "e7", index: 7 }]);
+    historyManager.forgetCatchUp();
+    treeManager.exactness.restart();
+    getHistoryEntriesAfter.mockResolvedValue([entryDoc(7, "e6")]);
+    const replaced = { lastHistoryEntryId: "e6", exactThrough: { index: 6, since: "e2" } };
+    await historyManager.catchUpAtLoad(() => replaced);
+    expect(getHistoryEntriesAfter).toHaveBeenCalledWith(firestore, documentPath, 6, 7);
+    expect(tileContent.text).toBe("e7");
+    expect(historyManager.lastCommitted).toBeUndefined();
+    expect(treeManager.exactness.exactSince).toBe("e2");
+    expect(treeManager.exactness.isExact).toBe(true);
   });
 
   it("doesn't fetch a gap over 200 entries and leaves the session not exact", async () => {

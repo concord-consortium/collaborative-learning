@@ -162,11 +162,20 @@ in `functions-v2/node_modules` or `authoring-api/node_modules`: those packages p
 in shipping.md.
 
 **Indexes:**
-`npx firebase deploy --only firestore:indexes --project <project> --config <worktree>/firebase.json`.
-Leave off `--non-interactive` and `--force`: the CLI asks before deleting indexes that aren't in
-the file, and the answer is no unless the developer decides otherwise. Wait until the new indexes
-show Enabled (`npx firebase firestore:indexes --project <project>`, or the console) before the
-next part.
+`npx firebase deploy --only firestore:indexes --project <project> --config <worktree>/firebase.json --non-interactive`.
+The CLI asks before deleting indexes and field overrides that aren't in the file, and Claude's
+shell can't answer a prompt. `--non-interactive` without `--force` answers no to both (in
+firebase-tools 15.15.0, `firestore/api.js` keeps them in non-interactive mode unless `--force` is
+set). The log gives only how many of each it kept, and suggests rerunning with `--force`: don't.
+The comparison in "Firebase deployables" (preparing.md) names them. Deleting one is the
+developer's decision; they run that deploy themselves.
+
+Wait until the new indexes are built before the next part. `npx firebase firestore:indexes
+--project <project> --pretty` marks each composite index `[READY]` or `[CREATING]`; without
+`--pretty` it prints no state. It shows no state for field overrides: for those, `gcloud firestore
+operations list --project <project>` shows the field operation, and `gcloud firestore indexes
+fields list --project <project>` the result. `fields describe` prints only an `ancestorField`
+reference for an exemption, so that alone doesn't mean the override is missing.
 
 **Firestore rules:**
 `npx firebase deploy --only firestore:rules --project <project> --config <worktree>/firebase.json --non-interactive`.
@@ -193,7 +202,10 @@ file (preparing.md):
 4. **Check:** `git -C <worktree> status --short` is empty (a deploy that asked for a param would
    have written to a project file), and check the functions' deploy times and params.
 
-Deploy all of a codebase, not a subset. Each function keeps the params it was deployed with, so a
+Deploy all of a codebase, not a subset, unless the developer decides otherwise (for example, to
+keep a function deployed from an unmerged PR; see "Firebase deployables" in preparing.md). Then
+deploy the release's changed functions by name, `--only functions:<codebase>:<fn>,...`, and
+record it. Each function keeps the params it was deployed with, so a
 subset deploy leaves the others on older values.
 
 **functions-v1:** stop and ask. Production's 1st-gen functions are in codebase `default` on
@@ -212,7 +224,10 @@ assignment whose resource is on `branch/v<X.Y>.x/`, and after the tag against on
 since the spec checks the report's CLUE path matches the resource's. The previous release's
 smoke-test set has both, assigned in the developer's class and created by the admin API user:
 resources named "(vX.Y.Z, staging FB)" and "(vX.Y.x branch, staging FB)", with the matching
-teacher reports. `GET /api/v1/classes/<id>` lists the class's offerings with their URLs.
+teacher reports. `GET /api/v1/classes/<id>` lists the class's offerings with their URLs. To find
+the class from an offering you know, such as the one in the last release record's smoke test,
+`GET /api/v1/offerings/<id>` gives its `clazz_id`. Do both from a script in `scripts/local/` on
+`PortalSession`, with `readOnly = true` set (it defaults to false).
 
 First check the assignment's resource URL is on the expected path (`branch/v<X.Y>.x/` here) and
 includes `firebaseEnv=staging` (the resource's edit page, or the portal API). On the branch the
@@ -281,7 +296,11 @@ Functions v2 and CI Regression. The branch push starts its own runs; watch **the
 of `ci.yml` and `functions-v2.yml`, find the run with `gh run list --workflow <file> --branch
 v<X.Y.Z>`, then `gh run watch <id> --exit-status`. Both must pass before Release Staging. Confirm
 `https://collaborative-learning.concord.org/version/v<X.Y.Z>/` loads; a 200 is enough here, since
-`deployed-version.ts` checks the compiled version after Release Staging.
+`deployed-version.ts` checks the compiled version after Release Staging. There's no
+`version.json` in the folder: the version is compiled into the bundle. Checking it now is
+optional. If something calls for it, search the page's non-vendor scripts for
+`appVersion:"<X.Y.Z>"` and the commit the tag points to (`git rev-parse v<X.Y.Z>^{commit}`; the
+tag is annotated, so its own sha differs).
 
 ## GitHub release [approve]
 
@@ -318,7 +337,16 @@ Tell the project team's tester in #clue-dev that the release is ready on the sta
 draft to a temporary Markdown file for the developer to edit, then post it. Include:
 - the version URL and the release notes link;
 - which of their resources changed, and that staging Firebase starts without their old work;
-- where the other staging-Firebase resources are.
+- where the other staging-Firebase resources are;
+- a request, mentioning the tester by name, to confirm in the thread once they've tested the tag
+  on the staging portal: "we'll release to production once you confirm."
+
+Approving stories on the branch build isn't that confirmation. Without the request, the tester
+may not know the release is waiting on them. A mention isn't enough on its own either: in 7.8.0
+it rendered and the tester still wasn't notified. So once the post is up, set something to bring
+you back to check for the confirmation (a background watcher, or a reminder in the developer's
+self-DM), and if it hasn't come by then, propose a nudge in the thread **[approve]** or suggest the
+developer message the tester directly.
 
 Keep a testing checklist out of the post unless the developer wants one.
 
@@ -337,5 +365,7 @@ release's, which already succeeded, so watching it would report a false pass. Re
 list` until it prints an id; take only a run created after `<dispatched>`.
 
 The log should show "Assuming role with OIDC" and four `copy:` lines, to `staging.html`, `editor/`,
-`authoring/` and `authoring-iframe/`. Then check with `deployed-version.ts`. The staging page is
+`authoring/` and `authoring-iframe/`. Its Notify Rollbar step lists the `version` it sent, which
+should be the commit the tag points to (`git rev-parse v<X.Y.Z>^{commit}`), not master's. Then
+check with `deployed-version.ts`. The staging page is
 `https://collaborative-learning.concord.org/staging.html`.

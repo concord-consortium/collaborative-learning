@@ -7,9 +7,9 @@ import { getDataflowProgramVersion, STATE_VERSION_RETE_V1 } from "./dataflow-sta
 
 /**
  * Legacy DataFlow tiles (see `getDataflowProgramVersion`) were converted to the current format
- * without a conversion entry: before conversion entries were recorded, or in a concurrent document, which
- * doesn't record them yet. Their history goes straight from legacy entries to current ones. This
- * bridge finds that boundary for each tile and rebuilds the legacy tile there, so playback can
+ * without a conversion entry: before conversion entries were recorded, or in a concurrent document,
+ * which doesn't record them yet. Their history goes straight from legacy entries to current ones.
+ * This bridge finds that boundary for each tile and rebuilds the legacy tile there, so playback can
  * cross it.
  */
 
@@ -98,9 +98,9 @@ function rebuildTileJson(
   return getJsonAtPath(documentJson, tilePath);
 }
 
-// True when a conversion entry converts the tile from legacy: its forward or inverse patches on the tile
-// include a legacy patch. A conversion of a legacy program with no nodes and no `values` map has
-// a legacy patch only in its inverse, which sets the legacy program id back.
+// True when a conversion entry converts the tile from legacy: its forward or inverse patches on the
+// tile include a legacy patch. A conversion of a legacy program with no nodes and no `values` map
+// has a legacy patch only in its inverse, which sets the legacy program id back.
 function convertsLegacyTile(entry: HistoryEntryType, treeId: string, tilePath: string) {
   return [HistoryOperation.Redo, HistoryOperation.Undo].some(opType =>
     getEntryPatchesForTree(entry, treeId, opType)
@@ -115,12 +115,57 @@ function getLegacyTileBefore(entry: HistoryEntryType, treeId: string, tilePath: 
   return isLegacyProgram(tile?.content?.program) ? tile : undefined;
 }
 
+// What the bridge reads from an entry. Completed entries don't change, so it is kept per entry.
+interface IEntrySummary {
+  treeId: string;
+  // The tiles a legacy patch is on. Empty for a conversion entry.
+  legacyTileIds: string[];
+  // The tiles a patch is at or under.
+  touchedTileIds: Set<string>;
+  // True when a patch is above the tiles, such as a replace of the whole tile map.
+  touchesEveryTile: boolean;
+}
+
+const entrySummaries = new WeakMap<HistoryEntryType, IEntrySummary>();
+
+function getEntrySummary(entry: HistoryEntryType, treeId: string) {
+  const kept = entrySummaries.get(entry);
+  if (kept?.treeId === treeId) return kept;
+  const legacyTileIds = new Set<string>();
+  const touchedTileIds = new Set<string>();
+  let touchesEveryTile = false;
+  getEntryPatchesForTree(entry, treeId, HistoryOperation.Redo).forEach(patch => {
+    const tileId = getTileId(patch.path);
+    if (tileId) {
+      touchedTileIds.add(tileId);
+      if (!entry.isConversionEntry && isLegacyDataflowPatch(patch)) legacyTileIds.add(tileId);
+    } else if (isAbove(patch.path, `${kTileMapPath}/`)) {
+      touchesEveryTile = true;
+    }
+  });
+  const summary = { treeId, legacyTileIds: Array.from(legacyTileIds), touchedTileIds, touchesEveryTile };
+  entrySummaries.set(entry, summary);
+  return summary;
+}
+
+const touchesTile = (summary: IEntrySummary, tileId: string) =>
+  summary.touchesEveryTile || summary.touchedTileIds.has(tileId);
+
+// The index of the first entry from `start` on that touches the tile, or -1.
+function findEntryTouchingTile(history: readonly HistoryEntryType[], treeId: string, tileId: string,
+    start: number, end = history.length) {
+  for (let index = start; index < end; index++) {
+    if (touchesTile(getEntrySummary(history[index], treeId), tileId)) return index;
+  }
+  return -1;
+}
+
 /**
  * Puts a virtual conversion after each tile's last legacy entry. Conversion entries don't count as
- * legacy entries, although a conversion entry that converts a legacy tile has legacy patches. When the
- * next entry that touches the tile is a conversion entry that converts it from legacy, the history
- * records the conversion, and the tile needs no virtual conversion. A conversion entry from a later
- * schema change doesn't cover it.
+ * legacy entries, although a conversion entry that converts a legacy tile has legacy patches. When
+ * the next entry that touches the tile is a conversion entry that converts it from legacy, the
+ * history records the conversion, and the tile needs no virtual conversion. A conversion entry from
+ * a later schema change doesn't cover it.
  *
  * The tile's old JSON is rebuilt from its patches. When that fails, such as when the history
  * doesn't hold the tile's add, it is taken from the next entry's undo patches if they set the
@@ -128,29 +173,36 @@ function getLegacyTileBefore(entry: HistoryEntryType, treeId: string, tilePath: 
  */
 export const legacyDataflowHistoryBridge: IHistoryBridge = {
   findVirtualConversions(history: readonly HistoryEntryType[], treeId: string): IVirtualConversion[] {
-    const patchesByEntry = history.map(entry => getEntryPatchesForTree(entry, treeId, HistoryOperation.Redo));
-
     const lastLegacyIndex = new Map<string, number>();
-    patchesByEntry.forEach((patches, index) => {
-      if (history[index].isConversionEntry) return;
-      patches.forEach(patch => {
-        if (!isLegacyDataflowPatch(patch)) return;
-        const tileId = getTileId(patch.path);
-        if (tileId) lastLegacyIndex.set(tileId, index);
-      });
+    history.forEach((entry, index) => {
+      getEntrySummary(entry, treeId).legacyTileIds.forEach(tileId => lastLegacyIndex.set(tileId, index));
     });
 
+    let patchesByEntry: IJsonPatch[][] | undefined;
     const conversions: IVirtualConversion[] = [];
     lastLegacyIndex.forEach((lastLegacy, tileId) => {
       const tilePath = `${kTileMapPath}/${tileId}`;
-      const next = patchesByEntry.findIndex((patches, index) => index > lastLegacy &&
-        patches.some(patch => isAtOrUnder(patch.path, tilePath) || isAbove(patch.path, tilePath)));
+      const next = findEntryTouchingTile(history, treeId, tileId, lastLegacy + 1);
       const nextEntry = next >= 0 ? history[next] : undefined;
       if (nextEntry?.isConversionEntry && convertsLegacyTile(nextEntry, treeId, tilePath)) return;
+      patchesByEntry ??= history.map(entry => getEntryPatchesForTree(entry, treeId, HistoryOperation.Redo));
       const oldJson = rebuildTileJson(patchesByEntry, tilePath, lastLegacy) ??
         (nextEntry && getLegacyTileBefore(nextEntry, treeId, tilePath));
       conversions.push({ path: tilePath, position: lastLegacy + 1, oldJson });
     });
     return conversions;
+  },
+
+  // Appended entries change the conversions when one has a legacy patch, or is the first entry
+  // after a conversion to touch its tile, which decides whether the history records it.
+  appendChangesConversions(history: readonly HistoryEntryType[], previousLength: number, treeId: string,
+      conversions: readonly IVirtualConversion[]) {
+    const appended = history.slice(previousLength).map(entry => getEntrySummary(entry, treeId));
+    if (appended.some(summary => summary.legacyTileIds.length > 0)) return true;
+    return conversions.some(({ path, position }) => {
+      const tileId = getTileId(path);
+      return !!tileId && appended.some(summary => touchesTile(summary, tileId)) &&
+        findEntryTouchingTile(history, treeId, tileId, position, previousLength) < 0;
+    });
   }
 };
