@@ -164,6 +164,31 @@ export interface TileHandler {
   (params: TileHandlerParams): string|undefined;
 }
 
+/**
+ * What a describer is given to turn one annotation endpoint into a phrase. `tile` is the raw
+ * snapshot from the document's tileMap, not a normalized tile: annotations name tiles by id, and
+ * the tileMap is what resolves an id. `tileMap` is here for the Simulator, whose annotatable nodes
+ * are mirrored from a Dataflow tile elsewhere in the document.
+ */
+export interface AnnotationDescriberParams {
+  tile: ITileModelSnapshotOut;
+  objectId: string;
+  objectType?: string;
+  dataSets: NormalizedDataSet[];
+  variables: NormalizedVariable[];
+  tileMap?: TileMap;
+}
+
+/**
+ * `undefined` means one thing only: no such object in this tile any more. The registry is keyed on
+ * tile type for exactly that reason -- with a first-match array of handlers, `undefined` would also
+ * mean "not my tile type", and a sparrow anchored to a deleted object could not be told from one
+ * whose describer simply declined it.
+ */
+export interface AnnotationDescriber {
+  (params: AnnotationDescriberParams): string | undefined;
+}
+
 export interface AiSummarizerOptions {
   includeModel?: boolean; // If true, include the full JSON model in the output
   minimal?: boolean;      // If true, skip all boilerplate and headers and just return the text content

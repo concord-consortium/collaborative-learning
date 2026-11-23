@@ -54,7 +54,7 @@ interface Program {
 }
 
 /** Escape a string for use inside a double-quoted Graphviz attribute value. */
-function escapeDotString(text: string): string {
+export function escapeDotString(text: string): string {
   // Escape backslashes and quotes, then turn newlines into DOT's `\n` line-break escape. Group
   // labels are multi-line, so a raw newline inside label="..." would render unpredictably.
   return text
