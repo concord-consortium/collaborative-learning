@@ -113,6 +113,13 @@ export function annotationsSummary({
     edgeLines.push(`  "${ends[0]}" -> "${ends[1]}"${label};`);
   }
 
+  const count = countLine(annotations.length, skipped);
+  // Nothing drawable leaves an empty digraph, which states only that the summarizer ran. The count
+  // line already says the sparrows are there and why none of them can be shown.
+  if (edgeLines.length === 0) {
+    return `\n${heading(headingLevel + 1, "Sparrows")}${count}\n`;
+  }
+
   const graph = [
     "```dot",
     "digraph sparrows {",
@@ -124,7 +131,7 @@ export function annotationsSummary({
   ].join("\n");
 
   const preamble = options.minimal ? "" : `${kPreamble}\n\n`;
-  return `\n${heading(headingLevel + 1, "Sparrows")}${preamble}${graph}\n\n${countLine(annotations.length, skipped)}\n`;
+  return `\n${heading(headingLevel + 1, "Sparrows")}${preamble}${graph}\n\n${count}\n`;
 }
 
 type ResolvedEnd = "free" | "missing" | { id: string; label: string };
@@ -158,7 +165,7 @@ function tileLabel(tile: any): string {
 function countLine(total: number, skipped: number): string {
   const sentence = `This document has ${total} ${pluralize(total, "sparrow", "sparrows")}.`;
   if (skipped === 0) { return sentence; }
-  const subject = skipped === 1 ? "One is" : skipped === total ? "Both are" : `${skipped} are`;
+  const subject = skipped === 1 ? "One is" : skipped === 2 && skipped === total ? "Both are" : `${skipped} are`;
   const they = skipped === 1 ? "it is" : "they are";
   const appear = skipped === 1 ? "it no longer appears" : "they no longer appear";
   return `${sentence} ${subject} not shown: ${they} anchored to something that has since been ` +

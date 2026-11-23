@@ -145,6 +145,29 @@ describe("annotationsSummary with endpoints that no longer exist", () => {
     expect(result).toContain("One is not shown");
   });
 
+  // "Both" is only true of two. Three gone out of three is "3 are not shown".
+  it("counts more than two missing sparrows by number", () => {
+    const result = annotationsSummary(params([
+      { id: "a1", sourceObject: { tileId: "gone", objectId: "o1" } },
+      { id: "a2", sourceObject: { tileId: "gone", objectId: "o2" } },
+      { id: "a3", sourceObject: { tileId: "gone", objectId: "o3" } }
+    ], tileMap));
+
+    expect(result).toContain("3 are not shown");
+  });
+
+  // With nothing left to draw, an empty digraph says only that the summarizer ran. The count line
+  // is the whole of what is known.
+  it("writes no digraph when every sparrow is skipped", () => {
+    const result = annotationsSummary(params([
+      { id: "a1", sourceObject: { tileId: "gone", objectId: "o1" } }
+    ], tileMap));
+
+    expect(result).not.toContain("digraph sparrows");
+    expect(result).not.toContain("A sparrow is an arrow");
+    expect(result).toContain("This document has 1 sparrow.");
+  });
+
   it("counts several missing sparrows in the plural", () => {
     const result = annotationsSummary(params([
       { id: "a1", sourceObject: { tileId: "gone", objectId: "o1" } },
