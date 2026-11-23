@@ -6,8 +6,9 @@ TODO: Support more tile types.
 */
 
 import {
-  AiSummarizerOptions, DocumentContentSnapshotType, INormalizedTile, NormalizedDataSet,
-  NormalizedModel, NormalizedSection, NormalizedVariable, SharedModelMapEntry, TileMap
+  AiSummarizerOptions, DocumentContentSnapshotType, INormalizedTile, NormalizedAnnotation,
+  NormalizedAnnotationEndpoint, NormalizedDataSet, NormalizedModel, NormalizedSection,
+  NormalizedVariable, SharedModelMapEntry, TileMap
 } from "./ai-summarizer-types";
 import {
   generateAttributesMarkdownTable, generateMarkdownTable, generateVariablesMarkdownTable, heading, pluralize
@@ -113,6 +114,7 @@ function buildNormalizedDataSet(entryId: string, entry: SharedModelMapEntry): No
       formula: attr.formula?.display || undefined
     })),
     numCases: caseCount,
+    caseIds: (cases || []).map((aCase: any) => `${aCase?.__id__ ?? ""}`),
     data: [],
     sharedDataSetId: entryId
   };
@@ -145,11 +147,36 @@ export function parseContent(content: string): DocumentContentSnapshotType {
   }
 }
 
+/**
+ * A runtime document stores annotations as an MST map, keyed by id; authored curriculum exports
+ * them as an array. Both reach the summarizer, so both normalize to one list.
+ */
+function normalizeAnnotations(annotations: any): NormalizedAnnotation[] {
+  if (!annotations) { return []; }
+  const list = Array.isArray(annotations) ? annotations : Object.values(annotations);
+  return list
+    .filter((annotation: any) => annotation?.sourceObject || annotation?.targetObject)
+    .map((annotation: any) => ({
+      id: annotation.id,
+      ...(annotation.text !== undefined ? { text: annotation.text } : {}),
+      ...(annotation.sourceObject ? { sourceObject: endpoint(annotation.sourceObject) } : {}),
+      ...(annotation.targetObject ? { targetObject: endpoint(annotation.targetObject) } : {})
+    }));
+}
+
+function endpoint(object: any): NormalizedAnnotationEndpoint {
+  return {
+    tileId: object.tileId,
+    objectId: object.objectId,
+    ...(object.objectType !== undefined ? { objectType: object.objectType } : {})
+  };
+}
+
 export function normalize(model: DocumentContentSnapshotType) {
   const sections: NormalizedSection[] = [];
   const dataSets: NormalizedDataSet[] = [];
   const variables: NormalizedVariable[] = [];
-  const { rowOrder, rowMap, tileMap, sharedModelMap } = model || {};
+  const { rowOrder, rowMap, tileMap, sharedModelMap, annotations } = model || {};
 
   const addSection = (sectionId?: string): NormalizedSection => {
     const newSection: NormalizedSection = {
@@ -251,6 +278,7 @@ export function normalize(model: DocumentContentSnapshotType) {
       sections,
       dataSets,
       variables,
+      annotations: normalizeAnnotations(annotations),
     },
     tileMap: tileMap as TileMap | undefined,
   };

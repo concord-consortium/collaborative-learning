@@ -77,6 +77,10 @@ export interface NormalizedDataSet {
   tileIds: string[];
   attributes: NormalizedAttribute[];
   numCases: number;
+  // The ids of the data set's cases, in the order the rows are shown. An annotation names a cell
+  // by case id, and only this order says which row that is. Optional because a data set built from
+  // curriculum content can have no cases at all.
+  caseIds?: string[];
   data: string[][];
   sharedDataSetId?: string;
 }
@@ -103,6 +107,27 @@ export interface NormalizedVariable {
   value?: number;
 }
 
+/**
+ * One arrow annotation as a document stores it. Students call these sparrows, and so does the
+ * summary they appear in; the code keeps the model's own word.
+ *
+ * An endpoint is optional on each end -- a one-sided sparrow anchors one end to an object and
+ * leaves the other floating in the document, which is how students use them as labels. The model
+ * requires only that one end have an object.
+ */
+export interface NormalizedAnnotationEndpoint {
+  tileId: string;
+  objectId: string;
+  objectType?: string;
+}
+
+export interface NormalizedAnnotation {
+  id: string;
+  text?: string;
+  sourceObject?: NormalizedAnnotationEndpoint;
+  targetObject?: NormalizedAnnotationEndpoint;
+}
+
 export interface INormalizedTile {
   model: ITileModelSnapshotOut;
   number: number;
@@ -118,6 +143,7 @@ export interface NormalizedModel {
   sections: NormalizedSection[];
   dataSets: NormalizedDataSet[];
   variables: NormalizedVariable[];
+  annotations: NormalizedAnnotation[];
 }
 
 export type TileMap = Record<string, ITileModelSnapshotOut>;
