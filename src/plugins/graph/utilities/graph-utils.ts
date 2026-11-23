@@ -24,6 +24,7 @@ import {measureText} from "../../../components/tiles/hooks/use-measure-text";
 import { GraphModel, IGraphModel } from "../models/graph-model";
 import { isFiniteNumber } from "../../../utilities/math-utils";
 import { SharedModelEntrySnapshotType } from "../../../models/document/shared-model-entry";
+import { decipherDotId, getDotId } from "../../../../shared/annotations/object-ids";
 
 /**
  * Utility routines having to do with graph entities
@@ -785,21 +786,9 @@ export function computeSlopeAndIntercept(xAxis?: IAxisModel, yAxis?: IAxisModel)
   return {slope, intercept};
 }
 
-export function getDotId(caseId: string, xAttributeId: string, yAttributeId: string) {
-  return `dot:{${caseId}}:{${xAttributeId}}:{${yAttributeId}}`;
-}
-
-const dotIdRegEx = /^dot:{(.+)}:{(.+)}:{(.+)}$/;
-export function decipherDotId(dotId: string) {
-  const match = dotId.match(dotIdRegEx);
-  if (match && match.length === 4) {
-    const caseId = match[1];
-    const xAttributeId = match[2];
-    const yAttributeId = match[3];
-    return { caseId, xAttributeId, yAttributeId };
-  }
-  return {};
-}
+// Defined in shared/ so the AI summarizer reads annotation endpoints with the same format the
+// client writes them with. Re-exported here because src/ already imports them from this file.
+export { decipherDotId, getDotId };
 
 export function updateGraphContentWithNewSharedModelIds(
   content: SnapshotOut<typeof GraphModel>,
