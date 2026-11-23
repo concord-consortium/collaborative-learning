@@ -17,6 +17,7 @@ import { heading, pluralize } from "./ai-summarizer-utils";
 import { escapeDotString } from "./tile-summarizers/dataflow-to-graphviz";
 import { describeDrawingObject } from "./tile-summarizers/handle-drawing-tile";
 import { describeGraphObject } from "./tile-summarizers/handle-graph-tile";
+import { describeNumberlineObject } from "./tile-summarizers/handle-numberline-tile";
 import { describeGeometryObject } from "./tile-summarizers/handle-geometry-tile";
 import { describeTableObject } from "./tile-summarizers/handle-table-tile";
 
@@ -26,6 +27,7 @@ const describersByType: Record<string, AnnotationDescriber> = {
   Drawing: describeDrawingObject,
   Geometry: describeGeometryObject,
   Graph: describeGraphObject,
+  Numberline: describeNumberlineObject,
   Table: describeTableObject,
 };
 
