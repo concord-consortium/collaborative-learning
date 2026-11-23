@@ -20,6 +20,7 @@ import { describeGraphObject } from "./tile-summarizers/handle-graph-tile";
 import { describeNumberlineObject } from "./tile-summarizers/handle-numberline-tile";
 import { describeGeometryObject } from "./tile-summarizers/handle-geometry-tile";
 import { describeTableObject } from "./tile-summarizers/handle-table-tile";
+import { describeTextObject } from "./tile-summarizers/handle-text-tile";
 
 // Keyed on tile content type, so `undefined` from a describer means one thing: no such object any
 // more. A tile type with no entry here falls to the generic backstop below.
@@ -29,6 +30,7 @@ const describersByType: Record<string, AnnotationDescriber> = {
   Graph: describeGraphObject,
   Numberline: describeNumberlineObject,
   Table: describeTableObject,
+  Text: describeTextObject,
 };
 
 /**
