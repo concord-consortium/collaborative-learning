@@ -15,10 +15,13 @@ import {
 } from "./ai-summarizer-types";
 import { heading, pluralize } from "./ai-summarizer-utils";
 import { escapeDotString } from "./tile-summarizers/dataflow-to-graphviz";
+import { describeTableObject } from "./tile-summarizers/handle-table-tile";
 
 // Keyed on tile content type, so `undefined` from a describer means one thing: no such object any
-// more. An empty registry sends every endpoint to the backstop.
-const describersByType: Record<string, AnnotationDescriber> = {};
+// more. A tile type with no entry here falls to the generic backstop below.
+const describersByType: Record<string, AnnotationDescriber> = {
+  Table: describeTableObject,
+};
 
 /**
  * The backstop for a tile type with no describer. It finds the object in the raw tile JSON so the
