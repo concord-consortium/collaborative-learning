@@ -1,5 +1,6 @@
 import { getSimulationData } from "../../simulations/simulations";
-import { TileHandlerParams } from "../ai-summarizer-types";
+import { displayNameForType } from "../../dataflow-node-types";
+import { AnnotationDescriberParams, TileHandlerParams } from "../ai-summarizer-types";
 import { generateMarkdownTable } from "../ai-summarizer-utils";
 
 export function handleSimulatorTile({ tile }: TileHandlerParams) {
@@ -24,4 +25,33 @@ export function handleSimulatorTile({ tile }: TileHandlerParams) {
   );
 
   return result;
+}
+
+/**
+ * The simulator is the one tile whose annotatable objects are not in its own content. Its
+ * mini-nodes come from SharedProgramData, whose `programNodes` is volatile and so never
+ * serialized, and its pins are synthesized -- 14 a side -- rather than stored.
+ *
+ * So a node id is resolved against the Dataflow program the mini-nodes mirror, and when the
+ * document holds no such program the id is named as it stands. Returning undefined would report the
+ * object deleted, and a simulator node is never deleted: it was never written down.
+ */
+const kPinIdPattern = /^[LR](\d|1[0-3])$/;
+
+export function describeSimulatorObject(
+  { objectId, objectType, tileMap }: AnnotationDescriberParams
+): string | undefined {
+  if (objectType === "pin") {
+    return kPinIdPattern.test(objectId) ? `pin ${objectId}` : undefined;
+  }
+  if (objectType !== "node") { return undefined; }
+
+  for (const tile of Object.values(tileMap ?? {})) {
+    const node = (tile as any)?.content?.program?.nodes?.[objectId];
+    if (node) {
+      const name = node.data?.orderedDisplayName || displayNameForType(node.name);
+      return `the ${name} node, shown in the simulation`;
+    }
+  }
+  return `the ${objectId} node in the simulation`;
 }

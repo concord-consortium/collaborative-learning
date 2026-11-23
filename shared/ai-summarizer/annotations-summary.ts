@@ -20,6 +20,7 @@ import { describeDrawingObject } from "./tile-summarizers/handle-drawing-tile";
 import { describeGraphObject } from "./tile-summarizers/handle-graph-tile";
 import { describeNumberlineObject } from "./tile-summarizers/handle-numberline-tile";
 import { describeGeometryObject } from "./tile-summarizers/handle-geometry-tile";
+import { describeSimulatorObject } from "./tile-summarizers/handle-simulator-tile";
 import { describeTableObject } from "./tile-summarizers/handle-table-tile";
 import { describeTextObject } from "./tile-summarizers/handle-text-tile";
 
@@ -31,6 +32,7 @@ const describersByType: Record<string, AnnotationDescriber> = {
   Geometry: describeGeometryObject,
   Graph: describeGraphObject,
   Numberline: describeNumberlineObject,
+  Simulator: describeSimulatorObject,
   Table: describeTableObject,
   Text: describeTextObject,
 };
