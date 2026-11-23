@@ -4,8 +4,10 @@
 its history. Keep it up to date as that changes.
 
 An individual document whose envelope has `exactThrough` and is behind its history applies the
-missing entries, up to 200, when its owner opens it for editing (`TreeManager.applyEntriesAtLoad`).
-A document this session created has no history in Firestore yet, so it opens caught up instead
+missing entries when its owner opens it for editing (`TreeManager.applyEntriesAtLoad`). When more
+than 200 are missing, it applies none of them, and the session isn't exact
+(`catch-up-gap-too-large`), so its saves are intermediate ones. A document this session created has
+no history in Firestore yet, so it opens caught up instead
 (`DocumentsModel.markNewDocumentCaughtUp`).
 
 An envelope without `exactThrough` can hold entries after its `lastHistoryEntryId`, so applying the
@@ -32,7 +34,9 @@ older content when the caught-up content was never saved, the session starts ove
 marked as not caught up again, and the next open for editing catches it up from the new content's
 envelope. The catch-up plans against the newest entry the session knows of: its own newest commit,
 or else Firestore's last entry as read when the document first caught up. As soon as the sender
-starts, it saves the caught-up content, so the stored content isn't left behind its history.
+starts, it saves the caught-up content, so the stored content isn't left behind its history, unless
+a conversion entry is pending. In that case the caught-up content is first saved with the next
+content change, and if there isn't one, the next open for editing catches up again.
 
 ## How the entries are applied
 

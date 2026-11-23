@@ -95,7 +95,9 @@ save has been possible for 5 seconds. Each stretch of intermediate saves is logg
 `exactThrough` and is behind its history applies the missing entries when its owner opens it for
 editing (see [catch-up-at-load.md](catch-up-at-load.md)). Its content isn't saved until the catch-up
 finishes, and as soon as the sender starts, it saves the caught-up content, so the stored content
-isn't left behind its history. When the catch-up can't apply the entries the content is missing, for
+isn't left behind its history, unless a conversion entry is pending. In that case the caught-up
+content is first saved with the next content change, and if there isn't one, the next open for
+editing catches up again. When the catch-up can't apply the entries the content is missing, for
 example because the envelope is behind its history and has no `exactThrough`, or because the content
 listener replaces the content while the catch-up reads Firestore, the session isn't exact, so its
 saves are intermediate ones.
