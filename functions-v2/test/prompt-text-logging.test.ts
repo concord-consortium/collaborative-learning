@@ -40,6 +40,7 @@ function deps(overrides: Partial<CategorizeDeps> = {}): CategorizeDeps {
     getEmbeddings: jest.fn().mockResolvedValue([0.1, 0.2, 0.3]),
     findRelatedSummaries: jest.fn().mockResolvedValue([relatedSummary]),
     getUnitSummary: jest.fn().mockResolvedValue(undefined),
+    getClassSummaries: jest.fn().mockResolvedValue({}),
     createOpenAI: () => ({
       chat: {
         completions: {

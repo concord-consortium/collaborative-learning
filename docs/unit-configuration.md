@@ -180,6 +180,26 @@ Ideas and Teacher Summary run server-side, with no browser session and no branch
 
 Teacher Summary's "current problem" is the one exception to "the student's current problem": it uses the *class's* current problem instead — the furthest-along problem, in authored order, that any student in the class has done real work on (requiring both `documentHasStudentWork(content)` and evidence of an edit since creation: `changeCount`, when present, is authoritative — `changeCount >= 1` — and `lastEditedAt` is used only as a fallback for older records that predate `changeCount`). Untouched templates have neither edit marker and do not advance the class; `changeCount` counts saved edits even before a student disconnects. `lastEditedAt` is a weaker signal than `changeCount` — it is also written by an Ideas click whether or not the student edited anything — so it is only trusted when `changeCount` is absent; one accepted residual: a legacy record with no `changeCount` whose `lastEditedAt` came only from an Ideas click still qualifies. A student who is behind the rest of the class can therefore see, through the class summary the AI Tile forwards, curriculum context from a problem ahead of where they personally are. Also unlike the other three consumers, a class summary is not regenerated just because its unit's `aiUnitSummary` changes: regeneration is still triggered by student work changing, so a newly generated or edited summary reaches an existing class summary the next time that class's work changes (the nightly pass, or an on-demand regeneration), not immediately.
 
+### Context tokens in AI prompts
+
+An AI tile prompt and the `aiPrompt` "mainPrompt" may name which contexts the AI should work with:
+
+| Token | What it supplies |
+|---|---|
+| `{{curriculum}}` | The unit's curriculum around the student's current problem |
+| `{{problem}}` | The current problem and how it asks students to work |
+| `{{classwork}}` | All student work in this class, including this student's own |
+| `{{teacherwork}}` | The teacher's materials, supplied as reference |
+| `{{mywork}}` | The document the student is working in |
+
+A token names a context; it does not paste text where it appears. `Compare {{mywork}} with {{classwork}}` reads to the AI as "Compare this document with the class's work", with both summaries supplied alongside, each labelled with what it holds.
+
+A prompt that names no token uses `{{curriculum}}` and `{{mywork}}`. In an AI tile it is not given the class's work; in Ideas it also receives related documents from the class.
+
+`{{classwork}}` is a summary of every student document in the class and includes the student's own, so it cannot be used to mean "everyone except me".
+
+A misspelled token such as `{{myWork}}` is left in the prompt as ordinary text, so it will show up in the AI's answer.
+
 ## Unit- or Problem-level `config` properties
 
 These properties are configurable at the unit, investigation, or problem levels of the curriculum JSON.

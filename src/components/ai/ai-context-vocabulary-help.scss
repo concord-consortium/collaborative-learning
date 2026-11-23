@@ -1,0 +1,37 @@
+.ai-context-vocabulary-help {
+  margin: 0 0 5px 0;
+  font-size: 0.8em;
+  color: #444;
+  // The authoring settings form puts this in a `td`, which sets `white-space: nowrap` for the
+  // short values that fill the rest of that table.
+  white-space: normal;
+
+  summary {
+    cursor: pointer;
+    color: #336;
+    user-select: none;
+  }
+
+  p {
+    margin: 4px 0;
+  }
+
+  ul {
+    margin: 4px 0;
+    padding-left: 18px;
+    list-style: none;
+  }
+
+  li {
+    margin-bottom: 2px;
+    text-indent: -18px;
+    padding-left: 18px;
+  }
+
+  code {
+    font-family: monospace;
+    background-color: rgba(0, 0, 0, 0.06);
+    padding: 0 2px;
+    white-space: nowrap;
+  }
+}
