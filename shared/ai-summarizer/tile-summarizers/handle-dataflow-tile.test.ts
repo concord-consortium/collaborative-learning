@@ -1,4 +1,4 @@
-import { handleDataflowTile } from "./handle-dataflow-tile";
+import { describeDataflowObject, handleDataflowTile } from "./handle-dataflow-tile";
 
 // handleDataflowTile reads only tile.model.content (type/program/outputConfig) and tile.sharedDataSet,
 // so a minimal literal exercises the unit-config note without a full normalized tile.
@@ -38,5 +38,39 @@ describe("handleDataflowTile — unit output config note", () => {
   it("returns undefined for a non-dataflow tile", () => {
     const result = handleDataflowTile({ tile: { model: { content: { type: "Table" } } } } as any);
     expect(result).toBeUndefined();
+  });
+});
+
+describe("describeDataflowObject", () => {
+  const content = {
+    type: "Dataflow",
+    program: {
+      nodes: {
+        n1: { id: "n1", name: "Sensor", data: { type: "Sensor", orderedDisplayName: "Sensor 1" } },
+        n2: { id: "n2", name: "Logic", data: { type: "Logic" } }
+      }
+    }
+  };
+
+  function describe_(objectId: string) {
+    return describeDataflowObject({
+      tile: { id: "df1", content }, objectId, objectType: "Node", dataSets: [], variables: []
+    });
+  }
+
+  // The program's own graph identifies nodes by this same name, so a sparrow names a block the
+  // reader has already met rather than introducing a second vocabulary for it.
+  it("names a node the way the program's graph names it", () => {
+    expect(describe_("n1")).toBe("the Sensor 1 node");
+  });
+
+  // A node saved before orderedDisplayName existed has the raw internal type in `name`, which is
+  // not what the block is called on screen: "Logic" is the Compare block.
+  it("names a node saved without a display name by its block's displayed name", () => {
+    expect(describe_("n2")).toBe("the Compare node");
+  });
+
+  it("reports nothing for a node the program no longer holds", () => {
+    expect(describe_("gone")).toBeUndefined();
   });
 });
