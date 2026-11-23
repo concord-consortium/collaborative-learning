@@ -1,3 +1,4 @@
+import { documentSummarizer } from "./ai-summarizer";
 import { annotationsSummary } from "./annotations-summary";
 import { NormalizedAnnotation, TileMap } from "./ai-summarizer-types";
 
@@ -161,5 +162,47 @@ describe("annotationsSummary with endpoints that no longer exist", () => {
     ], tileMap));
 
     expect(result).not.toContain('"t1:o1" [label=');
+  });
+});
+
+describe("sparrows across a whole document", () => {
+  const document = {
+    rowOrder: ["row1"],
+    rowMap: { row1: { id: "row1", tiles: [{ tileId: "table1" }, { tileId: "n1" }] } },
+    tileMap: {
+      table1: { id: "table1", title: "Trip", content: { type: "Table" } },
+      n1: { id: "n1", content: { type: "Numberline", points: { p1: { id: "p1", xValue: 10 } } } }
+    },
+    sharedModelMap: {
+      sm1: {
+        sharedModel: {
+          type: "SharedDataSet",
+          id: "sm1",
+          dataSet: {
+            id: "ds1",
+            name: "Trip",
+            attributes: [{ id: "a1", name: "distance", values: ["10", "20"] }],
+            cases: [{ __id__: "c1" }, { __id__: "c2" }]
+          }
+        },
+        tiles: ["table1"]
+      }
+    },
+    annotations: {
+      ann1: {
+        id: "ann1",
+        text: "same distance",
+        sourceObject: { tileId: "table1", objectId: "cell:{c1}:{a1}", objectType: "cell" },
+        targetObject: { tileId: "n1", objectId: "p1", objectType: "point" },
+        type: "arrowAnnotation"
+      }
+    }
+  };
+
+  it("describes both ends of a sparrow that spans two tiles", () => {
+    const result = documentSummarizer(document, {});
+    expect(result).toContain('"table1:cell:{c1}:{a1}" [label="row 1 of distance (10) — Table \\"Trip\\""];');
+    expect(result).toContain('"n1:p1" [label="the point at 10 — Numberline"];');
+    expect(result).toContain('"table1:cell:{c1}:{a1}" -> "n1:p1" [label="same distance"];');
   });
 });
