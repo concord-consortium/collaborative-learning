@@ -1,5 +1,5 @@
 import { TileHandlerParams } from "../ai-summarizer-types";
-import { handleDrawingTile } from "./handle-drawing-tile";
+import { describeDrawingObject, handleDrawingTile } from "./handle-drawing-tile";
 
 function params(content: unknown): TileHandlerParams {
   return {
@@ -27,5 +27,40 @@ describe("handleDrawingTile", () => {
     // documentSummarizer and the entire document's summary is lost — every other tile with it.
     const result = handleDrawingTile(params({ type: "Drawing", objects: [null] }));
     expect(result).toBe("This tile contains a malformed drawing.");
+  });
+});
+
+describe("describeDrawingObject", () => {
+  const content = {
+    type: "Drawing",
+    objects: [
+      { id: "o1", type: "rectangle", x: 10, y: 20 },
+      { id: "o2", type: "text", text: "goes up by 10" },
+      { id: "o3", type: "group", objectIds: ["o1"] }
+    ]
+  };
+
+  function describe_(objectId: string, objectType?: string) {
+    return describeDrawingObject({
+      tile: { id: "d1", content }, objectId, objectType, dataSets: [], variables: []
+    });
+  }
+
+  it("names a shape by its kind and id", () => {
+    expect(describe_("o1", "rectangle")).toBe("rectangle o1");
+  });
+
+  // The drawing summarizer already prints an id column for every shape, so the id in the label is
+  // what lets a reader find the shape there.
+  it("quotes a text object's words, which are the student's", () => {
+    expect(describe_("o2", "text")).toBe('text o2 reading "goes up by 10"');
+  });
+
+  it("reports nothing for an object the drawing no longer holds", () => {
+    expect(describe_("gone", "rectangle")).toBeUndefined();
+  });
+
+  it("names a shape by the stored type when the annotation carries none", () => {
+    expect(describe_("o1")).toBe("rectangle o1");
   });
 });

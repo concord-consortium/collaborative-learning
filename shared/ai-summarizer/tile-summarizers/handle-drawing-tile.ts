@@ -1,4 +1,4 @@
-import { TileHandlerParams } from "../ai-summarizer-types";
+import { AnnotationDescriberParams, TileHandlerParams } from "../ai-summarizer-types";
 import { drawingToTable } from "./drawing-to-table";
 
 // There is an alternative drawing tile handler in `ai-summarizer.ts` that outputs the SVG of the
@@ -17,4 +17,19 @@ export function handleDrawingTile({ tile }: TileHandlerParams): string|undefined
     console.error("Error summarizing drawing tile:", error, tile);
     return "This tile contains a malformed drawing.";
   }
+}
+
+/**
+ * The id is part of the phrase on purpose: drawing-to-table.ts prints an `id` column for every
+ * shape, so a reader can take the id from a sparrow straight to the row describing the shape.
+ */
+export function describeDrawingObject(
+  { tile, objectId, objectType }: AnnotationDescriberParams
+): string | undefined {
+  const objects: any[] = tile?.content?.objects ?? [];
+  const object = objects.find(candidate => candidate?.id === objectId);
+  if (!object) { return undefined; }
+  const kind = object.type ?? objectType ?? "object";
+  const text = typeof object.text === "string" && object.text.trim() ? ` reading "${object.text}"` : "";
+  return `${kind} ${objectId}${text}`;
 }
