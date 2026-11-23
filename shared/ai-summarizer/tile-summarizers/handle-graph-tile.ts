@@ -1,4 +1,5 @@
-import { TileHandlerParams } from "../ai-summarizer-types";
+import { AnnotationDescriberParams, TileHandlerParams } from "../ai-summarizer-types";
+import { decipherDotId } from "../../annotations/object-ids";
 import { pluralize } from "../ai-summarizer-utils";
 
 export function handleGraphTile({ dataSets, tile }: TileHandlerParams): string|undefined {
@@ -69,4 +70,61 @@ export function handleGraphTile({ dataSets, tile }: TileHandlerParams): string|u
 
   // TODO: Add information about more adornments
   return result;
+}
+
+/**
+ * A dot is named by the values it sits at rather than by its case id, because that is what the
+ * student is looking at. The case is found by searching every data set for one holding both the
+ * case and the x attribute: a graph can plot several layers, so the tile's own data set is not
+ * enough to say which one a dot belongs to.
+ *
+ * The adornment ids come from the adornment models (`movable_line_handle:{key}:lower`,
+ * `var:{xId}:{yId}`). They are parsed only as far as the phrase needs; the line key itself means
+ * nothing to a reader, so it is used to look the line up and then dropped.
+ */
+export function describeGraphObject(
+  { tile, objectId, objectType, dataSets, variables }: AnnotationDescriberParams
+): string | undefined {
+  switch (objectType) {
+    case "dot": {
+      const { caseId, xAttributeId, yAttributeId } = decipherDotId(objectId);
+      if (!caseId || !xAttributeId || !yAttributeId) { return undefined; }
+      const dataSet = dataSets.find(ds =>
+        (ds.caseIds?.includes(caseId) ?? false) && ds.attributes.some(attr => attr.id === xAttributeId));
+      const rowIndex = dataSet?.caseIds?.indexOf(caseId) ?? -1;
+      const x = dataSet?.attributes.find(attr => attr.id === xAttributeId)?.values[rowIndex];
+      const y = dataSet?.attributes.find(attr => attr.id === yAttributeId)?.values[rowIndex];
+      if (x === undefined || y === undefined) { return undefined; }
+      return `the dot at (${x}, ${y})`;
+    }
+    case "movable-line-handle": {
+      const parts = objectId.split(":");
+      const position = parts[parts.length - 1] === "upper" ? "upper" : "lower";
+      const key = parts.slice(1, -1).join(":");
+      return `the ${position} handle of the movable line${movableLineEquation(tile, key)}`;
+    }
+    case "movable-line-equation": {
+      const key = objectId.split(":").slice(1).join(":");
+      return `the equation of the movable line${movableLineEquation(tile, key)}`;
+    }
+    case "variable": {
+      const match = objectId.match(/^var:{(.+)}:{(.+)}$/);
+      if (!match) { return undefined; }
+      const name = (id: string) => {
+        const variable = variables.find(candidate => candidate.id === id);
+        return variable?.displayName || variable?.name || id;
+      };
+      return `the plotted point for ${name(match[1])} against ${name(match[2])}`;
+    }
+    default:
+      return undefined;
+  }
+}
+
+function movableLineEquation(tile: any, lineKey: string): string {
+  const adornment = tile?.content?.adornments?.find((a: any) => a.type === "Movable Line");
+  const line = adornment?.lines?.[lineKey];
+  if (!line || line.slope === undefined || line.intercept === undefined) { return ""; }
+  const sign = line.intercept < 0 ? "-" : "+";
+  return ` y = ${line.slope}x ${sign} ${Math.abs(line.intercept)}`;
 }
