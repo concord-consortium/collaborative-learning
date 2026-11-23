@@ -12,7 +12,7 @@ import { CDocument, TreeManager } from "./tree-manager";
 import { HistoryEntry, HistoryEntrySnapshot } from "./history";
 import { JsonHistoryCopy } from "./json-history-copy";
 import { toJsonValue } from "./json-patch";
-import { buildLoadEntry } from "./schema-conversion";
+import { buildConversionEntry } from "./schema-conversion";
 import { kVersionedTestTileType, versionedTestTileSchema } from "./schema-conversion-test-types";
 
 const TestTile = TileContentModel
@@ -134,7 +134,7 @@ describe("JsonHistoryCopy", () => {
     });
 
     it("leaves a partly applied entry unapplied even when its inverse patches don't pair with its patches", () => {
-      // The entry's one inverse patch undoes nothing it changed, as in a load entry, whose two
+      // The entry's one inverse patch undoes nothing it changed, as in a conversion entry, whose two
       // directions are separate diffs.
       const unpairedEntry = HistoryEntry.create(makeEntry(
         [{ path: `${kPrefix}/actionText`, value: "changed" }, { path: "/content/tileMap/NOPE/x", value: 1 }],
@@ -147,10 +147,10 @@ describe("JsonHistoryCopy", () => {
     });
   });
 
-  it("applies load entries in both directions", () => {
+  it("applies conversion entries in both directions", () => {
     const before = { type: "VersionedTestTile", text: "c" };
     const after = { type: "VersionedTestTile", version: "2", label: "c" };
-    const entry = HistoryEntry.create(buildLoadEntry(kTreeId, [
+    const entry = HistoryEntry.create(buildConversionEntry(kTreeId, [
       { path: "/content/tileMap/t1/content", before, after }
     ]));
     const copy = new JsonHistoryCopy(

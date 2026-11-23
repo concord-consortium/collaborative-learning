@@ -1,6 +1,6 @@
 import { destroy } from "mobx-state-tree";
 import { deferred } from "promise-assist";
-import { buildLoadEntry } from "../history/schema-conversion";
+import { buildConversionEntry } from "../history/schema-conversion";
 import { FAKE_HISTORY_ENTRY_ID } from "../history/tree-manager";
 import { LogEventName } from "../../lib/logger-types";
 import { hashString } from "../../utilities/js-utils";
@@ -141,26 +141,26 @@ describe("ContentSaveSender", () => {
       expect(rtdbEnvelopeRef.writes[0].values.lastHistoryEntryId).toBe(b);
     });
 
-    it("skips a snapshot taken while the load entry is pending, and uses the next usable one", async () => {
+    it("skips a snapshot taken while the conversion entry is pending, and uses the next usable one", async () => {
       const { commits, rtdbEnvelopeRef, document, edit, treeManager } = track(setup());
-      const loadEntry = buildLoadEntry(document.key, [{
+      const conversionEntry = buildConversionEntry(document.key, [{
         path: "/content/tileMap/t1/content", before: { type: "TestTile", text: "stored" }, after: { type: "TestTile" }
       }]);
-      treeManager.setPendingLoadEntry(loadEntry);
+      treeManager.setPendingConversionEntry(conversionEntry);
       const ids: string[] = [];
       const remove = treeManager.addEntryCompletedListener(entry => { ids.push(entry.id); });
-      // A title change isn't a content change, so the load entry stays pending.
+      // A title change isn't a content change, so the conversion entry stays pending.
       document.setTitle("renamed");
       await flush();
       remove();
       expect(ids).toHaveLength(1);
-      expect(treeManager.pendingLoadEntry).toBe(loadEntry);
+      expect(treeManager.pendingConversionEntry).toBe(conversionEntry);
 
       commits.commit(ids[0]);
       expect(rtdbEnvelopeRef.update).not.toHaveBeenCalled();
       const a = await edit("alpha");
-      expect(treeManager.pendingLoadEntry).toBeUndefined();
-      commits.commit(loadEntry.id!, a);
+      expect(treeManager.pendingConversionEntry).toBeUndefined();
+      commits.commit(conversionEntry.id!, a);
       expect(rtdbEnvelopeRef.update).toHaveBeenCalledTimes(1);
       expect(rtdbEnvelopeRef.writes[0].values.lastHistoryEntryId).toBe(a);
       expect(textOf(rtdbEnvelopeRef.writes[0].values)).toBe("alpha");

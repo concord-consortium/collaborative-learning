@@ -8,7 +8,7 @@ export interface IStoredRecord {
   inversePatches: Operation[];
 }
 export interface IStoredEntry {
-  isLoadEntry?: boolean;
+  isConversionEntry?: boolean;
   records: IStoredRecord[];
 }
 
@@ -27,7 +27,7 @@ function redoEntry(doc: any, entry: IStoredEntry) {
 }
 
 /**
- * Undoes every entry from `endDocument` back to the start, then redoes them all. The load entry
+ * Undoes every entry from `endDocument` back to the start, then redoes them all. The conversion entry
  * is applied like any other entry. Returns the document at each position, where
  * `positions[i]` comes before entry `i`, and the document rebuilt at the end.
  */

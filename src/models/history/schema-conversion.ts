@@ -168,18 +168,17 @@ export function convertContentJson(content: any): { content: any; convertedPaths
   return { content: newContent, convertedPaths };
 }
 
-const kLoadContentAction = "/loadContent";
-const kLoadEntryModel = "DocumentContent";
+const kConvertContentAction = "/convertContent";
+const kConversionEntryModel = "DocumentContent";
 
 // An entry is uploaded as one Firestore document, and Firestore limits a document to 1 MiB.
 const kMaxEntryBytes = 1048576;
 
 /**
- * Builds the load entry, which records the changes CLUE made to the stored content while loading
- * it, as the patches that turn the stored JSON into the loaded JSON. It is flagged `isLoadEntry`
- * and is not undoable.
+ * Builds the conversion entry: the patches that turn the stored JSON of old models into their
+ * converted JSON. It is flagged `isConversionEntry` and is not undoable.
  */
-export function buildLoadEntry(
+export function buildConversionEntry(
   treeId: string, changes: { path: string; before: unknown; after: unknown }[]
 ): HistoryEntrySnapshot {
   const patches = changes.flatMap(({ path, before, after }) => diffJson(before, after, path));
@@ -190,18 +189,18 @@ export function buildLoadEntry(
     // Stamped here, not when the entry is added to a history, so every copy of it shows the same time.
     created: Date.now(),
     tree: treeId,
-    model: kLoadEntryModel,
-    action: kLoadContentAction,
+    model: kConversionEntryModel,
+    action: kConvertContentAction,
     undoable: false,
-    isLoadEntry: true,
+    isConversionEntry: true,
     background: true,
     state: "complete",
-    records: [{ tree: treeId, action: kLoadContentAction, patches, inversePatches }]
+    records: [{ tree: treeId, action: kConvertContentAction, patches, inversePatches }]
   };
   // Nothing splits an oversized entry, so log it.
   const size = new TextEncoder().encode(JSON.stringify(entry)).length;
   if (size > kMaxEntryBytes) {
-    console.error(`The load entry for document ${treeId} is ${size} bytes, over the ` +
+    console.error(`The conversion entry for document ${treeId} is ${size} bytes, over the ` +
       `${kMaxEntryBytes}-byte limit on a Firestore document, so it can't be uploaded.`);
   }
   return entry;

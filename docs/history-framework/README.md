@@ -3,10 +3,10 @@
 How CLUE records the changes to a document, and uses them for undo, redo and history playback, and
 how it saves a document's content at a known position in its history.
 
-[history-framework.md](../history-framework.md) is the overview of the framework: its models, how
-an entry is recorded, how undo and playback apply entries, playback across schema conversions, and
-how history is stored in Firestore. It is one large document. New
-topics go in this folder, and sections of the overview can move here as they grow.
+[history-framework.md](../history-framework.md) is the overview of the framework: its models, how an
+entry is recorded, how undo and playback apply entries, and how history is stored in Firestore. It
+is one large document. New topics go in this folder, and sections of the overview can move here as
+they grow.
 
 Each doc in this folder describes one part of the history system. It says at the top whether that
 part is built, and it is kept up to date as the work lands, rather than replaced by a separate
@@ -15,12 +15,13 @@ what CLUE does today, so the doc stays accurate at every stage.
 
 ## Docs
 
+- [catch-up-at-load.md](catch-up-at-load.md) — How an individual document opened for editing
+  applies the history entries its saved content is missing. Status: built.
 - [content-saves.md](content-saves.md) — How a document's content is saved, and how each save
   records the history entry it holds and whether it is exact. Status: built. What group documents
   add is in [group-doc-content-saves.md](../group-docs/group-doc-content-saves.md).
-- [load-entries.md](load-entries.md) — The entry that records the schema conversions CLUE makes
-  when it loads old content, and how a document opened for editing catches up to its history.
-  Status: built.
+- [conversion-entries.md](conversion-entries.md) — The entry that records the schema conversions
+  CLUE makes when it loads old content, and how history playback crosses it. Status: built.
 - [start-editing-entry.md](start-editing-entry.md) — The entry recorded when a document is opened
   for editing: a session marker that also holds the changes CLUE makes on open and the content's
   drift from history. Status: not built. Also covers what CLUE does today instead, and the script

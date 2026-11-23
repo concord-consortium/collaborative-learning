@@ -47,7 +47,7 @@ Firestore index. The snapshot is usable only if, when the entry completed:
 
 - no other entry that could hold changes was open;
 - no tracked flow that had changed state was running; and
-- no load entry was waiting to join history.
+- no conversion entry was waiting to join history.
 
 This lets a lone writer whose entries complete faster than they upload keep making exact saves, each
 one upload behind. While entries wait to commit, the sender keeps the newest snapshot and, of the
@@ -93,21 +93,14 @@ save has been possible for 5 seconds. Each stretch of intermediate saves is logg
 
 **Catching up when the document is opened for editing.** An individual document whose envelope has
 `exactThrough` and is behind its history applies the missing entries when its owner opens it for
-editing. See "Catching up at load" in [load-entries.md](load-entries.md). Until the catch-up
-finishes, the document shows a spinner in place of its toolbar and content, and its content isn't
-saved. Its title bar still works, and a change there, such as sharing it, is saved. A document shown
-read-only in the workspace's comparison pane catches up and shows the spinner too, since that pane
-has the workspace's editing toolbar. A document that is only listed or viewed elsewhere never
-queries Firestore for its history. Its toolbar's tools don't change it, so its Edit tool still opens
-it for editing. The catch-up starts from the document's current envelope, which the content
-listener replaces along with the content. If the listener replaces the content while the catch-up
-reads Firestore, the catch-up applies nothing and the session isn't exact. If it replaces the content
-of a document that has already caught up with different content, for example older content when
-the caught-up content was never saved, the session starts over: the document is marked as not
-caught up again, and the next open for editing catches it up from the new content's envelope. The
-catch-up plans against the newest entry the session knows of: its own newest commit, or else
-Firestore's last entry as read when the document first caught up. As soon as the sender starts, it
-saves the caught-up content, so the stored content isn't left behind its history.
+editing (see [catch-up-at-load.md](catch-up-at-load.md)). Its content isn't saved until the catch-up
+finishes, and as soon as the sender starts, it saves the caught-up content, so the stored content
+isn't left behind its history, unless a conversion entry is pending. In that case the caught-up
+content is first saved with the next content change, and if there isn't one, the next open for
+editing catches up again. When the catch-up can't apply the entries the content is missing, for
+example because the envelope is behind its history and has no `exactThrough`, or because the content
+listener replaces the content while the catch-up reads Firestore, the session isn't exact, so its
+saves are intermediate ones.
 
 **The content listener waits for the last save.** Once a document closes, the content listener
 monitors it again, but not while the sender may still write its content: while the sender keeps
@@ -116,15 +109,6 @@ saving after the document closes, and until its last write settles, including th
 has been opened again with a new sender, so the listener waits until no sender of the document is
 running or has a write in flight. Until then the stored content can be older than the document's,
 and replacing it would undo edits that haven't been saved yet.
-
-An envelope without `exactThrough` can hold entries after its `lastHistoryEntryId`, so applying the
-entries after that id could apply some of them twice. When such an envelope is behind its history,
-nothing is applied for it: the document opens as saved, and the session isn't exact, so its saves
-are intermediate ones. The same goes for an envelope with no `lastHistoryEntryId` when the document
-has history, since it says nothing about which entries its content holds. One at Firestore's last
-entry has nothing to catch up, so the session is exact. An exact envelope at an entry other than the
-newest one the session knows of, with an index at or past it, was most likely saved by another
-session; the session isn't exact (`history-written-elsewhere`). Publications are never caught up.
 
 **Page hide.** On page hide, the sender sends the newest committed snapshot save at once, without
 waiting for the minimum gap or the write in flight. The sender listens for page hide itself, so this
@@ -158,8 +142,10 @@ intermediate save over it loses nothing. The client tracks that envelope in the 
 
 ## Related docs
 
-- [load-entries.md](load-entries.md) — Load entries, and how a document opened for editing catches
-  up to its history.
+- [catch-up-at-load.md](catch-up-at-load.md) — How a document opened for editing catches up to its
+  history.
+- [conversion-entries.md](conversion-entries.md) — The entry that records the schema conversions
+  CLUE makes when it loads old content.
 - [group-doc-content-saves.md](../group-docs/group-doc-content-saves.md) — What group documents
   add: saving only from a settled history, the stale-check, and the notice shown when saving stops.
 - [metadata-fields.md](../document-metadata/metadata-fields.md) — The envelope fields.

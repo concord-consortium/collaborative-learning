@@ -226,10 +226,10 @@ describe("PlaybackControlModel", () => {
       expect(stopPositions(model)).toEqual([0, 1, 2]);
     });
 
-    it("makes no user stop for a load entry", () => {
+    it("makes no user stop for a conversion entry", () => {
       const { model, treeManager } = setupModel(0);
       treeManager.setChangeDocument(CDocument.create({
-        history: [entrySnapshot(0, { isLoadEntry: true, background: true }), entrySnapshot(1)]
+        history: [entrySnapshot(0, { isConversionEntry: true, background: true }), entrySnapshot(1)]
       }));
 
       expect(stopKinds(model)).toEqual(["initial", "user"]);

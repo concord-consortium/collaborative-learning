@@ -7,9 +7,9 @@ import { getDataflowProgramVersion, STATE_VERSION_RETE_V1 } from "./dataflow-sta
 
 /**
  * Legacy DataFlow tiles (see `getDataflowProgramVersion`) were converted to the current format
- * without a load entry: before load entries were recorded, or in a concurrent document, which
- * doesn't record them yet. Their history goes straight from legacy entries to current ones. This
- * bridge finds that boundary for each tile and rebuilds the legacy tile there, so playback can
+ * without a conversion entry: before conversion entries were recorded, or in a concurrent document,
+ * which doesn't record them yet. Their history goes straight from legacy entries to current ones.
+ * This bridge finds that boundary for each tile and rebuilds the legacy tile there, so playback can
  * cross it.
  */
 
@@ -98,9 +98,9 @@ function rebuildTileJson(
   return getJsonAtPath(documentJson, tilePath);
 }
 
-// True when a load entry converts the tile from legacy: its forward or inverse patches on the tile
-// include a legacy patch. A conversion of a legacy program with no nodes and no `values` map has
-// a legacy patch only in its inverse, which sets the legacy program id back.
+// True when a conversion entry converts the tile from legacy: its forward or inverse patches on the
+// tile include a legacy patch. A conversion of a legacy program with no nodes and no `values` map
+// has a legacy patch only in its inverse, which sets the legacy program id back.
 function convertsLegacyTile(entry: HistoryEntryType, treeId: string, tilePath: string) {
   return [HistoryOperation.Redo, HistoryOperation.Undo].some(opType =>
     getEntryPatchesForTree(entry, treeId, opType)
@@ -118,7 +118,7 @@ function getLegacyTileBefore(entry: HistoryEntryType, treeId: string, tilePath: 
 // What the bridge reads from an entry. Completed entries don't change, so it is kept per entry.
 interface IEntrySummary {
   treeId: string;
-  // The tiles a legacy patch is on. Empty for a load entry.
+  // The tiles a legacy patch is on. Empty for a conversion entry.
   legacyTileIds: string[];
   // The tiles a patch is at or under.
   touchedTileIds: Set<string>;
@@ -138,7 +138,7 @@ function getEntrySummary(entry: HistoryEntryType, treeId: string) {
     const tileId = getTileId(patch.path);
     if (tileId) {
       touchedTileIds.add(tileId);
-      if (!entry.isLoadEntry && isLegacyDataflowPatch(patch)) legacyTileIds.add(tileId);
+      if (!entry.isConversionEntry && isLegacyDataflowPatch(patch)) legacyTileIds.add(tileId);
     } else if (isAbove(patch.path, `${kTileMapPath}/`)) {
       touchesEveryTile = true;
     }
@@ -161,11 +161,11 @@ function findEntryTouchingTile(history: readonly HistoryEntryType[], treeId: str
 }
 
 /**
- * Puts a virtual conversion after each tile's last legacy entry. Load entries don't count as
- * legacy entries, although a load entry that converts a legacy tile has legacy patches. When the
- * next entry that touches the tile is a load entry that converts it from legacy, the history
- * records the conversion, and the tile needs no virtual conversion. A load entry from a later
- * schema change doesn't cover it.
+ * Puts a virtual conversion after each tile's last legacy entry. Conversion entries don't count as
+ * legacy entries, although a conversion entry that converts a legacy tile has legacy patches. When
+ * the next entry that touches the tile is a conversion entry that converts it from legacy, the
+ * history records the conversion, and the tile needs no virtual conversion. A conversion entry from
+ * a later schema change doesn't cover it.
  *
  * The tile's old JSON is rebuilt from its patches. When that fails, such as when the history
  * doesn't hold the tile's add, it is taken from the next entry's undo patches if they set the
@@ -184,7 +184,7 @@ export const legacyDataflowHistoryBridge: IHistoryBridge = {
       const tilePath = `${kTileMapPath}/${tileId}`;
       const next = findEntryTouchingTile(history, treeId, tileId, lastLegacy + 1);
       const nextEntry = next >= 0 ? history[next] : undefined;
-      if (nextEntry?.isLoadEntry && convertsLegacyTile(nextEntry, treeId, tilePath)) return;
+      if (nextEntry?.isConversionEntry && convertsLegacyTile(nextEntry, treeId, tilePath)) return;
       patchesByEntry ??= history.map(entry => getEntryPatchesForTree(entry, treeId, HistoryOperation.Redo));
       const oldJson = rebuildTileJson(patchesByEntry, tilePath, lastLegacy) ??
         (nextEntry && getLegacyTileBefore(nextEntry, treeId, tilePath));

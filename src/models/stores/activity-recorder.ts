@@ -71,7 +71,8 @@ export class ActivityRecorder {
   }
 
   onLocalEntryUploaded(document: DocumentModelType, entry: HistoryEntryType) {
-    // A background entry is code's own change, such as a tick or a load, not a person's activity.
+    // A background entry is code's own change, such as a tick or a conversion at load, not a
+    // person's activity.
     if (!this.isEnabled || entry.background) return;
     if (!this.listening) {
       window.addEventListener("pagehide", this.handlePageHide);

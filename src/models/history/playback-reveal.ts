@@ -48,8 +48,8 @@ export function getChangedTileId(patches: readonly IJsonPatch[], content: Docume
 
 /**
  * The tile a playback move from history position `from` to `to` changed, as `getChangedTileId`
- * picks it from the entry nearest the move's end: the last one applied going forward, the last
- * one undone going backward. Background entries (program ticks, load entries) are passed over,
+ * picks it from the entry nearest the move's end: the last one applied going forward, the last one
+ * undone going backward. Background entries (program ticks, conversion entries) are passed over,
  * since the slider shows only the changes people made. `content` is the document after the move.
  */
 export function getPlaybackRevealTileId(args: {

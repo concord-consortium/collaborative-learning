@@ -103,13 +103,13 @@ describe("getPlaybackRevealTileId with background entries", () => {
   const reveal = (entries: HistoryEntryType[], from: number, to: number) =>
     getPlaybackRevealTileId({ history: entries, treeId: kTreeId, from, to, content });
 
-  it("passes over a load entry at the end of a move", () => {
-    const entries = [entryOn(tableId), entryOn(textId, { isLoadEntry: true, background: true })];
+  it("passes over a conversion entry at the end of a move", () => {
+    const entries = [entryOn(tableId), entryOn(textId, { isConversionEntry: true, background: true })];
     expect(reveal(entries, 0, 2)).toBe(tableId);
   });
 
-  it("does not reveal for a move across only a load entry", () => {
-    const entries = [entryOn(tableId), entryOn(textId, { isLoadEntry: true, background: true })];
+  it("does not reveal for a move across only a conversion entry", () => {
+    const entries = [entryOn(tableId), entryOn(textId, { isConversionEntry: true, background: true })];
     expect(reveal(entries, 1, 2)).toBeUndefined();
   });
 

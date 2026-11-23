@@ -16,7 +16,7 @@ import {
  * History entries record what happened, in whatever format the document had
  * then. A patch source turns that record into patches the current MST models
  * accept. The default source passes the record through unchanged, apart
- * from giving load entries no patches.
+ * from giving conversion entries no patches.
  */
 export interface IPlaybackPatchSource {
   /**
@@ -30,7 +30,7 @@ export interface IPlaybackPatchSource {
    * after the move's patches, in the same action. Each one sets a model, in
    * place, to its state at the move's target. A source uses them for models
    * whose recorded patches it left out, such as tiles saved in an older
-   * schema. This is also how playback crosses a load entry: a tree gets no
+   * schema. This is also how playback crosses a conversion entry: a tree gets no
    * patches for the entry, so each model it changed is replaced instead. A
    * model replacement is not itself a history entry; the source builds it for
    * one move.
@@ -40,10 +40,10 @@ export interface IPlaybackPatchSource {
 
 /**
  * Applies each entry's recorded patches as they are, with no model replacements. Playback never
- * applies a load entry to an MST tree, so it has no patches here.
+ * applies a conversion entry to an MST tree, so it has no patches here.
  */
 export const defaultPatchSource: IPlaybackPatchSource = {
-  getPatches: (entry, treeId, opType) => entry.isLoadEntry ? [] : getEntryPatchesForTree(entry, treeId, opType),
+  getPatches: (entry, treeId, opType) => entry.isConversionEntry ? [] : getEntryPatchesForTree(entry, treeId, opType),
   getModelReplacements: () => []
 };
 
@@ -174,7 +174,7 @@ export function createOldModelPatchSource(
   return {
     getPatches(entry, entryTreeId, opType) {
       if (entryTreeId !== treeId) return defaultPatchSource.getPatches(entry, entryTreeId, opType);
-      if (entry.isLoadEntry) return [];
+      if (entry.isConversionEntry) return [];
 
       const result: IJsonPatch[] = [];
       getEntryPatchesForTree(entry, treeId, opType).forEach(patch => {
