@@ -1875,3 +1875,44 @@ describe("normalize with annotations", () => {
     expect(normalizedModel.dataSets[0].caseIds).toEqual(["c1", "c2"]);
   });
 });
+
+describe("documentSummarizer with sparrows", () => {
+  const document = {
+    rowOrder: ["row1"],
+    rowMap: { row1: { id: "row1", tiles: [{ tileId: "tile1" }] } },
+    tileMap: { tile1: { id: "tile1", content: { type: "Expression", latexStr: "x+1" } } },
+    annotations: {
+      ann1: {
+        id: "ann1",
+        text: "+10",
+        sourceObject: { tileId: "tile1", objectId: "o1" },
+        targetObject: { tileId: "tile1", objectId: "o2" },
+        type: "arrowAnnotation"
+      }
+    }
+  };
+
+  it("puts the Sparrows section before the end of the summary", () => {
+    const result = documentSummarizer(document, {});
+    expect(result).toContain("## Sparrows");
+    expect(result.indexOf("## Sparrows")).toBeLessThan(result.indexOf("End of CLUE Document Summary"));
+  });
+
+  it("writes no Sparrows section for a document with no annotations", () => {
+    const result = documentSummarizer({ ...document, annotations: {} }, {});
+    expect(result).not.toContain("Sparrows");
+  });
+
+  it("keeps the sparrows under minimal", () => {
+    const result = documentSummarizer(document, { minimal: true });
+    expect(result).toContain("digraph sparrows {");
+  });
+
+  // A document whose tiles are all gone still has its annotations. The count has to survive, even
+  // when nothing can be drawn.
+  it("reports sparrows left in an otherwise empty document", () => {
+    const result = documentSummarizer({ annotations: document.annotations }, {});
+    expect(result).toContain("This document has 1 sparrow.");
+    expect(result).toContain("One is not shown");
+  });
+});

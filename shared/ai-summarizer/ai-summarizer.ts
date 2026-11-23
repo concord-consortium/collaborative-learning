@@ -13,6 +13,7 @@ import {
 import {
   generateAttributesMarkdownTable, generateMarkdownTable, generateVariablesMarkdownTable, heading, pluralize
 } from "./ai-summarizer-utils";
+import { annotationsSummary } from "./annotations-summary";
 import { rowsSummary, tileSummary } from "./ai-tile-summarizer";
 
 /** Return the markdown summary of the given Document content.
@@ -285,7 +286,10 @@ export function normalize(model: DocumentContentSnapshotType) {
 }
 
 export function summarize(normalizedModel: NormalizedModel, tileMap: TileMap | undefined, options: AiSummarizerOptions): string {
-  const { sections, dataSets, variables } = normalizedModel;
+  const { sections, dataSets, variables, annotations } = normalizedModel;
+  const sparrows = annotationsSummary({
+    annotations, dataSets, variables, tileMap, options, headingLevel: 1
+  });
   if (sections.length === 0) {
     return documentSummary(
       options.minimal ? "" : "This is an empty CLUE document with no content.",
@@ -293,7 +297,8 @@ export function summarize(normalizedModel: NormalizedModel, tileMap: TileMap | u
       variables,
       "",
       options,
-      1
+      1,
+      sparrows
     );
   }
 
@@ -312,7 +317,8 @@ export function summarize(normalizedModel: NormalizedModel, tileMap: TileMap | u
         options
       }),
       options,
-      1
+      1,
+      sparrows
     );
   }
 
@@ -323,11 +329,12 @@ export function summarize(normalizedModel: NormalizedModel, tileMap: TileMap | u
     variables,
     sectionsSummary({normalizedModel, tileMap, options, headingLevel: 2}),
     options,
-    1
+    1,
+    sparrows
   );
 }
 
-export function documentSummary(preamble: string, dataSets: NormalizedDataSet[], variables: NormalizedVariable[], summary: string = "", options: AiSummarizerOptions, headingLevel: number = 1): string {
+export function documentSummary(preamble: string, dataSets: NormalizedDataSet[], variables: NormalizedVariable[], summary: string = "", options: AiSummarizerOptions, headingLevel: number = 1, sparrows: string = ""): string {
   const maybeTileInfo = summary.length > 0
     ? " Tiles are either static UI elements or interactive elements " +
       "that students can use."
@@ -383,6 +390,7 @@ export function documentSummary(preamble: string, dataSets: NormalizedDataSet[],
     summary + "\n" +
     dataSetSummary + "\n" +
     variablsSummary + "\n" +
+    sparrows +
     heading(headingLevel, "End of CLUE Document Summary")
   );
 }
