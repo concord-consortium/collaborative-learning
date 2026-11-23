@@ -17,15 +17,17 @@ import { heading, pluralize } from "./ai-summarizer-utils";
 import { escapeDotString } from "./tile-summarizers/dataflow-to-graphviz";
 import { describeDataflowObject } from "./tile-summarizers/handle-dataflow-tile";
 import { describeDrawingObject } from "./tile-summarizers/handle-drawing-tile";
+import { describeGeometryObject } from "./tile-summarizers/handle-geometry-tile";
 import { describeGraphObject } from "./tile-summarizers/handle-graph-tile";
 import { describeNumberlineObject } from "./tile-summarizers/handle-numberline-tile";
-import { describeGeometryObject } from "./tile-summarizers/handle-geometry-tile";
 import { describeSimulatorObject } from "./tile-summarizers/handle-simulator-tile";
 import { describeTableObject } from "./tile-summarizers/handle-table-tile";
 import { describeTextObject } from "./tile-summarizers/handle-text-tile";
 
-// Keyed on tile content type, so `undefined` from a describer means one thing: no such object any
-// more. A tile type with no entry here falls to the generic backstop below.
+// Keyed on tile content type rather than tried in turn like `defaultTileHandlers`, so that
+// `undefined` from a describer means one thing: no such object any more. With a first-match array
+// it would also mean "not my tile type", and a sparrow anchored to a deleted object could not be
+// told from one whose describer simply declined it. A type with no entry falls to the backstop.
 const describersByType: Record<string, AnnotationDescriber> = {
   Dataflow: describeDataflowObject,
   Drawing: describeDrawingObject,
@@ -42,7 +44,7 @@ const describersByType: Record<string, AnnotationDescriber> = {
  * label says what kind of thing it is, and names the id either way. The result is clumsy on
  * purpose: a tile type added later reads awkwardly in the summary rather than vanishing from it.
  */
-export function describeObjectGenerically({ tile, objectId, objectType }: AnnotationDescriberParams) {
+function describeObjectGenerically({ tile, objectId, objectType }: AnnotationDescriberParams) {
   const found = findObjectById(tile?.content, objectId);
   const kind = (typeof found?.type === "string" && found.type) || objectType || "object";
   return `${kind} ${objectId}`;
@@ -58,7 +60,7 @@ function findObjectById(node: any, objectId: string): any {
   return undefined;
 }
 
-export function describeObject(params: AnnotationDescriberParams): string | undefined {
+function describeAnchoredObject(params: AnnotationDescriberParams): string | undefined {
   const describer = describersByType[params.tile?.content?.type] ?? describeObjectGenerically;
   return describer(params);
 }
@@ -143,7 +145,7 @@ function resolveEnd(
   if (!object) { return "free"; }
   const tile = context.tileMap?.[object.tileId];
   if (!tile) { return "missing"; }
-  const phrase = describeObject({
+  const phrase = describeAnchoredObject({
     tile, objectId: object.objectId, objectType: object.objectType, ...context
   });
   if (!phrase) { return "missing"; }

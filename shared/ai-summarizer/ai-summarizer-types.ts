@@ -180,10 +180,9 @@ export interface AnnotationDescriberParams {
 }
 
 /**
- * `undefined` means one thing only: no such object in this tile any more. The registry is keyed on
- * tile type for exactly that reason -- with a first-match array of handlers, `undefined` would also
- * mean "not my tile type", and a sparrow anchored to a deleted object could not be told from one
- * whose describer simply declined it.
+ * Returns `undefined` only when the tile no longer holds such an object, which is what drops the
+ * sparrow from the graph. A describer that cannot phrase an object it does have should say
+ * something clumsy rather than nothing.
  */
 export interface AnnotationDescriber {
   (params: AnnotationDescriberParams): string | undefined;

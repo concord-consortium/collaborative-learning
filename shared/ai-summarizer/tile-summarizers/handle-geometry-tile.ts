@@ -1,7 +1,7 @@
 /**
- * Describes a geometry object an annotation is anchored to. The geometry tile has no summarizer of
- * its own -- its content reaches the generic tile description, which strips ids -- so these phrases
- * have to stand alone: coordinates, not ids, wherever the student has not named the object.
+ * The geometry tile has no summarizer of its own -- its content reaches the generic tile
+ * description, which strips ids -- so these phrases have to stand alone: coordinates, not ids,
+ * wherever the student has not named the object.
  */
 import { AnnotationDescriberParams } from "../ai-summarizer-types";
 

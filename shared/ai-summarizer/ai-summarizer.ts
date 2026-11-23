@@ -160,12 +160,12 @@ function normalizeAnnotations(annotations: any): NormalizedAnnotation[] {
     .map((annotation: any) => ({
       id: annotation.id,
       ...(annotation.text !== undefined ? { text: annotation.text } : {}),
-      ...(annotation.sourceObject ? { sourceObject: endpoint(annotation.sourceObject) } : {}),
-      ...(annotation.targetObject ? { targetObject: endpoint(annotation.targetObject) } : {})
+      ...(annotation.sourceObject ? { sourceObject: normalizeEndpoint(annotation.sourceObject) } : {}),
+      ...(annotation.targetObject ? { targetObject: normalizeEndpoint(annotation.targetObject) } : {})
     }));
 }
 
-function endpoint(object: any): NormalizedAnnotationEndpoint {
+function normalizeEndpoint(object: any): NormalizedAnnotationEndpoint {
   return {
     tileId: object.tileId,
     objectId: object.objectId,

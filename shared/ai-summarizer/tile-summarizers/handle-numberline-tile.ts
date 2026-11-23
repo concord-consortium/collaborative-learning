@@ -1,6 +1,6 @@
 /**
- * Describes a number line point an annotation is anchored to. Like the geometry tile, the number
- * line has no summarizer of its own, so the phrase has to carry the value rather than the point id.
+ * Like the geometry tile, the number line has no summarizer of its own, so the phrase has to carry
+ * the value rather than the point id.
  */
 import { AnnotationDescriberParams } from "../ai-summarizer-types";
 
