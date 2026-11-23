@@ -1,5 +1,6 @@
 import { RefObject, useEffect, useRef } from "react";
 import { DataGridHandle } from "react-data-grid";
+import { prefersReducedMotion } from "../../../utilities/dom-utils";
 import { TRow } from "./table-types";
 
 // How close to the bottom still counts as "following". A couple of pixels of slack absorbs the
@@ -20,11 +21,6 @@ const kSmoothMaxDistancePx = 240;
 // How long to treat scroll events as our own after starting a smooth scroll. Comfortably longer
 // than a browser's animation for a row-sized distance.
 const kAnimationWindowMs = 500;
-
-/** Honors the OS setting. matchMedia is absent under jsdom, hence the optional call. */
-function prefersReducedMotion() {
-  return !!window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
-}
 
 /**
  * Keeps the newest row in view as rows arrive, which is what makes a Dataflow recording legible:
