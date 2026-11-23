@@ -17,12 +17,14 @@ import { heading, pluralize } from "./ai-summarizer-utils";
 import { escapeDotString } from "./tile-summarizers/dataflow-to-graphviz";
 import { describeDrawingObject } from "./tile-summarizers/handle-drawing-tile";
 import { describeGraphObject } from "./tile-summarizers/handle-graph-tile";
+import { describeGeometryObject } from "./tile-summarizers/handle-geometry-tile";
 import { describeTableObject } from "./tile-summarizers/handle-table-tile";
 
 // Keyed on tile content type, so `undefined` from a describer means one thing: no such object any
 // more. A tile type with no entry here falls to the generic backstop below.
 const describersByType: Record<string, AnnotationDescriber> = {
   Drawing: describeDrawingObject,
+  Geometry: describeGeometryObject,
   Graph: describeGraphObject,
   Table: describeTableObject,
 };
