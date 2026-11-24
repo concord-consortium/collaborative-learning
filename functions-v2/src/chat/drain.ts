@@ -8,7 +8,7 @@
 // undefined there, while the modular entry points work in both the emulator and production.
 import {
   CollectionReference, DocumentData, DocumentReference, FieldPath as FirestoreFieldPath, FieldValue,
-  Query, QueryDocumentSnapshot, getFirestore,
+  Query, QueryDocumentSnapshot, Timestamp, getFirestore,
 } from "firebase-admin/firestore";
 
 import {TurnResult, TutorProvider} from "./provider";
@@ -153,6 +153,16 @@ async function processUnit(ctx: DrainContext, doc: MsgSnap): Promise<UnitResult>
     ...(persistence.reserved ? {pendingRequestRef: persistence.ref} : {})};
 }
 
+// The drain's own order: createdAt, then document id.
+function cursorIsPast(parent: DocumentData | undefined, message: MsgSnap): boolean {
+  const at: Timestamp | undefined = parent?.lastProcessedCreatedAt;
+  const id: unknown = parent?.lastProcessedMessageId;
+  const messageAt: Timestamp | undefined = message.get("createdAt");
+  if (!at || typeof id !== "string" || !messageAt) return false;
+  const order = at.toMillis() - messageAt.toMillis() || at.nanoseconds - messageAt.nanoseconds;
+  return order > 0 || (order === 0 && id > message.id);
+}
+
 export async function processAndDrain(ctx: DrainContext): Promise<void> {
   const {parentRef, messagesCol} = ctx;
   const db = getFirestore();
@@ -265,10 +275,12 @@ export async function processAndDrain(ctx: DrainContext): Promise<void> {
       }
       const parent = (await parentRef.get()).data();
       // A lost Firestore acknowledgement is not a failed turn if the atomic delivery batch landed.
+      // A cursor already past this message means another invocation has taken over the drain.
       if (parent?.lastProcessedMessageId === next.id) {
         if (parent.delivery?.state === "closed") return;
         continue;
       }
+      if (cursorIsPast(parent, next)) return;
       if ((parent?.provider ?? next.get("provider")) === "foreverlearning") {
         await recordDeliveryFailure(parentRef, next, error);
         throw new RecordedDeliveryError(error);

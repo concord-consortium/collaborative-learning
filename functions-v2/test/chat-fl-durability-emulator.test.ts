@@ -346,6 +346,53 @@ it("records an unconfirmed-session closeout as failed without dispatch or an inv
 });
 
 
+it("does not record a failure when another invocation has moved the cursor past a lost acknowledgement", async () => {
+  const f = await fixture(); let spy: jest.SpyInstance | undefined;
+  const later = f.messagesCol.doc("later");
+  await later.set({...owner, kind: "assistant", userText: "Later reply",
+    createdAt: Timestamp.fromMillis(Date.now() + 60_000)});
+  try {
+    await processAndDrain(f.ctx(async (config, args) => {
+      const result = await flChat(config, args);
+      const batch = db.batch(); const commit = batch.commit.bind(batch);
+      jest.spyOn(batch, "commit").mockImplementationOnce(async () => {
+        await commit();
+        await f.parentRef.update({lastProcessedMessageId: "later",
+          lastProcessedCreatedAt: (await later.get()).get("createdAt")});
+        throw Error("Acknowledgement lost");
+      });
+      spy = jest.spyOn(db, "batch").mockReturnValueOnce(batch);
+      return result;
+    }));
+  } finally {
+    spy?.mockRestore();
+  }
+  expect((await f.parentRef.get()).get("delivery")).toBeUndefined();
+  expect((await f.messagesCol.doc("delivery-first").get()).exists).toBe(false);
+});
+
+it("resumes queued work after support clears a blocked delivery and writes a recovery control", async () => {
+  const f = await fixture();
+  await f.source.update({text: "Changed"});
+  const changesSourceFirst = {
+    processTurn: async (...turn: Parameters<ReturnType<typeof f.provider>["processTurn"]>) => {
+      await f.source.update({text: "Changed again"});
+      return f.provider().processTurn(...turn);
+    },
+  };
+  await expect(processAndDrain({...f.ctx(), provider: createRoutingProvider({defaultProvider: "openai",
+    providers: {foreverlearning: () => changesSourceFirst, openai: () => f.provider()}})})).rejects.toThrow();
+  expect((await f.parentRef.get()).get("delivery.state")).toBe("blocked");
+  await f.messagesCol.doc("queued").set({...owner, kind: "user", provider: "foreverlearning", text: "Queued question",
+    createdAt: FieldValue.serverTimestamp()});
+  const source = await f.source.get();
+  await f.parentRef.update({delivery: FieldValue.delete(), error: FieldValue.delete(), status: "idle",
+    lastProcessedMessageId: source.id, lastProcessedCreatedAt: source.get("createdAt")});
+  await processAndDrain(await f.recoveryCtx("retry", "support-resume"));
+  expect(calls.map((c) => JSON.parse(c.body).prompt)).toEqual(["Queued question"]);
+  expect(await f.assistants()).toHaveLength(1);
+});
+
 it("recognizes a committed local batch after its acknowledgement is lost", async () => {
   const f = await fixture(); let spy: jest.SpyInstance | undefined;
   try {

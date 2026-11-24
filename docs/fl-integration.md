@@ -162,7 +162,10 @@ in `prepareRecovery` (`functions-v2/src/chat/delivery-recovery.ts`), done by han
      change.
    - **If it exists**, take the request id from its `snapshotJson`
      (`request.context.envelope.trace.request_id`) or from the parent's `delivery.requestId`, ask
-     FL whether that request was answered, and note the snapshot's `parentUpdate` if it parses.
+     FL for that request's outcome, and note the snapshot's `parentUpdate` if it parses. Go on only
+     if FL reports the request as answered, failed, or never received. If FL reports it pending or
+     cannot say, stop: leave the delivery blocked and the reservation in place, and ask again later.
+     An answered request's reply stays with FL; this procedure does not add it to the transcript.
 2. Only while no drain holds the lock: in one admin transaction that re-reads the parent and the
    reservation and aborts if the parent's `status` is `"generating"`, its `delivery.id` changed, or
    the reservation's existence differs from step 1:
@@ -172,6 +175,12 @@ in `prepareRecovery` (`functions-v2/src/chat/delivery-recovery.ts`), done by han
      is missing, `flTurn` to the parent's value plus one), set `flContent` from the source message's
      `rightContent` when it is a non-empty string, and delete the reservation;
    - merge `{resolved: true, resolution: "continued"}` into `messages/delivery-<messageId>`.
+3. If the learner sent messages after the source message, start the drain for them: after the
+   transaction commits, write a `messages` doc with `kind: "recovery"`, `provider: "foreverlearning"`,
+   `action: "retry"`, the parent's `uid`, `context_id` and `problemPath`, any `recoveryId` (such as
+   `"support-resume"`) and a server timestamp `createdAt`. With no delivery left, the trigger takes
+   the lock, consumes the control as stale and drains the queued messages; the lock keeps it from
+   running alongside another drain.
 
 Advancing the turn after a dispatched request keeps the next request from reusing its
 `Idempotency-Key` (`<trace>-t<turn>`).
