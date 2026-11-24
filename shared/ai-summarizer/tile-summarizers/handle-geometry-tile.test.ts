@@ -10,9 +10,20 @@ const content = {
   }
 };
 
-function describe_(objectId: string, objectType?: string) {
+// A table linked into the geometry tile plots one point per case per attribute after the first:
+// x comes from that first attribute, y from the attribute named in the point's id.
+const linkedDataSet = {
+  id: "ds1", name: "Trip", tileIds: ["table1", "g1"], numCases: 2, data: [],
+  caseIds: ["c1", "c2"],
+  attributes: [
+    { id: "ax", name: "time", values: ["1", "2"] },
+    { id: "ay", name: "distance", values: ["10", "24.5"] }
+  ]
+};
+
+function describe_(objectId: string, objectType?: string, dataSets: any[] = []) {
   return describeGeometryObject({
-    tile: { id: "g1", content }, objectId, objectType, dataSets: [], variables: []
+    tile: { id: "g1", content }, objectId, objectType, dataSets, variables: []
   });
 }
 
@@ -63,5 +74,21 @@ describe("describeGeometryObject", () => {
       variables: []
     });
     expect(result).toBe("the point from row 2 of distance (24.5)");
+  });
+
+  // A polygon can be drawn on points the tile never stored -- the table's, plotted -- so looking
+  // only in `objects` would report every segment between them deleted.
+  it("names a segment between two linked table points", () => {
+    expect(describe_("c1:ay::c2:ay", "segment", [linkedDataSet]))
+      .toBe("the segment from (1, 10) to (2, 24.5)");
+  });
+
+  it("names a segment that joins a stored point to a linked one", () => {
+    expect(describe_("p1::c2:ay", "segment", [linkedDataSet]))
+      .toBe("the segment from (1, 2) to (2, 24.5)");
+  });
+
+  it("reports nothing for a segment on a linked point whose case is gone", () => {
+    expect(describe_("c1:ay::gone:ay", "segment", [linkedDataSet])).toBeUndefined();
   });
 });

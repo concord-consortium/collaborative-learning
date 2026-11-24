@@ -36,7 +36,11 @@ describe("describeDrawingObject", () => {
     objects: [
       { id: "o1", type: "rectangle", x: 10, y: 20 },
       { id: "o2", type: "text", text: "goes up by 10" },
-      { id: "o3", type: "group", objectIds: ["o1"] }
+      // A group holds its members as nested objects, which is where grouping moves a shape to.
+      { id: "o3", type: "group", objects: [
+        { id: "o4", type: "ellipse" },
+        { id: "o5", type: "group", objects: [{ id: "o6", type: "vector" }] }
+      ] }
     ]
   };
 
@@ -62,5 +66,15 @@ describe("describeDrawingObject", () => {
 
   it("names a shape by the stored type when the annotation carries none", () => {
     expect(describe_("o1")).toBe("rectangle o1");
+  });
+
+  // Grouping moves a shape into the group's own list without changing its id, and the tile keeps
+  // drawing it, so a search of the top level alone would call a visible shape deleted.
+  it("finds a shape that grouping moved out of the top level", () => {
+    expect(describe_("o4", "ellipse")).toBe("ellipse o4");
+  });
+
+  it("finds a shape inside a group within a group", () => {
+    expect(describe_("o6", "vector")).toBe("vector o6");
   });
 });

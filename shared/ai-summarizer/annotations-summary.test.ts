@@ -114,6 +114,19 @@ describe("annotationsSummary", () => {
     expect(result).toContain('[label="goes up by \\"10\\"\\nevery time"];');
   });
 
+  // A movable line's key is `JSON.stringify(subPlotKey)`, so its object id can carry double quotes
+  // and would otherwise close the DOT identifier partway through.
+  it("escapes a quote in the object id, not just in the label", () => {
+    const result = annotationsSummary(params([{
+      id: "a1",
+      sourceObject: { tileId: "t1", objectId: 'movable_line_handle:{"group":"A"}:lower' },
+      targetObject: { tileId: "t1", objectId: "o1" }
+    }], expressionTiles));
+
+    expect(result).toContain('"t1:movable_line_handle:{\\"group\\":\\"A\\"}:lower"');
+    expect(result).not.toContain('"t1:movable_line_handle:{"group"');
+  });
+
   it("drops the explanatory paragraph under minimal but keeps the graph", () => {
     const result = annotationsSummary(params([{
       id: "a1",
@@ -128,16 +141,33 @@ describe("annotationsSummary", () => {
 });
 
 describe("annotationsSummary with endpoints that no longer exist", () => {
-  // Nothing prunes an annotation when its anchor is deleted: the arrow stops rendering, but the
-  // annotation stays in the document. A skipped sparrow is one the teacher cannot see either.
+  // Nothing prunes an annotation when its anchor is deleted: the arrow stops rendering only when
+  // it has lost both of them. A skipped sparrow is one the teacher cannot see either.
   const tileMap: TileMap = { t1: { id: "t1", content: { type: "Expression" } } };
 
-  it("skips a sparrow anchored to a tile that is gone, and says so", () => {
+  // One anchor still holds the arrow on screen -- the client positions the loose end relative to
+  // it -- so the sparrow is drawn, with the end that went missing marked for what it is.
+  it("draws a sparrow that has lost one of its two anchors", () => {
+    const withOneAnchor: TileMap = {
+      t1: { id: "t1", content: { type: "Expression", objects: [{ id: "o1", type: "blob" }] } }
+    };
+    const result = annotationsSummary(params([
+      { id: "a1", text: "+10", sourceObject: { tileId: "gone", objectId: "o3" },
+        targetObject: { tileId: "t1", objectId: "o1" } }
+    ], withOneAnchor));
+
+    expect(result).not.toContain("gone:o3");
+    expect(result).toContain('"free1" [label="a deleted object", shape=point];');
+    expect(result).toContain('"free1" -> "t1:o1" [label="+10"];');
+    expect(result).not.toContain("not shown");
+  });
+
+  it("skips a sparrow when neither of its anchors is left, and says so", () => {
     const result = annotationsSummary(params([
       { id: "a1", sourceObject: { tileId: "t1", objectId: "o1" },
         targetObject: { tileId: "t1", objectId: "o2" } },
       { id: "a2", sourceObject: { tileId: "gone", objectId: "o3" },
-        targetObject: { tileId: "t1", objectId: "o1" } }
+        targetObject: { tileId: "gone", objectId: "o4" } }
     ], tileMap));
 
     expect(result).not.toContain("gone:o3");
@@ -178,13 +208,15 @@ describe("annotationsSummary with endpoints that no longer exist", () => {
     expect(result).toContain("Both are not shown");
   });
 
-  it("declares no node for the surviving end of a skipped sparrow", () => {
+  // A one-sided sparrow whose only object is gone has nothing to hang from, unlike one that has
+  // lost just one of two.
+  it("skips a one-sided sparrow whose object is gone", () => {
     const result = annotationsSummary(params([
-      { id: "a1", sourceObject: { tileId: "gone", objectId: "o3" },
-        targetObject: { tileId: "t1", objectId: "o1" } }
+      { id: "a1", targetObject: { tileId: "gone", objectId: "o3" } }
     ], tileMap));
 
-    expect(result).not.toContain('"t1:o1" [label=');
+    expect(result).not.toContain("digraph sparrows");
+    expect(result).toContain("This document has 1 sparrow.");
   });
 });
 

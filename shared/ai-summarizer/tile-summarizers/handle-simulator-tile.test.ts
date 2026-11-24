@@ -31,9 +31,15 @@ describe("describeSimulatorObject", () => {
     expect(describe_("n1", "node")).toBe("the Sensor 1 node, shown in the simulation");
   });
 
-  // And when no Dataflow tile is in the document, the node is still on screen: the shared model
-  // simply left no record of it. Saying nothing would report it deleted, which it is not.
-  it("names a mini-node by its id when no program in the document holds it", () => {
-    expect(describe_("n1", "node", {})).toBe("the n1 node in the simulation");
+  // A mini-node exists only as a mirror of a Dataflow node. Delete the node and the mini-node goes
+  // with it, so an id no program holds is an id with nothing on screen under it.
+  it("reports nothing for a mini-node no program in the document holds", () => {
+    expect(describe_("n1", "node", {})).toBeUndefined();
+  });
+
+  it("reports nothing when the program is present but the node has been deleted", () => {
+    const program = { nodes: { n2: { name: "Sensor" } } };
+    const tileMap = { df1: { id: "df1", content: { type: "Dataflow", program } } };
+    expect(describe_("n1", "node", tileMap)).toBeUndefined();
   });
 });

@@ -92,18 +92,20 @@ export function annotationsSummary({
   for (const annotation of annotations) {
     const source = resolveEnd(annotation.sourceObject, { dataSets, variables, tileMap });
     const target = resolveEnd(annotation.targetObject, { dataSets, variables, tileMap });
-    // An end that carries an object the document no longer holds takes the sparrow with it: the
-    // arrow renders nothing on screen either, so describing it would report something no one sees.
-    if (source === "missing" || target === "missing") {
+    // One surviving anchor is enough to draw an arrow: the client positions the other end relative
+    // to the anchor it still has, so a sparrow that lost one of its objects is on screen, now
+    // pointing at bare canvas. Only when neither end resolves does it stop rendering.
+    if (typeof source === "string" && typeof target === "string") {
       skipped++;
       continue;
     }
 
     const ends = [source, target].map(end => {
-      if (end === "free") {
+      if (typeof end === "string") {
         freeCount++;
         const id = `free${freeCount}`;
-        nodeLines.set(id, `  "${id}" [label="empty space", shape=point];`);
+        const what = end === "missing" ? "a deleted object" : "empty space";
+        nodeLines.set(id, `  "${id}" [label="${what}", shape=point];`);
         return id;
       }
       nodeLines.set(end.id, `  "${end.id}" [label="${end.label}"];`);
@@ -150,7 +152,9 @@ function resolveEnd(
   });
   if (!phrase) { return "missing"; }
   return {
-    id: `${object.tileId}:${object.objectId}`,
+    // Escaped like the labels are: an object id is not always inert text. A movable line's key is
+    // `JSON.stringify(subPlotKey)`, whose quotes would otherwise close the DOT identifier early.
+    id: escapeDotString(`${object.tileId}:${object.objectId}`),
     label: escapeDotString(`${phrase} — ${tileLabel(tile)}`)
   };
 }

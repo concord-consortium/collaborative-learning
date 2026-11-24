@@ -26,10 +26,22 @@ export function handleDrawingTile({ tile }: TileHandlerParams): string|undefined
 export function describeDrawingObject(
   { tile, objectId, objectType }: AnnotationDescriberParams
 ): string | undefined {
-  const objects: any[] = tile?.content?.objects ?? [];
-  const object = objects.find(candidate => candidate?.id === objectId);
+  const object = findDrawingObject(tile?.content?.objects, objectId);
   if (!object) { return undefined; }
   const kind = object.type ?? objectType ?? "object";
   const text = typeof object.text === "string" && object.text.trim() ? ` reading "${object.text}"` : "";
   return `${kind} ${objectId}${text}`;
+}
+
+// Grouping moves a shape into its group's own `objects` array without changing its id, and the
+// tile keeps drawing it and keeps it annotatable, so the search has to follow groups down or a
+// sparrow on a grouped shape would be reported deleted. Mirrors the client's `objectMap`.
+function findDrawingObject(objects: unknown, objectId: string): any {
+  if (!Array.isArray(objects)) { return undefined; }
+  for (const candidate of objects) {
+    if (candidate?.id === objectId) { return candidate; }
+    const nested = findDrawingObject(candidate?.objects, objectId);
+    if (nested) { return nested; }
+  }
+  return undefined;
 }

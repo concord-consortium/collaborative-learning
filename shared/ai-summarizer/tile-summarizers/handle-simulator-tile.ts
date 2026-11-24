@@ -32,9 +32,11 @@ export function handleSimulatorTile({ tile }: TileHandlerParams) {
  * mini-nodes come from SharedProgramData, whose `programNodes` is volatile and so never
  * serialized, and its pins are synthesized -- 14 a side -- rather than stored.
  *
- * So a node id is resolved against the Dataflow program the mini-nodes mirror, and when the
- * document holds no such program the id is named as it stands. Returning undefined would report the
- * object deleted, and a simulator node is never deleted: it was never written down.
+ * A node id therefore resolves against the Dataflow program the mini-nodes mirror. Nothing of the
+ * node survives that program: deleting it there removes the mini-node here, so a program that does
+ * not hold the id means there is nothing in the simulation to point at. Every Dataflow tile in the
+ * document is searched rather than only the bound one, which the shared model would have to say;
+ * node ids are unique, so the two answers differ only for an id in no program at all.
  */
 const kPinIdPattern = /^[LR](\d|1[0-3])$/;
 
@@ -53,5 +55,5 @@ export function describeSimulatorObject(
       return `the ${name} node, shown in the simulation`;
     }
   }
-  return `the ${objectId} node in the simulation`;
+  return undefined;
 }
