@@ -2,9 +2,8 @@
 //
 // The schema files are not vendored here — so the check is opt-in: point FL_SCHEMA_DIR at a
 // directory holding clue_context_packet_v2.schema.json and it runs; leave it unset and it skips.
-// The activity and capability context case needs FL's capabilities schema
-// (clue_context_packet_v2_capabilities_v1.schema.json) under that name: an earlier v2 schema does
-// not define capability_context and rejects it.
+// The activity and capability context case reads FL's capabilities schema,
+// clue_context_packet_v2_capabilities_v1.schema.json, from the same directory and skips without it.
 //
 //   FL_SCHEMA_DIR=~/Documents/ForeverLearning/current npx jest shared/fl-packet
 //
@@ -21,22 +20,24 @@ const schemaDir = process.env.FL_SCHEMA_DIR;
 const contextSchemaPath = schemaDir
   ? path.join(schemaDir, "clue_context_packet_v2.schema.json") : undefined;
 const haveSchema = !!contextSchemaPath && fs.existsSync(contextSchemaPath);
+const capabilitiesSchemaPath = schemaDir
+  ? path.join(schemaDir, "clue_context_packet_v2_capabilities_v1.schema.json") : undefined;
+const haveCapabilitiesSchema = !!capabilitiesSchemaPath && fs.existsSync(capabilitiesSchemaPath);
 
 // it.skip rather than describe.skip: a skipped describe never registers its tests, so the run
 // would report "all passed" with no sign the conformance check did not happen. These stay visible
 // as skips in the summary.
 const itIfSchema = haveSchema ? it : it.skip;
+const itIfCapabilitiesSchema = haveCapabilitiesSchema ? it : it.skip;
 
 describe("clue.context_packet.v2 conformance", () => {
   // Compiled lazily — the describe body runs even when the schema is absent.
+  const compile = (schemaPath: string) =>
+    new Ajv2020({ allErrors: true, strict: false }).compile(JSON.parse(fs.readFileSync(schemaPath, "utf8")));
   let validate: ReturnType<Ajv2020["compile"]> | undefined;
-  const validator = () => {
-    if (!validate) {
-      const ajv = new Ajv2020({ allErrors: true, strict: false });
-      validate = ajv.compile(JSON.parse(fs.readFileSync(contextSchemaPath!, "utf8")));
-    }
-    return validate;
-  };
+  const validator = () => (validate ??= compile(contextSchemaPath!));
+  let validateCapabilities: ReturnType<Ajv2020["compile"]> | undefined;
+  const capabilitiesValidator = () => (validateCapabilities ??= compile(capabilitiesSchemaPath!));
 
   const envelope = buildEnvelope({
     traceId: "clue-trace-1",
@@ -89,7 +90,7 @@ describe("clue.context_packet.v2 conformance", () => {
     expect(ok).toBe(true);
   });
 
-  itIfSchema("accepts a packet carrying activity and capability context", () => {
+  itIfCapabilitiesSchema("accepts a packet carrying activity and capability context", () => {
     const { packet } = buildContextPacket({
       content: aConformanceDocument(),
       documentId: "doc-abc",
@@ -111,7 +112,7 @@ describe("clue.context_packet.v2 conformance", () => {
     });
     expect(packet.activity_context?.task_prompt).toContain("fan");
     expect(packet.capability_context?.schema_version).toBe("clue.capability_context.v1");
-    const validateFn = validator();
+    const validateFn = capabilitiesValidator();
     const ok = validateFn(packet);
     expect(validateFn.errors ?? []).toEqual([]);
     expect(ok).toBe(true);

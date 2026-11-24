@@ -63,8 +63,9 @@ This example shows VIBE's settings, not universal defaults. The builder imports 
 palette, Demo output catalog and Live output resolver. Palette and Demo lists use UI labels;
 `allowedOutputTypes` uses the product's internal names. Known absent/malformed unit settings follow
 the actual product defaults. An unavailable application configuration is unknown and omitted.
-`shared/fl-packet/schema-conformance.test.ts` can check these fields only against FL's capabilities
-schema, `clue_context_packet_v2_capabilities_v1.schema.json`; an earlier v2 schema rejects them.
+`shared/fl-packet/schema-conformance.test.ts` checks these fields against FL's capabilities schema,
+`clue_context_packet_v2_capabilities_v1.schema.json`, when `FL_SCHEMA_DIR` holds it; an earlier v2
+schema rejects them.
 
 `creation_tool_configured` means the application toolbar includes Dataflow. It does not assert
 edit permission, remaining tile capacity, connected hardware, a selected device or a successful
@@ -115,7 +116,9 @@ private record. Do not delete one simply to force another request.
 Before dispatch, the parent and private reservation also record an awaiting-confirmation receipt.
 The browser shows waiting, then offers a check after its 30-second display deadline. This deadline
 does not cancel the request or prove failure. The existing five-minute stale-lock interval still
-exceeds the function timeout; a check cannot interrupt a running lock owner.
+exceeds the function timeout; a check cannot interrupt a running lock owner. A check made while
+that owner holds the lock is not queued: the running invocation's own outcome normally settles the
+delivery, and if the invocation dies instead, the next check after the lock goes stale is processed.
 
 | Confirmed delivery state | Offered action | Backend transition |
 | --- | --- | --- |
