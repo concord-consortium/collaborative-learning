@@ -51,7 +51,8 @@ it.each([{uid: "101"}, {context_id: "other"}, {problemPath: "other/1/1"}])(
 it.each(["uid:202_doc_vibe_1_2", "network_doc_vibe_1_2"])("continues established legacy parent %s", async (id) => {
   const ref = parent(id); const fake = provider();
   await ref.set({...owner, status: "idle", conversationId: "existing-vendor-session"});
-  await ref.collection("messages").doc("m").set({...owner, kind: "user", text: "Continue", createdAt: Timestamp.fromMillis(1)});
+  await ref.collection("messages").doc("m")
+    .set({...owner, kind: "user", text: "Continue", createdAt: Timestamp.fromMillis(1)});
   expect(await acquireLock(ref, owner)).toBe(true);
   await processAndDrain({parentRef: ref, messagesCol: ref.collection("messages"), provider: fake});
   expect(fake.processTurn).toHaveBeenCalledTimes(1);

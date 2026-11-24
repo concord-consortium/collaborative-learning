@@ -47,7 +47,8 @@ export const buildChatTranscript = (turns: ChatTurn[], title?: string): string =
     if (turn.variant === "debug") continue;
     const text = turn.text.trim();
     if (!text) continue;
-    lines.push(`**${turn.sender === "user" ? "You" : turn.sender === "system" ? "Delivery notice" : "Ada"}:** ${text}`, "");
+    const speaker = turn.sender === "user" ? "You" : turn.sender === "system" ? "Delivery notice" : "Ada";
+    lines.push(`**${speaker}:** ${text}`, "");
   }
   return lines.join("\n").trimEnd();
 };
@@ -381,15 +382,17 @@ export const Chat: React.FC<IProps> = ({ chat, onClose, closeLabel, transcriptTi
       {delivery && !pending &&
         <div className="chat-recovery" role="status" data-testid="chat-recovery">
           <p>{deliveryMessage(delivery.state)}</p>
-          {action && recover && <button type="button" disabled={recovering} onClick={async () => {
-            // This button is about to be disabled, then unmounted, which would drop focus to body.
-            inputRef.current?.focus();
-            setRecovering(true);
-            try { await recover(action); } finally { setRecovering(false); }
-          }}>
-            {action === "continue" ? "Continue conversation" : action === "new_session" ? "Start a new conversation" :
-              delivery.state === "retryable" ? "Retry saved message" : "Check for reply"}
-                                </button>}
+          {action && recover &&
+            <button type="button" disabled={recovering} onClick={async () => {
+              // This button is about to be disabled, then unmounted, which would drop focus to body.
+              inputRef.current?.focus();
+              setRecovering(true);
+              try { await recover(action); } finally { setRecovering(false); }
+            }}>
+              {action === "continue" ? "Continue conversation"
+                : action === "new_session" ? "Start a new conversation"
+                : delivery.state === "retryable" ? "Retry saved message" : "Check for reply"}
+            </button>}
         </div>}
       {(error || (timedOut && !delivery)) &&
         <div className="chat-error" role="alert" data-testid="chat-error">{error ?? kTimeoutMessage}</div>}

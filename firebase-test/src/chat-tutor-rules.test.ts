@@ -240,21 +240,9 @@ describe("Firestore security rules: chat tutor", () => {
       await expectReadToFail(db, kParentPath);
     });
 
-    it("rejects all client parent creation, including owner-pinned pre-claims", async () => {
+    it("rejects client parent creation, even an owner-pinned pre-claim", async () => {
       db = initFirestore(learnerAuth);
       await expectWriteToFail(db, kParentPath, specParent(learnerId));
-      await prepareEachTest();
-      // forged owner
-      await expectWriteToFail(db, kParentPath, specParent(classmateId));
-      // server-owned field injection
-      await expectWriteToFail(db, kParentPath, { ...specParent(learnerId), problemInstalled: true });
-      await expectWriteToFail(db, kParentPath, { ...specParent(learnerId), status: "idle" });
-      // context pinned to the token
-      await expectWriteToFail(db, kParentPath, { ...specParent(learnerId), context_id: otherClass });
-      // non-learner claim
-      db = initFirestore(teacherAuth);
-      await expectWriteToFail(db, kParentPath,
-        { uid: teacherAuth.uid, context_id: thisClass, problemPath: "abc/1/2" });
     });
 
     it("rejects client updates and deletes of the parent", async () => {

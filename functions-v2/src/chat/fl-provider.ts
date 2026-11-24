@@ -181,7 +181,8 @@ export function createFlProvider(args: FlProviderArgs): TutorProvider {
       // continue from a turn that never happened. A failed turn is recoverable; a plausible
       // half-answer recorded as final is not.
       if (!stream.complete) {
-        throw new FlDeliveryError("unknown", "ForeverLearning stream ended incomplete; refusing to record a partial turn");
+        throw new FlDeliveryError("unknown",
+          "ForeverLearning stream ended incomplete; refusing to record a partial turn");
       }
 
       // The prose part and the packet are separate parts of one stream and either can arrive

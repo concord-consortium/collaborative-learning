@@ -1,14 +1,15 @@
-# FL integration reference: current context and durable delivery
+# FL integration reference: context, ownership and durable delivery
 
-Local cumulative reference against upstream `0d9e556026018f9f44e44ed0ac58d1b08b22f17a`.
-This is a reviewable implementation, not a deployment instruction or classroom release.
+How CLUE's tutor conversations are owned, what each ForeverLearning (FL) turn carries beyond the
+workspace, how FL requests are made durable, and how a failed turn is recovered.
 
 ## Conversation ownership from the first message
 
 New conversations use an owner-bound id containing the full platform uid, its length, the class
-and the existing workspace/problem/provider identity. This includes network-based workspaces;
-sharing a network/document never grants access to another learner's tutor history. Rules compare
-the literal owner prefix with the authenticated claim and reject all client parent creation.
+and the existing workspace/problem/provider identity (`ownedConversationId` in
+`shared/chat-ownership.ts`). This includes network-based workspaces; sharing a network/document
+never grants access to another learner's tutor history. Rules compare the literal owner prefix with
+the authenticated claim and reject all client parent creation: only the trigger creates a parent.
 Recovery cannot establish a missing parent. Subsequent messages and controls must match the
 parent's immutable uid, class and problem.
 
@@ -16,18 +17,18 @@ On opening the tutor, the client checks the canonical parent on the server, then
 parent. An existing legacy conversation is reused only when all three owner fields match.
 Its history, session, request numbering and recovery fence remain in place. A foreign, missing
 or differently scoped legacy parent is not reused. A network/offline lookup failure is an error,
-not permission to fork a fresh conversation. No transcript migration or bulk rewrite is needed.
+not permission to fork a fresh conversation; the lookup runs again on the next send, which then
+attaches the listeners. No transcript migration or bulk rewrite is needed.
 
-The backend checks ownership before taking the lock and again before provider dispatch. Old
-mixed-owner queued messages without reservations are marked rejected, with a generic owner-visible
-notice, and consumed without a provider call. A mismatched message that already has a private
-reservation stays fenced for support: external work or expense may exist and must not be erased
-or skipped automatically. Existing historical records are not retroactively certified by this fix.
+The backend checks ownership before taking the lock and again before provider dispatch. A queued
+message whose owner fields differ from its parent's, with no reservation, is marked rejected, with
+a generic owner-visible notice, and consumed without a provider call. A mismatched message that
+already has a private reservation stops the drain ("Reserved message ownership mismatch"): external
+work or expense may exist and must not be erased or skipped automatically.
 
-Authenticated first sends under unowned legacy ids now fail. Existing established conversations
-continue to work. This requires a coordinated client/rules/backend rollout, not an early rules
-deployment while old clients are still creating conversations. The change applies to both tutor
-providers. Anonymous demo and permissive QA/dev modes remain test modes, not classroom isolation.
+A client must use owner-bound ids to start a conversation; existing conversations under their
+legacy ids keep working. The ownership checks apply to both tutor providers. Anonymous demo and
+permissive QA/dev modes remain test modes, not classroom isolation.
 
 Ownership tests cover concurrent first writes, parent pre-claims, literal/Unicode ids, established
 uid/network histories, class/problem mismatches, recovery, provider non-dispatch and reserved-work
@@ -62,8 +63,8 @@ This example shows VIBE's settings, not universal defaults. The builder imports 
 palette, Demo output catalog and Live output resolver. Palette and Demo lists use UI labels;
 `allowedOutputTypes` uses the product's internal names. Known absent/malformed unit settings follow
 the actual product defaults. An unavailable application configuration is unknown and omitted.
-The JSON-schema companion is `clue_context_packet_v2_capabilities_v1.schema.json`, supplied with
-the FL qualification package; the original v2 schema remains an earlier contract checkpoint.
+`shared/fl-packet/schema-conformance.test.ts` can check these fields only against FL's capabilities
+schema, `clue_context_packet_v2_capabilities_v1.schema.json`; an earlier v2 schema rejects them.
 
 `creation_tool_configured` means the application toolbar includes Dataflow. It does not assert
 edit permission, remaining tile capacity, connected hardware, a selected device or a successful
@@ -85,8 +86,10 @@ override or teaching-action authority.
 The drain supplies server-owned persistence tied to the exact source Firestore message path.
 Before HTTP dispatch, a transaction reserves an immutable versioned snapshot in
 `chatTutorPendingRequests/{sha256(messagePath)}`. It includes the request identity, exact serialized
-body, intended endpoint/solution/user, and successful parent state to apply. It contains no API key.
-The source message and snapshot are hashed; source mutation, corrupt storage, changed target or
+body, intended endpoint/solution/user, and the turn and trace to apply on success. It contains no
+API key and no raw workspace: that is read again from the source message (or the parent's copy)
+once the reply arrives, so a workspace near the browser's attachment limit still fits. The source
+message and snapshot are hashed; source mutation, corrupt storage, changed target or
 body/argument disagreement fails before dispatch. Transaction retries may prepare more than once,
 but only the committed snapshot can be sent.
 
@@ -102,10 +105,10 @@ session/turn update, cursor and pending-record deletion commit in one Firestore 
 before commit leaves a replayable request; a duplicate after commit is skipped by the cursor.
 OpenAI does not reserve a request and incurs no pending-record write/delete.
 
-Old successfully established sessions retain their trace and next-turn numbering. This change
-cannot reconstruct identities for requests dispatched by older code before reservation existed.
-Failed pending records must remain until their outcomes are reconciled; any customer erasure workflow must
-also remove the corresponding private record. Do not delete one simply to force another request.
+Established sessions keep their trace and next-turn numbering. Requests dispatched before
+reservation existed have no saved identity to reconstruct. Failed pending records must remain until
+their outcomes are reconciled; any customer erasure workflow must also remove the corresponding
+private record. Do not delete one simply to force another request.
 
 ## Delivery recovery
 
@@ -117,16 +120,17 @@ exceeds the function timeout; a check cannot interrupt a running lock owner.
 | Confirmed delivery state | Offered action | Backend transition |
 | --- | --- | --- |
 | 401, 403 or 429 rejection | Retry saved message | Reuse the exact reserved body and identity |
+| `FL_NOT_DISPATCHED`: a failure before anything reached FL (no reservation) | Retry saved message | Build and reserve the request again; nothing was sent |
 | Network/stream loss, pending/uncertain or other unclassified failure | Check for reply | Same exact request; no skip or new session |
 | HTTP 422 with `CLUE_TURN_FAILED` | Continue conversation | Consume the failed sequence/cursor and drain queued genuine work |
-| Conflicting identity or damaged reservation | Support required | No client bypass |
+| Conflicting identity, damaged reservation or a request the reservation refuses | Support required | No client bypass; see below |
 | Completed response with `session_ended` | Start a new conversation | Clear session/trace/turn and resume queued work under a fresh identity |
 
 FL errors may arrive as SSE on non-2xx responses. An execution error in an SSE stream, even with
 `done`, does not prove that the admission ledger persisted terminal failure. Check the same key
 to obtain its authoritative outcome. A generic 422 or 503 is not terminal proof. In particular,
-older closed-session failures that surface as generic storage errors remain fenced; Concord does
-not infer closure from prose. `/end` without a confirmed session fails locally before HTTP rather
+closed-session failures that surface as generic storage errors remain fenced; Concord does not
+infer closure from prose. `/end` without a confirmed session fails locally before HTTP rather
 than inventing a closeout. Continue can then move on from that explicit local failure.
 
 Recovery buttons write immutable `kind: recovery` controls with an action and server-issued
@@ -136,37 +140,54 @@ Admin-only consumption markers and changing recovery ids make duplicate or delay
 Unknown work cannot be bypassed with a new user message. Delivery notices remain in the transcript
 as system notices, including in copied text. A failed answer is never an assistant success.
 
-Continue atomically applies the reserved trace/turn and current workspace snapshot, advances the
-cursor, resolves the notice and deletes the pending reservation. A successful response likewise
+Continue atomically applies the reserved trace/turn and the source message's workspace, advances
+the cursor, resolves the notice and deletes the pending reservation. A successful response likewise
 commits the reply/state/cursor/deletion together. Lost local commit acknowledgements are checked
 against the cursor before recording failure. A published failure is not written again by the
 outer trigger, which could otherwise overwrite a new recovery invocation. Completed closeout
 stops the queue until the explicit new-conversation action; history remains visible.
 
-## Checks and deployment compatibility
+## Clearing a delivery that needs support
+
+This covers a `blocked` delivery, and a `retryable` `FL_NOT_DISPATCHED` delivery that fails the same
+way on every retry (an oversized packet or a missing tutor user id). It is the "continue" transition
+in `prepareRecovery` (`functions-v2/src/chat/delivery-recovery.ts`), done by hand.
+
+1. Read `chatTutorPendingRequests/{sha256(source message path)}`, where the source message is the
+   one the parent's `delivery.messageId` names.
+   - **If it does not exist**, nothing reached FL: no FL check is needed, and `flTurn` must not
+     change.
+   - **If it exists**, take the request id from its `snapshotJson`
+     (`request.context.envelope.trace.request_id`) or from the parent's `delivery.requestId`, ask
+     FL whether that request was answered, and note the snapshot's `parentUpdate` if it parses.
+2. In one admin batch:
+   - on the parent, delete `delivery` and `error`, set `status: "idle"`, and set
+     `lastProcessedMessageId` and `lastProcessedCreatedAt` to the source message;
+   - when a reservation existed, set `flTurn` and `flTraceId` from its `parentUpdate` (or, if that
+     is missing, `flTurn` to the parent's value plus one), set `flContent` from the source message's
+     `rightContent` when it is a non-empty string, and delete the reservation;
+   - merge `{resolved: true, resolution: "continued"}` into `messages/delivery-<messageId>`.
+
+Advancing the turn after a dispatched request keeps the next request from reusing its
+`Idempotency-Key` (`<trace>-t<turn>`).
+
+One case is outside this procedure: a message with a reservation whose owner fields do not match
+its parent stops the drain with "Reserved message ownership mismatch" and records no delivery. It
+needs an engineer, since the reservation may represent FL work billed to another learner.
+
+## Checks
 
 Run focused browser/shared tests and backend tests serially (`--runInBand --watch=false`).
-`chat-fl-durability-emulator.test.ts` uses project `demo-clue-item3`, real Firestore transactions,
-the actual drain/router/provider/HTTP client and a loopback HTTP fixture. It checks crashes before
-send, lost accepted responses, failed local commits, concurrent reservations, duplicate drains,
-changed source/target, legacy sessions, terminal/uncertain statuses, corruption and snapshot size.
-It makes no model calls. `chat-drain-emulator.test.ts` uses an isolated project and a path outside
-the deployed trigger pattern, so it is safe with the full local emulator stack. Rules tests verify
-that clients cannot read, write or delete pending reservations, forge recovery receipts or mutate
-recovery controls. Item 4 also exercises these transitions through the real local browser,
-Firestore and Functions with a deterministic loopback endpoint. These are delivery tests, not
-proof of hosted FL reconciliation or new teaching behavior.
+`chat-fl-durability-emulator.test.ts` uses project `demo-clue-fl-durability`, real Firestore
+transactions, the actual drain/router/provider/HTTP client and a loopback HTTP fixture. It checks
+crashes before send, lost accepted responses, failed local commits, concurrent reservations,
+duplicate drains, changed source/target, legacy sessions, terminal/uncertain statuses, failures
+before dispatch, corruption, snapshot size and large workspaces. It makes no model calls.
+`chat-drain-emulator.test.ts` uses an isolated project and a path outside the deployed trigger
+pattern, so it is safe with the full local emulator stack. Rules tests verify that clients cannot
+read, write or delete pending reservations, forge recovery receipts or mutate recovery controls.
+These are delivery tests, not proof of hosted FL reconciliation or new teaching behavior.
 
-Recommended timing for the deployment owner's review: indexes **before**; rules and Functions
-**with** the browser. Ownership hardening supersedes the earlier recommendation to deploy rules
-early: released clients cannot create new conversations under the new rules/backend, although
-established owned conversations still work. Old clients also cannot operate recovery controls.
-A new browser against old rules cannot check its missing canonical parent or write the new context
-and recovery controls reliably; an old backend cannot enforce the new owner boundary. Settle active
-work and coordinate activation/reload of all three parts. The deployment owner must confirm timing;
-this reference does not select or execute a deployment. Verify the exact hosted combination before
-classroom use. Before rolling back
-the durable backend, reconcile pending requests and keep new work from dispatching: old code cannot
-honor these saved identities or fences. Preserve recovery state and history; disabling the UI alone
-does not reconcile pending work. Keep the deployed classroom identity/configuration and hosted replay
-qualification separate from this local reference. No full teaching regression is implied.
+Rolling back the durable backend needs care: old code cannot honor saved request identities or
+recovery fences, so reconcile pending requests and keep new work from dispatching first. Preserve
+recovery state and history; disabling the UI alone does not reconcile pending work.

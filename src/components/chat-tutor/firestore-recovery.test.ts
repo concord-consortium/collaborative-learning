@@ -35,7 +35,8 @@ it("rehydrates failure and closure without a stuck typing indicator, then clears
   expect(f.onStatus.mock.calls.at(-1)[0]).toBe("error");
   f.setParent({status: "idle", delivery: {id: "o", messageId: "m", state: "closed", code: "TEST"}});
   expect(f.onStatus.mock.calls.at(-1)[0]).toBe("idle");
-  f.setHistory([{kind: "user", text: "failed"}, {kind: "delivery", resolved: true, resolution: "continued", text: "Failed"}]);
+  f.setHistory([{kind: "user", text: "failed"},
+    {kind: "delivery", resolved: true, resolution: "continued", text: "Failed"}]);
   f.setParent({status: "idle"});
   expect(f.onStatus.mock.calls.at(-1)).toEqual(["idle", undefined]);
 });

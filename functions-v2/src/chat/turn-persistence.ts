@@ -15,7 +15,8 @@ function canonical(value: unknown): unknown {
   return value;
 }
 
-export function readReservedSnapshot<T extends object>(data: DocumentData, sourcePath: string, message: DocumentData): T {
+export function readReservedSnapshot<T extends object>(data: DocumentData, sourcePath: string,
+  message: DocumentData): T {
   const sourceHash = hash(JSON.stringify(canonical(JSON.parse(JSON.stringify(message)))));
   if (data.version !== 1 || data.sourcePath !== sourcePath || data.sourceHash !== sourceHash ||
       typeof data.snapshotJson !== "string" || hash(data.snapshotJson) !== data.snapshotHash) {

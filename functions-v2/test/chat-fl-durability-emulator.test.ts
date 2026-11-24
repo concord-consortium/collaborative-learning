@@ -12,7 +12,7 @@ import {flChat, FlChatArgs} from "../src/chat/fl-client";
 
 jest.setTimeout(30000);
 
-const app = initializeApp({projectId: "demo-clue-item3"});
+const app = initializeApp({projectId: "demo-clue-fl-durability"});
 const db = getFirestore(app);
 let server: Server;
 let baseUrl: string;
@@ -72,7 +72,7 @@ afterAll(async () => {
 });
 
 async function fixture(parent: Record<string, unknown> = {}) {
-  const parentRef = db.doc(`qa/synthetic/chatTutor/item3-${Date.now()}-${++counter}`);
+  const parentRef = db.doc(`qa/synthetic/chatTutor/durability-${Date.now()}-${++counter}`);
   await parentRef.set({...owner, ...parent});
   const messagesCol = parentRef.collection("messages");
   const source = messagesCol.doc("first");
@@ -280,7 +280,7 @@ it("reserves and answers a turn whose attached workspace is near the browser's l
   expect((await (await f.reservation()).ref.get()).exists).toBe(false);
 });
 
-it("preserves terminal failure, explicitly continues queued work/end, then starts new work only after closure", async () => {
+it("preserves terminal failure, continues queued work/end, then starts new work only after closure", async () => {
   const f = await fixture(); failStatus = 422; failCode = "CLUE_TURN_FAILED";
   const workspace = JSON.stringify({tiles: []});
   await f.source.update({rightContent: workspace});

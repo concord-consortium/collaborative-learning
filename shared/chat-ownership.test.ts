@@ -1,4 +1,6 @@
-import { canStartConversation, ownedConversationId, sameChatOwner } from "./chat-ownership";
+import {
+  canStartConversation, hasChatOwner, kChatOwnerFields, ownedConversationId, sameChatOwner
+} from "./chat-ownership";
 
 it("separates different learners on the same network workspace", () => {
   const a = ownedConversationId("101", "class", "network_doc");
@@ -30,5 +32,14 @@ it("requires all immutable owner fields, not just a matching user", () => {
   for (const field of ["uid", "context_id", "problemPath"]) {
     expect(sameChatOwner(owner, {...owner, [field]: "different"})).toBe(false);
     expect(sameChatOwner({...owner, [field]: undefined}, owner)).toBe(false);
+  }
+});
+it("has an owner only when every owner field is a non-empty string", () => {
+  const owner = {uid: "101", context_id: "class", problemPath: "vibe/1/2"};
+  expect(hasChatOwner(owner)).toBe(true);
+  expect(kChatOwnerFields).toHaveLength(3);
+  for (const field of kChatOwnerFields) {
+    expect(hasChatOwner({...owner, [field]: undefined})).toBe(false);
+    expect(hasChatOwner({...owner, [field]: ""})).toBe(false);
   }
 });

@@ -16,9 +16,11 @@ export function recoveryAction(state: DeliveryState): RecoveryAction | undefined
 }
 export function deliveryMessage(state: DeliveryState): string {
   switch (state) {
-    case "failed": return "Ada could not complete this message. It is saved here. Continue when you are ready to move on.";
+    case "failed":
+      return "Ada could not complete this message. It is saved here. Continue when you are ready to move on.";
     case "retryable": return "Ada is temporarily unavailable. Retry this saved message to continue.";
-    case "unknown": return "We could not confirm a completed reply. Check for the reply before sending another message.";
+    case "unknown":
+      return "We could not confirm a completed reply. Check for the reply before sending another message.";
     case "blocked": return "This message needs support before the conversation can continue. Your messages are saved.";
     case "closed": return "This conversation is closed. Start a new conversation to continue.";
   }

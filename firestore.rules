@@ -700,9 +700,9 @@ service cloud.firestore {
       // AI chat tutor (spike): a self-contained top-level collection so all chat data can be
       // deleted wholesale when the spike ends. A parent conversation doc (server-created by the
       // chatTutorOnWrite trigger via the admin SDK) with a messages subcollection the client
-      // writes `user` docs into. This is a discrete leaf match: the portal-level
-      // teacher/researcher grant above does not cascade here under rules_version 2, so the
-      // students-only stance below holds.
+      // writes `user` messages and `recovery` controls into. This is a discrete leaf match: the
+      // portal-level teacher/researcher grant above does not cascade here under rules_version 2,
+      // so the students-only stance below holds.
       match /chatTutor/{conversationId} {
         // The real Firebase claim students carry is user_type "learner" (the app-model
         // "student" value is a client-side remap the rules never see).
@@ -710,17 +710,18 @@ service cloud.firestore {
           return hasRole("learner");
         }
 
-        // Owner-only + student-only: reads trust resource.data.uid, which the create rules pin
-        // to the caller's token and the trigger stamps (admin SDK) on server-written docs. No
-        // teacher/researcher branch — evaluators inspect via the Firestore console/emulator.
+        // Owner-only + student-only: reads trust resource.data.uid, which the message create rules
+        // pin to the caller's token and the trigger stamps (admin SDK) on every doc it writes;
+        // clients cannot write a parent. No teacher/researcher branch: evaluators inspect via the
+        // Firestore console/emulator.
         // Deliberately NOT the documents rule's class-wide resourceInUserClass() branch, which
         // would expose a student's transcript to classmates.
         function canStartChat() {
           let uid = string(request.auth.token.platform_user_id);
           let prefix = 'owner:' + string(uid.size()) + ':' + uid + '_';
           // Exact substring comparison avoids regex metacharacter and uid-prefix attacks.
-          // First conversations require the updated client. Established uid/network parents
-          // keep working; an unowned legacy id cannot prove who is entitled to create it.
+          // Established uid/network parents keep working; an unowned legacy id cannot prove who
+          // is entitled to create it.
           return hasUserId() && conversationId.size() > prefix.size() &&
             conversationId[0:prefix.size()] == prefix;
         }
@@ -755,7 +756,7 @@ service cloud.firestore {
                   data.problemPath);
           }
 
-          // Five load-bearing checks:
+          // Load-bearing checks:
           // (a) hasOnly blocks extra/server-owned fields;
           // (b) the kind VALUE check — not hasOnly — is what blocks a forged 'assistant';
           // (c) createdAt presence + orderable type, so the drain's ordering can't wedge on a
@@ -785,7 +786,7 @@ service cloud.firestore {
             return isStudentClaim() &&
               userIsRequestUser() &&
               classIsRequestContextId() &&
-               data.problemPath is string && data.problemPath.size() > 0 &&
+              data.problemPath is string && data.problemPath.size() > 0 &&
               // 'unitContext' carries a filtered slice of the unit's authored aiUnitSummary,
               // installed alongside leftContext. Optional: a unit with no summary authored, or
               // whose summary fails the live-structure check, sends none.

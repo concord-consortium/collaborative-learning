@@ -57,9 +57,9 @@ export interface FirestoreTransportOptions {
   provider?: TutorProviderId;
 }
 
-// Live transport: writes `user` message docs to the conversation's messages
-// collection and renders `assistant` replies via onSnapshot; reload rehydrates
-// from Firestore.
+// Live transport: writes `user` message docs and `recovery` controls to the conversation's
+// messages collection and renders `assistant` replies and delivery notices via onSnapshot;
+// reload rehydrates from Firestore.
 export class FirestoreTransport implements ChatTransport {
   private unsubMessages?: () => void;
   private unsubParent?: () => void;
@@ -163,10 +163,9 @@ export class FirestoreTransport implements ChatTransport {
     this.onStatus(effective, this.delivery);
   }
 
-  // Snapshot read errors are not tutor failures by default: `permission-denied` is
-  // the expected benign case before the server creates the parent doc on the first
-  // send (the read rule derefs resource.data.uid, which errors on a missing doc).
-  // Treat it as "no conversation yet" → idle; any other code is a real failure.
+  // Snapshot read errors are not tutor failures by default: permission-denied means the rules did
+  // not let this caller read the conversation (a non-learner claim, or a parent that is not
+  // theirs). Show it as idle rather than as a tutor outage; any other code is a real failure.
   private onReadError(where: string, err: { code?: string; message?: string }) {
     console.warn(`[chat-tutor] ${where} read error (${err.code}):`, err.message);
     this.parentStatus = err.code === "permission-denied" ? "idle" : "error";

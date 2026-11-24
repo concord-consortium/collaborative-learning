@@ -52,7 +52,7 @@ async function readMessages() {
   return snap.docs;
 }
 
-// file-scoped: cleanup() deletes the Firebase app, so it must not run between describe blocks
+// file-scoped: the afterAll below deletes the Firebase app, so it must not run between describe blocks
 beforeEach(async () => {
   await getFirestore().recursiveDelete(getFirestore().doc(kConversation));
 });

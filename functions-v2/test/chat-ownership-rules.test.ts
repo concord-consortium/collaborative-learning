@@ -57,11 +57,13 @@ describe("authenticated chat ownership before and after the first parent", () =>
     await assertFails(db("101").doc(`${parent("uid:202_doc_vibe_1_2")}/messages/foreign`).set(message("101")));
     await assertFails(db().doc(`${parent("network_doc_vibe_1_2")}/messages/first`).set(message()));
   });
-  it.each(["uid:202_doc_vibe_1_2", "network_doc_vibe_1_2", id])("preserves established owner history: %s", async (key) => {
+  const established = ["uid:202_doc_vibe_1_2", "network_doc_vibe_1_2", id];
+  it.each(established)("preserves established owner history: %s", async (key) => {
     await seed(parent(key), owner);
     await seed(`${parent(key)}/messages/reply`, {...owner, kind: "assistant", userText: "Private reply", createdAt: 1});
     await assertSucceeds(db().doc(parent(key)).get());
-    await assertSucceeds(db().collection(`${parent(key)}/messages`).where("uid", "==", "202").orderBy("createdAt").get());
+    await assertSucceeds(db().collection(`${parent(key)}/messages`)
+      .where("uid", "==", "202").orderBy("createdAt").get());
     await assertSucceeds(db().doc(`${parent(key)}/messages/next`).set(message()));
     await assertFails(db("101").doc(parent(key)).get());
     await assertFails(db("101").doc(`${parent(key)}/messages/reply`).get());
@@ -81,7 +83,8 @@ describe("authenticated chat ownership before and after the first parent", () =>
     await seed(parent(), owner);
     await assertSucceeds(db().doc(`${parent()}/messages/recover`).set(recovery));
     await assertFails(db("101").doc(`${parent()}/messages/foreign`).set({...recovery, uid: "101"}));
-    await assertFails(db("202", "other-class").doc(`${parent()}/messages/class`).set({...message(), context_id: "other-class"}));
+    await assertFails(db("202", "other-class").doc(`${parent()}/messages/class`)
+      .set({...message(), context_id: "other-class"}));
     await assertFails(db().doc(`${parent()}/messages/problem`).set({...message(), problemPath: "other/1/1"}));
     await assertFails(db("202", "class", "teacher").doc(`${parent()}/messages/teacher`).set(message()));
   });

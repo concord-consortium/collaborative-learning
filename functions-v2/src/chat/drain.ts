@@ -15,7 +15,7 @@ import {TurnResult, TutorProvider} from "./provider";
 import {createTurnPersistence} from "./turn-persistence";
 import {prepareRecovery, recordDeliveryFailure, recordPendingDelivery} from "./delivery-recovery";
 import {RecordedDeliveryError} from "./fl-delivery-error";
-import {canStartConversation, sameChatOwner} from "../../../shared/chat-ownership";
+import {canStartConversation, hasChatOwner, kChatOwnerFields, sameChatOwner} from "../../../shared/chat-ownership";
 
 class ChatOwnershipError extends Error {}
 
@@ -49,10 +49,10 @@ export interface DrainContext {
   recoveryRef?: DocumentReference;
 }
 
-// The owner fields the client's rules require on any doc it reads. One list, because it feeds two
-// places that must not disagree: pickOwnerFields copies them onto function-written docs, and the
-// guard below refuses to let a provider set them. A field added here is protected in both.
-const kOwnerFields = ["uid", "context_id", "problemPath"] as const;
+// The owner fields the client's rules require on any doc it reads come from kChatOwnerFields in
+// shared/chat-ownership.ts, where the client and the drain share them. One list, because it feeds
+// two places here that must not disagree: pickOwnerFields copies them onto function-written docs,
+// and the guard below refuses to let a provider set them. A field added there is protected in both.
 
 // Parent-doc fields the drain owns; a provider may write anything EXCEPT these.
 //
@@ -68,7 +68,7 @@ const kOwnerFields = ["uid", "context_id", "problemPath"] as const;
 const kDrainOwnedParentFields = new Set<string>([
   "status", "lockedAt", "error", "delivery",
   "lastProcessedCreatedAt", "lastProcessedMessageId",
-  ...kOwnerFields,
+  ...kChatOwnerFields,
 ]);
 
 // Throwing (rather than dropping the offending keys) is deliberate: a provider reaching for these
@@ -87,7 +87,7 @@ function assertProviderOwnsFields(parentUpdate: Record<string, unknown>): void {
 // function-created parent). This is the only channel through which the parent gets its stamp.
 export function pickOwnerFields(data: DocumentData | undefined): Record<string, unknown> {
   const out: Record<string, unknown> = {};
-  for (const field of kOwnerFields) {
+  for (const field of kChatOwnerFields) {
     if (data?.[field] !== undefined) out[field] = data[field];
   }
   return out;
@@ -138,7 +138,8 @@ async function processUnit(ctx: DrainContext, doc: MsgSnap): Promise<UnitResult>
   if (requiresChatOwner(parentRef, parent) && !sameChatOwner(parent, data)) {
     throw new ChatOwnershipError("CHAT_OWNER_MISMATCH");
   }
-  const persistence = createTurnPersistence(doc.ref, data, (snapshot) => recordPendingDelivery(parentRef, doc, snapshot));
+  const persistence = createTurnPersistence(doc.ref, data,
+    (snapshot) => recordPendingDelivery(parentRef, doc, snapshot));
   const turnResult = await provider.processTurn(parent, data, persistence);
   const {parentUpdate} = turnResult;
   assertProviderOwnsFields(parentUpdate);
@@ -227,7 +228,9 @@ export async function processAndDrain(ctx: DrainContext): Promise<void> {
       const writeBatch = db.batch();
       if (pendingRequestRef) writeBatch.delete(pendingRequestRef);
       const noticeRef = messagesCol.doc(`delivery-${next.id}`);
-      if ((await noticeRef.get()).exists) writeBatch.set(noticeRef, {resolved: true, resolution: "recovered"}, {merge: true});
+      if ((await noticeRef.get()).exists) {
+        writeBatch.set(noticeRef, {resolved: true, resolution: "recovered"}, {merge: true});
+      }
       writeBatch.set(messagesCol.doc(), assistant);
       writeBatch.set(parentRef, {
         ...parentUpdate,
@@ -242,13 +245,14 @@ export async function processAndDrain(ctx: DrainContext): Promise<void> {
       if (sessionClosed) return;
     } catch (error) {
       if (error instanceof ChatOwnershipError) {
-        // Old rules could admit mixed first messages. Quarantine them before any provider or
-        // reservation sees their content. Advance atomically so they cannot trap the owner.
+        // A message whose owner fields differ from the parent's is rejected before any provider or
+        // reservation sees it, and the cursor advances past it in the same transaction so it cannot
+        // trap the owner.
         await db.runTransaction(async (tx) => {
           const parent = (await tx.get(parentRef)).data();
           const reserved = await tx.get(createTurnPersistence(next.ref, next.data()).ref);
-          if (!parent || !sameChatOwner(parent, parent)) throw error;
-          // A historical reservation may already have external work/expense. Do not skip it
+          if (!parent || !hasChatOwner(parent)) throw error;
+          // A reservation may already have external work/expense. Do not skip it
           // or delete its evidence: ownership reconciliation then requires operator support.
           if (reserved.exists) throw new Error("Reserved message ownership mismatch; support is required");
           tx.update(next.ref, {rejectedAt: FieldValue.serverTimestamp(), rejectionCode: "CHAT_OWNER_MISMATCH"});
@@ -278,7 +282,8 @@ export async function processAndDrain(ctx: DrainContext): Promise<void> {
 
   // Pathological drain length. Throw so the catch sets status:"error" (self-heals — acquire
   // proceeds on anything != "generating"); the persisted cursor means the next trigger
-  // continues in order.
+  // continues in order. Self-healing assumes no recorded delivery; under ForeverLearning a recorded
+  // delivery keeps the drain stopped until a recovery control.
   throw new Error("chat drain exceeded MAX_DRAIN_TURNS");
 }
 
@@ -296,7 +301,7 @@ export async function acquireLock(
     if (!p.exists && !allowCreate) return false;
     if (p.exists && requiresChatOwner(parentRef, parent) && !sameChatOwner(parent, ownerFields)) return false;
     if (!p.exists && parentRef.path.startsWith("authed/") &&
-        (!sameChatOwner(ownerFields, ownerFields) ||
+        (!hasChatOwner(ownerFields) ||
          !canStartConversation(parentRef.id, String(ownerFields.uid)))) return false;
     const status = p.data()?.status ?? "idle";
     const lockedAtMs = p.data()?.lockedAt?.toMillis?.() ?? 0;

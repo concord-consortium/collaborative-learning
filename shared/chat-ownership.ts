@@ -13,7 +13,12 @@ export function canStartConversation(id: string, uid: string): boolean {
   return id.length > prefix.length && id.startsWith(prefix);
 }
 
+export const kChatOwnerFields = ["uid", "context_id", "problemPath"] as const;
+
+export function hasChatOwner(fields: Record<string, unknown>): boolean {
+  return kChatOwnerFields.every(field => typeof fields[field] === "string" && (fields[field] as string).length > 0);
+}
+
 export function sameChatOwner(parent: Record<string, unknown>, message: Record<string, unknown>): boolean {
-  return ["uid", "context_id", "problemPath"].every(field =>
-    typeof parent[field] === "string" && (parent[field] as string).length > 0 && parent[field] === message[field]);
+  return hasChatOwner(parent) && kChatOwnerFields.every(field => parent[field] === message[field]);
 }

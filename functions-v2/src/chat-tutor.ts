@@ -73,8 +73,8 @@ export const chatTutorOnWrite = functionsV1
   .onWrite(async (change, context) => {
     const doc = change.after.data();
     if (!doc) return null; // delete → ignore
-    // self-trigger guard: only user messages start/continue a turn; ignore our own assistant
-    // writes (and any other kind).
+    // self-trigger guard: user messages start/continue a turn and a recovery control starts a
+    // recovery once, on its create; ignore our own assistant writes (and any other kind).
     if (doc.kind !== "user" && doc.kind !== "recovery") return null;
     if (doc.kind === "recovery" && change.before.exists) return null;
 
@@ -161,7 +161,8 @@ export const chatTutorOnWrite = functionsV1
       // "generating") and re-throw only to surface it in the function logs. This trigger must
       // run with the DEFAULT no-retry policy: with retries enabled, a deterministic failure
       // would re-acquire and re-drain forever, burning OpenAI spend. Do not enable
-      // failurePolicy/retries.
+      // failurePolicy/retries. Self-healing holds for OpenAI; under ForeverLearning a recorded
+      // delivery keeps the drain stopped until a recovery control.
       const message = e instanceof Error ? e.message : String(e);
       await parentRef.set({status: "error", error: message}, {merge: true});
       throw e;
