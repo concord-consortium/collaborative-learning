@@ -178,3 +178,9 @@ it("does not mistake an SSE error plus done for an accepted reply or a definitiv
   await expect(flChat({...kConfig, fetchImpl: impl}, {userId: "u", prompt: "hi", context: kContext}))
     .rejects.toMatchObject({state: "unknown", code: "CLUE_TURN_FAILED"});
 });
+
+it("rejects a stream whose error event has a blank code, even when a reply and done follow", async () => {
+  const {impl} = fakeFetch([line({type: "error", code: " "}) + "\n\n" + kStream]);
+  await expect(flChat({...kConfig, fetchImpl: impl}, {userId: "u", prompt: "hi", context: kContext}))
+    .rejects.toMatchObject({state: "unknown", code: "FL_STREAM_ERROR"});
+});
