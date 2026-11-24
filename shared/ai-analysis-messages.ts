@@ -4,6 +4,7 @@ import { ChatCompletionContentPart, ChatCompletionMessageParam } from "openai/re
 import {z} from "zod";
 import { escapeHtmlAttribute, escapeHtmlText } from "./escape-for-html";
 import { RatingValue } from "./shared";
+import { AiContextBlocks, buildContextSection, substituteContext, tokensUsed } from "./ai-context-tokens";
 import { fencedUnitContext, withCurriculumInstructions } from "./unit-summary-slice";
 
 export interface IAiPrompt {
@@ -213,6 +214,28 @@ function unitContextPart(unitContext: string): ChatCompletionContentPart {
 }
 
 /**
+ * The context blocks the main prompt named, as one part placed above the question.
+ *
+ * Only what the prompt asked for: a caller may pass everything it holds without widening what any
+ * particular prompt receives. A prompt naming no token adds no part at all.
+ *
+ * Above the question because what trails the question reads as the most relevant thing to answer
+ * from, and the class's work is not that.
+ */
+function contextBlockParts(
+  mainPrompt: string, blocks: AiContextBlocks | undefined
+): ChatCompletionContentPart[] {
+  if (!blocks) return [];
+  const requested: AiContextBlocks = {};
+  tokensUsed(mainPrompt).forEach(token => {
+    const content = blocks[token];
+    if (content) requested[token] = content;
+  });
+  const section = buildContextSection(requested);
+  return section ? [{ type: "text", text: section }] : [];
+}
+
+/**
  * The summary part, plus one part per related summary.
  *
  * Shared by `buildSummaryMessages` and `buildMixedMessages` so the two cannot drift: a mixed message
@@ -264,7 +287,8 @@ export function buildImageMessages(
   aiPrompt: IAiPrompt,
   images: string | ImageInput[],
   options: ImageMessageOptions = {},
-  unitContext?: string
+  unitContext?: string,
+  contextBlocks?: AiContextBlocks
 ): ChatCompletionMessageParam[] {
   return [
     {
@@ -274,9 +298,10 @@ export function buildImageMessages(
     {
       role: "user",
       content: [
+        ...contextBlockParts(aiPrompt.mainPrompt, contextBlocks),
         {
           type: "text",
-          text: aiPrompt.mainPrompt,
+          text: substituteContext(aiPrompt.mainPrompt),
         },
         ...imageContentParts(images, options),
         ...(unitContext ? [unitContextPart(unitContext)] : []),
@@ -286,7 +311,8 @@ export function buildImageMessages(
 }
 
 export function buildSummaryMessages(
-  aiPrompt: IAiPrompt, summary: string, relatedSummaries: RelatedSummary[], unitContext?: string
+  aiPrompt: IAiPrompt, summary: string, relatedSummaries: RelatedSummary[], unitContext?: string,
+  contextBlocks?: AiContextBlocks
 ): ChatCompletionMessageParam[] {
   return [
     {
@@ -296,9 +322,10 @@ export function buildSummaryMessages(
     {
       role: "user",
       content: [
+        ...contextBlockParts(aiPrompt.mainPrompt, contextBlocks),
         {
           type: "text",
-          text: aiPrompt.mainPrompt,
+          text: substituteContext(aiPrompt.mainPrompt),
         },
         ...summaryContentParts(summary, relatedSummaries),
         ...(unitContext ? [unitContextPart(unitContext)] : []),
@@ -324,7 +351,8 @@ export function buildMixedMessages(
   relatedSummaries: RelatedSummary[],
   images: string | ImageInput[],
   options: ImageMessageOptions = {},
-  unitContext?: string
+  unitContext?: string,
+  contextBlocks?: AiContextBlocks
 ): ChatCompletionMessageParam[] {
   return [
     {
@@ -334,9 +362,10 @@ export function buildMixedMessages(
     {
       role: "user",
       content: [
+        ...contextBlockParts(aiPrompt.mainPrompt, contextBlocks),
         {
           type: "text",
-          text: aiPrompt.mainPrompt,
+          text: substituteContext(aiPrompt.mainPrompt),
         },
         ...(summary === null ? [] : summaryContentParts(summary, relatedSummaries)),
         ...imageContentParts(images, options),

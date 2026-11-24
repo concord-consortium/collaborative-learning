@@ -138,6 +138,10 @@ export class PlaybackControlModel {
   // link's stop can take the index of the old one. So the seek loop compares this count, not the
   // index, to tell whether a request arrived while it waited or sought.
   private requestCount = 0;
+  // Whether the next seek should bring the tile it changes on screen. A request that asks for it
+  // keeps it set until a seek uses it, so a later request that doesn't, such as a move following
+  // the end, can't cancel it.
+  private queuedRevealChange = false;
   private seekLoop: Promise<void> | undefined = undefined;
   private followEndDisposer: IReactionDisposer;
 
@@ -154,8 +158,9 @@ export class PlaybackControlModel {
     this.requestedStop = initialRequest;
     this.requestedHistoryId = requestedHistoryId;
     makeAutoObservable<PlaybackControlModel,
-                       "treeManager" | "advanceTimer" | "queuedStopIndex" | "requestCount" | "seekLoop" |
-                       "followEndDisposer" | "requestedStopIndex" | "linkStopIndex">(this, {
+                       "treeManager" | "advanceTimer" | "queuedStopIndex" | "requestCount" |
+                       "queuedRevealChange" | "seekLoop" | "followEndDisposer" | "requestedStopIndex" |
+                       "linkStopIndex">(this, {
       // The comment queries hand back a new array whenever their results change, so tracking
       // the reference is enough, and it leaves the comment objects themselves alone.
       comments: observable.ref,
@@ -167,6 +172,7 @@ export class PlaybackControlModel {
       treeManager: false,
       advanceTimer: false,
       requestCount: false,
+      queuedRevealChange: false,
       seekLoop: false,
       followEndDisposer: false,
       requestedStopIndex: computed,
@@ -181,7 +187,9 @@ export class PlaybackControlModel {
     this.followEndDisposer = reaction(
       () => [this.lastStopIndex, this.treeManager.document.history.length],
       ([lastStopIndex]) => {
-        if (this.requestedStop === "end") void this.goToSliderStop(lastStopIndex);
+        // The reader did not make this move, so it leaves their view where it is, as the live
+        // document does when a collaborator's change arrives.
+        if (this.requestedStop === "end") void this.goToSliderStop(lastStopIndex, { revealChange: false });
       },
       { equals: comparer.structural }
     );
@@ -452,12 +460,17 @@ export class PlaybackControlModel {
     this.selectedFailure = failure;
   }
 
-  async goToSliderStop(requestedIndex: number) {
+  /**
+   * @param options.revealChange false for a move the reader did not make, which leaves the
+   * history view's scroll position alone.
+   */
+  async goToSliderStop(requestedIndex: number, options: { revealChange?: boolean } = {}) {
     const stopIndex = this.reachableStopIndex(requestedIndex);
     // Asking for the last stop is asking to be at the end. The behavior we want when they
     // are at the end is to stay at the end as new stops are added, so record the request as
     // "end" rather than as the index that happens to be last right now.
-    await this.seekToStop(stopIndex, stopIndex >= this.lastStopIndex ? "end" : stopIndex);
+    await this.seekToStop(stopIndex, stopIndex >= this.lastStopIndex ? "end" : stopIndex,
+      options.revealChange ?? true);
   }
 
   // The stops before the earliest available one can't be reached, so a request for one of them
@@ -466,9 +479,10 @@ export class PlaybackControlModel {
     return Math.max(requestedIndex, this.earliestStopIndex);
   }
 
-  private async seekToStop(stopIndex: number, request: StopRequest) {
+  private async seekToStop(stopIndex: number, request: StopRequest, revealChange = true) {
     this.requestedStop = request;
     this.queuedStopIndex = stopIndex;
+    this.queuedRevealChange = this.queuedRevealChange || revealChange;
     this.requestCount++;
     // Only one seek runs at a time. A request arriving while one is running waits for it,
     // and the loop then goes to wherever the reader has got to by that point rather than
@@ -542,7 +556,9 @@ export class PlaybackControlModel {
           // destination that is out of date.
           if (this.requestCount !== requestCount) continue;
         }
-        await this.treeManager.goToHistoryEntryPosition(position);
+        const revealChange = this.queuedRevealChange;
+        this.queuedRevealChange = false;
+        await this.treeManager.goToHistoryEntryPosition(position, { revealChange });
       } catch (error) {
         console.warn("PlaybackControlModel: seek to history position", position, "failed:", error);
         threw = true;

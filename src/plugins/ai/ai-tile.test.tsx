@@ -44,6 +44,7 @@ import {
 import { DocumentContentModel } from "../../models/document/document-content";
 import { ReadOnlyContext } from "../../components/document/read-only-context";
 import { hashString } from "../../../shared/hash-string";
+import { buildRequestPrompt, classSummaryBlocks } from "../../../shared/ai-context-tokens";
 
 // The starter tile needs to be registered so the TileModel.create
 // knows it is a supported tile type
@@ -335,7 +336,7 @@ describe("AIComponent", () => {
       expect(mockGetAiContent).not.toHaveBeenCalled();
     });
 
-    it("on a populated document, calls getAiContent with a prompt containing the summary", async () => {
+    it("on a populated document, calls getAiContent with the summary as the my-work block", async () => {
       mockStores.documents.getDocument.mockReturnValue(documentWith(populatedDocContent()));
       const aiContent = defaultAIContent();
       aiContent.setPrompt("What do you think?");
@@ -345,18 +346,77 @@ describe("AIComponent", () => {
 
       expect(mockGetAiContent).toHaveBeenCalledTimes(1);
       const [request] = mockGetAiContent.mock.calls[0];
-      expect(request.dynamicContentPrompt).toContain("The student's answer.");
+      expect(request.contextBlocks.mywork).toContain("The student's answer.");
       expect(request.dynamicContentPrompt).toContain("What do you think?");
+      // A prompt naming no token asks for curriculum and its own document, never the class's.
+      expect(request.contextBlocks.classwork).toBeUndefined();
+      expect(request.contextBlocks.teacherwork).toBeUndefined();
+      expect(request.contextTokens.sort()).toEqual(["curriculum", "mywork"]);
       expect(aiContent.text).toBe("Mocked customized content");
+    });
+
+    // Runs the real request through the real composer, so the client and server cannot disagree
+    // about the request shape unnoticed.
+    it("sends a request the server resolves the named class context from", async () => {
+      mockStores.documents.getDocument.mockReturnValue(documentWith(populatedDocContent()));
+      const aiContent = defaultAIContent();
+      aiContent.setPrompt("Compare {{mywork}} with {{classwork}}.");
+      const aiModel = TileModel.create({ content: aiContent });
+
+      await act(async () => render(<AIComponent {...defaultProps} model={aiModel} documentId="test-doc-1" />));
+
+      const [request] = mockGetAiContent.mock.calls[0];
+      const composed = buildRequestPrompt(
+        request.dynamicContentPrompt, request.contextBlocks, request.contextTokens,
+        classSummaryBlocks({ studentSummary: "What the class has been doing." })
+      );
+      expect(composed).toContain("What the class has been doing.");
+      expect(composed).toContain("The student's answer.");
+      // The question still reads as a question, and the contexts sit above it.
+      expect(composed.indexOf("What the class has been doing."))
+        .toBeLessThan(composed.indexOf("Compare this document with the class's work."));
+    });
+
+    it("sends no document summary when the prompt does not ask for its own work", async () => {
+      mockStores.documents.getDocument.mockReturnValue(documentWith(populatedDocContent()));
+      const aiContent = defaultAIContent();
+      aiContent.setPrompt("Give an example drawn from {{classwork}}.");
+      const aiModel = TileModel.create({ content: aiContent });
+
+      await act(async () => render(<AIComponent {...defaultProps} model={aiModel} documentId="test-doc-1" />));
+
+      const [request] = mockGetAiContent.mock.calls[0];
+      expect(request.contextBlocks.mywork).toBeUndefined();
+    });
+
+    // The sent text carries noun phrases, not tokens, so the token list is the only record of
+    // what was named; the class block is the server's to fill rather than the client's.
+    it("names a class context without resolving it, which only the server may do", async () => {
+      mockStores.documents.getDocument.mockReturnValue(documentWith(populatedDocContent()));
+      const aiContent = defaultAIContent();
+      aiContent.setPrompt("Compare {{mywork}} with {{classwork}}.");
+      const aiModel = TileModel.create({ content: aiContent });
+
+      await act(async () => render(<AIComponent {...defaultProps} model={aiModel} documentId="test-doc-1" />));
+
+      const [request] = mockGetAiContent.mock.calls[0];
+      expect(request.contextTokens.sort()).toEqual(["classwork", "mywork"]);
+      expect(request.contextBlocks.mywork).toContain("The student's answer.");
+      expect(request.contextBlocks.classwork).toBeUndefined();
+      expect(request.dynamicContentPrompt).toBe("Compare this document with the class's work.");
     });
 
     describe("the document-changed gate", () => {
       // Hashes the request the tile actually sent, so these cannot pass against a request the
-      // production code no longer makes. The formula is copied from the tile: a change to it
-      // must change this too.
+      // tile does not make. The formula is copied from the tile: a change to it must change this
+      // too.
       const hashOfLastRequest = () => {
         const sent = mockGetAiContent.mock.calls[mockGetAiContent.mock.calls.length - 1][0];
-        return hashString(`${sent.systemPrompt ?? ""}\u0000${sent.dynamicContentPrompt}`);
+        return hashString(
+          `${sent.systemPrompt ?? ""}\u0000${sent.dynamicContentPrompt}` +
+          `\u0000${JSON.stringify(sent.contextBlocks)}` +
+          `\u0000${[...sent.contextTokens].sort().join(",")}`
+        );
       };
 
       // A content model can only ever belong to one TileModel, so remount tests reuse the model
@@ -400,6 +460,66 @@ describe("AIComponent", () => {
         await pressUpdate(aiContent);
 
         expect(mockGetAiContent).toHaveBeenCalledTimes(1);
+      });
+
+      // The client may not read the class summary, so it cannot tell whether that summary moved.
+      // Gating here would suppress the one change such a prompt exists to pick up. The server
+      // composes that summary into its cache key, so an unchanged one costs a round trip rather
+      // than a second LLM call.
+      it("always re-requests for a prompt naming class work, even with nothing else changed", async () => {
+        mockStores.documents.getDocument.mockReturnValue(documentWith(populatedDocContent()));
+        const aiContent = defaultAIContent();
+        aiContent.setPrompt("Summarize {{classwork}} for me.");
+        const aiModel = TileModel.create({ content: aiContent });
+
+        await renderTile(aiModel);
+        expect(mockGetAiContent).toHaveBeenCalledTimes(1);
+
+        await pressUpdate(aiContent);
+
+        expect(mockGetAiContent).toHaveBeenCalledTimes(2);
+        expect(screen.queryByText(AI_TILE_UNCHANGED_MESSAGE)).not.toBeInTheDocument();
+      });
+
+      // The counterpart: a prompt that names only contexts the client can see is still gated, so
+      // the bypass above is scoped to what it is for rather than disabling the gate everywhere.
+      it("still gates a prompt naming only contexts the client resolves", async () => {
+        mockStores.documents.getDocument.mockReturnValue(documentWith(populatedDocContent()));
+        const aiContent = defaultAIContent();
+        aiContent.setPrompt("Comment on {{mywork}}.");
+        const aiModel = TileModel.create({ content: aiContent });
+
+        await renderTile(aiModel);
+        expect(mockGetAiContent).toHaveBeenCalledTimes(1);
+
+        await pressUpdate(aiContent);
+
+        expect(mockGetAiContent).toHaveBeenCalledTimes(1);
+        expect(screen.queryByText(AI_TILE_UNCHANGED_MESSAGE)).toBeInTheDocument();
+      });
+
+      // A prompt of nothing but tokens substitutes to empty text whichever contexts it named, and
+      // the server-resolved ones never reach contextBlocks. Dropping {{classwork}} therefore moves
+      // nothing else in the request, so without the tokens in the hash the author would be told
+      // nothing had changed and keep an answer still drawn from the class's work.
+      it("sends the request when a token was removed but the sent text did not change", async () => {
+        mockStores.documents.getDocument.mockReturnValue(documentWith(populatedDocContent()));
+        const aiContent = defaultAIContent();
+        aiContent.setPrompt("{{classwork}} {{curriculum}}");
+        const aiModel = TileModel.create({ content: aiContent });
+
+        await renderTile(aiModel);
+        expect(mockGetAiContent).toHaveBeenCalledTimes(1);
+        const first = mockGetAiContent.mock.calls[0][0];
+
+        await act(async () => { aiContent.setPrompt("{{curriculum}}"); });
+        await pressUpdate(aiContent);
+
+        expect(mockGetAiContent).toHaveBeenCalledTimes(2);
+        const second = mockGetAiContent.mock.calls[1][0];
+        // The premise: the sent text and blocks are identical, so only the token list differs.
+        expect(second.dynamicContentPrompt).toBe(first.dynamicContentPrompt);
+        expect(second.contextBlocks).toEqual(first.contextBlocks);
       });
 
       // The prompt is part of the request even though it is not part of the document. An author
@@ -461,12 +581,13 @@ describe("AIComponent", () => {
         expect(aiContent.evaluatedRequestHash).toBe(goodHash);
       });
 
-      // The current server always echoes the prompt it answered, so this is the production path.
-      it("records the gate when the server answered the prompt that was sent", async () => {
+      // The server echoes the hash it was sent, except under lock contention, so this is the
+      // production path.
+      it("records the gate when the server answered the request that was sent", async () => {
         mockStores.documents.getDocument.mockReturnValue(documentWith(populatedDocContent()));
         const { aiContent, aiModel } = tileWithPrompt();
-        mockGetAiContent.mockImplementationOnce(async (request: { dynamicContentPrompt: string }) =>
-          ({ data: { text: "an answer", prompt: request.dynamicContentPrompt } }));
+        mockGetAiContent.mockImplementationOnce(async (request: { requestHash: string }) =>
+          ({ data: { text: "an answer", clientRequestHash: request.requestHash } }));
 
         await renderTile(aiModel);
 
@@ -477,7 +598,7 @@ describe("AIComponent", () => {
       // Under lock contention the server hands back whatever the lock holder generated, which can
       // be an answer for a different revision of this tile. Recording our hash against it would
       // gate away the request we actually made.
-      it("does not record the gate when the server answered a different prompt", async () => {
+      it("does not record the gate when the server answered a different request", async () => {
         mockStores.documents.getDocument.mockReturnValue(documentWith(populatedDocContent()));
         const { aiContent, aiModel } = tileWithPrompt();
 
@@ -486,7 +607,7 @@ describe("AIComponent", () => {
 
         editDocument();
         mockGetAiContent.mockResolvedValueOnce(
-          { data: { text: "an answer to someone else's prompt", prompt: "a different prompt" } });
+          { data: { text: "an answer to someone else's prompt", clientRequestHash: "a-different-hash" } });
         await pressUpdate(aiContent);
 
         expect(aiContent.text).toBe("an answer to someone else's prompt");
@@ -566,10 +687,7 @@ describe("AIComponent", () => {
           ],
         };
       }
-      const unitContextHeading = "This is a summary of the unit's current and nearby problems.";
-
-      it("in a curriculum document of the loaded unit, prepends the slice ahead of the document " +
-         "summary", async () => {
+      it("in a curriculum document of the loaded unit, sends the slice as the curriculum block", async () => {
         mockStores.unit.config = { aiUnitSummary: unitSummaryWithDigest("digest one") };
         mockStores.documents.getDocument.mockReturnValue(
           documentWith(populatedDocContent(), { unit: "test-unit", investigation: "1", problem: "1" })
@@ -581,12 +699,8 @@ describe("AIComponent", () => {
         await act(async () => render(<AIComponent {...defaultProps} model={aiModel} documentId="test-doc-1" />));
 
         const [request] = mockGetAiContent.mock.calls[0];
-        expect(request.dynamicContentPrompt).toContain(unitContextHeading);
-        expect(request.dynamicContentPrompt).toContain("digest one");
-        expect(request.dynamicContentPrompt).toContain("The student's answer.");
-        // The unit context comes first, ahead of the document summary.
-        expect(request.dynamicContentPrompt.indexOf(unitContextHeading))
-          .toBeLessThan(request.dynamicContentPrompt.indexOf("The student's answer."));
+        expect(request.contextBlocks.curriculum).toContain("digest one");
+        expect(request.contextBlocks.mywork).toContain("The student's answer.");
       });
 
       it("in a personal document (no curriculum fields), sends no unit-summary slice", async () => {
@@ -599,8 +713,8 @@ describe("AIComponent", () => {
         await act(async () => render(<AIComponent {...defaultProps} model={aiModel} documentId="test-doc-1" />));
 
         const [request] = mockGetAiContent.mock.calls[0];
-        expect(request.dynamicContentPrompt).not.toContain(unitContextHeading);
-        expect(request.dynamicContentPrompt).toContain("The student's answer.");
+        expect(request.contextBlocks.curriculum).toBeUndefined();
+        expect(request.contextBlocks.mywork).toContain("The student's answer.");
       });
 
       it("in a document from a different unit than the one loaded, sends no unit-summary slice", async () => {
@@ -615,8 +729,8 @@ describe("AIComponent", () => {
         await act(async () => render(<AIComponent {...defaultProps} model={aiModel} documentId="test-doc-1" />));
 
         const [request] = mockGetAiContent.mock.calls[0];
-        expect(request.dynamicContentPrompt).not.toContain(unitContextHeading);
-        expect(request.dynamicContentPrompt).toContain("The student's answer.");
+        expect(request.contextBlocks.curriculum).toBeUndefined();
+        expect(request.contextBlocks.mywork).toContain("The student's answer.");
       });
 
       it("for a unit with no aiUnitSummary authored, sends no unit-summary slice even for a " +
@@ -631,8 +745,25 @@ describe("AIComponent", () => {
         await act(async () => render(<AIComponent {...defaultProps} model={aiModel} documentId="test-doc-1" />));
 
         const [request] = mockGetAiContent.mock.calls[0];
-        expect(request.dynamicContentPrompt).not.toContain(unitContextHeading);
-        expect(request.dynamicContentPrompt).toContain("The student's answer.");
+        expect(request.contextBlocks.curriculum).toBeUndefined();
+        expect(request.contextBlocks.mywork).toContain("The student's answer.");
+      });
+
+      it("sends only the current problem, with no look-ahead, for a problem-scoped prompt", async () => {
+        mockStores.unit.config = { aiUnitSummary: unitSummaryWithDigest("digest one") };
+        mockStores.documents.getDocument.mockReturnValue(
+          documentWith(populatedDocContent(), { unit: "test-unit", investigation: "1", problem: "1" })
+        );
+        const aiContent = defaultAIContent();
+        aiContent.setPrompt("Explain {{problem}}.");
+        const aiModel = TileModel.create({ content: aiContent });
+
+        await act(async () => render(<AIComponent {...defaultProps} model={aiModel} documentId="test-doc-1" />));
+
+        const [request] = mockGetAiContent.mock.calls[0];
+        expect(request.contextBlocks.problem).toContain("digest one");
+        expect(request.contextBlocks.problem).not.toContain("digest two");
+        expect(request.contextBlocks.curriculum).toBeUndefined();
       });
 
       it("when the summary's sourceManifest no longer matches the unit's live problems, sends no " +
@@ -653,8 +784,8 @@ describe("AIComponent", () => {
         await act(async () => render(<AIComponent {...defaultProps} model={aiModel} documentId="test-doc-1" />));
 
         const [request] = mockGetAiContent.mock.calls[0];
-        expect(request.dynamicContentPrompt).not.toContain(unitContextHeading);
-        expect(request.dynamicContentPrompt).toContain("The student's answer.");
+        expect(request.contextBlocks.curriculum).toBeUndefined();
+        expect(request.contextBlocks.mywork).toContain("The student's answer.");
       });
     });
 

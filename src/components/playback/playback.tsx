@@ -10,6 +10,9 @@ import { PlaybackControlComponent } from "./playback-control";
 
 import "./playback.scss";
 
+// The bar sits over the bottom of the document, which the history view allows for when it scrolls.
+export const kPlaybackComponentClass = "playback-component";
+
 interface IProps {
   document: DocumentModelType | undefined;
   historyManager: FirestoreHistoryManager | undefined;
@@ -28,7 +31,7 @@ export const PlaybackComponent: React.FC<IProps> = observer((props: IProps) => {
   }, [props.requestedHistoryId, historyManager]);
 
   const disablePlayback = false;
-  const playbackComponentClass = classNames("playback-component show-control", activeNavTab,
+  const playbackComponentClass = classNames(kPlaybackComponentClass, "show-control", activeNavTab,
                                             {"disabled" : disablePlayback});
 
   // The control builds a model around the tree manager when it mounts, so switching to

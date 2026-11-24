@@ -1,4 +1,5 @@
 import { TutorProviderId } from "../../shared/chat-tutor-providers";
+import { IClassSummaryPrompts } from "../../shared/class-summary-prompts";
 import { IUnitSummary } from "../../shared/unit-summary-types";
 import { EAuthorableNavTab } from "../models/view/nav-tabs";
 import { PanelLayout } from "../models/stores/problem-configuration";
@@ -228,6 +229,9 @@ export interface IItemTemplateConfig {
   defaultDocumentTemplateEnabled?: boolean;
   planningTemplate?: Record<string, ITemplateContent>;
   planningTemplateEnabled?: boolean;
+  // Authorable at unit level (the Class Summary page) and per problem (Container Configuration),
+  // so it sits here rather than on IUnitConfig alone.
+  classSummaryPrompts?: IClassSummaryPrompts;
 }
 
 export interface ITile {

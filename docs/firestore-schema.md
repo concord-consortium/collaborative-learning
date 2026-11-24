@@ -74,7 +74,7 @@ uploaded and a content save covering it has succeeded, or 30 seconds after the u
 is confirmed; a change still waiting when the page closes is written then. A change whose history
 upload fails, or that is rolled back after a conflicting edit in a group or class document, is never
 recorded. Any entry flagged `background`, which code produces on its own, such as DataFlow ticks,
-Simulator steps and the load entry, does not count (see
+Simulator steps and the conversion entry, does not count (see
 [undo-and-time-travel.md](undo-and-time-travel.md#asbackground)). The cases a running DataFlow
 recording captures are therefore not counted, even though the student starts the recording. Each tab
 writes at most every 5 seconds; a student with several tabs open can write more often. The Firestore

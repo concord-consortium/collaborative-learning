@@ -593,8 +593,9 @@ attempted.
   entries that fail to apply, and saved content at an entry the history doesn't have).
 - Describe the envelope's id and where playback starts in
   [history-framework.md](../../history-framework.md), the catch-up in
-  [history-framework/load-entries.md](../../history-framework/load-entries.md), which also takes over
-  the overview's "Load entries" section, and the envelope fields in
+  `history-framework/load-entries.md`, which also takes over the overview's "Load entries" section
+  (now split into [catch-up-at-load.md](../../history-framework/catch-up-at-load.md) and
+  [conversion-entries.md](../../history-framework/conversion-entries.md)), and the envelope fields in
   [metadata-fields.md](../../document-metadata/metadata-fields.md).
 
 The work CLUE-751 leaves for later (out-of-order entries, drift entries, one mechanism for every

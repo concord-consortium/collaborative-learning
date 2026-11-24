@@ -22,7 +22,7 @@ function liveProblems(ordinals: string[]): ILiveProblem[] {
 }
 
 function unitSummaryResult(ordinals: string[]): IUnitSummaryFetchResult {
-  return {summary: undefined, liveProblems: liveProblems(ordinals)};
+  return {summary: undefined, liveProblems: liveProblems(ordinals), classSummaryPrompts: {byProblemOrdinal: {}}};
 }
 
 const kTextTile = (text: string) => ({type: "Text", text});

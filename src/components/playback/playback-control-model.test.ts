@@ -226,10 +226,10 @@ describe("PlaybackControlModel", () => {
       expect(stopPositions(model)).toEqual([0, 1, 2]);
     });
 
-    it("makes no user stop for a load entry", () => {
+    it("makes no user stop for a conversion entry", () => {
       const { model, treeManager } = setupModel(0);
       treeManager.setChangeDocument(CDocument.create({
-        history: [entrySnapshot(0, { isLoadEntry: true, background: true }), entrySnapshot(1)]
+        history: [entrySnapshot(0, { isConversionEntry: true, background: true }), entrySnapshot(1)]
       }));
 
       expect(stopKinds(model)).toEqual(["initial", "user"]);
@@ -506,7 +506,7 @@ describe("PlaybackControlModel", () => {
       expect(seekTo).not.toHaveBeenCalled();
       jest.advanceTimersByTime(0);
       await seek;
-      expect(seekTo).toHaveBeenCalledWith(0);
+      expect(seekTo).toHaveBeenCalledWith(0, { revealChange: true });
       expect(model.longSeekInProgress).toBe(false);
     });
 
@@ -516,7 +516,7 @@ describe("PlaybackControlModel", () => {
 
       const seek = model.goToSliderStop(1);
       expect(model.longSeekInProgress).toBe(false);
-      expect(seekTo).toHaveBeenCalledWith(1);
+      expect(seekTo).toHaveBeenCalledWith(1, { revealChange: true });
       await seek;
     });
 
@@ -669,9 +669,72 @@ describe("PlaybackControlModel", () => {
       expect(treeManager.numHistoryEventsApplied).toBe(4);
       expect(model.currentStopIndex).toBe(model.lastStopIndex);
     });
+
+    it("leaves the history view's scroll alone while following the end", async () => {
+      const { model, treeManager } = setupModel(3, { appliedPosition: 2 });
+      await model.goToSliderStop(model.lastStopIndex);
+      const seekTo = jest.spyOn(treeManager, "goToHistoryEntryPosition");
+
+      addEntry(treeManager, 3);
+      await flushPromises();
+      addEntry(treeManager, 4, { background: true });
+      await flushPromises();
+      addEntry(treeManager, 5, { background: true });
+      await flushPromises();
+
+      expect(seekTo.mock.calls).toEqual([
+        [4, { revealChange: false }], [5, { revealChange: false }], [6, { revealChange: false }]
+      ]);
+      expect(model.currentStopIndex).toBe(model.lastStopIndex);
+    });
+
+    it("still reveals the change for a reader's seek when an entry arrives before it starts", async () => {
+      const entryCount = kLongSeekEntryCount + 1;
+      const { model, treeManager } = setupModel(entryCount, {
+        appliedPosition: 0, backgroundIndexes: [entryCount - 1]
+      });
+      const seekTo = jest.spyOn(treeManager, "goToHistoryEntryPosition");
+      const seek = model.goToSliderStop(model.lastStopIndex);
+      expect(model.longSeekInProgress).toBe(true);
+
+      addEntry(treeManager, entryCount, { background: true });
+      await new Promise(resolve => requestAnimationFrame(resolve));
+      jest.advanceTimersByTime(0);
+      await seek;
+
+      expect(seekTo.mock.calls).toEqual([[entryCount + 1, { revealChange: true }]]);
+    });
+
+    it("reveals the change for a reader's request queued behind a move following the end", async () => {
+      const { model, treeManager } = setupModel(3);
+      const seekTo = treeManager.goToHistoryEntryPosition;
+      let releaseFollow!: () => void;
+      const spy = jest.spyOn(treeManager, "goToHistoryEntryPosition").mockImplementationOnce(async position => {
+        await new Promise<void>(resolve => { releaseFollow = resolve; });
+        return seekTo(position);
+      });
+
+      addEntry(treeManager, 3);
+      await flushPromises();
+      const pick = model.goToSliderStop(1);
+      releaseFollow();
+      await pick;
+
+      expect(spy.mock.calls).toEqual([[4, { revealChange: false }], [1, { revealChange: true }]]);
+      expect(model.currentStopIndex).toBe(1);
+    });
   });
 
   describe("goToSliderStop", () => {
+    it("asks the history view to reveal the change at a stop the reader picks", async () => {
+      const { model, treeManager } = setupModel(3);
+      const seekTo = jest.spyOn(treeManager, "goToHistoryEntryPosition");
+
+      await model.goToSliderStop(1);
+
+      expect(seekTo).toHaveBeenCalledWith(1, { revealChange: true });
+    });
+
     // rc-slider reports every mouse move of a drag, so without coalescing each one starts its
     // own replay through the trees on top of the ones already running.
     it("runs one seek at a time, skipping the stops a drag passed through", async () => {
@@ -957,6 +1020,15 @@ describe("PlaybackControlModel", () => {
       seek.mockRestore();
     });
 
+    it("asks the history view to reveal the change at a link's entry", async () => {
+      const { model, treeManager } = setupLink(4, "entry-2", { backgroundIndexes: [1, 2] });
+      const seekTo = jest.spyOn(treeManager, "goToHistoryEntryPosition");
+
+      await model.followLink("entry-2");
+
+      expect(seekTo).toHaveBeenCalledWith(3, { revealChange: true });
+    });
+
     it("sends the document to the entry a link asks for", async () => {
       const { model, treeManager } = setupLink(4, "entry-2", { backgroundIndexes: [1, 2] });
 
@@ -998,7 +1070,7 @@ describe("PlaybackControlModel", () => {
       await new Promise(resolve => requestAnimationFrame(resolve));
       jest.advanceTimersByTime(0);
       await seek;
-      expect(seekTo).toHaveBeenCalledWith(1);
+      expect(seekTo).toHaveBeenCalledWith(1, { revealChange: true });
       expect(model.seekInProgress).toBe(false);
     });
 
@@ -1024,7 +1096,7 @@ describe("PlaybackControlModel", () => {
       jest.advanceTimersByTime(0);
       await Promise.all([slide, link]);
 
-      expect(seekTo).not.toHaveBeenCalledWith(0);
+      expect(seekTo).not.toHaveBeenCalledWith(0, expect.anything());
       expect(treeManager.numHistoryEventsApplied).toBe(3);
       expect(model.currentStopIndex).toBe(3);
     });
@@ -1105,8 +1177,8 @@ describe("PlaybackControlModel", () => {
 
       await model.goToSliderStop(0);
 
-      expect(seek).toHaveBeenCalledWith(3);
-      expect(seek).not.toHaveBeenCalledWith(0);
+      expect(seek).toHaveBeenCalledWith(3, { revealChange: true });
+      expect(seek).not.toHaveBeenCalledWith(0, expect.anything());
       expect(treeManager.numHistoryEventsApplied).toBe(3);
       expect(model.sliderValue).toBe(2);
       // The time readout shows the last entry applied at the earliest stop.
@@ -1149,6 +1221,16 @@ describe("PlaybackControlModel", () => {
   });
 
   describe("playback", () => {
+    it("asks the history view to reveal the change at each step", async () => {
+      const { model, treeManager } = setupModel(3, { appliedPosition: 0 });
+      const seekTo = jest.spyOn(treeManager, "goToHistoryEntryPosition");
+      model.togglePlay(true);
+
+      await runPlaybackStep();
+
+      expect(seekTo).toHaveBeenCalledWith(1, { revealChange: true });
+    });
+
     it("advances one stop at a time while playing", async () => {
       const { model } = setupModel(3, { appliedPosition: 0 });
       model.togglePlay(true);

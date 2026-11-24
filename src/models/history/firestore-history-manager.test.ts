@@ -228,13 +228,13 @@ describe("history loading", () => {
     });
   });
 
-  describe("local load entry", () => {
-    const loadEntry: HistoryEntrySnapshot = { id: "loadEntry", isLoadEntry: true };
+  describe("local conversion entry", () => {
+    const conversionEntry: HistoryEntrySnapshot = { id: "conversionEntry", isConversionEntry: true };
 
     async function subscribeWithLocalEntry(entries: HistoryEntrySnapshot[], lastHistoryEntry?: LastHistoryEntry) {
       const { treeManager } = setupDocument();
       const { historyManager } = setupFirestoreHistoryManager(treeManager);
-      treeManager.setLocalLoadEntry(loadEntry);
+      treeManager.setLocalConversionEntry(conversionEntry);
       getLastHistoryEntry.mockResolvedValue(lastHistoryEntry);
       loadHistory.mockImplementation((firestore, path, historyLoaded) => {
         historyLoaded(entries.map((entry, index) => ({ id: entry.id!, index, entry })));
@@ -245,7 +245,7 @@ describe("history loading", () => {
       return { treeManager, historyManager };
     }
 
-    it("keeps a local load entry out of the history and the starting position", async () => {
+    it("keeps a local conversion entry out of the history and the starting position", async () => {
       const { treeManager, historyManager } = await subscribeWithLocalEntry(
         [{ id: "a1" }, { id: "a2" }], { index: 1, id: "a2" });
       expect(treeManager.document.history.map(e => e.id)).toEqual(["a1", "a2"]);

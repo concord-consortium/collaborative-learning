@@ -28,9 +28,9 @@ const makeDocument = (type = "problem", uid = "7") =>
   createDocumentModel({ type: type as any, key: nanoid(), uid, content: {} });
 
 const addEntry = (document: DocumentModelType, model = "TextContent",
-                  action = "/content/tileMap/t/content/setText", isLoadEntry?: boolean, background?: boolean) => {
+                  action = "/content/tileMap/t/content/setText", isConversionEntry?: boolean, background?: boolean) => {
   const entry = HistoryEntry.create({
-    id: nanoid(), tree: document.key, model, action, isLoadEntry, background, state: "complete"
+    id: nanoid(), tree: document.key, model, action, isConversionEntry, background, state: "complete"
   });
   (document.treeManagerAPI as TreeManagerType).addHistoryEntryAfterApplying(entry);
   return entry;
@@ -91,12 +91,12 @@ describe("ActivityRecorder", () => {
     expect(mockSet).toHaveBeenCalledTimes(1);
   });
 
-  it("writes nothing for a load entry", async () => {
+  it("writes nothing for a conversion entry", async () => {
     recorder = new ActivityRecorder(makeStores());
     const doc = makeDocument();
-    const load = addEntry(doc, "DocumentContent", "/loadContent", true, true);
-    recorder.onLocalEntryUploaded(doc, load);
-    recorder.onContentSaved(doc, load.id);
+    const conversion = addEntry(doc, "DocumentContent", "/convertContent", true, true);
+    recorder.onLocalEntryUploaded(doc, conversion);
+    recorder.onContentSaved(doc, conversion.id);
     jest.advanceTimersByTime(kActivitySaveTimeoutMs * 2);
     await flush();
     expect(mockSet).not.toHaveBeenCalled();

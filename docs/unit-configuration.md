@@ -180,6 +180,26 @@ Ideas and Teacher Summary run server-side, with no browser session and no branch
 
 Teacher Summary's "current problem" is the one exception to "the student's current problem": it uses the *class's* current problem instead — the furthest-along problem, in authored order, that any student in the class has done real work on (requiring both `documentHasStudentWork(content)` and evidence of an edit since creation: `changeCount`, when present, is authoritative — `changeCount >= 1` — and `lastEditedAt` is used only as a fallback for older records that predate `changeCount`). Untouched templates have neither edit marker and do not advance the class; `changeCount` counts saved edits even before a student disconnects. `lastEditedAt` is a weaker signal than `changeCount` — it is also written by an Ideas click whether or not the student edited anything — so it is only trusted when `changeCount` is absent; one accepted residual: a legacy record with no `changeCount` whose `lastEditedAt` came only from an Ideas click still qualifies. A student who is behind the rest of the class can therefore see, through the class summary the AI Tile forwards, curriculum context from a problem ahead of where they personally are. Also unlike the other three consumers, a class summary is not regenerated just because its unit's `aiUnitSummary` changes: regeneration is still triggered by student work changing, so a newly generated or edited summary reaches an existing class summary the next time that class's work changes (the nightly pass, or an on-demand regeneration), not immediately.
 
+### Context tokens in AI prompts
+
+An AI tile prompt and the `aiPrompt` "mainPrompt" may name which contexts the AI should work with:
+
+| Token | What it supplies |
+|---|---|
+| `{{curriculum}}` | The unit's curriculum around the student's current problem |
+| `{{problem}}` | The current problem and how it asks students to work |
+| `{{classwork}}` | All student work in this class, including this student's own |
+| `{{teacherwork}}` | The teacher's materials, supplied as reference |
+| `{{mywork}}` | The document the student is working in |
+
+A token names a context; it does not paste text where it appears. `Compare {{mywork}} with {{classwork}}` reads to the AI as "Compare this document with the class's work", with both summaries supplied alongside, each labelled with what it holds.
+
+A prompt that names no token uses `{{curriculum}}` and `{{mywork}}`. In an AI tile it is not given the class's work; in Ideas it also receives related documents from the class.
+
+`{{classwork}}` is a summary of every student document in the class and includes the student's own, so it cannot be used to mean "everyone except me".
+
+A misspelled token such as `{{myWork}}` is left in the prompt as ordinary text, so it will show up in the AI's answer.
+
 ## Unit- or Problem-level `config` properties
 
 These properties are configurable at the unit, investigation, or problem levels of the curriculum JSON.
@@ -193,6 +213,18 @@ These properties are configurable at the unit, investigation, or problem levels 
 `chatTutorHighlights`: (boolean) Whether the tutor may render buttons that highlight an object in the student's document. Separate from `chatTutorEnabled`: a unit can have the tutor without the pointing behavior. Turning it on is necessary but not sufficient: the tutor produces the references those buttons need when the unit's prompt asks it to, via `chatTutorPrompts.appendToGenericPrompt`. With the flag on and no such instruction, replies will rarely have anything to show. Unset behaves as false. Not yet exposed in the authoring UI, so it is set in the curriculum JSON.
 
 `chatTutorProvider`: ("openai" | "foreverlearning") Which AI backend is selected for this unit's tutor turns. Both `openai` and `foreverlearning` are implemented, and the value selects which one answers. The choice is read from a conversation's **first** message and then held on the conversation: a later message naming a different backend is ignored, because a conversation's backend-specific state (an OpenAI conversation id, a ForeverLearning session id) means nothing to the other one. Unset uses `openai`, the default. The `chatProvider` URL param overrides this property so a single session can be flipped for testing without re-authoring; an unrecognized URL param value falls back to the unit config, and an unrecognized unit config value falls back to the default. Switching providers starts a fresh conversation rather than continuing the existing one, because a conversation's backend-specific state cannot transfer. `chatTutorPrompts` still starts a fresh conversation when edited, but it only has an effect under `openai`: `foreverlearning` installs no generic prompt for an override to replace, so the overrides are not sent to it at all. Not exposed in the authoring UI, so it is set in the curriculum JSON.
+
+`classSummaryPrompts`: (object) Optional overrides for the prompt that summarizes **student** work in the Class Summary a teacher sees in the Sort Work tab: `replaceStudentPrompt` swaps out the built-in instruction, and `appendToStudentPrompt` is added after the (possibly replaced) instruction. Either or both may be set. The "Teacher work summary" half of that panel always uses its built-in prompt, and the system prompt — including the curriculum instructions every AI feature receives — is not authorable here. Like other config this merges bottom-up, but a whole block wins: a problem-level `classSummaryPrompts` replaces the unit's outright rather than combining field by field, so a problem that only wants to add a sentence must restate the unit's replacement alongside it. Edit it on the **Class Summary** page under Configuration for the unit, and in the Class Summary section of a problem's **Container Configuration** page for one problem.
+
+One set of rules applies to the whole summary. The Class Summary covers every student document in the unit, not the documents of one problem, so only one `classSummaryPrompts` block can steer it. The block chosen is the one for the furthest problem any student has done real work on, falling back to that problem's investigation and then to the unit. This means a problem's rules stop applying once any student starts the next problem, even if the rest of the class is still behind: if problem 2.1 has a block and 2.2 has none, one student working on 2.2 moves the whole class's summary onto the unit's rules. This is accepted rather than worked around, because students rarely run ahead except when the class is about to move on together. The summary panel names the rules it used, so a teacher can always see which block ran.
+
+Three things to expect when authoring one, all of which make iterating slower than most config:
+
+- **Branch previews do not show it.** Class summaries are generated on the server from the unit's published **main-branch** `content.json` (see [unit-summary-consumers.md](unit-summary-consumers.md)), so a prompt edited on a branch has no effect until it is merged.
+- **It can take ten minutes.** The server caches each unit's fetched `content.json` for ten minutes, so a freshly merged edit is not picked up immediately.
+- **Existing summaries are not reissued.** A summary already generated for a class is not regenerated because its prompt changed. The new prompt applies the next time that class's work changes, or when a teacher clicks "Summarize Again".
+
+One behavior worth knowing for long prompts: when a class's work is large enough to be summarized in several pieces, a second built-in prompt merges those pieces. `appendToStudentPrompt` is applied to that merge step as well, so an added instruction survives it; `replaceStudentPrompt` is not, because an instruction written to be applied to student work is the wrong instruction for combining summaries of it. A unit that needs the merge steered should say so in `appendToStudentPrompt`.
 
 ```typescript
   disabledFeatures: string[];

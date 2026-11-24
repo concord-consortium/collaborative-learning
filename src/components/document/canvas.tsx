@@ -234,7 +234,9 @@ class _CanvasComponent extends BaseComponent<IProps, IState> {
   private renderContent() {
     const {content, document, showPlayback, viaTeacherDashboard, ...others} = this.props;
     const showPlaybackControls = this.props.document?.showPlaybackControls;
+    const showingPlayback = showPlayback && showPlaybackControls;
     const documentToShow = this.getDocumentToShow();
+    const documentToShowTreeManager = documentToShow?.treeManagerAPI as TreeManagerType | undefined;
     const documentContent = content || documentToShow?.content; // we only pass in content if it is a problem panel
     const typeClass = content ? "problem-panel" : document?.type === "planning" ? "planning-doc" : "";
 
@@ -256,9 +258,11 @@ class _CanvasComponent extends BaseComponent<IProps, IState> {
             content={documentContent}
             documentId={documentToShow?.key}
             onScroll={(x: number, y: number) => this.setState({ documentScrollX: x, documentScrollY: y })}
+            showPlaybackSpacer={showingPlayback}
+            playbackRevealRequest={showingPlayback ? documentToShowTreeManager?.playbackRevealRequest : undefined}
             {...{typeClass, viaTeacherDashboard, ...others}}
           />
-          {showPlayback && showPlaybackControls && (
+          {showingPlayback && (
             <PlaybackComponent
               document={documentToShow}
               historyManager={this.historyManager}
@@ -387,10 +391,10 @@ class _CanvasComponent extends BaseComponent<IProps, IState> {
       const treeManager = docCopy.treeManagerAPI as TreeManagerType;
       const firestore = this.stores.db.firestore;
 
-      // Only a still-pending load entry is handed over. A flushed one is in the
+      // Only a still-pending conversion entry is handed over. A flushed one is in the
       // Firestore history (or its local cache) already.
       const liveTreeManager = this.props.document.treeManagerAPI as TreeManagerType | undefined;
-      treeManager.setLocalLoadEntry(liveTreeManager?.pendingLoadEntry);
+      treeManager.setLocalConversionEntry(liveTreeManager?.pendingConversionEntry);
 
       // We don't need to dispose the old history manager because the old document copy will be destroyed
       // by updateHistoryDocument. This document disposal will trigger the tree manager disposal. The
