@@ -415,3 +415,18 @@ $chat-bubble-max-width: 85%;
     }
   }
 }
+
+
+.chat-tutor .chat-row.system {
+  align-self: stretch;
+  color: #4d5660;
+  font-size: 0.9em;
+  .chat-bubble { background: #f0f2f4; border: 1px solid #d2d6da; }
+}
+.chat-tutor .chat-recovery {
+  padding: 10px 14px;
+  background: #fff6df;
+  color: #413a29;
+  p { margin: 0 0 8px; }
+  button { padding: 6px 10px; cursor: pointer; }
+}

@@ -114,6 +114,8 @@ export interface CollectedStream {
   complete: boolean;
   /** True once `display_complete` has been seen. */
   displayComplete: boolean;
+  errorCode?: string;
+  sessionEnded?: boolean;
 }
 
 export function emptyStream(): CollectedStream {
@@ -123,6 +125,12 @@ export function emptyStream(): CollectedStream {
 /** Folds one event into the accumulating stream state. Unknown types are ignored by design. */
 export function collectEvent(into: CollectedStream, event: SseEvent): CollectedStream {
   switch (event.type) {
+    case "error":
+      into.errorCode = typeof event.code === "string" ? event.code : "FL_STREAM_ERROR";
+      break;
+    case "session_ended":
+      into.sessionEnded = true;
+      break;
     case "content": {
       const text = typeof event.text === "string" ? event.text : "";
       if (event.part === "conversation") into.conversation += text;

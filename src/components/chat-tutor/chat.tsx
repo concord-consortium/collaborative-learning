@@ -3,6 +3,7 @@ import classNames from "classnames";
 import { v4 as uuidv4 } from "uuid";
 import { kReplyDeadlineMs, kTimeoutMessage, UseChatResult } from "./use-chat";
 import { ChatTurn } from "./transport";
+import { deliveryMessage, recoveryAction } from "../../../shared/chat-delivery";
 
 import "./chat.scss";
 
@@ -46,7 +47,7 @@ export const buildChatTranscript = (turns: ChatTurn[], title?: string): string =
     if (turn.variant === "debug") continue;
     const text = turn.text.trim();
     if (!text) continue;
-    lines.push(`**${turn.sender === "user" ? "You" : "Ada"}:** ${text}`, "");
+    lines.push(`**${turn.sender === "user" ? "You" : turn.sender === "system" ? "Delivery notice" : "Ada"}:** ${text}`, "");
   }
   return lines.join("\n").trimEnd();
 };
@@ -119,7 +120,9 @@ const DebugTurn: React.FC<{ turn: ChatTurn }> = ({ turn }) => {
 
 export const Chat: React.FC<IProps> = ({ chat, onClose, closeLabel, transcriptTitle, introText,
     onHighlightHover, onHighlightToggle, activeHighlightKey, enableHighlights = false }) => {
-  const { turns, error, pending, timedOut, sendMessage, header } = chat;
+  const { turns, error, pending, timedOut, sendMessage, header, delivery, recover } = chat;
+  const action = delivery && recoveryAction(delivery.state);
+  const [recovering, setRecovering] = useState(false);
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
   // Identifies the newest submit. Once the release timer below frees the composer, an earlier send
@@ -297,7 +300,9 @@ export const Chat: React.FC<IProps> = ({ chat, onClose, closeLabel, transcriptTi
             : <div key={turn.id} className={classNames("chat-row", turn.sender)}
                    data-testid={`chat-row-${turn.sender}`}>
                 {/* per-turn sender attribution in the DOM (sender is otherwise conveyed by position+color only) */}
-                <span className="visually-hidden">{turn.sender === "user" ? "You said:" : "Ada said:"}</span>
+                <span className="visually-hidden">{turn.sender === "user" ? "You said:" :
+                  turn.sender === "system" ? "Delivery notice:" : "Ada said:"}
+                </span>
                 <div className={classNames("chat-bubble", { pending: turn.pending })}>{turn.text}</div>
                 {enableHighlights && turn.highlights?.length
                   ? <div className="chat-highlights" data-testid="chat-highlights">
@@ -373,7 +378,18 @@ export const Chat: React.FC<IProps> = ({ chat, onClose, closeLabel, transcriptTi
           {activeHighlightLabel ? `Highlighting ${activeHighlightLabel}` : ""}
         </div>}
 
-      {(error || timedOut) &&
+      {delivery && !pending &&
+        <div className="chat-recovery" role="status" data-testid="chat-recovery">
+          <p>{deliveryMessage(delivery.state)}</p>
+          {action && recover && <button type="button" disabled={recovering} onClick={async () => {
+            setRecovering(true);
+            try { await recover(action); } finally { setRecovering(false); }
+          }}>
+            {action === "continue" ? "Continue conversation" : action === "new_session" ? "Start a new conversation" :
+              delivery.state === "retryable" ? "Retry saved message" : "Check for reply"}
+                                </button>}
+        </div>}
+      {(error || (timedOut && !delivery)) &&
         <div className="chat-error" role="alert" data-testid="chat-error">{error ?? kTimeoutMessage}</div>}
 
       <form className="chat-composer" onSubmit={onSubmit} data-testid="chat-composer">
@@ -385,14 +401,14 @@ export const Chat: React.FC<IProps> = ({ chat, onClose, closeLabel, transcriptTi
           value={input}
           onChange={e => setInput(e.target.value)}
           placeholder="Message Ada…"
-          disabled={sending}
+          disabled={sending || !!delivery}
           autoComplete="off"
           data-testid="chat-input"
         />
         <button
           type="submit"
           className="chat-send"
-          disabled={sending || !input.trim()}
+          disabled={sending || !!delivery || !input.trim()}
           data-testid="chat-send"
         >
           Send

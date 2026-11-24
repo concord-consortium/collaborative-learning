@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { ChatStatus, ChatTransport, ChatTurn } from "./transport";
+import { ChatDelivery, RecoveryAction } from "../../../shared/chat-delivery";
 import { Logger } from "../../lib/logger";
 import { LogEventName } from "../../lib/logger-types";
 
@@ -21,6 +22,8 @@ export interface UseChatResult {
   timedOut: boolean;
   sendMessage: (text: string) => Promise<void>;
   header: string;
+  delivery?: ChatDelivery;
+  recover?: (action: RecoveryAction) => Promise<void>;
 }
 
 export interface ChatLogContext extends Record<string, unknown> {
@@ -44,6 +47,8 @@ export function useChat({ transport, header, logContext }: UseChatOptions): UseC
   const [status, setStatus] = useState<ChatStatus>("idle");
   const [error, setError] = useState<string | null>(null);
   const [timedOut, setTimedOut] = useState(false);
+  const [delivery, setDelivery] = useState<ChatDelivery>();
+  const [recoveryAttempt, setRecoveryAttempt] = useState(0);
   // Reopening a wedged conversation re-arms the deadline from rehydrated history. The message
   // should appear every time, but only a send made here counts, or repeat views inflate the rate.
   const sentThisSessionRef = useRef(false);
@@ -57,18 +62,21 @@ export function useChat({ transport, header, logContext }: UseChatOptions): UseC
     setStatus("idle");
     setTurns([]);
     sentThisSessionRef.current = false;
-    return transport.subscribe(setTurns, setStatus);
+    setDelivery(undefined);
+    return transport.subscribe(setTurns, (value, currentDelivery) => {
+      setStatus(value); setDelivery(currentDelivery);
+    });
   }, [transport]);
 
   // Surface an authoritative `status:"error"` as a visible error (never an infinite spinner).
   useEffect(() => {
-    if (status === "error") {
+    if (status === "error" && !delivery) {
       setError("Ada is currently unavailable. Please try again.");
       // Gated like the timeout below: the parent doc's "error" persists in Firestore, so every
       // reopen of a failed conversation would otherwise log again with no matching send.
       if (logContext && sentThisSessionRef.current) Logger.log(LogEventName.AI_CHAT_UNAVAILABLE, logContext);
-    }
-  }, [status, logContext]);
+    } else {setError(null);}
+  }, [status, logContext, delivery]);
 
   // The live transport folds "a just-sent user message awaits a reply" into the status it
   // emits — computed from the raw doc stream, so a silent reply clears it.
@@ -87,7 +95,7 @@ export function useChat({ transport, header, logContext }: UseChatOptions): UseC
       if (logContext && sentThisSessionRef.current) Logger.log(LogEventName.AI_CHAT_TIMEOUT, logContext);
     }, kReplyDeadlineMs);
     return () => clearTimeout(timer);
-  }, [waiting, newestTurnId, logContext]);
+  }, [waiting, newestTurnId, logContext, recoveryAttempt]);
 
   const pending = waiting && !timedOut;
 
@@ -109,5 +117,13 @@ export function useChat({ transport, header, logContext }: UseChatOptions): UseC
     }
   }, [transport, logContext]);
 
-  return { turns, status, error, pending, timedOut, sendMessage, header };
+  const recover = useCallback(async (action: RecoveryAction) => {
+    setError(null);
+    try {
+      await transport.recover?.(action);
+      setRecoveryAttempt(n => n + 1);
+    } catch (e) { setError((e as Error).message); }
+  }, [transport]);
+  return { turns, status, error, pending, timedOut, sendMessage, header, delivery,
+    ...(transport.recover ? { recover } : {}) };
 }

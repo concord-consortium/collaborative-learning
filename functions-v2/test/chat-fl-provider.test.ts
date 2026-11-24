@@ -5,7 +5,8 @@
 // answering with. Assertions prefer the returned TurnResult; the injected client is inspected only
 // where the behavior under test is a request the provider is supposed to make.
 import {CollectedStream, emptyStream} from "../../shared/fl-packet/sse";
-import {ContextPacket, kMaxPacketBytes} from "../../shared/fl-packet/packet";
+import {buildContextPacket, ContextPacket, kMaxPacketBytes} from "../../shared/fl-packet/packet";
+import {utf8ByteLength} from "../../shared/utf8-byte-length";
 import {createFlProvider} from "../src/chat/fl-provider";
 
 const kConfig = {baseUrl: "https://api.example.test", apiKey: "k", solutionId: "concordclue"};
@@ -97,6 +98,51 @@ function provider(overrides: {
 const aMessage = (over: Record<string, unknown> = {}) =>
   ({uid: "user-42", tutorUserId: "clue:authed/learn_concord_org/users/42",
     text: "Is my program right?", ...over});
+
+describe("FL per-turn activity context", () => {
+  const activity = {task_prompt: "Compare the readings.",
+    source: {system: "CLUE", lesson_id: "1.2", unit: "vibe", section: "lab"}};
+
+  it.each([true, false])("carries the task with document present=%s", async (hasDocument) => {
+    const {chat, provider: p} = provider(hasDocument ? {} : {document: undefined});
+    await p.processTurn({}, aMessage({activityContext: activity}));
+    expect(chat.mock.calls[0][1].context.activity_context).toEqual(activity);
+    expect(chat.mock.calls[0][1].context.envelope).toMatchObject({
+      answer_protection: {classes: kProtection.classes},
+    });
+  });
+
+  it("uses current message context and never restores an absent task from the parent", async () => {
+    const {chat, provider: p} = provider();
+    const parent = {activityContext: activity, flActivityContext: activity, flTraceId: "trace", flTurn: 1};
+    await p.processTurn(parent, aMessage({activityContext: {task_prompt: "New task"}}));
+    expect(chat.mock.calls[0][1].context.activity_context).toEqual({task_prompt: "New task"});
+    await p.processTurn(parent, aMessage());
+    expect(chat.mock.calls[1][1].context).not.toHaveProperty("activity_context");
+  });
+
+  it("counts activity bytes and retains task/protection when workspace is omitted", async () => {
+    const document = aDocument();
+    // Below cap on its own; adding a multibyte task pushes the full packet over the cap.
+    document.content.tileMap["tile-df-1"].title = "x".repeat(20000);
+    const before = buildContextPacket({content: document.content, documentId: document.documentId,
+      revision: document.revision, envelope: {traceId: "trace-new", requestId: "trace-new-t1", turn: 1,
+        protection: kProtection, catalogCommit: kCommit}});
+    expect(before.overLimit).toBe(false);
+    const {chat, provider: p} = provider({document});
+    const current = {task_prompt: "界".repeat(2000)};
+    const warn = jest.spyOn(console, "warn").mockImplementation(() => undefined);
+    await p.processTurn({}, aMessage({activityContext: current}));
+    const packet = chat.mock.calls[0][1].context;
+    expect(packet.activity_context).toEqual(current);
+    expect(packet.envelope).toEqual(before.packet.envelope);
+    expect(packet.workspace_state.omitted).toContainEqual({kind: "workspace_over_cap", count: 1});
+    expect(packet.workspace_state.tiles).toEqual([]);
+    expect(packet).not.toHaveProperty("run_state");
+    expect(utf8ByteLength(JSON.stringify(packet))).toBeLessThanOrEqual(kMaxPacketBytes);
+    warn.mockRestore();
+  });
+});
 
 describe("createFlProvider", () => {
   it("sends the student's text with a packet built from their document", async () => {
@@ -367,5 +413,35 @@ describe("createFlProvider over-cap packets", () => {
     expect(ctx.workspace_state?.omitted).toEqual(
       expect.arrayContaining([expect.objectContaining({kind: "workspace_over_cap"})]));
     expect(ctx.workspace_state?.document_id).toBe("doc-big");
+  });
+});
+
+
+describe("FL current capability context", () => {
+  const capabilityContext = {schema_version: "clue.capability_context.v1", dataflow: {
+    creation_tool_configured: true, node_palette: ["Number", "Demo Device"], demo_device_options: ["Servo"],
+    outputConfig: {servoInputMode: "proportion", allowedOutputTypes: ["Servo"]},
+  }};
+  it.each([false, true])("forwards current settings with document=%s", async (withDocument) => {
+    const chat = jest.fn().mockResolvedValue(aReply());
+    const provider = createFlProvider({config: kConfig, catalogCommit: kCommit, protection: kProtection,
+      readDocument: async () => withDocument ? aDocument() : undefined,
+      resolveUserId: () => "user", chat: chat as never});
+    await provider.processTurn({}, aMessage({capabilityContext}));
+    expect(chat.mock.calls[0][1].context.capability_context).toEqual(capabilityContext);
+    await provider.processTurn({capabilityContext}, aMessage());
+    expect(chat.mock.calls[1][1].context).not.toHaveProperty("capability_context");
+  });
+  it("preserves capabilities and task when omitting an oversized workspace", async () => {
+    const chat = jest.fn().mockResolvedValue(aReply());
+    const doc = aDocument(); doc.content.tileMap["tile-df-1"].title = "x".repeat(30000);
+    const provider = createFlProvider({config: kConfig, catalogCommit: kCommit, protection: kProtection,
+      readDocument: async () => doc, resolveUserId: () => "user", chat: chat as never});
+    await provider.processTurn({}, aMessage({capabilityContext, activityContext: {task_prompt: "Task"}}));
+    const context = chat.mock.calls[0][1].context;
+    expect(context.capability_context).toEqual(capabilityContext);
+    expect(context.activity_context.task_prompt).toBe("Task");
+    expect(context.workspace_state.tiles).toEqual([]);
+    expect(utf8ByteLength(JSON.stringify(context))).toBeLessThan(kMaxPacketBytes);
   });
 });

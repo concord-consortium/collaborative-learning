@@ -135,6 +135,11 @@
   ],
   "fieldOverrides": [
     {
+      "collectionGroup": "chatTutorPendingRequests",
+      "fieldPath": "snapshotJson",
+      "indexes": []
+    },
+    {
       "collectionGroup": "comments",
       "fieldPath": "uid",
       "indexes": [

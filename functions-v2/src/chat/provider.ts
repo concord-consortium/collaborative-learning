@@ -1,10 +1,8 @@
 // The contract between the drain engine and a tutor backend.
 //
-// Everything Firestore-shaped — the lock, the drain cursor, the batch commit, the owner fields —
-// stays in drain.ts, which refuses a parentUpdate that reaches for any of them. A provider sees
-// only the parent doc's current state plus the triggering message, and returns what to persist.
-// That split is what lets a second backend sit alongside the OpenAI path without touching the
-// lock and cursor machinery.
+// Firestore ownership stays in the drain and its persistence helper. Providers receive the
+// current parent/message plus an optional reservation seam; they never receive a document ref.
+// The drain protects its lock/cursor/owner fields and atomically commits successful delivery.
 import {DocumentData} from "firebase-admin/firestore";
 
 import {TutorHighlight} from "../../../shared/chat-tutor-highlight";
@@ -13,6 +11,9 @@ export interface TurnResult {
   // The reply to write as an assistant doc. A null text still writes a doc, or the client's
   // "awaiting reply" indicator spins forever.
   assistantText: string | null;
+  // Optional delivery receipt, unrelated to teaching meaning or action flags.
+  requestId?: string;
+  sessionClosed?: boolean;
   // Objects in the student's document this reply points at. Optional, not an empty array: a
   // backend that cannot produce them says nothing and the assistant doc omits the field, which
   // the client reads the same as an empty one. The shape is shared/ rather than a backend's own
@@ -24,5 +25,10 @@ export interface TurnResult {
 }
 
 export interface TutorProvider {
-  processTurn(parent: DocumentData, message: DocumentData): Promise<TurnResult>;
+  processTurn(parent: DocumentData, message: DocumentData, persistence?: TurnPersistence): Promise<TurnResult>;
+}
+
+// Supplied by the drain for the actual source message, never from client message fields.
+export interface TurnPersistence {
+  reserve<T extends object>(prepare: () => Promise<T>): Promise<T>;
 }

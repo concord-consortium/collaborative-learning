@@ -1,18 +1,17 @@
 // Drain-engine tests: the lock, the cursor, and the batch commit, run against the Firestore
 // emulator with a fake TutorProvider so no backend is involved.
 //
-// Requires a FIRESTORE-ONLY emulator (npm run test:emulator). A full stack with functions loaded
-// fires the real chatTutorOnWrite trigger on these writes and corrupts state mid-run.
-import {clearFirestoreData} from "firebase-functions-test/lib/providers/firestore";
+// Isolated project and path outside the deployed trigger pattern: safe with either a
+// Firestore-only emulator or the full local app stack. No project-wide data clearing.
+import {deleteApp, initializeApp} from "firebase-admin/app";
 import {DocumentData, FieldValue, Timestamp, getFirestore} from "firebase-admin/firestore";
 
-import {initialize, projectConfig} from "./initialize";
 import {DrainContext, acquireLock, processAndDrain} from "../src/chat/drain";
 import {TurnResult, TutorProvider} from "../src/chat/provider";
 
-const {cleanup} = initialize();
+const app = initializeApp({projectId: "demo-clue-drain"});
 
-const kConversation = "demo/test-demo/chatTutor/conv1";
+const kConversation = "testSupport/isolated/scopes/drain/chatTutor/conv1";
 
 // A provider that records what the drain handed it and replies with a canned script, so a test
 // can assert on both directions of the seam. Running off the end of the script throws rather
@@ -55,11 +54,12 @@ async function readMessages() {
 
 // file-scoped: cleanup() deletes the Firebase app, so it must not run between describe blocks
 beforeEach(async () => {
-  await clearFirestoreData(projectConfig);
+  await getFirestore().recursiveDelete(getFirestore().doc(kConversation));
 });
 
 afterAll(async () => {
-  await cleanup();
+  await getFirestore().recursiveDelete(getFirestore().doc(kConversation));
+  await deleteApp(app);
 });
 
 describe("processAndDrain", () => {

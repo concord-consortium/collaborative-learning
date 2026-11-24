@@ -25,6 +25,7 @@
 import * as functionsV1 from "firebase-functions/v1";
 import {defineSecret, defineString} from "firebase-functions/params";
 import {getFirestore} from "firebase-admin/firestore";
+import {RecordedDeliveryError} from "./chat/fl-delivery-error";
 
 import {CHAT_GENERIC_PROMPT} from "../../shared/chat-tutor-generic-prompt";
 import {kDefaultTutorProvider} from "../../shared/chat-tutor-providers";
@@ -74,7 +75,8 @@ export const chatTutorOnWrite = functionsV1
     if (!doc) return null; // delete → ignore
     // self-trigger guard: only user messages start/continue a turn; ignore our own assistant
     // writes (and any other kind).
-    if (doc.kind !== "user") return null;
+    if (doc.kind !== "user" && doc.kind !== "recovery") return null;
+    if (doc.kind === "recovery" && change.before.exists) return null;
 
     const db = getFirestore();
     const {root, rootId, conversationId} = context.params as Record<string, string>;
@@ -92,6 +94,7 @@ export const chatTutorOnWrite = functionsV1
     const ctx: DrainContext = {
       parentRef,
       messagesCol,
+      ...(doc.kind === "recovery" ? {recoveryRef: change.after.ref} : {}),
       provider: createRoutingProvider({
         defaultProvider: kDefaultTutorProvider,
         providers: {
@@ -153,6 +156,7 @@ export const chatTutorOnWrite = functionsV1
     try {
       await processAndDrain(ctx);
     } catch (e) {
+      if (e instanceof RecordedDeliveryError) throw e;
       // Record the error (status:"error" self-heals — acquire proceeds on anything !=
       // "generating") and re-throw only to surface it in the function logs. This trigger must
       // run with the DEFAULT no-retry policy: with retries enabled, a deterministic failure

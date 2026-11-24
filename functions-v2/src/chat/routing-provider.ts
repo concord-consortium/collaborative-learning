@@ -17,7 +17,7 @@
 import {DocumentData} from "firebase-admin/firestore";
 
 import {kTutorProviders, TutorProviderId} from "../../../shared/chat-tutor-providers";
-import {TurnResult, TutorProvider} from "./provider";
+import {TurnResult, TutorProvider, TurnPersistence} from "./provider";
 
 function isTutorProviderId(value: string): value is TutorProviderId {
   return (kTutorProviders as readonly string[]).includes(value);
@@ -42,7 +42,7 @@ export function createRoutingProvider(args: RoutingProviderArgs): TutorProvider 
   const {providers, defaultProvider} = args;
 
   return {
-    async processTurn(parent: DocumentData, message: DocumentData): Promise<TurnResult> {
+    async processTurn(parent: DocumentData, message: DocumentData, persistence?: TurnPersistence): Promise<TurnResult> {
       const held = typeof parent.provider === "string" ? parent.provider : undefined;
       const requested = typeof message.provider === "string" ? message.provider : undefined;
       const name = held ?? requested ?? defaultProvider;
@@ -59,7 +59,7 @@ export function createRoutingProvider(args: RoutingProviderArgs): TutorProvider 
         throw new Error(`unknown tutor provider "${name}"`);
       }
 
-      const result = await providers[name]().processTurn(parent, message);
+      const result = await providers[name]().processTurn(parent, message, persistence);
 
       // Recorded even when it is the default, so an unset field never has to mean two things:
       // after the first turn of any conversation, the parent says which backend owns it.

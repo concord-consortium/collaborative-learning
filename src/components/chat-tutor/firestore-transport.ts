@@ -1,6 +1,9 @@
 import firebase from "firebase/app";
+import { ChatDelivery, RecoveryAction, readChatDelivery, recoveryAction } from "../../../shared/chat-delivery";
 import { providerInstallsProblem, TutorProviderId } from "../../../shared/chat-tutor-providers";
 import { utf8ByteLength } from "../../../shared/utf8-byte-length";
+import { CapabilityContext, readCapabilityContext } from "../../../shared/fl-packet/capability-context";
+import { ActivityContext, readActivityContext } from "../../../shared/fl-packet/activity-context";
 import { Firestore } from "../../lib/firestore";
 import { ChatStatus, ChatTransport, ChatTurn } from "./transport";
 import { decideContext, RightContent, RightSummary } from "./right-context";
@@ -33,6 +36,9 @@ export interface FirestoreTransportOptions {
   // A slice of the unit's authored aiUnitSummary, undefined if the unit has none or the current
   // problem isn't found in it. Rides the same install-eligible sends as LEFT. See unit-context.ts.
   getUnitContext?: () => string | undefined;
+  // FL current task, read afresh on every turn, not gated on workspace changes or problem installation.
+  getActivityContext?: () => ActivityContext | undefined;
+  getCapabilityContext?: () => CapabilityContext | undefined;
   // RIGHT workspace summary; undefined until the document content has loaded
   getRightSummary: () => RightSummary | undefined;
   // The workspace document itself, for a backend that projects it server-side; undefined until
@@ -71,7 +77,8 @@ export class FirestoreTransport implements ChatTransport {
   private lastSentRightHash: string | undefined;
   private rightSendSeq = 0;
   private lastSentRightSeq = 0;
-  private onStatus?: (status: ChatStatus) => void;
+  private onStatus?: (status: ChatStatus, delivery?: ChatDelivery) => void;
+  private delivery?: ChatDelivery;
 
   constructor(private readonly opts: FirestoreTransportOptions) {}
 
@@ -93,10 +100,12 @@ export class FirestoreTransport implements ChatTransport {
 
   private emitStatus() {
     if (!this.onStatus) return;
-    const effective: ChatStatus =
+    const effective: ChatStatus = this.delivery
+      ? this.parentStatus === "generating" ? "generating" : this.delivery.state === "closed" ? "idle" : "error"
+      :
       this.parentStatus === "error" ? "error"
-        : this.awaitingReply ? "generating" : "idle";
-    this.onStatus(effective);
+        : this.parentStatus === "generating" || this.awaitingReply ? "generating" : "idle";
+    this.onStatus(effective, this.delivery);
   }
 
   // Snapshot read errors are not tutor failures by default: `permission-denied` is
@@ -109,10 +118,12 @@ export class FirestoreTransport implements ChatTransport {
     this.emitStatus();
   }
 
-  subscribe(onTurns: (turns: ChatTurn[]) => void, onStatus: (status: ChatStatus) => void): () => void {
+  subscribe(onTurns: (turns: ChatTurn[]) => void,
+    onStatus: (status: ChatStatus, delivery?: ChatDelivery) => void): () => void {
     this.onStatus = onStatus;
     this.parentStatus = "idle";
     this.awaitingReply = false;
+    this.delivery = undefined;
     onTurns([]);
     this.emitStatus();
 
@@ -126,7 +137,7 @@ export class FirestoreTransport implements ChatTransport {
           const data = doc.data({ serverTimestamps: "estimate" }) as any;
           // Push for every document, including a silent reply that produces no turn: isAwaitingReply
           // counts messages, not visible turns, and a silent reply is what clears the typing indicator.
-          kinds.push(data.kind);
+          kinds.push(data.kind === "delivery" && data.resolved ? "assistant" : data.kind);
           const turn = turnFromDoc(doc.id, data, doc.metadata.hasPendingWrites);
           if (turn) turns.push(turn);
         });
@@ -140,6 +151,7 @@ export class FirestoreTransport implements ChatTransport {
     this.unsubParent = this.parentRef().onSnapshot(
       doc => {
         const data = doc.exists ? doc.data() as any : undefined;
+        this.delivery = readChatDelivery(data?.delivery);
         const status = data?.status;
         this.parentStatus = status === "generating" ? "generating" : status === "error" ? "error" : "idle";
         this.problemInstalled = !!data?.problemInstalled;
@@ -175,6 +187,7 @@ export class FirestoreTransport implements ChatTransport {
   }
 
   async sendUserMessage(text: string): Promise<void> {
+    if (this.delivery) throw new Error("Resolve the saved message before sending another one.");
     const { uid, contextId, problemPath, getLeftContext, getUnitContext, tutorPrompts, provider } = this.opts;
     const right = this.workspacePayload();
     // LEFT is an OpenAI-path concept: that provider installs the problem once and flips the
@@ -219,6 +232,16 @@ export class FirestoreTransport implements ChatTransport {
     if (unitContext !== undefined) {
       message.unitContext = unitContext;
     }
+    if (provider === "foreverlearning") {
+      const capability = this.opts.getCapabilityContext?.();
+      const capabilities = readCapabilityContext(capability);
+      if (capabilities) message.capabilityContext = capabilities;
+      else if (capability !== undefined) console.warn("[chat-tutor] Invalid capability context omitted.");
+      const activity = this.opts.getActivityContext?.();
+      const snapshot = readActivityContext(activity);
+      if (snapshot) message.activityContext = snapshot;
+      else if (activity !== undefined) console.warn("[chat-tutor] Invalid or oversized activity context omitted.");
+    }
     // Stamped on every message rather than only install-eligible ones, so the trigger can read it
     // off whichever message it happens to be draining. Routing must persist it from the first
     // message and ignore the field thereafter, or a mid-conversation flip splits one
@@ -244,6 +267,15 @@ export class FirestoreTransport implements ChatTransport {
       this.lastSentRightSeq = sendSeq;
       this.lastSentRightHash = right.hash;
     }
+  }
+
+  async recover(action: RecoveryAction): Promise<void> {
+    if (!this.delivery || action !== recoveryAction(this.delivery.state)) {
+      throw new Error("This recovery action is no longer available.");
+    }
+    await this.messagesRef().add({ uid: this.opts.uid, context_id: this.opts.contextId,
+      problemPath: this.opts.problemPath, provider: "foreverlearning", kind: "recovery",
+      action, recoveryId: this.delivery.id, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
   }
 
   dispose(): void {

@@ -12,6 +12,9 @@ import {
 } from "firebase-admin/firestore";
 
 import {TurnResult, TutorProvider} from "./provider";
+import {createTurnPersistence} from "./turn-persistence";
+import {prepareRecovery, recordDeliveryFailure, recordPendingDelivery} from "./delivery-recovery";
+import {RecordedDeliveryError} from "./fl-delivery-error";
 
 // reclaim a lock whose owner crashed mid-drain, so a conversation can't wedge forever.
 // INVARIANT: STALE_LOCK_MS must exceed the function's configured timeout (default 60s, no
@@ -36,6 +39,7 @@ export interface DrainContext {
   messagesCol: MsgCol;
   // which tutor backend answers a turn; the drain itself is vendor-agnostic
   provider: TutorProvider;
+  recoveryRef?: DocumentReference;
 }
 
 // The owner fields the client's rules require on any doc it reads. One list, because it feeds two
@@ -55,7 +59,7 @@ const kOwnerFields = ["uid", "context_id", "problemPath"] as const;
 // Providers stay free to add their own fields (a session id, an install flag) without touching
 // this file — the rule is only that they cannot touch the drain's.
 const kDrainOwnedParentFields = new Set<string>([
-  "status", "lockedAt", "error",
+  "status", "lockedAt", "error", "delivery",
   "lastProcessedCreatedAt", "lastProcessedMessageId",
   ...kOwnerFields,
 ]);
@@ -108,6 +112,8 @@ interface UnitResult {
   assistant: Record<string, unknown>;
   // parent-doc fields the provider earned this turn (conversation/session ids, flags, seq)
   parentUpdate: Record<string, unknown>;
+  pendingRequestRef?: DocumentReference;
+  sessionClosed?: boolean;
 }
 
 // Process one user message: hand the provider the current parent state + the message, and RETURN
@@ -122,21 +128,28 @@ async function processUnit(ctx: DrainContext, doc: MsgSnap): Promise<UnitResult>
   // Per-conversation state is read fresh each turn (no in-memory state). The lock serializes
   // turns, so a provider's seq increment can't race across invocations.
   const parent = (await parentRef.get()).data() ?? {};
-  const turnResult = await provider.processTurn(parent, data);
+  const persistence = createTurnPersistence(doc.ref, data, (snapshot) => recordPendingDelivery(parentRef, doc, snapshot));
+  const turnResult = await provider.processTurn(parent, data, persistence);
   const {parentUpdate} = turnResult;
   assertProviderOwnsFields(parentUpdate);
 
   // Stamp owner fields so the client's owner-only onSnapshot can read the reply; write even a
   // null-text assistant doc so the client's "awaiting" indicator clears.
   const assistant = buildAssistantDoc(turnResult, ownerFields);
+  if (turnResult.requestId) {
+    assistant.providerRequestId = turnResult.requestId;
+    assistant.sourceMessageId = doc.id;
+  }
 
-  return {assistant, parentUpdate};
+  return {assistant, parentUpdate, sessionClosed: turnResult.sessionClosed,
+    ...(persistence.reserved ? {pendingRequestRef: persistence.ref} : {})};
 }
 
 export async function processAndDrain(ctx: DrainContext): Promise<void> {
   const {parentRef, messagesCol} = ctx;
   const db = getFirestore();
   const FieldPath = FirestoreFieldPath;
+  if (!await prepareRecovery(parentRef, ctx.recoveryRef)) return;
 
   // order on (createdAt, __name__) so the cursor is deterministic even when messages share a
   // serverTimestamp() millisecond; range-only (no kind filter) so it needs NO composite index —
@@ -195,21 +208,41 @@ export async function processAndDrain(ctx: DrainContext): Promise<void> {
     }
 
     const next = pending[0];
-    const {assistant, parentUpdate} = await processUnit(ctx, next);
+    try {
+      const {assistant, parentUpdate, pendingRequestRef, sessionClosed} = await processUnit(ctx, next);
 
-    lastSnap = next;
-    // commit the assistant doc + earned parent state + cursor advance in ONE batch: either all
-    // land or none, so a crash between the reply and the cursor can't duplicate the assistant
-    // doc (a pre-commit crash re-processes the unit but wrote nothing — only a possible re-bill
-    // from the provider remains, the documented replay risk).
-    const writeBatch = db.batch();
-    writeBatch.set(messagesCol.doc(), assistant);
-    writeBatch.set(parentRef, {
-      ...parentUpdate,
-      lastProcessedCreatedAt: next.get("createdAt"),
-      lastProcessedMessageId: next.id,
-    }, {merge: true});
-    await writeBatch.commit();
+      lastSnap = next;
+      // Reply, earned session state, cursor and removal of the pending request commit atomically.
+      // A pre-commit crash retains the exact request for replay; a post-commit duplicate skips it.
+      const writeBatch = db.batch();
+      if (pendingRequestRef) writeBatch.delete(pendingRequestRef);
+      const noticeRef = messagesCol.doc(`delivery-${next.id}`);
+      if ((await noticeRef.get()).exists) writeBatch.set(noticeRef, {resolved: true, resolution: "recovered"}, {merge: true});
+      writeBatch.set(messagesCol.doc(), assistant);
+      writeBatch.set(parentRef, {
+        ...parentUpdate,
+        lastProcessedCreatedAt: next.get("createdAt"),
+        lastProcessedMessageId: next.id,
+        error: FieldValue.delete(),
+        delivery: sessionClosed ? {id: crypto.randomUUID(), messageId: next.id, state: "closed",
+          code: "FL_SESSION_CLOSED", requestId: assistant.providerRequestId} : FieldValue.delete(),
+        ...(sessionClosed ? {status: "idle", lockedAt: FieldValue.delete()} : {}),
+      }, {merge: true});
+      await writeBatch.commit();
+      if (sessionClosed) return;
+    } catch (error) {
+      const parent = (await parentRef.get()).data();
+      // A lost Firestore acknowledgement is not a failed turn if the atomic delivery batch landed.
+      if (parent?.lastProcessedMessageId === next.id) {
+        if (parent.delivery?.state === "closed") return;
+        continue;
+      }
+      if (next.get("provider") === "foreverlearning" || parent?.provider === "foreverlearning") {
+        await recordDeliveryFailure(parentRef, next, error);
+        throw new RecordedDeliveryError(error);
+      }
+      throw error;
+    }
   }
 
   // Pathological drain length. Throw so the catch sets status:"error" (self-heals — acquire

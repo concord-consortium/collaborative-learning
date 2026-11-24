@@ -146,3 +146,35 @@ describe("flChat", () => {
     expect(stream.conversation).toBe("Compare them.");
   });
 });
+
+
+it("refuses changed body bytes and sends the explicit idempotency key for a reserved request", async () => {
+  const {impl, calls} = fakeFetch([kStream]);
+  const context = {...kContext, envelope: {...kContext.envelope,
+    trace: {...kContext.envelope.trace, request_id: "trace-t1"}}};
+  const args = {userId: "u", prompt: "hello", context};
+  await expect(flChat({...kConfig, fetchImpl: impl}, {...args, serializedBody: "{}"}))
+    .rejects.toThrow("reserved request differs");
+  expect(calls).toHaveLength(0);
+  const serializedBody = JSON.stringify({prompt: args.prompt, context});
+  await flChat({...kConfig, fetchImpl: impl}, {...args, serializedBody});
+  expect(calls[0].init.body).toBe(serializedBody);
+  expect(calls[0].init.headers["Idempotency-Key"]).toBe("trace-t1");
+});
+
+
+it.each([
+  [422, "CLUE_TURN_FAILED", "failed"], [422, "UNRECOGNIZED", "unknown"],
+  [503, "CLUE_TURN_UNCERTAIN", "unknown"], [409, "CLUE_TURN_IN_PROGRESS", "unknown"],
+  [409, "CLUE_IDEMPOTENCY_CONFLICT", "blocked"], [429, "RATE_LIMITED", "retryable"],
+])("classifies HTTP %s/%s conservatively", async (status, code, state) => {
+  const fetchImpl = (async () => new Response(`data: ${JSON.stringify({type: "error", code})}\n\n`,
+    {status: status as number})) as typeof fetch;
+  await expect(flChat({...kConfig, fetchImpl}, {userId: "u", prompt: "hi", context: kContext}))
+    .rejects.toMatchObject({state});
+});
+it("does not mistake an SSE error plus done for an accepted reply or a definitive failure", async () => {
+  const {impl} = fakeFetch([line({type: "error", code: "CLUE_TURN_FAILED"}) + "\n\n" + kStream]);
+  await expect(flChat({...kConfig, fetchImpl: impl}, {userId: "u", prompt: "hi", context: kContext}))
+    .rejects.toMatchObject({state: "unknown", code: "CLUE_TURN_FAILED"});
+});

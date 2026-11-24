@@ -5,6 +5,7 @@
 // in behind the same interface with no UI changes.
 
 import { TutorHighlight } from "../../../shared/chat-tutor-highlight";
+import { ChatDelivery, RecoveryAction } from "../../../shared/chat-delivery";
 
 export type { TutorHighlight };
 
@@ -21,7 +22,7 @@ export interface DebugSegment {
 
 export interface ChatTurn {
   id: string;
-  sender: "user" | "assistant";
+  sender: "user" | "assistant" | "system";
   text: string;
   // optimistic user turn not yet confirmed by the backend (live path only)
   pending?: boolean;
@@ -40,7 +41,9 @@ export interface ChatTurn {
 export interface ChatTransport {
   // Subscribe to turn + status changes. Implementations should immediately emit current
   // state. Returns an unsubscribe function.
-  subscribe(onTurns: (turns: ChatTurn[]) => void, onStatus: (status: ChatStatus) => void): () => void;
+  subscribe(onTurns: (turns: ChatTurn[]) => void,
+    onStatus: (status: ChatStatus, delivery?: ChatDelivery) => void): () => void;
   // Write a user message (live path) / render what would be sent (debug path).
   sendUserMessage(text: string): Promise<void>;
+  recover?: (action: RecoveryAction) => Promise<void>;
 }

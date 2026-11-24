@@ -32,6 +32,8 @@ import {
 import { buildEnvelope, BuildEnvelopeOptions, Envelope } from "./envelope";
 import { ProjectedSharedModel, projectSharedModels } from "./shared-models";
 import { ProjectedTile, projectTile } from "./tiles";
+import { CapabilityContext } from "./capability-context";
+import { ActivityContext } from "./activity-context";
 
 // ForeverLearning's per-request context cap, raised from 12,288 after we put the firehose question
 // to them. Bytes of UTF-8 JSON, not characters.
@@ -55,6 +57,8 @@ export interface Omission {
 export interface ContextPacket {
   schema_version: "clue.context_packet.v2";
   envelope: Envelope;
+  activity_context?: ActivityContext;
+  capability_context?: CapabilityContext;
   workspace_state?: {
     document_id: string;
     revision: string;
@@ -71,6 +75,8 @@ export interface BuildContextPacketOptions {
   documentId: string;
   revision: string;
   envelope: BuildEnvelopeOptions;
+  activityContext?: ActivityContext;
+  capabilityContext?: CapabilityContext;
   caseSampleSize?: number;
 }
 
@@ -161,6 +167,8 @@ export function buildContextPacket(
   const packet: ContextPacket = {
     schema_version: "clue.context_packet.v2",
     envelope: buildEnvelope(opts.envelope),
+    ...(opts.capabilityContext ? { capability_context: opts.capabilityContext } : {}),
+    ...(opts.activityContext ? { activity_context: opts.activityContext } : {}),
     workspace_state: {
       document_id: opts.documentId,
       revision: opts.revision,

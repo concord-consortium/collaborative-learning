@@ -13,6 +13,9 @@ import { DebugTransport } from "./debug-transport";
 import { FirestoreTransport } from "./firestore-transport";
 import { buildLeftContext, problemSectionsLoaded } from "./left-context";
 import { buildUnitContext } from "./unit-context";
+import { buildCapabilityContext } from "./capability-context";
+import { buildActivityContext } from "./activity-context";
+import { ENavTab } from "../../models/view/nav-tabs";
 import { normalizeTutorPrompts, tutorPromptsKey } from "./tutor-prompts";
 import { sessionTutorProvider } from "./tutor-provider";
 import { providerInstallsProblem } from "../../../shared/chat-tutor-providers";
@@ -46,7 +49,7 @@ interface IProps {
 // sidebar stays open.
 export const ChatTutorSidebar: React.FC<IProps> = observer((props) => {
   const { documentKey, documentTitle, problemPath, problem, content, onClose } = props;
-  const { appConfig, db, user, unit } = useStores();
+  const { appConfig, db, user, unit, persistentUI } = useStores();
   const containerRef = useRef<HTMLDivElement>(null);
   const bodyRef = useRef<HTMLDivElement>(null);
 
@@ -96,6 +99,10 @@ export const ChatTutorSidebar: React.FC<IProps> = observer((props) => {
       problemPath,
       getLeftContext,
       getUnitContext,
+      // Read the current student curriculum tab at send time, independently of workspace edits.
+      getCapabilityContext: () => buildCapabilityContext(appConfig),
+      getActivityContext: () => buildActivityContext(
+        unit, problem, persistentUI.tabs.get(ENavTab.kProblems)?.currentDocumentGroupId),
       getRightSummary,
       // Read only for a backend that projects the document server-side. No dirty-tracking
       // around it the way there is around the summary: serializing a snapshot is cheap, and
@@ -104,7 +111,7 @@ export const ChatTutorSidebar: React.FC<IProps> = observer((props) => {
       tutorPrompts,
       provider,
     }) };
-  }, [documentKey, problemPath, problem, getRightSummary, content, appConfig, db, user, unit]);
+  }, [documentKey, problemPath, problem, getRightSummary, content, appConfig, db, user, unit, persistentUI]);
 
   const logContext = useMemo(
     () => conversationId ? { conversationId, documentKey } : undefined,

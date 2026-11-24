@@ -1,11 +1,13 @@
 import React from "react";
 import { act, fireEvent, render, screen } from "@testing-library/react";
+import { observable } from "mobx";
 import { DocumentContentModel } from "../../models/document/document-content";
 import { UnitModel, UnitModelType } from "../../models/curriculum/unit";
 import { IUnitSummary } from "../../../shared/unit-summary-types";
 import { ChatTutorSidebar } from "./chat-sidebar";
 import { ChatStatus, ChatTransport, ChatTurn } from "./transport";
 import { FirestoreTransport } from "./firestore-transport";
+import "../../models/tiles/text/text-registration";
 
 // The sidebar builds its transport (FirestoreTransport) inside a useMemo, so the only way to hand it
 // scripted turns is to replace that module. This fake immediately delivers one assistant turn with two
@@ -89,6 +91,7 @@ const mockStores = {
   db: { firestore: {} },
   user: { id: "1", network: undefined, classHash: "class-hash" },
   unit: makeUnit(),
+  persistentUI: { tabs: observable.map<string, { currentDocumentGroupId: string }>() },
 };
 jest.mock("../../hooks/use-stores", () => ({ useStores: () => mockStores }));
 
@@ -377,6 +380,27 @@ describe("ChatTutorSidebar as a highlight source", () => {
       mockStores.unit = makeUnit(summaryWithDigest("digest two"));
       rerender(sidebarWithUnit(mockStores.unit, makeContent()));
       expect(lastConversationId()).toBe(firstId);
+    });
+
+    it("reads the live student section without rebuilding the transport or using the teacher guide selection", () => {
+      mockStores.appConfig.chatTutorProvider = "foreverlearning";
+      mockStores.unit = makeUnit();
+      const p = mockStores.unit.investigations[0].problems[0];
+      p.addSections(["intro", "lab"].map(type => ({ type, content: {
+        rowOrder: ["r"], rowMap: { r: { id: "r", tiles: [{ tileId: "t" }] } },
+        tileMap: { t: { id: "t", content: { type: "Text", text: `Task ${type}` } } }
+      } })));
+      mockStores.persistentUI.tabs.set("problems", { currentDocumentGroupId: "intro" });
+      mockStores.persistentUI.tabs.set("teacher-guide", { currentDocumentGroupId: "answers" });
+      render(sidebarWithUnit(mockStores.unit, makeContent()));
+      const calls = (FirestoreTransport as unknown as jest.Mock).mock.calls;
+      const transportsBuilt = calls.length;
+      const options = calls[transportsBuilt - 1][0];
+      expect(options.getActivityContext().task_prompt).toBe("Task intro");
+      act(() => { mockStores.persistentUI.tabs.set("problems", { currentDocumentGroupId: "lab" }); });
+      expect(options.getActivityContext().task_prompt).toBe("Task lab");
+      expect(calls).toHaveLength(transportsBuilt);
+      mockStores.persistentUI.tabs.clear();
     });
   });
 });
