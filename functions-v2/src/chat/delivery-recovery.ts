@@ -92,11 +92,12 @@ export async function prepareRecovery(parentRef: DocumentReference, controlRef?:
       const snapshot = readReservedSnapshot<{parentUpdate: Record<string, unknown>}>(saved.data()!, sourceRef.path,
         source.data()!);
       const earned = snapshot.parentUpdate;
+      const rightContent = source.get("rightContent");
       if (!Number.isInteger(earned?.flTurn) || typeof earned?.flTraceId !== "string") {
         throw new Error("Recovery reservation is invalid");
       }
       tx.set(parentRef, {flTurn: earned.flTurn, flTraceId: earned.flTraceId,
-        ...(typeof earned.flContent === "string" ? {flContent: earned.flContent} : {}),
+        ...(typeof rightContent === "string" && rightContent ? {flContent: rightContent} : {}),
         lastProcessedMessageId: source.id, lastProcessedCreatedAt: source.get("createdAt"),
         delivery: FieldValue.delete(), error: FieldValue.delete()}, {merge: true});
       tx.delete(pending.ref);

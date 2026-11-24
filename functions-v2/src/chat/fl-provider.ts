@@ -157,7 +157,6 @@ export function createFlProvider(args: FlProviderArgs): TutorProvider {
         const request: FlChatArgs = {userId, prompt: String(message.text ?? ""), context,
           ...(parent.flSessionId ? {sessionId: parent.flSessionId} : {})};
         const parentUpdate: Record<string, unknown> = {flTurn: turn, flTraceId: traceId};
-        if (document?.raw) parentUpdate.flContent = document.raw;
         return {version: 1, endpoint: config.baseUrl, solutionId: config.solutionId, request,
           serializedBody: serializeFlChatBody(request), parentUpdate};
       };
@@ -204,7 +203,10 @@ export function createFlProvider(args: FlProviderArgs): TutorProvider {
       if (stream.sessionId && stream.sessionId !== parent.flSessionId) {
         parentUpdate.flSessionId = stream.sessionId;
       }
-      if (parentUpdate.flContent === parent.flContent) delete parentUpdate.flContent;
+      // Read again rather than reserved: the raw workspace can approach Firestore's document
+      // limit, and it is derived from the immutable message or the parent's own copy.
+      const current = await readDocument(parent, message);
+      if (current?.raw && current.raw !== parent.flContent) parentUpdate.flContent = current.raw;
 
       return {
         assistantText,

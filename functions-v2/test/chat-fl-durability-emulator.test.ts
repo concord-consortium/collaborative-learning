@@ -81,13 +81,12 @@ async function fixture(parent: Record<string, unknown> = {}) {
   const provider = (chat?: typeof flChat, endpoint = baseUrl) => createFlProvider({
     config: {baseUrl: endpoint, solutionId: "concordclue", apiKey: "synthetic-key"},
     catalogCommit: "a".repeat(40), protection, resolveUserId: () => "synthetic-user", chat,
-    readDocument: async (state) => {
+    readDocument: async (state, message) => {
       const hook = beforeNextRead;
       beforeNextRead = undefined;
       await hook?.();
-      return state.flContent ? {
-        content: JSON.parse(state.flContent), documentId: "document", revision: "r1", raw: state.flContent,
-      } : undefined;
+      const raw = message.rightContent || state.flContent;
+      return raw ? {content: JSON.parse(raw), documentId: "document", revision: "r1", raw} : undefined;
     },
   });
   const ctx = (chat?: typeof flChat) => ({parentRef, messagesCol,
@@ -269,8 +268,22 @@ it("keeps a source message changed before its reservation blocked, without dispa
   expect(delivery.code).not.toBe("FL_NOT_DISPATCHED");
 });
 
+it("reserves and answers a turn whose attached workspace is near the browser's limit", async () => {
+  const f = await fixture();
+  const workspace = JSON.stringify({tiles: [{content: "\"".repeat(445_000)}]});
+  expect(workspace.length).toBeGreaterThan(880_000);
+  await f.source.update({rightContent: workspace});
+  await processAndDrain(f.ctx());
+  expect(calls).toHaveLength(1);
+  expect(await f.assistants()).toHaveLength(1);
+  expect((await f.parentRef.get()).get("flContent")).toBe(workspace);
+  expect((await (await f.reservation()).ref.get()).exists).toBe(false);
+});
+
 it("preserves terminal failure, explicitly continues queued work/end, then starts new work only after closure", async () => {
   const f = await fixture(); failStatus = 422; failCode = "CLUE_TURN_FAILED";
+  const workspace = JSON.stringify({tiles: []});
+  await f.source.update({rightContent: workspace});
   await expect(processAndDrain(f.ctx())).rejects.toThrow("CLUE_TURN_FAILED");
   const failedId = calls[0].key;
   for (const [id, text] of [["second", "Next question"], ["third", "/end"], ["fourth", "After closeout"]]) {
@@ -285,6 +298,7 @@ it("preserves terminal failure, explicitly continues queued work/end, then start
   expect(calls[1].key).not.toBe(failedId);
   expect((await f.parentRef.get()).get("delivery.state")).toBe("closed");
   expect((await f.messagesCol.doc("delivery-first").get()).get("resolution")).toBe("continued");
+  expect((await f.parentRef.get()).get("flContent")).toBe(workspace);
   expect(await f.assistants()).toHaveLength(2);
   await processAndDrain(f.ctx()); expect(calls).toHaveLength(3);
   await processAndDrain(await f.recoveryCtx("new_session"));
