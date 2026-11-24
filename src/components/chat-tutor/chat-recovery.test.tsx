@@ -16,11 +16,39 @@ it.each([
   ["unknown", "Check for reply", "retry"], ["closed", "Start a new conversation", "new_session"],
 ] as const)("offers the appropriate %s recovery without submitting a learner prompt", async (state, label, action) => {
   const chat = makeChat(state); render(<Chat chat={chat} />);
-  expect(screen.getByRole("textbox")).toBeDisabled();
+  const input = screen.getByRole("textbox");
+  expect(input).toHaveAttribute("readonly");
+  expect(input).toHaveAttribute("aria-disabled", "true");
+  expect(input).not.toBeDisabled();
   expect(screen.queryByTestId("chat-typing")).not.toBeInTheDocument();
   fireEvent.click(screen.getByRole("button", { name: label }));
   await waitFor(() => expect(chat.recover).toHaveBeenCalledWith(action));
   expect(chat.sendMessage).not.toHaveBeenCalled();
+});
+
+it("keeps focus in the composer and refuses to submit while a reply is pending", () => {
+  const chat = makeChat("unknown", { delivery: undefined, status: "idle" });
+  const { rerender } = render(<Chat chat={chat} />);
+  const input = screen.getByRole("textbox");
+  input.focus();
+  fireEvent.change(input, { target: { value: "Another question" } });
+  rerender(<Chat chat={{ ...chat, pending: true, status: "generating",
+    delivery: { id: "pending", messageId: "user", code: "FL_REQUEST_PENDING", state: "unknown" } }} />);
+  expect(document.activeElement).toBe(input);
+  fireEvent.submit(screen.getByTestId("chat-composer"));
+  expect(chat.sendMessage).not.toHaveBeenCalled();
+});
+
+it("moves focus to the composer when a recovery button is clicked", async () => {
+  const chat = makeChat("retryable");
+  const { rerender } = render(<Chat chat={chat} />);
+  const retry = screen.getByRole("button", { name: "Retry saved message" });
+  retry.focus();
+  fireEvent.click(retry);
+  await waitFor(() => expect(chat.recover).toHaveBeenCalledWith("retry"));
+  rerender(<Chat chat={{ ...chat, pending: true, status: "generating" }} />);
+  expect(screen.queryByRole("button", { name: "Retry saved message" })).not.toBeInTheDocument();
+  expect(document.activeElement).toBe(screen.getByRole("textbox"));
 });
 
 it("keeps uncertain work fenced and requires support for a request conflict", () => {

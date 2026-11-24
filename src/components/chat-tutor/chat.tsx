@@ -228,7 +228,7 @@ export const Chat: React.FC<IProps> = ({ chat, onClose, closeLabel, transcriptTi
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
     const text = input.trim();
-    if (!text || sending) return;
+    if (!text || sending || delivery) return;
     setSending(true);
     setInput("");
     // An offline add() stays pending indefinitely, so awaiting it for the UI would hold the
@@ -382,6 +382,8 @@ export const Chat: React.FC<IProps> = ({ chat, onClose, closeLabel, transcriptTi
         <div className="chat-recovery" role="status" data-testid="chat-recovery">
           <p>{deliveryMessage(delivery.state)}</p>
           {action && recover && <button type="button" disabled={recovering} onClick={async () => {
+            // This button is about to be disabled, then unmounted, which would drop focus to body.
+            inputRef.current?.focus();
             setRecovering(true);
             try { await recover(action); } finally { setRecovering(false); }
           }}>
@@ -401,7 +403,9 @@ export const Chat: React.FC<IProps> = ({ chat, onClose, closeLabel, transcriptTi
           value={input}
           onChange={e => setInput(e.target.value)}
           placeholder="Message Ada…"
-          disabled={sending || !!delivery}
+          disabled={sending}
+          readOnly={!!delivery}
+          aria-disabled={delivery ? true : undefined}
           autoComplete="off"
           data-testid="chat-input"
         />
