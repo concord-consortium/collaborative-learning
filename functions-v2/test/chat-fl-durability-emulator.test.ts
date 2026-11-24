@@ -22,6 +22,7 @@ let generations: number;
 let loseResponse: boolean;
 let failStatus: number;
 let failCode: string;
+let beforeNextRead: (() => Promise<void>) | undefined;
 let counter = 0;
 const cleanupPaths: string[] = [];
 const owner = {uid: "synthetic", context_id: "class", problemPath: "vibe/1/2"};
@@ -62,6 +63,7 @@ beforeAll(async () => {
 });
 beforeEach(() => {
   calls = []; accepted = new Map(); generations = 0; loseResponse = false; failStatus = 0; failCode = "";
+  beforeNextRead = undefined;
 });
 afterAll(async () => {
   await new Promise<void>((resolve) => server.close(() => resolve()));
@@ -79,9 +81,14 @@ async function fixture(parent: Record<string, unknown> = {}) {
   const provider = (chat?: typeof flChat, endpoint = baseUrl) => createFlProvider({
     config: {baseUrl: endpoint, solutionId: "concordclue", apiKey: "synthetic-key"},
     catalogCommit: "a".repeat(40), protection, resolveUserId: () => "synthetic-user", chat,
-    readDocument: async (state) => state.flContent ? {
-      content: JSON.parse(state.flContent), documentId: "document", revision: "r1", raw: state.flContent,
-    } : undefined,
+    readDocument: async (state) => {
+      const hook = beforeNextRead;
+      beforeNextRead = undefined;
+      await hook?.();
+      return state.flContent ? {
+        content: JSON.parse(state.flContent), documentId: "document", revision: "r1", raw: state.flContent,
+      } : undefined;
+    },
   });
   const ctx = (chat?: typeof flChat) => ({parentRef, messagesCol,
     provider: createRoutingProvider({defaultProvider: "openai", providers: {
@@ -112,6 +119,7 @@ it("persists before dispatch, survives a crash before send and deletes pending s
     saved = args; throw Error("Crash before send");
   }))).rejects.toThrow("Crash before send");
   expect(calls).toHaveLength(0);
+  expect((await f.parentRef.get()).get("delivery")).toMatchObject({state: "unknown", code: "FL_DELIVERY_UNCONFIRMED"});
   expect(await f.assistants()).toHaveLength(0);
   expect((await f.parentRef.get()).get("flSessionId")).toBeUndefined();
   await processAndDrain(await f.retryCtx());
@@ -227,6 +235,39 @@ it("refuses a snapshot that cannot be persisted before any dispatch", async () =
   expect((await (await f.reservation()).ref.get()).exists).toBe(false);
 });
 
+
+it("lets a failure before any reservation be retried, and the retry dispatches once", async () => {
+  const f = await fixture();
+  beforeNextRead = async () => {
+    throw Error("Transient read failure");
+  };
+  await expect(processAndDrain(f.ctx())).rejects.toThrow("Transient read failure");
+  expect(calls).toHaveLength(0);
+  expect((await (await f.reservation()).ref.get()).exists).toBe(false);
+  expect((await f.parentRef.get()).get("delivery")).toMatchObject({state: "retryable", code: "FL_NOT_DISPATCHED"});
+  await processAndDrain(await f.retryCtx());
+  expect(calls).toHaveLength(1);
+  expect(await f.assistants()).toHaveLength(1);
+  expect((await f.parentRef.get()).get("delivery")).toBeUndefined();
+});
+
+it("keeps a source message changed before its reservation blocked, without dispatch", async () => {
+  const f = await fixture();
+  const changesSourceFirst = {
+    processTurn: async (...turn: Parameters<ReturnType<typeof f.provider>["processTurn"]>) => {
+      await f.source.update({text: "Changed question"});
+      return f.provider().processTurn(...turn);
+    },
+  };
+  await expect(processAndDrain({...f.ctx(), provider: createRoutingProvider({defaultProvider: "openai",
+    providers: {foreverlearning: () => changesSourceFirst, openai: () => f.provider()}})}))
+    .rejects.toThrow("source message changed");
+  expect(calls).toHaveLength(0);
+  expect((await (await f.reservation()).ref.get()).exists).toBe(false);
+  const delivery = (await f.parentRef.get()).get("delivery");
+  expect(delivery.state).toBe("blocked");
+  expect(delivery.code).not.toBe("FL_NOT_DISPATCHED");
+});
 
 it("preserves terminal failure, explicitly continues queued work/end, then starts new work only after closure", async () => {
   const f = await fixture(); failStatus = 422; failCode = "CLUE_TURN_FAILED";

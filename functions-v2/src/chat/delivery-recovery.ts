@@ -4,6 +4,8 @@ import {FlDeliveryError} from "./fl-delivery-error";
 import {createTurnPersistence, readReservedSnapshot} from "./turn-persistence";
 import {FlChatArgs} from "./fl-client";
 
+const kNotDispatched = "FL_NOT_DISPATCHED";
+
 export async function recordPendingDelivery(parentRef: DocumentReference, source: QueryDocumentSnapshot,
   snapshot: object): Promise<void> {
   const request = (snapshot as {request?: FlChatArgs}).request;
@@ -20,8 +22,9 @@ export async function recordDeliveryFailure(parentRef: DocumentReference, source
   error: unknown): Promise<void> {
   const pending = createTurnPersistence(source.ref, source.data());
   const reserved = await pending.ref.get();
-  const failure = error instanceof FlDeliveryError ? error :
-    new FlDeliveryError(reserved.exists ? "unknown" : "blocked", "FL_DELIVERY_UNCONFIRMED");
+  // With no reservation the request was never dispatched, so a retry can rebuild it safely.
+  const failure = error instanceof FlDeliveryError ? error : reserved.exists ?
+    new FlDeliveryError("unknown", "FL_DELIVERY_UNCONFIRMED") : new FlDeliveryError("retryable", kNotDispatched);
   let snapshot;
   try {
     snapshot = reserved.exists ? JSON.parse(reserved.get("snapshotJson")) : undefined;
@@ -77,7 +80,9 @@ export async function prepareRecovery(parentRef: DocumentReference, controlRef?:
     if (!source.exists) throw new Error("Recovery source is missing");
     const pending = createTurnPersistence(sourceRef, source.data()!);
     const saved = await tx.get(pending.ref);
-    if (data.action !== "new_session" && (!saved.exists || saved.get("failure.id") !== delivery.id)) {
+    const notDispatched = delivery.code === kNotDispatched && !saved.exists;
+    if (data.action !== "new_session" && !notDispatched &&
+        (!saved.exists || saved.get("failure.id") !== delivery.id)) {
       throw new Error("Recovery has no matching server-owned failure receipt");
     }
     tx.update(controlRef, {processedAt: FieldValue.serverTimestamp(), disposition: "accepted"});
