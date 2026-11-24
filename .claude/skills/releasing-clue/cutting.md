@@ -63,7 +63,8 @@ The push starts CI Base, which builds and deploys to `branch/v<X.Y>.x/`. Find it
 list --workflow ci.yml --branch v<X.Y>.x`, then `gh run watch <id> --exit-status`; it must pass
 before the smoke test. Confirm `https://collaborative-learning.concord.org/branch/v<X.Y>.x/` loads
 (a 200). CI Functions v2 doesn't run here: `functions-v2.yml` only runs on pushes that change
-`functions-v2/`, `shared/` or the workflow, which a new branch at a master commit doesn't. It runs
+`functions-v2/`, `shared/`, `firestore.rules` or the workflow, which a new branch at a master
+commit doesn't. It runs
 for the tag, and for a fix on the branch that changes those paths.
 
 **Full regression on the branch [approve].** Manual Regression with `test=all` runs the same

@@ -6,6 +6,7 @@ on:
       - 'functions-v2/**'
       - 'shared/**'
       - '.github/workflows/functions-v2.yml'
+      - 'firestore.rules'
 
 jobs:
   functions-v2:
