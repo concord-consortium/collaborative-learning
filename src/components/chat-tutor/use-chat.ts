@@ -52,6 +52,7 @@ export function useChat({ transport, header, logContext }: UseChatOptions): UseC
   // Reopening a wedged conversation re-arms the deadline from rehydrated history. The message
   // should appear every time, but only a send made here counts, or repeat views inflate the rate.
   const sentThisSessionRef = useRef(false);
+  const transportRef = useRef(transport);
 
   // Re-subscribe whenever the transport instance changes — this is the hard
   // conversation swap when the student switches documents or problems.
@@ -63,6 +64,7 @@ export function useChat({ transport, header, logContext }: UseChatOptions): UseC
     setTurns([]);
     sentThisSessionRef.current = false;
     setDelivery(undefined);
+    transportRef.current = transport;
     return transport.subscribe(setTurns, (value, currentDelivery) => {
       setStatus(value); setDelivery(currentDelivery);
     });
@@ -140,10 +142,13 @@ export function useChat({ transport, header, logContext }: UseChatOptions): UseC
 
   const recover = useCallback(async (action: RecoveryAction) => {
     setError(null);
+    // A recovery that settles after the drawer has moved to another conversation must not touch it.
     try {
       await transport.recover?.(action);
-      setRecoveryAttempt(n => n + 1);
-    } catch (e) { setError((e as Error).message); }
+      if (transportRef.current === transport) setRecoveryAttempt(n => n + 1);
+    } catch (e) {
+      if (transportRef.current === transport) setError((e as Error).message);
+    }
   }, [transport]);
   return { turns, status, error, pending, timedOut, sendMessage, header, delivery,
     ...(transport.recover ? { recover } : {}) };

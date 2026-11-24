@@ -305,3 +305,19 @@ describe("useChat delivery failure logging", () => {
     expect(named(LogEventName.AI_CHAT_UNAVAILABLE)).toHaveLength(0);
   });
 });
+
+describe("useChat recovery across a conversation switch", () => {
+  it("ignores a recovery from the previous conversation that fails after the switch", async () => {
+    let fail: (error: Error) => void = () => undefined;
+    const first = stubTransport();
+    first.transport.recover = jest.fn(() => new Promise<void>((_resolve, reject) => { fail = reject; }));
+    const second = stubTransport();
+    const { result, rerender } = renderHook(({ transport }) => useChat({ transport, header: "Doc · 1.1" }),
+      { initialProps: { transport: first.transport } });
+    let pending: Promise<void> | undefined;
+    act(() => { pending = result.current.recover!("retry"); });
+    rerender({ transport: second.transport });
+    await act(async () => { fail(new Error("Recovery failed")); await pending; });
+    expect(result.current.error).toBeNull();
+  });
+});

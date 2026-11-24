@@ -163,7 +163,9 @@ in `prepareRecovery` (`functions-v2/src/chat/delivery-recovery.ts`), done by han
    - **If it exists**, take the request id from its `snapshotJson`
      (`request.context.envelope.trace.request_id`) or from the parent's `delivery.requestId`, ask
      FL whether that request was answered, and note the snapshot's `parentUpdate` if it parses.
-2. In one admin batch:
+2. Only while no drain holds the lock: in one admin transaction that re-reads the parent and the
+   reservation and aborts if the parent's `status` is `"generating"`, its `delivery.id` changed, or
+   the reservation's existence differs from step 1:
    - on the parent, delete `delivery` and `error`, set `status: "idle"`, and set
      `lastProcessedMessageId` and `lastProcessedCreatedAt` to the source message;
    - when a reservation existed, set `flTurn` and `flTraceId` from its `parentUpdate` (or, if that

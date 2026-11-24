@@ -250,6 +250,13 @@ it("lets a failure before any reservation be retried, and the retry dispatches o
   expect((await f.parentRef.get()).get("delivery")).toBeUndefined();
 });
 
+it("does not record an FL delivery for a message stamped foreverlearning in an OpenAI conversation", async () => {
+  const f = await fixture({provider: "openai"});
+  await expect(processAndDrain(f.ctx())).rejects.toThrow("Wrong backend");
+  expect((await f.parentRef.get()).get("delivery")).toBeUndefined();
+  expect((await f.messagesCol.doc("delivery-first").get()).exists).toBe(false);
+});
+
 it("keeps a source message changed before its reservation blocked, without dispatch", async () => {
   const f = await fixture();
   const changesSourceFirst = {

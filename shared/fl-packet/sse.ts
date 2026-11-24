@@ -126,7 +126,8 @@ export function emptyStream(): CollectedStream {
 export function collectEvent(into: CollectedStream, event: SseEvent): CollectedStream {
   switch (event.type) {
     case "error":
-      into.errorCode = typeof event.code === "string" ? event.code : "FL_STREAM_ERROR";
+      into.errorCode = typeof event.code === "string" && event.code.trim() ? event.code
+        : into.errorCode ?? "FL_STREAM_ERROR";
       break;
     case "session_ended":
       into.sessionEnded = true;

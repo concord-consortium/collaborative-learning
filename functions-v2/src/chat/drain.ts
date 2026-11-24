@@ -269,7 +269,7 @@ export async function processAndDrain(ctx: DrainContext): Promise<void> {
         if (parent.delivery?.state === "closed") return;
         continue;
       }
-      if (next.get("provider") === "foreverlearning" || parent?.provider === "foreverlearning") {
+      if ((parent?.provider ?? next.get("provider")) === "foreverlearning") {
         await recordDeliveryFailure(parentRef, next, error);
         throw new RecordedDeliveryError(error);
       }
