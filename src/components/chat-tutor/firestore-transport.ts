@@ -85,6 +85,9 @@ export class FirestoreTransport implements ChatTransport {
   private resolvedConversationId?: string;
   private resolution?: Promise<void>;
   private subscriptionVersion = 0;
+  // The current subscription's listener setup, kept until it attaches so that a later successful
+  // resolution (from a send or a recovery) can attach it after a failed first lookup.
+  private pendingListen?: () => void;
 
   constructor(private readonly opts: FirestoreTransportOptions) {}
 
@@ -124,9 +127,18 @@ export class FirestoreTransport implements ChatTransport {
           // than silently abandoning a real conversation and sending under a fresh id.
           if ((error as { code?: string }).code !== "permission-denied") throw error;
         }
-      })();
+      })().catch(error => {
+        // Not cached: a transient failure must not keep every later send and the listeners out.
+        this.resolution = undefined;
+        throw error;
+      });
     }
     return this.resolution;
+  }
+
+  private async resolveAndListen(): Promise<void> {
+    await this.resolveConversation();
+    this.pendingListen?.();
   }
 
   private messagesRef() {
@@ -174,7 +186,8 @@ export class FirestoreTransport implements ChatTransport {
     // Estimate pending serverTimestamps so a just-sent doc orders correctly before
     // the server resolves it (otherwise it can momentarily sort to the top as null).
     const listen = () => {
-      if (version !== this.subscriptionVersion) return;
+      if (version !== this.subscriptionVersion || this.pendingListen !== listen) return;
+      this.pendingListen = undefined;
       this.unsubMessages = this.messagesQuery().onSnapshot(
         snapshot => {
           const turns: ChatTurn[] = [];
@@ -203,6 +216,7 @@ export class FirestoreTransport implements ChatTransport {
         err => this.onReadError("parent", err)
       );
     };
+    this.pendingListen = listen;
     if (this.opts.legacyConversationId) {
       void this.resolveConversation().then(listen, error => {
         if (version === this.subscriptionVersion) {
@@ -242,7 +256,7 @@ export class FirestoreTransport implements ChatTransport {
   }
 
   async sendUserMessage(text: string): Promise<void> {
-    if (this.opts.legacyConversationId) await this.resolveConversation();
+    if (this.opts.legacyConversationId) await this.resolveAndListen();
     if (this.delivery) throw new Error("Resolve the saved message before sending another one.");
     const { uid, contextId, problemPath, getLeftContext, getUnitContext, tutorPrompts, provider } = this.opts;
     const right = this.workspacePayload();
@@ -326,7 +340,7 @@ export class FirestoreTransport implements ChatTransport {
   }
 
   async recover(action: RecoveryAction): Promise<void> {
-    if (this.opts.legacyConversationId) await this.resolveConversation();
+    if (this.opts.legacyConversationId) await this.resolveAndListen();
     if (!this.delivery || action !== recoveryAction(this.delivery.state)) {
       throw new Error("This recovery action is no longer available.");
     }
@@ -341,6 +355,7 @@ export class FirestoreTransport implements ChatTransport {
     this.unsubParent?.();
     this.unsubMessages = undefined;
     this.unsubParent = undefined;
+    this.pendingListen = undefined;
     this.onStatus = undefined;
   }
 }

@@ -76,3 +76,28 @@ it("does not attach late listeners after disposal during resolution", async () =
   await f.transport.sendUserMessage("Await resolution");
   expect(f.listens).toEqual([]);
 });
+it("retries a lookup that failed on open, then attaches the listeners and sends", async () => {
+  const failures: Record<string, string> = {network_doc: "unavailable"};
+  const f = setup({network_doc: owner}, failures);
+  const onStatus = jest.fn();
+  f.transport.subscribe(jest.fn(), onStatus);
+  await new Promise(resolve => setTimeout(resolve));
+  expect(onStatus).toHaveBeenLastCalledWith("error", undefined);
+  expect(f.listens).toEqual([]);
+  delete failures.network_doc;
+  await f.transport.sendUserMessage("After the blip");
+  expect(f.listens).toEqual(["network_doc", "network_doc"]);
+  expect(f.added.map(a => a.id)).toEqual(["network_doc"]);
+  const lookups = f.gets.length;
+  await f.transport.sendUserMessage("Again");
+  expect(f.gets).toHaveLength(lookups);
+  expect(f.listens).toHaveLength(2);
+});
+it("attaches the listeners once when a send's lookup finishes before the subscription's", async () => {
+  const f = setup({network_doc: owner});
+  const sent = f.transport.sendUserMessage("Early");
+  f.transport.subscribe(jest.fn(), jest.fn());
+  await sent;
+  await new Promise(resolve => setTimeout(resolve));
+  expect(f.listens).toEqual(["network_doc", "network_doc"]);
+});
