@@ -6,12 +6,14 @@ TODO: Support more tile types.
 */
 
 import {
-  AiSummarizerOptions, DocumentContentSnapshotType, INormalizedTile, NormalizedDataSet,
-  NormalizedModel, NormalizedSection, NormalizedVariable, SharedModelMapEntry, TileMap
+  AiSummarizerOptions, DocumentContentSnapshotType, INormalizedTile, NormalizedAnnotation,
+  NormalizedAnnotationEndpoint, NormalizedDataSet, NormalizedModel, NormalizedSection,
+  NormalizedVariable, SharedModelMapEntry, TileMap
 } from "./ai-summarizer-types";
 import {
   generateAttributesMarkdownTable, generateMarkdownTable, generateVariablesMarkdownTable, heading, pluralize
 } from "./ai-summarizer-utils";
+import { annotationsSummary } from "./annotations-summary";
 import { rowsSummary, tileSummary } from "./ai-tile-summarizer";
 
 /** Return the markdown summary of the given Document content.
@@ -113,6 +115,7 @@ function buildNormalizedDataSet(entryId: string, entry: SharedModelMapEntry): No
       formula: attr.formula?.display || undefined
     })),
     numCases: caseCount,
+    caseIds: (cases || []).map((aCase: any) => `${aCase?.__id__ ?? ""}`),
     data: [],
     sharedDataSetId: entryId
   };
@@ -145,11 +148,36 @@ export function parseContent(content: string): DocumentContentSnapshotType {
   }
 }
 
+/**
+ * A runtime document stores annotations as an MST map, keyed by id; authored curriculum exports
+ * them as an array. Both reach the summarizer, so both normalize to one list.
+ */
+function normalizeAnnotations(annotations: any): NormalizedAnnotation[] {
+  if (!annotations) { return []; }
+  const list = Array.isArray(annotations) ? annotations : Object.values(annotations);
+  return list
+    .filter((annotation: any) => annotation?.sourceObject || annotation?.targetObject)
+    .map((annotation: any) => ({
+      id: annotation.id,
+      ...(annotation.text !== undefined ? { text: annotation.text } : {}),
+      ...(annotation.sourceObject ? { sourceObject: normalizeEndpoint(annotation.sourceObject) } : {}),
+      ...(annotation.targetObject ? { targetObject: normalizeEndpoint(annotation.targetObject) } : {})
+    }));
+}
+
+function normalizeEndpoint(object: any): NormalizedAnnotationEndpoint {
+  return {
+    tileId: object.tileId,
+    objectId: object.objectId,
+    ...(object.objectType !== undefined ? { objectType: object.objectType } : {})
+  };
+}
+
 export function normalize(model: DocumentContentSnapshotType) {
   const sections: NormalizedSection[] = [];
   const dataSets: NormalizedDataSet[] = [];
   const variables: NormalizedVariable[] = [];
-  const { rowOrder, rowMap, tileMap, sharedModelMap } = model || {};
+  const { rowOrder, rowMap, tileMap, sharedModelMap, annotations } = model || {};
 
   const addSection = (sectionId?: string): NormalizedSection => {
     const newSection: NormalizedSection = {
@@ -251,13 +279,17 @@ export function normalize(model: DocumentContentSnapshotType) {
       sections,
       dataSets,
       variables,
+      annotations: normalizeAnnotations(annotations),
     },
     tileMap: tileMap as TileMap | undefined,
   };
 }
 
 export function summarize(normalizedModel: NormalizedModel, tileMap: TileMap | undefined, options: AiSummarizerOptions): string {
-  const { sections, dataSets, variables } = normalizedModel;
+  const { sections, dataSets, variables, annotations } = normalizedModel;
+  const sparrows = annotationsSummary({
+    annotations, dataSets, variables, tileMap, options, headingLevel: 1
+  });
   if (sections.length === 0) {
     return documentSummary(
       options.minimal ? "" : "This is an empty CLUE document with no content.",
@@ -265,7 +297,8 @@ export function summarize(normalizedModel: NormalizedModel, tileMap: TileMap | u
       variables,
       "",
       options,
-      1
+      1,
+      sparrows
     );
   }
 
@@ -284,7 +317,8 @@ export function summarize(normalizedModel: NormalizedModel, tileMap: TileMap | u
         options
       }),
       options,
-      1
+      1,
+      sparrows
     );
   }
 
@@ -295,11 +329,12 @@ export function summarize(normalizedModel: NormalizedModel, tileMap: TileMap | u
     variables,
     sectionsSummary({normalizedModel, tileMap, options, headingLevel: 2}),
     options,
-    1
+    1,
+    sparrows
   );
 }
 
-export function documentSummary(preamble: string, dataSets: NormalizedDataSet[], variables: NormalizedVariable[], summary: string = "", options: AiSummarizerOptions, headingLevel: number = 1): string {
+export function documentSummary(preamble: string, dataSets: NormalizedDataSet[], variables: NormalizedVariable[], summary: string = "", options: AiSummarizerOptions, headingLevel: number = 1, sparrows: string = ""): string {
   const maybeTileInfo = summary.length > 0
     ? " Tiles are either static UI elements or interactive elements " +
       "that students can use."
@@ -355,6 +390,7 @@ export function documentSummary(preamble: string, dataSets: NormalizedDataSet[],
     summary + "\n" +
     dataSetSummary + "\n" +
     variablsSummary + "\n" +
+    sparrows +
     heading(headingLevel, "End of CLUE Document Summary")
   );
 }

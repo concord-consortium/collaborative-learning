@@ -1810,3 +1810,109 @@ describe('normalize tolerates a malformed shared model', () => {
     expect(normalize(content as any).normalizedModel.dataSets[0].name).toBeUndefined();
   });
 });
+
+describe("normalize with annotations", () => {
+  const contentWithSparrow = {
+    rowOrder: ["row1"],
+    rowMap: { row1: { id: "row1", tiles: [{ tileId: "tile1" }] } },
+    tileMap: { tile1: { id: "tile1", content: { type: "Table" } } },
+    annotations: {
+      ann1: {
+        id: "ann1",
+        text: "+10",
+        sourceObject: { tileId: "tile1", objectId: "cell:{c1}:{a1}", objectType: "cell" },
+        targetObject: { tileId: "tile1", objectId: "cell:{c2}:{a1}", objectType: "cell" },
+        type: "arrowAnnotation"
+      }
+    }
+  };
+
+  it("collects the document's annotations", () => {
+    const { normalizedModel } = normalize(contentWithSparrow);
+    expect(normalizedModel.annotations).toEqual([{
+      id: "ann1",
+      text: "+10",
+      sourceObject: { tileId: "tile1", objectId: "cell:{c1}:{a1}", objectType: "cell" },
+      targetObject: { tileId: "tile1", objectId: "cell:{c2}:{a1}", objectType: "cell" }
+    }]);
+  });
+
+  // Authored curriculum exports annotations as an array; a runtime document stores them as an MST
+  // map. Both reach this code, so both have to normalize to the same list.
+  it("collects annotations stored as an array", () => {
+    const { normalizedModel } = normalize({
+      ...contentWithSparrow,
+      annotations: Object.values(contentWithSparrow.annotations)
+    });
+    expect(normalizedModel.annotations).toHaveLength(1);
+  });
+
+  it("collects no annotations from a document that has none", () => {
+    const { normalizedModel } = normalize({ ...contentWithSparrow, annotations: undefined });
+    expect(normalizedModel.annotations).toEqual([]);
+  });
+
+  // A cell endpoint names a case by id; only the case order says which row that is.
+  it("keeps data set case ids in row order", () => {
+    const { normalizedModel } = normalize({
+      ...contentWithSparrow,
+      sharedModelMap: {
+        sm1: {
+          sharedModel: {
+            type: "SharedDataSet",
+            id: "sm1",
+            dataSet: {
+              id: "ds1",
+              name: "Trip",
+              attributes: [{ id: "a1", name: "distance", values: ["10", "20"] }],
+              cases: [{ __id__: "c1" }, { __id__: "c2" }]
+            }
+          },
+          tiles: ["tile1"]
+        }
+      }
+    });
+    expect(normalizedModel.dataSets[0].caseIds).toEqual(["c1", "c2"]);
+  });
+});
+
+describe("documentSummarizer with sparrows", () => {
+  const document = {
+    rowOrder: ["row1"],
+    rowMap: { row1: { id: "row1", tiles: [{ tileId: "tile1" }] } },
+    tileMap: { tile1: { id: "tile1", content: { type: "Expression", latexStr: "x+1" } } },
+    annotations: {
+      ann1: {
+        id: "ann1",
+        text: "+10",
+        sourceObject: { tileId: "tile1", objectId: "o1" },
+        targetObject: { tileId: "tile1", objectId: "o2" },
+        type: "arrowAnnotation"
+      }
+    }
+  };
+
+  it("puts the Sparrows section before the end of the summary", () => {
+    const result = documentSummarizer(document, {});
+    expect(result).toContain("## Sparrows");
+    expect(result.indexOf("## Sparrows")).toBeLessThan(result.indexOf("End of CLUE Document Summary"));
+  });
+
+  it("writes no Sparrows section for a document with no annotations", () => {
+    const result = documentSummarizer({ ...document, annotations: {} }, {});
+    expect(result).not.toContain("Sparrows");
+  });
+
+  it("keeps the sparrows under minimal", () => {
+    const result = documentSummarizer(document, { minimal: true });
+    expect(result).toContain("digraph sparrows {");
+  });
+
+  // A document whose tiles are all gone still has its annotations. The count has to survive, even
+  // when nothing can be drawn.
+  it("reports sparrows left in an otherwise empty document", () => {
+    const result = documentSummarizer({ annotations: document.annotations }, {});
+    expect(result).toContain("This document has 1 sparrow.");
+    expect(result).toContain("One is not shown");
+  });
+});

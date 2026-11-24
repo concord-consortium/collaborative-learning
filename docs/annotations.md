@@ -26,6 +26,27 @@ Annotations can be connected to anything set up as a CLUE Object. These can be a
 
 To set a tile up with annotations, its content model must have a `get annotatableObjects` view. This function should return an array of all the tile's objects (see CLUE Objects above) that can have an annotation attached. This array is used to create buttons that attach annotations when the user enters annotation mode.
 
+### Describing Objects for AI Summaries
+
+A tile's annotatable objects also have to be describable in words, because the AI document summary
+includes a `Sparrows` section: a GraphViz digraph whose nodes are the objects sparrows are anchored
+to and whose edges are the sparrows themselves, labelled with the student's own text.
+
+Each tile type contributes one `describe<Tile>Object` function, exported from its summarizer in
+`shared/ai-summarizer/tile-summarizers/` and registered by content type in
+`shared/ai-summarizer/annotations-summary.ts`. It takes an `objectId` and `objectType` and returns a
+short phrase naming the object as a reader would recognise it -- `row 5 of distance (34.5)`, `the
+point at 1` -- or `undefined` if the tile no longer holds such an object, in which case the sparrow
+is left out of the graph and counted in the section's closing line.
+
+Two things to know when writing one:
+
+- It runs on the server, against the document's plain JSON. It cannot use `annotatableObjects` or
+  anything else on the MST model; the knowledge is expressed a second time against the snapshot.
+- A tile with no describer falls back to a generic one that names the object's id and type. Nothing
+  disappears from the summary, but the phrase is clumsy, which is the signal that a describer is
+  owed.
+
 ### Tile Component Modifications
 
 Setting up a tile with annotations also requires defining one function, `getObjectBoundingBox` in the `tileApi`. Additionally, there are two optional functions that can be defined in the `tileApi` to customize how annotations work with the tile.

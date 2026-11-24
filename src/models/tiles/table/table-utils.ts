@@ -1,23 +1,12 @@
+import { decipherCellId, getCellId } from "../../../../shared/annotations/object-ids";
 import { TableContentSnapshotType } from "./table-content";
 import { IClueObjectSnapshot } from "../../annotations/clue-object";
 import { UpdatedSharedDataSetIds } from "../../shared/shared-data-set";
 import { SharedModelEntrySnapshotType } from "../../document/shared-model-entry";
 
-const cellIdRegEx = /^cell:{(.+)}:{(.+)}$/;
-
-export function getCellId(caseId: string, attributeId: string) {
-  return `cell:{${caseId}}:{${attributeId}}`;
-}
-
-export function decipherCellId(cellId: string) {
-  const match = cellId.match(cellIdRegEx);
-  if (match && match.length === 3) {
-    const caseId = match[1];
-    const attributeId = match[2];
-    return { caseId, attributeId };
-  }
-  return {};
-}
+// Defined in shared/ so the AI summarizer reads annotation endpoints with the same format the
+// client writes them with. Re-exported here because src/ already imports them from this file.
+export { decipherCellId, getCellId };
 
 export function updateTableContentWithNewSharedModelIds(
   content: TableContentSnapshotType,

@@ -1,4 +1,7 @@
-import { AiSummarizerOptions, NormalizedAttribute, NormalizedDataSet, TileHandlerParams } from "../ai-summarizer-types";
+import {
+  AiSummarizerOptions, AnnotationDescriberParams, NormalizedAttribute, NormalizedDataSet, TileHandlerParams
+} from "../ai-summarizer-types";
+import { decipherCellId } from "../../annotations/object-ids";
 import { generateMarkdownTable, pluralize } from "../ai-summarizer-utils";
 
 // After this many rows a table is truncated with a "...and N more rows" note. Applies regardless
@@ -79,4 +82,25 @@ function renderCappedTable(headers: string[], rows: string[][]): string {
   const shown = rows.slice(0, TABLE_MARKDOWN_ROW_CAP);
   const remaining = rows.length - TABLE_MARKDOWN_ROW_CAP;
   return `${generateMarkdownTable(headers, shown)}\n\n...and ${remaining} more ${pluralize(remaining, "row", "rows")}.`;
+}
+
+/**
+ * A table cell has no id of its own, so an annotation names it by case and attribute. The row
+ * number is the case's position in the data set, which is the only thing a reader can match to
+ * what they see; the value comes along because a sparrow saying "+10" is only checkable against it.
+ */
+export function describeTableObject(
+  { tile, objectId, objectType, dataSets }: AnnotationDescriberParams
+): string | undefined {
+  if (objectType !== "cell") { return undefined; }
+  const { caseId, attributeId } = decipherCellId(objectId);
+  if (!caseId || !attributeId) { return undefined; }
+
+  const dataSet = dataSets.find(ds => ds.tileIds.includes(tile.id) || ds.providerId === tile.id);
+  const rowIndex = dataSet?.caseIds?.indexOf(caseId) ?? -1;
+  const attribute = dataSet?.attributes.find(attr => attr.id === attributeId);
+  if (!dataSet || rowIndex < 0 || !attribute) { return undefined; }
+
+  const value = attribute.values[rowIndex];
+  return `row ${rowIndex + 1} of ${attribute.name} (${value === "" || value === undefined ? "empty" : value})`;
 }

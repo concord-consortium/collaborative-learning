@@ -1,4 +1,4 @@
-import { TileHandlerParams } from "../ai-summarizer-types";
+import { AnnotationDescriberParams, TileHandlerParams } from "../ai-summarizer-types";
 import { drawingToTable } from "./drawing-to-table";
 
 // There is an alternative drawing tile handler in `ai-summarizer.ts` that outputs the SVG of the
@@ -17,4 +17,31 @@ export function handleDrawingTile({ tile }: TileHandlerParams): string|undefined
     console.error("Error summarizing drawing tile:", error, tile);
     return "This tile contains a malformed drawing.";
   }
+}
+
+/**
+ * The id is part of the phrase on purpose: drawing-to-table.ts prints an `id` column for every
+ * shape, so a reader can take the id from a sparrow straight to the row describing the shape.
+ */
+export function describeDrawingObject(
+  { tile, objectId, objectType }: AnnotationDescriberParams
+): string | undefined {
+  const object = findDrawingObject(tile?.content?.objects, objectId);
+  if (!object) { return undefined; }
+  const kind = object.type ?? objectType ?? "object";
+  const text = typeof object.text === "string" && object.text.trim() ? ` reading "${object.text}"` : "";
+  return `${kind} ${objectId}${text}`;
+}
+
+// Grouping moves a shape into its group's own `objects` array without changing its id, and the
+// tile keeps drawing it and keeps it annotatable, so the search has to follow groups down or a
+// sparrow on a grouped shape would be reported deleted. Mirrors the client's `objectMap`.
+function findDrawingObject(objects: unknown, objectId: string): any {
+  if (!Array.isArray(objects)) { return undefined; }
+  for (const candidate of objects) {
+    if (candidate?.id === objectId) { return candidate; }
+    const nested = findDrawingObject(candidate?.objects, objectId);
+    if (nested) { return nested; }
+  }
+  return undefined;
 }

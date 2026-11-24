@@ -1,0 +1,263 @@
+import { documentSummarizer } from "./ai-summarizer";
+import { annotationsSummary } from "./annotations-summary";
+import { NormalizedAnnotation, TileMap } from "./ai-summarizer-types";
+
+function params(annotations: NormalizedAnnotation[], tileMap: TileMap, minimal = false) {
+  return { annotations, tileMap, dataSets: [], variables: [], options: { minimal }, headingLevel: 1 };
+}
+
+// An Expression tile has no describer, so every endpoint here falls to the generic backstop.
+const expressionTiles: TileMap = {
+  t1: { id: "t1", title: "My work", content: { type: "Expression", objects: [{ id: "o1", type: "blob" }] } }
+};
+
+describe("annotationsSummary", () => {
+  it("writes nothing for a document with no sparrows", () => {
+    expect(annotationsSummary(params([], expressionTiles))).toBe("");
+  });
+
+  it("renders a two-sided sparrow as an edge labelled with the student's text", () => {
+    const result = annotationsSummary(params([{
+      id: "a1",
+      text: "+10",
+      sourceObject: { tileId: "t1", objectId: "o1" },
+      targetObject: { tileId: "t1", objectId: "o2" }
+    }], expressionTiles));
+
+    expect(result).toContain("## Sparrows");
+    expect(result).toContain("digraph sparrows {");
+    expect(result).toContain('"t1:o1" -> "t1:o2" [label="+10"];');
+    expect(result).toContain("This document has 1 sparrow.");
+  });
+
+  // An unknown tile type must be clumsy, never silent: this is what a ninth tile type gets until
+  // someone writes it a describer.
+  it("labels an object in a tile with no describer from the raw tile JSON", () => {
+    const result = annotationsSummary(params([{
+      id: "a1",
+      sourceObject: { tileId: "t1", objectId: "o1" },
+      targetObject: { tileId: "t1", objectId: "o2" }
+    }], expressionTiles));
+
+    expect(result).toContain('"t1:o1" [label="blob o1 — Expression \\"My work\\""];');
+    expect(result).toContain('"t1:o2" [label="object o2 — Expression \\"My work\\""];');
+  });
+
+  it("emits no label attribute for a sparrow the student left untitled", () => {
+    const result = annotationsSummary(params([{
+      id: "a1",
+      sourceObject: { tileId: "t1", objectId: "o1" },
+      targetObject: { tileId: "t1", objectId: "o2" }
+    }], expressionTiles));
+
+    expect(result).toContain('"t1:o1" -> "t1:o2";');
+  });
+
+  // The arrowhead is drawn at the target end, so edge direction is the whole of what a one-sided
+  // sparrow means: at an object is a label, away from it is a callout.
+  it("points a one-sided sparrow at its object when the object is the target", () => {
+    const result = annotationsSummary(params([{
+      id: "a1",
+      text: ">2",
+      targetObject: { tileId: "t1", objectId: "o1" }
+    }], expressionTiles));
+
+    expect(result).toContain('"free1" [label="empty space", shape=point];');
+    expect(result).toContain('"free1" -> "t1:o1" [label=">2"];');
+  });
+
+  it("points a one-sided sparrow away from its object when the object is the source", () => {
+    const result = annotationsSummary(params([{
+      id: "a1",
+      text: "see here",
+      sourceObject: { tileId: "t1", objectId: "o1" }
+    }], expressionTiles));
+
+    expect(result).toContain('"t1:o1" -> "free1" [label="see here"];');
+  });
+
+  // Repeated relations are the point: three anchors joined by two "+10" sparrows have to read as
+  // one path through shared nodes, not as two unrelated arrows.
+  it("joins a repeated relation into a path through shared nodes", () => {
+    const result = annotationsSummary(params([
+      { id: "a1", text: "+10", sourceObject: { tileId: "t1", objectId: "o1" },
+        targetObject: { tileId: "t1", objectId: "o2" } },
+      { id: "a2", text: "+10", sourceObject: { tileId: "t1", objectId: "o2" },
+        targetObject: { tileId: "t1", objectId: "o3" } }
+    ], expressionTiles));
+
+    expect(result).toContain('"t1:o1" -> "t1:o2" [label="+10"];');
+    expect(result).toContain('"t1:o2" -> "t1:o3" [label="+10"];');
+    // Anchored to the start of a line: the same text ends the edge that points at the node.
+    expect(result.match(/^ {2}"t1:o2" \[label=/gm)).toHaveLength(1);
+  });
+
+  it("names a tile with no title by its type alone", () => {
+    const result = annotationsSummary(params([{
+      id: "a1",
+      sourceObject: { tileId: "t2", objectId: "o1" },
+      targetObject: { tileId: "t2", objectId: "o2" }
+    }], { t2: { id: "t2", content: { type: "Expression" } } }));
+
+    expect(result).toContain('"t2:o1" [label="object o1 — Expression"];');
+  });
+
+  // A student's own text is the one thing in the label this code did not write.
+  it("escapes a quote and a newline in the student's text", () => {
+    const result = annotationsSummary(params([{
+      id: "a1",
+      text: 'goes up by "10"\nevery time',
+      sourceObject: { tileId: "t1", objectId: "o1" },
+      targetObject: { tileId: "t1", objectId: "o2" }
+    }], expressionTiles));
+
+    expect(result).toContain('[label="goes up by \\"10\\"\\nevery time"];');
+  });
+
+  // A movable line's key is `JSON.stringify(subPlotKey)`, so its object id can carry double quotes
+  // and would otherwise close the DOT identifier partway through.
+  it("escapes a quote in the object id, not just in the label", () => {
+    const result = annotationsSummary(params([{
+      id: "a1",
+      sourceObject: { tileId: "t1", objectId: 'movable_line_handle:{"group":"A"}:lower' },
+      targetObject: { tileId: "t1", objectId: "o1" }
+    }], expressionTiles));
+
+    expect(result).toContain('"t1:movable_line_handle:{\\"group\\":\\"A\\"}:lower"');
+    expect(result).not.toContain('"t1:movable_line_handle:{"group"');
+  });
+
+  it("drops the explanatory paragraph under minimal but keeps the graph", () => {
+    const result = annotationsSummary(params([{
+      id: "a1",
+      sourceObject: { tileId: "t1", objectId: "o1" },
+      targetObject: { tileId: "t1", objectId: "o2" }
+    }], expressionTiles, true));
+
+    expect(result).not.toContain("A sparrow is an arrow");
+    expect(result).toContain("digraph sparrows {");
+    expect(result).toContain("This document has 1 sparrow.");
+  });
+});
+
+describe("annotationsSummary with endpoints that no longer exist", () => {
+  // Nothing prunes an annotation when its anchor is deleted: the arrow stops rendering only when
+  // it has lost both of them. A skipped sparrow is one the teacher cannot see either.
+  const tileMap: TileMap = { t1: { id: "t1", content: { type: "Expression" } } };
+
+  // One anchor still holds the arrow on screen -- the client positions the loose end relative to
+  // it -- so the sparrow is drawn, with the end that went missing marked for what it is.
+  it("draws a sparrow that has lost one of its two anchors", () => {
+    const withOneAnchor: TileMap = {
+      t1: { id: "t1", content: { type: "Expression", objects: [{ id: "o1", type: "blob" }] } }
+    };
+    const result = annotationsSummary(params([
+      { id: "a1", text: "+10", sourceObject: { tileId: "gone", objectId: "o3" },
+        targetObject: { tileId: "t1", objectId: "o1" } }
+    ], withOneAnchor));
+
+    expect(result).not.toContain("gone:o3");
+    expect(result).toContain('"free1" [label="a deleted object", shape=point];');
+    expect(result).toContain('"free1" -> "t1:o1" [label="+10"];');
+    expect(result).not.toContain("not shown");
+  });
+
+  it("skips a sparrow when neither of its anchors is left, and says so", () => {
+    const result = annotationsSummary(params([
+      { id: "a1", sourceObject: { tileId: "t1", objectId: "o1" },
+        targetObject: { tileId: "t1", objectId: "o2" } },
+      { id: "a2", sourceObject: { tileId: "gone", objectId: "o3" },
+        targetObject: { tileId: "gone", objectId: "o4" } }
+    ], tileMap));
+
+    expect(result).not.toContain("gone:o3");
+    expect(result).toContain("This document has 2 sparrows.");
+    expect(result).toContain("One is not shown");
+  });
+
+  // "Both" is only true of two. Three gone out of three is "3 are not shown".
+  it("counts more than two missing sparrows by number", () => {
+    const result = annotationsSummary(params([
+      { id: "a1", sourceObject: { tileId: "gone", objectId: "o1" } },
+      { id: "a2", sourceObject: { tileId: "gone", objectId: "o2" } },
+      { id: "a3", sourceObject: { tileId: "gone", objectId: "o3" } }
+    ], tileMap));
+
+    expect(result).toContain("3 are not shown");
+  });
+
+  // With nothing left to draw, an empty digraph says only that the summarizer ran. The count line
+  // is the whole of what is known.
+  it("writes no digraph when every sparrow is skipped", () => {
+    const result = annotationsSummary(params([
+      { id: "a1", sourceObject: { tileId: "gone", objectId: "o1" } }
+    ], tileMap));
+
+    expect(result).not.toContain("digraph sparrows");
+    expect(result).not.toContain("A sparrow is an arrow");
+    expect(result).toContain("This document has 1 sparrow.");
+  });
+
+  it("counts several missing sparrows in the plural", () => {
+    const result = annotationsSummary(params([
+      { id: "a1", sourceObject: { tileId: "gone", objectId: "o1" } },
+      { id: "a2", sourceObject: { tileId: "gone", objectId: "o2" } }
+    ], tileMap));
+
+    expect(result).toContain("This document has 2 sparrows.");
+    expect(result).toContain("Both are not shown");
+  });
+
+  // A one-sided sparrow whose only object is gone has nothing to hang from, unlike one that has
+  // lost just one of two.
+  it("skips a one-sided sparrow whose object is gone", () => {
+    const result = annotationsSummary(params([
+      { id: "a1", targetObject: { tileId: "gone", objectId: "o3" } }
+    ], tileMap));
+
+    expect(result).not.toContain("digraph sparrows");
+    expect(result).toContain("This document has 1 sparrow.");
+  });
+});
+
+describe("sparrows across a whole document", () => {
+  const document = {
+    rowOrder: ["row1"],
+    rowMap: { row1: { id: "row1", tiles: [{ tileId: "table1" }, { tileId: "n1" }] } },
+    tileMap: {
+      table1: { id: "table1", title: "Trip", content: { type: "Table" } },
+      n1: { id: "n1", content: { type: "Numberline", points: { p1: { id: "p1", xValue: 10 } } } }
+    },
+    sharedModelMap: {
+      sm1: {
+        sharedModel: {
+          type: "SharedDataSet",
+          id: "sm1",
+          dataSet: {
+            id: "ds1",
+            name: "Trip",
+            attributes: [{ id: "a1", name: "distance", values: ["10", "20"] }],
+            cases: [{ __id__: "c1" }, { __id__: "c2" }]
+          }
+        },
+        tiles: ["table1"]
+      }
+    },
+    annotations: {
+      ann1: {
+        id: "ann1",
+        text: "same distance",
+        sourceObject: { tileId: "table1", objectId: "cell:{c1}:{a1}", objectType: "cell" },
+        targetObject: { tileId: "n1", objectId: "p1", objectType: "point" },
+        type: "arrowAnnotation"
+      }
+    }
+  };
+
+  it("describes both ends of a sparrow that spans two tiles", () => {
+    const result = documentSummarizer(document, {});
+    expect(result).toContain('"table1:cell:{c1}:{a1}" [label="row 1 of distance (10) — Table \\"Trip\\""];');
+    expect(result).toContain('"n1:p1" [label="the point at 10 — Numberline"];');
+    expect(result).toContain('"table1:cell:{c1}:{a1}" -> "n1:p1" [label="same distance"];');
+  });
+});

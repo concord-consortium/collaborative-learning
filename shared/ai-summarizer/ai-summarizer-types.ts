@@ -77,6 +77,10 @@ export interface NormalizedDataSet {
   tileIds: string[];
   attributes: NormalizedAttribute[];
   numCases: number;
+  // The ids of the data set's cases, in the order the rows are shown. An annotation names a cell
+  // by case id, and only this order says which row that is. Optional because a data set built from
+  // curriculum content can have no cases at all.
+  caseIds?: string[];
   data: string[][];
   sharedDataSetId?: string;
 }
@@ -103,6 +107,27 @@ export interface NormalizedVariable {
   value?: number;
 }
 
+/**
+ * One arrow annotation as a document stores it. Students call these sparrows, and so does the
+ * summary they appear in; the code keeps the model's own word.
+ *
+ * An endpoint is optional on each end -- a one-sided sparrow anchors one end to an object and
+ * leaves the other floating in the document, which is how students use them as labels. The model
+ * requires only that one end have an object.
+ */
+export interface NormalizedAnnotationEndpoint {
+  tileId: string;
+  objectId: string;
+  objectType?: string;
+}
+
+export interface NormalizedAnnotation {
+  id: string;
+  text?: string;
+  sourceObject?: NormalizedAnnotationEndpoint;
+  targetObject?: NormalizedAnnotationEndpoint;
+}
+
 export interface INormalizedTile {
   model: ITileModelSnapshotOut;
   number: number;
@@ -118,6 +143,7 @@ export interface NormalizedModel {
   sections: NormalizedSection[];
   dataSets: NormalizedDataSet[];
   variables: NormalizedVariable[];
+  annotations: NormalizedAnnotation[];
 }
 
 export type TileMap = Record<string, ITileModelSnapshotOut>;
@@ -136,6 +162,30 @@ export interface TilesHandlerParams extends TileHandlerBaseParams {
 }
 export interface TileHandler {
   (params: TileHandlerParams): string|undefined;
+}
+
+/**
+ * What a describer is given to turn one annotation endpoint into a phrase. `tile` is the raw
+ * snapshot from the document's tileMap, not a normalized tile: annotations name tiles by id, and
+ * the tileMap is what resolves an id. `tileMap` is here for the Simulator, whose annotatable nodes
+ * are mirrored from a Dataflow tile elsewhere in the document.
+ */
+export interface AnnotationDescriberParams {
+  tile: ITileModelSnapshotOut;
+  objectId: string;
+  objectType?: string;
+  dataSets: NormalizedDataSet[];
+  variables: NormalizedVariable[];
+  tileMap?: TileMap;
+}
+
+/**
+ * Returns `undefined` only when the tile no longer holds such an object, which is what drops the
+ * sparrow from the graph. A describer that cannot phrase an object it does have should say
+ * something clumsy rather than nothing.
+ */
+export interface AnnotationDescriber {
+  (params: AnnotationDescriberParams): string | undefined;
 }
 
 export interface AiSummarizerOptions {

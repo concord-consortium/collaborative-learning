@@ -1,5 +1,5 @@
 import { displayNameForType } from "../../dataflow-node-types";
-import { IDataflowOutputConfig, TileHandlerParams } from "../ai-summarizer-types";
+import { AnnotationDescriberParams, IDataflowOutputConfig, TileHandlerParams } from "../ai-summarizer-types";
 import { programToGraphviz } from "./dataflow-to-graphviz";
 
 export function handleDataflowTile({ tile }: TileHandlerParams): string|undefined {
@@ -32,4 +32,18 @@ export function handleDataflowTile({ tile }: TileHandlerParams): string|undefine
 
   result += "\n```dot\n" + programToGraphviz(tile.model.content.program) + "\n```";
   return result;
+}
+
+/**
+ * Names a node with the same expression dataflow-to-graphviz.ts uses for its graph identifiers, so
+ * a sparrow and the program diagram in the same summary call the node by one name. `name` holds
+ * the raw internal type for nodes saved before orderedDisplayName existed, which is why the
+ * fallback goes through displayNameForType rather than printing it.
+ */
+export function describeDataflowObject(
+  { tile, objectId }: AnnotationDescriberParams
+): string | undefined {
+  const node = tile?.content?.program?.nodes?.[objectId];
+  if (!node) { return undefined; }
+  return `the ${node.data?.orderedDisplayName || displayNameForType(node.name)} node`;
 }
