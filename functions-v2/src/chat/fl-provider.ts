@@ -105,12 +105,10 @@ export function createFlProvider(args: FlProviderArgs): TutorProvider {
           // buildContextPacket reports rather than enforces, on the grounds that the caller is
           // better placed to decide. This is that caller.
           //
-          // The decision is to send something that fits, because of how the drain replays. A failed
-          // turn leaves the cursor unadvanced, so every later trigger re-processes this same message
-          // first — and its rightContent is immutable, so an over-cap packet would rebuild
-          // identically every time. If ForeverLearning ever refuses one, that conversation is wedged
-          // for good, and the student cannot free it by shrinking their document: the stale message
-          // payload still wins over the copy held on the parent.
+          // The decision is to send something that fits, because a refused packet cannot be fixed by
+          // retrying: the message's rightContent is immutable and a retry replays the reserved
+          // request, so an over-cap packet would fail the same way every time, and the student
+          // cannot free the conversation by shrinking their document.
           //
           // So the workspace goes and the omission is declared in its place. Degraded rather than
           // silently emptied — the reader can tell a workspace we could not fit from one the student

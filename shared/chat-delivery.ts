@@ -1,4 +1,3 @@
-// Application delivery state; these are not model teaching actions.
 export type DeliveryState = "retryable" | "unknown" | "blocked" | "failed" | "closed";
 export type RecoveryAction = "retry" | "continue" | "new_session";
 export interface ChatDelivery {

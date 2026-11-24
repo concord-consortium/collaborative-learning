@@ -291,7 +291,7 @@ Prototyped on the patched tree: all 185 chat-tutor tests pass (the package's "do
 
 **Commit**: `fix: retry Ada's conversation lookup after a failed open [CLUE-823]`
 
-**As built**: a second case, "attaches the listeners once when a send's lookup finishes before the subscription's", covers the `this.pendingListen !== listen` guard (a send started before `subscribe` would otherwise attach a second pair of listeners).
+**As built**: a second case, "attaches the listeners once when a send's lookup finishes before the subscription's", covers the `this.pendingListen !== listen` guard (a send started before `subscribe` would otherwise attach a second pair of listeners), and a third, "retries a lookup that failed on open from a recovery...", covers the recovery path.
 
 ---
 
@@ -365,6 +365,8 @@ Before committing, run the comment audit from the global instructions over the s
 **Estimated diff size**: ~200 lines, most of it the doc rewrite.
 
 **Commit**: `refactor: tidy Ada owner checks, comments and docs [CLUE-823]`
+
+**As built (final review)**: the `kOwnerFields` comment shrinks to one line above `kDrainOwnedParentFields`; the over-cap comment in `fl-provider.ts` describes the retry replaying the reserved request instead of the drain rebuilding it; four package comments that only disclaimed FL vocabulary are deleted (`shared/chat-delivery.ts`, `firestore.rules`, `activity-context.ts`) or say what the field is (`TurnResult.requestId` and `sessionClosed`); and the recovery and system-notice styles in `chat.scss` move inside the `.chat-tutor` block and use the palette variables, with their contrast added to the file's AA notes.
 
 ---
 

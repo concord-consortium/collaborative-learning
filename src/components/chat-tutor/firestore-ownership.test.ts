@@ -101,3 +101,16 @@ it("attaches the listeners once when a send's lookup finishes before the subscri
   await new Promise(resolve => setTimeout(resolve));
   expect(f.listens).toEqual(["network_doc", "network_doc"]);
 });
+it("retries a lookup that failed on open from a recovery, then attaches the listeners", async () => {
+  const failures: Record<string, string> = {network_doc: "unavailable"};
+  const f = setup({network_doc: {...owner, status: "error",
+    delivery: {id: "receipt", messageId: "m", state: "retryable", code: "HTTP_429"}}}, failures);
+  f.transport.subscribe(jest.fn(), jest.fn());
+  await new Promise(resolve => setTimeout(resolve));
+  expect(f.listens).toEqual([]);
+  delete failures.network_doc;
+  await f.transport.recover("retry");
+  expect(f.listens).toEqual(["network_doc", "network_doc"]);
+  expect(f.added).toHaveLength(1);
+  expect(f.added[0]).toMatchObject({id: "network_doc", data: {kind: "recovery", recoveryId: "receipt"}});
+});

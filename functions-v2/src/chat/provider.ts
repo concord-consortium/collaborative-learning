@@ -11,7 +11,7 @@ export interface TurnResult {
   // The reply to write as an assistant doc. A null text still writes a doc, or the client's
   // "awaiting reply" indicator spins forever.
   assistantText: string | null;
-  // Optional delivery receipt, unrelated to teaching meaning or action flags.
+  // FL request id and whether FL ended the session; the drain records both on success.
   requestId?: string;
   sessionClosed?: boolean;
   // Objects in the student's document this reply points at. Optional, not an empty array: a

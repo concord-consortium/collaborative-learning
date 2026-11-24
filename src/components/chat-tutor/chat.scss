@@ -8,7 +8,8 @@ $chat-bubble-max-width: 85%;
 
 // Color pairs below are WCAG AA checked: white on $workspace-teal-dark-2 = 7.0:1;
 // $charcoal-dark-2 on $charcoal-light-7 = 9.4:1; $charcoal border on white = 4.95:1;
-// $error-red on white = 7.3:1; $charcoal-dark-1 on white = 7.6:1.
+// $error-red on white = 7.3:1; $charcoal-dark-1 on white = 7.6:1 and on $charcoal-light-7 = 6.8:1;
+// $charcoal-dark-2 on $problem-orange-light-8 = 9.6:1.
 // .chat-highlight: $charcoal-dark-2 text on white = 10.5:1; $charcoal border (non-text,
 // WCAG 1.4.11) on white = 4.95:1 and on the $charcoal-light-6 hover fill = 4.3:1 — the
 // border carries the boundary alone on hover, since the fill itself is only 1.1:1 against
@@ -415,19 +416,19 @@ $chat-bubble-max-width: 85%;
       &[disabled] { opacity: 0.5; cursor: default; }
     }
   }
-}
 
+  .chat-row.system {
+    align-self: stretch;
+    color: $charcoal-dark-1;
+    font-size: 0.9em;
+    .chat-bubble { background: $charcoal-light-7; border: 1px solid $charcoal-light-3; }
+  }
 
-.chat-tutor .chat-row.system {
-  align-self: stretch;
-  color: #4d5660;
-  font-size: 0.9em;
-  .chat-bubble { background: #f0f2f4; border: 1px solid #d2d6da; }
-}
-.chat-tutor .chat-recovery {
-  padding: 10px 14px;
-  background: #fff6df;
-  color: #413a29;
-  p { margin: 0 0 8px; }
-  button { padding: 6px 10px; cursor: pointer; }
+  .chat-recovery {
+    padding: 10px 14px;
+    background: $problem-orange-light-8;
+    color: $charcoal-dark-2;
+    p { margin: 0 0 8px; }
+    button { padding: 6px 10px; cursor: pointer; }
+  }
 }

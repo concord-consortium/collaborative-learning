@@ -1,6 +1,5 @@
 import { utf8ByteLength } from "../utf8-byte-length";
 
-// Existing FL activity_context contract. Curriculum facts are not protection-policy overrides.
 export interface ActivityContext {
   task_prompt: string;
   source?: { system: "CLUE"; lesson_id: string; unit?: string; section?: string };

@@ -20,7 +20,6 @@ service cloud.firestore {
       return request.auth != null;
     }
 
-    // Shape/size validation only. These are current curriculum facts, never policy overrides.
     function activityText(value, limit) {
       return value is string && value.size() > 0 && value.size() <= limit && value.matches('(?s).*\\S.*');
     }

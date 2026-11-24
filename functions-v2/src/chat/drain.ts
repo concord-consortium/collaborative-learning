@@ -49,11 +49,8 @@ export interface DrainContext {
   recoveryRef?: DocumentReference;
 }
 
-// The owner fields the client's rules require on any doc it reads come from kChatOwnerFields in
-// shared/chat-ownership.ts, where the client and the drain share them. One list, because it feeds
-// two places here that must not disagree: pickOwnerFields copies them onto function-written docs,
-// and the guard below refuses to let a provider set them. A field added there is protected in both.
-
+// kChatOwnerFields (shared/chat-ownership.ts) feeds both pickOwnerFields and this guard, so a field
+// added there is protected in both.
 // Parent-doc fields the drain owns; a provider may write anything EXCEPT these.
 //
 // A provider returns a plain field map that gets merged into the parent doc, so the boundary needs
