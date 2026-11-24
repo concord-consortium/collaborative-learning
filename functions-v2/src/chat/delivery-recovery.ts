@@ -52,13 +52,15 @@ export async function prepareRecovery(parentRef: DocumentReference, controlRef?:
     const parent = (await tx.get(parentRef)).data() ?? {};
     const delivery = readChatDelivery(parent.delivery);
     if (parent.delivery !== undefined && !delivery) throw new Error("Recovery state is invalid; support is required");
-    if (!controlRef) {
+    // With a delivery recorded, release the lock and keep the fence; without one, the drain may run.
+    const keepFence = () => {
       if (delivery) {
         tx.set(parentRef, {status: delivery.state === "closed" ? "idle" : "error",
           lockedAt: FieldValue.delete()}, {merge: true});
       }
       return !delivery;
-    }
+    };
+    if (!controlRef) return keepFence();
     const control = await tx.get(controlRef);
     const data = control.data();
     const valid = data && !data.processedAt && data.kind === "recovery" &&
@@ -69,11 +71,7 @@ export async function prepareRecovery(parentRef: DocumentReference, controlRef?:
         tx.update(controlRef,
           {processedAt: FieldValue.serverTimestamp(), disposition: "stale_or_invalid"});
       }
-      if (delivery) {
-        tx.set(parentRef, {status: delivery.state === "closed" ? "idle" : "error",
-          lockedAt: FieldValue.delete()}, {merge: true});
-      }
-      return !delivery;
+      return keepFence();
     }
     const sourceRef = parentRef.collection("messages").doc(delivery.messageId);
     const source = await tx.get(sourceRef);

@@ -2,7 +2,7 @@
 //
 // FL owns the session. The drain reserves the exact request before dispatch, so a failed
 // opening reuses its identity and body even before a session id has returned. Successful
-// session/cursor updates still commit atomically with the assistant message.
+// session/cursor updates commit atomically with the assistant message.
 //
 // Where the student's document comes from is injected rather than reached for. The trigger
 // supplies it from the message's rightContent, or from the copy kept on the parent when an

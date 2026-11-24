@@ -15,6 +15,7 @@
 
 import { programToGraphviz } from "../ai-summarizer/tile-summarizers/dataflow-to-graphviz";
 import { displayNameForType } from "../dataflow-node-types";
+import { kMaxCapabilityNameLength, kMaxCapabilityNames } from "./capability-context";
 
 export interface DataflowNode {
   id: string;
@@ -187,8 +188,8 @@ export function projectDataflowTile(
       outputConfig.servoInputMode = config.servoInputMode;
     }
     if (Array.isArray(config.allowedOutputTypes) && config.allowedOutputTypes.length > 0 &&
-        config.allowedOutputTypes.length <= 20 && config.allowedOutputTypes.every(
-          (name: unknown) => typeof name === "string" && !!name.trim() && name.length <= 80)) {
+        config.allowedOutputTypes.length <= kMaxCapabilityNames && config.allowedOutputTypes.every(
+          (name: unknown) => typeof name === "string" && !!name.trim() && name.length <= kMaxCapabilityNameLength)) {
       outputConfig.allowedOutputTypes = [...new Set<string>(config.allowedOutputTypes)];
     }
     if (Object.keys(outputConfig).length) tile.content.outputConfig = outputConfig;

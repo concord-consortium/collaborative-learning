@@ -1,4 +1,5 @@
-export type DeliveryState = "retryable" | "unknown" | "blocked" | "failed" | "closed";
+export const kDeliveryStates = ["retryable", "unknown", "blocked", "failed", "closed"] as const;
+export type DeliveryState = typeof kDeliveryStates[number];
 export type RecoveryAction = "retry" | "continue" | "new_session";
 export interface ChatDelivery {
   id: string;
@@ -26,6 +27,6 @@ export function deliveryMessage(state: DeliveryState): string {
 }
 export function readChatDelivery(value: any): ChatDelivery | undefined {
   return value && typeof value.id === "string" && typeof value.messageId === "string" &&
-    typeof value.code === "string" && ["retryable", "unknown", "blocked", "failed", "closed"].includes(value.state)
+    typeof value.code === "string" && (kDeliveryStates as readonly string[]).includes(value.state)
     ? value : undefined;
 }

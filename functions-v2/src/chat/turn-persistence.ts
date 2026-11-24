@@ -14,10 +14,13 @@ function canonical(value: unknown): unknown {
   }
   return value;
 }
+function sourceHashOf(message: DocumentData | null): string {
+  return hash(JSON.stringify(canonical(JSON.parse(JSON.stringify(message)))));
+}
 
 export function readReservedSnapshot<T extends object>(data: DocumentData, sourcePath: string,
   message: DocumentData): T {
-  const sourceHash = hash(JSON.stringify(canonical(JSON.parse(JSON.stringify(message)))));
+  const sourceHash = sourceHashOf(message);
   if (data.version !== 1 || data.sourcePath !== sourcePath || data.sourceHash !== sourceHash ||
       typeof data.snapshotJson !== "string" || hash(data.snapshotJson) !== data.snapshotHash) {
     throw new FlDeliveryError("blocked", "Tutor pending request conflicts with its source message; refusing dispatch");
@@ -33,7 +36,7 @@ export function createTurnPersistence(messageRef: DocumentReference, message: Do
     TurnPersistence & {ref: DocumentReference; reserved: boolean} {
   const db = messageRef.firestore;
   const ref = db.collection("chatTutorPendingRequests").doc(hash(messageRef.path));
-  const sourceHash = hash(JSON.stringify(canonical(JSON.parse(JSON.stringify(message)))));
+  const sourceHash = sourceHashOf(message);
   let reserved = false;
   return {
     ref,
@@ -44,7 +47,7 @@ export function createTurnPersistence(messageRef: DocumentReference, message: Do
       const snapshot = await db.runTransaction(async (tx) => {
         const existing = await tx.get(ref);
         const source = await tx.get(messageRef);
-        const currentSourceHash = hash(JSON.stringify(canonical(JSON.parse(JSON.stringify(source.data() ?? null)))));
+        const currentSourceHash = sourceHashOf(source.data() ?? null);
         if (!source.exists || currentSourceHash !== sourceHash) {
           throw new FlDeliveryError("blocked", "Tutor source message changed before reservation; refusing dispatch");
         }

@@ -29,6 +29,12 @@ it("writes only a recovery intent for the current outcome; it cannot send new wo
   expect(f.added).toEqual([{uid: "u", context_id: "class", problemPath: "vibe/1/2", provider: "foreverlearning",
     kind: "recovery", action: "retry", recoveryId: "outcome1", createdAt: "server-timestamp"}]);
 });
+it("ignores a parent left generating when no reply is awaited and no delivery is recorded", () => {
+  const f = setup(); f.setHistory([{kind: "user", text: "q"}, {kind: "assistant", userText: "a"}]);
+  f.setParent({status: "generating"});
+  expect(f.onStatus.mock.calls.at(-1)).toEqual(["idle", undefined]);
+});
+
 it("rehydrates failure and closure without a stuck typing indicator, then clears a continued failure", () => {
   const f = setup(); f.setHistory([{kind: "user", text: "failed"}]);
   f.setParent({status: "error", delivery: {id: "o", messageId: "m", state: "failed", code: "TEST"}});

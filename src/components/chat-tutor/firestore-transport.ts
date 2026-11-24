@@ -159,7 +159,7 @@ export class FirestoreTransport implements ChatTransport {
       ? this.parentStatus === "generating" ? "generating" : this.delivery.state === "closed" ? "idle" : "error"
       :
       this.parentStatus === "error" ? "error"
-        : this.parentStatus === "generating" || this.awaitingReply ? "generating" : "idle";
+        : this.awaitingReply ? "generating" : "idle";
     this.onStatus(effective, this.delivery);
   }
 

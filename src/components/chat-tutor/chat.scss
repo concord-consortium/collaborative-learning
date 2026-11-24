@@ -429,6 +429,10 @@ $chat-bubble-max-width: 85%;
     background: $problem-orange-light-8;
     color: $charcoal-dark-2;
     p { margin: 0 0 8px; }
-    button { padding: 6px 10px; cursor: pointer; }
+    button {
+      padding: 6px 10px;
+      cursor: pointer;
+      &:focus-visible { outline: 2px solid $focus-ring-color; outline-offset: 1px; }
+    }
   }
 }
