@@ -15,6 +15,13 @@ import {TurnResult, TutorProvider} from "./provider";
 import {createTurnPersistence} from "./turn-persistence";
 import {prepareRecovery, recordDeliveryFailure, recordPendingDelivery} from "./delivery-recovery";
 import {RecordedDeliveryError} from "./fl-delivery-error";
+import {canStartConversation, sameChatOwner} from "../../../shared/chat-ownership";
+
+class ChatOwnershipError extends Error {}
+
+function requiresChatOwner(parentRef: DocumentReference, parent: DocumentData): boolean {
+  return parentRef.path.startsWith("authed/") || parent.uid !== undefined;
+}
 
 // reclaim a lock whose owner crashed mid-drain, so a conversation can't wedge forever.
 // INVARIANT: STALE_LOCK_MS must exceed the function's configured timeout (default 60s, no
@@ -128,6 +135,9 @@ async function processUnit(ctx: DrainContext, doc: MsgSnap): Promise<UnitResult>
   // Per-conversation state is read fresh each turn (no in-memory state). The lock serializes
   // turns, so a provider's seq increment can't race across invocations.
   const parent = (await parentRef.get()).data() ?? {};
+  if (requiresChatOwner(parentRef, parent) && !sameChatOwner(parent, data)) {
+    throw new ChatOwnershipError("CHAT_OWNER_MISMATCH");
+  }
   const persistence = createTurnPersistence(doc.ref, data, (snapshot) => recordPendingDelivery(parentRef, doc, snapshot));
   const turnResult = await provider.processTurn(parent, data, persistence);
   const {parentUpdate} = turnResult;
@@ -231,6 +241,27 @@ export async function processAndDrain(ctx: DrainContext): Promise<void> {
       await writeBatch.commit();
       if (sessionClosed) return;
     } catch (error) {
+      if (error instanceof ChatOwnershipError) {
+        // Old rules could admit mixed first messages. Quarantine them before any provider or
+        // reservation sees their content. Advance atomically so they cannot trap the owner.
+        await db.runTransaction(async (tx) => {
+          const parent = (await tx.get(parentRef)).data();
+          const reserved = await tx.get(createTurnPersistence(next.ref, next.data()).ref);
+          if (!parent || !sameChatOwner(parent, parent)) throw error;
+          // A historical reservation may already have external work/expense. Do not skip it
+          // or delete its evidence: ownership reconciliation then requires operator support.
+          if (reserved.exists) throw new Error("Reserved message ownership mismatch; support is required");
+          tx.update(next.ref, {rejectedAt: FieldValue.serverTimestamp(), rejectionCode: "CHAT_OWNER_MISMATCH"});
+          tx.set(messagesCol.doc(`delivery-${next.id}`), {
+            ...pickOwnerFields(parent), kind: "delivery", resolved: true, resolution: "rejected",
+            text: "A message that did not belong to this conversation was rejected.",
+            code: "CHAT_OWNER_MISMATCH", createdAt: FieldValue.serverTimestamp(),
+          });
+          tx.update(parentRef, {lastProcessedCreatedAt: next.get("createdAt"), lastProcessedMessageId: next.id});
+        });
+        lastSnap = next;
+        continue;
+      }
       const parent = (await parentRef.get()).data();
       // A lost Firestore acknowledgement is not a failed turn if the atomic delivery batch landed.
       if (parent?.lastProcessedMessageId === next.id) {
@@ -256,11 +287,17 @@ export async function processAndDrain(ctx: DrainContext): Promise<void> {
 // lock. Exported so the single-in-flight + stale-reclaim behavior is testable against the
 // emulator.
 export async function acquireLock(
-  parentRef: ParentRef, ownerFields: Record<string, unknown>
+  parentRef: ParentRef, ownerFields: Record<string, unknown>, allowCreate = true
 ): Promise<boolean> {
   const db = getFirestore();
   return db.runTransaction(async (tx) => {
     const p = await tx.get(parentRef);
+    const parent = p.data() ?? {};
+    if (!p.exists && !allowCreate) return false;
+    if (p.exists && requiresChatOwner(parentRef, parent) && !sameChatOwner(parent, ownerFields)) return false;
+    if (!p.exists && parentRef.path.startsWith("authed/") &&
+        (!sameChatOwner(ownerFields, ownerFields) ||
+         !canStartConversation(parentRef.id, String(ownerFields.uid)))) return false;
     const status = p.data()?.status ?? "idle";
     const lockedAtMs = p.data()?.lockedAt?.toMillis?.() ?? 0;
     const stale = Date.now() - lockedAtMs > STALE_LOCK_MS;

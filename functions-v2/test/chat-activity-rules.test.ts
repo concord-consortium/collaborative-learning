@@ -41,7 +41,7 @@ describe("chat activity context rules", () => {
     source: {system: "CLUE", lesson_id: "1.2", unit: "vibe", section: "lab"}};
 
   describe.each(["authed/test", "demo/test"])("%s", (root) => {
-    const path = `${root}/chatTutor/conv/messages/m`;
+    const path = `${root}/chatTutor/owner:3:101_class_conv/messages/m`;
     it.each([undefined, {task_prompt: "Task only"}, activity,
       {...activity, learning_goal: "Compare inputs"}])("accepts supported current context %j", async (value) => {
       await assertSucceeds(db().doc(path).set(message(value)));
@@ -74,6 +74,11 @@ describe("chat activity context rules", () => {
       await assertFails(db().doc(path).update({capabilityContext: {}}));
     });
     it("allows immutable bounded recovery controls but no forged outcome or prompt", async () => {
+      await env.withSecurityRulesDisabled(async (context) => {
+        await context.firestore().doc(`${root}/chatTutor/owner:3:101_class_conv`).set({
+          uid: "101", context_id: "class", problemPath: "vibe/1/2",
+        });
+      });
       const control = {uid: "101", kind: "recovery", provider: "foreverlearning", context_id: "class",
         problemPath: "vibe/1/2", createdAt: serverTimestamp(), action: "retry", recoveryId: "server-outcome"};
       await assertSucceeds(db().doc(path).set(control));

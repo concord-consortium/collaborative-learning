@@ -10,6 +10,7 @@ import { decideContext, RightContent, RightSummary } from "./right-context";
 import { TutorPrompts } from "./tutor-prompts";
 import { turnFromDoc } from "./turn-from-doc";
 import { isAwaitingReply } from "./awaiting-reply";
+import { sameChatOwner } from "../../../shared/chat-ownership";
 
 // Top-level (per Firestore root) chat collection; a parent conversation doc per
 // conversationId, each with a `messages` subcollection. The parent doc is created
@@ -23,8 +24,10 @@ export const kMaxAttachedWorkspace = 900_000;
 
 export interface FirestoreTransportOptions {
   firestore: Firestore;
-  // canonical conversation doc id (already escaped — see conversationDocId)
+  // owner-bound conversation doc id (ownedConversationId in shared/chat-ownership.ts)
   conversationId: string;
+  // Reuse an existing path only after checking its saved owner, class and problem.
+  legacyConversationId?: string;
   // string form of the platform user id, matching CLUE's document uid convention
   uid: string;
   // the user's class_hash; the rules pin it to the token's claim
@@ -79,11 +82,51 @@ export class FirestoreTransport implements ChatTransport {
   private lastSentRightSeq = 0;
   private onStatus?: (status: ChatStatus, delivery?: ChatDelivery) => void;
   private delivery?: ChatDelivery;
+  private resolvedConversationId?: string;
+  private resolution?: Promise<void>;
+  private subscriptionVersion = 0;
 
   constructor(private readonly opts: FirestoreTransportOptions) {}
 
   private parentRef() {
-    return this.opts.firestore.collection(kChatTutorCollection).doc(this.opts.conversationId);
+    return this.opts.firestore.collection(kChatTutorCollection).doc(
+      this.resolvedConversationId ?? this.opts.conversationId);
+  }
+
+  private applyParent(data: Record<string, unknown> | undefined) {
+    this.delivery = readChatDelivery(data?.delivery);
+    const status = data?.status;
+    this.parentStatus = status === "generating" ? "generating" : status === "error" ? "error" : "idle";
+    this.problemInstalled = !!data?.problemInstalled;
+  }
+
+  private resolveConversation(): Promise<void> {
+    if (!this.opts.legacyConversationId) return Promise.resolve();
+    if (!this.resolution) {
+      this.resolution = (async () => {
+        const expected = { uid: this.opts.uid, context_id: this.opts.contextId, problemPath: this.opts.problemPath };
+        // A cached missing parent must not fork existing history.
+        const current = await this.parentRef().get({ source: "server" });
+        if (current.exists) {
+          if (!sameChatOwner(current.data() ?? {}, expected)) throw new Error("Conversation owner does not match.");
+          this.applyParent(current.data());
+          return;
+        }
+        const legacy = this.opts.firestore.collection(kChatTutorCollection).doc(this.opts.legacyConversationId!);
+        try {
+          const previous = await legacy.get({ source: "server" });
+          if (previous.exists && sameChatOwner(previous.data() ?? {}, expected)) {
+            this.resolvedConversationId = this.opts.legacyConversationId;
+            this.applyParent(previous.data());
+          }
+        } catch (error) {
+          // Missing/foreign legacy parents are unreadable. Other errors must surface rather
+          // than silently abandoning a real conversation and sending under a fresh id.
+          if ((error as { code?: string }).code !== "permission-denied") throw error;
+        }
+      })();
+    }
+    return this.resolution;
   }
 
   private messagesRef() {
@@ -120,6 +163,7 @@ export class FirestoreTransport implements ChatTransport {
 
   subscribe(onTurns: (turns: ChatTurn[]) => void,
     onStatus: (status: ChatStatus, delivery?: ChatDelivery) => void): () => void {
+    const version = ++this.subscriptionVersion;
     this.onStatus = onStatus;
     this.parentStatus = "idle";
     this.awaitingReply = false;
@@ -129,36 +173,47 @@ export class FirestoreTransport implements ChatTransport {
 
     // Estimate pending serverTimestamps so a just-sent doc orders correctly before
     // the server resolves it (otherwise it can momentarily sort to the top as null).
-    this.unsubMessages = this.messagesQuery().onSnapshot(
-      snapshot => {
-        const turns: ChatTurn[] = [];
-        const kinds: Array<string | undefined> = [];
-        snapshot.forEach(doc => {
-          const data = doc.data({ serverTimestamps: "estimate" }) as any;
-          // Push for every document, including a silent reply that produces no turn: isAwaitingReply
-          // counts messages, not visible turns, and a silent reply is what clears the typing indicator.
-          kinds.push(data.kind === "delivery" && data.resolved ? "assistant" : data.kind);
-          const turn = turnFromDoc(doc.id, data, doc.metadata.hasPendingWrites);
-          if (turn) turns.push(turn);
-        });
-        this.awaitingReply = isAwaitingReply(kinds);
-        onTurns(turns);
-        this.emitStatus();
-      },
-      err => this.onReadError("messages", err)
-    );
+    const listen = () => {
+      if (version !== this.subscriptionVersion) return;
+      this.unsubMessages = this.messagesQuery().onSnapshot(
+        snapshot => {
+          const turns: ChatTurn[] = [];
+          const kinds: Array<string | undefined> = [];
+          snapshot.forEach(doc => {
+            const data = doc.data({ serverTimestamps: "estimate" }) as any;
+            // Push for every document, including a silent reply that produces no turn: isAwaitingReply
+            // counts messages, not visible turns, and a silent reply is what clears the typing indicator.
+            kinds.push(data.kind === "delivery" && data.resolved ? "assistant" : data.kind);
+            const turn = turnFromDoc(doc.id, data, doc.metadata.hasPendingWrites);
+            if (turn) turns.push(turn);
+          });
+          this.awaitingReply = isAwaitingReply(kinds);
+          onTurns(turns);
+          this.emitStatus();
+        },
+        err => this.onReadError("messages", err)
+      );
 
-    this.unsubParent = this.parentRef().onSnapshot(
-      doc => {
-        const data = doc.exists ? doc.data() as any : undefined;
-        this.delivery = readChatDelivery(data?.delivery);
-        const status = data?.status;
-        this.parentStatus = status === "generating" ? "generating" : status === "error" ? "error" : "idle";
-        this.problemInstalled = !!data?.problemInstalled;
-        this.emitStatus();
-      },
-      err => this.onReadError("parent", err)
-    );
+      this.unsubParent = this.parentRef().onSnapshot(
+        doc => {
+          const data = doc.exists ? doc.data() as any : undefined;
+          this.applyParent(data);
+          this.emitStatus();
+        },
+        err => this.onReadError("parent", err)
+      );
+    };
+    if (this.opts.legacyConversationId) {
+      void this.resolveConversation().then(listen, error => {
+        if (version === this.subscriptionVersion) {
+          this.parentStatus = "error";
+          this.emitStatus();
+          console.warn("[chat-tutor] conversation resolution failed", error);
+        }
+      });
+    } else {
+      listen();
+    }
 
     return () => this.dispose();
   }
@@ -187,6 +242,7 @@ export class FirestoreTransport implements ChatTransport {
   }
 
   async sendUserMessage(text: string): Promise<void> {
+    if (this.opts.legacyConversationId) await this.resolveConversation();
     if (this.delivery) throw new Error("Resolve the saved message before sending another one.");
     const { uid, contextId, problemPath, getLeftContext, getUnitContext, tutorPrompts, provider } = this.opts;
     const right = this.workspacePayload();
@@ -270,6 +326,7 @@ export class FirestoreTransport implements ChatTransport {
   }
 
   async recover(action: RecoveryAction): Promise<void> {
+    if (this.opts.legacyConversationId) await this.resolveConversation();
     if (!this.delivery || action !== recoveryAction(this.delivery.state)) {
       throw new Error("This recovery action is no longer available.");
     }
@@ -279,6 +336,7 @@ export class FirestoreTransport implements ChatTransport {
   }
 
   dispose(): void {
+    this.subscriptionVersion++;
     this.unsubMessages?.();
     this.unsubParent?.();
     this.unsubMessages = undefined;

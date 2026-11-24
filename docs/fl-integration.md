@@ -3,6 +3,36 @@
 Local cumulative reference against upstream `0d9e556026018f9f44e44ed0ac58d1b08b22f17a`.
 This is a reviewable implementation, not a deployment instruction or classroom release.
 
+## Conversation ownership from the first message
+
+New conversations use an owner-bound id containing the full platform uid, its length, the class
+and the existing workspace/problem/provider identity. This includes network-based workspaces;
+sharing a network/document never grants access to another learner's tutor history. Rules compare
+the literal owner prefix with the authenticated claim and reject all client parent creation.
+Recovery cannot establish a missing parent. Subsequent messages and controls must match the
+parent's immutable uid, class and problem.
+
+On opening the tutor, the client checks the canonical parent on the server, then the legacy
+parent. An existing legacy conversation is reused only when all three owner fields match.
+Its history, session, request numbering and recovery fence remain in place. A foreign, missing
+or differently scoped legacy parent is not reused. A network/offline lookup failure is an error,
+not permission to fork a fresh conversation. No transcript migration or bulk rewrite is needed.
+
+The backend checks ownership before taking the lock and again before provider dispatch. Old
+mixed-owner queued messages without reservations are marked rejected, with a generic owner-visible
+notice, and consumed without a provider call. A mismatched message that already has a private
+reservation stays fenced for support: external work or expense may exist and must not be erased
+or skipped automatically. Existing historical records are not retroactively certified by this fix.
+
+Authenticated first sends under unowned legacy ids now fail. Existing established conversations
+continue to work. This requires a coordinated client/rules/backend rollout, not an early rules
+deployment while old clients are still creating conversations. The change applies to both tutor
+providers. Anonymous demo and permissive QA/dev modes remain test modes, not classroom isolation.
+
+Ownership tests cover concurrent first writes, parent pre-claims, literal/Unicode ids, established
+uid/network histories, class/problem mismatches, recovery, provider non-dispatch and reserved-work
+fencing.
+
 ## Current lesson and capabilities
 
 Every ForeverLearning message snapshots the selected student-visible task in `activityContext`
@@ -127,11 +157,15 @@ recovery controls. Item 4 also exercises these transitions through the real loca
 Firestore and Functions with a deterministic loopback endpoint. These are delivery tests, not
 proof of hosted FL reconciliation or new teaching behavior.
 
-Recommended eventual deployment order: rules and indexes, backend, then browser (or one coordinated
-deployment). Old clients remain compatible with the optional context fields, but cannot operate the
-new recovery controls; a failed conversation may require the updated browser. A new browser against
-old rules cannot create recovery controls, and an old backend ignores them. Coordinate the rollout
-and verify the exact hosted combination before classroom use. Before rolling back
+Recommended timing for the deployment owner's review: indexes **before**; rules and Functions
+**with** the browser. Ownership hardening supersedes the earlier recommendation to deploy rules
+early: released clients cannot create new conversations under the new rules/backend, although
+established owned conversations still work. Old clients also cannot operate recovery controls.
+A new browser against old rules cannot check its missing canonical parent or write the new context
+and recovery controls reliably; an old backend cannot enforce the new owner boundary. Settle active
+work and coordinate activation/reload of all three parts. The deployment owner must confirm timing;
+this reference does not select or execute a deployment. Verify the exact hosted combination before
+classroom use. Before rolling back
 the durable backend, reconcile pending requests and keep new work from dispatching: old code cannot
 honor these saved identities or fences. Preserve recovery state and history; disabling the UI alone
 does not reconcile pending work. Keep the deployed classroom identity/configuration and hosted replay

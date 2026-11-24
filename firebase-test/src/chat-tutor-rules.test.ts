@@ -28,7 +28,7 @@ describe("Firestore security rules: chat tutor", () => {
     await tearDownTests();
   });
 
-  const kParentPath = "authed/myPortal/chatTutor/conv-1";
+  const kParentPath = "authed/myPortal/chatTutor/owner:3:101_this-class_conv-1";
   const kMessagePath = `${kParentPath}/messages/msg-1`;
 
   interface ISpecMessage {
@@ -233,15 +233,16 @@ describe("Firestore security rules: chat tutor", () => {
       await expectReadToFail(db, kParentPath);
     });
 
-    it("denies a read of a non-existent parent under the learner claim", async () => {
-      // the transport treats this permission-denied as the benign "no conversation yet" case
+    it("allows the owner to check a missing owner-bound parent", async () => {
       db = initFirestore(learnerAuth);
+      await expectReadToSucceed(db, kParentPath);
+      db = initFirestore(classmateAuth);
       await expectReadToFail(db, kParentPath);
     });
 
-    it("defensive create: owner-pinned whitelist only", async () => {
+    it("rejects all client parent creation, including owner-pinned pre-claims", async () => {
       db = initFirestore(learnerAuth);
-      await expectWriteToSucceed(db, kParentPath, specParent(learnerId));
+      await expectWriteToFail(db, kParentPath, specParent(learnerId));
       await prepareEachTest();
       // forged owner
       await expectWriteToFail(db, kParentPath, specParent(classmateId));

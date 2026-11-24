@@ -24,6 +24,7 @@ import { useRightDirty } from "./use-right-dirty";
 import { useTutorDrawerTrap } from "./use-tutor-drawer-trap";
 import { CHAT_TUTOR_DEFAULT_INTRO } from "../../../shared/chat-tutor-default-intro";
 import { hashString } from "../../../shared/hash-string";
+import { ownedConversationId } from "../../../shared/chat-ownership";
 
 import "./chat-sidebar.scss";
 
@@ -88,12 +89,14 @@ export const ChatTutorSidebar: React.FC<IProps> = observer((props) => {
     // never fork on it either.
     const unitContext = providerInstallsProblem(provider) ? getUnitContext() : undefined;
     const unitKey = unitContext ? hashString(unitContext) : undefined;
-    const docId = conversationDocId(
+    const legacyConversationId = conversationDocId(
       user.id, documentKey, user.network, problemPath, promptsKey, provider, unitKey
     );
+    const docId = ownedConversationId(user.id, user.classHash, legacyConversationId);
     return { conversationId: docId, transport: new FirestoreTransport({
       firestore: db.firestore,
       conversationId: docId,
+      legacyConversationId,
       uid: user.id,
       contextId: user.classHash,
       problemPath,

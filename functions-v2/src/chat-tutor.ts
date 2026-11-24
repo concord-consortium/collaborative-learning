@@ -85,7 +85,7 @@ export const chatTutorOnWrite = functionsV1
     const ownerFields = pickOwnerFields(doc);
 
     // acquire the per-conversation lock (compare-and-set idle→generating) with stale reclaim.
-    const acquired = await acquireLock(parentRef, ownerFields);
+    const acquired = await acquireLock(parentRef, ownerFields, doc.kind === "user");
     if (!acquired) return null;
 
     // Factories, not instances: each backend needs its own credential, and only the one this

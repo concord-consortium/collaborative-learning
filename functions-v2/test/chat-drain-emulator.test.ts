@@ -168,7 +168,9 @@ describe("processAndDrain", () => {
     // seed the owner stamp so the assertion below has something to defend: the owner stamp is
     // what the client's owner-only read rule keys on, and letting a provider set it would
     // re-point a conversation at another user.
-    await getFirestore().doc(kConversation).set({uid: "student-1"});
+    await getFirestore().doc(kConversation).set({
+      uid: "student-1", context_id: "class-hash-1", problemPath: "sas/1/1",
+    });
     await queueUserMessage("a provider reaching further");
     const provider = fakeProvider([{assistantText: "reply", parentUpdate: {uid: "someone-else"}}]);
 
