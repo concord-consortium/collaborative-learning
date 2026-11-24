@@ -1,4 +1,5 @@
 import { act, renderHook } from "@testing-library/react";
+import { ChatDelivery } from "../../../shared/chat-delivery";
 import { ChatStatus, ChatTransport, ChatTurn } from "./transport";
 import { ChatLogContext, kReplyDeadlineMs, useChat } from "./use-chat";
 import { Logger } from "../../lib/logger";
@@ -11,7 +12,7 @@ const mockLog = Logger.log as jest.Mock;
 // order a real conversation produces them.
 function stubTransport() {
   let emitTurns: (turns: ChatTurn[]) => void = () => undefined;
-  let emitStatus: (status: ChatStatus) => void = () => undefined;
+  let emitStatus: (status: ChatStatus, delivery?: ChatDelivery) => void = () => undefined;
   const sendUserMessage = jest.fn(async () => undefined);
   const transport: ChatTransport = {
     subscribe(onTurns, onStatus) {
@@ -27,7 +28,7 @@ function stubTransport() {
     transport,
     sendUserMessage,
     turns: (t: ChatTurn[]) => act(() => { emitTurns(t); }),
-    status: (s: ChatStatus) => act(() => { emitStatus(s); }),
+    status: (s: ChatStatus, d?: ChatDelivery) => act(() => { emitStatus(s, d); }),
   };
 }
 
@@ -251,5 +252,56 @@ describe("useChat logging", () => {
 
     expect(mockLog).toHaveBeenCalled();
     expect(JSON.stringify(mockLog.mock.calls)).not.toContain("my secret answer");
+  });
+});
+
+describe("useChat delivery failure logging", () => {
+  const logContext = { conversationId: "c1", documentKey: "d1" };
+  const delivery = (id: string, state: ChatDelivery["state"], code = "HTTP_429", messageId = "m1"): ChatDelivery =>
+    ({ id, messageId, state, code });
+  const named = (event: LogEventName) => mockLog.mock.calls.filter(([name]) => name === event);
+  const withRecover = () => {
+    const t = stubTransport();
+    t.transport.recover = jest.fn(async () => undefined);
+    return t;
+  };
+
+  it("logs a recorded failure once, with its state and code", async () => {
+    const t = stubTransport();
+    const { result } = renderChat(t.transport, logContext);
+    await act(async () => { await result.current.sendMessage("help"); });
+    t.status("generating", delivery("p1", "unknown", "FL_REQUEST_PENDING"));
+    t.status("error", delivery("f1", "retryable"));
+    t.status("error", delivery("f1", "retryable"));
+    t.status("generating", delivery("f1", "retryable"));
+    t.status("error", delivery("f1", "retryable"));
+    expect(named(LogEventName.AI_CHAT_UNAVAILABLE)).toEqual([[LogEventName.AI_CHAT_UNAVAILABLE,
+      { ...logContext, deliveryState: "retryable", deliveryCode: "HTTP_429" }]]);
+  });
+
+  it("logs one unavailable event and one timeout per sent message, however many retries fail", async () => {
+    const t = withRecover();
+    const { result } = renderChat(t.transport, logContext);
+    await act(async () => { await result.current.sendMessage("help"); });
+    t.turns([userTurn("m1")]);
+    for (const id of ["f1", "f2", "f3"]) {
+      t.status("generating", delivery(`p-${id}`, "unknown", "FL_REQUEST_PENDING"));
+      advance(kReplyDeadlineMs);
+      t.status("error", delivery(id, "retryable"));
+      t.turns([userTurn("m1"), { id: "delivery-m1", sender: "system", text: "Ada could not reply." }]);
+      await act(async () => { await result.current.recover!("retry"); });
+    }
+    expect(named(LogEventName.AI_CHAT_MESSAGE_SENT)).toHaveLength(1);
+    expect(named(LogEventName.AI_CHAT_UNAVAILABLE)).toHaveLength(1);
+    expect(named(LogEventName.AI_CHAT_TIMEOUT)).toHaveLength(1);
+  });
+
+  it("does not log a closed session or a failure already present on open", async () => {
+    const t = stubTransport();
+    const { result } = renderChat(t.transport, logContext);
+    t.status("error", delivery("old", "failed"));
+    await act(async () => { await result.current.sendMessage("help"); });
+    t.status("idle", delivery("c1", "closed", "FL_SESSION_CLOSED", "m2"));
+    expect(named(LogEventName.AI_CHAT_UNAVAILABLE)).toHaveLength(0);
   });
 });

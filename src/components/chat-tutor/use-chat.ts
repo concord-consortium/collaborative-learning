@@ -78,6 +78,21 @@ export function useChat({ transport, header, logContext }: UseChatOptions): UseC
     } else {setError(null);}
   }, [status, logContext, delivery]);
 
+  // Once per sent message (retries share its messageId), so this stays a rate over AI_CHAT_MESSAGE_SENT.
+  const failure = delivery && status !== "generating" && delivery.state !== "closed" ? delivery : undefined;
+  const failureMessageId = failure?.messageId;
+  const failureState = failure?.state;
+  const failureCode = failure?.code;
+  const loggedFailureMessageRef = useRef<string>();
+  useEffect(() => {
+    if (failureMessageId && failureMessageId !== loggedFailureMessageRef.current &&
+        logContext && sentThisSessionRef.current) {
+      loggedFailureMessageRef.current = failureMessageId;
+      Logger.log(LogEventName.AI_CHAT_UNAVAILABLE,
+        { ...logContext, deliveryState: failureState, deliveryCode: failureCode });
+    }
+  }, [failureMessageId, failureState, failureCode, logContext]);
+
   // The live transport folds "a just-sent user message awaits a reply" into the status it
   // emits — computed from the raw doc stream, so a silent reply clears it.
   const waiting = status === "generating";
@@ -87,15 +102,21 @@ export function useChat({ transport, header, logContext }: UseChatOptions): UseC
   // own clock rather than inherit the first one's and be cut off seconds after the student sent
   // it. The id is minted client-side by the transport's add(), so the optimistic turn and its
   // confirmation share one id and this changes exactly once per message.
+  // Keyed on the delivery's source message so a recovery's re-armed deadline does not log again.
+  const waitingForId = delivery?.messageId ?? newestTurnId;
+  const loggedTimeoutRef = useRef<string>();
   useEffect(() => {
     setTimedOut(false);
     if (!waiting) return;
     const timer = setTimeout(() => {
       setTimedOut(true);
-      if (logContext && sentThisSessionRef.current) Logger.log(LogEventName.AI_CHAT_TIMEOUT, logContext);
+      if (logContext && sentThisSessionRef.current && waitingForId !== loggedTimeoutRef.current) {
+        loggedTimeoutRef.current = waitingForId;
+        Logger.log(LogEventName.AI_CHAT_TIMEOUT, logContext);
+      }
     }, kReplyDeadlineMs);
     return () => clearTimeout(timer);
-  }, [waiting, newestTurnId, logContext, recoveryAttempt]);
+  }, [waiting, newestTurnId, waitingForId, logContext, recoveryAttempt]);
 
   const pending = waiting && !timedOut;
 
