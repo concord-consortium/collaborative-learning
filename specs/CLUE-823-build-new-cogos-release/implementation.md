@@ -36,6 +36,8 @@ Verified in a throwaway worktree of master: both applies are clean, and the resu
 
 **Commit**: `feat: send Ada task and tool context, recover failed turns [CLUE-823]`, with a body that names ForeverLearning's integration package of November 21, 2026 as the source.
 
+**As built**: one test change on top of the patch. The `chat-sidebar.test.tsx` case "reads the live student section without rebuilding the transport..." mocked `persistentUI.tabs` as a plain `Map`, so a rebuild on a tab change could not happen and its title's claim was untested. The mock is now a MobX `observable.map`, the tab change runs in `act()`, and the case asserts the transport count is unchanged; reading the tab in the sidebar's render turns it red.
+
 ---
 
 ### Bind tutor conversations to their learner from the first message
@@ -60,6 +62,8 @@ After the first step that file is identical to master (verified), so checking it
 
 **Commit**: `fix: bind Ada conversations to their learner from the start [CLUE-823]`
 
+**As built**: the package's two "race" tests could not fail (the foreign write fails the prefix check in any order). `chat-ownership-emulator.test.ts` now races two first triggers that both pass the prefix check and differ in `problemPath`, and expects exactly one lock and the winner's owner fields (a non-transactional `acquireLock` turns it red); the rules-test case is renamed "rejects a foreign first message under another learner's owner prefix". The `conversationId` option comment in `firestore-transport.ts` names `ownedConversationId` instead of `conversationDocId`.
+
 ---
 
 ### Log recorded FL delivery failures as unavailable
@@ -73,9 +77,7 @@ After the first step that file is identical to master (verified), so checking it
 `recover` deliberately does not mark the session as having sent: a recovery click logs no `AI_CHAT_MESSAGE_SENT`, so a failure after a recovery click on a conversation that opened already failed is not counted.
 
 ```ts
-  // A recorded delivery failure replaces the generic error above, but it is still the backend
-  // being unavailable for a send made here. Logged at most once per sent message: retries that
-  // fail again carry new failure ids but the same messageId, and the event is a rate over sends.
+  // Once per sent message (retries share its messageId), so this stays a rate over AI_CHAT_MESSAGE_SENT.
   const failure = delivery && status !== "generating" && delivery.state !== "closed" ? delivery : undefined;
   const failureMessageId = failure?.messageId;
   const failureState = failure?.state;
@@ -91,8 +93,7 @@ After the first step that file is identical to master (verified), so checking it
   }, [failureMessageId, failureState, failureCode, logContext]);
 
   // (timeout effect, replacing the package's)
-  // A recovery re-arms the deadline for the same message, so the log is keyed on the message the
-  // wait is for: the delivery's source message while one is recorded, else the newest turn.
+  // Keyed on the delivery's source message so a recovery's re-armed deadline does not log again.
   const waitingForId = delivery?.messageId ?? newestTurnId;
   const loggedTimeoutRef = useRef<string>();
   useEffect(() => {
@@ -152,6 +153,7 @@ describe("useChat delivery failure logging", () => {
       t.status("generating", delivery(`p-${id}`, "unknown", "FL_REQUEST_PENDING"));
       advance(kReplyDeadlineMs);
       t.status("error", delivery(id, "retryable"));
+      t.turns([userTurn("m1"), { id: "delivery-m1", sender: "system", text: "Ada could not reply." }]);
       await act(async () => { await result.current.recover!("retry"); });
     }
     expect(named(LogEventName.AI_CHAT_MESSAGE_SENT)).toHaveLength(1);
@@ -175,6 +177,8 @@ Prototyped on the patched tree: `use-chat.test.ts`, `chat-recovery.test.tsx` and
 **Estimated diff size**: ~80 lines.
 
 **Commit**: `fix: log Ada delivery failures once per sent message [CLUE-823]`
+
+The second test pushes the delivery notice turn after each failure, as the transport does, so the newest turn is no longer the source message; without it, keying the timeout on `newestTurnId` alone stayed green.
 
 ---
 
@@ -210,6 +214,8 @@ Prototyped on the patched tree: `tsc` is clean, the functions-v2 chat tests pass
 
 **Commit**: `fix: let Ada retry a turn that never reached FL [CLUE-823]`
 
+**As built**: the durability fixture's `readDocument` runs a one-shot `beforeNextRead` hook, which the new test sets to throw. Two more checks: "keeps a source message changed before its reservation blocked, without dispatch" (a provider wrapper edits the source message before `processTurn`; reordering the ternary to test the reservation first turns it red), and "persists before dispatch..." now asserts its plain-`Error` failure with a reservation is `unknown` / `FL_DELIVERY_UNCONFIRMED`.
+
 ---
 
 ### Keep the raw workspace out of the reservation
@@ -234,6 +240,8 @@ Prototyped on the patched tree: `tsc` is clean, the functions-v2 chat tests pass
 **Estimated diff size**: ~45 lines.
 
 **Commit**: `fix: keep large workspaces out of Ada's saved requests [CLUE-823]`
+
+**As built**: the fixture's `readDocument` itself prefers `rightContent`, as the trigger's does, rather than a separate one for the new case. "preserves terminal failure..." now gives its source message a workspace and asserts "continue" copies it to the parent's `flContent`; going back to `earned.flContent` turns it red.
 
 ---
 
@@ -282,6 +290,8 @@ Prototyped on the patched tree: all 185 chat-tutor tests pass (the package's "do
 **Estimated diff size**: ~40 lines.
 
 **Commit**: `fix: retry Ada's conversation lookup after a failed open [CLUE-823]`
+
+**As built**: a second case, "attaches the listeners once when a send's lookup finishes before the subscription's", covers the `this.pendingListen !== listen` guard (a send started before `subscribe` would otherwise attach a second pair of listeners).
 
 ---
 
@@ -340,13 +350,13 @@ The focus behavior itself was checked in headless Chrome during review round 4: 
 - `src/components/chat-tutor/firestore-transport.ts`: the `onReadError` comment (four lines) becomes "Snapshot read errors are not tutor failures by default: permission-denied means the rules did not let this caller read the conversation (a non-learner claim, or a parent that is not theirs). Show it as idle rather than as a tutor outage; any other code is a real failure." 
 - `functions-v2/src/chat/drain.ts`: the `kOwnerFields` comment says the list comes from `shared/chat-ownership.ts`, where the client and the drain share it.
 - `functions-v2/src/chat-tutor.ts` (the catch around `processAndDrain`) and `functions-v2/src/chat/drain.ts` (the "Pathological drain length" comment): "status:"error" self-heals" stays true for OpenAI but not for FL, where a recorded `delivery` keeps the drain stopped until a recovery control. Add that qualification to both comments.
-- `firebase-test/src/chat-tutor-rules.test.ts`, "rejects all client parent creation, including owner-pinned pre-claims": with parent `create` now `false`, every assertion but the owner-pinned pre-claim passes by construction (the old rule denied the teacher claim too). Keep only the pre-claim.
+- `firebase-test/src/chat-tutor-rules.test.ts`, "rejects all client parent creation, including owner-pinned pre-claims": with parent `create` now `false`, every assertion but the owner-pinned pre-claim passes by construction (the old rule denied the teacher claim too). Keep only the pre-claim, and retitle the case "rejects client parent creation, even an owner-pinned pre-claim".
 - `functions-v2/test/chat-drain-emulator.test.ts`: the "file-scoped: cleanup() deletes the Firebase app" comment names a helper the package removed; it now describes the `deleteApp` call in `afterAll`.
 - Comments that still say clients write only `user` messages, now that they also write `recovery` controls: the self-trigger guard in `functions-v2/src/chat-tutor.ts` ("only user messages start/continue a turn") names both kinds and says a control starts a recovery once, on its create; the chatTutor block header in `firestore.rules` ("the client writes `user` docs into") becomes "`user` messages and `recovery` controls"; the `FirestoreTransport` class comment in `firestore-transport.ts` adds the recovery controls it writes and the delivery notices it renders.
 - `firestore.rules`: "Five load-bearing checks" in `chatMessageCreate`'s comment becomes "Load-bearing checks", since the package adds the `problemPath` and context checks.
 - `docs/unit-summary-consumers.md`: after the `conversationDocId` sentence, add "The Firestore id is that key wrapped in an owner prefix (`ownedConversationId` in `shared/chat-ownership.ts`); a conversation that already exists under the bare key is reused when its owner, class and problem match."
-- `src/components/chat-tutor/chat.tsx`: re-indent the recovery `</button>}` to line up with its `<button`.
-- Lines over 120 characters (13, listed by `npx eslint -c .eslintrc.build.js` and `functions-v2` `npm run lint`) in `shared/chat-delivery.ts`, `chat.tsx`, `firestore-recovery.test.ts`, `drain.ts`, `fl-provider.ts`, `turn-persistence.ts` and three functions-v2 tests: wrap them.
+- `src/components/chat-tutor/chat.tsx`: the recovery `</button>}` already lines up with its `<button` for `react/jsx-closing-tag-location`; the button moves to its own line under `{action && recover &&`, with the label's nested ternary one branch per line, so the closing tag sits where a reader expects it.
+- Lines over 120 characters (13, plus the `hasChatOwner` test's import; listed by `npx eslint -c .eslintrc.build.js` and `functions-v2` `npm run lint`) in `shared/chat-delivery.ts`, `chat.tsx`, `firestore-recovery.test.ts`, `drain.ts`, `fl-provider.ts`, `turn-persistence.ts` and three functions-v2 tests: wrap them.
 - `functions-v2/test/chat-fl-durability-emulator.test.ts`: project id `demo-clue-item3` becomes `demo-clue-fl-durability`, and the `item3-` parent prefix becomes `durability-`.
 - `docs/fl-integration.md`: rewrite as the contract reference for the next engineer. Keep the sections on ownership, the context fields (with the capability JSON example and its limits), durable requests, the delivery-state table and the checks. Remove the opening "local cumulative reference against upstream <hash>" line, the "Item 4" and `demo-clue-item3` references, the qualification-package wording (keeping one sentence that `schema-conformance.test.ts` needs FL's capabilities schema, `clue_context_packet_v2_capabilities_v1.schema.json`, to check the context fields), the "now fail" and "supersedes the earlier recommendation" narrative, and the closing deploy-timing paragraph (it lives in the PR's callout). Update the delivery-state table so `FL_NOT_DISPATCHED` (a failure before anything reached FL) maps to "Retry saved message". Add a "Clearing a delivery that needs support" section. It covers a `blocked` delivery, and also a `retryable` `FL_NOT_DISPATCHED` that fails the same way on every retry (an oversized packet or a missing tutor user id). First read `chatTutorPendingRequests/{sha256(source message path)}`. **If it does not exist**, nothing reached FL: no FL check is needed and `flTurn` must not change. **If it exists**, take the request id from its `snapshotJson` (`request.context.envelope.trace.request_id`) or the parent's `delivery.requestId`, ask FL whether that request was answered, and note the snapshot's `parentUpdate` if it parses. Then, in one admin batch: delete the parent's `delivery` and `error`; set `status: "idle"`; set `lastProcessedMessageId` and `lastProcessedCreatedAt` to the source message; when a reservation existed, set `flTurn` and `flTraceId` from its `parentUpdate` (or, if that is missing, `flTurn` to the parent's value plus one) and `flContent` from the source message's `rightContent` when it is a non-empty string, and delete the reservation; and merge `{resolved: true, resolution: "continued"}` into `messages/delivery-<messageId>`. This mirrors the "continue" transition in `prepareRecovery` (`delivery-recovery.ts`); advancing the turn after a dispatched request keeps the next request from reusing its `Idempotency-Key` (`<trace>-t<turn>`). One case is outside this procedure: a message with a reservation whose owner fields do not match its parent stops the drain with "Reserved message ownership mismatch" and records no delivery; it needs an engineer, since the reservation may represent FL work billed to another learner. Add a one-line pointer to it at the end of the "ForeverLearning tutor backend" section of `functions-v2/README.md`.
 
@@ -371,6 +381,8 @@ The case needs a schema that defines `capability_context`: FL's `clue_context_pa
 
 **Commit**: `test: check Ada context fields against FL's packet schema [CLUE-823]`
 
+**As built**: the activity context uses `lesson_id: "1.2"`, the only form `buildActivityContext` emits, and the three packet cases share one typed `packetEnvelope`.
+
 ---
 
 ### Run the functions-v2 suite when the Firestore rules change
@@ -379,6 +391,7 @@ The case needs a schema that defines `capability_context`: FL's `clue_context_pa
 
 **Files affected**:
 - `.github/workflows/functions-v2.yml`: add `'firestore.rules'` to `on.push.paths`.
+- `.claude/skills/releasing-clue/cutting.md`: the sentence listing the workflow's trigger paths adds `firestore.rules`.
 
 **Estimated diff size**: 1 line.
 
