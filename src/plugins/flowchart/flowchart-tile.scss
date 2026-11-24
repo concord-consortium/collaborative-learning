@@ -7,5 +7,22 @@
   .flowchart-canvas {
     flex: 1;
     min-height: 0;
+
+    // The canvas is static, so don't show React Flow's grab cursor.
+    .react-flow__pane {
+      cursor: default;
+    }
+
+    // Set explicitly: the Diagram tile's React Flow stylesheet also styles default nodes, and
+    // whichever loads last would otherwise win.
+    .react-flow__node-default {
+      border: 1px solid #1a192b;
+      color: #1a192b;
+    }
+
+    // Nodes can't be connected yet, so hide the connection handles.
+    .react-flow__handle {
+      display: none;
+    }
   }
 }

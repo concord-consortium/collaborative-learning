@@ -43,6 +43,36 @@ describe("FlowchartToolComponent", () => {
     expect(getByText("Step")).toBeInTheDocument();
   });
 
+  it("does not make the static node a keyboard tab stop", () => {
+    const {container} =
+      render(<FlowchartToolComponent {...defaultProps} {...{model}} />);
+    const node = container.querySelector(".react-flow__node");
+    expect(node).not.toHaveAttribute("tabindex");
+    expect(node).not.toHaveAttribute("role", "button");
+  });
+
+  it("leaves the default action of Space and Backspace alone elsewhere on the page", () => {
+    render(<FlowchartToolComponent {...defaultProps} {...{model}} />);
+    [" ", "Backspace"].forEach(key => {
+      const event = new KeyboardEvent("keydown",
+        { key, code: key === " " ? "Space" : key, bubbles: true, cancelable: true });
+      document.body.dispatchEvent(event);
+      expect(event.defaultPrevented).toBe(false);
+    });
+  });
+
+  it("gives each instance its own React Flow id", () => {
+    const {container} = render(
+      <>
+        <FlowchartToolComponent {...defaultProps} {...{model}} />
+        <FlowchartToolComponent {...defaultProps} {...{model}} />
+      </>
+    );
+    const ids = Array.from(container.querySelectorAll("[data-testid='rf__wrapper']")).map(el => el.id);
+    expect(ids).toHaveLength(2);
+    expect(ids[0]).not.toBe(ids[1]);
+  });
+
   it("renders an editable tile title", () => {
     const {container} =
       render(<FlowchartToolComponent {...defaultProps} {...{model}} />);
