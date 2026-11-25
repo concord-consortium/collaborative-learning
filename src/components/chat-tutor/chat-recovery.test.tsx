@@ -133,3 +133,40 @@ describe("delivery notices in the transcript", () => {
       .toMatchObject({ sender: "system", text: `${deliveryMessage("failed")} You chose to continue.` });
   });
 });
+
+describe("a recovery still running when the conversation changes", () => {
+  const deferredRecover = () => {
+    let settle!: () => void;
+    const recover = jest.fn(() => new Promise<void>(resolve => { settle = resolve; }));
+    return { recover, settle: () => settle() };
+  };
+
+  it("does not disable the new conversation's recovery button", async () => {
+    const first = deferredRecover();
+    const { rerender } = render(<Chat chat={makeChat("retryable", { recover: first.recover })} />);
+    fireEvent.click(screen.getByRole("button", { name: "Retry saved message" }));
+    expect(screen.getByRole("button", { name: "Retry saved message" })).toBeDisabled();
+
+    const second = deferredRecover();
+    rerender(<Chat chat={makeChat("retryable", { recover: second.recover })} />);
+    expect(screen.getByRole("button", { name: "Retry saved message" })).toBeEnabled();
+
+    fireEvent.click(screen.getByRole("button", { name: "Retry saved message" }));
+    expect(screen.getByRole("button", { name: "Retry saved message" })).toBeDisabled();
+    first.settle();
+    await waitFor(() => expect(first.recover).toHaveBeenCalled());
+    await Promise.resolve();
+    expect(screen.getByRole("button", { name: "Retry saved message" })).toBeDisabled();
+    second.settle();
+    await waitFor(() =>
+      expect(screen.getByRole("button", { name: "Retry saved message" })).toBeEnabled());
+  });
+
+  it("does not announce its outcome in the new conversation", () => {
+    const first = deferredRecover();
+    const { rerender } = render(<Chat chat={makeChat("failed", { recover: first.recover })} />);
+    fireEvent.click(screen.getByRole("button", { name: "Continue conversation" }));
+    rerender(<Chat chat={makeChat("failed", { recover: jest.fn(), delivery: undefined, status: "idle" })} />);
+    expect(screen.getByTestId("chat-delivery-live")).toHaveTextContent("");
+  });
+});

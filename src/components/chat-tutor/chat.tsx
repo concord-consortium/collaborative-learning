@@ -126,17 +126,20 @@ export const Chat: React.FC<IProps> = ({ chat, onClose, closeLabel, transcriptTi
     onHighlightHover, onHighlightToggle, activeHighlightKey, enableHighlights = false }) => {
   const { turns, error, pending, timedOut, sendMessage, header, delivery, recover } = chat;
   const action = delivery && recoveryAction(delivery.state);
-  const [recovering, setRecovering] = useState(false);
+  // `recover` is rebuilt for each conversation, so holding the one that started a recovery scopes
+  // the lock and the announced outcome to that conversation.
+  const [recovering, setRecovering] = useState<UseChatResult["recover"]>();
   // Continue and Start new clear the notice; this says so once the delivery they acted on is gone.
   const [outcome, setOutcome] = useState("");
-  const clickedActionRef = useRef<string>();
+  const clickedActionRef = useRef<{ action: string, recover: UseChatResult["recover"] }>();
   useEffect(() => {
     if (delivery) return;
     const clicked = clickedActionRef.current;
     clickedActionRef.current = undefined;
-    if (clicked === "continue") setOutcome(kContinuedMessage);
-    if (clicked === "new_session") setOutcome(kNewSessionMessage);
-  }, [delivery]);
+    if (!clicked || clicked.recover !== recover) return;
+    if (clicked.action === "continue") setOutcome(kContinuedMessage);
+    if (clicked.action === "new_session") setOutcome(kNewSessionMessage);
+  }, [delivery, recover]);
   const showNotice = !!delivery && !pending;
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
@@ -403,13 +406,17 @@ export const Chat: React.FC<IProps> = ({ chat, onClose, closeLabel, transcriptTi
         <div className="chat-recovery" data-testid="chat-recovery">
           <p id={noticeId}>{deliveryMessage(delivery.state)}</p>
           {action && recover &&
-            <button type="button" disabled={recovering} onClick={async () => {
+            <button type="button" disabled={recovering === recover} onClick={async () => {
               // This button is about to be disabled, then unmounted, which would drop focus to body.
               inputRef.current?.focus();
-              clickedActionRef.current = action;
+              clickedActionRef.current = { action, recover };
               setOutcome("");
-              setRecovering(true);
-              try { await recover(action); } finally { setRecovering(false); }
+              setRecovering(() => recover);
+              try {
+                await recover(action);
+              } finally {
+                setRecovering((current: UseChatResult["recover"]) => current === recover ? undefined : current);
+              }
             }}>
               {action === "continue" ? "Continue conversation"
                 : action === "new_session" ? "Start a new conversation"
