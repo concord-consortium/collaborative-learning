@@ -3,6 +3,10 @@ import classNames from "classnames";
 import { v4 as uuidv4 } from "uuid";
 import { kReplyDeadlineMs, kTimeoutMessage, UseChatResult } from "./use-chat";
 import { ChatTurn } from "./transport";
+import {
+  deliveryMessage, kContinuedMessage, kNewSessionMessage, recoveryAction
+} from "../../../shared/chat-delivery";
+import { kMaxChatMessageChars } from "../../../shared/chat-message";
 
 import "./chat.scss";
 
@@ -46,7 +50,8 @@ export const buildChatTranscript = (turns: ChatTurn[], title?: string): string =
     if (turn.variant === "debug") continue;
     const text = turn.text.trim();
     if (!text) continue;
-    lines.push(`**${turn.sender === "user" ? "You" : "Ada"}:** ${text}`, "");
+    const speaker = turn.sender === "user" ? "You" : turn.sender === "system" ? "Delivery notice" : "Ada";
+    lines.push(`**${speaker}:** ${text}`, "");
   }
   return lines.join("\n").trimEnd();
 };
@@ -119,7 +124,23 @@ const DebugTurn: React.FC<{ turn: ChatTurn }> = ({ turn }) => {
 
 export const Chat: React.FC<IProps> = ({ chat, onClose, closeLabel, transcriptTitle, introText,
     onHighlightHover, onHighlightToggle, activeHighlightKey, enableHighlights = false }) => {
-  const { turns, error, pending, timedOut, sendMessage, header } = chat;
+  const { turns, error, pending, timedOut, sendMessage, header, delivery, recover } = chat;
+  const action = delivery && recoveryAction(delivery.state);
+  // `recover` is rebuilt for each conversation, so holding the one that started a recovery scopes
+  // the lock and the announced outcome to that conversation.
+  const [recovering, setRecovering] = useState<UseChatResult["recover"]>();
+  // Continue and Start new clear the notice; this says so once the delivery they acted on is gone.
+  const [outcome, setOutcome] = useState("");
+  const clickedActionRef = useRef<{ action: string, recover: UseChatResult["recover"] }>();
+  useEffect(() => {
+    if (delivery) return;
+    const clicked = clickedActionRef.current;
+    clickedActionRef.current = undefined;
+    if (!clicked || clicked.recover !== recover) return;
+    if (clicked.action === "continue") setOutcome(kContinuedMessage);
+    if (clicked.action === "new_session") setOutcome(kNewSessionMessage);
+  }, [delivery, recover]);
+  const showNotice = !!delivery && !pending;
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
   // Identifies the newest submit. Once the release timer below frees the composer, an earlier send
@@ -131,6 +152,7 @@ export const Chat: React.FC<IProps> = ({ chat, onClose, closeLabel, transcriptTi
   const inputRef = useRef<HTMLInputElement>(null);
   // Unique id so a <label htmlFor> stays valid even if two chat instances ever coexist.
   const inputId = useMemo(() => `chat-input-${uuidv4()}`, []);
+  const noticeId = `${inputId}-notice`;
 
   // Copy-to-clipboard: only offer it when there's real conversation to copy.
   const hasCopyableTurns = useMemo(
@@ -225,7 +247,7 @@ export const Chat: React.FC<IProps> = ({ chat, onClose, closeLabel, transcriptTi
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
     const text = input.trim();
-    if (!text || sending) return;
+    if (!text || sending || delivery) return;
     setSending(true);
     setInput("");
     // An offline add() stays pending indefinitely, so awaiting it for the UI would hold the
@@ -297,7 +319,9 @@ export const Chat: React.FC<IProps> = ({ chat, onClose, closeLabel, transcriptTi
             : <div key={turn.id} className={classNames("chat-row", turn.sender)}
                    data-testid={`chat-row-${turn.sender}`}>
                 {/* per-turn sender attribution in the DOM (sender is otherwise conveyed by position+color only) */}
-                <span className="visually-hidden">{turn.sender === "user" ? "You said:" : "Ada said:"}</span>
+                <span className="visually-hidden">{turn.sender === "user" ? "You said:" :
+                  turn.sender === "system" ? "Delivery notice:" : "Ada said:"}
+                </span>
                 <div className={classNames("chat-bubble", { pending: turn.pending })}>{turn.text}</div>
                 {enableHighlights && turn.highlights?.length
                   ? <div className="chat-highlights" data-testid="chat-highlights">
@@ -373,7 +397,33 @@ export const Chat: React.FC<IProps> = ({ chat, onClose, closeLabel, transcriptTi
           {activeHighlightLabel ? `Highlighting ${activeHighlightLabel}` : ""}
         </div>}
 
-      {(error || timedOut) &&
+      {/* Mounted empty so a failure's text is announced when written into it; the action stays
+          outside so its label is not read as part of the announcement. */}
+      <div className="visually-hidden" role="status" data-testid="chat-delivery-live">
+        {showNotice && delivery ? deliveryMessage(delivery.state) : outcome}
+      </div>
+      {showNotice && delivery &&
+        <div className="chat-recovery" data-testid="chat-recovery">
+          <p id={noticeId}>{deliveryMessage(delivery.state)}</p>
+          {action && recover &&
+            <button type="button" disabled={recovering === recover} onClick={async () => {
+              // This button is about to be disabled, then unmounted, which would drop focus to body.
+              inputRef.current?.focus();
+              clickedActionRef.current = { action, recover };
+              setOutcome("");
+              setRecovering(() => recover);
+              try {
+                await recover(action);
+              } finally {
+                setRecovering((current: UseChatResult["recover"]) => current === recover ? undefined : current);
+              }
+            }}>
+              {action === "continue" ? "Continue conversation"
+                : action === "new_session" ? "Start a new conversation"
+                : delivery.state === "retryable" ? "Retry saved message" : "Check for reply"}
+            </button>}
+        </div>}
+      {(error || (timedOut && !delivery)) &&
         <div className="chat-error" role="alert" data-testid="chat-error">{error ?? kTimeoutMessage}</div>}
 
       <form className="chat-composer" onSubmit={onSubmit} data-testid="chat-composer">
@@ -382,17 +432,21 @@ export const Chat: React.FC<IProps> = ({ chat, onClose, closeLabel, transcriptTi
           id={inputId}
           ref={inputRef}
           className="chat-input"
+          maxLength={kMaxChatMessageChars}
           value={input}
           onChange={e => setInput(e.target.value)}
           placeholder="Message Ada…"
           disabled={sending}
+          readOnly={!!delivery}
+          aria-disabled={delivery ? true : undefined}
+          aria-describedby={showNotice ? noticeId : undefined}
           autoComplete="off"
           data-testid="chat-input"
         />
         <button
           type="submit"
           className="chat-send"
-          disabled={sending || !input.trim()}
+          disabled={sending || !!delivery || !input.trim()}
           data-testid="chat-send"
         >
           Send

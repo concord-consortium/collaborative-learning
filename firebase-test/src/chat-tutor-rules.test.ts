@@ -28,7 +28,7 @@ describe("Firestore security rules: chat tutor", () => {
     await tearDownTests();
   });
 
-  const kParentPath = "authed/myPortal/chatTutor/conv-1";
+  const kParentPath = "authed/myPortal/chatTutor/owner:3:101_this-class_conv-1";
   const kMessagePath = `${kParentPath}/messages/msg-1`;
 
   interface ISpecMessage {
@@ -231,29 +231,6 @@ describe("Firestore security rules: chat tutor", () => {
       await expectReadToFail(db, kParentPath);
       db = initFirestore(teacherAuth);
       await expectReadToFail(db, kParentPath);
-    });
-
-    it("denies a read of a non-existent parent under the learner claim", async () => {
-      // the transport treats this permission-denied as the benign "no conversation yet" case
-      db = initFirestore(learnerAuth);
-      await expectReadToFail(db, kParentPath);
-    });
-
-    it("defensive create: owner-pinned whitelist only", async () => {
-      db = initFirestore(learnerAuth);
-      await expectWriteToSucceed(db, kParentPath, specParent(learnerId));
-      await prepareEachTest();
-      // forged owner
-      await expectWriteToFail(db, kParentPath, specParent(classmateId));
-      // server-owned field injection
-      await expectWriteToFail(db, kParentPath, { ...specParent(learnerId), problemInstalled: true });
-      await expectWriteToFail(db, kParentPath, { ...specParent(learnerId), status: "idle" });
-      // context pinned to the token
-      await expectWriteToFail(db, kParentPath, { ...specParent(learnerId), context_id: otherClass });
-      // non-learner claim
-      db = initFirestore(teacherAuth);
-      await expectWriteToFail(db, kParentPath,
-        { uid: teacherAuth.uid, context_id: thisClass, problemPath: "abc/1/2" });
     });
 
     it("rejects client updates and deletes of the parent", async () => {

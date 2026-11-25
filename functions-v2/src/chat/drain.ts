@@ -8,10 +8,20 @@
 // undefined there, while the modular entry points work in both the emulator and production.
 import {
   CollectionReference, DocumentData, DocumentReference, FieldPath as FirestoreFieldPath, FieldValue,
-  Query, QueryDocumentSnapshot, getFirestore,
+  Query, QueryDocumentSnapshot, Timestamp, getFirestore,
 } from "firebase-admin/firestore";
 
 import {TurnResult, TutorProvider} from "./provider";
+import {createTurnPersistence} from "./turn-persistence";
+import {prepareRecovery, recordDeliveryFailure, recordPendingDelivery} from "./delivery-recovery";
+import {RecordedDeliveryError} from "./fl-delivery-error";
+import {canStartConversation, hasChatOwner, kChatOwnerFields, sameChatOwner} from "../../../shared/chat-ownership";
+
+class ChatOwnershipError extends Error {}
+
+function requiresChatOwner(parentRef: DocumentReference, parent: DocumentData): boolean {
+  return parentRef.path.startsWith("authed/") || parent.uid !== undefined;
+}
 
 // reclaim a lock whose owner crashed mid-drain, so a conversation can't wedge forever.
 // INVARIANT: STALE_LOCK_MS must exceed the function's configured timeout (default 60s, no
@@ -36,13 +46,11 @@ export interface DrainContext {
   messagesCol: MsgCol;
   // which tutor backend answers a turn; the drain itself is vendor-agnostic
   provider: TutorProvider;
+  recoveryRef?: DocumentReference;
 }
 
-// The owner fields the client's rules require on any doc it reads. One list, because it feeds two
-// places that must not disagree: pickOwnerFields copies them onto function-written docs, and the
-// guard below refuses to let a provider set them. A field added here is protected in both.
-const kOwnerFields = ["uid", "context_id", "problemPath"] as const;
-
+// kChatOwnerFields (shared/chat-ownership.ts) feeds both pickOwnerFields and this guard, so a field
+// added there is protected in both.
 // Parent-doc fields the drain owns; a provider may write anything EXCEPT these.
 //
 // A provider returns a plain field map that gets merged into the parent doc, so the boundary needs
@@ -55,9 +63,9 @@ const kOwnerFields = ["uid", "context_id", "problemPath"] as const;
 // Providers stay free to add their own fields (a session id, an install flag) without touching
 // this file — the rule is only that they cannot touch the drain's.
 const kDrainOwnedParentFields = new Set<string>([
-  "status", "lockedAt", "error",
+  "status", "lockedAt", "error", "delivery",
   "lastProcessedCreatedAt", "lastProcessedMessageId",
-  ...kOwnerFields,
+  ...kChatOwnerFields,
 ]);
 
 // Throwing (rather than dropping the offending keys) is deliberate: a provider reaching for these
@@ -76,7 +84,7 @@ function assertProviderOwnsFields(parentUpdate: Record<string, unknown>): void {
 // function-created parent). This is the only channel through which the parent gets its stamp.
 export function pickOwnerFields(data: DocumentData | undefined): Record<string, unknown> {
   const out: Record<string, unknown> = {};
-  for (const field of kOwnerFields) {
+  for (const field of kChatOwnerFields) {
     if (data?.[field] !== undefined) out[field] = data[field];
   }
   return out;
@@ -108,6 +116,8 @@ interface UnitResult {
   assistant: Record<string, unknown>;
   // parent-doc fields the provider earned this turn (conversation/session ids, flags, seq)
   parentUpdate: Record<string, unknown>;
+  pendingRequestRef?: DocumentReference;
+  sessionClosed?: boolean;
 }
 
 // Process one user message: hand the provider the current parent state + the message, and RETURN
@@ -122,21 +132,44 @@ async function processUnit(ctx: DrainContext, doc: MsgSnap): Promise<UnitResult>
   // Per-conversation state is read fresh each turn (no in-memory state). The lock serializes
   // turns, so a provider's seq increment can't race across invocations.
   const parent = (await parentRef.get()).data() ?? {};
-  const turnResult = await provider.processTurn(parent, data);
+  if (requiresChatOwner(parentRef, parent) && !sameChatOwner(parent, data)) {
+    throw new ChatOwnershipError("CHAT_OWNER_MISMATCH");
+  }
+  const persistence = createTurnPersistence(doc.ref, data,
+    (snapshot) => recordPendingDelivery(parentRef, doc, snapshot));
+  const turnResult = await provider.processTurn(parent, data, persistence);
   const {parentUpdate} = turnResult;
   assertProviderOwnsFields(parentUpdate);
 
   // Stamp owner fields so the client's owner-only onSnapshot can read the reply; write even a
   // null-text assistant doc so the client's "awaiting" indicator clears.
   const assistant = buildAssistantDoc(turnResult, ownerFields);
+  if (turnResult.requestId) {
+    assistant.providerRequestId = turnResult.requestId;
+    assistant.sourceMessageId = doc.id;
+  }
 
-  return {assistant, parentUpdate};
+  return {assistant, parentUpdate, sessionClosed: turnResult.sessionClosed,
+    ...(persistence.reserved ? {pendingRequestRef: persistence.ref} : {})};
+}
+
+// The drain's own order: createdAt, then document id.
+function cursorIsPast(parent: DocumentData | undefined, message: MsgSnap): boolean {
+  const at: Timestamp | undefined = parent?.lastProcessedCreatedAt;
+  const id: unknown = parent?.lastProcessedMessageId;
+  const messageAt: Timestamp | undefined = message.get("createdAt");
+  if (typeof at?.toMillis !== "function" || typeof id !== "string" || typeof messageAt?.toMillis !== "function") {
+    return false;
+  }
+  const order = at.toMillis() - messageAt.toMillis() || at.nanoseconds - messageAt.nanoseconds;
+  return order > 0 || (order === 0 && id > message.id);
 }
 
 export async function processAndDrain(ctx: DrainContext): Promise<void> {
   const {parentRef, messagesCol} = ctx;
   const db = getFirestore();
   const FieldPath = FirestoreFieldPath;
+  if (!await prepareRecovery(parentRef, ctx.recoveryRef)) return;
 
   // order on (createdAt, __name__) so the cursor is deterministic even when messages share a
   // serverTimestamp() millisecond; range-only (no kind filter) so it needs NO composite index —
@@ -195,26 +228,73 @@ export async function processAndDrain(ctx: DrainContext): Promise<void> {
     }
 
     const next = pending[0];
-    const {assistant, parentUpdate} = await processUnit(ctx, next);
+    try {
+      const {assistant, parentUpdate, pendingRequestRef, sessionClosed} = await processUnit(ctx, next);
 
-    lastSnap = next;
-    // commit the assistant doc + earned parent state + cursor advance in ONE batch: either all
-    // land or none, so a crash between the reply and the cursor can't duplicate the assistant
-    // doc (a pre-commit crash re-processes the unit but wrote nothing — only a possible re-bill
-    // from the provider remains, the documented replay risk).
-    const writeBatch = db.batch();
-    writeBatch.set(messagesCol.doc(), assistant);
-    writeBatch.set(parentRef, {
-      ...parentUpdate,
-      lastProcessedCreatedAt: next.get("createdAt"),
-      lastProcessedMessageId: next.id,
-    }, {merge: true});
-    await writeBatch.commit();
+      lastSnap = next;
+      // Reply, earned session state, cursor and removal of the reservation commit atomically.
+      // A pre-commit crash retains the exact request for replay; a post-commit duplicate skips it.
+      const writeBatch = db.batch();
+      // exists: a second drain of the same message fails here instead of writing a second reply.
+      if (pendingRequestRef) writeBatch.delete(pendingRequestRef, {exists: true});
+      const noticeRef = messagesCol.doc(`delivery-${next.id}`);
+      if ((await noticeRef.get()).exists) {
+        writeBatch.set(noticeRef, {resolved: true, resolution: "recovered"}, {merge: true});
+      }
+      writeBatch.set(messagesCol.doc(), assistant);
+      writeBatch.set(parentRef, {
+        ...parentUpdate,
+        lastProcessedCreatedAt: next.get("createdAt"),
+        lastProcessedMessageId: next.id,
+        error: FieldValue.delete(),
+        delivery: sessionClosed ? {id: crypto.randomUUID(), messageId: next.id, state: "closed",
+          code: "FL_SESSION_CLOSED", requestId: assistant.providerRequestId} : FieldValue.delete(),
+        ...(sessionClosed ? {status: "idle", lockedAt: FieldValue.delete()} : {}),
+      }, {merge: true});
+      await writeBatch.commit();
+      if (sessionClosed) return;
+    } catch (error) {
+      if (error instanceof ChatOwnershipError) {
+        // A mismatched message with no reservation is rejected and the cursor advances past it in the
+        // same transaction, so it cannot trap the owner. One with a reservation stops the drain (below).
+        await db.runTransaction(async (tx) => {
+          const parent = (await tx.get(parentRef)).data();
+          const reserved = await tx.get(createTurnPersistence(next.ref, next.data()).ref);
+          if (!parent || !hasChatOwner(parent)) throw error;
+          // A reservation may already have external work/expense. Do not skip it
+          // or delete its evidence: ownership reconciliation then requires operator support.
+          if (reserved.exists) throw new Error("Reserved message ownership mismatch; support is required");
+          tx.update(next.ref, {rejectedAt: FieldValue.serverTimestamp(), rejectionCode: "CHAT_OWNER_MISMATCH"});
+          tx.set(messagesCol.doc(`delivery-${next.id}`), {
+            ...pickOwnerFields(parent), kind: "delivery", resolved: true, resolution: "rejected",
+            text: "A message that did not belong to this conversation was rejected.",
+            code: "CHAT_OWNER_MISMATCH", createdAt: FieldValue.serverTimestamp(),
+          });
+          tx.update(parentRef, {lastProcessedCreatedAt: next.get("createdAt"), lastProcessedMessageId: next.id});
+        });
+        lastSnap = next;
+        continue;
+      }
+      const parent = (await parentRef.get()).data();
+      // A lost Firestore acknowledgement is not a failed turn if the atomic delivery batch landed.
+      // A cursor already past this message means another invocation has taken over the drain.
+      if (parent?.lastProcessedMessageId === next.id) {
+        if (parent.delivery?.state === "closed") return;
+        continue;
+      }
+      if (cursorIsPast(parent, next)) return;
+      if ((parent?.provider ?? next.get("provider")) === "foreverlearning") {
+        await recordDeliveryFailure(parentRef, next, error);
+        throw new RecordedDeliveryError(error);
+      }
+      throw error;
+    }
   }
 
   // Pathological drain length. Throw so the catch sets status:"error" (self-heals — acquire
   // proceeds on anything != "generating"); the persisted cursor means the next trigger
-  // continues in order.
+  // continues in order. Self-healing assumes no recorded delivery; under ForeverLearning a recorded
+  // delivery keeps the drain stopped until a recovery control.
   throw new Error("chat drain exceeded MAX_DRAIN_TURNS");
 }
 
@@ -223,11 +303,17 @@ export async function processAndDrain(ctx: DrainContext): Promise<void> {
 // lock. Exported so the single-in-flight + stale-reclaim behavior is testable against the
 // emulator.
 export async function acquireLock(
-  parentRef: ParentRef, ownerFields: Record<string, unknown>
+  parentRef: ParentRef, ownerFields: Record<string, unknown>, allowCreate = true
 ): Promise<boolean> {
   const db = getFirestore();
   return db.runTransaction(async (tx) => {
     const p = await tx.get(parentRef);
+    const parent = p.data() ?? {};
+    if (!p.exists && !allowCreate) return false;
+    if (p.exists && requiresChatOwner(parentRef, parent) && !sameChatOwner(parent, ownerFields)) return false;
+    if (!p.exists && parentRef.path.startsWith("authed/") &&
+        (!hasChatOwner(ownerFields) ||
+         !canStartConversation(parentRef.id, String(ownerFields.uid)))) return false;
     const status = p.data()?.status ?? "idle";
     const lockedAtMs = p.data()?.lockedAt?.toMillis?.() ?? 0;
     const stale = Date.now() - lockedAtMs > STALE_LOCK_MS;

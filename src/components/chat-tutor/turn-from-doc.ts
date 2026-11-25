@@ -16,6 +16,13 @@ function readHighlights(value: unknown): TutorHighlight[] | undefined {
  * indicator without adding a bubble, so any highlights it carried have no words to belong to.
  */
 export function turnFromDoc(id: string, data: any, hasPendingWrites: boolean): ChatTurn | undefined {
+  // An unresolved notice is shown by the drawer's recovery panel, so the transcript waits for it.
+  if (data?.kind === "delivery" && typeof data.text === "string") {
+    if (!data.resolved) return undefined;
+    const suffix = data.resolution === "recovered" ? " The reply was recovered." :
+      data.resolution === "continued" ? " You chose to continue." : "";
+    return { id, sender: "system", text: data.text + suffix };
+  }
   if (data?.kind === "user") {
     return { id, sender: "user", text: data.text ?? "", pending: hasPendingWrites };
   }

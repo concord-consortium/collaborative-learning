@@ -134,6 +134,9 @@ to is constructed, and a missing FL key cannot break an OpenAI turn.
 
 Both secrets are declared in the trigger's `runWith({secrets: [...]})`, so a deploy provisions both.
 
+Conversation ownership, durable FL requests, delivery recovery and how to clear a delivery that
+needs support are in [docs/fl-integration.md](../docs/fl-integration.md).
+
 #### Notes
 
 In the tests, the function cannot be imported normally. This is because the `firebase-functions-test`'s initialize function has to be called before the function code calls `initializeApp`. The standard practice for Firebase functions seems to be calling `initializeApp` at the module level not inside of the function body, so it will be called when the module is imported. The work around is to dynamically import the function. The docs for the `firebase-functions-test` use `require` to import the function, but we are trying to stick with the `import` syntax. The dynamic `import` syntax is asynchronous so it requires waiting, which means it can't be at the top level of the module. So the dynamic import of the function is inside of the test body. Typescript is able to track down the types for these dynamic imports. There is info about this approach in the code.

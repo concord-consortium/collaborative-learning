@@ -25,6 +25,7 @@
 import * as functionsV1 from "firebase-functions/v1";
 import {defineSecret, defineString} from "firebase-functions/params";
 import {getFirestore} from "firebase-admin/firestore";
+import {RecordedDeliveryError} from "./chat/fl-delivery-error";
 
 import {CHAT_GENERIC_PROMPT} from "../../shared/chat-tutor-generic-prompt";
 import {kDefaultTutorProvider} from "../../shared/chat-tutor-providers";
@@ -72,9 +73,10 @@ export const chatTutorOnWrite = functionsV1
   .onWrite(async (change, context) => {
     const doc = change.after.data();
     if (!doc) return null; // delete → ignore
-    // self-trigger guard: only user messages start/continue a turn; ignore our own assistant
-    // writes (and any other kind).
-    if (doc.kind !== "user") return null;
+    // self-trigger guard: user messages start/continue a turn and a recovery control starts a
+    // recovery once, on its create; ignore our own assistant writes (and any other kind).
+    if (doc.kind !== "user" && doc.kind !== "recovery") return null;
+    if (doc.kind === "recovery" && change.before.exists) return null;
 
     const db = getFirestore();
     const {root, rootId, conversationId} = context.params as Record<string, string>;
@@ -83,7 +85,7 @@ export const chatTutorOnWrite = functionsV1
     const ownerFields = pickOwnerFields(doc);
 
     // acquire the per-conversation lock (compare-and-set idle→generating) with stale reclaim.
-    const acquired = await acquireLock(parentRef, ownerFields);
+    const acquired = await acquireLock(parentRef, ownerFields, doc.kind === "user");
     if (!acquired) return null;
 
     // Factories, not instances: each backend needs its own credential, and only the one this
@@ -92,6 +94,7 @@ export const chatTutorOnWrite = functionsV1
     const ctx: DrainContext = {
       parentRef,
       messagesCol,
+      ...(doc.kind === "recovery" ? {recoveryRef: change.after.ref} : {}),
       provider: createRoutingProvider({
         defaultProvider: kDefaultTutorProvider,
         providers: {
@@ -153,11 +156,13 @@ export const chatTutorOnWrite = functionsV1
     try {
       await processAndDrain(ctx);
     } catch (e) {
+      if (e instanceof RecordedDeliveryError) throw e;
       // Record the error (status:"error" self-heals — acquire proceeds on anything !=
       // "generating") and re-throw only to surface it in the function logs. This trigger must
       // run with the DEFAULT no-retry policy: with retries enabled, a deterministic failure
       // would re-acquire and re-drain forever, burning OpenAI spend. Do not enable
-      // failurePolicy/retries.
+      // failurePolicy/retries. Self-healing holds for OpenAI; under ForeverLearning a recorded
+      // delivery keeps the drain stopped until a recovery control.
       const message = e instanceof Error ? e.message : String(e);
       await parentRef.set({status: "error", error: message}, {merge: true});
       throw e;

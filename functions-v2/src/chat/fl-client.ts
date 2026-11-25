@@ -9,6 +9,7 @@
 // as a header, so the packet's own privacy claims are unaffected by it.
 import {CollectedStream, collectEvent, emptyStream, SseParser} from "../../../shared/fl-packet/sse";
 import {ContextPacket} from "../../../shared/fl-packet/packet";
+import {FlDeliveryError, flResponseFailure} from "./fl-delivery-error";
 
 export interface FlClientConfig {
   baseUrl: string;
@@ -25,39 +26,68 @@ export interface FlChatArgs {
   context: ContextPacket;
   /** Present only when continuing a session FL has already opened. */
   sessionId?: string;
+  /** Exact body durably reserved by the provider before dispatch. Never includes credentials. */
+  serializedBody?: string;
 }
 
-export async function flChat(
-  config: FlClientConfig, args: FlChatArgs
-): Promise<CollectedStream> {
-  const fetchImpl = config.fetchImpl ?? fetch;
+export function serializeFlChatBody(args: FlChatArgs): string {
   const body: Record<string, unknown> = {prompt: args.prompt, context: args.context};
   // Absent rather than null: the field is what tells FL to continue an existing session, and
   // sending an empty one is a different statement from not sending it.
   if (args.sessionId) {
     body.session_id = args.sessionId;
   }
+  return JSON.stringify(body);
+}
 
-  const response = await fetchImpl(`${config.baseUrl}/v1/chat`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "Accept": "text/event-stream",
-      "Authorization": `Bearer ${config.apiKey}`,
-      "X-Solution-Id": config.solutionId,
-      "X-User-Id": args.userId,
-    },
-    body: JSON.stringify(body),
-  });
+export async function flChat(
+  config: FlClientConfig, args: FlChatArgs
+): Promise<CollectedStream> {
+  const fetchImpl = config.fetchImpl ?? fetch;
+  const currentBody = serializeFlChatBody(args);
+  if (args.serializedBody !== undefined && args.serializedBody !== currentBody) {
+    throw new FlDeliveryError("blocked", "FL_RESERVED_BODY_MISMATCH", undefined,
+      "ForeverLearning reserved request differs from its arguments; refusing dispatch");
+  }
+  const requestId = args.context.envelope.trace.request_id;
+
+  let response: Response;
+  try {
+    response = await fetchImpl(`${config.baseUrl}/v1/chat`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Accept": "text/event-stream",
+        "Authorization": `Bearer ${config.apiKey}`,
+        "X-Solution-Id": config.solutionId,
+        "X-User-Id": args.userId,
+        ...(requestId ? {"Idempotency-Key": requestId} : {}),
+      },
+      body: args.serializedBody ?? currentBody,
+    });
+  } catch {
+    throw new FlDeliveryError("unknown", "FL_TRANSPORT_UNCONFIRMED");
+  }
 
   if (!response.ok) {
-    // The status is the only thing that separates causes here: 401 covers an expired key, a wrong
-    // key, a wrong solution id and a revoked one, byte-identical in all four, so a caller that
-    // loses the number cannot tell any of them from a server fault.
-    throw new Error(`ForeverLearning chat request failed with status ${response.status}`);
+    let code: string | undefined;
+    try {
+      const raw = await response.text();
+      if (raw.length <= 65536) {
+        const events = new SseParser().push(raw + "\n\n");
+        const event = events.find((e) => e.type === "error");
+        if (typeof event?.code === "string") code = event.code;
+        if (!code) {
+          const json = JSON.parse(raw);
+          code = typeof json.code === "string" ? json.code :
+            typeof json.error?.code === "string" ? json.error.code : undefined;
+        }
+      }
+    } catch {/* Missing/unreadable error detail never proves a terminal failure. */}
+    throw flResponseFailure(response.status, code);
   }
   if (!response.body) {
-    throw new Error("ForeverLearning chat response carried no body");
+    throw new FlDeliveryError("unknown", "FL_EMPTY_BODY", undefined, "ForeverLearning chat response carried no body");
   }
 
   const parser = new SseParser();
@@ -66,13 +96,18 @@ export async function flChat(
   // Node's fetch body is an async iterable of byte chunks whose boundaries have nothing to do with
   // event boundaries; SseParser buffers across them. `stream: true` on decode matters for the same
   // reason one level down — a chunk can split a multi-byte character.
-  for await (const chunk of response.body as AsyncIterable<Uint8Array>) {
-    for (const event of parser.push(decoder.decode(chunk, {stream: true}))) {
-      collectEvent(stream, event);
+  try {
+    for await (const chunk of response.body as AsyncIterable<Uint8Array>) {
+      for (const event of parser.push(decoder.decode(chunk, {stream: true}))) {
+        collectEvent(stream, event);
+      }
     }
+  } catch {
+    throw new FlDeliveryError("unknown", "FL_STREAM_UNCONFIRMED");
   }
   for (const event of parser.end()) {
     collectEvent(stream, event);
   }
+  if (stream.errorCode) throw new FlDeliveryError("unknown", stream.errorCode);
   return stream;
 }

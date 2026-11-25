@@ -20,6 +20,54 @@ service cloud.firestore {
       return request.auth != null;
     }
 
+    function activityText(value, limit) {
+      return value is string && value.size() > 0 && value.size() <= limit && value.matches('(?s).*\\S.*');
+    }
+
+    function boundedCapabilityList(value) {
+      return value is list && value.size() > 0 && value.size() <= 20;
+    }
+    function validCapabilityContext(data) {
+      return !('capabilityContext' in data) ||
+        (data.provider == 'foreverlearning' && data.capabilityContext is map &&
+         data.capabilityContext.keys().hasOnly(['schema_version', 'dataflow']) &&
+         data.capabilityContext.schema_version == 'clue.capability_context.v1' &&
+         validDataflowCapabilities(data.capabilityContext.dataflow));
+    }
+    function validDataflowCapabilities(d) {
+      return d is map && d.keys().hasOnly(['creation_tool_configured', 'node_palette',
+          'demo_device_options', 'outputConfig']) && d.creation_tool_configured is bool &&
+        boundedCapabilityList(d.node_palette) && boundedCapabilityList(d.demo_device_options) &&
+        d.outputConfig is map && d.outputConfig.keys().hasOnly(['servoInputMode', 'allowedOutputTypes']) &&
+        d.outputConfig.servoInputMode in ['degrees', 'proportion'] &&
+        boundedCapabilityList(d.outputConfig.allowedOutputTypes);
+    }
+
+    function validChatRecovery(data) {
+      return data.keys().hasOnly(['uid', 'kind', 'createdAt', 'context_id', 'problemPath',
+        'provider', 'action', 'recoveryId']) && data.kind == 'recovery' && data.provider == 'foreverlearning' &&
+        data.createdAt is timestamp && data.action in ['retry', 'continue', 'new_session'] &&
+        activityText(data.recoveryId, 80) && data.problemPath is string;
+    }
+
+    function validActivitySource(source) {
+      return source is map && source.keys().hasOnly(['system', 'lesson_id', 'unit', 'section']) &&
+        source.keys().hasAll(['system', 'lesson_id']) && source.system == 'CLUE' &&
+        activityText(source.lesson_id, 200) &&
+        (!('unit' in source) || activityText(source.unit, 200)) &&
+        (!('section' in source) || activityText(source.section, 200));
+    }
+
+    function validActivityContext(data) {
+      return !('activityContext' in data) ||
+        (data.provider == 'foreverlearning' && data.activityContext is map &&
+         data.activityContext.keys().hasOnly(['task_prompt', 'source', 'learning_goal']) &&
+         data.activityContext.keys().hasAll(['task_prompt']) &&
+         activityText(data.activityContext.task_prompt, 8000) &&
+         (!('source' in data.activityContext) || validActivitySource(data.activityContext.source)) &&
+         (!('learning_goal' in data.activityContext) || activityText(data.activityContext.learning_goal, 2000)));
+    }
+
     // function hasClass() {
     //   return isAuthed() && request.auth.token.class_hash != null;
     // }
@@ -651,9 +699,9 @@ service cloud.firestore {
       // AI chat tutor (spike): a self-contained top-level collection so all chat data can be
       // deleted wholesale when the spike ends. A parent conversation doc (server-created by the
       // chatTutorOnWrite trigger via the admin SDK) with a messages subcollection the client
-      // writes `user` docs into. This is a discrete leaf match: the portal-level
-      // teacher/researcher grant above does not cascade here under rules_version 2, so the
-      // students-only stance below holds.
+      // writes `user` messages and `recovery` controls into. This is a discrete leaf match: the
+      // portal-level teacher/researcher grant above does not cascade here under rules_version 2,
+      // so the students-only stance below holds.
       match /chatTutor/{conversationId} {
         // The real Firebase claim students carry is user_type "learner" (the app-model
         // "student" value is a client-side remap the rules never see).
@@ -661,38 +709,53 @@ service cloud.firestore {
           return hasRole("learner");
         }
 
-        // Owner-only + student-only: reads trust resource.data.uid, which the create rules pin
-        // to the caller's token and the trigger stamps (admin SDK) on server-written docs. No
-        // teacher/researcher branch — evaluators inspect via the Firestore console/emulator.
+        // Owner-only + student-only: reads trust resource.data.uid, which the message create rules
+        // pin to the caller's token and the trigger stamps (admin SDK) on every doc it writes;
+        // clients cannot write a parent. No teacher/researcher branch: evaluators inspect via the
+        // Firestore console/emulator.
         // Deliberately NOT the documents rule's class-wide resourceInUserClass() branch, which
         // would expose a student's transcript to classmates.
-        allow read: if userIsResourceUser() && isStudentClaim();
+        function canStartChat() {
+          let uid = string(request.auth.token.platform_user_id);
+          let prefix = 'owner:' + string(uid.size()) + ':' + uid + '_';
+          // Exact substring comparison avoids regex metacharacter and uid-prefix attacks.
+          // A parent under a legacy uid/network id stays readable by its owner; an unowned legacy id
+          // cannot prove who is entitled to create it.
+          return hasUserId() && conversationId.size() > prefix.size() &&
+            conversationId[0:prefix.size()] == prefix;
+        }
 
-        // Defense-in-depth only: the parent is created server-side, so no client parent-create
-        // is exercised — but if a client attempted one it could not forge an owner or inject
-        // server-owned state (status/lock/cursor/conversationId/problemInstalled/seq).
-        allow create: if isStudentClaim() &&
-          userIsRequestUser() &&
-          classIsRequestContextId() &&
-          request.resource.data.keys().hasOnly(['uid', 'context_id', 'problemPath']);
-        allow update, delete: if false;
+        function chatExists() {
+          return exists(/databases/$(database)/documents/authed/$(portal)/chatTutor/$(conversationId));
+        }
+
+        function ownsExistingChat() {
+          return chatExists() &&
+            get(/databases/$(database)/documents/authed/$(portal)/chatTutor/$(conversationId)).data.uid ==
+              string(request.auth.token.platform_user_id);
+        }
+
+        // A missing owner-bound parent may be checked before subscribing. This grants no
+        // parent writes. Only the server may establish immutable conversation ownership.
+        allow get: if isStudentClaim() && ((chatExists() && userIsResourceUser()) ||
+          (!chatExists() && canStartChat()));
+        allow list: if userIsResourceUser() && isStudentClaim();
+        allow create, update, delete: if false;
 
         match /messages/{messageId} {
-          // A student may write messages only into their OWN conversation: either the parent
-          // doesn't exist yet (the first send — the trigger creates it stamped with this
-          // sender's uid), or the existing parent carries the caller's uid. Without this, a
-          // classmate could inject owner-pinned messages into another student's conversation
-          // and read replies derived from that student's private workspace context. Residual
-          // (accepted for the spike): a malicious classmate could pre-create traffic on a
-          // victim's conversation path before their first send, denying the victim that
-          // conversation — a denial, not an exposure.
+          // Bind a first user message to the caller's id before a parent exists. Once the
+          // server establishes ownership, every message/control must match all owner fields.
           function ownsConversation() {
-            return !exists(/databases/$(database)/documents/authed/$(portal)/chatTutor/$(conversationId)) ||
-              get(/databases/$(database)/documents/authed/$(portal)/chatTutor/$(conversationId)).data.uid ==
-                string(request.auth.token.platform_user_id);
+            let data = request.resource.data;
+            return (!chatExists() && data.kind == 'user' && canStartChat()) ||
+              (ownsExistingChat() &&
+                get(/databases/$(database)/documents/authed/$(portal)/chatTutor/$(conversationId)).data.context_id ==
+                  data.context_id &&
+                get(/databases/$(database)/documents/authed/$(portal)/chatTutor/$(conversationId)).data.problemPath ==
+                  data.problemPath);
           }
 
-          // Five load-bearing checks:
+          // Load-bearing checks:
           // (a) hasOnly blocks extra/server-owned fields;
           // (b) the kind VALUE check — not hasOnly — is what blocks a forged 'assistant';
           // (c) createdAt presence + orderable type, so the drain's ordering can't wedge on a
@@ -722,15 +785,18 @@ service cloud.firestore {
             return isStudentClaim() &&
               userIsRequestUser() &&
               classIsRequestContextId() &&
+              data.problemPath is string && data.problemPath.size() > 0 &&
               // 'unitContext' carries a filtered slice of the unit's authored aiUnitSummary,
               // installed alongside leftContext. Optional: a unit with no summary authored, or
               // whose summary fails the live-structure check, sends none.
               data.keys().hasOnly(['uid', 'kind', 'createdAt', 'text', 'context_id',
                                    'problemPath', 'leftContext', 'unitContext', 'rightContext',
-                                   'rightContent', 'promptReplace', 'promptAppend', 'provider']) &&
+                                   'rightContent', 'promptReplace', 'promptAppend', 'provider', 'activityContext', 'capabilityContext']) &&
+              validActivityContext(data) && validCapabilityContext(data) &&
               data.kind == 'user' &&
               'createdAt' in data &&
               (data.createdAt is timestamp || data.createdAt is int || data.createdAt is float) &&
+              (!('text' in data) || (data.text is string && data.text.size() <= 10000)) &&
               (!('promptReplace' in data) || data.promptReplace is string) &&
               (!('promptAppend' in data) || data.promptAppend is string) &&
               (!('rightContent' in data) || data.rightContent is string) &&
@@ -738,8 +804,10 @@ service cloud.firestore {
               (!('provider' in data) || data.provider in ['openai', 'foreverlearning']);
           }
 
-          allow read: if userIsResourceUser() && isStudentClaim();
-          allow create: if chatMessageCreate() && ownsConversation();
+          allow read: if userIsResourceUser() && isStudentClaim() &&
+            (ownsExistingChat() || (!chatExists() && canStartChat()));
+          allow create: if (chatMessageCreate() || (isStudentClaim() && userIsRequestUser() &&
+            classIsRequestContextId() && validChatRecovery(request.resource.data))) && ownsConversation();
           allow update, delete: if false;
         }
       }
@@ -851,10 +919,12 @@ service cloud.firestore {
         return isAuthed() &&
           data.keys().hasOnly(['uid', 'kind', 'createdAt', 'text', 'context_id',
                                'problemPath', 'leftContext', 'unitContext', 'rightContext',
-                               'rightContent', 'promptReplace', 'promptAppend', 'provider']) &&
+                               'rightContent', 'promptReplace', 'promptAppend', 'provider', 'activityContext', 'capabilityContext']) &&
+          validActivityContext(data) && validCapabilityContext(data) &&
           data.kind == 'user' &&
           'createdAt' in data &&
           (data.createdAt is timestamp || data.createdAt is int || data.createdAt is float) &&
+          (!('text' in data) || (data.text is string && data.text.size() <= 10000)) &&
           (!('promptReplace' in data) || data.promptReplace is string) &&
           (!('promptAppend' in data) || data.promptAppend is string) &&
           (!('rightContent' in data) || data.rightContent is string) &&
@@ -867,7 +937,7 @@ service cloud.firestore {
 
       match /messages/{messageId} {
         allow read: if isAuthed();
-        allow create: if demoChatMessageCreate();
+        allow create: if demoChatMessageCreate() || (isAuthed() && validChatRecovery(request.resource.data));
         allow update, delete: if false;
       }
     }

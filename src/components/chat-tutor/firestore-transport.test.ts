@@ -10,6 +10,7 @@ jest.mock("firebase/app", () => ({
 import { FirestoreTransport, kMaxAttachedWorkspace } from "./firestore-transport";
 import { TutorPrompts } from "./tutor-prompts";
 import { TutorProviderId } from "../../../shared/chat-tutor-providers";
+import { ActivityContext } from "../../../shared/fl-packet/activity-context";
 
 // Minimal stand-in for the Firestore handle the transport reaches through. Only the
 // add() path is exercised here; subscribe() is not called, so no listeners are needed.
@@ -35,6 +36,39 @@ function makeTransport(provider?: TutorProviderId, tutorPrompts?: TutorPrompts) 
   });
   return { added, transport };
 }
+
+describe("FL current activity context", () => {
+  it("resends current task with unchanged workspace and clears missing context", async () => {
+    const { added, firestore } = fakeFirestore();
+    let activity: ActivityContext | undefined = { task_prompt: "First task",
+      source: { system: "CLUE", lesson_id: "1.2", section: "intro" } };
+    const transport = new FirestoreTransport({ firestore, conversationId: "c", uid: "1", contextId: "class",
+      problemPath: "vibe/1/2", provider: "foreverlearning", getLeftContext: () => undefined,
+      getRightSummary: () => undefined, getRightContent: () => ({ json: "{}", hash: "same" }),
+      getActivityContext: () => activity });
+    await transport.sendUserMessage("one");
+    activity.task_prompt = "Second task";
+    activity.source!.section = "lab";
+    await transport.sendUserMessage("two");
+    expect(added[0].activityContext).toMatchObject({ task_prompt: "First task", source: { section: "intro" } });
+    expect(added[1].activityContext).toMatchObject({ task_prompt: "Second task", source: { section: "lab" } });
+    expect(added[0]).toHaveProperty("rightContent");
+    expect(added[1]).not.toHaveProperty("rightContent");
+    activity = undefined;
+    await transport.sendUserMessage("three");
+    expect(added[2]).not.toHaveProperty("activityContext");
+  });
+
+  it("does not read or attach FL task context for OpenAI", async () => {
+    const { added, firestore } = fakeFirestore();
+    const getActivityContext = jest.fn(() => ({ task_prompt: "Task" }));
+    const transport = new FirestoreTransport({ firestore, conversationId: "c", uid: "1", contextId: "class",
+      problemPath: "vibe/1/2", getLeftContext: () => "{}", getRightSummary: () => undefined, getActivityContext });
+    await transport.sendUserMessage("hello");
+    expect(getActivityContext).not.toHaveBeenCalled();
+    expect(added[0]).not.toHaveProperty("activityContext");
+  });
+});
 
 describe("FirestoreTransport message provider stamp", () => {
   // The default path must write exactly the fields it wrote before provider selection
@@ -445,5 +479,37 @@ describe("FirestoreTransport workspace bookkeeping under overlapping sends", () 
 
     expect(added).toHaveLength(1);
     expect(added[0].rightContext).toBe("W1");
+  });
+});
+
+
+describe("FL current capabilities", () => {
+  it("sends fresh settings with unchanged graph, then clears unknown settings", async () => {
+    const { added, firestore } = fakeFirestore();
+    let capability: any = { schema_version: "clue.capability_context.v1", dataflow: {
+      creation_tool_configured: true, node_palette: ["Number", "Demo Device"], demo_device_options: ["Servo"],
+      outputConfig: { servoInputMode: "degrees", allowedOutputTypes: ["Servo"] } } };
+    const transport = new FirestoreTransport({ firestore, conversationId: "c", uid: "1", contextId: "class",
+      problemPath: "vibe/1/2", provider: "foreverlearning", getLeftContext: () => undefined,
+      getRightSummary: () => undefined, getRightContent: () => ({ json: "{}", hash: "same" }),
+      getCapabilityContext: () => capability });
+    await transport.sendUserMessage("one");
+    capability.dataflow.outputConfig.servoInputMode = "proportion";
+    await transport.sendUserMessage("two");
+    expect((added[0].capabilityContext as any).dataflow.outputConfig.servoInputMode).toBe("degrees");
+    expect((added[1].capabilityContext as any).dataflow.outputConfig.servoInputMode).toBe("proportion");
+    expect(added[1]).not.toHaveProperty("rightContent");
+    capability = undefined;
+    await transport.sendUserMessage("three");
+    expect(added[2]).not.toHaveProperty("capabilityContext");
+  });
+  it("does not read FL capabilities on the OpenAI path", async () => {
+    const { added, firestore } = fakeFirestore();
+    const getCapabilityContext = jest.fn();
+    const transport = new FirestoreTransport({ firestore, conversationId: "c", uid: "1", contextId: "class",
+      problemPath: "vibe/1/2", getLeftContext: () => "{}", getRightSummary: () => undefined, getCapabilityContext });
+    await transport.sendUserMessage("hello");
+    expect(getCapabilityContext).not.toHaveBeenCalled();
+    expect(added[0]).not.toHaveProperty("capabilityContext");
   });
 });

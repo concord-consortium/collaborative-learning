@@ -15,6 +15,7 @@
 
 import { programToGraphviz } from "../ai-summarizer/tile-summarizers/dataflow-to-graphviz";
 import { displayNameForType } from "../dataflow-node-types";
+import { kMaxCapabilityNameLength, kMaxCapabilityNames } from "./capability-context";
 
 export interface DataflowNode {
   id: string;
@@ -50,6 +51,7 @@ export interface ProjectedDataflowTile {
   title?: string;
   content: {
     program_id: string;
+    outputConfig?: { servoInputMode?: string; allowedOutputTypes?: string[] };
     nodes: DataflowNode[];
     edges: DataflowEdge[];
     groups?: DataflowGroup[];
@@ -179,6 +181,19 @@ export function projectDataflowTile(
       rendering: renderProgram(program),
     },
   };
+  const config = content.outputConfig;
+  if (config && typeof config === "object") {
+    const outputConfig: NonNullable<ProjectedDataflowTile["content"]["outputConfig"]> = {};
+    if (config.servoInputMode === "degrees" || config.servoInputMode === "proportion") {
+      outputConfig.servoInputMode = config.servoInputMode;
+    }
+    if (Array.isArray(config.allowedOutputTypes) && config.allowedOutputTypes.length > 0 &&
+        config.allowedOutputTypes.length <= kMaxCapabilityNames && config.allowedOutputTypes.every(
+          (name: unknown) => typeof name === "string" && !!name.trim() && name.length <= kMaxCapabilityNameLength)) {
+      outputConfig.allowedOutputTypes = [...new Set<string>(config.allowedOutputTypes)];
+    }
+    if (Object.keys(outputConfig).length) tile.content.outputConfig = outputConfig;
+  }
   // Their catalog asks for the key to be omitted when there are no groups.
   const groups = projectGroups(program, new Set(nodes.map(node => node.id).filter(Boolean)));
   if (groups.length) tile.content.groups = groups;

@@ -13,6 +13,9 @@ import { DebugTransport } from "./debug-transport";
 import { FirestoreTransport } from "./firestore-transport";
 import { buildLeftContext, problemSectionsLoaded } from "./left-context";
 import { buildUnitContext } from "./unit-context";
+import { buildCapabilityContext } from "./capability-context";
+import { buildActivityContext } from "./activity-context";
+import { ENavTab } from "../../models/view/nav-tabs";
 import { normalizeTutorPrompts, tutorPromptsKey } from "./tutor-prompts";
 import { sessionTutorProvider } from "./tutor-provider";
 import { providerInstallsProblem } from "../../../shared/chat-tutor-providers";
@@ -21,6 +24,7 @@ import { useRightDirty } from "./use-right-dirty";
 import { useTutorDrawerTrap } from "./use-tutor-drawer-trap";
 import { CHAT_TUTOR_DEFAULT_INTRO } from "../../../shared/chat-tutor-default-intro";
 import { hashString } from "../../../shared/hash-string";
+import { ownedConversationId } from "../../../shared/chat-ownership";
 
 import "./chat-sidebar.scss";
 
@@ -46,7 +50,7 @@ interface IProps {
 // sidebar stays open.
 export const ChatTutorSidebar: React.FC<IProps> = observer((props) => {
   const { documentKey, documentTitle, problemPath, problem, content, onClose } = props;
-  const { appConfig, db, user, unit } = useStores();
+  const { appConfig, db, user, unit, persistentUI } = useStores();
   const containerRef = useRef<HTMLDivElement>(null);
   const bodyRef = useRef<HTMLDivElement>(null);
 
@@ -85,17 +89,23 @@ export const ChatTutorSidebar: React.FC<IProps> = observer((props) => {
     // never fork on it either.
     const unitContext = providerInstallsProblem(provider) ? getUnitContext() : undefined;
     const unitKey = unitContext ? hashString(unitContext) : undefined;
-    const docId = conversationDocId(
+    const legacyConversationId = conversationDocId(
       user.id, documentKey, user.network, problemPath, promptsKey, provider, unitKey
     );
+    const docId = ownedConversationId(user.id, user.classHash, legacyConversationId);
     return { conversationId: docId, transport: new FirestoreTransport({
       firestore: db.firestore,
       conversationId: docId,
+      legacyConversationId,
       uid: user.id,
       contextId: user.classHash,
       problemPath,
       getLeftContext,
       getUnitContext,
+      getCapabilityContext: () => buildCapabilityContext(appConfig),
+      // Read the current student curriculum tab at send time, independently of workspace edits.
+      getActivityContext: () => buildActivityContext(
+        unit, problem, persistentUI.tabs.get(ENavTab.kProblems)?.currentDocumentGroupId),
       getRightSummary,
       // Read only for a backend that projects the document server-side. No dirty-tracking
       // around it the way there is around the summary: serializing a snapshot is cheap, and
@@ -104,7 +114,7 @@ export const ChatTutorSidebar: React.FC<IProps> = observer((props) => {
       tutorPrompts,
       provider,
     }) };
-  }, [documentKey, problemPath, problem, getRightSummary, content, appConfig, db, user, unit]);
+  }, [documentKey, problemPath, problem, getRightSummary, content, appConfig, db, user, unit, persistentUI]);
 
   const logContext = useMemo(
     () => conversationId ? { conversationId, documentKey } : undefined,

@@ -1,8 +1,7 @@
 // The ForeverLearning tutor backend, behind the TutorProvider seam.
 //
-// Conversation state lives on FL, keyed by a session id it returns, and the drain persists that id
-// only once this returns — so a turn that fails part-way leaves nothing recorded, exactly as the
-// OpenAI path earns its conversation id.
+// FL owns the session. The drain reserves the exact request before dispatch, so a failed
+// opening reuses its identity and body even before a session id has returned.
 //
 // Where the student's document comes from is injected rather than reached for. The trigger
 // supplies it from the message's rightContent, or from the copy kept on the parent when an
@@ -13,10 +12,14 @@ import {DocumentData} from "firebase-admin/firestore";
 
 import {DocumentContentSnapshotType} from "../../../shared/ai-summarizer/ai-summarizer-types";
 import {buildEnvelope, ProtectionPolicy} from "../../../shared/fl-packet/envelope";
-import {buildContextPacket, ContextPacket} from "../../../shared/fl-packet/packet";
+import {buildContextPacket, ContextPacket, kMaxPacketBytes} from "../../../shared/fl-packet/packet";
+import {readCapabilityContext} from "../../../shared/fl-packet/capability-context";
+import {readActivityContext} from "../../../shared/fl-packet/activity-context";
+import {utf8ByteLength} from "../../../shared/utf8-byte-length";
 import {parseResponsePacket, replyText, responseHighlights} from "../../../shared/fl-packet/response";
-import {flChat, FlClientConfig} from "./fl-client";
-import {TurnResult, TutorProvider} from "./provider";
+import {flChat, FlChatArgs, FlClientConfig, serializeFlChatBody} from "./fl-client";
+import {TurnResult, TutorProvider, TurnPersistence} from "./provider";
+import {FlDeliveryError} from "./fl-delivery-error";
 
 /** A document to describe, and the two things the packet must say about it. */
 export interface FlDocument {
@@ -53,82 +56,120 @@ export interface FlProviderArgs {
   chat?: typeof flChat;
 }
 
+interface PreparedFlTurn {
+  version: 1;
+  endpoint: string;
+  solutionId: string;
+  request: FlChatArgs;
+  serializedBody: string;
+  parentUpdate: Record<string, unknown>;
+}
+
 export function createFlProvider(args: FlProviderArgs): TutorProvider {
   const {config, catalogCommit, protection, readDocument} = args;
   const chat = args.chat ?? flChat;
   const newTraceId = args.newTraceId ?? (() => crypto.randomUUID());
 
   return {
-    async processTurn(parent: DocumentData, message: DocumentData): Promise<TurnResult> {
-      // trace_id identifies the conversation, request_id the turn within it, so a reader can put
-      // one turn's packet beside the reply it produced.
-      const traceId: string = parent.flTraceId ?? newTraceId();
-      const turn: number = (parent.flTurn ?? 0) + 1;
-      const envelope = {
-        traceId, requestId: `${traceId}-t${turn}`, turn, protection, catalogCommit,
-      };
+    async processTurn(parent: DocumentData, message: DocumentData, persistence?: TurnPersistence): Promise<TurnResult> {
+      const prepare = async (): Promise<PreparedFlTurn> => {
+        // trace_id identifies the conversation, request_id the turn within it, so a reader can put
+        // one turn's packet beside the reply it produced.
+        const traceId: string = parent.flTraceId ?? newTraceId();
+        const turn: number = (parent.flTurn ?? 0) + 1;
+        const envelope = {
+          traceId, requestId: `${traceId}-t${turn}`, turn, protection, catalogCommit,
+        };
 
-      const document = await readDocument(parent, message);
-      let context: ContextPacket;
-      if (document) {
-        const built = buildContextPacket({
-          content: document.content,
-          documentId: document.documentId,
-          revision: document.revision,
-          envelope,
-        });
-        context = built.packet;
-        // buildContextPacket reports rather than enforces, on the grounds that the caller is
-        // better placed to decide. This is that caller.
-        //
-        // The decision is to send something that fits, because of how the drain replays. A failed
-        // turn leaves the cursor unadvanced, so every later trigger re-processes this same message
-        // first — and its rightContent is immutable, so an over-cap packet would rebuild
-        // identically every time. If ForeverLearning ever refuses one, that conversation is wedged
-        // for good, and the student cannot free it by shrinking their document: the stale message
-        // payload still wins over the copy held on the parent.
-        //
-        // So the workspace goes and the omission is declared in its place. Degraded rather than
-        // silently emptied — the reader can tell a workspace we could not fit from one the student
-        // never had, which an envelope-only packet could not express.
-        if (built.overLimit) {
-          console.warn(`FL context packet over cap: ${built.bytes} bytes; sending workspace as omitted`,
-            {trace: envelope.traceId, turn});
-          context = {
-            schema_version: "clue.context_packet.v2",
-            envelope: built.packet.envelope,
-            workspace_state: {
-              document_id: document.documentId,
-              revision: document.revision,
-              tiles: [],
-              omitted: [
-                ...(built.packet.workspace_state?.omitted ?? []),
-                {kind: "workspace_over_cap", count: built.packet.workspace_state?.tiles.length || 1},
-              ],
-            },
-          };
+        const document = await readDocument(parent, message);
+        // Per-message snapshot only: an absent current task must never revive a previous lesson.
+        const capabilityContext = readCapabilityContext(message.capabilityContext);
+        if (message.capabilityContext !== undefined && !capabilityContext) {
+          console.warn("FL capability context omitted: invalid or oversized", {trace: traceId, turn});
         }
-      } else {
-        // The envelope is the only section a packet cannot omit. A turn with no document to
-        // describe is still a turn, and an envelope-only packet says "no workspace" rather than
-        // inventing an empty one.
-        context = {schema_version: "clue.context_packet.v2", envelope: buildEnvelope(envelope)};
-      }
+        const activityContext = readActivityContext(message.activityContext);
+        if (message.activityContext !== undefined && !activityContext) {
+          console.warn("FL activity context omitted: invalid or oversized", {trace: traceId, turn});
+        }
+        let context: ContextPacket;
+        if (document) {
+          const built = buildContextPacket({
+            content: document.content,
+            documentId: document.documentId,
+            revision: document.revision,
+            envelope,
+            activityContext, capabilityContext,
+          });
+          context = built.packet;
+          // buildContextPacket reports rather than enforces, on the grounds that the caller is
+          // better placed to decide. This is that caller.
+          //
+          // The decision is to send something that fits, because a refused packet cannot be fixed by
+          // retrying: the message's rightContent is immutable and a retry replays the reserved
+          // request, so an over-cap packet would fail the same way every time, and the student
+          // cannot free the conversation by shrinking their document.
+          //
+          // So the workspace goes and the omission is declared in its place. Degraded rather than
+          // silently emptied — the reader can tell a workspace we could not fit from one the student
+          // never had, which an envelope-only packet could not express.
+          if (built.overLimit) {
+            console.warn(`FL context packet over cap: ${built.bytes} bytes; sending workspace as omitted`,
+              {trace: envelope.traceId, turn});
+            context = {
+              schema_version: "clue.context_packet.v2",
+              envelope: built.packet.envelope,
+              ...(capabilityContext ? {capability_context: capabilityContext} : {}),
+              ...(activityContext ? {activity_context: activityContext} : {}),
+              workspace_state: {
+                document_id: document.documentId,
+                revision: document.revision,
+                tiles: [],
+                omitted: [
+                  ...(built.packet.workspace_state?.omitted ?? []),
+                  {kind: "workspace_over_cap", count: built.packet.workspace_state?.tiles.length || 1},
+                ],
+              },
+            };
+          }
+        } else {
+          // The envelope is the only section a packet cannot omit. A turn with no document to
+          // describe is still a turn, and an envelope-only packet says "no workspace" rather than
+          // inventing an empty one.
+          context = {schema_version: "clue.context_packet.v2", envelope: buildEnvelope(envelope)};
+          if (activityContext) context.activity_context = activityContext;
+          if (capabilityContext) context.capability_context = capabilityContext;
+        }
+        if (utf8ByteLength(JSON.stringify(context)) > kMaxPacketBytes) {
+          throw new Error("FL context exceeds the packet limit after workspace omission");
+        }
 
-      // Empty means the trigger path or the uid was missing, so there is no identity to key a
-      // session on. Refusing is deliberate: any fallback here would either share one memory
-      // between students or invent an identity, and both fail silently.
-      const userId = args.resolveUserId(message);
-      if (!userId) {
-        throw new Error("cannot derive a tutor user id for this turn; refusing to start a session");
-      }
+        // Empty means the trigger path or the uid was missing, so there is no identity to key a
+        // session on. Refusing is deliberate: any fallback here would either share one memory
+        // between students or invent an identity, and both fail silently.
+        const userId = args.resolveUserId(message);
+        if (!userId) {
+          throw new Error("cannot derive a tutor user id for this turn; refusing to start a session");
+        }
 
-      const stream = await chat(config, {
-        userId,
-        prompt: String(message.text ?? ""),
-        context,
-        sessionId: parent.flSessionId,
-      });
+        const request: FlChatArgs = {userId, prompt: String(message.text ?? ""), context,
+          ...(parent.flSessionId ? {sessionId: parent.flSessionId} : {})};
+        const parentUpdate: Record<string, unknown> = {flTurn: turn, flTraceId: traceId};
+        return {version: 1, endpoint: config.baseUrl, solutionId: config.solutionId, request,
+          serializedBody: serializeFlChatBody(request), parentUpdate};
+      };
+      // Production drain supplies persistence. The optional seam also permits isolated provider
+      // tests without Firestore; no trigger path dispatches without the durable reservation.
+      const prepared = persistence ? await persistence.reserve(prepare) : await prepare();
+      if (prepared.version !== 1 || prepared.endpoint !== config.baseUrl ||
+          prepared.solutionId !== config.solutionId || prepared.request.userId !== args.resolveUserId(message)) {
+        throw new FlDeliveryError("blocked", "FL_RESERVED_TARGET_CHANGED", undefined,
+          "ForeverLearning pending request target changed; refusing dispatch");
+      }
+      const {context} = prepared.request;
+      if (prepared.request.prompt.trim() === "/end" && !prepared.request.sessionId) {
+        throw new FlDeliveryError("failed", "FL_NO_CONFIRMED_SESSION_TO_CLOSE");
+      }
+      const stream = await chat(config, {...prepared.request, serializedBody: prepared.serializedBody});
 
       // `complete` is set by the stream's own `done` event, so its absence means the connection
       // ended before ForeverLearning said it had finished. Refusing here rather than further down
@@ -138,7 +179,8 @@ export function createFlProvider(args: FlProviderArgs): TutorProvider {
       // continue from a turn that never happened. A failed turn is recoverable; a plausible
       // half-answer recorded as final is not.
       if (!stream.complete) {
-        throw new Error("ForeverLearning stream ended incomplete; refusing to record a partial turn");
+        throw new FlDeliveryError("unknown", "FL_STREAM_INCOMPLETE", undefined,
+          "ForeverLearning stream ended incomplete; refusing to record a partial turn");
       }
 
       // The prose part and the packet are separate parts of one stream and either can arrive
@@ -149,27 +191,27 @@ export function createFlProvider(args: FlProviderArgs): TutorProvider {
         // A turn that produced nothing is a failed turn. The drain's catch turns this into
         // status:"error", which clears the client's indicator honestly rather than writing an
         // empty assistant message the client renders as a finished answer.
-        throw new Error("ForeverLearning returned no reply for this turn");
+        throw new FlDeliveryError("unknown", "FL_NO_REPLY", undefined,
+          "ForeverLearning returned no reply for this turn");
       }
       const highlights = response ? responseHighlights(response, context) : [];
 
       // Only now is any of this earned. status/lockedAt/error belong to the drain and a provider
       // that writes them corrupts the lock, so nothing here goes near them.
-      const parentUpdate: Record<string, unknown> = {flTurn: turn};
-      if (!parent.flTraceId) {
-        parentUpdate.flTraceId = traceId;
-      }
+      const parentUpdate = {...prepared.parentUpdate};
+      if (parentUpdate.flTraceId === parent.flTraceId) delete parentUpdate.flTraceId;
       if (stream.sessionId && stream.sessionId !== parent.flSessionId) {
         parentUpdate.flSessionId = stream.sessionId;
       }
-      // Only when it moved. Rewriting an unchanged document would put the whole workspace back on
-      // the parent every turn for a value that did not change.
-      if (document?.raw && document.raw !== parent.flContent) {
-        parentUpdate.flContent = document.raw;
-      }
+      // Read again rather than reserved: the raw workspace can approach Firestore's document
+      // limit, and it is derived from the immutable message or the parent's own copy.
+      const current = await readDocument(parent, message);
+      if (current?.raw && current.raw !== parent.flContent) parentUpdate.flContent = current.raw;
 
       return {
         assistantText,
+        ...(stream.sessionEnded ? {sessionClosed: true} : {}),
+        requestId: context.envelope.trace.request_id,
         // Optional, not an empty array: a backend with nothing to point at says nothing, and the
         // client reads an omitted field the same as an empty one.
         ...(highlights.length ? {highlights} : {}),

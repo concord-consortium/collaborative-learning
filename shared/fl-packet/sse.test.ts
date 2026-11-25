@@ -155,3 +155,15 @@ describe("collectSseText", () => {
     expect(state.complete).toBe(false);
   });
 });
+
+describe("collectEvent error codes", () => {
+  it("records a stream error whose code is empty, and keeps an earlier code over a later empty one", () => {
+    const blank = emptyStream();
+    collectEvent(blank, { type: "error", code: " " });
+    expect(blank.errorCode).toBe("FL_STREAM_ERROR");
+    const earlier = emptyStream();
+    collectEvent(earlier, { type: "error", code: "CLUE_TURN_FAILED" });
+    collectEvent(earlier, { type: "error", code: "" });
+    expect(earlier.errorCode).toBe("CLUE_TURN_FAILED");
+  });
+});

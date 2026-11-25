@@ -1,12 +1,16 @@
 import firebase from "firebase/app";
+import { ChatDelivery, RecoveryAction, readChatDelivery, recoveryAction } from "../../../shared/chat-delivery";
 import { providerInstallsProblem, TutorProviderId } from "../../../shared/chat-tutor-providers";
 import { utf8ByteLength } from "../../../shared/utf8-byte-length";
+import { CapabilityContext, readCapabilityContext } from "../../../shared/fl-packet/capability-context";
+import { ActivityContext, readActivityContext } from "../../../shared/fl-packet/activity-context";
 import { Firestore } from "../../lib/firestore";
 import { ChatStatus, ChatTransport, ChatTurn } from "./transport";
 import { decideContext, RightContent, RightSummary } from "./right-context";
 import { TutorPrompts } from "./tutor-prompts";
 import { turnFromDoc } from "./turn-from-doc";
 import { isAwaitingReply } from "./awaiting-reply";
+import { sameChatOwner } from "../../../shared/chat-ownership";
 
 // Top-level (per Firestore root) chat collection; a parent conversation doc per
 // conversationId, each with a `messages` subcollection. The parent doc is created
@@ -20,8 +24,10 @@ export const kMaxAttachedWorkspace = 900_000;
 
 export interface FirestoreTransportOptions {
   firestore: Firestore;
-  // canonical conversation doc id (already escaped — see conversationDocId)
+  // owner-bound conversation doc id (ownedConversationId in shared/chat-ownership.ts)
   conversationId: string;
+  // Reuse an existing path only after checking its saved owner, class and problem.
+  legacyConversationId?: string;
   // string form of the platform user id, matching CLUE's document uid convention
   uid: string;
   // the user's class_hash; the rules pin it to the token's claim
@@ -33,6 +39,9 @@ export interface FirestoreTransportOptions {
   // A slice of the unit's authored aiUnitSummary, undefined if the unit has none or the current
   // problem isn't found in it. Rides the same install-eligible sends as LEFT. See unit-context.ts.
   getUnitContext?: () => string | undefined;
+  // FL current task, read afresh on every turn, not gated on workspace changes or problem installation.
+  getActivityContext?: () => ActivityContext | undefined;
+  getCapabilityContext?: () => CapabilityContext | undefined;
   // RIGHT workspace summary; undefined until the document content has loaded
   getRightSummary: () => RightSummary | undefined;
   // The workspace document itself, for a backend that projects it server-side; undefined until
@@ -48,9 +57,9 @@ export interface FirestoreTransportOptions {
   provider?: TutorProviderId;
 }
 
-// Live transport: writes `user` message docs to the conversation's messages
-// collection and renders `assistant` replies via onSnapshot; reload rehydrates
-// from Firestore.
+// Live transport: writes `user` message docs and `recovery` controls to the conversation's
+// messages collection and renders `assistant` replies and delivery notices via onSnapshot;
+// reload rehydrates from Firestore.
 export class FirestoreTransport implements ChatTransport {
   private unsubMessages?: () => void;
   private unsubParent?: () => void;
@@ -71,12 +80,65 @@ export class FirestoreTransport implements ChatTransport {
   private lastSentRightHash: string | undefined;
   private rightSendSeq = 0;
   private lastSentRightSeq = 0;
-  private onStatus?: (status: ChatStatus) => void;
+  private onStatus?: (status: ChatStatus, delivery?: ChatDelivery) => void;
+  private delivery?: ChatDelivery;
+  private resolvedConversationId?: string;
+  private resolution?: Promise<void>;
+  private subscriptionVersion = 0;
+  // The current subscription's listener setup, kept until it attaches so that a later successful
+  // resolution (from a send or a recovery) can attach it after a failed first lookup.
+  private pendingListen?: () => void;
 
   constructor(private readonly opts: FirestoreTransportOptions) {}
 
   private parentRef() {
-    return this.opts.firestore.collection(kChatTutorCollection).doc(this.opts.conversationId);
+    return this.opts.firestore.collection(kChatTutorCollection).doc(
+      this.resolvedConversationId ?? this.opts.conversationId);
+  }
+
+  private applyParent(data: Record<string, unknown> | undefined) {
+    this.delivery = readChatDelivery(data?.delivery);
+    const status = data?.status;
+    this.parentStatus = status === "generating" ? "generating" : status === "error" ? "error" : "idle";
+    this.problemInstalled = !!data?.problemInstalled;
+  }
+
+  private resolveConversation(): Promise<void> {
+    if (!this.opts.legacyConversationId) return Promise.resolve();
+    if (!this.resolution) {
+      this.resolution = (async () => {
+        const expected = { uid: this.opts.uid, context_id: this.opts.contextId, problemPath: this.opts.problemPath };
+        // A cached missing parent must not fork existing history.
+        const current = await this.parentRef().get({ source: "server" });
+        if (current.exists) {
+          if (!sameChatOwner(current.data() ?? {}, expected)) throw new Error("Conversation owner does not match.");
+          this.applyParent(current.data());
+          return;
+        }
+        const legacy = this.opts.firestore.collection(kChatTutorCollection).doc(this.opts.legacyConversationId!);
+        try {
+          const previous = await legacy.get({ source: "server" });
+          if (previous.exists && sameChatOwner(previous.data() ?? {}, expected)) {
+            this.resolvedConversationId = this.opts.legacyConversationId;
+            this.applyParent(previous.data());
+          }
+        } catch (error) {
+          // Missing/foreign legacy parents are unreadable. Other errors must surface rather
+          // than silently abandoning a real conversation and sending under a fresh id.
+          if ((error as { code?: string }).code !== "permission-denied") throw error;
+        }
+      })().catch(error => {
+        // Not cached: a transient failure must not keep every later send and the listeners out.
+        this.resolution = undefined;
+        throw error;
+      });
+    }
+    return this.resolution;
+  }
+
+  private async resolveAndListen(): Promise<void> {
+    await this.resolveConversation();
+    this.pendingListen?.();
   }
 
   private messagesRef() {
@@ -93,60 +155,78 @@ export class FirestoreTransport implements ChatTransport {
 
   private emitStatus() {
     if (!this.onStatus) return;
-    const effective: ChatStatus =
+    const effective: ChatStatus = this.delivery
+      ? this.parentStatus === "generating" ? "generating" : this.delivery.state === "closed" ? "idle" : "error"
+      :
       this.parentStatus === "error" ? "error"
         : this.awaitingReply ? "generating" : "idle";
-    this.onStatus(effective);
+    this.onStatus(effective, this.delivery);
   }
 
-  // Snapshot read errors are not tutor failures by default: `permission-denied` is
-  // the expected benign case before the server creates the parent doc on the first
-  // send (the read rule derefs resource.data.uid, which errors on a missing doc).
-  // Treat it as "no conversation yet" → idle; any other code is a real failure.
+  // Snapshot read errors are not tutor failures by default: permission-denied means the rules did
+  // not let this caller read the conversation (a non-learner claim, or a parent that is not
+  // theirs). Show it as idle rather than as a tutor outage; any other code is a real failure.
   private onReadError(where: string, err: { code?: string; message?: string }) {
     console.warn(`[chat-tutor] ${where} read error (${err.code}):`, err.message);
     this.parentStatus = err.code === "permission-denied" ? "idle" : "error";
     this.emitStatus();
   }
 
-  subscribe(onTurns: (turns: ChatTurn[]) => void, onStatus: (status: ChatStatus) => void): () => void {
+  subscribe(onTurns: (turns: ChatTurn[]) => void,
+    onStatus: (status: ChatStatus, delivery?: ChatDelivery) => void): () => void {
+    const version = ++this.subscriptionVersion;
     this.onStatus = onStatus;
     this.parentStatus = "idle";
     this.awaitingReply = false;
+    this.delivery = undefined;
     onTurns([]);
     this.emitStatus();
 
     // Estimate pending serverTimestamps so a just-sent doc orders correctly before
     // the server resolves it (otherwise it can momentarily sort to the top as null).
-    this.unsubMessages = this.messagesQuery().onSnapshot(
-      snapshot => {
-        const turns: ChatTurn[] = [];
-        const kinds: Array<string | undefined> = [];
-        snapshot.forEach(doc => {
-          const data = doc.data({ serverTimestamps: "estimate" }) as any;
-          // Push for every document, including a silent reply that produces no turn: isAwaitingReply
-          // counts messages, not visible turns, and a silent reply is what clears the typing indicator.
-          kinds.push(data.kind);
-          const turn = turnFromDoc(doc.id, data, doc.metadata.hasPendingWrites);
-          if (turn) turns.push(turn);
-        });
-        this.awaitingReply = isAwaitingReply(kinds);
-        onTurns(turns);
-        this.emitStatus();
-      },
-      err => this.onReadError("messages", err)
-    );
+    const listen = () => {
+      if (version !== this.subscriptionVersion || this.pendingListen !== listen) return;
+      this.pendingListen = undefined;
+      this.unsubMessages = this.messagesQuery().onSnapshot(
+        snapshot => {
+          const turns: ChatTurn[] = [];
+          const kinds: Array<string | undefined> = [];
+          snapshot.forEach(doc => {
+            const data = doc.data({ serverTimestamps: "estimate" }) as any;
+            // Push for every document, including a silent reply that produces no turn: isAwaitingReply
+            // counts messages, not visible turns, and a silent reply is what clears the typing indicator.
+            kinds.push(data.kind === "delivery" && data.resolved ? "assistant" : data.kind);
+            const turn = turnFromDoc(doc.id, data, doc.metadata.hasPendingWrites);
+            if (turn) turns.push(turn);
+          });
+          this.awaitingReply = isAwaitingReply(kinds);
+          onTurns(turns);
+          this.emitStatus();
+        },
+        err => this.onReadError("messages", err)
+      );
 
-    this.unsubParent = this.parentRef().onSnapshot(
-      doc => {
-        const data = doc.exists ? doc.data() as any : undefined;
-        const status = data?.status;
-        this.parentStatus = status === "generating" ? "generating" : status === "error" ? "error" : "idle";
-        this.problemInstalled = !!data?.problemInstalled;
-        this.emitStatus();
-      },
-      err => this.onReadError("parent", err)
-    );
+      this.unsubParent = this.parentRef().onSnapshot(
+        doc => {
+          const data = doc.exists ? doc.data() as any : undefined;
+          this.applyParent(data);
+          this.emitStatus();
+        },
+        err => this.onReadError("parent", err)
+      );
+    };
+    this.pendingListen = listen;
+    if (this.opts.legacyConversationId) {
+      void this.resolveConversation().then(listen, error => {
+        if (version === this.subscriptionVersion) {
+          this.parentStatus = "error";
+          this.emitStatus();
+          console.warn("[chat-tutor] conversation resolution failed", error);
+        }
+      });
+    } else {
+      listen();
+    }
 
     return () => this.dispose();
   }
@@ -175,6 +255,8 @@ export class FirestoreTransport implements ChatTransport {
   }
 
   async sendUserMessage(text: string): Promise<void> {
+    if (this.opts.legacyConversationId) await this.resolveAndListen();
+    if (this.delivery) throw new Error("Resolve the saved message before sending another one.");
     const { uid, contextId, problemPath, getLeftContext, getUnitContext, tutorPrompts, provider } = this.opts;
     const right = this.workspacePayload();
     // LEFT is an OpenAI-path concept: that provider installs the problem once and flips the
@@ -219,6 +301,16 @@ export class FirestoreTransport implements ChatTransport {
     if (unitContext !== undefined) {
       message.unitContext = unitContext;
     }
+    if (provider === "foreverlearning") {
+      const capability = this.opts.getCapabilityContext?.();
+      const capabilities = readCapabilityContext(capability);
+      if (capabilities) message.capabilityContext = capabilities;
+      else if (capability !== undefined) console.warn("[chat-tutor] Invalid capability context omitted.");
+      const activity = this.opts.getActivityContext?.();
+      const snapshot = readActivityContext(activity);
+      if (snapshot) message.activityContext = snapshot;
+      else if (activity !== undefined) console.warn("[chat-tutor] Invalid or oversized activity context omitted.");
+    }
     // Stamped on every message rather than only install-eligible ones, so the trigger can read it
     // off whichever message it happens to be draining. Routing must persist it from the first
     // message and ignore the field thereafter, or a mid-conversation flip splits one
@@ -246,11 +338,23 @@ export class FirestoreTransport implements ChatTransport {
     }
   }
 
+  async recover(action: RecoveryAction): Promise<void> {
+    if (this.opts.legacyConversationId) await this.resolveAndListen();
+    if (!this.delivery || action !== recoveryAction(this.delivery.state)) {
+      throw new Error("This recovery action is no longer available.");
+    }
+    await this.messagesRef().add({ uid: this.opts.uid, context_id: this.opts.contextId,
+      problemPath: this.opts.problemPath, provider: "foreverlearning", kind: "recovery",
+      action, recoveryId: this.delivery.id, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
+  }
+
   dispose(): void {
+    this.subscriptionVersion++;
     this.unsubMessages?.();
     this.unsubParent?.();
     this.unsubMessages = undefined;
     this.unsubParent = undefined;
+    this.pendingListen = undefined;
     this.onStatus = undefined;
   }
 }
