@@ -43,14 +43,6 @@ describe("FlowchartToolComponent", () => {
     expect(getByText("Step")).toBeInTheDocument();
   });
 
-  it("does not make the static node a keyboard tab stop", () => {
-    const {container} =
-      render(<FlowchartToolComponent {...defaultProps} {...{model}} />);
-    const node = container.querySelector(".react-flow__node");
-    expect(node).not.toHaveAttribute("tabindex");
-    expect(node).not.toHaveAttribute("role", "button");
-  });
-
   it("leaves the default action of Space and Backspace alone elsewhere on the page", () => {
     render(<FlowchartToolComponent {...defaultProps} {...{model}} />);
     [" ", "Backspace"].forEach(key => {

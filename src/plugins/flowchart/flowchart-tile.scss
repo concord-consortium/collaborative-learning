@@ -13,8 +13,8 @@
       cursor: default;
     }
 
-    // Set explicitly: the Diagram tile's React Flow stylesheet also styles default nodes, and
-    // whichever loads last would otherwise win.
+    // Defined within .flowchart-canvas to avoid conflicts with the Diagram tile, which styles
+    // default nodes at the global scope.
     .react-flow__node-default {
       border: 1px solid #1a192b;
       color: #1a192b;

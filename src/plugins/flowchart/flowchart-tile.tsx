@@ -16,7 +16,7 @@ const kNodes: Node[] = [
 ];
 
 export const FlowchartToolComponent: React.FC<ITileProps> = observer(() => {
-  // React Flow builds its element ids from this, so each instance (including read-only copies
+  // React Flow builds its element ids from flowId, so each instance (including read-only copies
   // and thumbnails of the same tile) needs its own.
   const flowId = useId();
   return (
@@ -36,6 +36,7 @@ export const FlowchartToolComponent: React.FC<ITileProps> = observer(() => {
           zoomOnDoubleClick={false}
           preventScrolling={false}
           disableKeyboardA11y
+          attributionPosition="bottom-left"
           // React Flow listens for these keys on the whole document and cancels their default
           // action, so a static canvas turns them all off.
           deleteKeyCode={null}
@@ -43,7 +44,6 @@ export const FlowchartToolComponent: React.FC<ITileProps> = observer(() => {
           multiSelectionKeyCode={null}
           panActivationKeyCode={null}
           zoomActivationKeyCode={null}
-          attributionPosition="bottom-left"
         />
       </div>
     </div>
