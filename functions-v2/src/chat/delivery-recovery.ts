@@ -1,5 +1,6 @@
 import {DocumentReference, FieldValue, QueryDocumentSnapshot} from "firebase-admin/firestore";
-import {ChatDelivery, deliveryMessage, readChatDelivery, recoveryAction} from "../../../shared/chat-delivery";
+import {ChatDelivery, deliveryMessage, kNewSessionMessage, readChatDelivery, recoveryAction}
+  from "../../../shared/chat-delivery";
 import {FlDeliveryError} from "./fl-delivery-error";
 import {createTurnPersistence, readReservedSnapshot} from "./turn-persistence";
 import {FlChatArgs} from "./fl-client";
@@ -107,7 +108,7 @@ export async function prepareRecovery(parentRef: DocumentReference, controlRef?:
       tx.set(parentRef, {flSessionId: FieldValue.delete(), flTraceId: FieldValue.delete(), flTurn: FieldValue.delete(),
         delivery: FieldValue.delete(), error: FieldValue.delete()}, {merge: true});
       tx.set(parentRef.collection("messages").doc(`delivery-${control.id}`), {
-        kind: "delivery", text: "A new conversation has started. Earlier messages remain in this history.",
+        kind: "delivery", text: kNewSessionMessage,
         uid: parent.uid, context_id: parent.context_id, problemPath: parent.problemPath,
         createdAt: FieldValue.serverTimestamp(), resolved: true,
       });

@@ -3,7 +3,9 @@ import classNames from "classnames";
 import { v4 as uuidv4 } from "uuid";
 import { kReplyDeadlineMs, kTimeoutMessage, UseChatResult } from "./use-chat";
 import { ChatTurn } from "./transport";
-import { deliveryMessage, recoveryAction } from "../../../shared/chat-delivery";
+import {
+  deliveryMessage, kContinuedMessage, kNewSessionMessage, recoveryAction
+} from "../../../shared/chat-delivery";
 import { kMaxChatMessageChars } from "../../../shared/chat-message";
 
 import "./chat.scss";
@@ -125,6 +127,17 @@ export const Chat: React.FC<IProps> = ({ chat, onClose, closeLabel, transcriptTi
   const { turns, error, pending, timedOut, sendMessage, header, delivery, recover } = chat;
   const action = delivery && recoveryAction(delivery.state);
   const [recovering, setRecovering] = useState(false);
+  // Continue and Start new clear the notice; this says so once the delivery they acted on is gone.
+  const [outcome, setOutcome] = useState("");
+  const clickedActionRef = useRef<string>();
+  useEffect(() => {
+    if (delivery) return;
+    const clicked = clickedActionRef.current;
+    clickedActionRef.current = undefined;
+    if (clicked === "continue") setOutcome(kContinuedMessage);
+    if (clicked === "new_session") setOutcome(kNewSessionMessage);
+  }, [delivery]);
+  const showNotice = !!delivery && !pending;
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
   // Identifies the newest submit. Once the release timer below frees the composer, an earlier send
@@ -136,6 +149,7 @@ export const Chat: React.FC<IProps> = ({ chat, onClose, closeLabel, transcriptTi
   const inputRef = useRef<HTMLInputElement>(null);
   // Unique id so a <label htmlFor> stays valid even if two chat instances ever coexist.
   const inputId = useMemo(() => `chat-input-${uuidv4()}`, []);
+  const noticeId = `${inputId}-notice`;
 
   // Copy-to-clipboard: only offer it when there's real conversation to copy.
   const hasCopyableTurns = useMemo(
@@ -380,13 +394,20 @@ export const Chat: React.FC<IProps> = ({ chat, onClose, closeLabel, transcriptTi
           {activeHighlightLabel ? `Highlighting ${activeHighlightLabel}` : ""}
         </div>}
 
-      {delivery && !pending &&
-        <div className="chat-recovery" role="status" data-testid="chat-recovery">
-          <p>{deliveryMessage(delivery.state)}</p>
+      {/* Mounted empty so a failure's text is announced when written into it; the action stays
+          outside so its label is not read as part of the announcement. */}
+      <div className="visually-hidden" role="status" data-testid="chat-delivery-live">
+        {showNotice && delivery ? deliveryMessage(delivery.state) : outcome}
+      </div>
+      {showNotice && delivery &&
+        <div className="chat-recovery" data-testid="chat-recovery">
+          <p id={noticeId}>{deliveryMessage(delivery.state)}</p>
           {action && recover &&
             <button type="button" disabled={recovering} onClick={async () => {
               // This button is about to be disabled, then unmounted, which would drop focus to body.
               inputRef.current?.focus();
+              clickedActionRef.current = action;
+              setOutcome("");
               setRecovering(true);
               try { await recover(action); } finally { setRecovering(false); }
             }}>
@@ -411,6 +432,7 @@ export const Chat: React.FC<IProps> = ({ chat, onClose, closeLabel, transcriptTi
           disabled={sending}
           readOnly={!!delivery}
           aria-disabled={delivery ? true : undefined}
+          aria-describedby={showNotice ? noticeId : undefined}
           autoComplete="off"
           data-testid="chat-input"
         />

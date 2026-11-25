@@ -135,8 +135,10 @@ Recovery buttons write immutable `kind: recovery` controls with an action and se
 recovery id. They are not learner prompts and never reach the model. Rules limit their shape;
 server transactions validate ownership, current receipt, source integrity and allowed transition.
 Admin-only consumption markers and changing recovery ids make duplicate or delayed clicks stale.
-Unknown work cannot be bypassed with a new user message. Delivery notices remain in the transcript
-as system notices, including in copied text. A failed answer is never an assistant success.
+Unknown work cannot be bypassed with a new user message. While a delivery is unresolved, its notice
+shows only in the drawer's recovery panel, which a polite status region announces; once resolved,
+the notice stays in the transcript as a system notice, including in copied text. A failed answer is
+never an assistant success.
 
 Continue atomically applies the reserved trace/turn and the source message's workspace, advances
 the cursor, resolves the notice and deletes the pending reservation. A successful response likewise

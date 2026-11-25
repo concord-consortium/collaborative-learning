@@ -2,7 +2,7 @@ import React from "react";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { Chat, buildChatTranscript } from "./chat";
 import { UseChatResult } from "./use-chat";
-import { ChatDelivery } from "../../../shared/chat-delivery";
+import { ChatDelivery, deliveryMessage, kContinuedMessage, kNewSessionMessage } from "../../../shared/chat-delivery";
 import { turnFromDoc } from "./turn-from-doc";
 import { kMaxChatMessageChars } from "../../../shared/chat-message";
 
@@ -84,4 +84,52 @@ it("preserves failed exchanges and recovery notices without attributing them to 
 it("limits the composer to the longest message the rules accept", () => {
   render(<Chat chat={makeChat("unknown", { delivery: undefined, status: "idle" })} />);
   expect(screen.getByRole("textbox")).toHaveAttribute("maxlength", String(kMaxChatMessageChars));
+});
+
+describe("delivery failure announcements", () => {
+  const idle = () => makeChat("failed", { delivery: undefined, status: "idle" });
+
+  it("mounts the announcement region empty before any failure, then writes the notice into it", () => {
+    const { rerender } = render(<Chat chat={idle()} />);
+    const region = screen.getByTestId("chat-delivery-live");
+    expect(region).toHaveAttribute("role", "status");
+    expect(region).toHaveTextContent("");
+    rerender(<Chat chat={makeChat("failed")} />);
+    expect(screen.getByTestId("chat-delivery-live")).toBe(region);
+    expect(region).toHaveTextContent(deliveryMessage("failed"));
+  });
+
+  it("keeps the recovery button outside the announcement region", () => {
+    render(<Chat chat={makeChat("retryable")} />);
+    const button = screen.getByRole("button", { name: "Retry saved message" });
+    expect(screen.getByTestId("chat-delivery-live")).not.toContainElement(button);
+    expect(screen.getByTestId("chat-recovery").getAttribute("role")).toBeNull();
+  });
+
+  it("describes the fenced composer by the notice", () => {
+    render(<Chat chat={makeChat("blocked")} />);
+    const describedBy = screen.getByRole("textbox").getAttribute("aria-describedby");
+    expect(describedBy).toBeTruthy();
+    expect(document.getElementById(describedBy!)).toHaveTextContent(deliveryMessage("blocked"));
+  });
+
+  it.each([["failed", "Continue conversation", kContinuedMessage],
+    ["closed", "Start a new conversation", kNewSessionMessage]] as const)(
+    "announces the outcome after a %s delivery is resolved", async (state, label, announced) => {
+      const chat = makeChat(state);
+      const { rerender } = render(<Chat chat={chat} />);
+      fireEvent.click(screen.getByRole("button", { name: label }));
+      await waitFor(() => expect(chat.recover).toHaveBeenCalled());
+      rerender(<Chat chat={{ ...chat, delivery: undefined, status: "idle" }} />);
+      expect(screen.getByTestId("chat-delivery-live")).toHaveTextContent(announced);
+    });
+});
+
+describe("delivery notices in the transcript", () => {
+  it("leaves an unresolved notice to the recovery panel and shows it once resolved", () => {
+    const notice = { kind: "delivery", text: deliveryMessage("failed"), resolved: false };
+    expect(turnFromDoc("delivery-m", notice, false)).toBeUndefined();
+    expect(turnFromDoc("delivery-m", { ...notice, resolved: true, resolution: "continued" }, false))
+      .toMatchObject({ sender: "system", text: `${deliveryMessage("failed")} You chose to continue.` });
+  });
 });

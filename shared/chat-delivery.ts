@@ -8,6 +8,8 @@ export interface ChatDelivery {
   code: string;
   requestId?: string;
 }
+export const kNewSessionMessage = "A new conversation has started. Earlier messages remain in this history.";
+export const kContinuedMessage = "You chose to continue. Ada is ready for your next message.";
 export function recoveryAction(state: DeliveryState): RecoveryAction | undefined {
   if (state === "retryable" || state === "unknown") return "retry";
   if (state === "failed") return "continue";
