@@ -34,7 +34,7 @@ Follow the recorded order:
 - **`after`:** don't deploy yet. Deploy it once Release Production has succeeded and
   `deployed-version.ts` shows production serving the tag.
 
-## Migration scripts [approve]
+## Migration scripts
 
 Run each migration script in the release (`scripts/migrations/`, listed under `migrations` in the
 deploy report) at its recorded timing. For a script, the timing says when to run it relative to
@@ -47,34 +47,52 @@ Release Production:
 - **`after`:** run it once Release Production has succeeded and `deployed-version.ts` shows
   production serving the tag, from the tag's checkout.
 
-Every script runs against staging first, then production, and on each a dry run comes first, then,
-once its report looks right, the run that writes. The developer runs them, or asks Claude to; each
-run that writes is its own **[approve]**, and so is any run against production, dry runs
-included. For each one, give the commands from the script's header. Scripts read
-`scripts/serviceAccountKey.json`, so to target a project, copy that project's key over it ("Local
-Setup" in `scripts/README.md`); print only the key's `project_id` to check which one is active, and
-put the usual one back after each run. Record what each run changed or skipped in the release
-record.
+The service-account keys are git-ignored, so they're only in the developer's main checkout. Run
+from there when `git diff <ref> -- scripts/` is empty, `<ref>` being the commit the timing names
+(the tag, or `origin/master` for `before`); don't copy a key into a worktree.
 
-**Roots:** a script that takes `--root` runs once per root. Besides the portal's root
-(`authed/learn_concord_org` on production, `authed/learn_portal_staging_concord_org` on staging),
-the demo spaces (`demo/<name>`) hold documents too: in 7.9.0 they had 51 of production's 262
-documents to repair. `firestore.collection("demo").listDocuments()` lists them.
+Every script runs against staging first, then production, and on each a dry run comes first, then,
+once its report looks right, the run that writes. The developer runs them, or asks Claude to. Each
+write run, and each run with the production key (dry runs and read-only helpers included), needs
+an approval that names it and its project; one approval can name a set of batches with the same
+flags. For each one, give the commands from the script's header. Record what each run changed or
+skipped in the release record.
+
+**The key.** Scripts read `scripts/serviceAccountKey.json`, with no way to name another file:
+- Before the first swap, list the `serviceAccountKey*.json` files and print each one's
+  `project_id` (SKILL.md, "Never"). Keep every project's key in its own named file
+  (`serviceAccountKey.production.json`, `serviceAccountKey.staging.json`; `.gitignore` matches the
+  pattern), so a copy over `serviceAccountKey.json` never destroys the only copy of a key. In
+  `scripts/README.md`'s layout the production key is `serviceAccountKey.json` itself: copy it to
+  `serviceAccountKey.production.json` first.
+- To target a project, copy its named file over `serviceAccountKey.json`. Check `project_id` in the
+  same command, right before each run, against the project the approval named.
+- Put back the key that was there before, in a `trap` so it happens even if the run fails.
+- While a key other than the usual one is in place, run nothing else from that checkout: any other
+  script would use it too, and an approved staging write would hit production.
+
+**Roots:** a script that takes `--root` runs once per root. List the roots under both `authed/`
+and `demo/` (`firestore.collection("authed").listDocuments()`, and the same for `demo`); a project
+can hold other portals' roots besides its own. In 7.9.0 production's demo spaces had 51 of the 262
+documents its dry runs found to repair.
 
 **Size the run first.** Count the documents a run will check, per root. Don't time a `--limit` run
 to estimate the whole: the script takes documents in id order, oldest first, and in 7.9.0 the
 first 25 had no history at all. What a run costs depends on the history it reads (about 70,000
-entries a minute in 7.9.0). Production's portal root took about 1.5 h for 4,657 documents; a
-few demo documents had histories of over 400,000 entries.
+entries a minute in 7.9.0). Production's portal root took about 1.5 h for 4,657 documents, and one
+demo document had a history of over 400,000 entries. For a split run, the first shuffled batch's
+time is a fair guide to the rest.
 
 **Long runs:** a script that takes `--doc` (repeatable) checks only those documents. To split a
-long run, list the root's document ids once, shuffle them so each batch mixes old and new, and
+long dry run, list the root's document ids once, shuffle them so each batch mixes old and new, and
 write them to batch files in `scripts/output/`. Run each batch with
 `$(sed 's/^/--doc /' <batch file>)`; zsh splits the command substitution into arguments, and a
-batch of about 1,200 ids fits on the command line. Use the same files for the dry run and the
-write run, so both check the same documents, and run them in the background, one at a time, each
-swapping the key in and back. For the write runs on the remaining roots, pass only the documents
-the dry run flagged. Afterward, dry run the repaired documents again by `--doc` to confirm nothing
+batch of over 1,000 ids fits on the command line. Run them in the background, one at a time,
+swapping the key in for each run and back after it exits.
+
+**Write runs:** for every root, pass only the documents its dry run found to repair, plus those it
+skipped as recently edited. That's a fraction of what the dry run read: in 7.9.0, 211 of the
+portal root's 4,657. Afterward, dry run the repaired documents again by `--doc` to confirm nothing
 is left to repair.
 
 **Skips:** a document skipped because it changed recently (still being edited) needs a second run
@@ -155,7 +173,9 @@ Check each of these before calling the release finished, and report any that are
 - [ ] Production and staging serve the tag (`deployed-version.ts`)
 - [ ] GitHub release promoted: Latest, not a pre-release
 - [ ] Production Firebase has what the deploy-timing decisions called for, `after` parts included
-- [ ] Each migration script in the release has been run against production at its timing
+- [ ] Each migration script in the release has been run against production at its timing, and the
+  usual service-account key is back in `scripts/serviceAccountKey.json`
+- [ ] Worktrees made for `before` deploys removed
 - [ ] Release story Done; Jira version (and the previous one) released
 - [ ] #clue: "now live" reply in the pre-announcement's thread
 - [ ] #releases: announcement with the GitHub release link and notes
