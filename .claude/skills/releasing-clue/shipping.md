@@ -48,11 +48,38 @@ Release Production:
   production serving the tag, from the tag's checkout.
 
 Every script runs against staging first, then production, and on each a dry run comes first, then,
-once its report looks right, the run that writes. The developer runs them. For each one, give them
-the commands from the script's header. Scripts read `scripts/serviceAccountKey.json`, so to target
-staging the developer swaps in `scripts/serviceAccountKey.staging.json` for those runs ("Local
-Setup" in `scripts/README.md`). Record what each run changed or skipped in the release record. A
-script that skips documents still being edited needs a second run later; add it to the follow-ups.
+once its report looks right, the run that writes. The developer runs them, or asks Claude to; each
+run that writes is its own **[approve]**, and so is any run against production, dry runs
+included. For each one, give the commands from the script's header. Scripts read
+`scripts/serviceAccountKey.json`, so to target a project, copy that project's key over it ("Local
+Setup" in `scripts/README.md`); print only the key's `project_id` to check which one is active, and
+put the usual one back after each run. Record what each run changed or skipped in the release
+record.
+
+**Roots:** a script that takes `--root` runs once per root. Besides the portal's root
+(`authed/learn_concord_org` on production, `authed/learn_portal_staging_concord_org` on staging),
+the demo spaces (`demo/<name>`) hold documents too: in 7.9.0 they had 51 of production's 262
+documents to repair. `firestore.collection("demo").listDocuments()` lists them.
+
+**Size the run first.** Count the documents a run will check, per root. Don't time a `--limit` run
+to estimate the whole: the script takes documents in id order, oldest first, and in 7.9.0 the
+first 25 had no history at all. What a run costs depends on the history it reads (about 70,000
+entries a minute in 7.9.0). Production's portal root took about 1.5 h for 4,657 documents; a
+few demo documents had histories of over 400,000 entries.
+
+**Long runs:** a script that takes `--doc` (repeatable) checks only those documents. To split a
+long run, list the root's document ids once, shuffle them so each batch mixes old and new, and
+write them to batch files in `scripts/output/`. Run each batch with
+`$(sed 's/^/--doc /' <batch file>)`; zsh splits the command substitution into arguments, and a
+batch of about 1,200 ids fits on the command line. Use the same files for the dry run and the
+write run, so both check the same documents, and run them in the background, one at a time, each
+swapping the key in and back. For the write runs on the remaining roots, pass only the documents
+the dry run flagged. Afterward, dry run the repaired documents again by `--doc` to confirm nothing
+is left to repair.
+
+**Skips:** a document skipped because it changed recently (still being edited) needs a second run
+later; add it to the follow-ups. A document the script refuses for its own reasons stays as it is;
+list it in the record.
 
 ## Release Production [approve]
 
@@ -90,7 +117,9 @@ Check the release list shows it as Latest, with no Pre-release badge.
   `GET /rest/api/3/project/CLUE/versions` to find the id, then
   `PUT /rest/api/3/version/<id>` with `{"released": true, "releaseDate": "YYYY-MM-DD"}`.
   `/version/<id>/unresolvedIssueCount` shows what's still open; read it after closing the release
-  story, which otherwise counts as open. Unlike the Jira UI, the API doesn't make you move
+  story, which otherwise counts as open. It can lag the transition: right after closing the story
+  it still counted it, and a minute later it didn't. If it's off by the story you just closed,
+  check with a JQL search (`fixVersion = "<X.Y.Z>" AND resolution is EMPTY`) and read it again. Unlike the Jira UI, the API doesn't make you move
   unresolved issues. Leave a story whose code shipped on this version. An open story nobody
   triaged may be a clone of one in the release, since cloning keeps the fix version: look at its
   comments and creation time, and ask the developer where it goes.

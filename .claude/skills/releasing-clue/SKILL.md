@@ -96,7 +96,8 @@ the branch is tested in cutting.md, as long as they're done before the tag.
   `[CLUE-123](https://concord-consortium.atlassian.net/browse/CLUE-123)` every time the key
   appears, not just the first, or reword ("can it be marked Done"). The self-DM preview can't show
   a card, since that DM isn't connected to Jira, so before posting, search the draft for keys that
-  aren't inside `[...](...)`.
+  aren't inside `[...](...)`. Search again on every revision of a draft, before sending its preview:
+  an edit can repeat a key bare.
 
 ## Common mistakes
 
@@ -107,6 +108,7 @@ the branch is tested in cutting.md, as long as they're done before the tag.
 | Moving a story to the next version because its sprint says so | Surface the sprint, and let the developer decide |
 | Holding a story open for a PR the release doesn't need | Mark it Done, and move the PR to its own story (preparing.md) |
 | Posting straight to a channel | Preview in the developer's self-DM first; Claude can't edit or delete messages |
+| Posting to a channel id from memory, or sending placeholder text to try the call | Look the channel up with the Slack search tools in this session (preparing.md, "Slack IDs"), check its purpose fits, and send only the approved text |
 | Writing Slack's own formatting (`*bold*`, `_italic_`) in a post | The Slack tool takes standard markdown: `**bold**` and `*italic*`. A `*heading*` renders italic |
 | Checking a thread for new replies with `slack_read_thread`'s `oldest` set to a reply's ts | It has returned none of the replies; read the whole thread and compare times yourself |
 | Waiting for someone's reply with nothing to bring you back | Nothing pushes a Slack reply to the session. Within a session, a background timer or watcher brings you back to check; across sessions, schedule a reminder in the developer's self-DM (`slack_schedule_message`) |

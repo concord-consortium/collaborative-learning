@@ -52,6 +52,11 @@ Agree on these with the developer first and put them at the top of the release r
   The developer creates a missing version in the Jira UI; propose creating a missing release
   story **[approve]**. Jira automation may create both (in 7.8.0 it made the 7.9.0 version and
   release story partway through), so list them again just before proposing either.
+- **Start the release story [approve]:** once the parameters are agreed, assign the release story
+  to the developer, put it in the active sprint (the "Dev Team Sprints" board, id 475:
+  `GET /rest/agile/1.0/board/475/sprint?state=active`), and move it to In Progress ("Start work").
+  Propose this with the parameters, so it's the first Jira change of the release, and read the
+  story back afterward.
 - **Previous version:** check it's marked released in Jira; if not, include it in the wrap-up.
 - **Deployed versions:** `npx --prefix scripts tsx scripts/deployed-version.ts` after
   `git fetch --tags`. It checks every page a release deploys, on production and staging.
@@ -96,6 +101,10 @@ Sort each story into one of these, and propose an action for each:
 Other rules:
 - **"Docs only" PRs:** before calling a PR docs only, grep for how the changed files are used (env
   params, pinned shas, URLs), not just imports.
+- **Stories with a functions change:** check that staging had the change before the story was
+  approved. Compare the story's move to Done (or to project team review) with when its functions
+  reached staging ("Firebase deployables"). A story approved before its function was deployed
+  anywhere wasn't tested; ask for it to be tested again once staging has it.
 - **Other repositories:** a story can have PRs in other repositories; the script labels them
   "(other repo)".
 - **Jira keys in other repositories:** a key written in a PR in another repository links that PR to
@@ -113,6 +122,11 @@ Other rules:
 since the last post, then each open item with what it's waiting on and who. Show the draft, and
 let the developer edit it. Updates between rounds, replies and nudges go in the latest status
 post's thread.
+
+Work the deadlines back from the release time. The project team's smoke test of the tag takes
+half a day to a full day, and before it come the branch, its smoke test and the tag, so every
+story should be Done, reviews included, before the branch is cut. Ask for reviews by a time that
+leaves room for that, not "by tomorrow afternoon" for a release that evening.
 
 When the release needs other people's time soon (a same-day release that waits on reviews and a
 smoke test), a full list buries the question. Make the first post ask only whether the people
@@ -204,6 +218,12 @@ What's deployed (read-only; projects are `staging` = collaborative-learning-stag
   (production). Deployed RTDB rules can include console-only rules that aren't in
   `database.rules.json`, so deploying from the repo would silently delete them. Compare first, and don't deploy RTDB rules unless the developer decides to.
 - **Secrets:** `npx firebase functions:secrets:get <NAME> --project <project>` shows metadata only.
+
+Look ahead too: list the open PRs and recently pushed branches that change functions, rules,
+indexes, `shared/` or migrations. Whoever tests one of them may deploy it to staging, and a branch
+cut before the release's own functions changes would put staging's functions back to older code
+than the release needs. Tell their authors what the release has deployed, so they merge master
+into the branch first.
 
 Read the deployed state again every triage round, even when no Firebase files have changed:
 other developers deploy too, for their own PRs. They don't always report it in #clue-dev, so also

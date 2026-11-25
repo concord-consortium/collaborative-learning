@@ -88,6 +88,12 @@ what failed. To retry a flake, re-run all its jobs **[approve]** (`gh run rerun 
 branch ("A fix before the tag"). Each full run counts against CLUE's monthly Cypress budget, so
 don't start one the release doesn't need.
 
+When the branch is cut at a master commit, master's CI Regression run on that same commit has
+already run the same specs against the same code. If it passed, tell the developer, who may let it
+stand as the release's regression and skip the branch run, as in 7.9.0 when the Cypress Cloud
+quota had run out. A fix on the branch after the cut means the branch has code that run didn't
+test, so it needs its own run.
+
 ## Staging portal: the branch set
 
 Point learn.portal.staging.concord.org at the release. Run the portal scripts from the developer's
@@ -197,6 +203,13 @@ file (preparing.md):
    deploy that went out from somewhere else; find out which before deploying. Don't copy a `.env`
    into the worktree: the CLI deploys every key a plain `.env` sets, as well as the project file's.
 2. **Install:** `npm --prefix <worktree>/shared ci` and `npm --prefix <worktree>/<codebase> ci`.
+   Then build the codebase and load its entry module once, for example
+   `node -e "require('./lib/functions-v2/src/index.js')"` from `<worktree>/functions-v2`. On a
+   fresh install, on-access antivirus (Microsoft Defender) can make the first load of new
+   `node_modules` take 16–150 s, longer than the CLI's 10 s limit for loading the code, and the
+   deploy fails with "User code failed to load. Cannot determine backend specification. Timeout
+   after 10000". After one load it takes under a second. `FUNCTIONS_DISCOVERY_TIMEOUT` raises the
+   limit instead.
 3. **Deploy:**
    `npx firebase deploy --only functions:<codebase> --project <project> --config <worktree>/firebase.json --non-interactive`.
 4. **Check:** `git -C <worktree> status --short` is empty (a deploy that asked for a param would
