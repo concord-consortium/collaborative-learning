@@ -2,7 +2,7 @@
 //
 // Firestore ownership stays in the drain and its persistence helper. Providers receive the
 // current parent/message plus an optional reservation seam; they never receive a document ref.
-// The drain protects its lock/cursor/owner fields and atomically commits successful delivery.
+// The drain protects its lock/cursor/owner fields and owns the commit of a successful turn.
 import {DocumentData} from "firebase-admin/firestore";
 
 import {TutorHighlight} from "../../../shared/chat-tutor-highlight";

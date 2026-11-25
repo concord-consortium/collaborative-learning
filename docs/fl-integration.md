@@ -23,7 +23,7 @@ which then attaches the listeners.
 The backend checks ownership before taking the lock and again before provider dispatch. A queued
 message whose owner fields differ from its parent's, with no reservation, is marked rejected, with
 a generic owner-visible notice, and consumed without a provider call. A mismatched message that
-already has a private reservation stops the drain ("Reserved message ownership mismatch"): external
+already has a reservation stops the drain ("Reserved message ownership mismatch"): external
 work or expense may exist and must not be erased or skipped automatically.
 
 A client must use owner-bound ids to start a conversation; a conversation under a legacy id stays
@@ -81,26 +81,25 @@ override or teaching-action authority.
 ## Durable FL requests
 
 The drain supplies server-owned persistence tied to the exact source Firestore message path.
-Before HTTP dispatch, a transaction reserves an immutable versioned snapshot in
+Before HTTP dispatch, a transaction writes an immutable, versioned reservation to
 `chatTutorPendingRequests/{sha256(messagePath)}`. It includes the request identity, exact serialized
 body, intended endpoint/solution/user, and the turn and trace to apply on success. It contains no
 API key and no raw workspace: that is read again from the source message (or the parent's copy)
 once the reply arrives, so a workspace near the browser's attachment limit still fits. The source
-message and snapshot are hashed; source mutation, corrupt storage, changed target or
+message and reservation are hashed; source mutation, corrupt storage, changed target or
 body/argument disagreement fails before dispatch. Transaction retries may prepare more than once,
-but only the committed snapshot can be sent.
+but only the committed reservation can be sent.
 
 The collection is outside client-writable QA/dev trees; the deny-by-default rules deny all
-client access. `snapshotJson` is exempt from indexing. The bounded snapshot must fit before any
+client access. `snapshotJson` is exempt from indexing. The bounded reservation must fit before any
 external call. A failed attempt retains it. A retry uses the exact body and an `Idempotency-Key`
 matching `context.envelope.trace.request_id`, even for an opening that has not returned a session
 id. The FL service decides whether to replay, reject or fence that identity. CLUE does not
 create a replacement identity to bypass an error and does not interpret teaching semantics.
 
 The accepted assistant message records `sourceMessageId` and `providerRequestId`. The assistant,
-session/turn update, cursor and pending-record deletion commit in one Firestore batch. A crash
-before commit leaves a replayable request; a duplicate after commit is skipped by the cursor.
-OpenAI does not reserve a request and incurs no pending-record write/delete.
+session/turn update, cursor and reservation deletion commit in one Firestore batch (see the commit
+in `drain.ts`). OpenAI does not reserve a request.
 
 `chatTutorPendingRequests` is one top-level collection for every root, so demo and qa failures leave
 records beside production ones, and `clean-firebase-roots` does not reach it. Reservations have no
@@ -110,7 +109,7 @@ request. Tutor data, reservations included, is not yet covered by `student-data-
 
 ## Delivery recovery
 
-Before dispatch, the parent and private reservation also record an awaiting-confirmation receipt.
+Before dispatch, the parent and the reservation also record a pending delivery.
 The browser shows waiting, then offers a check after its 30-second display deadline. This deadline
 does not cancel the request or prove failure. The five-minute stale-lock interval exceeds the
 function timeout; a check cannot interrupt a running lock owner. A check made while
@@ -133,16 +132,15 @@ locally before HTTP rather than inventing a closeout. Continue can then move on 
 
 Recovery buttons write immutable `kind: recovery` controls with an action and server-issued
 recovery id. They are not learner prompts and never reach the model. Rules limit their shape;
-server transactions validate ownership, current receipt, source integrity and allowed transition.
+server transactions validate ownership, the current delivery, source integrity and the transition.
 Admin-only consumption markers and changing recovery ids make duplicate or delayed clicks stale.
 Unknown work cannot be bypassed with a new user message. While a delivery is unresolved, its notice
 shows only in the drawer's recovery panel, which a polite status region announces; once resolved,
 the notice stays in the transcript as a system notice, including in copied text. A failed answer is
 never an assistant success.
 
-Continue atomically applies the reserved trace/turn and the source message's workspace, advances
-the cursor, resolves the notice and deletes the pending reservation. A successful response likewise
-commits the reply/state/cursor/deletion together. Lost local commit acknowledgements are checked
+Continue applies the reserved trace/turn and the source message's workspace, advances the cursor,
+resolves the notice and deletes the reservation in one transaction. Lost local commit acknowledgements are checked
 against the cursor before recording failure. A published failure is not written again by the
 outer trigger, which could otherwise overwrite a new recovery invocation. Completed closeout
 stops the queue until the explicit new-conversation action; history remains visible.
@@ -160,7 +158,7 @@ in `prepareRecovery` (`functions-v2/src/chat/delivery-recovery.ts`), done by han
      change.
    - **If it exists**, take the request id from its `snapshotJson`
      (`request.context.envelope.trace.request_id`) or from the parent's `delivery.requestId`, ask
-     FL for that request's outcome, and note the snapshot's `parentUpdate` if it parses. Go on only
+     FL for that request's outcome, and note the reservation's `parentUpdate` if it parses. Go on only
      if FL reports the request as answered, failed, or never received. If FL reports it pending or
      cannot say, stop: leave the delivery blocked and the reservation in place, and ask again later.
      An answered request's reply stays with FL; this procedure does not add it to the transcript.
@@ -204,6 +202,6 @@ hosted FL reconciliation or teaching behavior.
   whose saved endpoint or solution differs from the current configuration is refused as `blocked`.
 - Roll back only to a browser, rules and functions combination that still enforces ownership and
   handles recovery, never to a build without them and never with the rules alone. Old code cannot
-  honor saved request identities or recovery fences, so reconcile pending requests and keep new
+  honor saved request identities or recovery fences, so reconcile outstanding reservations and keep new
   work from dispatching first, and preserve recovery state and history; disabling the UI alone does
   not reconcile pending work.

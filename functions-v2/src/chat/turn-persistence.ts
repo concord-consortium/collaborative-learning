@@ -30,8 +30,8 @@ export function readReservedSnapshot<T extends object>(data: DocumentData, sourc
 }
 
 // A top-level private collection is deliberate: qa/dev roots allow client writes to arbitrary
-// descendants. No client rule grants access here, even for those modes. Only pending requests
-// are retained; the drain deletes the record atomically with reply + session + cursor commit.
+// descendants. No client rule grants access here, even for those modes. The drain deletes a
+// reservation in the same commit as its reply (drain.ts).
 export function createTurnPersistence(messageRef: DocumentReference, message: DocumentData,
   onReserved?: (snapshot: object) => Promise<void>):
     TurnPersistence & {ref: DocumentReference; reserved: boolean} {

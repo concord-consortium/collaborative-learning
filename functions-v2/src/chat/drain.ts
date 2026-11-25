@@ -232,7 +232,7 @@ export async function processAndDrain(ctx: DrainContext): Promise<void> {
       const {assistant, parentUpdate, pendingRequestRef, sessionClosed} = await processUnit(ctx, next);
 
       lastSnap = next;
-      // Reply, earned session state, cursor and removal of the pending request commit atomically.
+      // Reply, earned session state, cursor and removal of the reservation commit atomically.
       // A pre-commit crash retains the exact request for replay; a post-commit duplicate skips it.
       const writeBatch = db.batch();
       // exists: a second drain of the same message fails here instead of writing a second reply.
