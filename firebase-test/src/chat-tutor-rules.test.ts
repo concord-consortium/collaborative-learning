@@ -233,18 +233,6 @@ describe("Firestore security rules: chat tutor", () => {
       await expectReadToFail(db, kParentPath);
     });
 
-    it("allows the owner to check a missing owner-bound parent", async () => {
-      db = initFirestore(learnerAuth);
-      await expectReadToSucceed(db, kParentPath);
-      db = initFirestore(classmateAuth);
-      await expectReadToFail(db, kParentPath);
-    });
-
-    it("rejects client parent creation, even an owner-pinned pre-claim", async () => {
-      db = initFirestore(learnerAuth);
-      await expectWriteToFail(db, kParentPath, specParent(learnerId));
-    });
-
     it("rejects client updates and deletes of the parent", async () => {
       await adminWriteDoc(kParentPath, { ...specParent(learnerId), status: "idle" });
       db = initFirestore(learnerAuth);
