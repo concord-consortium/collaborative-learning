@@ -52,6 +52,13 @@ Agree on these with the developer first and put them at the top of the release r
   The developer creates a missing version in the Jira UI; propose creating a missing release
   story **[approve]**. Jira automation may create both (in 7.8.0 it made the 7.9.0 version and
   release story partway through), so list them again just before proposing either.
+- **Start the release story [approve]:** once the parameters are agreed and the release story
+  exists, assign it to the developer, put it in the active sprint, and move it to In Progress
+  ("Start work"). The sprint is on the "Dev Team Sprints" board, id 475: the Atlassian
+  connection's `listJiraBoardSprints` (board 475, state active) finds it, and
+  `transitionJiraIssue` with `sprintId` moves the story, so neither needs the Jira token
+  (`GET /rest/agile/1.0/board/475/sprint?state=active` is the REST form). Read the story first and
+  propose only what differs, with the parameters, then read it back afterward.
 - **Previous version:** check it's marked released in Jira; if not, include it in the wrap-up.
 - **Deployed versions:** `npx --prefix scripts tsx scripts/deployed-version.ts` after
   `git fetch --tags`. It checks every page a release deploys, on production and staging.
@@ -96,6 +103,15 @@ Sort each story into one of these, and propose an action for each:
 Other rules:
 - **"Docs only" PRs:** before calling a PR docs only, grep for how the changed files are used (env
   params, pinned shas, URLs), not just imports.
+- **Stories with a functions, rules or index change:** check that the change was deployed where
+  the story was tested before the story was approved. Compare the story's move to Done (from the
+  Jira changelog) with when the change was first deployed. "Firebase deployables" gives only the
+  latest deploy, which a later redeploy replaces, so a deploy time after the approval proves
+  nothing either way. Find the first deploy from the deploy reports in Slack, the Cloud audit logs
+  (`gcloud logging read` on the functions' UpdateFunction and CreateFunction calls), or the PR's
+  author. A story approved before its change was deployed anywhere wasn't tested: ask its tester
+  to test it again once staging has it, with `firebaseEnv=staging` **[approve]**, in the status
+  post.
 - **Other repositories:** a story can have PRs in other repositories; the script labels them
   "(other repo)".
 - **Jira keys in other repositories:** a key written in a PR in another repository links that PR to
@@ -113,6 +129,14 @@ Other rules:
 since the last post, then each open item with what it's waiting on and who. Show the draft, and
 let the developer edit it. Updates between rounds, replies and nudges go in the latest status
 post's thread.
+
+Work the deadlines back from the release time. The project team's smoke test of the tag takes
+half a day to a full day, and before it come the branch, its smoke test and the tag. So aim for
+every story to be Done, reviews included, before the branch is cut, and ask for reviews by a time
+that leaves room for that, not "by tomorrow afternoon" for a release that evening. This is a
+planning target, not a gate: a story that isn't Done doesn't block the cut if its code is merged
+(cutting.md). Some testers prefer to review on the branch or the tag; ask, and count that time
+before the tag.
 
 When the release needs other people's time soon (a same-day release that waits on reviews and a
 smoke test), a full list buries the question. Make the first post ask only whether the people
@@ -205,6 +229,14 @@ What's deployed (read-only; projects are `staging` = collaborative-learning-stag
   `database.rules.json`, so deploying from the repo would silently delete them. Compare first, and don't deploy RTDB rules unless the developer decides to.
 - **Secrets:** `npx firebase functions:secrets:get <NAME> --project <project>` shows metadata only.
 
+Look ahead too: list the open PRs (`gh pr list --state open`, then each one's changed files) and
+recently pushed branches (`git for-each-ref --sort=-committerdate refs/remotes/origin`, then
+`git diff --name-only origin/master...<branch>`) that change functions, rules, indexes, `shared/`
+or migrations. Whoever tests one of them may deploy it to staging, and a feature branch that left
+master before the release's own functions changes merged would put staging's functions back to
+older code than the release needs. Tell their authors what the release has deployed, so they merge
+master into the branch first **[approve]**, in a PR comment or the status post's thread.
+
 Read the deployed state again every triage round, even when no Firebase files have changed:
 other developers deploy too, for their own PRs. They don't always report it in #clue-dev, so also
 search Slack, including DMs the developer is in, for deploy reports from the authors of PRs that
@@ -223,7 +255,8 @@ is being prepared:
   origin/master` after a fetch), never the developer's checkout or a local branch that may hold
   unpushed or unmerged work;
 - with the commands in "Staging Firebase" (cutting.md), using that checkout as `<worktree>`;
-- then read each one back, as above, and compare it with that checkout.
+- then read each one back, as above, and compare it with that checkout;
+- remove the worktree (`git worktree remove ../<dir>`) once nothing more deploys or runs from it.
 
 A migration script marked `before` runs now too, but not with those commands: "Migration scripts"
 in shipping.md says how, and what each timing means for a script.

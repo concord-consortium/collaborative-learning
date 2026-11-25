@@ -28,7 +28,7 @@ These actions are gated, marked **[approve]** in the phase files:
 | git | creating branches or tags, `npm version`, commits, pushes |
 | GitHub | releases, workflow runs, opening PRs, PR titles, bodies, labels or comments, merging |
 | Portal | any write to a portal: clients, reports, resources, assignments |
-| Firebase | deploying functions, rules or indexes to any project; running a migration script that writes |
+| Firebase | deploying functions, rules or indexes to any project; running a script that writes, on any project; running any script with the production service-account key, dry runs and read-only scripts (counts, listings) included |
 | Google Cloud | any `gcloud` or `firebase` command that creates, updates or deletes something: probe deploys, function deletes, Cloud Run service or env changes, in any project |
 
 For each gated action:
@@ -52,9 +52,13 @@ A standing instruction like "you don't need to ask me before posting" doesn't li
 this skill is new. Say so, keep asking, and suggest the developer change this skill if a gate is
 more trouble than it's worth. When unsure whether something is gated, it is.
 
+If Claude Code's permission check blocks an action the developer approved, stop: don't retry it
+another way. Tell the developer what was blocked; they can allow it, ask for it again directly, or
+do it themselves.
+
 Not gated:
-- Reading: Jira and GitHub queries, `gh run watch`, `firebase functions:list`, dry runs,
-  `deployed-version.ts`, reading Slack threads.
+- Reading: Jira and GitHub queries, `gh run watch`, `firebase functions:list`, script dry runs on
+  staging, `deployed-version.ts`, reading Slack threads.
 - Messages sent or scheduled in the developer's own self-DM, which only they see: previews (the
   preview is how they approve the real post) and reminders.
 - The smoke test spec, which writes test data to staging Firebase as the test users and removes it,
@@ -77,7 +81,7 @@ the branch is tested in cutting.md, as long as they're done before the tag.
 
 1. [preparing.md](preparing.md): preflight, Jira and PR triage, status posts, deploy timing,
    Firebase and external dependencies, release notes, the pre-announcement.
-2. [cutting.md](cutting.md): the release branch and a full regression run on it, staging portal
+2. [cutting.md](cutting.md): the release branch and a full regression run on its code, staging portal
    and Firebase, a smoke test on the branch, then the tag, GitHub pre-release and a smoke test on the tag, handing over to the
    project team, Release Staging.
 3. [shipping.md](shipping.md): approval, production Firebase, Release Production, promoting the
@@ -88,6 +92,8 @@ the branch is tested in cutting.md, as long as they're done before the tag.
 
 - Read `.env` files that hold keys (`scripts/.env`, `dev-templates/scripts/.env`, `cypress.env.json`).
   Scripts read them; you print key names at most.
+- Read a service-account key (`scripts/serviceAccountKey*.json`). Print its `project_id` field and
+  nothing else, for example `node -e 'console.log(require(process.argv[1]).project_id)' "$PWD/<key>"`.
 - Decide a deploy timing yourself. Ask the PR's author (see "Deploy timing" in `docs/deploy.md`).
 - Deploy RTDB rules without checking what's deployed (see preparing.md).
 - Pass `--force` to `firebase deploy`, even when the CLI suggests it. A deploy that deletes
@@ -96,7 +102,8 @@ the branch is tested in cutting.md, as long as they're done before the tag.
   `[CLUE-123](https://concord-consortium.atlassian.net/browse/CLUE-123)` every time the key
   appears, not just the first, or reword ("can it be marked Done"). The self-DM preview can't show
   a card, since that DM isn't connected to Jira, so before posting, search the draft for keys that
-  aren't inside `[...](...)`.
+  aren't inside `[...](...)`. Search again on every revision of a draft, before sending its preview:
+  an edit can repeat a key bare.
 
 ## Common mistakes
 
@@ -107,6 +114,7 @@ the branch is tested in cutting.md, as long as they're done before the tag.
 | Moving a story to the next version because its sprint says so | Surface the sprint, and let the developer decide |
 | Holding a story open for a PR the release doesn't need | Mark it Done, and move the PR to its own story (preparing.md) |
 | Posting straight to a channel | Preview in the developer's self-DM first; Claude can't edit or delete messages |
+| Posting to a channel id from memory, or sending placeholder text to try the call | Look the channel up with the Slack search tools in this session (preparing.md, "Slack IDs"), check its purpose fits, and send only the approved text |
 | Writing Slack's own formatting (`*bold*`, `_italic_`) in a post | The Slack tool takes standard markdown: `**bold**` and `*italic*`. A `*heading*` renders italic |
 | Checking a thread for new replies with `slack_read_thread`'s `oldest` set to a reply's ts | It has returned none of the replies; read the whole thread and compare times yourself |
 | Waiting for someone's reply with nothing to bring you back | Nothing pushes a Slack reply to the session. Within a session, a background timer or watcher brings you back to check; across sessions, schedule a reminder in the developer's self-DM (`slack_schedule_message`) |

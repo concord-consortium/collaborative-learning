@@ -7,7 +7,7 @@ it means a patch release; smoke testing the branch first lets a fix go in before
 order:
 
 1. Before cutting: checks.
-2. Release branch, its CI, and a full regression run on it.
+2. Release branch, its CI, and a full regression run on its code.
 3. Staging portal: the branch set.
 4. Staging Firebase.
 5. Smoke test on the branch. A failure means a fix on the branch, then repeat.
@@ -28,8 +28,10 @@ order:
   exists on origin yet.
 - **Regression tests:** CI Regression skips its Cypress jobs on a tag or a release branch (they run
   only on master or with the `run regression` label), so those runs mean nothing. The gate is a
-  Manual Regression run on the release branch itself ("Release branch" below). Before cutting,
-  master's CI Regression run for the commit you'll cut from is a guide to picking `<sha>`:
+  full regression run on the code being released: a Manual Regression run on the release branch
+  itself, or master's passing run on `<sha>` if the developer accepts it in its place ("Release
+  branch" below). Before cutting, master's CI Regression run for the commit you'll cut from is a
+  guide to picking `<sha>`:
 
   ```bash
   gh run list --workflow ci-regression.yml --branch master --commit <sha> \
@@ -66,9 +68,16 @@ before the smoke test. Confirm `https://collaborative-learning.concord.org/branc
 `functions-v2/`, `shared/` or the workflow, which a new branch at a master commit doesn't. It runs
 for the tag, and for a fix on the branch that changes those paths.
 
-**Full regression on the branch [approve].** Manual Regression with `test=all` runs the same
-specs as CI Regression (`cypress/e2e/functional/**` and the portal specs it opts in) against the
-branch's code, without a PR:
+**Full regression on the branch [approve].** Before dispatching it, check master's CI Regression
+run on `<sha>` (the command in "Before cutting"). It may already have run the same specs against
+the same code. If it passed, including on a re-run of all its jobs (say so if it took one), tell
+the developer, who may let it stand as the release's regression and skip the branch run, as in
+7.9.0 when the Cypress Cloud quota had run out. Record which run served. If master's run was
+canceled or is missing, or the branch has a fix since the cut, the branch needs its own run.
+
+Manual Regression with `test=all` runs the same specs as CI Regression
+(`cypress/e2e/functional/**` and the portal specs it opts in) against the branch's code, without a
+PR:
 
 ```bash
 date -u +%Y-%m-%dT%H:%M:%SZ                                        # <dispatched>, before the run
@@ -96,8 +105,11 @@ have (don't copy it). Dry run first; show the output, then run it for real **[ap
 
 ```bash
 npx --prefix scripts tsx scripts/update-portal-release.ts --tag v<X.Y.Z> \
-  --report-id <report ids> --activity-id <resource ids> --dry-run
+  --report-id <id> --report-id <id> --activity-id <id> --activity-id <id> --dry-run
 ```
+
+Each flag takes one id; repeat the flag for each report or resource. It rejects a comma-separated
+list, and zsh doesn't split a variable holding several, so write each flag out.
 
 It adds the release's version and branch folders to the `clue` OAuth client's redirect URIs, and
 moves the named reports and resources to the release, names included. Re-running is safe, though
@@ -197,6 +209,15 @@ file (preparing.md):
    deploy that went out from somewhere else; find out which before deploying. Don't copy a `.env`
    into the worktree: the CLI deploys every key a plain `.env` sets, as well as the project file's.
 2. **Install:** `npm --prefix <worktree>/shared ci` and `npm --prefix <worktree>/<codebase> ci`.
+   Then build it, `npm --prefix <worktree>/<codebase> run build`, and load its entry module (its
+   `package.json` `main`) once:
+   `node -e "require('<worktree>/<codebase>/lib/<codebase>/src/index.js')"`. On a fresh install,
+   on-access antivirus (Microsoft Defender) can make the first load of new `node_modules` take
+   16–150 s, longer than the CLI's 10 s limit for loading the code, and the deploy fails with
+   "User code failed to load. Cannot determine backend specification. Timeout after 10000". After
+   one load it takes under a second. The other way round it is `FUNCTIONS_DISCOVERY_TIMEOUT`, in
+   seconds (for example `FUNCTIONS_DISCOVERY_TIMEOUT=200`); adding it to a deploy that failed
+   changes the command, so it's a new **[approve]**.
 3. **Deploy:**
    `npx firebase deploy --only functions:<codebase> --project <project> --config <worktree>/firebase.json --non-interactive`.
 4. **Check:** `git -C <worktree> status --short` is empty (a deploy that asked for a param would
@@ -272,7 +293,8 @@ and a reply in the post's thread can cover it. Record what was done.
 
 ## Version and tag [approve]
 
-Once the branch's regression run and smoke test pass, on the branch's current commit, and the
+Once the branch's regression run (or master's run on `<sha>`, if the developer accepted it and
+nothing has reached the branch since) and smoke test pass, on the branch's current commit, and the
 release notes and pre-announcement are done, bring the
 worktree up to date with origin's branch and check what's on it since `<sha>`. A fix that reached
 the branch on GitHub leaves the worktree behind, and `npm version` would tag the commit before it.
