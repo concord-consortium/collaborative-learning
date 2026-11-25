@@ -163,7 +163,8 @@ export function createFlProvider(args: FlProviderArgs): TutorProvider {
       const prepared = persistence ? await persistence.reserve(prepare) : await prepare();
       if (prepared.version !== 1 || prepared.endpoint !== config.baseUrl ||
           prepared.solutionId !== config.solutionId || prepared.request.userId !== args.resolveUserId(message)) {
-        throw new Error("ForeverLearning pending request target changed; refusing dispatch");
+        throw new FlDeliveryError("blocked", "FL_RESERVED_TARGET_CHANGED", undefined,
+          "ForeverLearning pending request target changed; refusing dispatch");
       }
       const {context} = prepared.request;
       if (prepared.request.prompt.trim() === "/end" && !prepared.request.sessionId) {
@@ -179,7 +180,7 @@ export function createFlProvider(args: FlProviderArgs): TutorProvider {
       // continue from a turn that never happened. A failed turn is recoverable; a plausible
       // half-answer recorded as final is not.
       if (!stream.complete) {
-        throw new FlDeliveryError("unknown",
+        throw new FlDeliveryError("unknown", "FL_STREAM_INCOMPLETE", undefined,
           "ForeverLearning stream ended incomplete; refusing to record a partial turn");
       }
 
@@ -191,7 +192,8 @@ export function createFlProvider(args: FlProviderArgs): TutorProvider {
         // A turn that produced nothing is a failed turn. The drain's catch turns this into
         // status:"error", which clears the client's indicator honestly rather than writing an
         // empty assistant message the client renders as a finished answer.
-        throw new FlDeliveryError("unknown", "ForeverLearning returned no reply for this turn");
+        throw new FlDeliveryError("unknown", "FL_NO_REPLY", undefined,
+          "ForeverLearning returned no reply for this turn");
       }
       const highlights = response ? responseHighlights(response, context) : [];
 

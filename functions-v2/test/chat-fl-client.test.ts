@@ -184,3 +184,29 @@ it.each(["", " "])("rejects a stream whose error code is %j, even when a reply a
   await expect(flChat({...kConfig, fetchImpl: impl}, {userId: "u", prompt: "hi", context: kContext}))
     .rejects.toMatchObject({state: "unknown", code: "FL_STREAM_ERROR"});
 });
+
+describe("flChat failure classification", () => {
+  const args = {userId: "u", prompt: "hi", context: kContext};
+  it("treats a fetch that never returned as unconfirmed", async () => {
+    const fetchImpl = (async () => {
+      throw new TypeError("fetch failed");
+    }) as unknown as typeof fetch;
+    await expect(flChat({...kConfig, fetchImpl}, args))
+      .rejects.toMatchObject({state: "unknown", code: "FL_TRANSPORT_UNCONFIRMED"});
+  });
+  it("treats a stream that breaks part-way as unconfirmed", async () => {
+    const fetchImpl = (async () => ({ok: true, status: 200, body: (async function* () {
+      yield new TextEncoder().encode(line({type: "content", part: "conversation", text: "Par"}) + "\n\n");
+      throw new Error("socket reset");
+    })()})) as unknown as typeof fetch;
+    await expect(flChat({...kConfig, fetchImpl}, args))
+      .rejects.toMatchObject({state: "unknown", code: "FL_STREAM_UNCONFIRMED"});
+  });
+  it.each([{code: "CLUE_TURN_FAILED"}, {error: {code: "CLUE_TURN_FAILED"}}])(
+    "reads the code from a JSON error body %j", async (body) => {
+      const fetchImpl = (async () => ({ok: false, status: 422,
+        text: async () => JSON.stringify(body)})) as unknown as typeof fetch;
+      await expect(flChat({...kConfig, fetchImpl}, args))
+        .rejects.toMatchObject({state: "failed", code: "CLUE_TURN_FAILED", httpStatus: 422});
+    });
+});

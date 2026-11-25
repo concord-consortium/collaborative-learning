@@ -399,7 +399,7 @@ $chat-bubble-max-width: 85%;
       color: $charcoal-dark-2;
 
       &:focus-visible { outline: 2px solid $focus-ring-color; outline-offset: 1px; }
-      &[aria-disabled="true"] { opacity: 0.5; cursor: default; }
+      &[aria-disabled="true"] { color: $charcoal; border-color: $charcoal-light-2; cursor: default; }
     }
 
     .chat-send {

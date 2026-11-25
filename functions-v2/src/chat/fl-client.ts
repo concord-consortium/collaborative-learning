@@ -46,7 +46,8 @@ export async function flChat(
   const fetchImpl = config.fetchImpl ?? fetch;
   const currentBody = serializeFlChatBody(args);
   if (args.serializedBody !== undefined && args.serializedBody !== currentBody) {
-    throw new Error("ForeverLearning reserved request differs from its arguments; refusing dispatch");
+    throw new FlDeliveryError("blocked", "FL_RESERVED_BODY_MISMATCH", undefined,
+      "ForeverLearning reserved request differs from its arguments; refusing dispatch");
   }
   const requestId = args.context.envelope.trace.request_id;
 
@@ -86,7 +87,7 @@ export async function flChat(
     throw flResponseFailure(response.status, code);
   }
   if (!response.body) {
-    throw new FlDeliveryError("unknown", "ForeverLearning chat response carried no body");
+    throw new FlDeliveryError("unknown", "FL_EMPTY_BODY", undefined, "ForeverLearning chat response carried no body");
   }
 
   const parser = new SseParser();

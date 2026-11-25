@@ -158,7 +158,9 @@ function cursorIsPast(parent: DocumentData | undefined, message: MsgSnap): boole
   const at: Timestamp | undefined = parent?.lastProcessedCreatedAt;
   const id: unknown = parent?.lastProcessedMessageId;
   const messageAt: Timestamp | undefined = message.get("createdAt");
-  if (!at || typeof id !== "string" || !messageAt) return false;
+  if (typeof at?.toMillis !== "function" || typeof id !== "string" || typeof messageAt?.toMillis !== "function") {
+    return false;
+  }
   const order = at.toMillis() - messageAt.toMillis() || at.nanoseconds - messageAt.nanoseconds;
   return order > 0 || (order === 0 && id > message.id);
 }
@@ -233,7 +235,8 @@ export async function processAndDrain(ctx: DrainContext): Promise<void> {
       // Reply, earned session state, cursor and removal of the pending request commit atomically.
       // A pre-commit crash retains the exact request for replay; a post-commit duplicate skips it.
       const writeBatch = db.batch();
-      if (pendingRequestRef) writeBatch.delete(pendingRequestRef);
+      // exists: a second drain of the same message fails here instead of writing a second reply.
+      if (pendingRequestRef) writeBatch.delete(pendingRequestRef, {exists: true});
       const noticeRef = messagesCol.doc(`delivery-${next.id}`);
       if ((await noticeRef.get()).exists) {
         writeBatch.set(noticeRef, {resolved: true, resolution: "recovered"}, {merge: true});
@@ -252,9 +255,8 @@ export async function processAndDrain(ctx: DrainContext): Promise<void> {
       if (sessionClosed) return;
     } catch (error) {
       if (error instanceof ChatOwnershipError) {
-        // A message whose owner fields differ from the parent's is rejected before any provider or
-        // reservation sees it, and the cursor advances past it in the same transaction so it cannot
-        // trap the owner.
+        // A mismatched message with no reservation is rejected and the cursor advances past it in the
+        // same transaction, so it cannot trap the owner. One with a reservation stops the drain (below).
         await db.runTransaction(async (tx) => {
           const parent = (await tx.get(parentRef)).data();
           const reserved = await tx.get(createTurnPersistence(next.ref, next.data()).ref);

@@ -17,8 +17,8 @@ On opening the tutor, the client checks the canonical parent on the server, then
 parent. An existing legacy conversation is reused only when all three owner fields match.
 Its history, session, request numbering and recovery fence remain in place. A foreign, missing
 or differently scoped legacy parent is not reused. A network/offline lookup failure is an error,
-not permission to fork a fresh conversation; the lookup runs again on the next send, which then
-attaches the listeners. No transcript migration or bulk rewrite is needed.
+not permission to fork a fresh conversation; the lookup runs again on the next send or recovery,
+which then attaches the listeners.
 
 The backend checks ownership before taking the lock and again before provider dispatch. A queued
 message whose owner fields differ from its parent's, with no reservation, is marked rejected, with
@@ -26,13 +26,9 @@ a generic owner-visible notice, and consumed without a provider call. A mismatch
 already has a private reservation stops the drain ("Reserved message ownership mismatch"): external
 work or expense may exist and must not be erased or skipped automatically.
 
-A client must use owner-bound ids to start a conversation; existing conversations under their
-legacy ids keep working. The ownership checks apply to both tutor providers. Anonymous demo and
-permissive QA/dev modes remain test modes, not classroom isolation.
-
-Ownership tests cover concurrent first writes, parent pre-claims, literal/Unicode ids, established
-uid/network histories, class/problem mismatches, recovery, provider non-dispatch and reserved-work
-fencing.
+A client must use owner-bound ids to start a conversation; a conversation under a legacy id stays
+reachable for its owner. The ownership checks apply to both tutor providers. Anonymous demo and
+permissive QA/dev modes are test modes, not classroom isolation.
 
 ## Current lesson and capabilities
 
@@ -40,7 +36,7 @@ Every ForeverLearning message snapshots the selected student-visible task in `ac
 and resolved application capabilities in `capabilityContext`, independently of workspace dirty
 tracking. The backend maps these to optional `activity_context` and `capability_context` in
 `clue.context_packet.v2`. Missing context is omitted; the previous message's value is never reused.
-The OpenAI context installation path is unchanged.
+OpenAI conversations carry neither field.
 
 Capability context has this versioned shape:
 
@@ -94,11 +90,11 @@ message and snapshot are hashed; source mutation, corrupt storage, changed targe
 body/argument disagreement fails before dispatch. Transaction retries may prepare more than once,
 but only the committed snapshot can be sent.
 
-The collection is outside client-writable QA/dev trees; existing deny-by-default rules deny all
+The collection is outside client-writable QA/dev trees; the deny-by-default rules deny all
 client access. `snapshotJson` is exempt from indexing. The bounded snapshot must fit before any
 external call. A failed attempt retains it. A retry uses the exact body and an `Idempotency-Key`
 matching `context.envelope.trace.request_id`, even for an opening that has not returned a session
-id. The FL service decides whether to replay, reject or fence that identity. Concord does not
+id. The FL service decides whether to replay, reject or fence that identity. CLUE does not
 create a replacement identity to bypass an error and does not interpret teaching semantics.
 
 The accepted assistant message records `sourceMessageId` and `providerRequestId`. The assistant,
@@ -106,17 +102,18 @@ session/turn update, cursor and pending-record deletion commit in one Firestore 
 before commit leaves a replayable request; a duplicate after commit is skipped by the cursor.
 OpenAI does not reserve a request and incurs no pending-record write/delete.
 
-Established sessions keep their trace and next-turn numbering. Requests dispatched before
-reservation existed have no saved identity to reconstruct. Failed pending records must remain until
-their outcomes are reconciled; any customer erasure workflow must also remove the corresponding
-private record. Do not delete one simply to force another request.
+`chatTutorPendingRequests` is one top-level collection for every root, so demo and qa failures leave
+records beside production ones, and `clean-firebase-roots` does not reach it. Reservations have no
+expiry, deliberately: an expiry would delete a request before its outcome is known. A failed
+reservation stays until its outcome is reconciled; do not delete one simply to force another
+request. Tutor data, reservations included, is not yet covered by `student-data-deletion`.
 
 ## Delivery recovery
 
 Before dispatch, the parent and private reservation also record an awaiting-confirmation receipt.
 The browser shows waiting, then offers a check after its 30-second display deadline. This deadline
-does not cancel the request or prove failure. The existing five-minute stale-lock interval still
-exceeds the function timeout; a check cannot interrupt a running lock owner. A check made while
+does not cancel the request or prove failure. The five-minute stale-lock interval exceeds the
+function timeout; a check cannot interrupt a running lock owner. A check made while
 that owner holds the lock is not queued: the running invocation's own outcome normally settles the
 delivery, and if the invocation dies instead, the next check after the lock goes stale is processed.
 
@@ -129,12 +126,10 @@ delivery, and if the invocation dies instead, the next check after the lock goes
 | Conflicting identity, damaged reservation or a request the reservation refuses | Support required | No client bypass; see below |
 | Completed response with `session_ended` | Start a new conversation | Clear session/trace/turn and resume queued work under a fresh identity |
 
-FL errors may arrive as SSE on non-2xx responses. An execution error in an SSE stream, even with
-`done`, does not prove that the admission ledger persisted terminal failure. Check the same key
-to obtain its authoritative outcome. A generic 422 or 503 is not terminal proof. In particular,
-closed-session failures that surface as generic storage errors remain fenced; Concord does not
-infer closure from prose. `/end` without a confirmed session fails locally before HTTP rather
-than inventing a closeout. Continue can then move on from that explicit local failure.
+Only HTTP 422 with `CLUE_TURN_FAILED` proves terminal failure; an SSE error event, even followed by
+`done`, and a generic 422 or 503 do not, so those stay fenced until a check of the same key returns
+an outcome. CLUE does not infer closure from prose. `/end` without a confirmed session fails
+locally before HTTP rather than inventing a closeout. Continue can then move on from that explicit local failure.
 
 Recovery buttons write immutable `kind: recovery` controls with an action and server-issued
 recovery id. They are not learner prompts and never reach the model. Rules limit their shape;
@@ -152,8 +147,9 @@ stops the queue until the explicit new-conversation action; history remains visi
 
 ## Clearing a delivery that needs support
 
-This covers a `blocked` delivery, and a `retryable` `FL_NOT_DISPATCHED` delivery that fails the same
-way on every retry (an oversized packet or a missing tutor user id). It is the "continue" transition
+This covers a `blocked` delivery, a `retryable` `FL_NOT_DISPATCHED` delivery that fails the same
+way on every retry (an oversized packet or a missing tutor user id), and an `unknown` delivery whose
+"Check for reply" never resolves (an unclassified error, such as a 413, returned on every check). It is the "continue" transition
 in `prepareRecovery` (`functions-v2/src/chat/delivery-recovery.ts`), done by hand.
 
 1. Read `chatTutorPendingRequests/{sha256(source message path)}`, where the source message is the
@@ -192,16 +188,20 @@ needs an engineer, since the reservation may represent FL work billed to another
 ## Checks
 
 Run focused browser/shared tests and backend tests serially (`--runInBand --watch=false`).
-`chat-fl-durability-emulator.test.ts` uses project `demo-clue-fl-durability`, real Firestore
-transactions, the actual drain/router/provider/HTTP client and a loopback HTTP fixture. It checks
-crashes before send, lost accepted responses, failed local commits, concurrent reservations,
-duplicate drains, changed source/target, legacy sessions, terminal/uncertain statuses, failures
-before dispatch, corruption, snapshot size and large workspaces. It makes no model calls.
+`chat-fl-durability-emulator.test.ts` runs the real Firestore transactions, drain, provider and HTTP
+client against a loopback HTTP fixture (project `demo-clue-fl-durability`) and makes no model calls.
 `chat-drain-emulator.test.ts` uses an isolated project and a path outside the deployed trigger
-pattern, so it is safe with the full local emulator stack. Rules tests verify that clients cannot
-read, write or delete pending reservations, forge recovery receipts or mutate recovery controls.
-These are delivery tests, not proof of hosted FL reconciliation or new teaching behavior.
+pattern, so it is safe with the full local emulator stack. These are delivery tests, not proof of
+hosted FL reconciliation or teaching behavior.
 
-Rolling back the durable backend needs care: old code cannot honor saved request identities or
-recovery fences, so reconcile pending requests and keep new work from dispatching first. Preserve
-recovery state and history; disabling the UI alone does not reconcile pending work.
+## Deploying
+
+- Deploy the functions while no tutor turn is generating: a turn the old code is part-way through
+  would be resent by the new code under a new `Idempotency-Key`, so FL could answer it twice.
+- Do not change `FL_BASE_URL` or `FL_SOLUTION_ID` while failed reservations exist: a reservation
+  whose saved endpoint or solution differs from the current configuration is refused as `blocked`.
+- Roll back only to a browser, rules and functions combination that still enforces ownership and
+  handles recovery, never to a build without them and never with the rules alone. Old code cannot
+  honor saved request identities or recovery fences, so reconcile pending requests and keep new
+  work from dispatching first, and preserve recovery state and history; disabling the UI alone does
+  not reconcile pending work.

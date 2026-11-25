@@ -4,6 +4,7 @@ import {readFileSync} from "node:fs";
 import {resolve} from "node:path";
 import {assertFails, assertSucceeds, initializeTestEnvironment, RulesTestEnvironment}
   from "@firebase/rules-unit-testing";
+import {kMaxChatMessageChars} from "../../shared/chat-message";
 
 describe("chat activity context rules", () => {
   let env: RulesTestEnvironment;
@@ -53,6 +54,10 @@ describe("chat activity context rules", () => {
       {...activity, source: {...activity.source, system: "unknown"}},
     ])("rejects invalid context case %#", async (value) => {
       await assertFails(db().doc(path).set(message(value)));
+    });
+    it("accepts message text up to kMaxChatMessageChars and rejects longer text", async () => {
+      await assertSucceeds(db().doc(path).set({...message(), text: "x".repeat(kMaxChatMessageChars)}));
+      await assertFails(db().doc(path + "long").set({...message(), text: "x".repeat(kMaxChatMessageChars + 1)}));
     });
     it("rejects activity on OpenAI and preserves message immutability", async () => {
       await assertFails(db().doc(path).set({...message(activity), provider: "openai"}));

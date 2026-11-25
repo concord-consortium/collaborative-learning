@@ -128,6 +128,7 @@ it("persists before dispatch, survives a crash before send and deletes pending s
   expect(await f.assistants()).toHaveLength(1);
   expect((await f.assistants())[0].get("providerRequestId")).toBe(calls[0].key);
   expect((await f.assistants())[0].get("sourceMessageId")).toBe("first");
+  expect((await f.messagesCol.doc("delivery-first").get()).get("resolution")).toBe("recovered");
   expect((await f.parentRef.get()).get("lastProcessedMessageId")).toBe("first");
 });
 
@@ -190,6 +191,20 @@ it("rejects changed source content and target before any replacement dispatch", 
     (await f.parentRef.get()).data()!, data, await f.reservation())).rejects.toThrow("target changed");
   await f.source.update({text: "Changed question"});
   await expect(processAndDrain(await f.retryCtx())).rejects.toThrow("conflicts with its source");
+  expect(calls).toHaveLength(0);
+});
+
+it("records a reservation whose target changed as blocked, not as a reply to check for", async () => {
+  const f = await fixture();
+  await expect(processAndDrain(f.ctx(async () => {
+    throw Error("Before send");
+  }))).rejects.toThrow();
+  expect((await f.parentRef.get()).get("delivery.state")).toBe("unknown");
+  const moved = {...await f.retryCtx(), provider: createRoutingProvider({defaultProvider: "openai",
+    providers: {foreverlearning: () => f.provider(undefined, "http://127.0.0.1:1"), openai: () => f.provider()}})};
+  await expect(processAndDrain(moved)).rejects.toThrow("target changed");
+  expect((await f.parentRef.get()).get("delivery"))
+    .toMatchObject({state: "blocked", code: "FL_RESERVED_TARGET_CHANGED"});
   expect(calls).toHaveLength(0);
 });
 

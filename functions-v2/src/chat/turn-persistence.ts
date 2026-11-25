@@ -23,7 +23,8 @@ export function readReservedSnapshot<T extends object>(data: DocumentData, sourc
   const sourceHash = sourceHashOf(message);
   if (data.version !== 1 || data.sourcePath !== sourcePath || data.sourceHash !== sourceHash ||
       typeof data.snapshotJson !== "string" || hash(data.snapshotJson) !== data.snapshotHash) {
-    throw new FlDeliveryError("blocked", "Tutor pending request conflicts with its source message; refusing dispatch");
+    throw new FlDeliveryError("blocked", "FL_RESERVATION_CONFLICT", undefined,
+      "Tutor pending request conflicts with its source message; refusing dispatch");
   }
   return JSON.parse(data.snapshotJson) as T;
 }
@@ -49,7 +50,8 @@ export function createTurnPersistence(messageRef: DocumentReference, message: Do
         const source = await tx.get(messageRef);
         const currentSourceHash = sourceHashOf(source.data() ?? null);
         if (!source.exists || currentSourceHash !== sourceHash) {
-          throw new FlDeliveryError("blocked", "Tutor source message changed before reservation; refusing dispatch");
+          throw new FlDeliveryError("blocked", "FL_SOURCE_CHANGED", undefined,
+            "Tutor source message changed before reservation; refusing dispatch");
         }
         if (existing.exists) {
           reserved = true;
@@ -59,7 +61,8 @@ export function createTurnPersistence(messageRef: DocumentReference, message: Do
         // only one candidate is persisted, and dispatch happens after this promise resolves.
         const snapshotJson = JSON.stringify(await prepare());
         if (Buffer.byteLength(snapshotJson, "utf8") > 980000) {
-          throw new FlDeliveryError("blocked", "Tutor pending request exceeds the durable snapshot limit");
+          throw new FlDeliveryError("blocked", "FL_RESERVATION_TOO_LARGE", undefined,
+            "Tutor pending request exceeds the durable snapshot limit");
         }
         tx.create(ref, {version: 1, sourcePath: messageRef.path, sourceHash,
           snapshotJson, snapshotHash: hash(snapshotJson), createdAt: FieldValue.serverTimestamp()});

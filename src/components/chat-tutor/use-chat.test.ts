@@ -321,3 +321,24 @@ describe("useChat recovery across a conversation switch", () => {
     expect(result.current.error).toBeNull();
   });
 });
+
+describe("useChat error lifetime", () => {
+  it("keeps a rejected send's error through the status changes that follow it", async () => {
+    const t = stubTransport();
+    t.sendUserMessage.mockRejectedValueOnce(new Error("Missing or insufficient permissions."));
+    const { result } = renderChat(t.transport);
+    await act(async () => { await result.current.sendMessage("help").catch(() => undefined); });
+    t.status("generating");
+    t.status("idle");
+    expect(result.current.error).toBe("Missing or insufficient permissions.");
+  });
+
+  it("still clears the generic unavailable message once the conversation recovers", () => {
+    const t = stubTransport();
+    const { result } = renderChat(t.transport);
+    t.status("error");
+    expect(result.current.error).toBe("Ada is currently unavailable. Please try again.");
+    t.status("idle");
+    expect(result.current.error).toBeNull();
+  });
+});

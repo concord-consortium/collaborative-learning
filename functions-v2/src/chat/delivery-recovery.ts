@@ -4,6 +4,7 @@ import {FlDeliveryError} from "./fl-delivery-error";
 import {createTurnPersistence, readReservedSnapshot} from "./turn-persistence";
 import {FlChatArgs} from "./fl-client";
 
+// Errors reserve() itself raises are FlDeliveryErrors and keep their own state (blocked).
 const kNotDispatched = "FL_NOT_DISPATCHED";
 
 export async function recordPendingDelivery(parentRef: DocumentReference, source: QueryDocumentSnapshot,

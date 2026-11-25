@@ -102,8 +102,8 @@ export const ChatTutorSidebar: React.FC<IProps> = observer((props) => {
       problemPath,
       getLeftContext,
       getUnitContext,
-      // Read the current student curriculum tab at send time, independently of workspace edits.
       getCapabilityContext: () => buildCapabilityContext(appConfig),
+      // Read the current student curriculum tab at send time, independently of workspace edits.
       getActivityContext: () => buildActivityContext(
         unit, problem, persistentUI.tabs.get(ENavTab.kProblems)?.currentDocumentGroupId),
       getRightSummary,

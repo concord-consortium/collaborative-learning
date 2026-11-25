@@ -4,6 +4,7 @@ import { Chat, buildChatTranscript } from "./chat";
 import { UseChatResult } from "./use-chat";
 import { ChatDelivery } from "../../../shared/chat-delivery";
 import { turnFromDoc } from "./turn-from-doc";
+import { kMaxChatMessageChars } from "../../../shared/chat-message";
 
 const makeChat = (state: ChatDelivery["state"], overrides: Partial<UseChatResult> = {}): UseChatResult => ({
   turns: [{ id: "user", sender: "user", text: "My saved question" }], status: "error", error: null,
@@ -78,4 +79,9 @@ it("preserves failed exchanges and recovery notices without attributing them to 
   expect(screen.getByTestId("chat-live")).toHaveTextContent("");
   expect(buildChatTranscript(chat.turns)).toContain("**Delivery notice:**");
   expect(buildChatTranscript(chat.turns)).not.toContain("**Ada:**");
+});
+
+it("limits the composer to the longest message the rules accept", () => {
+  render(<Chat chat={makeChat("unknown", { delivery: undefined, status: "idle" })} />);
+  expect(screen.getByRole("textbox")).toHaveAttribute("maxlength", String(kMaxChatMessageChars));
 });

@@ -4,6 +4,7 @@ import { v4 as uuidv4 } from "uuid";
 import { kReplyDeadlineMs, kTimeoutMessage, UseChatResult } from "./use-chat";
 import { ChatTurn } from "./transport";
 import { deliveryMessage, recoveryAction } from "../../../shared/chat-delivery";
+import { kMaxChatMessageChars } from "../../../shared/chat-message";
 
 import "./chat.scss";
 
@@ -403,6 +404,7 @@ export const Chat: React.FC<IProps> = ({ chat, onClose, closeLabel, transcriptTi
           id={inputId}
           ref={inputRef}
           className="chat-input"
+          maxLength={kMaxChatMessageChars}
           value={input}
           onChange={e => setInput(e.target.value)}
           placeholder="Message Ada…"
