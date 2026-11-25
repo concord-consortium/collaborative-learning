@@ -63,6 +63,7 @@ export const tileCapabilities: Record<string, TileRepresentationCapability> = {
   DataCard: capability(false, "fallback", true),
   Numberline: capability(false, "fallback", true),
   Expression: capability(false, "fallback", true),
+  Flowchart: capability(false, "fallback", true),
   Timeline: capability(false, "fallback", true),
   WaveRunner: capability(false, "fallback", true),
   AI: capability(false, "fallback", true),

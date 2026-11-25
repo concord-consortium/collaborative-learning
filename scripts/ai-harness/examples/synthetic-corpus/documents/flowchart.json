@@ -1,0 +1,25 @@
+{
+  "rowOrder": [
+    "row-1"
+  ],
+  "rowMap": {
+    "row-1": {
+      "id": "row-1",
+      "isSectionHeader": false,
+      "tiles": [
+        {
+          "tileId": "flowchart-tile"
+        }
+      ]
+    }
+  },
+  "tileMap": {
+    "flowchart-tile": {
+      "id": "flowchart-tile",
+      "content": {
+        "type": "Flowchart",
+        "fixtureMarker": "flowchart-fixture-marker"
+      }
+    }
+  }
+}

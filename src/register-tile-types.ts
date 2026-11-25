@@ -46,6 +46,9 @@ const gTileRegistration: Record<string, () => void> = {
   "Expression": loggedLoad("Expression", () => [
     import(/* webpackChunkName: "Expression" */"./plugins/expression/expression-registration")
   ]),
+  "Flowchart": loggedLoad("Flowchart", () => [
+    import(/* webpackChunkName: "Flowchart" */"./plugins/flowchart/flowchart-registration")
+  ]),
   "Geometry": loggedLoad("Geometry", () => [
     import(/* webpackChunkName: "Geometry" */"./models/tiles/geometry/geometry-registration"),
     import(/* webpackChunkName: "SharedDataSet" */"./models/shared/shared-data-set-registration")

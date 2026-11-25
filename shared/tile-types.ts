@@ -5,7 +5,7 @@
  * the evaluation harness (scripts/ai-harness), none of which should have to drag in the client-side
  * loading utilities that `src/register-tile-types.ts` uses.
  *
- * The first 20 entries mirror the keys of `gTileRegistration` in `src/register-tile-types.ts`, in the
+ * The first 21 entries mirror the keys of `gTileRegistration` in `src/register-tile-types.ts`, in the
  * same order. `Placeholder` and `Unknown` are registered statically by that file's top-level imports
  * rather than through `gTileRegistration`, so they are listed last.
  *
@@ -22,6 +22,7 @@ export const tileTypes = [
   "Drawing",
   "ErrorTest",
   "Expression",
+  "Flowchart",
   "Geometry",
   "Graph",
   "Image",

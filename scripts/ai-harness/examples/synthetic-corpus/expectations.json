@@ -155,6 +155,21 @@
       },
       "handlerTier": "fallback"
     },
+    "flowchart": {
+      "expectDistinctiveInDefaultSummary": false,
+      "defaultSummaryMustSucceed": true,
+      "minimalSummaryMustSucceed": true,
+      "distinctiveString": "flowchart-fixture-marker",
+      "computedModality": "visual-only",
+      "tileTypes": [
+        "Flowchart"
+      ],
+      "capability": {
+        "containsStudentText": false,
+        "requiresVisualRepresentation": true
+      },
+      "handlerTier": "fallback"
+    },
     "geometry": {
       "expectDistinctiveInDefaultSummary": false,
       "defaultSummaryMustSucceed": true,
